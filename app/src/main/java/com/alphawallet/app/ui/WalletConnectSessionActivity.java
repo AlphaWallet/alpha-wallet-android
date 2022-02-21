@@ -23,12 +23,15 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -58,6 +61,9 @@ public class WalletConnectSessionActivity extends BaseActivity
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private int connectionCount = -1;
+
+    @Inject
+    AWWalletConnectClient awWalletConnectClient;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -267,8 +273,16 @@ public class WalletConnectSessionActivity extends BaseActivity
         AlertDialog dialog = builder.setTitle(R.string.title_delete_session)
                 .setMessage(getString(R.string.delete_session, session.name))
                 .setPositiveButton(R.string.delete, (d, w) -> {
-                    viewModel.deleteSession(session.sessionId);
-                    setupList();
+                    viewModel.deleteSession(session, new AWWalletConnectClient.WalletConnectV2Callback() {
+                        @Override
+                        public void onSessionDisconnected()
+                        {
+                            runOnUiThread(() -> {
+                                setupList();
+                                awWalletConnectClient.updateNotification();
+                            });
+                        }
+                    });
                 })
                 .setNegativeButton(R.string.action_cancel, (d, w) -> {
                     d.dismiss();

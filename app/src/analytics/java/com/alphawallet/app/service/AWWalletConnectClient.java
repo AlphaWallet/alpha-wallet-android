@@ -231,9 +231,9 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
     }
 
     public interface WalletConnectV2Callback {
-        void onSessionProposalApproved();
-        void onSessionProposalRejected();
-        void onSessionDisconnected();
+        default void onSessionProposalApproved() {};
+        default void onSessionProposalRejected() {};
+        default void onSessionDisconnected() {};
     }
 }
 

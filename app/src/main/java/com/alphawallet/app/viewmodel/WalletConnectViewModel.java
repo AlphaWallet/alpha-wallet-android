@@ -23,6 +23,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
+import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -31,6 +32,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.repository.entity.RealmWCSignElement;
+import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
@@ -91,6 +93,8 @@ public class WalletConnectViewModel extends BaseViewModel
     @Nullable
     private Disposable prepareDisposable;
 
+    private final AWWalletConnectClient awWalletConnectClient;
+
     private static final String TAG = "WCClientVM";
 
     @Inject
@@ -102,7 +106,9 @@ public class WalletConnectViewModel extends BaseViewModel
                            GasService gasService,
                            TokensService tokensService,
                            AnalyticsServiceType analyticsService,
-                           EthereumNetworkRepositoryType ethereumNetworkRepository)
+                           EthereumNetworkRepositoryType ethereumNetworkRepository,
+                           AWWalletConnectClient awWalletConnectClient
+    )
     {
         this.keyService = keyService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
@@ -114,6 +120,7 @@ public class WalletConnectViewModel extends BaseViewModel
         this.tokensService = tokensService;
         this.analyticsService = analyticsService;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.awWalletConnectClient = awWalletConnectClient;
         prepareDisposable = null;
         disposable = genericWalletInteract
                 .find()
@@ -434,19 +441,36 @@ public class WalletConnectViewModel extends BaseViewModel
         }
     }
 
-    public void deleteSession(String sessionId)
+    public void deleteSession(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
+    {
+        if (session instanceof WalletConnectV2SessionItem)
+        {
+            deleteSessionV2(session, callback);
+        } else
+        {
+            deleteSessionV1(session, callback);
+        }
+    }
+
+    private void deleteSessionV2(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
+    {
+        awWalletConnectClient.disconnect(session.sessionId, callback);
+    }
+
+    private void deleteSessionV1(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
     {
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
             realm.executeTransactionAsync(r -> {
                 RealmWCSession sessionAux = r.where(RealmWCSession.class)
-                        .equalTo("sessionId", sessionId)
+                        .equalTo("sessionId", session.sessionId)
                         .findFirst();
 
                 if (sessionAux != null)
                 {
                     sessionAux.deleteFromRealm();
                 }
+                callback.onSessionDisconnected();
             });
         }
     }

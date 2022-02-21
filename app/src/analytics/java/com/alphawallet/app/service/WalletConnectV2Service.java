@@ -13,7 +13,6 @@ import android.os.IBinder;
 import com.alphawallet.app.R;
 import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.ui.WalletConnectNotificationActivity;
-import com.alphawallet.app.ui.WalletConnectSessionActivity;
 
 import javax.inject.Inject;
 
@@ -24,9 +23,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class WalletConnectV2Service extends Service
 {
-//    @Inject
-//    AWWalletConnectClient awWalletConnectClient;
-
     @Inject
     WalletConnectInteract walletConnectInteract;
 
@@ -65,7 +61,6 @@ public class WalletConnectV2Service extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-//        WalletConnectClient.INSTANCE.setWalletDelegate(awWalletConnectClient);
         return super.onStartCommand(intent, flags, startId);
     }
 

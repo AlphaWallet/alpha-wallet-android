@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="?colorSurface"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
@@ -12,7 +12,6 @@
         android:id="@+id/relativeLayout3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/background_card"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
@@ -27,29 +26,38 @@
             android:paddingEnd="20dp"
             android:text="@string/verify_seed_phrase"
             android:textAlignment="center"
-            android:textColor="@color/black"
+            android:textColor="@color/color_black"
             android:textSize="28sp" />
 
-        <TextView
-            android:id="@+id/text_verify"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/text_title"
-            android:layout_gravity="center_horizontal"
             android:layout_marginStart="16dp"
             android:layout_marginTop="47dp"
             android:layout_marginEnd="16dp"
-            android:background="@drawable/background_verify_window"
-            android:minHeight="110dp"
-            android:padding="15dp"
-            android:textColor="@color/dove"
-            android:textSize="18sp" />
+            app:cardBackgroundColor="@color/transparent"
+            app:strokeColor="@color/color_dove"
+            app:strokeWidth="1dp">
+
+            <TextView
+                android:id="@+id/text_verify"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:minHeight="110dp"
+                android:padding="16dp"
+                android:textColor="@color/color_dove"
+                android:textSize="18sp" />
+        </com.google.android.material.card.MaterialCardView>
+
 
         <TextView
             android:id="@+id/text_invalid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/text_verify"
+            android:layout_below="@id/container"
             android:layout_gravity="center_horizontal"
             android:layout_marginStart="16dp"
             android:layout_marginTop="5dp"

@@ -57,6 +57,7 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
+import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
@@ -177,6 +178,7 @@ public class WalletFragment extends BaseFragment implements
         refreshLayout.setOnRefreshListener(this::refreshList);
         recyclerView.addRecyclerListener(holder -> adapter.onRViewRecycled(holder));
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+//        recyclerView.addItemDecoration(new ListDivider(getContext()));
     }
 
     private void initViewModel() {
@@ -619,10 +621,10 @@ public class WalletFragment extends BaseFragment implements
     @Override
     public void run()
     {
-        if (selectedToken != null && selectedToken.findViewById(R.id.token_layout) != null)
-        {
-            selectedToken.findViewById(R.id.token_layout).setBackgroundResource(R.drawable.background_marketplace_event);
-        }
+//        if (selectedToken != null && selectedToken.findViewById(R.id.token_layout) != null)
+//        {
+//            selectedToken.findViewById(R.id.token_layout).setBackgroundResource(R.drawable.background_marketplace_event);
+//        }
         selectedToken = null;
     }
 

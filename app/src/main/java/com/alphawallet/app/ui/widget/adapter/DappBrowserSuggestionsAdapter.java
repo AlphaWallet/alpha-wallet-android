@@ -170,7 +170,7 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
             int end = lowerCaseText.length() + start;
             SpannableStringBuilder builder = new SpannableStringBuilder(name);
             if (start >= 0) {
-                int highlightColor = ContextCompat.getColor(getContext(), R.color.colorPrimaryDark);
+                int highlightColor = ContextCompat.getColor(getContext(), R.color.color_dove);
                 builder.setSpan(new ForegroundColorSpan(highlightColor), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             //this.name.setText(builder);

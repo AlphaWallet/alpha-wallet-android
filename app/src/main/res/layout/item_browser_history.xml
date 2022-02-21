@@ -44,7 +44,7 @@
             android:fontFamily="@font/font_bold"
             android:lines="1"
             tools:text="dapp.com"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/color_dove"
             android:textSize="10sp" />
     </LinearLayout>
 

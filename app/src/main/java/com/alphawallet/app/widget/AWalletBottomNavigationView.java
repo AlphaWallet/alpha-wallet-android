@@ -1,22 +1,24 @@
 package com.alphawallet.app.widget;
 
+import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
+import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
+import static com.alphawallet.app.entity.WalletPage.SETTINGS;
+import static com.alphawallet.app.entity.WalletPage.WALLET;
+
 import android.content.Context;
-import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.WalletPage;
+import com.google.android.material.color.MaterialColors;
 
 import java.util.ArrayList;
-
-import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
-import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
-import static com.alphawallet.app.entity.WalletPage.SETTINGS;
-import static com.alphawallet.app.entity.WalletPage.WALLET;
 
 public class AWalletBottomNavigationView extends LinearLayout {
 
@@ -30,14 +32,14 @@ public class AWalletBottomNavigationView extends LinearLayout {
     private final TextView settingsLabel;
     private final TextView settingsBadge;
     private final TextView activityLabel;
-
+    private final ArrayList<String> settingsBadgeKeys = new ArrayList<>();
+    private int selectedColor;
+    private int unselectedColor;
     private OnBottomNavigationItemSelectedListener listener;
-
     private WalletPage selectedItem;
 
-    private final ArrayList<String> settingsBadgeKeys = new ArrayList<>();
-
-    public AWalletBottomNavigationView(Context context, @Nullable AttributeSet attrs) {
+    public AWalletBottomNavigationView(Context context, @Nullable AttributeSet attrs)
+    {
         super(context, attrs);
         inflate(context, R.layout.layout_bottom_navigation, this);
         dappBrowser = findViewById(R.id.nav_browser);
@@ -67,93 +69,114 @@ public class AWalletBottomNavigationView extends LinearLayout {
         settingsLabel.setOnClickListener(v -> selectItem(SETTINGS));
         activityLabel.setOnClickListener(v -> selectItem(ACTIVITY));
 
+        selectedColor = MaterialColors.getColor(this, R.attr.colorControlHighlight);
+        unselectedColor = MaterialColors.getColor(this, R.attr.colorControlNormal);
+
         // set wallet fragment selected on start
         setSelectedItem(WALLET);
     }
 
-    public void setListener(OnBottomNavigationItemSelectedListener listener) {
+    public void setListener(OnBottomNavigationItemSelectedListener listener)
+    {
         this.listener = listener;
     }
 
-    private void selectItem(WalletPage index) {
+    private void selectItem(WalletPage index)
+    {
         listener.onBottomNavigationItemSelected(index);
     }
 
-    public void setSelectedItem(WalletPage index) {
+    public WalletPage getSelectedItem()
+    {
+        return selectedItem;
+    }
+
+    public void setSelectedItem(WalletPage index)
+    {
         deselectAll();
         selectedItem = index;
-        switch (index) {
+        switch (index)
+        {
             case DAPP_BROWSER:
                 dappBrowser.setImageResource(R.drawable.ic_tab_browser_active);
-                dappBrowserLabel.setTextColor(getResources().getColor(R.color.colorHighlight, getContext().getTheme()));
+                dappBrowserLabel.setTextColor(selectedColor);
                 break;
             case WALLET:
                 wallet.setImageResource(R.drawable.ic_tab_wallet_active);
-                walletLabel.setTextColor(getResources().getColor(R.color.colorHighlight, getContext().getTheme()));
+                walletLabel.setTextColor(selectedColor);
                 break;
             case SETTINGS:
                 settings.setImageResource(R.drawable.ic_tab_settings_active);
-                settingsLabel.setTextColor(getResources().getColor(R.color.colorHighlight, getContext().getTheme()));
+                settingsLabel.setTextColor(selectedColor);
                 break;
             case ACTIVITY:
                 activity.setImageResource(R.drawable.ic_tab_activity_active);
-                activityLabel.setTextColor(getResources().getColor(R.color.colorHighlight, getContext().getTheme()));
+                activityLabel.setTextColor(selectedColor);
                 break;
         }
     }
 
-    public WalletPage getSelectedItem() {
-        return selectedItem;
-    }
-
-    private void deselectAll() {
+    private void deselectAll()
+    {
         dappBrowser.setImageResource(R.drawable.ic_tab_browser);
         wallet.setImageResource(R.drawable.ic_tab_wallet);
         settings.setImageResource(R.drawable.ic_tab_settings);
         activity.setImageResource(R.drawable.ic_tab_activity);
         //reset text colour
-        dappBrowserLabel.setTextColor(getContext().getColor(R.color.dove));
-        walletLabel.setTextColor(getContext().getColor(R.color.dove));
-        settingsLabel.setTextColor(getContext().getColor(R.color.dove));
-        activityLabel.setTextColor(getContext().getColor(R.color.dove));
+        dappBrowserLabel.setTextColor(getContext().getColor(R.color.color_dove));
+        walletLabel.setTextColor(getContext().getColor(R.color.color_dove));
+        settingsLabel.setTextColor(getContext().getColor(R.color.color_dove));
+        activityLabel.setTextColor(getContext().getColor(R.color.color_dove));
     }
 
-    public interface OnBottomNavigationItemSelectedListener {
-        boolean onBottomNavigationItemSelected(WalletPage index);
-    }
-
-    public void setSettingsBadgeCount(int count) {
-        if (count > 0) {
+    public void setSettingsBadgeCount(int count)
+    {
+        if (count > 0)
+        {
             settingsBadge.setVisibility(View.VISIBLE);
-        } else {
+        }
+        else
+        {
             settingsBadge.setVisibility(View.GONE);
         }
         settingsBadge.setText(String.valueOf(count));
     }
 
-    public void addSettingsBadgeKey(String key) {
-        if (!settingsBadgeKeys.contains(key)) {
+    public void addSettingsBadgeKey(String key)
+    {
+        if (!settingsBadgeKeys.contains(key))
+        {
             settingsBadgeKeys.add(key);
         }
         showOrHideSettingsBadge();
     }
 
-    public void removeSettingsBadgeKey(String key) {
+    public void removeSettingsBadgeKey(String key)
+    {
         settingsBadgeKeys.remove(key);
         showOrHideSettingsBadge();
     }
 
-    private void showOrHideSettingsBadge() {
-        if (settingsBadgeKeys.size() > 0) {
+    private void showOrHideSettingsBadge()
+    {
+        if (settingsBadgeKeys.size() > 0)
+        {
             settingsBadge.setVisibility(View.VISIBLE);
-        } else {
+        }
+        else
+        {
             settingsBadge.setVisibility(View.GONE);
         }
         settingsBadge.setText(String.valueOf(settingsBadgeKeys.size()));
     }
 
-    public void hideBrowserTab() {
+    public void hideBrowserTab()
+    {
         LinearLayout browserTab = findViewById(R.id.browser_tab);
         if (browserTab != null) browserTab.setVisibility(View.GONE);
+    }
+
+    public interface OnBottomNavigationItemSelectedListener {
+        boolean onBottomNavigationItemSelected(WalletPage index);
     }
 }

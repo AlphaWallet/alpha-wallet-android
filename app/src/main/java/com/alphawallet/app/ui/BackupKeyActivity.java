@@ -22,6 +22,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -45,6 +46,8 @@ import com.alphawallet.app.widget.PasswordInputView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.color.MaterialColors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +79,7 @@ public class BackupKeyActivity extends BaseActivity implements
     private PasswordInputView inputView;
     private ImageView backupImage;
     private TextView verifyTextBox;
+    private MaterialCardView verifyTextContainer;
     private String[] mnemonicArray;
     private LinearLayout successOverlay;
     private final Handler handler = new Handler();
@@ -348,6 +352,7 @@ public class BackupKeyActivity extends BaseActivity implements
         detail = findViewById(R.id.text_detail);
         layoutWordHolder = findViewById(R.id.layout_word_holder);
         verifyTextBox = findViewById(R.id.text_verify);
+        verifyTextContainer = findViewById(R.id.container);
         backupImage = findViewById(R.id.backup_seed_image);
         functionButtonBar = findViewById(R.id.layoutButtons);
         inputView = findViewById(R.id.input_password);
@@ -406,8 +411,8 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     private void ResetInputBox() {
-        verifyTextBox.setBackgroundResource(R.drawable.background_verify_window);
-        verifyTextBox.setTextColor(getColor(R.color.dove));
+        verifyTextContainer.setStrokeColor(ContextCompat.getColor(this, R.color.dove));
+        verifyTextBox.setTextColor(getColor(R.color.color_dove));
         verifyTextBox.setText(R.string.empty);
         TextView invalid = findViewById(R.id.text_invalid);
         invalid.setVisibility(View.GONE);
@@ -451,8 +456,8 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     private void seedIncorrect() {
-        verifyTextBox.setBackgroundResource(R.drawable.background_verify_window_fail);
-        verifyTextBox.setTextColor(getColor(R.color.dove));
+        verifyTextContainer.setStrokeColor(ContextCompat.getColor(this, R.color.danger));
+        verifyTextBox.setTextColor(getColor(R.color.color_dove));
         TextView invalid = findViewById(R.id.text_invalid);
         invalid.setVisibility(View.VISIBLE);
         Toast.makeText(this, R.string.invalid_phrase, Toast.LENGTH_LONG).show();
@@ -534,7 +539,7 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     private void onWordClick(TextView tv) {
-        tv.setTextColor(getColor(R.color.alabaster));
+        tv.setTextColor(getColor(R.color.color_alabaster));
         tv.setBackgroundResource(R.drawable.background_seed_word_selected);
         tv.setOnClickListener(null);
         String currentText = verifyTextBox.getText().toString();
@@ -597,7 +602,7 @@ public class BackupKeyActivity extends BaseActivity implements
         seedWord.setTypeface(ResourcesCompat.getFont(this, R.font.font_regular));
         seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
         seedWord.setBackgroundResource(R.drawable.background_seed_word);
-        seedWord.setTextColor(getColor(R.color.mine));
+        seedWord.setTextColor(MaterialColors.getColor(seedWord, R.attr.colorOnSurface));
         seedWord.setLayoutParams(params);
         seedWord.setGravity(Gravity.CENTER);
         seedWord.setPadding(padding, 0, padding, 0);

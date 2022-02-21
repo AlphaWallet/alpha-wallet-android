@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="40dp"
-    android:background="@drawable/background_marketplace_event"
     android:orientation="vertical"
-    android:paddingBottom="30dp"
-    android:paddingTop="30dp">
+    android:paddingTop="30dp"
+    android:paddingBottom="30dp">
 
     <TextView
         android:id="@+id/dialog_main_text"
@@ -23,13 +23,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
         android:background="@color/mercury"
         android:orientation="vertical"
-        android:layout_marginBottom="30dp"
         android:padding="30dp">
 
         <TextView
-            android:visibility="gone"
             android:id="@+id/dialog_small_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -37,7 +36,8 @@
             android:fontFamily="@font/font_light"
             android:gravity="center"
             android:textColor="@color/mine"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/dialog_medium_text"
@@ -46,20 +46,20 @@
             android:layout_gravity="center_horizontal"
             android:fontFamily="@font/font_bold"
             android:gravity="center"
-            android:textColor="@color/colorPrimaryDark"
-            android:visibility="gone"
-            android:textSize="20sp" />
+            android:textColor="@color/color_dove"
+            android:textSize="20sp"
+            android:visibility="gone" />
 
         <TextView
-            android:visibility="gone"
             android:id="@+id/dialog_big_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:fontFamily="@font/font_bold"
             android:gravity="center"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="41sp" />
+            android:textColor="@color/color_dove"
+            android:textSize="41sp"
+            android:visibility="gone" />
 
     </LinearLayout>
 
@@ -82,13 +82,14 @@
             android:textColor="@color/mine"
             android:textSize="25sp" />
 
+        <!-- TODO: Convert to new button styles -->
         <LinearLayout
             android:id="@+id/dialog_button1_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:gravity="center"
-            android:background="@drawable/background_round_primary">
+            android:background="?colorOnSurface"
+            android:gravity="center">
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/dialog_button1"
@@ -97,21 +98,22 @@
                 android:layout_height="wrap_content"
                 android:background="@color/transparent"
                 android:fontFamily="@font/font_regular"
-                android:paddingBottom="10dp"
                 android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:textAllCaps="false"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:textColor="?colorSurface"
+                android:textSize="20sp"
+                tools:text="Action" />
 
             <ImageView
                 android:id="@+id/image_share"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:visibility="gone"
                 android:layout_gravity="center_vertical"
+                android:layout_marginStart="5dp"
+                android:background="@drawable/ic_share_light_24dp"
                 android:contentDescription="@string/action_share"
-                android:background="@drawable/ic_share_light_24dp" />
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -124,8 +126,8 @@
             android:background="@color/white"
             android:fontFamily="@font/font_regular"
             android:paddingLeft="20dp"
-            android:paddingRight="20dp"
             android:paddingTop="10dp"
+            android:paddingRight="20dp"
             android:textAllCaps="false"
             android:textColor="@color/danger"
             android:textSize="20sp" />

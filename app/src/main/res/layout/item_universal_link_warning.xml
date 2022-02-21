@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:background="@drawable/background_round_red"
+        android:background="?colorError"
         android:orientation="vertical"
         android:padding="15dp">
 
@@ -21,7 +21,7 @@
             android:fontFamily="@font/font_bold"
             android:text="@string/label_important"
             android:textAllCaps="true"
-            android:textColor="@color/danger"
+            android:textColor="?colorOnError"
             android:textSize="16sp" />
 
         <TextView
@@ -31,7 +31,7 @@
             android:fontFamily="@font/font_regular"
             android:gravity="center"
             android:text="@string/universal_link_notice"
-            android:textColor="@color/danger" />
+            android:textColor="?colorOnError" />
 
     </LinearLayout>
 </LinearLayout>

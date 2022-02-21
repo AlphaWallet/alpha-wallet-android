@@ -1,75 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_item_warning"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
     android:animateLayoutChanges="true"
-    android:background="@drawable/background_round_nofill_8dp"
     android:elevation="2dp"
-    android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingTop="23dp"
-    android:paddingEnd="16dp"
-    android:paddingBottom="25dp">
+    android:orientation="vertical">
 
-    <RelativeLayout
-        android:id="@+id/layout_backup_text"
-        android:layout_width="0dp"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_backup"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.9"
-        android:clickable="true"
-        android:focusable="true"
-        android:orientation="vertical">
+        android:layout_margin="0dp"
+        app:cardBackgroundColor="@color/mine"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp">
 
-        <TextView
-            android:id="@+id/text_title"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/layout_backup_text"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginBottom="16dp"
-            android:fontFamily="@font/font_regular"
-            android:text="@string/wallet_not_backed_up"
-            android:textColor="@color/white"
-            android:textSize="24sp" />
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:padding="@dimen/dp16">
 
-        <TextView
-            android:id="@+id/text_detail"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/text_title"
-            android:layout_marginEnd="70dp"
-            android:layout_marginBottom="24dp"
-            android:fontFamily="@font/font_regular"
-            android:text="@string/not_backed_up_detail"
-            android:textColor="@color/white"
-            android:textSize="18sp" />
+            <TextView
+                android:id="@+id/text_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginBottom="16dp"
+                android:fontFamily="@font/font_regular"
+                android:text="@string/wallet_not_backed_up"
+                android:textColor="@color/white"
+                android:textSize="24sp" />
 
-        <Button
-            android:id="@+id/button_backup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/text_detail"
-            android:background="@drawable/background_white_4dp"
-            android:fontFamily="@font/font_semibold"
-            android:paddingLeft="17dp"
-            android:paddingRight="17dp"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="17sp" />
+            <TextView
+                android:id="@+id/text_detail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/text_title"
+                android:layout_marginEnd="70dp"
+                android:layout_marginBottom="24dp"
+                android:fontFamily="@font/font_regular"
+                android:text="@string/not_backed_up_detail"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
 
-        <View
-            android:id="@+id/popup_anchor"
-            android:layout_width="1dp"
-            android:layout_height="10dp"
-            android:layout_centerHorizontal="true" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_backup"
+                style="@style/Aw.Component.Button.Secondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/text_detail"
+                android:paddingHorizontal="@dimen/dp16"
+                tools:text="Back up Wallet" />
 
-    </RelativeLayout>
+            <ImageView
+                android:id="@+id/btn_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/ic_menu_white"
+                app:tint="@color/white" />
 
-    <ImageView
-        android:id="@+id/btn_menu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_menu_white"
-        android:tint="@color/white" />
+            <View
+                android:id="@+id/popup_anchor"
+                android:layout_width="1dp"
+                android:layout_height="10dp"
+                android:layout_centerHorizontal="true" />
+
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

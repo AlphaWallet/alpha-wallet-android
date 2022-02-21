@@ -3,8 +3,7 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/colorPrimary">
+    android:layout_height="wrap_content">
 
     <com.alphawallet.app.widget.StandardHeader
         android:id="@+id/layout_header"
@@ -18,9 +17,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/layout_header"
-        android:layout_marginStart="@dimen/dp12"
+        android:layout_marginStart="@dimen/spacing_standard"
         android:layout_marginTop="@dimen/dp22"
-        android:layout_marginEnd="@dimen/dp12"
+        android:layout_marginEnd="@dimen/spacing_standard"
         android:background="@drawable/background_password_entry">
 
         <AutoCompleteTextView
@@ -34,12 +33,12 @@
             android:inputType="textNoSuggestions"
             android:lines="1"
             android:maxLines="1"
-            android:paddingStart="@dimen/dp8"
+            android:paddingStart="@dimen/spacing_standard"
             android:paddingTop="@dimen/dp12"
-            android:paddingEnd="@dimen/dp8"
+            android:paddingEnd="@dimen/spacing_standard"
             android:paddingBottom="@dimen/dp12"
-            android:textColor="@color/black"
-            android:textColorHint="@color/dove"
+            android:textColor="@color/color_black"
+            android:textColorHint="@color/color_dove"
             android:textSize="@dimen/sp17"
             tools:text="0x12345678...abcd1234" />
 
@@ -61,14 +60,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/box_layout"
-        android:layout_marginStart="31dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="-9dp"
         android:layout_marginBottom="5dp"
-        android:background="@color/colorPrimary"
+        android:background="?colorPrimary"
         android:fontFamily="@font/font_semibold"
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"
-        android:textColor="@color/dove"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:textColor="@color/color_black"
         android:textSize="@dimen/sp13"
         android:visibility="visible"
         tools:text="ENS Name" />

@@ -10,10 +10,9 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/Theme.MaterialComponents.Light"
         custom:cardCornerRadius="8dp"
         custom:cardElevation="0dp"
-        custom:strokeColor="@color/mercury"
+        custom:strokeColor="@color/color_mercury"
         custom:strokeWidth="1dp">
 
         <LinearLayout
@@ -39,10 +38,10 @@
                     android:layout_height="48dp"
                     android:layout_centerInParent="true"
                     android:background="@drawable/value_amount_overlay"
-                    android:backgroundTint="@color/azure"
+                    android:backgroundTint="@color/color_azure"
                     android:fontFamily="@font/font_bold"
                     android:gravity="center"
-                    android:textColor="@color/white"
+                    android:textColor="?colorOnSurface"
                     android:visibility="gone"
                     tools:text="25" />
 
@@ -73,7 +72,7 @@
                     android:ellipsize="end"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:textColor="@color/black"
+                    android:textColor="?colorOnSurface"
                     android:textSize="@dimen/sp18"
                     tools:text="Title" />
 
@@ -83,10 +82,10 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/title"
                     android:gravity="center"
-                    android:visibility="gone"
                     android:singleLine="true"
-                    android:textColor="@color/dove"
+                    android:textColor="@color/color_dove"
                     android:textSize="@dimen/sp15"
+                    android:visibility="gone"
                     tools:text="#1" />
 
             </RelativeLayout>

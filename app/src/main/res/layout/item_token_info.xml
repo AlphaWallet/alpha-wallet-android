@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <LinearLayout
@@ -23,9 +23,9 @@
             android:ellipsize="end"
             android:fontFamily="@font/font_regular"
             android:singleLine="true"
-            tools:text="Balance"
-            android:textColor="@color/dove"
-            android:textSize="@dimen/sp15" />
+            android:textColor="@color/color_dove"
+            android:textSize="@dimen/sp15"
+            tools:text="Balance" />
 
         <TextView
             android:id="@+id/value"
@@ -36,9 +36,9 @@
             android:fontFamily="@font/font_regular"
             android:gravity="end|center_vertical"
             android:singleLine="true"
-            tools:text="-"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp17" />
+            android:textColor="@color/color_black"
+            android:textSize="@dimen/sp17"
+            tools:text="-" />
 
         <TextView
             android:id="@+id/value_long"
@@ -49,17 +49,15 @@
             android:fontFamily="@font/font_semibold"
             android:gravity="end|center_vertical"
             android:maxLines="2"
-            tools:text="The smallest of the seven inhabited Aeolian Islands"
+            android:textColor="@color/color_black"
+            android:textSize="@dimen/sp16"
             android:visibility="gone"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp16" />
+            tools:text="The smallest of the seven inhabited Aeolian Islands" />
 
     </LinearLayout>
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
+        style="@style/Aw.Component.Separator"
         android:layout_marginStart="@dimen/dp16"
-        android:layout_marginEnd="@dimen/dp16"
-        android:background="@color/mercury" />
+        android:layout_marginEnd="@dimen/dp16" />
 </LinearLayout>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
     android:descendantFocusability="blocksDescendants"
     android:focusable="false"
     android:minHeight="80dp"
@@ -30,7 +30,9 @@
             android:background="@color/transparent"
             android:paddingStart="11dp"
             android:src="@drawable/ic_menu"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:tint="@color/color_black"
+            tools:visibility="visible" />
 
         <com.alphawallet.app.widget.UserAvatar
             android:id="@+id/wallet_icon"
@@ -45,9 +47,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginStart="15dp"
-
-        android:layout_toStartOf="@id/selected_wallet_indicator"
+        android:layout_marginStart="@dimen/spacing_standard"
+        android:layout_marginEnd="@dimen/spacing_standard"
+        android:layout_toStartOf="@id/arrow_right"
         android:layout_toEndOf="@+id/layout_manage_wallet"
         android:orientation="vertical">
 
@@ -59,13 +61,13 @@
             <TextView
                 android:id="@+id/wallet_balance"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:fontFamily="@font/font_semibold"
-                tools:text="3.2345"
-                android:textColor="@color/mine"
+                android:textColor="@color/color_black"
                 android:textIsSelectable="true"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                tools:text="3.2345" />
 
             <TextView
                 android:id="@+id/wallet_currency"
@@ -73,28 +75,22 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:fontFamily="@font/font_light"
-                tools:text="ETH"
-                android:textColor="@color/mine"
+                android:textColor="@color/color_mine"
                 android:textIsSelectable="true"
                 android:textSize="16sp"
-                android:visibility="gone" />
+                android:visibility="gone"
+                tools:text="ETH" />
 
             <TextView
                 android:id="@+id/wallet_24h_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
-                tools:text="+2.53%"
                 android:layout_marginEnd="@dimen/dp9"
+                android:fontFamily="@font/font_regular"
                 android:textColor="@color/green"
                 android:textIsSelectable="true"
-                android:textSize="20sp" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_arrow_right" />
+                android:textSize="20sp"
+                tools:text="+2.53%" />
 
         </LinearLayout>
 
@@ -109,9 +105,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
-                tools:text="user.eth"
-                android:textColor="@color/dove"
-                android:textSize="15sp" />
+                android:textColor="@color/color_dove"
+                android:textSize="15sp"
+                tools:text="user.eth" />
 
             <TextView
                 android:id="@+id/wallet_address_separator"
@@ -121,7 +117,7 @@
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:text="|"
-                android:textColor="@color/dove"
+                android:textColor="@color/color_dove"
                 android:textSize="15sp" />
 
             <TextView
@@ -131,23 +127,22 @@
                 android:ellipsize="middle"
                 android:fontFamily="@font/font_regular"
                 android:singleLine="true"
-                tools:text="0xe9f5cc10a54125828d7fc6b6fb0f784f731e33bf"
-                android:textColor="@color/dove"
-                android:textSize="15sp" />
+                android:textColor="@color/color_dove"
+                android:textSize="15sp"
+                tools:text="0xe9f5cc10a54125828d7fc6b6fb0f784f731e33bf" />
         </LinearLayout>
 
     </LinearLayout>
 
-
-
     <ImageView
-        android:id="@+id/selected_wallet_indicator"
+        android:id="@+id/arrow_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_arrow_right"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/selector_radio_tick"
-        android:visibility="gone" />
+        app:tint="@color/color_black" />
 
     <LinearLayout
         android:id="@+id/wallet_click_layer"
@@ -155,8 +150,8 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/wallet_info_layout"
         android:layout_alignTop="@id/layout_manage_wallet"
-        android:layout_alignParentEnd="true"
         android:layout_alignBottom="@id/layout_manage_wallet"
+        android:layout_alignParentEnd="true"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="-17dp"
         android:orientation="vertical" />

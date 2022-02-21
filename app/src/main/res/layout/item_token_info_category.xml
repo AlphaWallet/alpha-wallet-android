@@ -17,7 +17,7 @@
         android:fontFamily="@font/font_bold"
         android:singleLine="true"
         android:text="@string/token_info_portfolio"
-        android:textColor="@color/black"
+        android:textColor="@color/color_black"
         android:textSize="@dimen/sp24" />
 
 </RelativeLayout>

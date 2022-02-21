@@ -5,7 +5,6 @@
     android:id="@+id/coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorTheme"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -30,7 +29,7 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
-            style="@style/AwTabLayout.Scrollable"
+            style="@style/Aw.Component.TabLayout.Scrollable"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
@@ -39,7 +38,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/mercury" />
+            android:background="@color/color_mercury" />
 
         <com.alphawallet.app.widget.NotificationView
             android:id="@+id/notification"
@@ -54,7 +53,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="?actionBarSize"
-        android:background="@color/alabaster"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView

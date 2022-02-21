@@ -1,37 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_currency_import"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="true"
     android:layout_marginBottom="10dp"
+    android:clickable="true"
+    android:orientation="horizontal"
     android:visibility="gone"
-    tools:visibility="visible"
-    android:orientation="horizontal">
+    tools:visibility="visible">
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="110dp"
-        android:background="@drawable/background_card_shadow"
-        android:orientation="vertical"
-        android:gravity="center"
         android:layout_gravity="center"
-        android:paddingBottom="20dp"
+        android:gravity="center"
+        android:orientation="vertical"
         android:paddingLeft="20dp"
+        android:paddingTop="15dp"
         android:paddingRight="20dp"
-        android:paddingTop="15dp">
+        android:paddingBottom="20dp">
 
         <TextView
             android:id="@+id/text_currency_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="21sp"
-            android:fontFamily="@font/font_light"
             android:layout_marginBottom="5dp"
+            android:fontFamily="@font/font_light"
             android:textColor="@color/black"
+            android:textSize="21sp"
             tools:text="Sample" />
 
     </LinearLayout>

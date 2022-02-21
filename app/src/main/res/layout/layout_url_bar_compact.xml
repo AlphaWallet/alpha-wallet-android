@@ -79,18 +79,6 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/network_holder"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:ellipsize="end">
-
-            <include layout="@layout/item_network_select"/>
-
-        </LinearLayout>
-
         <!-- These are here to simplify source code -->
         <ImageView
             android:layout_height="wrap_content"

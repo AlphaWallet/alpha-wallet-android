@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -22,9 +23,9 @@
         android:layout_alignParentTop="true"
         android:layout_marginBottom="@dimen/dp16"
         android:fontFamily="@font/font_regular"
-        android:text="Notification"
-        android:textColor="@color/white"
-        android:textSize="@dimen/sp24" />
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="@dimen/sp24"
+        tools:text="Notification Title" />
 
     <TextView
         android:id="@+id/message"
@@ -33,9 +34,9 @@
         android:layout_below="@id/title"
         android:layout_marginEnd="@dimen/dp25"
         android:fontFamily="@font/font_regular"
-        android:text="This is a notification"
-        android:textColor="@color/white"
-        android:textSize="@dimen/sp17" />
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="@dimen/sp17"
+        tools:text="This is a notification" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -43,36 +44,26 @@
         android:layout_below="@id/message"
         android:orientation="horizontal">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_primary"
+            style="@style/Aw.Component.Button.Primary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp24"
-            android:layout_marginRight="@dimen/dp15"
-            android:background="@drawable/background_white_4dp"
-            android:fontFamily="@font/font_semibold"
-            android:paddingLeft="@dimen/dp17"
-            android:paddingRight="@dimen/dp17"
-            android:text="Primary"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="@dimen/sp17"
-            android:visibility="gone" />
+            android:layout_marginEnd="@dimen/dp15"
+            android:paddingHorizontal="@dimen/dp16"
+            android:visibility="visible"
+            tools:text="Primary" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_secondary"
-            style="@style/Widget.AppCompat.Button.Borderless"
+            style="@style/Aw.Component.Button.Secondary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp24"
-            android:fontFamily="@font/font_semibold"
-            android:paddingLeft="@dimen/dp17"
-            android:paddingRight="@dimen/dp17"
-            android:text="Secondary"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="@dimen/sp17"
-            android:visibility="gone" />
+            android:paddingHorizontal="@dimen/dp16"
+            android:visibility="visible"
+            tools:text="Secondary" />
     </LinearLayout>
 
 </RelativeLayout>

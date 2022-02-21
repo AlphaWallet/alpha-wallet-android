@@ -3,16 +3,131 @@
 
     <style name="Aw.Component.AppBarLayout" parent="Widget.Design.AppBarLayout">
         <item name="elevation">0dp</item>
+        <item name="background">?colorSurface</item>
     </style>
 
-    <style name="Aw.Component.Toolbar" parent="Widget.AppCompat.Toolbar">
+    <style name="Aw.Component.CheckBox" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+    </style>
+
+    <style name="Aw.Component.RadioButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+    </style>
+
+    <style name="Aw.Component.Toolbar" parent="Widget.MaterialComponents.Toolbar">
         <item name="contentInsetStart">0dp</item>
         <item name="contentInsetEnd">0dp</item>
         <item name="contentInsetLeft">0dp</item>
         <item name="contentInsetRight">0dp</item>
         <item name="contentInsetStartWithNavigation">0dp</item>
-        <item name="background">@color/colorPrimary</item>
-        <item name="popupTheme">@style/AppTheme.PopupOverlay</item>
+        <item name="background">?colorSurface</item>
+        <!--        <item name="popupTheme">@style/AppTheme.PopupOverlay</item>-->
+    </style>
+
+    <style name="Aw.Component.TabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">?colorAccent</item>
+        <item name="tabIndicatorHeight">3dp</item>
+        <item name="tabPaddingStart">25dp</item>
+        <item name="tabPaddingEnd">25dp</item>
+        <item name="tabBackground">?attr/colorSurface</item>
+        <item name="tabTextAppearance">@style/Aw.Typography.TabText</item>
+        <item name="tabSelectedTextColor">?colorAccent</item>
+        <item name="tabTextColor">@color/text_secondary</item>
+        <item name="android:background">?colorSurface</item>
+        <item name="tabIndicatorFullWidth">true</item>
+    </style>
+
+    <style name="Aw.Component.TabLayout.Fixed">
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="tabMode">fixed</item>
+        <item name="tabGravity">fill</item>
+    </style>
+
+    <style name="Aw.Component.TabLayout.Scrollable">
+        <item name="tabMode">scrollable</item>
+        <item name="tabGravity">center</item>
+    </style>
+
+    <style name="Aw.Component.RecyclerView" parent="">
+        <item name="android:background">?attr/colorSurface</item>
+    </style>
+
+    <style name="Aw.Component.Separator" parent="Widget.MaterialComponents.TextView">
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:background">@color/separator</item>
+    </style>
+
+    <style name="Aw.Component.Switch" parent="Widget.AppCompat.CompoundButton.Switch">
+        <!-- TODO: Create selectors for different states -->
+        <!-- <item name="thumbTint">@color/color_azure</item> -->
+        <!-- <item name="trackTint">@color/color_dusty</item> -->
+    </style>
+
+    <style name="Aw.Component.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:elevation">0dp</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:fontFamily">@font/font_semibold</item>
+        <item name="android:paddingLeft">@dimen/dp5</item>
+        <item name="android:paddingRight">@dimen/dp5</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/sp20</item>
+        <item name="cornerRadius">4dp</item>
+    </style>
+
+    <style name="Aw.Component.Button.Primary">
+        <item name="android:lines">1</item>
+        <item name="android:backgroundTint">@color/button_primary</item>
+        <item name="android:textColor">@color/color_white</item>
+    </style>
+
+    <style name="Aw.Component.Button.Secondary">
+        <item name="android:lines">1</item>
+        <item name="android:backgroundTint">@color/button_secondary</item>
+        <item name="strokeColor">?colorOnSurface</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textColor">?colorOnSurface</item>
+    </style>
+
+    <style name="Aw.Component.Button.Icon" parent="Aw.Component.Button.Secondary">
+        <item name="android:lines">1</item>
+        <item name="android:backgroundTint">@color/button_secondary</item>
+        <item name="strokeColor">?colorOnSurface</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textColor">?colorOnSurface</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconGravity">textEnd</item>
+    </style>
+
+    <style name="Aw.Component.Button.TextIcon" parent="">
+        <item name="android:backgroundTint">@color/color_concrete</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:padding">@dimen/standard_16</item>
+        <item name="android:textSize">@dimen/sp17</item>
+        <item name="iconPadding">@dimen/cozy_20</item>
+        <item name="iconGravity">textEnd</item>
+        <item name="iconTint">@color/brand_accent</item>
+        <item name="android:layout_margin">@dimen/cozy_20</item>
+    </style>
+
+    <style name="Aw.Component.CopyButton.Copy" parent="">
+        <item name="android:paddingTop">@dimen/dp15</item>
+        <item name="android:paddingBottom">@dimen/dp15</item>
+        <item name="android:layout_marginStart">@dimen/dp8</item>
+        <item name="android:layout_marginEnd">@dimen/dp8</item>
+        <item name="android:paddingStart">@dimen/dp24</item>
+        <item name="android:paddingEnd">@dimen/dp24</item>
+        <item name="android:background">@drawable/background_round_grey_5dp</item>
+    </style>
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.ActionBar">
+        <item name="iconTint">@color/azure</item>
     </style>
 
     <style name="AWLightAlertDialog" parent="Theme.MaterialComponents.Light.Dialog.Alert">

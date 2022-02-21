@@ -11,7 +11,7 @@
         android:layout_gravity="center_vertical|end"
         android:fontFamily="@font/font_bold"
         android:padding="2dp"
-        android:background="@drawable/chain_name_background_lozenge"
+        android:background="@drawable/background_chain_name"
         android:text="@string/ethereum"
         android:textColor="@color/white"
         android:maxLines="1"

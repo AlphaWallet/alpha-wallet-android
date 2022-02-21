@@ -3,15 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_card">
+        android:layout_height="match_parent">
 
         <com.alphawallet.app.widget.ProgressView
             android:id="@+id/progress_view"
@@ -33,18 +31,18 @@
 
         </RelativeLayout>
 
-        <androidx.appcompat.widget.AppCompatButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_next"
-            style="@style/AwButton.Primary"
+            style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_margin="@dimen/dp16"
             android:text="@string/action_next" />
 
-        <androidx.appcompat.widget.AppCompatButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_redeem"
-            style="@style/AwButton.Primary"
+            style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

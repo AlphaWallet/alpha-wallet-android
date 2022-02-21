@@ -28,6 +28,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.BuildConfig;
@@ -44,6 +45,7 @@ import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.Locale;
 
@@ -432,7 +434,6 @@ public class NewSettingsFragment extends BaseFragment {
             backupButton.setText(getString(R.string.back_up_wallet_action, wallet.address.substring(0, 5)));
             backupButton.setOnClickListener(v -> openBackupActivity(wallet));
             backupTitle.setText(getString(R.string.wallet_not_backed_up));
-            layoutBackup.setBackgroundResource(R.drawable.background_warning_red_8dp);
             backupDetail.setText(getString(R.string.backup_wallet_detail));
             backupMenuButton.setOnClickListener(v -> {
                 showPopup(backupPopupAnchor, wallet.address);

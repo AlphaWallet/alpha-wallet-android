@@ -3,7 +3,6 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
     android:descendantFocusability="blocksDescendants"
     android:minHeight="80dp"
     android:orientation="horizontal"
@@ -124,7 +123,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/selector_radio_tick"
+        android:src="@drawable/ic_copy"
         android:visibility="visible" />
 
     <LinearLayout

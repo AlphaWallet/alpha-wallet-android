@@ -29,7 +29,7 @@
             android:layout_marginEnd="@dimen/dp10"
             android:fontFamily="@font/font_regular"
             android:text="-"
-            android:textColor="@color/black"
+            android:textColor="@color/color_black"
             android:textSize="@dimen/sp36" />
 
         <TextView
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_regular"
             android:text="ETH"
-            android:textColor="@color/black"
+            android:textColor="@color/color_black"
             android:textSize="@dimen/sp36" />
     </LinearLayout>
 
@@ -55,7 +55,7 @@
             android:layout_marginEnd="@dimen/dp5"
             android:fontFamily="@font/font_regular"
             android:text="Market Price:"
-            android:textColor="@color/dove"
+            android:textColor="@color/color_dove"
             android:textSize="@dimen/sp17" />
 
         <TextView
@@ -65,7 +65,7 @@
             android:layout_marginEnd="@dimen/dp5"
             android:fontFamily="@font/font_regular"
             android:text="$0.00"
-            android:textColor="@color/mine"
+            android:textColor="@color/color_mine"
             android:textSize="@dimen/sp17" />
 
         <TextView
@@ -74,7 +74,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_semibold"
             android:text="(+0.00%)"
-            android:textColor="@color/green"
+            android:textColor="@color/color_green"
             android:textSize="@dimen/sp17" />
     </LinearLayout>
 

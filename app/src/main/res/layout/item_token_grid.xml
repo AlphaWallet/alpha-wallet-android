@@ -33,7 +33,7 @@
         android:fontFamily="@font/font_regular"
         android:gravity="center_horizontal"
         android:maxLines="1"
-        android:textColor="@color/black"
+        android:textColor="@color/color_black"
         android:textSize="@dimen/sp20"
         tools:text="Fifa World Cup" />
 
@@ -47,7 +47,7 @@
         android:layout_marginBottom="@dimen/dp10"
         android:fontFamily="@font/font_regular"
         android:gravity="center_horizontal"
-        android:textColor="@color/dove"
+        android:textColor="@color/color_dove"
         android:textSize="@dimen/sp15"
         tools:text="2 Tokens" />
 

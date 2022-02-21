@@ -1,7 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
+    android:background="?attr/colorSurface"
     android:orientation="vertical">
 
     <TextView
@@ -14,13 +14,10 @@
         android:paddingStart="20dp"
         android:paddingEnd="15dp"
         android:text="@string/copy_wallet_address"
-        android:textColor="@color/black"
+        android:textColor="@color/color_black"
         android:textSize="17sp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury"/>
+    <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/show_my_wallet_address_action"
@@ -32,13 +29,10 @@
         android:paddingStart="20dp"
         android:paddingEnd="15dp"
         android:text="@string/title_show_wallet_address"
-        android:textColor="@color/black"
+        android:textColor="@color/color_black"
         android:textSize="17sp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury"/>
+    <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/add_hide_tokens_action"
@@ -50,13 +44,10 @@
         android:paddingStart="20dp"
         android:paddingEnd="15dp"
         android:text="@string/add_hide_tokens"
-        android:textColor="@color/black"
+        android:textColor="@color/color_black"
         android:textSize="17sp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury"/>
+    <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/rename_this_wallet_action"
@@ -68,7 +59,7 @@
         android:paddingStart="20dp"
         android:paddingEnd="15dp"
         android:text="@string/rename_this_wallet_action"
-        android:textColor="@color/black"
+        android:textColor="@color/color_black"
         android:textSize="17sp" />
 </LinearLayout>
 

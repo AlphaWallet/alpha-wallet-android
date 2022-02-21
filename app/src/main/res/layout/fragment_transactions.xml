@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorTheme"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
@@ -13,14 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
-        android:layout_marginBottom="?actionBarSize"
-        android:background="@color/alabaster">
+        android:layout_marginBottom="?actionBarSize">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
     <com.alphawallet.app.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"

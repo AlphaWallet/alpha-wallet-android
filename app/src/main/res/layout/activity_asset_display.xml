@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <com.alphawallet.app.widget.CertifiedToolbarView
@@ -14,8 +13,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_card">
+        android:layout_height="match_parent">
 
         <com.alphawallet.app.web3.Web3TokenView
             android:id="@+id/test_web3"

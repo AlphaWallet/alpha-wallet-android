@@ -30,8 +30,8 @@ public class TabUtils {
             tabTextView.setTypeface(ResourcesCompat.getFont(context, R.font.font_regular));
 
             tab.view.setBackground(ContextCompat.getDrawable(context, R.drawable.background_round_nofill_8dp));
-            tab.view.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.mine));
-            tabTextView.setTextColor(context.getColor(R.color.white));
+            tab.view.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.color_mine));
+            tabTextView.setTextColor(context.getColor(R.color.color_white));
         }
     }
 
@@ -41,8 +41,8 @@ public class TabUtils {
         if (tabTextView != null) {
             tabTextView.setTypeface(ResourcesCompat.getFont(context, R.font.font_regular));
             tab.view.setBackground(ContextCompat.getDrawable(context, R.drawable.background_round_nofill_8dp));
-            tab.view.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.white));
-            tabTextView.setTextColor(context.getColor(R.color.dove));
+            tab.view.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.color_white));
+            tabTextView.setTextColor(context.getColor(R.color.color_dove));
         }
     }
 

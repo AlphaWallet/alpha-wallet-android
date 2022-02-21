@@ -1,24 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_card">
+        android:layout_height="match_parent">
 
         <com.alphawallet.app.widget.FunctionButtonBar
-            android:layout_alignParentBottom="true"
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true" />
 
         <LinearLayout
             android:id="@id/token_view"
@@ -26,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@id/layoutButtons"
             android:layout_alignParentTop="true"
-            android:background="@color/concrete"
+            android:background="?colorSurface"
             android:orientation="vertical">
 
             <include layout="@layout/item_ticket" />
@@ -35,7 +32,7 @@
                 android:id="@+id/history_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -43,17 +40,17 @@
             android:id="@+id/layout_success_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/blur"
             android:gravity="center"
-            android:visibility="gone"
-            android:background="@color/blur">
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/success_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|center_horizontal|center_vertical"
-                android:src="@drawable/big_green_tick"
-                android:foregroundGravity="center" />
+                android:foregroundGravity="center"
+                android:src="@drawable/big_green_tick" />
 
         </LinearLayout>
 

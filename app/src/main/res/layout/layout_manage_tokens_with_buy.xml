@@ -3,13 +3,12 @@
     android:id="@+id/layout_manage_tokens"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/background_divider_top_bottom"
     android:gravity="center"
     android:orientation="vertical">
 
-    <androidx.appcompat.widget.AppCompatButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/primary_button"
-        style="@style/AwButton.Primary"
+        style="@style/Aw.Component.Button.Primary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/dp16"

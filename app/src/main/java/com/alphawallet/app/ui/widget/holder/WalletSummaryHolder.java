@@ -47,7 +47,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 	private final TextView walletNameText;
 	private final TextView walletAddressSeparator;
 	private final TextView walletAddressText;
-	private final ImageView walletSelectedIcon;
 	private final TextView wallet24hChange;
 	private final int greyColor;
 	private final int blackColor;
@@ -66,13 +65,12 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 		walletNameText = findViewById(R.id.wallet_name);
 		walletAddressSeparator = findViewById(R.id.wallet_address_separator);
 		walletAddressText = findViewById(R.id.wallet_address);
-		walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
 		walletClickLayout = findViewById(R.id.wallet_click_layer);
 		wallet24hChange = findViewById(R.id.wallet_24h_change);
 		clickCallback = callback;
 		manageWalletLayout = findViewById(R.id.layout_manage_wallet);
-		greyColor = parent.getContext().getColor(R.color.concrete);
-		blackColor = parent.getContext().getColor(R.color.mine);
+		greyColor = parent.getContext().getColor(R.color.color_concrete);
+		blackColor = parent.getContext().getColor(R.color.color_mine);
 		this.realm = realm;
 	}
 
@@ -117,8 +115,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 			walletBalanceCurrency.setText(wallet.balanceSymbol);
 
 			walletAddressText.setText(Utils.formatAddress(wallet.address));
-
-			walletSelectedIcon.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 
 			if (addition.getBoolean(IS_SYNCED, false))
 			{

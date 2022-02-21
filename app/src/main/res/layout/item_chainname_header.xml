@@ -9,20 +9,20 @@
         android:id="@+id/chain_name"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@color/alabaster"
+        android:background="@color/color_alabaster"
         android:fontFamily="@font/font_semibold"
         android:gravity="center_vertical"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         tools:text="Ethereum Mainnet"
         android:textAllCaps="true"
-        android:textColor="@color/dove"
-        android:textSize="15sp" />
+        android:textColor="@color/color_dove"
+        android:textSize="@dimen/sp15" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/mercury" />
+        android:background="@color/color_mercury" />
 
 </LinearLayout>
 

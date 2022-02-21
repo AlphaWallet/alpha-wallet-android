@@ -20,22 +20,13 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
-            style="@style/AwTabLayout.Fixed"
+            style="@style/Aw.Component.TabLayout.Fixed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
             app:layout_scrollFlags="enterAlways" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/mercury" />
-
-        <!--        <com.alphawallet.app.widget.NotificationView-->
-        <!--            android:id="@+id/notification"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:background="@drawable/background_bottom_border" />-->
+        <View style="@style/Aw.Component.Separator" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

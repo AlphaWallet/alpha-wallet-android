@@ -9,7 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="40dp"
-        android:background="@drawable/background_marketplace_event"
         android:orientation="vertical"
         android:paddingLeft="20dp"
         android:paddingTop="30dp"
@@ -55,9 +54,9 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/dialog_sub_text" />
 
-        <androidx.appcompat.widget.AppCompatButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/dialog_button1"
-            style="@style/AwButton.Primary"
+            style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/dialog_view"
@@ -68,9 +67,9 @@
             tools:text="Primary"
             tools:visibility="visible" />
 
-        <androidx.appcompat.widget.AppCompatButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/dialog_button2"
-            style="@style/AwButton.Secondary"
+            style="@style/Aw.Component.Button.Secondary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/dialog_button1"
@@ -85,7 +84,7 @@
             android:layout_below="@id/dialog_main_text"
             android:layout_centerInParent="true"
             android:layout_marginTop="20dp"
-            android:indeterminateTint="@color/colorPrimaryDark"
+            android:indeterminateTint="@color/color_dove"
             android:visibility="gone" />
     </RelativeLayout>
 </ScrollView>

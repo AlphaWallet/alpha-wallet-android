@@ -3,7 +3,7 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:id="@+id/input_view_layout"
@@ -53,12 +53,13 @@
             android:gravity="center_horizontal"
             android:linksClickable="true"
             android:text="@string/import_from_cloud"
-            android:textColor="@color/colorPrimary"
+            tools:text="@string/import_from_cloud"
+            android:textColor="?colorSurface"
             android:textSize="14sp" />
 
-        <androidx.appcompat.widget.AppCompatButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/import_action_pk"
-            style="@style/AwButton.Primary"
+            style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dp16"

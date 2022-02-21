@@ -37,9 +37,9 @@
             android:textColor="@color/dove"
             android:textSize="17sp" />
 
-        <androidx.appcompat.widget.AppCompatButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_close"
-            style="@style/AwButton.Primary"
+            style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="40dp"

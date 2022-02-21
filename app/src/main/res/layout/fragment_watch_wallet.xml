@@ -2,8 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/input_view_layout"
@@ -28,9 +27,9 @@
 
     </LinearLayout>
 
-    <androidx.appcompat.widget.AppCompatButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/import_action_ww"
-        style="@style/AwButton.Primary"
+        style="@style/Aw.Component.Button.Primary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -43,6 +42,6 @@
         android:layout_height="1dp"
         android:layout_alignParentBottom="true"
         android:orientation="vertical"
-        android:visibility="invisible"></LinearLayout>
+        android:visibility="invisible" />
 
 </RelativeLayout>

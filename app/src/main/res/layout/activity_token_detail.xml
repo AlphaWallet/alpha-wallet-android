@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:custom="http://schemas.android.com/tools"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
@@ -24,8 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="visible"
-            android:layout_above="@id/layoutButtons"
-            android:background="@drawable/background_card">
+            android:layout_above="@id/layoutButtons">
 
             <RelativeLayout
                 android:id="@+id/layout_asset"
@@ -33,39 +31,9 @@
                 android:layout_height="wrap_content"
                 android:padding="10dp">
 
-                <LinearLayout
-                    android:id="@+id/layout_token_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginBottom="23dp"
-                    android:layout_marginTop="13dp"
-                    android:orientation="vertical"
-                    android:paddingLeft="25dp"
-                    android:paddingRight="25dp">
-
-                    <TextView
-                        android:id="@+id/title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_light"
-                        android:textColor="@color/mine"
-                        android:textSize="21sp"
-                        android:visibility="visible" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:fontFamily="@font/font_semibold"
-                        android:text="@string/ethereum_blockchain"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="11sp" />
-                </LinearLayout>
-
                 <com.alphawallet.app.widget.NFTImageView
                     android:id="@+id/layout_image"
-                    android:layout_below="@id/layout_token_title"
+                    android:layout_alignParentTop="true"
                     android:layout_width="match_parent"
                     android:layout_height="350dp"
                     custom:webview_height="350"

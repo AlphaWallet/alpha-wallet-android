@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/background_card"
     android:clickable="true"
     android:orientation="vertical"
     android:paddingLeft="10dp"
@@ -47,7 +46,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_semibold"
             android:text="@string/issuer"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/color_dove"
             android:textSize="11sp" />
 
         <TextView
@@ -57,7 +56,7 @@
             android:fontFamily="@font/font_semibold"
             android:layout_marginStart="4dp"
             android:text=""
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/color_dove"
             android:textSize="11sp" />
 
     </LinearLayout>

@@ -131,7 +131,7 @@
                 android:layout_width="19dp"
                 android:layout_height="19dp"
                 android:layout_toStartOf="@id/spacer"
-                android:background="@drawable/background_round_warning_red"
+                android:background="@drawable/background_settings_badge"
                 android:fontFamily="@font/font_semibold"
                 android:gravity="center"
                 android:paddingBottom="2dp"

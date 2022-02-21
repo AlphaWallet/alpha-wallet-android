@@ -1,12 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<!-- Application Palette -->
-	<color name="colorPrimary">#FFFFFF</color>
-	<color name="colorPrimaryDark">#707070</color>
-	<color name="colorAccent">#54C1E3</color>
-	<color name="colorPrimaryLight">#AA54C1E3</color>
-	<color name="colorTheme">#FFFFFF</color>
-	<color name="colorHighlight">@color/azure</color>
+	<color name="color_white">@color/white</color>
+	<color name="color_black">@color/black</color>
+	<color name="color_azure">@color/azure</color>
+	<color name="color_dove">@color/dove</color>
+	<color name="color_dusty">@color/dusty</color>
+	<color name="color_green">@color/green</color>
+	<color name="color_alabaster">@color/alabaster</color>
+	<color name="color_mercury">@color/mercury</color>
+	<color name="color_mine">@color/mine</color>
+	<color name="color_concrete">@color/concrete</color>
+	<color name="color_cod">@color/cod</color>
+
+	<!-- Functional -->
+	<color name="brand_accent">@color/color_azure</color>
+
+	<!-- Most prominent text color -->
+	<color name="text_primary">@color/color_black</color>
+	<color name="text_primary_inverse">@color/color_white</color>
+	<!-- Secondary text color for subtitles -->
+	<color name="text_secondary">@color/color_dove</color>
+	<color name="text_secondary_inverse">@color/color_dusty</color>
+	<!-- Tertiary text color -->
+	<color name="text_tertiary">@color/color_mine</color>
+
+	<color name="text_error">@color/danger</color>
+
+	<color name="positive">@color/color_green</color>
+	<color name="negative">@color/danger</color>
+
+	<color name="button_primary">@color/color_cod</color>
+	<color name="button_secondary">@color/transparent</color>
+
+	<!-- For toolbars ?? TODO -->
+	<color name="toolbar_icon_tint">@color/color_green</color>
+
+	<!-- For buttons - azure / white (probably) TODO -->
+	<color name="icon_tint">@color/color_black</color>
+	<color name="icon_tint_primary">@color/color_azure</color>
+
+	<color name="separator">@color/color_mercury</color>
+
+	<color name="section_header"></color>
+
+	<color name="seed_phrase"></color>
+
+
 
 	<!-- AlphaWallet Palette -->
 	<color name="pinkish_grey">#bdbdbd</color>
@@ -83,6 +123,7 @@
 	<!-- Functional Palette -->
 	<color name="transparent">#00000000</color>
 	<color name="translucent_white">#B3FFFFFF</color>
+	<color name="translucent_black">#1e000000</color>
 	<color name="translucent_dove">#66727272</color>
 	<color name="blur">#80000000</color>
 	<color name="danger_10_percent">#19ff3b30</color>

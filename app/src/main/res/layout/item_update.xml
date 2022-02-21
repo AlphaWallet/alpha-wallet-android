@@ -6,9 +6,9 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/dp8"
     android:animateLayoutChanges="true"
-    android:background="@drawable/background_round_border"
-    android:orientation="vertical"
+    android:background="?colorOnSurface"
     android:gravity="start"
+    android:orientation="vertical"
     android:paddingStart="@dimen/dp12"
     android:paddingTop="@dimen/dp12"
     android:paddingEnd="@dimen/dp12"
@@ -18,10 +18,10 @@
         android:id="@+id/text_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/font_regular"
-        android:textColor="@color/white"
-        android:text="@string/new_version_title"
         android:layout_marginBottom="@dimen/dp10"
+        android:fontFamily="@font/font_regular"
+        android:text="@string/new_version_title"
+        android:textColor="?colorSurface"
         android:textSize="@dimen/sp24" />
 
     <LinearLayout
@@ -34,9 +34,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_regular"
-            android:textColor="@color/white"
-            tools:text="Installed: 123"
-            android:textSize="@dimen/sp15" />
+            android:textColor="?colorSurface"
+            android:textSize="@dimen/sp15"
+            tools:text="Installed: 123" />
 
         <TextView
             android:id="@+id/text_detail_available"
@@ -44,9 +44,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:fontFamily="@font/font_regular"
-            android:textColor="@color/white"
-            tools:text="Available: 130"
-            android:textSize="@dimen/sp15" />
+            android:textColor="?colorSurface"
+            android:textSize="@dimen/sp15"
+            tools:text="Available: 130" />
 
     </LinearLayout>
 

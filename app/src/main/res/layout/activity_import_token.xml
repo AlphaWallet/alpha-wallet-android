@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <com.alphawallet.app.widget.CertifiedToolbarView
@@ -12,8 +11,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_card">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -91,7 +89,7 @@
                     android:fontFamily="@font/font_bold"
                     android:gravity="center"
                     android:text="0.00 ETH"
-                    android:textColor="@color/colorPrimaryDark"
+                    android:textColor="@color/color_dove"
                     android:textSize="21sp" />
 
                 <View
@@ -141,18 +139,18 @@
             android:orientation="horizontal"
             android:padding="@dimen/dp16">
 
-            <androidx.appcompat.widget.AppCompatButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/import_ticket"
-                style="@style/AwButton.Primary"
+                style="@style/Aw.Component.Button.Primary"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="@dimen/dp8"
                 android:layout_weight="1"
                 android:text="@string/action_import" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/cancel_button"
-                style="@style/AwButton.Secondary"
+                style="@style/Aw.Component.Button.Secondary"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

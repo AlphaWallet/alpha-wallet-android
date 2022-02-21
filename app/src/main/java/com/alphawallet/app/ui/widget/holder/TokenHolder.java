@@ -94,7 +94,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     public void bind(@Nullable TokenCardMeta data, @NonNull Bundle addition)
     {
         layoutAppreciation.setForeground(null);
-        balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.black));
         if (data == null) { fillEmpty(); return; }
         try
         {
@@ -112,7 +111,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             }
 
             tokenLayout.setVisibility(View.VISIBLE);
-            tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
+//            tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
             contractSeparator.setVisibility(View.GONE);
             if (!TextUtils.isEmpty(data.getFilterText()) && data.getFilterText().equals(CHECK_MARK))
@@ -216,12 +215,12 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         if ((System.currentTimeMillis() - ticker.updateTime) > TICKER_PERIOD_VALIDITY)
         {
             layoutAppreciation.setForeground(AppCompatResources.getDrawable(getContext(), R.color.translucent_white));
-            balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.translucent_dove));
+            balanceCurrency.setAlpha(0.3f);
         }
         else
         {
             layoutAppreciation.setForeground(null);
-            balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.black));
+            balanceCurrency.setAlpha(1.0f);
         }
     }
 

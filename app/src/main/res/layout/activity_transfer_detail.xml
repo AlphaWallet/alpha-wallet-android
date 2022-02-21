@@ -5,15 +5,13 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_card">
+        android:layout_height="match_parent">
 
         <com.alphawallet.app.widget.ProgressView
             android:id="@+id/progress_view"
@@ -101,7 +99,7 @@
                             android:gravity="center"
                             android:padding="10dp"
                             android:text="1"
-                            android:textColor="@color/colorPrimaryDark"
+                            android:textColor="@color/color_dove"
                             android:textSize="21sp" />
 
                         <RelativeLayout
@@ -216,7 +214,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginEnd="15dp"
-                                android:background="@drawable/selector_radio_check"
+                                android:background="@drawable/selector_checkbox_round"
                                 android:checked="true"
                                 app:buttonTint="@color/transparent" />
 
@@ -246,7 +244,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginEnd="15dp"
-                                android:background="@drawable/selector_radio_check"
+                                android:background="@drawable/selector_checkbox_round"
                                 android:checked="false"
                                 android:text=""
                                 app:buttonTint="@color/transparent" />
@@ -316,7 +314,7 @@
                                     android:imeOptions="actionDone"
                                     android:inputType="datetime"
                                     android:paddingStart="15dp"
-                                    android:textColor="@color/colorPrimaryDark"
+                                    android:textColor="@color/color_dove"
                                     android:textColorHint="@color/dusty"
                                     android:textSize="18sp" />
 
@@ -382,7 +380,7 @@
                                     android:imeOptions="actionDone"
                                     android:inputType="time"
                                     android:paddingStart="15dp"
-                                    android:textColor="@color/colorPrimaryDark"
+                                    android:textColor="@color/color_dove"
                                     android:textColorHint="@color/dusty"
                                     android:textSize="18sp" />
 

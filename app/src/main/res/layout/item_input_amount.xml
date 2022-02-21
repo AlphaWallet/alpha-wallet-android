@@ -8,27 +8,23 @@
     <RelativeLayout
         android:id="@+id/layout_header_amount"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/alabaster">
+        android:layout_height="50dp"
+        android:background="@color/color_alabaster">
 
         <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_alignParentTop="true"
-            android:background="@color/mercury" />
+            style="@style/Aw.Component.Separator"
+            android:layout_alignParentTop="true" />
 
         <TextView
             android:id="@+id/text_header"
+            style="@style/Aw.Typography.StandardHeaderText"
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:fontFamily="@font/font_semibold"
-            android:gravity="center_vertical|end"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:text="@string/amount"
-            android:textAllCaps="true"
-            android:textColor="@color/dove"
-            android:textSize="15sp" />
+            android:text="@string/amount" />
 
 
         <com.alphawallet.app.widget.ChainName
@@ -42,19 +38,16 @@
 
     </RelativeLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+    <View style="@style/Aw.Component.Separator" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:paddingStart="@dimen/dp16"
-        android:paddingEnd="@dimen/dp16"
         android:paddingTop="@dimen/dp30"
-        android:paddingBottom="@dimen/dp20"
-        android:orientation="vertical">
+        android:paddingEnd="@dimen/dp16"
+        android:paddingBottom="@dimen/dp20">
 
         <LinearLayout
             android:id="@+id/layout_container"
@@ -71,10 +64,10 @@
                 <com.alphawallet.app.widget.TokenIcon
                     android:id="@+id/token_icon"
                     android:layout_width="@dimen/token_icon"
-                    android:foregroundGravity="center_vertical"
                     android:layout_height="@dimen/token_icon"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="@dimen/dp8" />
+                    android:layout_marginEnd="@dimen/dp8"
+                    android:foregroundGravity="center_vertical" />
 
                 <TextView
                     android:id="@+id/text_token_symbol"
@@ -83,7 +76,7 @@
                     android:layout_gravity="center_vertical"
                     android:fontFamily="@font/font_regular"
                     android:textAllCaps="true"
-                    android:textColor="@color/black"
+                    android:textColor="?colorOnSurface"
                     android:textSize="@dimen/sp36"
                     tools:text="ETH" />
 
@@ -122,8 +115,8 @@
                 android:maxLines="1"
                 android:paddingStart="@dimen/dp5"
                 android:paddingEnd="@dimen/dp5"
-                android:textColor="@color/dove"
-                android:textColorHint="@color/dusty"
+                android:textColor="@color/color_dove"
+                android:textColorHint="@color/color_dusty"
                 android:textSize="36sp" />
 
         </LinearLayout>
@@ -131,15 +124,15 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
             android:layout_marginTop="@dimen/dp12"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/available"
                 android:paddingStart="2dp"
+                android:text="@string/available"
                 android:textColor="@color/dove"
                 android:textSize="@dimen/sp13" />
 
@@ -147,7 +140,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=":"
-                android:textColor="@color/dove"
+                android:textColor="@color/color_dove"
                 android:textSize="@dimen/sp13" />
 
             <TextView
@@ -155,7 +148,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="3dp"
-                android:textColor="@color/dove"
+                android:textColor="@color/color_dove"
                 android:textSize="@dimen/sp13"
                 tools:text="4.4328" />
 
@@ -164,7 +157,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="3dp"
-                android:textColor="@color/dove"
+                android:textColor="@color/color_dove"
                 android:textSize="@dimen/sp13"
                 tools:text="ETH" />
 
@@ -187,7 +180,7 @@
                 android:gravity="end"
                 android:lines="1"
                 android:text="@string/all_funds"
-                android:textColor="@color/azure"
+                android:textColor="@color/color_azure"
                 android:textSize="@dimen/sp17"
                 android:visibility="visible" />
 

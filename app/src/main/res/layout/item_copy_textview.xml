@@ -1,35 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/view_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:fontFamily="@font/font_regular"
-        android:gravity="center"
-        android:maxLines="2"
-        android:lineHeight="12pt"
-        tools:text="0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4"
-        android:textSize="@dimen/sp17" />
-
-    <ImageView
-        android:id="@+id/img_copy"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button"
+        style="@style/Aw.Component.Button.TextIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="@dimen/dp12"
-        android:clickable="true"
-        android:contentDescription="@string/action_copy"
-        android:focusable="true"
-        android:padding="@dimen/dp8"
-        android:foreground="?android:attr/selectableItemBackground"
-        android:src="@drawable/ic_copy" />
+        app:icon="@drawable/ic_copy"
+        tools:text="0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4" />
+
+<!--    <TextView-->
+<!--        android:id="@+id/text"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="center_vertical"-->
+<!--        android:layout_weight="1"-->
+<!--        android:fontFamily="@font/font_regular"-->
+<!--        android:gravity="center"-->
+<!--        android:maxLines="2"-->
+<!--        android:textColor="@color/text_primary"-->
+<!--        android:textSize="@dimen/sp17"-->
+<!--        android:visibility="gone"-->
+<!--        tools:text="0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4" />-->
+
+<!--    <ImageView-->
+<!--        android:id="@+id/img_copy"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="center_vertical"-->
+<!--        android:layout_marginStart="@dimen/dp12"-->
+<!--        android:clickable="true"-->
+<!--        android:contentDescription="@string/action_copy"-->
+<!--        android:focusable="true"-->
+<!--        android:foreground="?android:attr/selectableItemBackground"-->
+<!--        android:padding="@dimen/dp8"-->
+<!--        android:src="@drawable/ic_copy"-->
+<!--        android:visibility="gone" />-->
 
 </LinearLayout>

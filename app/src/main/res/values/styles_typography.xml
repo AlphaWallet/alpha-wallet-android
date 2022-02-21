@@ -2,13 +2,29 @@
 <resources>
 
     <style name="Aw.Typography.ToolbarTitle" parent="">
-        <item name="android:textColor">@color/black</item>
         <item name="android:fontFamily">@font/font_semibold</item>
+        <item name="android:textColor">?colorOnSurface</item>
         <item name="android:textSize">@dimen/sp20</item>
         <item name="android:gravity">center</item>
         <item name="android:ellipsize">end</item>
         <item name="android:paddingStart">@dimen/dp16</item>
         <item name="android:paddingEnd">@dimen/dp16</item>
         <item name="android:lines">1</item>
+    </style>
+
+    <style name="Aw.Typography.TabText" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">@dimen/sp15</item>
+        <item name="android:textColor">?colorOnSurface</item>
+        <item name="android:fontFamily">@font/font_regular</item>
+        <item name="textAllCaps">false</item>
+    </style>
+
+    <style name="Aw.Typography.StandardHeaderText" parent="">
+        <item name="android:fontFamily">@font/font_semibold</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:lines">1</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/color_dove</item>
+        <item name="android:textSize">@dimen/sp15</item>
     </style>
 </resources>

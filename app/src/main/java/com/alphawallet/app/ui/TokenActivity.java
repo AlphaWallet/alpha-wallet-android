@@ -309,14 +309,16 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
         transaction.getDestination(token);
         eventAction.setText(operationName);
-        eventActionSymbol.setText(sym);
+        eventAction.append(" " + sym);
+//        eventActionSymbol.setText(sym);
         //amount
         String transactionValue = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
 
         if (!token.shouldShowSymbol(transaction) && transaction.input.length() >= FUNCTION_LENGTH)
         {
             eventAmount.setText(transaction.input.substring(0, FUNCTION_LENGTH));
-            eventActionSymbol.setText(getString(R.string.sent_to, token.getFullName()));
+//            eventActionSymbol.setText(getString(R.string.sent_to, token.getFullName()));
+            eventAction.setText(operationName + " " + getString(R.string.sent_to, token.getFullName()));
         }
         else if (TextUtils.isEmpty(transactionValue))
         {

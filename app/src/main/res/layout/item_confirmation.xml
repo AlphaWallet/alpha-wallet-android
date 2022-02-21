@@ -6,7 +6,6 @@
     android:layout_height="wrap_content"
     android:paddingTop="@dimen/dp14"
     android:paddingBottom="@dimen/dp14"
-    android:background="@drawable/background_card"
     android:visibility="gone">
 
     <com.alphawallet.app.widget.ProgressKnobkerry

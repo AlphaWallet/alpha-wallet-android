@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- Application Palette -->
+	<color name="color_white">@color/cod</color>
+	<color name="color_black">@color/white</color>
+	<color name="color_azure">@color/dodge</color>
+	<color name="color_dove">@color/dusty</color>
+	<color name="color_dusty">@color/dusty</color>
+	<color name="color_green">@color/green</color>
+	<color name="color_alabaster">@color/venus</color>
+	<color name="color_mercury">@color/venus</color>
+	<color name="color_mine">@color/white</color>
+	<color name="color_concrete">@color/mine</color>
+	<color name="color_cod">@color/white</color>
+</resources>

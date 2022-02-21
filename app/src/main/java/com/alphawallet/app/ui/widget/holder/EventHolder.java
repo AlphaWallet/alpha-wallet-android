@@ -83,7 +83,7 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
 
         fetchTransactionsInteract = interact;
         refreshSignaller = signaller;
-        transactionBackground.setBackgroundResource(R.color.white);
+        transactionBackground.setBackgroundResource(R.color.color_white);
     }
 
     @Override

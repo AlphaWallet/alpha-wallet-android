@@ -22,7 +22,7 @@
                 android:layout_gravity="start"
                 android:layout_weight="1"
                 android:fontFamily="@font/font_bold"
-                android:textColor="@color/black"
+                android:textColor="@color/color_black"
                 android:textSize="@dimen/sp36"
                 tools:text="$27,890.23" />
 

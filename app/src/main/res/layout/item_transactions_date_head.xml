@@ -3,30 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@color/alabaster"
-    android:gravity="center">
+    android:background="@color/color_alabaster"
+    android:gravity="center"
+    android:orientation="vertical">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="@color/mercury"/>
+    <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/title"
+        style="@style/Aw.Typography.StandardHeaderText"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_marginEnd="@dimen/big_margin"
         android:layout_marginStart="@dimen/big_margin"
-        android:fontFamily="@font/font_semibold"
-        android:textAllCaps="true"
-        android:gravity="center_vertical"
-        android:textColor="@color/dove"
-        android:textSize="@dimen/sp15"
+        android:layout_marginEnd="@dimen/big_margin"
         tools:text="Jan 09, 2017" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="@color/mercury"/>
+    <View style="@style/Aw.Component.Separator" />
 </LinearLayout>

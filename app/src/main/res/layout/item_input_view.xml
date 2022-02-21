@@ -13,10 +13,7 @@
         android:visibility="gone"
         android:background="@color/alabaster">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/mercury" />
+        <View style="@style/Aw.Component.Separator" />
 
         <TextView
             android:id="@+id/text_header"
@@ -28,13 +25,10 @@
             android:paddingEnd="16dp"
             android:text="@string/wallet_name"
             android:textAllCaps="true"
-            android:textColor="@color/dove"
+            android:textColor="@color/color_dove"
             android:textSize="15sp" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/mercury" />
+        <View style="@style/Aw.Component.Separator" />
 
     </LinearLayout>
 
@@ -62,8 +56,8 @@
             android:paddingTop="@dimen/dp12"
             android:paddingEnd="@dimen/dp8"
             android:paddingBottom="@dimen/dp12"
-            android:textColor="@color/black"
-            android:textColorHint="@color/dusty"
+            android:textColor="@color/color_black"
+            android:textColorHint="@color/color_dusty"
             android:textSize="@dimen/sp17"
             android:layout_toStartOf="@id/img_scan_qr"
             tools:text="Awesome High Yield DeFi Token" />
@@ -87,16 +81,16 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/box_layout"
         android:layout_marginStart="31dp"
-        android:layout_marginBottom="5dp"
         android:layout_marginTop="-9dp"
-        android:background="@color/white"
+        android:layout_marginBottom="5dp"
+        android:background="@color/color_white"
         android:fontFamily="@font/font_semibold"
         android:paddingLeft="2dp"
         android:paddingRight="2dp"
-        android:textColor="@color/dove"
+        android:textColor="@color/color_dove"
         android:textSize="@dimen/sp13"
-        tools:text="Token Name"
-        android:visibility="visible" />
+        android:visibility="visible"
+        tools:text="Token Name" />
 
     <TextView
         android:id="@+id/text_paste"
@@ -106,7 +100,7 @@
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="16dp"
         android:fontFamily="@font/font_semibold"
-        android:textColor="@color/azure"
+        android:textColor="@color/color_azure"
         android:textSize="@dimen/sp17"
         android:text="@string/paste"
         android:visibility="visible" />
@@ -121,7 +115,7 @@
         android:layout_toStartOf="@id/text_paste"
         android:layout_marginTop="2dp"
         android:fontFamily="@font/font_regular"
-        android:textColor="@color/green"
+        android:textColor="@color/color_green"
         android:textSize="@dimen/sp12"
         android:visibility="gone"
         tools:text="Awesome Tokens" />

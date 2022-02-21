@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?colorSurface"
     android:orientation="vertical">
 
     <TextView
@@ -9,28 +10,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:background="@drawable/background_marketplace_event"
         android:fontFamily="@font/font_regular"
         android:paddingLeft="15dp"
         android:paddingTop="15dp"
         android:paddingRight="40dp"
         android:paddingBottom="15dp"
         android:text="@string/action_view"
-        android:textColor="@color/mine"
+        android:textColor="?colorOnSurface"
         android:textSize="16sp" />
     <TextView
         android:id="@+id/popup_delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:background="@drawable/background_marketplace_event"
         android:fontFamily="@font/font_regular"
         android:paddingLeft="15dp"
         android:paddingTop="15dp"
         android:paddingRight="40dp"
         android:paddingBottom="15dp"
         android:text="@string/action_remove"
-        android:textColor="@color/mine"
+        android:textColor="?colorOnSurface"
         android:textSize="16sp" />
 
 </LinearLayout>

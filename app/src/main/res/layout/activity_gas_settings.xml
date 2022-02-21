@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView android:id="@+id/setting_scroll"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/setting_scroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
         android:orientation="vertical">
 
         <include layout="@layout/layout_simple_toolbar" />
@@ -17,10 +17,10 @@
             android:layout_height="wrap_content" />
 
         <com.alphawallet.app.widget.GasSliderView
-            android:visibility="gone"
             android:id="@+id/gasSliderView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
 
         <FrameLayout
             android:id="@+id/layout_resend_note"
@@ -28,34 +28,33 @@
             android:layout_height="wrap_content"
             android:padding="@dimen/sp17"
             android:visibility="gone">
+
             <TextView
-                android:background="@drawable/background_round_azure_16dp_filled"
                 android:id="@+id/text_resend_note"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
                 android:lineHeight="29sp"
                 android:padding="26dp"
+                android:text="@string/text_resend_gas_note"
                 android:textAlignment="center"
-                android:textColor="@color/white"
-                android:textSize="@dimen/sp17"
-                android:text="@string/text_resend_gas_note" />
+                android:textColor="?colorOnSurface"
+                android:textSize="@dimen/sp17" />
         </FrameLayout>
 
         <TextView
             android:id="@+id/text_notice"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/background_dove_bar"
-            android:paddingTop="@dimen/dp16"
-            android:paddingStart="@dimen/dp11"
-            android:paddingEnd="@dimen/dp11"
-            android:lineSpacingExtra="@dimen/dp5"
-            android:textSize="@dimen/sp13"
-            android:gravity="center_horizontal"
             android:autoLink="web"
-            android:visibility="gone"
-            android:text="@string/gas_message"/>
+            android:gravity="center_horizontal"
+            android:lineSpacingExtra="@dimen/dp5"
+            android:paddingStart="@dimen/dp11"
+            android:paddingTop="@dimen/dp16"
+            android:paddingEnd="@dimen/dp11"
+            android:text="@string/gas_message"
+            android:textSize="@dimen/sp13"
+            android:visibility="gone" />
 
         <com.alphawallet.app.ui.widget.entity.GasWarningLayout
             android:id="@+id/gas_warning_bubble"
@@ -63,49 +62,53 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dp18"
             android:visibility="gone">
+
             <LinearLayout
-                android:background="@drawable/background_warning_salmon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/background_warning_salmon"
                 android:gravity="center"
-                android:paddingTop="14dp"
+                android:orientation="vertical"
                 android:paddingHorizontal="14dp"
-                android:paddingBottom="30dp"
-                android:orientation="vertical">
+                android:paddingTop="14dp"
+                android:paddingBottom="30dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_horizontal">
+                    android:gravity="center_horizontal"
+                    android:orientation="horizontal">
+
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/ic_red_warning"
-                        android:layout_margin="8dp"/>
+                        android:layout_margin="8dp"
+                        android:src="@drawable/ic_red_warning" />
+
                     <TextView
                         android:id="@+id/bubble_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/low_gas_setting"
-                        android:textStyle="normal"
-                        android:textSize="20sp"
-                        android:textColor="@color/danger"
-                        android:lineSpacingExtra="14sp"
-                        android:gravity="center_horizontal"
                         android:layout_gravity="center_vertical"
-                        android:lineHeight="34sp"/>
+                        android:gravity="center_horizontal"
+                        android:lineHeight="34sp"
+                        android:lineSpacingExtra="14sp"
+                        android:text="@string/low_gas_setting"
+                        android:textColor="@color/danger"
+                        android:textSize="20sp"
+                        android:textStyle="normal" />
                 </LinearLayout>
+
                 <TextView
                     android:id="@+id/bubble_body"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="0dp"
-                    android:text="@string/body_low_gas"
                     android:autoLink="web"
-                    android:textColor="@color/dove"
+                    android:text="@string/body_low_gas"
                     android:textAlignment="center"
-                    android:textSize="15sp"/>
+                    android:textColor="@color/dove"
+                    android:textSize="15sp" />
             </LinearLayout>
         </com.alphawallet.app.ui.widget.entity.GasWarningLayout>
 
@@ -116,47 +119,51 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dp18"
             android:visibility="gone">
+
             <LinearLayout
-                android:background="@drawable/background_warning_salmon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/background_warning_salmon"
                 android:gravity="center"
-                android:paddingTop="14dp"
+                android:orientation="vertical"
                 android:paddingHorizontal="14dp"
-                android:paddingBottom="30dp"
-                android:orientation="vertical">
+                android:paddingTop="14dp"
+                android:paddingBottom="30dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_horizontal">
+                    android:gravity="center_horizontal"
+                    android:orientation="horizontal">
+
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/ic_red_warning"
-                        android:layout_margin="8dp"/>
+                        android:layout_margin="8dp"
+                        android:src="@drawable/ic_red_warning" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/insufficient_gas"
-                        android:textStyle="normal"
-                        android:textSize="20sp"
-                        android:textColor="@color/danger"
-                        android:lineSpacingExtra="14sp"
-                        android:gravity="center_horizontal"
                         android:layout_gravity="center_vertical"
-                        android:lineHeight="34sp"/>
+                        android:gravity="center_horizontal"
+                        android:lineHeight="34sp"
+                        android:lineSpacingExtra="14sp"
+                        android:text="@string/insufficient_gas"
+                        android:textColor="@color/danger"
+                        android:textSize="20sp"
+                        android:textStyle="normal" />
                 </LinearLayout>
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="0dp"
-                    android:text="@string/body_insufficient_warning"
                     android:autoLink="web"
-                    android:textColor="@color/dove"
+                    android:text="@string/body_insufficient_warning"
                     android:textAlignment="center"
-                    android:textSize="15sp"/>
+                    android:textColor="@color/dove"
+                    android:textSize="15sp" />
             </LinearLayout>
         </com.alphawallet.app.ui.widget.entity.GasWarningLayout>
 

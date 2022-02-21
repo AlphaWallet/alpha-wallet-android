@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_setting"
     android:layout_width="match_parent"
     android:layout_height="61dp"
-    android:background="@drawable/selector_settings_item"
     android:clickable="true"
     android:focusable="true">
 
@@ -32,7 +33,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_regular"
             android:text="Setting Title"
-            android:textColor="@color/black"
+            android:textColor="@color/color_black"
             android:textSize="17sp" />
 
         <TextView
@@ -43,9 +44,8 @@
             android:fontFamily="@font/font_regular"
             android:lines="1"
             android:maxLines="1"
-
             android:text="Setting Subtitle"
-            android:textColor="@color/dove"
+            android:textColor="@color/color_dove"
             android:textSize="15sp"
             android:visibility="gone" />
     </LinearLayout>
@@ -64,22 +64,23 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="12dp"
             android:src="@drawable/ic_arrow_right"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:tint="@color/color_black" />
 
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/setting_switch"
+            style="@style/Aw.Component.Switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:checked="true"
             android:layout_marginEnd="16dp"
             android:clickable="false"
             android:focusable="false"
-            android:theme="@style/SettingsItemSwitchAppearance"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:visibility="visible" />
     </LinearLayout>
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/mercury" />
+        style="@style/Aw.Component.Separator"
+        android:layout_alignParentBottom="true" />
 </RelativeLayout>

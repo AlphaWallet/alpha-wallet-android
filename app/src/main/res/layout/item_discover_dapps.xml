@@ -60,7 +60,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:background="@drawable/background_round_blue_9dp"
             android:fontFamily="@font/font_regular"
             android:paddingBottom="5dp"
             android:paddingLeft="15dp"
@@ -68,7 +67,7 @@
             android:paddingTop="5dp"
             android:text="@string/add"
             android:textAllCaps="true"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/color_dove"
             android:textSize="11sp" />
 
         <TextView
@@ -76,7 +75,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:background="@drawable/background_round_blue_9dp"
             android:fontFamily="@font/font_regular"
             android:paddingBottom="5dp"
             android:paddingLeft="15dp"
@@ -84,7 +82,7 @@
             android:paddingTop="5dp"
             android:text="@string/action_remove"
             android:textAllCaps="true"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/color_dove"
             android:textSize="11sp"
             android:visibility="gone" />
 

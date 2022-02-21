@@ -60,7 +60,6 @@
             android:title="@string/action_scan_dapp"
             app:showAsAction="withText" />
 
-
         <item
             android:id="@+id/action_clear_cache"
             android:icon="@drawable/ic_settings_cache"

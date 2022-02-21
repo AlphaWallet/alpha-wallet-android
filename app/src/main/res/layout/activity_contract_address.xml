@@ -4,7 +4,6 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
@@ -53,7 +52,7 @@
             android:gravity="center"
             android:paddingTop="@dimen/dp20"
             android:text="@string/scan_qr_label"
-            android:textColor="@color/black"
+            android:textColor="?colorOnSurface"
             android:textSize="@dimen/sp17"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -83,13 +82,12 @@
 
             <com.alphawallet.app.widget.CopyTextView
                 android:id="@+id/copy_address"
-                style="@style/MyAddressCopyTextStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 custom:gravity="center"
                 custom:bold="true"
-                custom:textColor="@color/black" />
+                custom:textColor="?colorOnSurface" />
 
         </LinearLayout>
 

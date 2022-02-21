@@ -1,16 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimary</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="colorPrimary">@color/color_white</item>
+        <item name="colorOnPrimary">@color/color_black</item>
+        <item name="colorAccent">@color/color_azure</item>
+
+        <item name="colorSurface">@color/color_white</item>
+        <item name="colorOnSurface">@color/color_black</item>
+
+        <!-- Controls (Switch, CheckBox, etc) -->
+        <!-- Default state color -->
+        <item name="colorControlNormal">@color/color_black</item>
+        <!-- Activated state color -->
+        <item name="colorControlActivated">@color/color_azure</item>
+        <!-- Ripple color when control is tapped -->
+        <item name="colorControlHighlight">@color/color_azure</item>
+
+        <item name="colorError">@color/danger</item>
+        <item name="colorOnError">@color/color_white</item>
+
+        <item name="android:colorBackground">@color/color_white</item>
+        <item name="colorOnBackground">@color/color_black</item>
+
 
         <item name="toolbarStyle">@style/Aw.Component.Toolbar</item>
         <item name="appBarLayoutStyle">@style/Aw.Component.AppBarLayout</item>
+        <item name="recyclerViewStyle">@style/Aw.Component.RecyclerView</item>
+        <item name="switchStyle">@style/Aw.Component.Switch</item>
+        <item name="checkboxStyle">@style/Aw.Component.CheckBox</item>
+        <item name="radioButtonStyle">@style/Aw.Component.RadioButton</item>
     </style>
+
 
     <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
@@ -18,28 +40,18 @@
         <item name="actionMenuTextColor">@color/dove</item>
     </style>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
 
     <!-- Splash Screen theme. -->
 
-    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="actionMenuTextColor">@color/dove</item>
-        <item name="colorPrimaryDark">@color/colorPrimary</item>
-        <item name="android:windowLightStatusBar">true</item>
-
-        <item name="android:autoCompleteTextViewStyle">@style/Widget.AppCompat.Light.AutoCompleteTextView</item>
-        <item name="android:dialogTheme">@style/MyDialogTheme</item>
-        <item name="android:alertDialogTheme">@style/MyDialogTheme</item>
-        <item name="colorSurface">#FFFFFF</item>
+    <style name="SplashTheme" parent="AppTheme.NoActionBar">
+        <item name="android:windowBackground">@drawable/background_splash</item>
     </style>
 
 
     <style name="AppTheme.Toolbar" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="colorControlNormal">@color/black</item>
-        <item name="colorPrimaryDark">@color/transparent</item>
+<!--        <item name="color_dove">@color/transparent</item>-->
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
         <item name="colorSurface">#FFFFFF</item>
     </style>
@@ -63,7 +75,7 @@
     </style>
 
     <style name="ChartTabLayoutStyle" parent="Widget.Design.TabLayout">
-        <item name="tabIndicatorColor">@color/mine</item>
+        <item name="tabIndicatorColor">@color/color_mine</item>
         <item name="tabIndicatorHeight">0dp</item>
         <item name="tabPaddingStart">@dimen/dp23</item>
         <item name="tabPaddingEnd">@dimen/dp23</item>
@@ -80,25 +92,10 @@
 
     <style name="ChartTabTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">17sp</item>
-        <item name="android:textColor">@color/dove</item>
+        <item name="android:textColor">@color/color_dove</item>
         <item name="android:padding">@dimen/dp10</item>
         <item name="android:fontFamily">@font/font_regular</item>
         <item name="textAllCaps">false</item>
-    </style>
-
-    <style name="SettingsItemSwitchAppearance" parent="Theme.AppCompat.Light">
-        <item name="colorControlActivated">@color/azure</item>
-        <item name="colorSwitchThumbNormal">@color/dusty</item>
-    </style>
-
-    <style name="MyAddressCopyTextStyle">
-        <item name="android:paddingTop">@dimen/dp15</item>
-        <item name="android:paddingBottom">@dimen/dp15</item>
-        <item name="android:layout_marginStart">@dimen/dp8</item>
-        <item name="android:layout_marginEnd">@dimen/dp8</item>
-        <item name="android:paddingStart">@dimen/dp24</item>
-        <item name="android:paddingEnd">@dimen/dp24</item>
-        <item name="android:background">@drawable/background_round_grey_5dp</item>
     </style>
 
     <style name="TransactionDetailsCopyTextStyle">
@@ -142,59 +139,6 @@
         <item name="android:windowIsFloating">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
-    </style>
-
-    <style name="AwButton" parent="Widget.AppCompat.Button.Borderless.Colored">
-        <item name="android:elevation">0dp</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:fontFamily">@font/font_semibold</item>
-        <item name="android:lines">1</item>
-        <item name="android:paddingLeft">@dimen/dp5</item>
-        <item name="android:paddingRight">@dimen/dp5</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:textSize">@dimen/sp20</item>
-    </style>
-
-    <style name="AwButton.Primary">
-        <item name="android:background">@drawable/selector_round_button</item>
-        <item name="android:textColor">@color/colorPrimary</item>
-    </style>
-
-    <style name="AwButton.Secondary">
-        <item name="android:background">@drawable/selector_round_button_secondary</item>
-        <item name="android:textColor">@drawable/selector_button_text_secondary</item>
-    </style>
-
-    <style name="AwTextAppearance.Tab" parent="TextAppearance.Design.Tab">
-        <item name="android:textSize">15sp</item>
-        <item name="android:textColor">@color/colorHighlight</item>
-        <item name="android:fontFamily">@font/font_regular</item>
-        <item name="textAllCaps">false</item>
-    </style>
-
-    <style name="AwTabLayout" parent="Widget.Design.TabLayout">
-        <item name="tabIndicatorColor">@color/colorHighlight</item>
-        <item name="tabIndicatorHeight">3dp</item>
-        <item name="tabPaddingStart">25dp</item>
-        <item name="tabPaddingEnd">25dp</item>
-        <item name="tabBackground">@color/colorPrimary</item>
-        <item name="tabTextAppearance">@style/AwTextAppearance.Tab</item>
-        <item name="tabSelectedTextColor">@color/colorHighlight</item>
-        <item name="tabTextColor">@color/dove</item>
-        <item name="android:background">@color/white</item>
-        <item name="tabIndicatorFullWidth">true</item>
-    </style>
-
-    <style name="AwTabLayout.Fixed">
-        <item name="android:layout_marginStart">10dp</item>
-        <item name="android:layout_marginEnd">10dp</item>
-        <item name="tabMode">fixed</item>
-        <item name="tabGravity">fill</item>
-    </style>
-
-    <style name="AwTabLayout.Scrollable">
-        <item name="tabMode">scrollable</item>
-        <item name="tabGravity">center</item>
     </style>
     
 </resources>

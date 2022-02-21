@@ -1,112 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/address_bar"
+<com.google.android.material.appbar.MaterialToolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/address_bar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize">
+
+    <RelativeLayout
+        android:id="@+id/address_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@drawable/background_bottom_border"
-        android:theme="@style/AppTheme.Toolbar"
-        app:contentInsetEnd="0dp"
-        app:contentInsetLeft="0dp"
-        app:contentInsetRight="0dp"
-        app:contentInsetStart="0dp"
-        app:popupTheme="@style/AppTheme.PopupOverlay"
-        app:titleTextAppearance="@style/AppTheme.Toolbar.Title">
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:orientation="horizontal"
+        android:paddingStart="5dp">
 
-
-
-        <RelativeLayout
-            android:id="@+id/address_bar_layout"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/layout_navigator"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
             android:animateLayoutChanges="true"
-            android:orientation="horizontal"
-            android:paddingStart="5dp"
-            android:focusable="true"
-            android:focusableInTouchMode="true">
-
-            <LinearLayout
-                android:id="@+id/layout_navigator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:animateLayoutChanges="true"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/back"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:alpha="0.3"
-                    android:padding="5dp"
-                    android:src="@drawable/ic_browser_back" />
-
-                <ImageView
-                    android:id="@+id/next"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:alpha="0.3"
-                    android:padding="5dp"
-                    android:src="@drawable/ic_browser_next" />
-
-            </LinearLayout>
-
-            <AutoCompleteTextView
-                android:id="@+id/url_tv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="4dp"
-                android:layout_toStartOf="@id/network_holder"
-                android:layout_toEndOf="@id/layout_navigator"
-                android:animateLayoutChanges="true"
-                android:background="@drawable/background_address_bar"
-                android:clickable="true"
-                android:completionThreshold="1"
-                android:dropDownAnchor="@id/anchor"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:fontFamily="@font/font_regular"
-                android:hint="@string/search_or_type_web_address"
-                android:imeOptions="actionGo"
-                android:textColor="@color/black"
-                android:textColorHint="@color/dove"
-                android:inputType="textUri"
-                android:padding="5dp"
-                android:paddingRight="35dp"
-                android:textSize="18sp" />
+            android:orientation="horizontal">
 
             <ImageView
-                android:id="@+id/clear_url"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_alignRight="@id/url_tv"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="3dp"
-                android:padding="3dp"
-                android:src="@drawable/ic_clear"
-                app:tint="@color/dusty"
-                android:visibility="gone" />
-
-
-            <LinearLayout
-                android:layout_marginStart="@dimen/dp12"
-                android:layout_marginEnd="@dimen/dp12"
-                android:id="@+id/network_holder"
+                android:id="@+id/back"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:orientation="horizontal"
-                android:ellipsize="end"
-                android:gravity="center">
-                <ImageView
-                    android:id="@+id/home"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_home"/>
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:alpha="0.3"
+                android:padding="5dp"
+                android:src="@drawable/ic_browser_back"
+                app:tint="@color/color_black" />
 
-        </RelativeLayout>
-</androidx.appcompat.widget.Toolbar>
+            <ImageView
+                android:id="@+id/next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.3"
+                android:padding="5dp"
+                android:src="@drawable/ic_browser_next"
+                app:tint="@color/color_black" />
+
+        </LinearLayout>
+
+        <AutoCompleteTextView
+            android:id="@+id/url_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="4dp"
+            android:layout_toStartOf="@id/network_holder"
+            android:layout_toEndOf="@id/layout_navigator"
+            android:animateLayoutChanges="true"
+            android:background="@drawable/background_address_bar"
+            android:clickable="true"
+            android:completionThreshold="1"
+            android:dropDownAnchor="@id/anchor"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:fontFamily="@font/font_regular"
+            android:hint="@string/search_or_type_web_address"
+            android:imeOptions="actionGo"
+            android:inputType="textUri"
+            android:padding="5dp"
+            android:paddingRight="35dp"
+            android:textColor="@color/color_black"
+            android:textColorHint="@color/color_dove"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/clear_url"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignRight="@id/url_tv"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="3dp"
+            android:padding="3dp"
+            android:src="@drawable/ic_clear"
+            android:visibility="gone"
+            app:tint="@color/dusty" />
+
+
+        <LinearLayout
+            android:id="@+id/network_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="@dimen/dp12"
+            android:layout_marginEnd="@dimen/dp12"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/home"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_home"
+                app:tint="@color/color_black" />
+        </LinearLayout>
+
+    </RelativeLayout>
+</com.google.android.material.appbar.MaterialToolbar>

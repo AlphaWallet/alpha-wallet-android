@@ -2,22 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="50dp"
+    android:background="@color/color_alabaster"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:background="@color/alabaster"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp">
+    android:paddingLeft="@dimen/spacing_standard"
+    android:paddingRight="@dimen/spacing_standard">
 
     <TextView
         android:id="@+id/text"
+        style="@style/Aw.Typography.StandardHeaderText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/font_semibold"
-        android:gravity="center_horizontal"
-        android:shadowColor="@color/alabaster"
-        android:text="@string/legacy_wallets"
-        android:textAllCaps="true"
-        android:textColor="@color/dove"
-        android:textSize="15sp" />
-
+        android:text="@string/legacy_wallets" />
 </LinearLayout>

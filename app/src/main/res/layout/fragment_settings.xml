@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:id="@+id/settings_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
@@ -21,36 +21,27 @@
             <com.alphawallet.app.widget.NotificationView
                 android:id="@+id/notification"
                 android:layout_width="match_parent"
-                android:background="@drawable/background_bottom_border"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_bottom_border" />
 
             <include layout="@layout/item_warning" />
+
             <include layout="@layout/item_update" />
 
             <View
                 android:id="@+id/warning_separator"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/mercury"
+                android:background="@color/color_mercury"
                 android:visibility="gone" />
 
-            <TextView
+            <com.alphawallet.app.widget.StandardHeader
+                android:id="@+id/layout_header"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@color/alabaster"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center_vertical"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:text="@string/wallet_label"
-                android:textAllCaps="true"
-                android:textColor="@color/dove"
-                android:textSize="15sp" />
+                android:layout_height="wrap_content"
+                custom:headerText="@string/wallet_label"/>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/mercury" />
+            <View style="@style/Aw.Component.Separator" />
 
             <LinearLayout
                 android:id="@+id/layout_settings_wallet"
@@ -61,20 +52,20 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="@color/alabaster"
+                android:background="@color/color_alabaster"
                 android:fontFamily="@font/font_semibold"
                 android:gravity="center_vertical"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:text="@string/system"
                 android:textAllCaps="true"
-                android:textColor="@color/dove"
+                android:textColor="@color/color_dove"
                 android:textSize="15sp" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/mercury" />
+                android:background="@color/color_mercury" />
 
             <LinearLayout
                 android:id="@+id/layout_settings_system"
@@ -85,20 +76,20 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="@color/alabaster"
+                android:background="@color/color_alabaster"
                 android:fontFamily="@font/font_semibold"
                 android:gravity="center_vertical"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:text="@string/support"
                 android:textAllCaps="true"
-                android:textColor="@color/dove"
+                android:textColor="@color/color_dove"
                 android:textSize="15sp" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/mercury" />
+                android:background="@color/color_mercury" />
 
             <LinearLayout
                 android:id="@+id/layout_settings_support"
@@ -110,7 +101,7 @@
                 android:id="@+id/layout_version"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="@color/alabaster"
+                android:background="@color/color_alabaster"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp">
 
@@ -120,7 +111,7 @@
                     android:layout_centerVertical="true"
                     android:fontFamily="@font/font_regular"
                     android:text="@string/version"
-                    android:textColor="@color/dove"
+                    android:textColor="@color/color_dove"
                     android:textSize="15sp" />
 
                 <TextView
@@ -130,7 +121,7 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:fontFamily="@font/font_regular"
-                    android:textColor="@color/dove"
+                    android:textColor="@color/color_dove"
                     android:textSize="13sp" />
 
             </RelativeLayout>
@@ -138,13 +129,13 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/mercury" />
+                android:background="@color/color_mercury" />
 
             <RelativeLayout
                 android:id="@+id/layout_tokenscript_compatibility"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="@color/alabaster"
+                android:background="@color/color_alabaster"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp">
 
@@ -154,31 +145,30 @@
                     android:layout_centerVertical="true"
                     android:fontFamily="@font/font_regular"
                     android:text="@string/tokenscript_compatibility"
-                    android:textColor="@color/dove"
+                    android:textColor="@color/color_dove"
                     android:textSize="15sp" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                >
+                    android:layout_centerVertical="true">
 
-                <TextView
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/font_regular"
-                        android:textColor="@color/dove"
                         android:text="@string/version"
+                        android:textColor="@color/color_dove"
                         android:textSize="13sp" />
 
-                <TextView
+                    <TextView
                         android:id="@+id/text_tokenscript_compatibility"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="@dimen/default_gap"
                         android:fontFamily="@font/font_regular"
-                        android:textColor="@color/dove"
+                        android:textColor="@color/color_dove"
                         android:textSize="13sp" />
                 </LinearLayout>
             </RelativeLayout>

@@ -8,7 +8,6 @@
     android:paddingTop="@dimen/dp14"
     android:paddingBottom="@dimen/dp14"
     android:orientation="vertical"
-    android:background="@drawable/background_card"
     android:gravity="center_horizontal"
     android:visibility="gone">
 

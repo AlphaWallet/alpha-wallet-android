@@ -171,12 +171,12 @@ public class HistoryChart extends View
 
     private void init()
     {
-        paint.setColor(getResources().getColor(R.color.green, getContext().getTheme()));
+        paint.setColor(getResources().getColor(R.color.color_green, getContext().getTheme()));
 
         Resources r = getResources();
         int strokeWidth = (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
-                3,
+                2,
                 r.getDisplayMetrics()
         );
 
@@ -184,7 +184,7 @@ public class HistoryChart extends View
         paint.setDither(true);
 
 
-        greyPaint.setColor(getResources().getColor(R.color.mine,getContext().getTheme()));
+        greyPaint.setColor(getResources().getColor(R.color.color_mine,getContext().getTheme()));
         greyPaint.setStrokeWidth(1);
 
         noDataTextPaint.setTextAlign(Paint.Align.CENTER);
@@ -194,7 +194,7 @@ public class HistoryChart extends View
                 r.getDisplayMetrics()
         );
         noDataTextPaint.setTextSize(textSize);
-        noDataTextPaint.setColor(getResources().getColor(R.color.mine, getContext().getTheme()));
+        noDataTextPaint.setColor(getResources().getColor(R.color.color_mine, getContext().getTheme()));
 
         edgeValPaint.setTextAlign(Paint.Align.RIGHT);
         edgeValPaint.setTextSize(
@@ -204,7 +204,7 @@ public class HistoryChart extends View
                         r.getDisplayMetrics()
                 )
         );
-        edgeValPaint.setColor(getResources().getColor(R.color.black, getContext().getTheme()));
+        edgeValPaint.setColor(getResources().getColor(R.color.color_black, getContext().getTheme()));
 
     }
 
@@ -236,7 +236,7 @@ public class HistoryChart extends View
 
         //colour changes depending on first and last values
         path.reset();
-        int color = datasource.isGreen() ? R.color.green : R.color.danger;
+        int color = datasource.isGreen() ? R.color.color_green : R.color.danger;
         paint.setColor(getResources().getColor(color,getContext().getTheme()));
 
 

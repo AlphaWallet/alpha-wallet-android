@@ -45,6 +45,6 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_marginEnd="@dimen/dp16"
-        android:theme="@style/SettingsItemSwitchAppearance" />
+        android:theme="@style/Aw.Component.Switch" />
 
 </RelativeLayout>

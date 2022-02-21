@@ -48,7 +48,7 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="@dimen/dp20"
-            android:theme="@style/SettingsItemSwitchAppearance" />
+            android:theme="@style/Aw.Component.Switch" />
 
         <View
             android:layout_width="match_parent"

@@ -3,7 +3,6 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
@@ -12,8 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="?android:attr/actionBarSize"
-        android:layout_marginTop="?android:attr/actionBarSize"
-        android:background="@drawable/background_card">
+        android:layout_marginTop="?android:attr/actionBarSize">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -92,7 +90,7 @@
                     android:layout_marginEnd="16dp"
                     android:clickable="true"
                     android:focusable="true"
-                    android:theme="@style/SettingsItemSwitchAppearance"
+                    android:theme="@style/Aw.Component.Switch"
                     android:visibility="visible" />
 
                 <View

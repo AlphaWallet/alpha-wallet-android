@@ -3,9 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:background="@drawable/background_card">
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -14,13 +12,13 @@
 
         <ImageView
             android:id="@+id/image_close"
-            android:contentDescription="@string/action_close"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dp16"
-            android:padding="5dp"
             android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/dp16"
             android:background="@color/transparent"
+            android:contentDescription="@string/action_close"
+            android:padding="5dp"
             android:src="@drawable/ic_close" />
 
         <TextView
@@ -41,13 +39,13 @@
 
         <ImageView
             android:id="@+id/logo"
-            android:contentDescription="@string/app_name"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/ic_launcher_foreground"
-            android:layout_marginEnd="10dp"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_marginEnd="10dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_launcher_foreground" />
 
     </RelativeLayout>
 
@@ -55,16 +53,16 @@
         android:id="@+id/text_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp24"
         android:layout_marginTop="@dimen/dp8"
+        android:layout_marginEnd="@dimen/dp24"
         android:layout_marginBottom="@dimen/dp8"
+        android:fontFamily="@font/font_regular"
+        android:gravity="center_horizontal"
         android:text=""
         android:textColor="@color/black"
-        android:fontFamily="@font/font_regular"
-        android:layout_marginStart="@dimen/dp24"
-        android:layout_marginEnd="@dimen/dp24"
-        android:gravity="center_horizontal"
-        tools:text="This site is requesting you to switch to the Mumbai Testnet (Test) chain with chain ID: 80001. This will reload the page."
-        android:textSize="@dimen/sp15"/>
+        android:textSize="@dimen/sp15"
+        tools:text="This site is requesting you to switch to the Mumbai Testnet (Test) chain with chain ID: 80001. This will reload the page." />
 
     <com.alphawallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"

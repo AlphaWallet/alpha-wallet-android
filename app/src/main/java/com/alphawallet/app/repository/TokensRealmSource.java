@@ -543,22 +543,29 @@ public class TokensRealmSource implements TokenLocalSource {
     {
         try (Realm realm = realmManager.getRealmInstance(IMAGES_DB))
         {
-            realm.executeTransactionAsync(r -> {
-                String instanceKey = address.toLowerCase() + "-" + networkId;
+            final String instanceKey = address.toLowerCase() + "-" + networkId;
+            final RealmAuxData instance = realm.where(RealmAuxData.class)
+                    .equalTo("instanceKey", instanceKey)
+                    .findFirst();
 
-                RealmAuxData instance = r.where(RealmAuxData.class)
-                        .equalTo("instanceKey", instanceKey)
-                        .findFirst();
+            if (instance == null || !instance.getResult().equals(imageUrl))
+            {
+                realm.executeTransactionAsync(r -> {
+                    RealmAuxData aux;
+                    if (instance == null)
+                    {
+                        aux = r.createObject(RealmAuxData.class, instanceKey);
+                    }
+                    else
+                    {
+                        aux = instance;
+                    }
 
-                if (instance == null)
-                {
-                    instance = r.createObject(RealmAuxData.class, instanceKey);
-                }
-
-                instance.setResult(imageUrl);
-                instance.setResultTime(System.currentTimeMillis());
-                r.insertOrUpdate(instance);
-            });
+                    aux.setResult(imageUrl);
+                    aux.setResultTime(System.currentTimeMillis());
+                    r.insertOrUpdate(aux);
+                });
+            }
         }
     }
 

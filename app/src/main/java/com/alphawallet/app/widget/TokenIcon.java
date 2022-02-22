@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Pair;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -139,10 +140,14 @@ public class TokenIcon extends ConstraintLayout
     {
         if (token == null || (this.token != null && this.token.equals(token))) { return; } //stop update flicker
         this.tokenName = token.getName(assetDefinition, token.getTokenCount());
-        //this.tokenName = token.getFullName(assetDefinition, token.getTokenCount());
-        this.fallbackIconUrl = assetDefinition.getFallbackUrlForToken(token);
+        Pair<String, Boolean> iconFallback = assetDefinition.getFallbackUrlForToken(token);
+        String mainIcon = iconFallback.second ? iconFallback.first : getPrimaryIconURL(token);
+        this.fallbackIconUrl = iconFallback.second ? getPrimaryIconURL(token) : iconFallback.first;
 
-        bind(token, getIconUrl(token));
+        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
+        String tURL = Utils.getTokenImageUrl(correctedAddr);
+
+        bind(token, new IconItem(mainIcon, tURL, token.tokenInfo.chainId));
     }
 
     public void bindData(Token token)
@@ -218,6 +223,12 @@ public class TokenIcon extends ConstraintLayout
         {
             loadFromAltRepo();
         }
+    }
+
+    private String getPrimaryIconURL(Token token)
+    {
+        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
+        return Utils.getTokenImageUrl(correctedAddr);
     }
 
     private IconItem getIconUrl(Token token)

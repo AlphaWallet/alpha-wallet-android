@@ -27,8 +27,10 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
@@ -46,6 +48,7 @@ public class NFTImageView extends RelativeLayout {
     private final TokenIcon fallbackIcon;
     private final ProgressBar progressBar;
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private Request loadRequest;
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
@@ -87,6 +90,11 @@ public class NFTImageView extends RelativeLayout {
         webLayout.setVisibility(View.GONE);
         webView.setVisibility(View.GONE);
 
+        if (loadRequest != null && loadRequest.isRunning())
+        {
+            loadRequest.clear();
+        }
+
         //setup view attributes
         setAttrs(context, attrs);
     }
@@ -106,13 +114,13 @@ public class NFTImageView extends RelativeLayout {
     {
         image.setVisibility(View.VISIBLE);
 
-        Glide.with(image.getContext())
+        loadRequest = Glide.with(image.getContext())
                 .load(imageUrl)
                 .centerCrop()
                 .transition(withCrossFade())
                 .override(Target.SIZE_ORIGINAL)
                 .listener(requestListener)
-                .into(image);
+                .into(image).getRequest();
 
         if (!asset.needsLoading() && asset.getBackgroundColor() != null && !asset.getBackgroundColor().equals("null"))
         {

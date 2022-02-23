@@ -886,4 +886,12 @@
     <string name="wc_no_active_sessions">No Active sessions</string>
     <string name="wc_connect_wallet">Connect Wallet</string>
     <string name="error_seed_phrase_must_words">Seed phrase can only contain words</string>
+    <string name="label_token_id">Token #</string>
+    <string name="label_external_link">External Link</string>
+    <string name="label_description">Description</string>
+    <string name="label_details">Details</string>
+    <string name="send_multiple_tokens">Send Multiple Tokens</string>
+    <string name="switch_to_grid_view">Switch to Grid View</string>
+    <string name="switch_to_list_view">Switch to List View</string>
+    <string name="reload_metadata">Reload Metadata</string>
 </resources>

@@ -10,7 +10,6 @@ import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.recyclerview.widget.SortedList;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
@@ -21,17 +20,14 @@ import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.AssetInstanceSortedItem;
-import com.alphawallet.app.ui.widget.entity.AssetSortedItem;
 import com.alphawallet.app.ui.widget.entity.NFTSortedItem;
 import com.alphawallet.app.ui.widget.entity.QuantitySelectorSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
-import com.alphawallet.app.ui.widget.entity.TokenBalanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenIdSortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenPosition;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.NFTAssetHolder;
-import com.alphawallet.app.ui.widget.holder.OpenseaHolder;
 import com.alphawallet.app.ui.widget.holder.QuantitySelectorHolder;
 import com.alphawallet.app.ui.widget.holder.TicketHolder;
 import com.alphawallet.app.ui.widget.holder.TokenDescriptionHolder;
@@ -65,6 +61,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     protected int assetCount;
     private FunctionCallback functionCallback;
     private final Activity activity;
+    private boolean isGrid;
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
                                    OpenSeaService opensea, Activity activity) {
@@ -75,6 +72,18 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         openseaService = opensea;
         setToken(t);
         this.activity = activity;
+    }
+
+    public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
+                                   OpenSeaService opensea, Activity activity, boolean isGrid) {
+        super(tokenClickListener, service);
+        assetCount = 0;
+        token = t;
+        clickThrough = true;
+        openseaService = opensea;
+        this.activity = activity;
+        this.isGrid = isGrid;
+        setToken(t);
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, List<BigInteger> tokenSelection,
@@ -120,10 +129,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
                 break;
             case TokenDescriptionHolder.VIEW_TYPE:
                 holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, token, assetService, assetCount);
-                break;
-            case OpenseaHolder.VIEW_TYPE:
-                holder = new OpenseaHolder(R.layout.item_opensea_token, parent, token, activity, clickThrough);
-                holder.setOnTokenClickListener(tokensAdapterCallback);
                 break;
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, token, assetService, clickThrough);
@@ -173,7 +178,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     {
         items.beginBatchedUpdates();
         items.clear();
-        items.add(new TokenBalanceSortedItem(t));
         assetCount = t.getTokenCount();
         int holderType = getHolderType();
 
@@ -227,9 +231,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         {
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 item = (T) new AssetInstanceSortedItem(range, tp);
-                break;
-            case OpenseaHolder.VIEW_TYPE:
-                item = (T) new AssetSortedItem(range, tp);
                 break;
             case TicketHolder.VIEW_TYPE:
             default:
@@ -371,6 +372,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
 
     private int getHolderType()
     {
-        return (token.getInterfaceSpec() == ContractType.ERC1155 || token.isERC721())  ? OpenseaHolder.VIEW_TYPE : AssetInstanceScriptHolder.VIEW_TYPE;
+        return AssetInstanceScriptHolder.VIEW_TYPE;
     }
 }

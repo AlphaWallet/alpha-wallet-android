@@ -64,14 +64,24 @@ public class NFTAttributeLayout extends LinearLayout {
         if (size > 0 && token.tokenInfo.name.toLowerCase().contains("cryptokitties"))
         {
             labelAttributes.setTitle(getContext().getString(R.string.label_cattributes));
+            labelAttributes.setVisibility(View.VISIBLE);
         }
         else if (size > 0)
         {
             labelAttributes.setTitle(getContext().getString(R.string.label_attributes));
+            labelAttributes.setVisibility(View.VISIBLE);
         }
         else
         {
             labelAttributes.setVisibility(View.GONE);
         }
+    }
+
+    //In case anyone is using this and only wants it to remove the gridviews
+    @Override
+    public void removeAllViews()
+    {
+        labelAttributes.setVisibility(View.GONE);
+        grid.removeAllViews();
     }
 }

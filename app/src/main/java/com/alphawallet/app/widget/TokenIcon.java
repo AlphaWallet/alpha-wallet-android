@@ -125,11 +125,6 @@ public class TokenIcon extends ConstraintLayout
     {
         if (token == null || (this.token != null && this.token.equals(token))) { return; } //stop update flicker
 
-        if (token.tokenInfo.address.equalsIgnoreCase("0x1e988ba4692e52bc50b375bcc8585b95c48aad77"))
-        {
-            System.out.println("YOLESS");
-        }
-
         this.tokenName = token.getName(assetDefinition, token.getTokenCount());
         Pair<String, Boolean> iconFallback = assetDefinition.getFallbackUrlForToken(token);
         String mainIcon = iconFallback.second ? iconFallback.first : getPrimaryIconURL(token);
@@ -204,13 +199,11 @@ public class TokenIcon extends ConstraintLayout
 
         if (iconItem.usePrimary())
         {
-            //Glide.with(context).load(R.drawable.common_google_signin_btn_icon_dark).apply(new RequestOptions().placeholder(R.drawable.common_google_signin_btn_icon_dark)).
-            // into(new DrawableImageViewTarget(holder.profileImage));
             currentRq = Glide.with(getContext())
                     .load(iconItem.getUrl())
                     .placeholder(R.drawable.ic_token_eth)
                     .listener(requestListener)
-                    .into(new DrawableImageViewTarget(icon)).getRequest();//
+                    .into(new DrawableImageViewTarget(icon)).getRequest();
         }
         else
         {

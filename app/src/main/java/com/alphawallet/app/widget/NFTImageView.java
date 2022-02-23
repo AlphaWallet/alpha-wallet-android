@@ -32,6 +32,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 
 import java.nio.charset.StandardCharsets;
@@ -120,7 +121,7 @@ public class NFTImageView extends RelativeLayout {
                 .transition(withCrossFade())
                 .override(Target.SIZE_ORIGINAL)
                 .listener(requestListener)
-                .into(image).getRequest();
+                .into(new DrawableImageViewTarget(image)).getRequest();
 
         if (!asset.needsLoading() && asset.getBackgroundColor() != null && !asset.getBackgroundColor().equals("null"))
         {

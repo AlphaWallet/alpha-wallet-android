@@ -244,6 +244,7 @@ public class NFTAsset implements Parcelable
         {
             JSONObject jsonData = new JSONObject(metaData);
             Iterator<String> keys = jsonData.keys();
+
             while (keys.hasNext())
             {
                 String key = keys.next();

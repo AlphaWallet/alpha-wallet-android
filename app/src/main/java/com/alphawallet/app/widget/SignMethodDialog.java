@@ -14,6 +14,9 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
+import com.alphawallet.app.walletconnect.entity.BaseRequest;
+import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
+import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -46,19 +49,20 @@ public class SignMethodDialog extends BottomSheetDialog
     private ImageView closeButton;
     private final WalletConnect.Model.SettledSession settledSession;
     private final WalletConnect.Model.SessionRequest sessionRequest;
-    private String messageTextHex;
+    private BaseRequest request;
     private String walletAddress;
     private SignMethodDialogViewModel viewModel;
     private Signable signable;
     private SignDataWidget signDataWidget;
 
-    public SignMethodDialog(@NonNull Activity activity, WalletConnect.Model.SettledSession settledSession, WalletConnect.Model.SessionRequest sessionRequest, Signable signable)
+    public SignMethodDialog(@NonNull Activity activity, WalletConnect.Model.SettledSession settledSession, WalletConnect.Model.SessionRequest sessionRequest, BaseRequest request)
     {
         super(activity, R.style.FullscreenBottomSheetDialogStyle);
         this.activity = activity;
         this.settledSession = settledSession;
         this.sessionRequest = sessionRequest;
-        this.signable = signable;
+        this.request = request;
+        this.signable = request.getSignable();
         View view = LayoutInflater.from(activity).inflate(R.layout.dialog_sign_method, null);
         setContentView(view);
         initViewModel();
@@ -66,9 +70,9 @@ public class SignMethodDialog extends BottomSheetDialog
         BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
         behavior.setState(STATE_EXPANDED);
         behavior.setSkipCollapsed(true);
+        setCancelable(false);
 
         initViews();
-
         bindData();
     }
 
@@ -88,14 +92,8 @@ public class SignMethodDialog extends BottomSheetDialog
         }
         dAppName.setText(settledSession.getPeerAppMetaData().getName());
         url.setText(settledSession.getPeerAppMetaData().getUrl());
-        String params = sessionRequest.getRequest().getParams();
-        params = params.substring(1);
-        params = params.substring(0, params.length() - 1);
-        String[] array = params.split(", ");
-        walletAddress = array[1];
+        walletAddress = request.getWalletAddress();
         walletTv.setText(walletAddress);
-        messageTextHex = array[0];
-        message.setText(Hex.hexToUtf8(messageTextHex));
 
         long chainID = Long.parseLong(sessionRequest.getChainId().split(":")[1]);
         networkIcon.setImageResource(EthereumNetworkRepository.getChainLogo(chainID));
@@ -122,7 +120,15 @@ public class SignMethodDialog extends BottomSheetDialog
             }
         });
 
-
+        if (signable.getMessageType() == SignMessageType.SIGN_PERSONAL_MESSAGE)
+        {
+            message.setText(Hex.hexToUtf8(signable.getMessage()));
+        } else
+        {
+            message.setVisibility(View.GONE);
+            signDataWidget.setVisibility(View.VISIBLE);
+            signDataWidget.setupSignData(request.getSignable());
+        }
     }
 
     private void initViews()

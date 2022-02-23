@@ -31,4 +31,8 @@ public abstract class BaseRequest
     {
         return new WCEthereumSignMessage(params, type).getData();
     }
+
+    public abstract Signable getSignable();
+
+    public abstract String getWalletAddress();
 }

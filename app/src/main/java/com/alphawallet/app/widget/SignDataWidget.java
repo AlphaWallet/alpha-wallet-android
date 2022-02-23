@@ -44,6 +44,7 @@ public class SignDataWidget extends LinearLayout
         if (noTitle)
         {
             messageTitle.setText("");
+            messageTitle.setVisibility(GONE);
         }
     }
 

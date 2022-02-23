@@ -11,7 +11,14 @@ public class SignPersonalMessageRequest extends BaseRequest
         super(params, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE);
     }
 
+    @Override
     public Signable getSignable() {
         return new EthereumMessage(getMessage(), "", 0, SignMessageType.SIGN_PERSONAL_MESSAGE);
+    }
+
+    @Override
+    public String getWalletAddress()
+    {
+        return params.get(1);
     }
 }

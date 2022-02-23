@@ -1,6 +1,7 @@
 package com.alphawallet.app.widget;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -44,6 +45,7 @@ public class SignMethodDialog extends BottomSheetDialog
     private final ImageView networkIcon;
     private final ChainName networkName;
     private final Activity activity;
+    private final ImageView closeButton;
     private WalletConnect.Model.SettledSession settledSession;
     private WalletConnect.Model.SessionRequest sessionRequest;
     private String messageTextHex;
@@ -59,7 +61,7 @@ public class SignMethodDialog extends BottomSheetDialog
         View view = LayoutInflater.from(activity).inflate(R.layout.dialog_sign_method, null);
         setContentView(view);
         initViewModel();
-        setCancelable(false);
+
         BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
         behavior.setState(STATE_EXPANDED);
         behavior.setSkipCollapsed(true);
@@ -72,6 +74,7 @@ public class SignMethodDialog extends BottomSheetDialog
         networkIcon = findViewById(R.id.network_icon);
         networkName = findViewById(R.id.network_name);
         functionBar = findViewById(R.id.layoutButtons);
+        closeButton = findViewById(R.id.image_close);
 
         List<String> icons = settledSession.getPeerAppMetaData().getIcons();
 
@@ -104,16 +107,23 @@ public class SignMethodDialog extends BottomSheetDialog
             @Override
             public void handleClick(String action, int actionId)
             {
-                if (actionId == R.string.dialog_approve)
+                if (actionId == R.string.action_confirm)
                 {
                     approve();
-                } else if (actionId == R.string.dialog_reject)
-                {
-                    viewModel.reject(sessionRequest);
-                    dismiss();
                 }
             }
-        }, Arrays.asList(R.string.dialog_approve, R.string.dialog_reject));
+        }, Arrays.asList(R.string.action_confirm));
+
+        closeButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Log.d("seaborn", "onClick: close");
+                viewModel.reject(sessionRequest);
+                dismiss();
+            }
+        });
     }
 
     private void initViewModel()

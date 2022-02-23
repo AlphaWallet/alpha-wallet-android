@@ -12,6 +12,17 @@
         android:layout_height="wrap_content"
         android:minHeight="60dp">
 
+        <ImageView
+            android:id="@+id/image_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/dp16"
+            android:background="@color/transparent"
+            android:contentDescription="@string/action_close"
+            android:padding="5dp"
+            android:src="@drawable/ic_close" />
+
         <TextView
             android:id="@+id/text_sign_title"
             android:layout_width="wrap_content"

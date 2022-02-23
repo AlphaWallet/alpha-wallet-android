@@ -277,6 +277,7 @@ public class WalletConnectService extends Service
     {
         Intent intent = new Intent(command);
         intent.putExtra("sessionid", sessionId);
+        intent.putExtra("wcrequest", getPendingRequest(sessionId));     // pass WCRequest as parcelable in the intent
         sendBroadcast(intent);
     }
 

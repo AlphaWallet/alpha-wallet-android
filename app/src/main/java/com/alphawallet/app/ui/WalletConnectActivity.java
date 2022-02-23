@@ -383,11 +383,23 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 case C.WALLET_CONNECT_REQUEST:
                 case C.WALLET_CONNECT_NEW_SESSION:
                     Timber.tag(TAG).d("MSG: WALLET CONNECT RQ");
-                    getPendingRequest();
+//                    getPendingRequest();
+                    WCRequest wcRequest1 = (WCRequest) intent.getParcelableExtra("wcrequest");
+                    if (wcRequest1 != null) {
+                        receiveRequest(wcRequest1);
+                    } else {
+                        // something went wrong
+                    }
                     break;
                 case C.WALLET_CONNECT_FAIL:
                     Timber.tag(TAG).d("MSG: FAIL CONNECTION");
-                    getPendingRequest();
+//                    getPendingRequest();
+                    WCRequest wcRequest2 = (WCRequest) intent.getParcelableExtra("wcrequest");
+                    if (wcRequest2 != null) {
+                        receiveRequest(wcRequest2);
+                    } else {
+                        // something went wrong
+                    }
                     break;
                 case C.WALLET_CONNECT_CLIENT_TERMINATE:
                     String sessionId = intent.getStringExtra("sessionid");

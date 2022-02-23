@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/layout_search_tokens"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_margin="@dimen/dp8"
+        android:background="@drawable/background_round_search"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="@dimen/dp24"
+            android:layout_height="@dimen/dp24"
+            android:layout_marginStart="@dimen/dp12"
+            android:src="@drawable/ic_search_small" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/dp8"
+            android:layout_marginEnd="@dimen/dp16"
+            android:background="@null"
+            android:hint="@string/search_for_tokens"
+            android:inputType="textFilter"
+            android:maxLength="20"
+            android:maxLines="1"
+            android:textColor="@color/dove"
+            android:textColorHint="@color/dove"
+            android:textSize="@dimen/sp17" />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_search_tokens"
+        android:padding="0dp" />
+
+</RelativeLayout>

@@ -163,14 +163,6 @@ public class ERC1155Token extends Token
     }
 
     @Override
-    public byte[] getTransferBytes(String to, List<BigInteger> tokenIds) throws NumberFormatException
-    {
-        Function txFunc = getTransferFunction(to, tokenIds);
-        String encodedFunction = FunctionEncoder.encode(txFunc);
-        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
-    }
-
-    @Override
     public byte[] getTransferBytes(String to, ArrayList<Pair<BigInteger, NFTAsset>> transferData) throws NumberFormatException
     {
         Function txFunc = getTransferFunction(to, transferData);
@@ -774,5 +766,11 @@ public class ERC1155Token extends Token
         return getBaseTokenId(tokenId).compareTo(BigInteger.ZERO) > 0
                 && getNFTTokenId(tokenId).compareTo(BigInteger.valueOf(0xFFFF)) < 0
                 && getNFTTokenId(tokenId).compareTo(BigInteger.ZERO) > 0;
+    }
+
+    @Override
+    public boolean isBatchTransferAvailable()
+    {
+        return true;
     }
 }

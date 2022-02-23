@@ -1,78 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/layout_holder"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_holder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+    <View style="@style/Aw.Component.Separator" />
 
     <LinearLayout
-        android:paddingTop="@dimen/dp20"
-        android:paddingBottom="@dimen/dp20"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="@dimen/standard_16">
 
         <TextView
             android:id="@+id/text_message_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/small_12"
             android:layout_weight="0.8"
-            android:layout_marginStart="@dimen/dp16"
-            android:text="@string/message_to_sign"
-            android:textColor="@color/dove"
             android:fontFamily="@font/font_regular"
             android:gravity="start"
-            android:textSize="@dimen/sp13"/>
+            android:text="@string/message_to_sign"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/sp15" />
 
         <ScrollView
             android:id="@+id/scroll_view"
-            android:fillViewport="true"
             android:layout_width="0dp"
             android:layout_height="300dp"
+            android:layout_weight="3.1"
+            android:fillViewport="true"
             android:visibility="gone"
-            android:layout_weight="3.1">
+            tools:visibility="visible">
 
             <TextView
+                android:id="@+id/text_sign_data_max"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/dp16"
-                android:id="@+id/text_sign_data_max"
-                android:textColor="@color/black"
                 android:fontFamily="@font/font_regular"
                 android:gravity="start"
-                tools:text="Message:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337"
-                android:textSize="@dimen/sp16"/>
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/sp15"
+                tools:text="Message:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337" />
 
         </ScrollView>
 
         <TextView
+            android:id="@+id/text_sign_data"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:visibility="visible"
             android:layout_weight="3.1"
-            android:id="@+id/text_sign_data"
-            android:textColor="@color/black"
             android:fontFamily="@font/font_regular"
-            android:maxLines="4"
             android:gravity="start"
-            tools:text="Message:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337"
-            android:textSize="@dimen/sp16"/>
+            android:maxLines="4"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp15"
+            android:visibility="visible"
+            tools:text="Message:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337" />
 
         <ImageView
             android:id="@+id/image_more"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:src="@drawable/ic_expand_more"
-            android:padding="3dp"
             android:layout_gravity="start"
-            android:background="@color/transparent"/>
+            android:layout_weight="0.6"
+            android:background="@color/transparent"
+            android:padding="@dimen/mini_4"
+            android:src="@drawable/ic_expand_more"
+            app:tint="@color/icon_tint" />
 
     </LinearLayout>
 

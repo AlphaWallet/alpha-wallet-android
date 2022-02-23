@@ -41,7 +41,6 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
-import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.EthereumMessage;
@@ -92,7 +91,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private List<BigInteger> tokenIds;
     private BigInteger tokenId;
     private String actionMethod;
-    private SystemView systemView;
     private Web3TokenView tokenView;
     private final Map<String, String> args = new HashMap<>();
     private StringBuilder attrs;
@@ -274,8 +272,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         viewModel = new ViewModelProvider(this)
                 .get(TokenFunctionViewModel.class);
-        systemView = findViewById(R.id.system_view);
-        systemView.hide();
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
     }

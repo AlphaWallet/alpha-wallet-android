@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/standard_16"
         android:src="@drawable/ic_settings_wallet_address" />
 
     <LinearLayout
@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/standard_16"
         android:layout_toStartOf="@id/layout_controls"
         android:layout_toEndOf="@id/setting_icon"
         android:orientation="vertical">
@@ -32,9 +32,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_regular"
-            android:text="Setting Title"
-            android:textColor="@color/color_black"
-            android:textSize="17sp" />
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp17"
+            tools:text="Setting Title" />
 
         <TextView
             android:id="@+id/setting_subtitle"
@@ -44,10 +44,11 @@
             android:fontFamily="@font/font_regular"
             android:lines="1"
             android:maxLines="1"
-            android:text="Setting Subtitle"
-            android:textColor="@color/color_dove"
-            android:textSize="15sp"
-            android:visibility="gone" />
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/sp15"
+            android:visibility="gone"
+            tools:text="Setting Subtitle"
+            tools:visibility="visible" />
     </LinearLayout>
 
     <LinearLayout
@@ -62,18 +63,19 @@
             android:id="@+id/arrow_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="@dimen/small_12"
             android:src="@drawable/ic_arrow_right"
             android:visibility="gone"
-            app:tint="@color/color_black" />
+            app:tint="@color/icon_tint"
+            tools:visibility="visible" />
 
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/setting_switch"
             style="@style/Aw.Component.Switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/standard_16"
             android:checked="true"
-            android:layout_marginEnd="16dp"
             android:clickable="false"
             android:focusable="false"
             android:visibility="gone"

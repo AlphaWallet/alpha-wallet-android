@@ -5,10 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+    <View style="@style/Aw.Component.Separator" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
@@ -21,14 +18,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/dp18">
+        android:orientation="vertical">
 
         <ImageView
             android:id="@+id/no_recent_transactions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="@dimen/cozy_20"
             android:src="@drawable/ic_icons_no_transactions" />
 
         <TextView
@@ -38,7 +34,7 @@
             android:layout_gravity="center"
             android:fontFamily="@font/font_regular"
             android:text="@string/no_transactions_yet"
-            android:textColor="@color/mine"
+            android:textColor="@color/text_primary"
             android:textSize="@dimen/sp17" />
     </LinearLayout>
 
@@ -47,7 +43,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:padding="30dp"
+        android:padding="@dimen/base_24"
         android:visibility="visible" />
 
 </LinearLayout>

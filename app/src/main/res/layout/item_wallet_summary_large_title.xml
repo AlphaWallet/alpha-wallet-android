@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/dp16">
+        android:padding="@dimen/standard_16">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -22,7 +22,7 @@
                 android:layout_gravity="start"
                 android:layout_weight="1"
                 android:fontFamily="@font/font_bold"
-                android:textColor="@color/color_black"
+                android:textColor="@color/text_primary"
                 android:textSize="@dimen/sp36"
                 tools:text="$27,890.23" />
 
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:fontFamily="@font/font_regular"
-            android:textColor="@color/green"
+            android:textColor="@color/positive"
             android:textSize="@dimen/sp20"
             tools:text="+2.53% ($405.12) Today" />
     </LinearLayout>

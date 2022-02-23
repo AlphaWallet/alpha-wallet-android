@@ -3,18 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize"
-    android:contentInsetStart="0dp"
-    android:contentInsetLeft="0dp"
-    android:contentInsetEnd="0dp"
-    android:contentInsetRight="0dp"
-    android:theme="@style/AppTheme.Toolbar"
-    app:contentInsetEnd="0dp"
-    app:contentInsetLeft="0dp"
-    app:contentInsetRight="0dp"
-    app:contentInsetStart="0dp"
-    app:popupTheme="@style/AppTheme.PopupOverlay"
-    app:titleTextAppearance="@style/AppTheme.Toolbar.Title">
+    android:layout_height="?actionBarSize">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/mt_container"
@@ -29,30 +18,30 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/root"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize">
+            android:layout_height="?actionBarSize">
 
             <ImageView
                 android:id="@+id/st_backArrow"
-                android:layout_width="48dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:clickable="true"
                 android:focusable="true"
-                android:padding="12dp"
+                android:padding="@dimen/small_12"
                 android:src="@drawable/ic_arrow_back"
                 android:visibility="visible"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/color_black" />
+                app:tint="@color/icon_tint" />
 
             <ImageView
                 android:id="@+id/st_clear"
-                android:layout_width="48dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:padding="12dp"
+                android:padding="@dimen/small_12"
                 android:src="@drawable/ic_close"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/color_black" />
+                app:tint="@color/icon_tint" />
 
             <View
                 android:id="@+id/click_back"
@@ -77,19 +66,16 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@android:color/transparent"
+                android:background="@color/transparent"
                 android:hint="@string/token_name_hint"
                 android:imeOptions="flagNoExtractUi|actionSearch"
                 android:inputType="text"
                 android:maxLines="1"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/color_mine"
-                android:textColorHint="@color/color_dusty"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary"
                 app:layout_constraintEnd_toStartOf="@id/st_clear"
                 app:layout_constraintStart_toEndOf="@id/st_backArrow" />
 
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
-
 </androidx.appcompat.widget.Toolbar>

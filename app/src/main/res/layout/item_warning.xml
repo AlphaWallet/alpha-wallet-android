@@ -5,7 +5,7 @@
     android:id="@+id/layout_item_warning"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="16dp"
+    android:layout_margin="@dimen/standard_16"
     android:animateLayoutChanges="true"
     android:elevation="2dp"
     android:orientation="vertical">
@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="0dp"
-        app:cardBackgroundColor="@color/mine"
+        app:cardBackgroundColor="@color/color_mine"
         app:cardCornerRadius="8dp"
         app:cardElevation="0dp">
 
@@ -26,18 +26,18 @@
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
-            android:padding="@dimen/dp16">
+            android:padding="@dimen/standard_16">
 
             <TextView
                 android:id="@+id/text_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="@dimen/standard_16"
                 android:fontFamily="@font/font_regular"
                 android:text="@string/wallet_not_backed_up"
-                android:textColor="@color/white"
-                android:textSize="24sp" />
+                android:textColor="@color/text_primary_inverse"
+                android:textSize="@dimen/sp24" />
 
             <TextView
                 android:id="@+id/text_detail"
@@ -45,11 +45,11 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/text_title"
                 android:layout_marginEnd="70dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="@dimen/base_24"
                 android:fontFamily="@font/font_regular"
                 android:text="@string/not_backed_up_detail"
-                android:textColor="@color/white"
-                android:textSize="18sp" />
+                android:textColor="@color/text_primary_inverse"
+                android:textSize="@dimen/sp17" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_backup"
@@ -57,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/text_detail"
-                android:paddingHorizontal="@dimen/dp16"
+                android:paddingHorizontal="@dimen/standard_16"
                 tools:text="Back up Wallet" />
 
             <ImageView
@@ -67,7 +67,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
                 android:src="@drawable/ic_menu_white"
-                app:tint="@color/white" />
+                app:tint="@color/icon_tint_inverse" />
 
             <View
                 android:id="@+id/popup_anchor"

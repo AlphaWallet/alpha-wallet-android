@@ -9,8 +9,7 @@
         android:id="@+id/progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminateTint="?colorAccent" />
+        android:layout_gravity="center" />
 
     <LinearLayout
         android:id="@+id/error_box"
@@ -30,11 +29,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/normal_margin"
+            android:layout_marginTop="@dimen/tiny_8"
             android:fontFamily="@font/font_regular"
             android:text="@string/try_again"
             android:textAllCaps="true"
-            android:textColor="?colorOnSurface"
+            android:textColor="@color/text_primary"
             android:visibility="visible" />
     </LinearLayout>
 

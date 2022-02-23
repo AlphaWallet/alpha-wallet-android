@@ -4,12 +4,11 @@
     android:id="@+id/layout_currency_import"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
+    android:layout_marginBottom="@dimen/small_12"
     android:clickable="true"
     android:orientation="horizontal"
     android:visibility="gone"
     tools:visibility="visible">
-
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,19 +16,15 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:orientation="vertical"
-        android:paddingLeft="20dp"
-        android:paddingTop="15dp"
-        android:paddingRight="20dp"
-        android:paddingBottom="20dp">
+        android:padding="@dimen/cozy_20">
 
         <TextView
             android:id="@+id/text_currency_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:fontFamily="@font/font_light"
-            android:textColor="@color/black"
-            android:textSize="21sp"
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp20"
             tools:text="Sample" />
 
     </LinearLayout>

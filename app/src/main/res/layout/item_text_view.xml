@@ -5,8 +5,8 @@
     android:background="@color/color_alabaster"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingLeft="@dimen/spacing_standard"
-    android:paddingRight="@dimen/spacing_standard">
+    android:paddingLeft="@dimen/standard_16"
+    android:paddingRight="@dimen/standard_16">
 
     <TextView
         android:id="@+id/text"

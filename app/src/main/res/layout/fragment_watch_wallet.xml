@@ -16,8 +16,8 @@
             android:id="@+id/input_watch_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="5dp"
+            android:layout_marginTop="@dimen/cozy_20"
+            android:layout_marginBottom="@dimen/tiny_8"
             custom:ens="true"
             custom:hint="@string/input_address"
             custom:imeOptions="actionDone"
@@ -33,7 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/dp16"
+        android:layout_margin="@dimen/standard_16"
         android:text="@string/action_watch_account" />
 
     <LinearLayout

@@ -9,7 +9,7 @@
         android:id="@+id/user_address_blockie"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:layout_marginHorizontal="15dp"
+        android:layout_marginHorizontal="@dimen/standard_16"
         android:visibility="gone" />
 
     <TextView

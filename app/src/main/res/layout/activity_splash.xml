@@ -2,8 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?colorSurface">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,15 +19,6 @@
             android:background="@drawable/ic_logo_vertical"
             android:gravity="center_horizontal" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="9dp"
-            android:gravity="center_horizontal"
-            android:text="@string/welcome_to_alphawallet"
-            android:textColor="@color/color_mine"
-            android:textSize="26sp" />
-
     </LinearLayout>
 
     <LinearLayout
@@ -36,8 +26,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginEnd="@dimen/standard_16"
         android:orientation="vertical"
         android:visibility="gone"
         tools:visibility="visible">
@@ -47,40 +37,37 @@
             style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/create_new_wallet_margin_bottom"
+            android:layout_marginBottom="@dimen/base_24"
             android:text="@string/create_a_new_wallet" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="@dimen/divider_margin_top"
-            android:layout_marginEnd="16dp"
-            android:background="@color/mercury" />
+        <View
+            style="@style/Aw.Component.Separator"
+            android:layout_marginStart="@dimen/standard_16"
+            android:layout_marginTop="@dimen/base_24"
+            android:layout_marginEnd="@dimen/standard_16" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/already_label_margin_top"
+            android:layout_marginTop="@dimen/cozy_20"
             android:text="@string/already_have_a_wallet"
-            android:textColor="@color/dove"
-            android:textSize="16sp" />
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/sp17" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="@dimen/bottom_buttons_holder_margin_bottom"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="@dimen/standard_16">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_watch"
                 style="@style/Aw.Component.Button.Secondary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
+                android:layout_marginEnd="@dimen/mini_4"
                 android:layout_weight="1.0"
                 android:text="@string/watch" />
 
@@ -89,7 +76,7 @@
                 style="@style/Aw.Component.Button.Secondary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="@dimen/mini_4"
                 android:layout_weight="1.0"
                 android:text="@string/action_import" />
 

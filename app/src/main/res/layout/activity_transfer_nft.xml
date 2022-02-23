@@ -32,14 +32,14 @@
             android:layout_above="@id/layoutButtons"
             android:layout_alignParentTop="true"
             android:orientation="vertical"
-            android:paddingBottom="15dp">
+            android:paddingBottom="@dimen/standard_16">
 
             <com.alphawallet.app.widget.InputAddress
                 android:id="@+id/input_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp12"
-                android:layout_marginBottom="15dp"
+                android:layout_marginTop="@dimen/small_12"
+                android:layout_marginBottom="@dimen/standard_16"
                 android:visibility="visible"
                 custom:ens="true"
                 custom:hint="@string/recipient"
@@ -55,20 +55,17 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/listTickets"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp" />
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
     </RelativeLayout>
-
 
     <com.alphawallet.app.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?actionBarSize"
-        android:background="?colorSurface"
         tools:visibility="gone" />
 
 </LinearLayout>

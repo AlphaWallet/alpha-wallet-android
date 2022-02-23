@@ -35,10 +35,7 @@
             android:layout_gravity="top"
             app:layout_scrollFlags="enterAlways" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/color_mercury" />
+        <View style="@style/Aw.Component.Separator" />
 
         <com.alphawallet.app.widget.NotificationView
             android:id="@+id/notification"

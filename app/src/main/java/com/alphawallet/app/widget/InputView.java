@@ -36,6 +36,7 @@ public class InputView extends LinearLayout {
     private final EditText editText;
     private final RelativeLayout boxLayout;
     private final ImageButton scanQrIcon;
+    private final StandardHeader header;
 
     private int labelResId;
     private int lines;
@@ -55,6 +56,7 @@ public class InputView extends LinearLayout {
         boxLayout = findViewById(R.id.box_layout);
         scanQrIcon = findViewById(R.id.img_scan_qr);
         pasteItem = findViewById(R.id.text_paste);
+        header = findViewById(R.id.layout_header);
 
         getAttrs(context, attrs);
 
@@ -101,9 +103,8 @@ public class InputView extends LinearLayout {
             boolean showHeader = a.getBoolean(R.styleable.InputView_show_header, false);
             boolean showPaste = a.getBoolean(R.styleable.InputView_show_paste, false);
             int headerTextId = a.getResourceId(R.styleable.InputView_label, R.string.token_name);
-            findViewById(R.id.layout_header).setVisibility(showHeader ? View.VISIBLE : View.GONE);
-            TextView headerText = findViewById(R.id.text_header);
-            headerText.setText(headerTextId);
+            header.setVisibility(showHeader ? View.VISIBLE : View.GONE);
+            header.setText(headerTextId);
             scanQrIcon.setVisibility(noCam ? View.GONE : View.VISIBLE);
             pasteItem.setVisibility(showPaste ? View.VISIBLE : View.GONE);
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?colorSurface"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
@@ -22,23 +22,23 @@
             android:layout_alignParentTop="true"
             android:fontFamily="@font/font_regular"
             android:gravity="center_horizontal"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
+            android:paddingStart="@dimen/base_24"
+            android:paddingEnd="@dimen/base_24"
             android:text="@string/verify_seed_phrase"
             android:textAlignment="center"
-            android:textColor="@color/color_black"
-            android:textSize="28sp" />
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp28" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/text_title"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="47dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginStart="@dimen/standard_16"
+            android:layout_marginTop="@dimen/double_base_48"
+            android:layout_marginEnd="@dimen/standard_16"
             app:cardBackgroundColor="@color/transparent"
-            app:strokeColor="@color/color_dove"
+            app:strokeColor="@color/text_secondary"
             app:strokeWidth="1dp">
 
             <TextView
@@ -47,9 +47,10 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_horizontal"
                 android:minHeight="110dp"
-                android:padding="16dp"
-                android:textColor="@color/color_dove"
-                android:textSize="18sp" />
+                android:padding="@dimen/standard_16"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/sp17"
+                tools:text="Verify" />
         </com.google.android.material.card.MaterialCardView>
 
 
@@ -59,16 +60,13 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/container"
             android:layout_gravity="center_horizontal"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="10dp"
-            android:paddingStart="5dp"
-            android:paddingEnd="5dp"
+            android:layout_marginStart="@dimen/small_12"
+            android:padding="@dimen/tiny_8"
             android:text="@string/invalid_phrase"
-            android:textColor="@color/danger"
-            android:textSize="14sp"
-            android:visibility="invisible" />
+            android:textColor="@color/text_error"
+            android:textSize="@dimen/sp15"
+            android:visibility="invisible"
+            tools:visibility="visible" />
 
         <LinearLayout
             android:id="@+id/flexbox_container"
@@ -82,8 +80,8 @@
                 android:id="@+id/layout_word_holder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"
+                android:layout_marginStart="@dimen/standard_16"
+                android:layout_marginEnd="@dimen/standard_16"
                 app:flexDirection="row"
                 app:flexWrap="wrap" />
 

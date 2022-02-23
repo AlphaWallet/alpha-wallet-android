@@ -11,7 +11,7 @@
         style="@style/Aw.Component.Button.Primary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/dp16"
+        android:layout_margin="@dimen/standard_16"
         android:text="@string/buy_eth" />
 
     <ImageView

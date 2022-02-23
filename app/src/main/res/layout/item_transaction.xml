@@ -7,14 +7,14 @@
     android:background="?attr/colorSurface"
     android:minHeight="80dp"
     android:orientation="horizontal"
-    android:padding="@dimen/dp16">
+    android:padding="@dimen/standard_16">
 
     <com.alphawallet.app.widget.TokenIcon
         android:id="@+id/token_icon"
         android:layout_width="@dimen/token_icon"
         android:layout_height="@dimen/token_icon"
         android:layout_gravity="center"
-        android:layout_marginEnd="@dimen/dp16" />
+        android:layout_marginEnd="@dimen/standard_16" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
                 android:maxLines="2"
-                android:textColor="@color/color_black"
+                android:textColor="@color/text_primary"
                 android:textSize="@dimen/sp17"
                 tools:text="Received Chain" />
 
@@ -50,7 +50,7 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:fontFamily="@font/font_semibold"
-            android:textColor="@color/color_black"
+            android:textColor="@color/text_primary"
             android:textSize="@dimen/sp17"
             tools:text="+ 70,000,000,000.3455 ETH" />
 
@@ -59,13 +59,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/address"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
+            android:layout_marginStart="@dimen/mini_4"
+            android:layout_marginEnd="@dimen/mini_4"
             android:layout_toStartOf="@id/text_tx_time"
             android:fontFamily="@font/font_regular"
             android:maxLines="1"
             android:textAppearance="?attr/textAppearanceListItem"
-            android:textColor="@color/color_dove"
+            android:textColor="@color/text_secondary"
             android:textSize="@dimen/sp15"
             android:visibility="visible"
             tools:text="+1.0 ETH" />
@@ -76,11 +76,11 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/value_layout"
             android:layout_alignStart="@id/value_layout"
-            android:layout_marginTop="@dimen/dp5"
+            android:layout_marginTop="@dimen/mini_4"
             android:layout_toStartOf="@id/supplimental"
             android:ellipsize="end"
             android:fontFamily="@font/font_regular"
-            android:textColor="@color/color_dove"
+            android:textColor="@color/text_secondary"
             android:textSize="@dimen/sp15"
             tools:text="0x123456778 ... 3434" />
 
@@ -94,7 +94,7 @@
             android:fontFamily="@font/font_regular"
             android:maxLines="1"
             android:textAppearance="?attr/textAppearanceListItem"
-            android:textColor="@color/color_dove"
+            android:textColor="@color/text_secondary"
             android:textSize="@dimen/sp15"
             android:visibility="visible"
             tools:text="11:53 pm" />

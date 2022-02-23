@@ -30,11 +30,10 @@
                     android:id="@+id/event_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="@dimen/dp18"
-                    android:fontFamily="@font/font_light"
-                    android:textColor="@color/color_black"
-                    android:textSize="@dimen/sp14"
+                    android:layout_marginTop="@dimen/mini_4"
+                    android:layout_marginBottom="@dimen/standard_16"
+                    android:textColor="@color/text_primary"
+                    android:textSize="@dimen/sp15"
                     tools:text="10:57 PM | July 22, 2020" />
 
                 <com.alphawallet.app.widget.TokenIcon
@@ -46,8 +45,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dp6"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="@dimen/tiny_8"
+                    android:layout_marginBottom="@dimen/tiny_8"
                     android:gravity="center"
                     android:orientation="horizontal">
 
@@ -57,7 +56,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/font_semibold"
                         android:gravity="center"
-                        android:textColor="@color/color_black"
+                        android:textColor="@color/text_primary"
                         android:textSize="@dimen/sp20"
                         tools:text="Sent" />
 
@@ -65,9 +64,9 @@
                         android:id="@+id/event_action_symbol"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
+                        android:layout_marginStart="@dimen/mini_4"
                         android:fontFamily="@font/font_semibold"
-                        android:textColor="@color/color_black"
+                        android:textColor="@color/text_primary"
                         android:textSize="@dimen/sp20"
                         android:visibility="gone"
                         tools:text="ETH" />
@@ -79,10 +78,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="@dimen/dp16"
+                    android:layout_marginTop="@dimen/standard_16"
                     android:fontFamily="@font/font_semibold"
                     android:gravity="center_horizontal"
-                    android:textColor="@color/color_black"
+                    android:textColor="@color/text_primary"
                     android:textSize="@dimen/sp24"
                     tools:text="+ 1.234 ETH" />
 
@@ -90,25 +89,23 @@
                     android:id="@+id/chain_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/dp5"
-                    android:layout_marginTop="@dimen/dp5"
-                    android:layout_marginEnd="@dimen/dp8"
+                    android:layout_marginTop="@dimen/tiny_8"
                     android:visibility="gone"
-                    custom:font_size="10" />
+                    custom:font_size="10"
+                    tools:visibility="visible" />
 
                 <LinearLayout
                     android:id="@+id/pending_time_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dp5"
+                    android:layout_marginTop="@dimen/tiny_8"
                     android:orientation="horizontal"
                     android:visibility="gone">
 
                     <ProgressBar
-                        android:layout_width="@dimen/dp14"
-                        android:layout_height="@dimen/dp14"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="6dp"
                         android:contentDescription="@string/empty" />
 
                     <TextView
@@ -116,7 +113,7 @@
                         style="@style/TransactionDetailsStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/color_dove"
+                        android:textColor="@color/text_secondary"
                         tools:text="@string/transaction_pending_for" />
 
                 </LinearLayout>
@@ -143,13 +140,5 @@
             android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
-
-    <com.alphawallet.app.widget.SystemView
-        android:id="@+id/system_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?actionBarSize"
-        android:background="@color/color_white"
-        tools:visibility="gone" />
 
 </LinearLayout>

@@ -2,76 +2,56 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    xmlns:custom="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout
+    <com.alphawallet.app.widget.StandardHeader
         android:id="@+id/layout_header"
-        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:background="@color/alabaster">
-
-        <View style="@style/Aw.Component.Separator" />
-
-        <TextView
-            android:id="@+id/text_header"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:fontFamily="@font/font_semibold"
-            android:gravity="center_vertical|end"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="@string/wallet_name"
-            android:textAllCaps="true"
-            android:textColor="@color/color_dove"
-            android:textSize="15sp" />
-
-        <View style="@style/Aw.Component.Separator" />
-
-    </LinearLayout>
+        android:layout_alignParentTop="true"
+        custom:headerText="@string/wallet_name" />
 
     <RelativeLayout
         android:id="@+id/box_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/layout_header"
-        android:layout_marginStart="@dimen/dp8"
-        android:layout_marginEnd="@dimen/dp8"
-        android:background="@drawable/background_password_entry"
-        android:layout_marginTop="@dimen/dp16">
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginTop="@dimen/standard_16"
+        android:layout_marginEnd="@dimen/standard_16"
+        android:background="@drawable/background_password_entry">
 
         <AutoCompleteTextView
             android:id="@+id/edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
+            android:layout_toStartOf="@id/img_scan_qr"
             android:background="@color/transparent"
             android:fontFamily="@font/font_regular"
             android:inputType="text"
             android:lines="1"
             android:maxLines="1"
-            android:paddingStart="@dimen/dp8"
-            android:paddingTop="@dimen/dp12"
-            android:paddingEnd="@dimen/dp8"
-            android:paddingBottom="@dimen/dp12"
-            android:textColor="@color/color_black"
-            android:textColorHint="@color/color_dusty"
+            android:paddingStart="@dimen/standard_16"
+            android:paddingTop="@dimen/small_12"
+            android:paddingEnd="@dimen/tiny_8"
+            android:paddingBottom="@dimen/small_12"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
             android:textSize="@dimen/sp17"
-            android:layout_toStartOf="@id/img_scan_qr"
-            tools:text="Awesome High Yield DeFi Token" />
+            tools:hint="Hint" />
 
         <ImageButton
             android:id="@+id/img_scan_qr"
-            android:src="@drawable/ic_camera_scan"
-            android:contentDescription="@string/scan_qr"
-            android:background="?android:selectableItemBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="@dimen/dp8"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:background="@color/transparent"
+            android:contentDescription="@string/scan_qr"
+            android:padding="@dimen/small_12"
+            android:src="@drawable/ic_camera_scan" />
 
     </RelativeLayout>
 
@@ -80,14 +60,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/box_layout"
-        android:layout_marginStart="31dp"
+        android:layout_marginStart="@dimen/comfy_28"
         android:layout_marginTop="-9dp"
-        android:layout_marginBottom="5dp"
-        android:background="@color/color_white"
+        android:background="?colorSurface"
         android:fontFamily="@font/font_semibold"
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"
-        android:textColor="@color/color_dove"
+        android:paddingLeft="@dimen/mini_4"
+        android:paddingRight="@dimen/mini_4"
+        android:textColor="@color/text_secondary"
         android:textSize="@dimen/sp13"
         android:visibility="visible"
         tools:text="Token Name" />
@@ -98,11 +77,12 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/box_layout"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="@dimen/small_12"
         android:fontFamily="@font/font_semibold"
-        android:textColor="@color/color_azure"
-        android:textSize="@dimen/sp17"
+        android:padding="@dimen/mini_4"
         android:text="@string/paste"
+        android:textColor="@color/brand_accent"
+        android:textSize="@dimen/sp17"
         android:visibility="visible" />
 
     <TextView
@@ -112,8 +92,8 @@
         android:layout_below="@id/box_layout"
         android:layout_alignParentStart="true"
         android:layout_marginStart="@dimen/dp10"
-        android:layout_toStartOf="@id/text_paste"
         android:layout_marginTop="2dp"
+        android:layout_toStartOf="@id/text_paste"
         android:fontFamily="@font/font_regular"
         android:textColor="@color/color_green"
         android:textSize="@dimen/sp12"
@@ -127,8 +107,8 @@
         android:layout_below="@id/box_layout"
         android:layout_alignParentStart="true"
         android:layout_marginStart="@dimen/dp10"
-        android:layout_toStartOf="@id/text_paste"
         android:layout_marginTop="2dp"
+        android:layout_toStartOf="@id/text_paste"
         android:fontFamily="@font/font_regular"
         android:textColor="@color/danger"
         android:textSize="@dimen/sp12"

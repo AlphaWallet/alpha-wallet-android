@@ -1,10 +1,17 @@
 package com.alphawallet.app.web3;
 
+import static androidx.webkit.WebSettingsCompat.FORCE_DARK_OFF;
+import static androidx.webkit.WebSettingsCompat.FORCE_DARK_ON;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.webkit.WebSettingsCompat;
+import androidx.webkit.WebViewFeature;
+
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
@@ -119,6 +126,20 @@ public class Web3TokenView extends WebView
         webSettings.setUserAgentString(webSettings.getUserAgentString()
                                                + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
         WebView.setWebContentsDebuggingEnabled(true);
+
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK))
+        {
+            switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
+            {
+                case Configuration.UI_MODE_NIGHT_YES:
+                    WebSettingsCompat.setForceDark(getSettings(), FORCE_DARK_ON);
+                    break;
+                case Configuration.UI_MODE_NIGHT_NO:
+                case Configuration.UI_MODE_NIGHT_UNDEFINED:
+                    WebSettingsCompat.setForceDark(getSettings(), FORCE_DARK_OFF);
+                    break;
+            }
+        }
 
         setScrollBarSize(0);
         setVerticalScrollBarEnabled(false);

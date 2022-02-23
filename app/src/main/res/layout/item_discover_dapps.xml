@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="40dp"
+    android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingLeft="20dp"
-    android:paddingRight="20dp">
+    android:paddingLeft="@dimen/standard_16"
+    android:paddingRight="@dimen/standard_16">
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/token_icon"
+        android:layout_height="@dimen/token_icon"
         android:layout_alignParentStart="true" />
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_toLeftOf="@id/controls"
-        android:layout_toRightOf="@+id/icon"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/small_12"
+        android:layout_marginRight="@dimen/small_12"
+        android:layout_toStartOf="@id/controls"
+        android:layout_toEndOf="@+id/icon"
         android:gravity="center_vertical"
         android:orientation="vertical">
 
@@ -29,11 +31,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:fontFamily="@font/font_bold"
+            android:fontFamily="@font/font_semibold"
             android:lines="1"
-            android:text="DApp"
-            android:textColor="@color/mine"
-            android:textSize="12sp" />
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp15"
+            tools:text="DApp" />
 
         <TextView
             android:id="@+id/description"
@@ -42,15 +44,15 @@
             android:ellipsize="end"
             android:fontFamily="@font/font_regular"
             android:lines="1"
-            android:text="Description goes here"
-            android:textColor="@color/mine"
-            android:textSize="10sp" />
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/sp12"
+            tools:text="Description goes here" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/controls"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -59,32 +61,25 @@
             android:id="@+id/add"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
             android:fontFamily="@font/font_regular"
-            android:paddingBottom="5dp"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:paddingTop="5dp"
+            android:padding="@dimen/standard_16"
             android:text="@string/add"
             android:textAllCaps="true"
-            android:textColor="@color/color_dove"
-            android:textSize="11sp" />
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/sp12" />
 
         <TextView
             android:id="@+id/remove"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
             android:fontFamily="@font/font_regular"
-            android:paddingBottom="5dp"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:paddingTop="5dp"
+            android:padding="@dimen/standard_16"
             android:text="@string/action_remove"
             android:textAllCaps="true"
-            android:textColor="@color/color_dove"
-            android:textSize="11sp"
-            android:visibility="gone" />
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/sp12"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
     </LinearLayout>
 

@@ -49,12 +49,12 @@ public class TabUtils {
     public static void decorateTabLayout(Context context, TabLayout tabLayout) {
         int tabCount = tabLayout.getTabCount();
 
-        if (tabCount > 3) {
-            View tab = ((ViewGroup) tabLayout.getChildAt(0)).getChildAt(tabCount - 1);
-            ViewGroup.MarginLayoutParams tabParams = (ViewGroup.MarginLayoutParams) tab.getLayoutParams();
-            tabParams.rightMargin = Utils.dp2px(context, 12);
-            tab.requestLayout();
-        }
+//        if (tabCount > 3) {
+//            View tab = ((ViewGroup) tabLayout.getChildAt(0)).getChildAt(tabCount - 1);
+//            ViewGroup.MarginLayoutParams tabParams = (ViewGroup.MarginLayoutParams) tab.getLayoutParams();
+//            tabParams.rightMargin = Utils.dp2px(context, 12);
+//            tab.requestLayout();
+//        }
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override

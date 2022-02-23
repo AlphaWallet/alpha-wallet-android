@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingStart="@dimen/dp16"
-    android:paddingTop="@dimen/dp16"
-    android:paddingEnd="@dimen/dp16"
-    android:paddingBottom="@dimen/dp8">
+    android:paddingStart="@dimen/standard_16"
+    android:paddingTop="@dimen/standard_16"
+    android:paddingEnd="@dimen/standard_16"
+    android:paddingBottom="@dimen/tiny_8">
 
     <TextView
         android:id="@+id/text_title"
@@ -18,7 +18,7 @@
         android:ellipsize="end"
         android:fontFamily="@font/font_bold"
         android:singleLine="true"
-        android:textColor="?colorOnSurface"
+        android:textColor="@color/text_primary"
         android:textSize="@dimen/sp24"
         tools:text="@string/add_hide_tokens" />
 
@@ -27,12 +27,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="@dimen/tiny_8"
         android:fontFamily="@font/font_regular"
         android:gravity="end"
         android:text="@string/ignore"
-        android:textColor="@color/azure"
-        android:textSize="17sp"
+        android:textColor="@color/icon_tint_accent"
+        android:textSize="@dimen/sp17"
         android:visibility="gone"
         tools:visibility="visible" />
 

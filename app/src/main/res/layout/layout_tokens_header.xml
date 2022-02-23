@@ -2,25 +2,21 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?attr/colorSurface">
+    android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/dp16"
-        android:layout_marginTop="@dimen/dp16"
-        android:layout_marginEnd="@dimen/dp16"
-        android:layout_marginBottom="@dimen/dp8"
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginTop="@dimen/standard_16"
+        android:layout_marginEnd="@dimen/standard_16"
+        android:layout_marginBottom="@dimen/tiny_8"
         android:fontFamily="@font/font_bold"
-        android:textColor="?attr/colorOnSurface"
+        android:textColor="@color/text_primary"
         android:textSize="@dimen/sp24"
         tools:text="Header Title" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_gravity="bottom"
-        android:background="@color/color_mercury" />
+    <View style="@style/Aw.Component.Separator"
+        android:layout_gravity="bottom" />
 </FrameLayout>

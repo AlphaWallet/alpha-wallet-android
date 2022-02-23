@@ -49,21 +49,15 @@
                     android:id="@+id/backup_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="19dp"
-                    android:layout_marginTop="13dp"
-                    android:layout_marginEnd="51dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_margin="@dimen/standard_16"
                     android:fontFamily="@font/font_regular"
                     android:text="@string/seed_phrase_loss_warning"
-                    android:textColor="@color/color_dove"
-                    android:textSize="13sp" />
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/sp15" />
 
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/mercury" />
+            <View style="@style/Aw.Component.Separator" />
 
             <com.alphawallet.app.widget.SettingsItemView
                 android:id="@+id/delete"
@@ -76,21 +70,18 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="19dp"
-                android:layout_marginTop="13dp"
-                android:layout_marginEnd="51dp"
-                android:layout_marginBottom="16dp"
+                android:layout_margin="@dimen/standard_16"
                 android:fontFamily="@font/font_regular"
                 android:text="@string/delete_lose_funds_warning"
-                android:textColor="@color/color_dove"
-                android:textSize="13sp" />
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/sp15" />
 
             <com.alphawallet.app.widget.InputAddress
                 android:id="@+id/input_ens"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="15dp"
+                android:layout_marginTop="@dimen/cozy_20"
+                android:layout_marginBottom="@dimen/standard_16"
                 custom:ens="true"
                 custom:hint="@string/enter_ens"
                 custom:label="@string/ens_name"

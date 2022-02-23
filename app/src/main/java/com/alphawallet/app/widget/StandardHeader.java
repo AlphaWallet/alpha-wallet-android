@@ -13,6 +13,8 @@ import com.alphawallet.app.R;
  */
 public class StandardHeader extends LinearLayout
 {
+    private TextView headerText;
+
     public StandardHeader(Context context, AttributeSet attrs)
     {
         super(context, attrs);
@@ -31,12 +33,20 @@ public class StandardHeader extends LinearLayout
         try
         {
             int headerId = a.getResourceId(R.styleable.StandardHeader_headerText, R.string.empty);
-            TextView headerText = findViewById(R.id.text_header);
+            headerText = findViewById(R.id.text_header);
             headerText.setText(headerId);
         }
         finally
         {
             a.recycle();
         }
+    }
+
+    public void setText(String text) {
+        headerText.setText(text);
+    }
+
+    public void setText(int resId) {
+        headerText.setText(resId);
     }
 }

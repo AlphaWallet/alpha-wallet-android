@@ -2,17 +2,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
+    android:layout_marginTop="@dimen/standard_16"
+    android:layout_marginBottom="@dimen/standard_16"
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:background="?colorError"
+        android:background="@color/text_error"
         android:orientation="vertical"
-        android:padding="15dp">
+        android:padding="@dimen/standard_16">
 
         <TextView
             android:layout_width="wrap_content"
@@ -21,8 +21,8 @@
             android:fontFamily="@font/font_bold"
             android:text="@string/label_important"
             android:textAllCaps="true"
-            android:textColor="?colorOnError"
-            android:textSize="16sp" />
+            android:textColor="@color/text_error_inverse"
+            android:textSize="@dimen/sp17" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -31,7 +31,8 @@
             android:fontFamily="@font/font_regular"
             android:gravity="center"
             android:text="@string/universal_link_notice"
-            android:textColor="?colorOnError" />
+            android:textColor="@color/text_error_inverse"
+            android:textSize="@dimen/sp17" />
 
     </LinearLayout>
 </LinearLayout>

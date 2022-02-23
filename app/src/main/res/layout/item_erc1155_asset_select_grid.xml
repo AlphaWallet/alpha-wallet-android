@@ -38,31 +38,30 @@
                     android:layout_height="48dp"
                     android:layout_centerInParent="true"
                     android:background="@drawable/value_amount_overlay"
-                    android:backgroundTint="@color/color_azure"
+                    android:backgroundTint="@color/brand_accent"
                     android:fontFamily="@font/font_bold"
                     android:gravity="center"
-                    android:textColor="?colorOnSurface"
+                    android:textColor="@color/text_primary"
                     android:visibility="gone"
+                    tools:visibility="visible"
                     tools:text="25" />
 
                 <ProgressBar
                     android:id="@+id/loading_spinner"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:padding="@dimen/dp16"
-                    android:visibility="gone" />
+                    android:padding="@dimen/standard_16"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
 
             </RelativeLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/icon_wrapper"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
                 android:orientation="vertical"
-                android:padding="@dimen/dp16">
+                android:padding="@dimen/standard_16">
 
                 <TextView
                     android:id="@+id/title"
@@ -72,7 +71,7 @@
                     android:ellipsize="end"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:textColor="?colorOnSurface"
+                    android:textColor="@color/text_primary"
                     android:textSize="@dimen/sp18"
                     tools:text="Title" />
 
@@ -83,10 +82,11 @@
                     android:layout_below="@id/title"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:textColor="@color/color_dove"
+                    android:textColor="@color/text_secondary"
                     android:textSize="@dimen/sp15"
                     android:visibility="gone"
-                    tools:text="#1" />
+                    tools:visibility="visible"
+                    tools:text="Subtitle" />
 
             </RelativeLayout>
         </LinearLayout>

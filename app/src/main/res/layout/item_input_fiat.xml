@@ -1,48 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <RelativeLayout
-        android:id="@+id/layout_header_amount"
+    <com.alphawallet.app.widget.StandardHeader
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/alabaster">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_alignParentTop="true"
-            android:background="@color/mercury" />
-
-        <TextView
-            android:id="@+id/text_header"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:fontFamily="@font/font_semibold"
-            android:gravity="center_vertical|end"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="@string/enter_target_price"
-            android:textAllCaps="true"
-            android:textColor="@color/dove"
-            android:textSize="15sp" />
-
-    </RelativeLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+        custom:headerText="@string/enter_target_price" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
         android:orientation="vertical"
-        android:padding="@dimen/dp16">
+        android:padding="@dimen/standard_16">
 
         <LinearLayout
             android:id="@+id/layout_container"
@@ -62,7 +37,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginStart="2dp"
-                    android:layout_marginEnd="@dimen/dp8"
+                    android:layout_marginEnd="@dimen/tiny_8"
                     android:src="@drawable/ic_flags_usa" />
 
                 <TextView
@@ -71,7 +46,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/font_regular"
                     android:textAllCaps="true"
-                    android:textColor="@color/black"
+                    android:textColor="@color/text_primary"
                     android:textSize="@dimen/sp32"
                     tools:text="USD" />
 
@@ -82,7 +57,8 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="@dimen/dp5"
                     android:orientation="horizontal"
-                    android:src="@drawable/ic_expand_more" />
+                    android:src="@drawable/ic_expand_more"
+                    app:tint="@color/icon_tint" />
 
             </LinearLayout>
 
@@ -99,18 +75,18 @@
                 android:inputType="numberDecimal"
                 android:lines="1"
                 android:maxLines="1"
-                android:paddingStart="@dimen/dp5"
-                android:paddingEnd="@dimen/dp5"
-                android:textColor="@color/dove"
-                android:textColorHint="@color/dusty"
-                android:textSize="36sp" />
+                android:paddingStart="@dimen/mini_4"
+                android:paddingEnd="@dimen/mini_4"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary"
+                android:textSize="@dimen/sp36" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp6"
+            android:layout_marginTop="@dimen/tiny_8"
             android:orientation="horizontal">
 
             <TextView
@@ -118,16 +94,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/current_price"
-                android:textColor="@color/dove"
-                android:textSize="12sp" />
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/sp12" />
 
             <TextView
                 android:id="@+id/subtext_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="3dp"
-                android:textColor="@color/dove"
-                android:textSize="12sp"
+                android:layout_marginStart="@dimen/mini_4"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/sp12"
                 tools:text="$4444.43" />
 
         </LinearLayout>

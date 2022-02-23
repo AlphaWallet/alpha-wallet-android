@@ -63,10 +63,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private String displayName;
     private Token token;
     private ImageView qrImageView;
-    private TextView titleView;
-    private TextView address;
     private LinearLayout layoutInputAmount;
-    private LinearLayout selectAddress;
     private NetworkInfo networkInfo;
     private AddressMode currentMode = AddressMode.MODE_ADDRESS;
     private long overrideNetwork;
@@ -110,12 +107,8 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
 
     private void initViews() {
         toolbar();
-        titleView = findViewById(R.id.title_my_address);
         layoutInputAmount = findViewById(R.id.layout_define_request);
-        selectAddress = findViewById(R.id.layout_select_address);
-        address =  findViewById(R.id.address);
         qrImageView = findViewById(R.id.qr_image);
-        selectAddress = findViewById(R.id.layout_select_address);
         qrImageView.setBackgroundResource(R.color.white);
         ensFetchProgressBar = findViewById(R.id.ens_fetch_progress);
 
@@ -208,12 +201,9 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         initViews();
         findViewById(R.id.toolbar_title).setVisibility(View.GONE);
         setTitle("");
-        titleView.setVisibility(View.VISIBLE);
         displayAddress = Keys.toChecksumAddress(wallet.address);
         networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork);
         currentMode = AddressMode.MODE_POS;
-        address.setVisibility(View.GONE);
-        selectAddress.setVisibility(View.GONE);
         layoutInputAmount.setVisibility(View.VISIBLE);
 
         amountInput = findViewById(R.id.input_amount);

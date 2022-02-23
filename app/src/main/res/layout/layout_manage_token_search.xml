@@ -7,28 +7,28 @@
     <LinearLayout
         android:id="@+id/layout_search_tokens"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:layout_marginStart="@dimen/dp8"
-        android:layout_marginTop="@dimen/dp8"
-        android:layout_marginEnd="@dimen/dp8"
-        android:layout_marginBottom="@dimen/dp8"
+        android:layout_height="@dimen/massive_44"
+        android:layout_marginStart="@dimen/tiny_8"
+        android:layout_marginTop="@dimen/tiny_8"
+        android:layout_marginEnd="@dimen/tiny_8"
+        android:layout_marginBottom="@dimen/tiny_8"
         android:background="@drawable/background_round_search"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="@dimen/dp24"
-            android:layout_height="@dimen/dp24"
-            android:layout_marginStart="@dimen/dp12"
+            android:layout_width="@dimen/base_24"
+            android:layout_height="@dimen/base_24"
+            android:layout_marginStart="@dimen/small_12"
             android:src="@drawable/ic_search_small"
-            app:tint="@color/dusty" />
+            app:tint="@color/text_secondary" />
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/edit_search"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/dp8"
-            android:layout_marginEnd="@dimen/dp16"
+            android:layout_marginStart="@dimen/tiny_8"
+            android:layout_marginEnd="@dimen/standard_16"
             android:background="@null"
             android:clickable="false"
             android:focusable="false"
@@ -37,8 +37,8 @@
             android:inputType="textFilter"
             android:maxLength="20"
             android:maxLines="1"
-            android:textColor="@color/color_dusty"
-            android:textColorHint="@color/color_dusty"
+            android:textColor="@color/text_secondary"
+            android:textColorHint="@color/text_secondary"
             android:textSize="@dimen/sp17" />
 
     </LinearLayout>
@@ -46,9 +46,9 @@
     <View
         android:id="@+id/click_layer"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/dp30"
+        android:layout_height="@dimen/optimal_30"
         android:layout_gravity="center_vertical"
-        android:layout_marginStart="@dimen/dp8"
-        android:layout_marginEnd="@dimen/dp8"
+        android:layout_marginStart="@dimen/tiny_8"
+        android:layout_marginEnd="@dimen/tiny_8"
         android:background="@color/transparent" />
 </FrameLayout>

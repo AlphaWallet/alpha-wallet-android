@@ -107,8 +107,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
         viewModel.transactionFinalised().observe(this, this::txWritten);
 
-        SystemView systemView = findViewById(R.id.system_view);
-        systemView.hide();
         functionBar = findViewById(R.id.layoutButtons);
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         initViews(viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS)));

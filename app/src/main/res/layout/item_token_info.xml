@@ -9,10 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingStart="@dimen/dp24"
-        android:paddingTop="@dimen/dp18"
-        android:paddingEnd="@dimen/dp24"
-        android:paddingBottom="@dimen/dp18">
+        android:paddingHorizontal="@dimen/base_24"
+        android:paddingVertical="@dimen/standard_16">
 
         <TextView
             android:id="@+id/label"
@@ -23,7 +21,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/font_regular"
             android:singleLine="true"
-            android:textColor="@color/color_dove"
+            android:textColor="@color/text_secondary"
             android:textSize="@dimen/sp15"
             tools:text="Balance" />
 
@@ -36,9 +34,9 @@
             android:fontFamily="@font/font_regular"
             android:gravity="end|center_vertical"
             android:singleLine="true"
-            android:textColor="@color/color_black"
+            android:textColor="@color/text_primary"
             android:textSize="@dimen/sp17"
-            tools:text="-" />
+            tools:text="0.00" />
 
         <TextView
             android:id="@+id/value_long"
@@ -46,13 +44,14 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
             android:ellipsize="end"
-            android:fontFamily="@font/font_semibold"
+            android:fontFamily="@font/font_regular"
             android:gravity="end|center_vertical"
             android:maxLines="2"
-            android:textColor="@color/color_black"
+            android:textColor="@color/text_primary"
             android:textSize="@dimen/sp16"
             android:visibility="gone"
-            tools:text="The smallest of the seven inhabited Aeolian Islands" />
+            tools:text="The smallest of the seven inhabited Aeolian Islands"
+            tools:visibility="visible" />
 
     </LinearLayout>
 

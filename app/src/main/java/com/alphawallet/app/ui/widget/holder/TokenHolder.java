@@ -55,12 +55,10 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final View     root24Hours;
     private final ImageView image24h;
     private final TextView textAppreciation;
-    private final View contractSeparator;
     private final View layoutAppreciation;
     private final LinearLayout extendedInfo;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
     private final TokensService tokensService;
-    private final TextView pendingText;
     private final RelativeLayout tokenLayout;
     private final MaterialCheckBox selectToken;
 
@@ -79,8 +77,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         root24Hours = findViewById(R.id.root_24_hrs);
         image24h = findViewById(R.id.image_24_hrs);
         textAppreciation = findViewById(R.id.text_appreciation);
-        contractSeparator = findViewById(R.id.contract_seperator);
-        pendingText = findViewById(R.id.balance_eth_pending);
         tokenLayout = findViewById(R.id.token_layout);
         extendedInfo = findViewById(R.id.layout_extended_info);
         layoutAppreciation = findViewById(R.id.layout_appreciation);
@@ -113,7 +109,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             tokenLayout.setVisibility(View.VISIBLE);
 //            tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
-            contractSeparator.setVisibility(View.GONE);
             if (!TextUtils.isEmpty(data.getFilterText()) && data.getFilterText().equals(CHECK_MARK))
             {
                 setupCheckButton(data);
@@ -141,8 +136,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
             populateTicker();
 
-            setPendingAmount();
-
         } catch (Exception ex) {
             fillEmpty();
         }
@@ -152,20 +145,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     public void onDestroyView()
     {
 
-    }
-
-    private void setPendingAmount()
-    {
-        String pendingDiff = token.getPendingDiff();
-        if (pendingDiff != null)
-        {
-            pendingText.setText(pendingDiff);
-            pendingText.setTextColor(ContextCompat.getColor(getContext(), (pendingDiff.startsWith("-")) ? R.color.danger : R.color.green));
-        }
-        else
-        {
-            pendingText.setText("");
-        }
     }
 
     private void populateTicker()
@@ -196,7 +175,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         if (ticker != null)
         {
-            hideIssuerViews();
             layoutAppreciation.setVisibility(View.VISIBLE);
             balanceCurrency.setVisibility(View.VISIBLE);
             setTickerInfo(ticker);
@@ -256,10 +234,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback) {
         this.tokensAdapterCallback = tokensAdapterCallback;
-    }
-
-    private void hideIssuerViews() {
-        contractSeparator.setVisibility(View.GONE);
     }
 
     private void setTickerInfo(TokenTicker ticker)

@@ -14,7 +14,7 @@
         android:id="@+id/grid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp8"
+        android:layout_marginTop="@dimen/tiny_8"
         android:numColumns="2"
         app:alignmentMode="alignBounds"
         app:columnCount="2"

@@ -51,6 +51,20 @@
         <item name="tabGravity">center</item>
     </style>
 
+    <style name="Aw.Component.ChartTabLayout" parent="Widget.Design.TabLayout">
+        <item name="android:layout_margin">@dimen/standard_16</item>
+        <item name="tabGravity">center</item>
+        <item name="tabIndicatorColor">@color/text_primary</item>
+        <item name="tabIndicatorFullWidth">true</item>
+        <item name="tabMode">fixed</item>
+        <item name="tabSelectedTextColor">@color/text_primary</item>
+        <item name="tabTextColor">@color/text_secondary</item>
+        <item name="tabIndicatorHeight">0dp</item>
+        <item name="tabPaddingStart">@dimen/cozy_20</item>
+        <item name="tabPaddingEnd">@dimen/cozy_20</item>
+        <item name="tabTextAppearance">@style/Aw.Typography.ChartTabText</item>
+    </style>
+
     <style name="Aw.Component.RecyclerView" parent="">
         <item name="android:background">?attr/colorSurface</item>
     </style>
@@ -105,7 +119,7 @@
         <item name="iconGravity">textEnd</item>
     </style>
 
-    <style name="Aw.Component.Button.TextIcon" parent="">
+    <style name="Aw.Component.Button.TextIcon">
         <item name="android:backgroundTint">@color/color_concrete</item>
         <item name="android:maxLines">2</item>
         <item name="android:padding">@dimen/standard_16</item>
@@ -114,16 +128,22 @@
         <item name="iconGravity">textEnd</item>
         <item name="iconTint">@color/brand_accent</item>
         <item name="android:layout_margin">@dimen/cozy_20</item>
+        <item name="cornerRadius">5dp</item>
     </style>
 
-    <style name="Aw.Component.CopyButton.Copy" parent="">
-        <item name="android:paddingTop">@dimen/dp15</item>
-        <item name="android:paddingBottom">@dimen/dp15</item>
-        <item name="android:layout_marginStart">@dimen/dp8</item>
-        <item name="android:layout_marginEnd">@dimen/dp8</item>
-        <item name="android:paddingStart">@dimen/dp24</item>
-        <item name="android:paddingEnd">@dimen/dp24</item>
-        <item name="android:background">@drawable/background_round_grey_5dp</item>
+    <style name="Aw.Component.QrScannerTextView" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:drawablePadding">@dimen/big_margin</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:paddingTop">@dimen/big_padding</item>
+        <item name="android:paddingBottom">@dimen/big_padding</item>
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.ActionBar">

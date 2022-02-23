@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/tools"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
@@ -23,9 +21,9 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginStart="@dimen/standard_16"
+                android:layout_marginTop="@dimen/standard_16"
+                android:layout_marginEnd="@dimen/standard_16"
                 android:minHeight="350dp">
 
                 <com.alphawallet.app.widget.NFTImageView
@@ -49,9 +47,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
-                android:padding="@dimen/dp16"
-                android:textColor="@color/mine"
-                tools:text="Test description" />
+                android:padding="@dimen/standard_16"
+                android:textColor="@color/text_primary"
+                custom:text="Test description" />
 
             <com.alphawallet.app.ui.widget.entity.NFTAttributeLayout
                 android:id="@+id/attributes"

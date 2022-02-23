@@ -36,7 +36,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingBottom="15dp">
+                android:paddingBottom="@dimen/standard_16">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/listTickets"
@@ -47,25 +47,24 @@
                     android:id="@+id/layout_ticket_quantity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="@dimen/cozy_20"
                     android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:layout_marginBottom="5dp"
+                        android:layout_marginBottom="@dimen/tiny_8"
                         android:fontFamily="@font/font_regular"
                         android:text="@string/quantity_of_tickets"
                         android:textAllCaps="true"
-                        android:textColor="@color/dusty"
-                        android:textSize="10sp" />
+                        android:textColor="@color/color_dusty"
+                        android:textSize="@dimen/sp12" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:layout_marginBottom="20dp"
                         android:background="@drawable/background_quantity"
                         android:orientation="horizontal">
 

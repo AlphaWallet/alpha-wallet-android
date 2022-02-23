@@ -17,9 +17,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/layout_header"
-        android:layout_marginStart="@dimen/spacing_standard"
-        android:layout_marginTop="@dimen/dp22"
-        android:layout_marginEnd="@dimen/spacing_standard"
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginTop="@dimen/standard_16"
+        android:layout_marginEnd="@dimen/standard_16"
         android:background="@drawable/background_password_entry">
 
         <AutoCompleteTextView
@@ -33,12 +33,12 @@
             android:inputType="textNoSuggestions"
             android:lines="1"
             android:maxLines="1"
-            android:paddingStart="@dimen/spacing_standard"
-            android:paddingTop="@dimen/dp12"
-            android:paddingEnd="@dimen/spacing_standard"
-            android:paddingBottom="@dimen/dp12"
-            android:textColor="@color/color_black"
-            android:textColorHint="@color/color_dove"
+            android:paddingStart="@dimen/standard_16"
+            android:paddingTop="@dimen/small_12"
+            android:paddingEnd="@dimen/tiny_8"
+            android:paddingBottom="@dimen/small_12"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
             android:textSize="@dimen/sp17"
             tools:text="0x12345678...abcd1234" />
 
@@ -48,9 +48,9 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="@dimen/dp8"
-            android:background="?android:selectableItemBackground"
+            android:background="@color/transparent"
             android:contentDescription="@string/scan_qr"
+            android:padding="@dimen/small_12"
             android:src="@drawable/ic_camera_scan" />
 
     </RelativeLayout>
@@ -60,14 +60,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/box_layout"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="@dimen/comfy_28"
         android:layout_marginTop="-9dp"
-        android:layout_marginBottom="5dp"
-        android:background="?colorPrimary"
+        android:background="?colorSurface"
         android:fontFamily="@font/font_semibold"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:textColor="@color/color_black"
+        android:paddingLeft="@dimen/mini_4"
+        android:paddingRight="@dimen/mini_4"
+        android:textColor="@color/text_secondary"
         android:textSize="@dimen/sp13"
         android:visibility="visible"
         tools:text="ENS Name" />
@@ -78,10 +77,11 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/box_layout"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="@dimen/small_12"
         android:fontFamily="@font/font_semibold"
+        android:padding="@dimen/mini_4"
         android:text="@string/paste"
-        android:textColor="@color/azure"
+        android:textColor="@color/brand_accent"
         android:textSize="@dimen/sp17"
         android:visibility="visible" />
 
@@ -108,10 +108,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_regular"
-            android:textColor="@color/green"
+            android:textColor="@color/positive"
             android:textSize="@dimen/sp12"
             android:visibility="gone"
-            tools:text="0x123456789abcdef12345" />
+            tools:text="0x123456789abcdef12345"
+            tools:visibility="visible" />
 
     </LinearLayout>
 
@@ -125,7 +126,7 @@
         android:layout_marginTop="2dp"
         android:layout_toStartOf="@id/text_paste"
         android:fontFamily="@font/font_regular"
-        android:textColor="@color/danger"
+        android:textColor="@color/text_error"
         android:textSize="@dimen/sp12"
         android:visibility="gone"
         tools:text="That address already exists" />

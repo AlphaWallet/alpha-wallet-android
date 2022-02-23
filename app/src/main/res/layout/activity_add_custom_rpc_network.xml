@@ -10,37 +10,35 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="?android:attr/actionBarSize"
-        android:layout_marginTop="?android:attr/actionBarSize">
+        android:layout_above="@id/layoutButtons"
+        android:layout_below="@id/toolbar">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:orientation="vertical"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp">
+            android:orientation="vertical">
 
             <com.alphawallet.app.widget.InputView
                 android:id="@+id/input_network_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                custom:label="@string/hint_network_name"/>
+                android:layout_marginBottom="@dimen/standard_16"
+                custom:label="@string/hint_network_name" />
 
             <com.alphawallet.app.widget.InputView
                 android:id="@+id/input_network_rpc_url"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                custom:label="@string/hint_network_rpc_url"/>
+                android:layout_marginBottom="@dimen/standard_16"
+                custom:label="@string/hint_network_rpc_url" />
 
             <com.alphawallet.app.widget.InputView
                 android:id="@+id/input_network_chain_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
+                android:layout_marginBottom="@dimen/standard_16"
                 custom:inputType="number"
                 custom:label="@string/hint_network_chain_id" />
 
@@ -48,21 +46,21 @@
                 android:id="@+id/input_network_symbol"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
+                android:layout_marginBottom="@dimen/standard_16"
                 custom:label="@string/hint_network_symbol" />
 
             <com.alphawallet.app.widget.InputView
                 android:id="@+id/input_network_block_explorer_url"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
+                android:layout_marginBottom="@dimen/standard_16"
                 custom:label="@string/hint_network_block_explorer_url" />
 
             <com.alphawallet.app.widget.InputView
                 android:id="@+id/input_network_explorer_api"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
+                android:layout_marginBottom="@dimen/standard_16"
                 custom:label="@string/hint_network_explorer_api" />
 
             <FrameLayout
@@ -75,22 +73,21 @@
                     android:layout_height="50dp"
                     android:fontFamily="@font/font_semibold"
                     android:gravity="center_vertical"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
+                    android:paddingStart="@dimen/standard_16"
+                    android:paddingEnd="@dimen/standard_16"
                     android:text="@string/this_is_testnet"
                     android:textAllCaps="false"
-                    android:textColor="@color/dove"
-                    android:textSize="15sp" />
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/sp17" />
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/testnet_switch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="@dimen/standard_16"
                     android:clickable="true"
                     android:focusable="true"
-                    android:theme="@style/Aw.Component.Switch"
                     android:visibility="visible" />
 
                 <View

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -22,10 +23,9 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:paddingStart="@dimen/standard_16"
+            android:paddingEnd="@dimen/standard_16"
             android:text="@string/amount" />
-
 
         <com.alphawallet.app.widget.ChainName
             android:id="@+id/chain_name"
@@ -34,7 +34,7 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/dp10" />
+            android:layout_marginEnd="@dimen/standard_16" />
 
     </RelativeLayout>
 
@@ -44,10 +44,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="@dimen/dp16"
-        android:paddingTop="@dimen/dp30"
-        android:paddingEnd="@dimen/dp16"
-        android:paddingBottom="@dimen/dp20">
+        android:paddingStart="@dimen/standard_16"
+        android:paddingTop="@dimen/comfy_28"
+        android:paddingEnd="@dimen/standard_16"
+        android:paddingBottom="@dimen/cozy_20">
 
         <LinearLayout
             android:id="@+id/layout_container"
@@ -66,7 +66,7 @@
                     android:layout_width="@dimen/token_icon"
                     android:layout_height="@dimen/token_icon"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="@dimen/dp8"
+                    android:layout_marginEnd="@dimen/tiny_8"
                     android:foregroundGravity="center_vertical" />
 
                 <TextView
@@ -76,7 +76,7 @@
                     android:layout_gravity="center_vertical"
                     android:fontFamily="@font/font_regular"
                     android:textAllCaps="true"
-                    android:textColor="?colorOnSurface"
+                    android:textColor="@color/text_primary"
                     android:textSize="@dimen/sp36"
                     tools:text="ETH" />
 
@@ -85,8 +85,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="@dimen/dp8"
-                    android:src="@drawable/ic_expand_more" />
+                    android:layout_marginStart="@dimen/tiny_8"
+                    android:src="@drawable/ic_expand_more"
+                    app:tint="@color/icon_tint" />
 
             </LinearLayout>
 
@@ -95,9 +96,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="end"
-                android:indeterminateTint="@color/azure"
-                android:paddingTop="@dimen/dp8"
-                android:paddingBottom="@dimen/dp8"
+                android:paddingTop="@dimen/tiny_8"
+                android:paddingBottom="@dimen/tiny_8"
                 android:visibility="gone" />
 
             <com.alphawallet.app.ui.widget.entity.NumericInput
@@ -115,8 +115,8 @@
                 android:maxLines="1"
                 android:paddingStart="@dimen/dp5"
                 android:paddingEnd="@dimen/dp5"
-                android:textColor="@color/color_dove"
-                android:textColorHint="@color/color_dusty"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary"
                 android:textSize="36sp" />
 
         </LinearLayout>
@@ -124,7 +124,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp12"
+            android:layout_marginTop="@dimen/small_12"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -133,22 +133,22 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="2dp"
                 android:text="@string/available"
-                android:textColor="@color/dove"
+                android:textColor="@color/text_secondary"
                 android:textSize="@dimen/sp13" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=":"
-                android:textColor="@color/color_dove"
+                android:textColor="@color/text_secondary"
                 android:textSize="@dimen/sp13" />
 
             <TextView
                 android:id="@+id/text_available"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="3dp"
-                android:textColor="@color/color_dove"
+                android:layout_marginStart="@dimen/mini_4"
+                android:textColor="@color/text_secondary"
                 android:textSize="@dimen/sp13"
                 tools:text="4.4328" />
 
@@ -156,8 +156,8 @@
                 android:id="@+id/text_symbol"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="3dp"
-                android:textColor="@color/color_dove"
+                android:layout_marginStart="@dimen/mini_4"
+                android:textColor="@color/text_secondary"
                 android:textSize="@dimen/sp13"
                 tools:text="ETH" />
 
@@ -168,7 +168,7 @@
                 android:fontFamily="@font/font_semibold"
                 android:gravity="end"
                 android:text="@string/error_insufficient_funds"
-                android:textColor="@color/danger"
+                android:textColor="@color/text_error"
                 android:textSize="@dimen/sp17"
                 android:visibility="gone" />
 
@@ -180,7 +180,7 @@
                 android:gravity="end"
                 android:lines="1"
                 android:text="@string/all_funds"
-                android:textColor="@color/color_azure"
+                android:textColor="@color/brand_accent"
                 android:textSize="@dimen/sp17"
                 android:visibility="visible" />
 

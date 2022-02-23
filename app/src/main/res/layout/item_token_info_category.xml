@@ -3,10 +3,10 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingStart="@dimen/dp16"
-    android:paddingTop="@dimen/dp16"
-    android:paddingEnd="@dimen/dp16"
-    android:paddingBottom="@dimen/dp8">
+    android:paddingStart="@dimen/standard_16"
+    android:paddingTop="@dimen/standard_16"
+    android:paddingEnd="@dimen/standard_16"
+    android:paddingBottom="@dimen/tiny_8">
 
     <TextView
         android:id="@+id/title"
@@ -17,7 +17,7 @@
         android:fontFamily="@font/font_bold"
         android:singleLine="true"
         android:text="@string/token_info_portfolio"
-        android:textColor="@color/color_black"
+        android:textColor="@color/text_primary"
         android:textSize="@dimen/sp24" />
 
 </RelativeLayout>

@@ -885,4 +885,5 @@
     <string name="switch_to_grid_view">Switch to Grid View</string>
     <string name="switch_to_list_view">Switch to List View</string>
     <string name="reload_metadata">Reload Metadata</string>
+    <string name="label_market_price">Market Price:</string>
 </resources>

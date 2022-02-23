@@ -9,12 +9,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:fontFamily="@font/font_regular"
-        android:paddingLeft="15dp"
-        android:paddingTop="15dp"
-        android:paddingRight="40dp"
-        android:paddingBottom="15dp"
+        android:paddingLeft="@dimen/standard_16"
+        android:paddingTop="@dimen/standard_16"
+        android:paddingRight="@dimen/giant_40"
+        android:paddingBottom="@dimen/standard_16"
         android:text="@string/action_remind_later"
-        android:textColor="?colorOnSurface"
-        android:textSize="16sp" />
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/sp15" />
 
 </LinearLayout>

@@ -147,8 +147,6 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         //TODO: Send event details
         icon = findViewById(R.id.token_icon);
 
-        SystemView systemView = findViewById(R.id.system_view);
-        systemView.hide();
         toolbar();
         setTitle(getString(R.string.activity_label));
 

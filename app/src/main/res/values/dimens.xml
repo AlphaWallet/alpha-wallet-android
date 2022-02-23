@@ -91,7 +91,7 @@
     <dimen name="double_giant_80">80dp</dimen>
     <dimen name="double_massive_88">88dp</dimen>
     <dimen name="hundred_100">100dp</dimen>
-
-    <dimen name="spacing_standard">@dimen/dp16</dimen>
+    <dimen name="horizontal_toolbar_progress_height">3dp</dimen>
+    <dimen name="action_item_height">60dp</dimen>
 
 </resources>

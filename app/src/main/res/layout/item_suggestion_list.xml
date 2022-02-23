@@ -4,15 +4,12 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginStart="10dp"
-    android:foreground="?android:attr/selectableItemBackground"
-    android:clickable="true"
     android:background="@drawable/background_round_grey_4dp"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingStart="10dp"
-    android:paddingTop="10dp"
-    android:paddingEnd="10dp"
-    android:paddingBottom="10dp">
+    android:padding="@dimen/small_12">
 
     <TextView
         android:id="@+id/name"
@@ -21,8 +18,8 @@
         android:ellipsize="end"
         android:fontFamily="@font/font_regular"
         android:lines="1"
-        android:textColor="@color/black"
-        android:textSize="17sp"
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/sp17"
         tools:text="Text" />
 
 </RelativeLayout>

@@ -36,20 +36,20 @@ import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_
 
 public class SignMethodDialog extends BottomSheetDialog
 {
-    private final FunctionButtonBar functionBar;
-    private final TextView dAppName;
-    private final ImageView logo;
-    private final TextView url;
-    private final TextView walletTv;
-    private final TextView message;
-    private final ImageView networkIcon;
-    private final ChainName networkName;
+    private FunctionButtonBar functionBar;
+    private TextView dAppName;
+    private ImageView logo;
+    private TextView url;
+    private TextView walletTv;
+    private TextView message;
+    private ImageView networkIcon;
+    private ChainName networkName;
     private final Activity activity;
-    private final ImageView closeButton;
-    private WalletConnect.Model.SettledSession settledSession;
-    private WalletConnect.Model.SessionRequest sessionRequest;
+    private ImageView closeButton;
+    private final WalletConnect.Model.SettledSession settledSession;
+    private final WalletConnect.Model.SessionRequest sessionRequest;
     private String messageTextHex;
-    private final String walletAddress;
+    private String walletAddress;
     private SignMethodDialogViewModel viewModel;
 
     public SignMethodDialog(@NonNull Activity activity, WalletConnect.Model.SettledSession settledSession, WalletConnect.Model.SessionRequest sessionRequest)
@@ -66,16 +66,13 @@ public class SignMethodDialog extends BottomSheetDialog
         behavior.setState(STATE_EXPANDED);
         behavior.setSkipCollapsed(true);
 
-        logo = findViewById(R.id.logo);
-        dAppName = findViewById(R.id.dapp_name);
-        url = findViewById(R.id.url);
-        walletTv = findViewById(R.id.wallet);
-        message = findViewById(R.id.message);
-        networkIcon = findViewById(R.id.network_icon);
-        networkName = findViewById(R.id.network_name);
-        functionBar = findViewById(R.id.layoutButtons);
-        closeButton = findViewById(R.id.image_close);
+        initViews();
 
+        bindData();
+    }
+
+    private void bindData()
+    {
         List<String> icons = settledSession.getPeerAppMetaData().getIcons();
 
         if (icons.isEmpty())
@@ -119,11 +116,23 @@ public class SignMethodDialog extends BottomSheetDialog
             @Override
             public void onClick(View v)
             {
-                Log.d("seaborn", "onClick: close");
                 viewModel.reject(sessionRequest);
                 dismiss();
             }
         });
+    }
+
+    private void initViews()
+    {
+        logo = findViewById(R.id.logo);
+        dAppName = findViewById(R.id.dapp_name);
+        url = findViewById(R.id.url);
+        walletTv = findViewById(R.id.wallet);
+        message = findViewById(R.id.message);
+        networkIcon = findViewById(R.id.network_icon);
+        networkName = findViewById(R.id.network_name);
+        functionBar = findViewById(R.id.layoutButtons);
+        closeButton = findViewById(R.id.image_close);
     }
 
     private void initViewModel()

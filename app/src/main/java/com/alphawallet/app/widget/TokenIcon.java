@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -34,10 +35,12 @@ import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomViewTarget;
+import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 
@@ -56,7 +59,6 @@ public class TokenIcon extends ConstraintLayout
 
     private TokensAdapterCallback tokensAdapterCallback;
     private Token token;
-    private final CustomViewTarget<ImageView, Drawable> viewTarget;
     private String tokenName;
     private StatusType currentStatus;
     private String fallbackIconUrl;
@@ -83,23 +85,6 @@ public class TokenIcon extends ConstraintLayout
         chainIconBackground = findViewById(R.id.chain_icon_background);
 
         bindViews();
-
-        viewTarget = new CustomViewTarget<ImageView, Drawable>(icon)
-        {
-            @Override
-            protected void onResourceCleared(@Nullable Drawable placeholder) { }
-
-            @Override
-            public void onLoadFailed(@Nullable Drawable errorDrawable) { }
-
-            @Override
-            public void onResourceReady(@NotNull Drawable bitmap, Transition<? super Drawable> transition)
-            {
-                textIcon.setVisibility(View.GONE);
-                icon.setVisibility(View.VISIBLE);
-                icon.setImageDrawable(bitmap);
-            }
-        };
     }
 
     private boolean getViewId(Context context, AttributeSet attrs)
@@ -139,6 +124,12 @@ public class TokenIcon extends ConstraintLayout
     public void bindData(Token token, @NotNull AssetDefinitionService assetDefinition)
     {
         if (token == null || (this.token != null && this.token.equals(token))) { return; } //stop update flicker
+
+        if (token.tokenInfo.address.equalsIgnoreCase("0x1e988ba4692e52bc50b375bcc8585b95c48aad77"))
+        {
+            System.out.println("YOLESS");
+        }
+
         this.tokenName = token.getName(assetDefinition, token.getTokenCount());
         Pair<String, Boolean> iconFallback = assetDefinition.getFallbackUrlForToken(token);
         String mainIcon = iconFallback.second ? iconFallback.first : getPrimaryIconURL(token);
@@ -213,11 +204,13 @@ public class TokenIcon extends ConstraintLayout
 
         if (iconItem.usePrimary())
         {
+            //Glide.with(context).load(R.drawable.common_google_signin_btn_icon_dark).apply(new RequestOptions().placeholder(R.drawable.common_google_signin_btn_icon_dark)).
+            // into(new DrawableImageViewTarget(holder.profileImage));
             currentRq = Glide.with(getContext())
                     .load(iconItem.getUrl())
                     .placeholder(R.drawable.ic_token_eth)
                     .listener(requestListener)
-                    .into(viewTarget).getRequest();
+                    .into(new DrawableImageViewTarget(icon)).getRequest();//
         }
         else
         {
@@ -295,7 +288,7 @@ public class TokenIcon extends ConstraintLayout
                 .placeholder(R.drawable.ic_token_eth)
                 .apply(optionalCircleCrop)
                 .listener(requestListenerTW)
-                .into(viewTarget).getRequest());
+                .into(new DrawableImageViewTarget(icon)).getRequest());
     }
 
     /**

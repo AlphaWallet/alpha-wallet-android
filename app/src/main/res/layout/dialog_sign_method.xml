@@ -105,20 +105,6 @@
                 tools:text="seabornlee.eth | 0xabcdefughhhoheutohestuh" />
 
             <TextView
-                    style="@style/TransactionDetailsSubTitleStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dp16"
-                    android:text="Message" />
-
-            <TextView
-                android:id="@+id/message"
-                style="@style/TransactionDetailsStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:text="0xabced" />
-
-            <TextView
                 style="@style/TransactionDetailsSubTitleStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -145,8 +131,29 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="2dp"
                     android:text="@string/ethereum" />
-
             </LinearLayout>
+
+            <TextView
+                    style="@style/TransactionDetailsSubTitleStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp16"
+                    android:text="Message" />
+
+            <TextView
+                android:id="@+id/message"
+                style="@style/TransactionDetailsStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="0xabced" />
+
+            <com.alphawallet.app.widget.SignDataWidget
+                android:id="@+id/sign_widget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:noTitle="true"/>
+
         </LinearLayout>
     </ScrollView>
 

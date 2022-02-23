@@ -1,9 +1,6 @@
 package com.alphawallet.app.widget;
 
 import android.app.Activity;
-import android.content.DialogInterface;
-import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -17,6 +14,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
+import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -51,13 +49,16 @@ public class SignMethodDialog extends BottomSheetDialog
     private String messageTextHex;
     private String walletAddress;
     private SignMethodDialogViewModel viewModel;
+    private Signable signable;
+    private SignDataWidget signDataWidget;
 
-    public SignMethodDialog(@NonNull Activity activity, WalletConnect.Model.SettledSession settledSession, WalletConnect.Model.SessionRequest sessionRequest)
+    public SignMethodDialog(@NonNull Activity activity, WalletConnect.Model.SettledSession settledSession, WalletConnect.Model.SessionRequest sessionRequest, Signable signable)
     {
         super(activity, R.style.FullscreenBottomSheetDialogStyle);
         this.activity = activity;
         this.settledSession = settledSession;
         this.sessionRequest = sessionRequest;
+        this.signable = signable;
         View view = LayoutInflater.from(activity).inflate(R.layout.dialog_sign_method, null);
         setContentView(view);
         initViewModel();
@@ -120,6 +121,8 @@ public class SignMethodDialog extends BottomSheetDialog
                 dismiss();
             }
         });
+
+
     }
 
     private void initViews()
@@ -133,6 +136,7 @@ public class SignMethodDialog extends BottomSheetDialog
         networkName = findViewById(R.id.network_name);
         functionBar = findViewById(R.id.layoutButtons);
         closeButton = findViewById(R.id.image_close);
+        signDataWidget = findViewById(R.id.sign_widget);
     }
 
     private void initViewModel()
@@ -167,7 +171,7 @@ public class SignMethodDialog extends BottomSheetDialog
         } else
         {
             functionBar.setPrimaryButtonWaiting();
-            viewModel.sign(activity, walletAddress, sessionRequest, messageTextHex);
+            viewModel.sign(activity, walletAddress, sessionRequest, signable);
         }
     }
 

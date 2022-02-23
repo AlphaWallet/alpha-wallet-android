@@ -11,8 +11,7 @@ import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.token.entity.EthereumMessage;
-import com.alphawallet.token.entity.SignMessageType;
+import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 
@@ -44,9 +43,8 @@ public class SignMethodDialogViewModel extends BaseViewModel
         this.keyService = keyService;
     }
 
-    public void sign(Activity activity, String walletAddress, WalletConnect.Model.SessionRequest sessionRequest, String messageTextHex)
+    public void sign(Activity activity, String walletAddress, WalletConnect.Model.SessionRequest sessionRequest, final Signable signable)
     {
-        EthereumMessage ethereumMessage = new EthereumMessage(messageTextHex, null, 0, SignMessageType.SIGN_PERSONAL_MESSAGE);
         Single<Wallet> signer = fetchWalletsInteract.getWallet(walletAddress);
         signer.subscribe(wallet ->
         {
@@ -58,7 +56,7 @@ public class SignMethodDialogViewModel extends BaseViewModel
                     if (gotAuth)
                     {
                         long chainId = Long.parseLong(sessionRequest.getChainId().split(":")[1]);
-                        Single<SignatureFromKey> signature = transactionRepositoryType.getSignature(wallet, ethereumMessage, chainId);
+                        Single<SignatureFromKey> signature = transactionRepositoryType.getSignature(wallet, signable, chainId);
                         signature
                                 .delay(3, TimeUnit.SECONDS) // The WC connection shutdown when show biometric, when back to foreground, it will open new connection, so need delay to wait the connection opened
                                 .subscribe(signatureFromKey -> onSuccess(signatureFromKey, sessionRequest), SignMethodDialogViewModel.this::onError);

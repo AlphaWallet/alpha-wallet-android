@@ -89,6 +89,9 @@
         <attr name="text"/>
         <attr name="showActionText" format="boolean"/>
     </declare-styleable>
+    <declare-styleable name="SignDataWidget">
+        <attr name="noTitle" format="boolean" />
+    </declare-styleable>
     <attr name="seedWordStyle" format="reference" />
     <attr name="whatsNewEntryStyle" format="reference" />
     <attr name="colorSurfaceSecondary" format="reference" />

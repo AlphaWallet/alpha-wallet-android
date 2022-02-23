@@ -1,9 +1,12 @@
 package com.alphawallet.app.service;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.alphawallet.app.App;
 import com.alphawallet.app.R;
@@ -11,7 +14,12 @@ import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
+import com.alphawallet.app.walletconnect.SignTypedDataDialogBuilder;
+import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
 import com.alphawallet.app.widget.SignMethodDialog;
+import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.SignMessageType;
+import com.alphawallet.token.entity.Signable;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
@@ -53,6 +61,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
     @Override
     public void onSessionProposal(@NonNull WalletConnect.Model.SessionProposal sessionProposal)
     {
+        Log.d("seaborn", "onSessionProposal: ");
         AWWalletConnectClient.sessionProposal = sessionProposal;
         Intent intent = new Intent(context, WalletConnectV2Activity.class);
         intent.putExtra("session", WalletConnectV2SessionItem.from(sessionProposal));
@@ -66,24 +75,34 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
     {
         String method = sessionRequest.getRequest().getMethod();
 
-        Timber.tag("seaborn").d(sessionRequest.getRequest().getParams());
+        Timber.tag("seaborn").d("onSessionRequest - method: " + sessionRequest.getRequest().getMethod() + ", params:" + sessionRequest.getRequest().getParams());
 
         WalletConnect.Model.SettledSession settledSession = getSession(sessionRequest.getTopic());
-        if ("personal_sign".equals(method))
-        {
-            showSignDialog(sessionRequest, settledSession);
-        }
+
+        Activity topActivity = App.getInstance().getTopActivity();
+        topActivity.runOnUiThread(() -> {
+            Dialog dialog = createDialog(method, sessionRequest, settledSession, topActivity);
+            if (dialog != null)
+            {
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
+            } else {
+                Toast.makeText(context, "Method "+ method + " not supported.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void showSignDialog(WalletConnect.Model.SessionRequest sessionRequest, WalletConnect.Model.SettledSession settledSession)
+    private Dialog createDialog(String method, @NonNull WalletConnect.Model.SessionRequest sessionRequest, WalletConnect.Model.SettledSession settledSession, Activity topActivity)
     {
-        Activity topActivity = App.getInstance().getTopActivity();
-        topActivity.runOnUiThread(() ->
+        if ("personal_sign".equals(method))
         {
-            SignMethodDialog signMethodDialog = new SignMethodDialog(topActivity, settledSession, sessionRequest);
-            signMethodDialog.show();
-        });
+            SignPersonalMessageRequest request = new SignPersonalMessageRequest(sessionRequest.getRequest().getParams());
+            return new SignMethodDialog(topActivity, settledSession, sessionRequest, request.getSignable());
+        } else if ("eth_signTypedData".equals(method))
+        {
+            return new SignTypedDataDialogBuilder(topActivity, settledSession, sessionRequest).build(this);
+        }
+        return null;
     }
 
     private WalletConnect.Model.SettledSession getSession(String topic)
@@ -143,10 +162,16 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
         WalletConnect.Params.Response response = new WalletConnect.Params.Response(sessionRequest.getTopic(), jsonRpcResponse);
         try
         {
-            WalletConnectClient.INSTANCE.respond(response, Timber::e);
+            Log.d("seaborn", "reject: " + sessionRequest.getTopic());
+            WalletConnectClient.INSTANCE.respond(response, t ->
+            {
+                Log.d("seaborn", "respond: " + t);
+                Timber.e(t);
+            });
         } catch (WalletConnectException e)
         {
             Timber.e(e);
+            Log.d("seaborn", "reject: " + e);
         }
     }
 

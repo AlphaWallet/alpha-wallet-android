@@ -122,7 +122,7 @@ public class QRScanner extends BaseActivity
     private void setupToolbar() {
         toolbar();
         setTitle(getString(R.string.action_scan_dapp));
-        enableDisplayHomeAsUp(R.drawable.ic_close_2);   //ic_close shows as white
+        enableDisplayHomeAsUp(R.drawable.ic_close);
     }
 
     private void setupButtons()

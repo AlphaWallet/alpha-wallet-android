@@ -50,9 +50,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    /** Created By Asif Ghanchi, 14/2/22,
-     * Enables DisplayHomeAsUp with custom drawable in place of back arrow.
-     */
     protected void enableDisplayHomeAsUp(@DrawableRes int resourceId) {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {

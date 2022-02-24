@@ -8,6 +8,8 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import timber.log.Timber;
+
 public class TokenSortedItem extends SortedItem<TokenCardMeta> {
 
     private boolean debugging = false;
@@ -83,7 +85,7 @@ public class TokenSortedItem extends SortedItem<TokenCardMeta> {
         {
             TokenCardMeta newToken = (TokenCardMeta) newItem.value;
             //if (!oldToken.tokenId.equalsIgnoreCase(newToken.tokenId)) return false;
-            if (debugging) System.out.println("DEBUG: Contents: " + weight + " " + newItem.weight + " Balance: " + value.balance + " " + newToken.balance);
+            if (debugging) Timber.d("DEBUG: Contents: " + weight + " " + newItem.weight + " Balance: " + value.balance + " " + newToken.balance);
             if (weight != newItem.weight) return false;
             else return value.balance.equals(newToken.balance) && value.type.ordinal() == newToken.type.ordinal()
                     && value.lastUpdate == newToken.lastUpdate;
@@ -104,8 +106,8 @@ public class TokenSortedItem extends SortedItem<TokenCardMeta> {
 
             if (debugging)
             {
-                if (oldToken == null || newToken == null) System.out.println("DEBUG: Item: One is null");
-                else System.out.println("DEBUG: Item: " + oldToken.tokenId + " " + newToken.tokenId);
+                if (oldToken == null || newToken == null) Timber.d("DEBUG: Item: One is null");
+                else Timber.d("DEBUG: Item: " + oldToken.tokenId + " " + newToken.tokenId);
             }
 
             if (oldToken == null || newToken == null) return false;

@@ -281,7 +281,7 @@ public class KeystoreAccountService implements AccountKeystoreService
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         Timber.tag("RealmDebug").d("gotcredentials + %s", address);
@@ -421,7 +421,7 @@ public class KeystoreAccountService implements AccountKeystoreService
         }
         catch (IndexOutOfBoundsException e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return sigBytes;

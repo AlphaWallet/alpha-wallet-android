@@ -34,6 +34,8 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 
+import timber.log.Timber;
+
 import com.alphawallet.app.R;
 
 import com.alphawallet.app.viewmodel.RedeemSignatureDisplayModel;
@@ -200,7 +202,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 

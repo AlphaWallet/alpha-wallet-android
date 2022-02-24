@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import io.reactivex.Single;
+import timber.log.Timber;
 
 /**
  * Created by James on 25/01/2018.
@@ -48,7 +49,7 @@ class SignatureGenerateInteract {
             int minsTime = (int) minsT;
             //This is the plain text message that gets signed
             String plainMessage = selectionStr + "," + minsTime + "," + contract.toLowerCase();
-            Log.d("SIG", plainMessage);
+            Timber.tag("SIG").d(plainMessage);
             return new MessagePair(selectionStr, plainMessage);
         });
     }

@@ -36,6 +36,7 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.Sort;
+import timber.log.Timber;
 
 import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 import static com.alphawallet.app.C.DEFAULT_GAS_PRICE;
@@ -366,7 +367,7 @@ public class GasWidget extends LinearLayout implements Runnable
         catch (Exception e)
         {
             currentGasSpeedIndex = 0;
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 

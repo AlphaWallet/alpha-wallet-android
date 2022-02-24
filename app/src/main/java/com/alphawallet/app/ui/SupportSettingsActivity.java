@@ -14,6 +14,8 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.MediaLinks;
 import com.alphawallet.app.widget.SettingsItemView;
 
+import timber.log.Timber;
+
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -145,7 +147,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -157,7 +159,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -172,7 +174,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -188,7 +190,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -201,7 +203,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -217,7 +219,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -232,7 +234,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -248,7 +250,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -263,7 +265,7 @@ public class SupportSettingsActivity extends BaseActivity {
         try {
             startActivity(intent);
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 

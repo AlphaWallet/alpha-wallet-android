@@ -56,6 +56,7 @@ import java.util.concurrent.Semaphore;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
@@ -384,7 +385,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             }
             catch (InterruptedException e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
                 functionMapComplete.release();
             }
             callStandardFunctions.showWaitSpinner(false);
@@ -645,7 +646,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         }
         catch (InterruptedException e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         //get the available map for this collection

@@ -45,6 +45,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import timber.log.Timber;
+
 public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> implements AdapterCallback
 {
     private final ActivitySortedList<SortedItem<?>> items = new ActivitySortedList<>(SortedItem.class, new ActivitySortedList.Callback<SortedItem<?>>() {
@@ -224,8 +226,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         else
         {
             //Not unique and may error
-            if (BuildConfig.DEBUG)
-                System.out.println("Unable to determine unique item ID for this holder - you must define a specific UID method");
+            Timber.d("Unable to determine unique item ID for this holder - you must define a specific UID method");
             return position;
         }
     }
@@ -402,7 +403,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
             }
             else
             {
-                if (BuildConfig.DEBUG) Log.e("ActivityAdapter", "Wrong item type in addTransaction (" + item.getClass().getName() + ")");
+                Timber.tag("ActivityAdapter").e("Wrong item type in addTransaction (" + item.getClass().getName() + ")");
             }
         }
     }

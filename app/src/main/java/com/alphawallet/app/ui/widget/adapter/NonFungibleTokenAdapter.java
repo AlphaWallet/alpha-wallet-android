@@ -45,6 +45,7 @@ import java.util.List;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 
@@ -280,7 +281,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
             clearCache(ctx)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::cleared, error -> System.out.println("Cache clean: " + error.getMessage()))
+                    .subscribe(this::cleared, error -> Timber.d("Cache clean: " + error.getMessage()))
                     .isDisposed();
         }
     }

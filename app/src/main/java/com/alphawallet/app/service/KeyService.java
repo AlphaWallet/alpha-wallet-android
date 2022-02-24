@@ -1126,7 +1126,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return keyAddress;
@@ -1169,11 +1169,11 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
         catch (FileNotFoundException e)
         {
-            System.out.println("File not found" + e);
+            Timber.d("File not found" + e);
         }
         catch (IOException ioe)
         {
-            System.out.println("Exception while writing file " + ioe);
+            Timber.d(ioe, "Exception while writing file ");
         }
         finally
         {
@@ -1187,7 +1187,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             }
             catch (IOException ioe)
             {
-                System.out.println("Error while closing stream: " + ioe);
+                Timber.d("Error while closing stream: " + ioe);
             }
         }
         return false;
@@ -1378,7 +1378,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                             break;
                     }
                     ke.printStackTrace();
-                    System.out.println("KSE: " + ke.code);
+                    Timber.d("KSE: %s", ke.code);
                 }
                 catch (Exception e)
                 {

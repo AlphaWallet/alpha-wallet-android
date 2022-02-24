@@ -10,8 +10,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import timber.log.Timber;
-
 /**
  * Created by weiwu on 12/3/18.
  */
@@ -45,7 +43,7 @@ public class EthereumReadWriteTest {
         //write a string
         eb.write(testValue.getBytes());
         eb.writeValue(decimalVal1, 4); //write 4 byte positive value
-        Timber.d("YOL " + Numeric.toHexString(buffer.toByteArray()));
+        System.out.println("YOL " + Numeric.toHexString(buffer.toByteArray()));
         Assert.assertEquals(result1, Numeric.toHexString(buffer.toByteArray()));
 
         buffer.reset();

@@ -31,7 +31,7 @@
 
                 <TextView
                     android:id="@+id/value_header"
-                    style="@style/TransactionDetailsSubTitleStyle"
+                    style="@style/Aw.Typography.TransactionDetailLabelText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
@@ -54,7 +54,7 @@
 
                     <TextView
                         android:id="@+id/text_operation_name"
-                        style="@style/TransactionDetailsStyle"
+                        style="@style/Aw.Typography.TransactionDetailTitleText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/standard_16"
@@ -62,14 +62,14 @@
 
                     <TextView
                         android:id="@+id/amount"
-                        style="@style/TransactionDetailsStyle"
+                        style="@style/Aw.Typography.TransactionDetailTitleText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         tools:text="4238793" />
 
                     <TextView
                         android:id="@+id/failed"
-                        style="@style/TransactionDetailsStyle"
+                        style="@style/Aw.Typography.TransactionDetailTitleText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/standard_16"
@@ -79,7 +79,7 @@
 
                     <TextView
                         android:id="@+id/failedFace"
-                        style="@style/TransactionDetailsStyle"
+                        style="@style/Aw.Typography.TransactionDetailTitleText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/mini_4"
@@ -92,7 +92,7 @@
             </RelativeLayout>
 
             <TextView
-                style="@style/TransactionDetailsSubTitleStyle"
+                style="@style/Aw.Typography.TransactionDetailLabelText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/standard_16"
@@ -100,12 +100,11 @@
 
             <com.alphawallet.app.widget.CopyTextView
                 android:id="@+id/txn_hash"
-                style="@style/TransactionDetailsCopyTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
             <TextView
-                style="@style/TransactionDetailsSubTitleStyle"
+                style="@style/Aw.Typography.TransactionDetailLabelText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/subtitle_network" />
@@ -121,12 +120,12 @@
                     android:layout_width="@dimen/base_24"
                     android:layout_height="@dimen/base_24"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="@dimen/mini_4"
+                    android:layout_marginEnd="@dimen/tiny_8"
                     android:src="@drawable/ic_coin_eth_small" />
 
                 <TextView
                     android:id="@+id/network"
-                    style="@style/TransactionDetailsStyle"
+                    style="@style/Aw.Typography.TransactionDetailTitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="2dp"
@@ -139,10 +138,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <TextView
-                    style="@style/TransactionDetailsSubTitleStyle"
+                    style="@style/Aw.Typography.TransactionDetailLabelText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/token_text" />
@@ -158,54 +158,44 @@
                         android:layout_width="@dimen/base_24"
                         android:layout_height="@dimen/base_24"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="@dimen/mini_4"
+                        android:layout_marginEnd="@dimen/tiny_8"
                         android:src="@drawable/ic_coin_eth_small" />
 
-                    <androidx.appcompat.widget.LinearLayoutCompat
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/token_name"
+                        style="@style/Aw.Typography.TransactionDetailTitleText"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/token_name"
-                            style="@style/TransactionDetailsStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="2dp"
-                            android:text="@string/ethereum" />
-
-                        <com.alphawallet.app.widget.CopyTextView
-                            android:id="@+id/token_address"
-                            style="@style/TransactionDetailsCopyTextStyle"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-
-                    </androidx.appcompat.widget.LinearLayoutCompat>
-
+                        android:layout_marginBottom="2dp"
+                        android:text="@string/ethereum" />
                 </LinearLayout>
+
+                <com.alphawallet.app.widget.CopyTextView
+                    android:id="@+id/token_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
             </LinearLayout>
 
             <TextView
-                style="@style/TransactionDetailsSubTitleStyle"
+                style="@style/Aw.Typography.TransactionDetailLabelText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/subtitle_from" />
 
             <com.alphawallet.app.widget.CopyTextView
                 android:id="@+id/from"
-                style="@style/TransactionDetailsCopyTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
             <TextView
-                style="@style/TransactionDetailsSubTitleStyle"
+                style="@style/Aw.Typography.TransactionDetailLabelText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/subtitle_to" />
 
             <com.alphawallet.app.widget.CopyTextView
                 android:id="@+id/to"
-                style="@style/TransactionDetailsCopyTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
@@ -222,7 +212,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        style="@style/TransactionDetailsSubTitleStyle"
+                        style="@style/Aw.Typography.TransactionDetailLabelText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/subtitle_block" />
@@ -243,7 +233,7 @@
 
                         <TextView
                             android:id="@+id/block_number"
-                            style="@style/TransactionDetailsStyle"
+                            style="@style/Aw.Typography.TransactionDetailTitleText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             tools:text="4238793" />
@@ -260,7 +250,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        style="@style/TransactionDetailsSubTitleStyle"
+                        style="@style/Aw.Typography.TransactionDetailLabelText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/subtitle_gas_used" />
@@ -272,13 +262,13 @@
 
                         <TextView
                             android:id="@+id/gas_used"
-                            style="@style/TransactionDetailsStyle"
+                            style="@style/Aw.Typography.TransactionDetailTitleText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             tools:text="21,000" />
 
                         <TextView
-                            style="@style/TransactionDetailsStyle"
+                            style="@style/Aw.Typography.TransactionDetailTitleText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/mini_4"
@@ -304,7 +294,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        style="@style/TransactionDetailsSubTitleStyle"
+                        style="@style/Aw.Typography.TransactionDetailLabelText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/subtitle_network_fee" />
@@ -316,14 +306,14 @@
 
                         <TextView
                             android:id="@+id/network_fee"
-                            style="@style/TransactionDetailsStyle"
+                            style="@style/Aw.Typography.TransactionDetailTitleText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             tools:text="0.002" />
 
                         <TextView
                             android:id="@+id/text_fee_unit"
-                            style="@style/TransactionDetailsStyle"
+                            style="@style/Aw.Typography.TransactionDetailTitleText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/mini_4"
@@ -342,7 +332,7 @@
 
                     <TextView
                         android:id="@+id/title_gas_price"
-                        style="@style/TransactionDetailsSubTitleStyle"
+                        style="@style/Aw.Typography.TransactionDetailLabelText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/subtitle_gas_price" />
@@ -354,13 +344,13 @@
 
                         <TextView
                             android:id="@+id/gas_price"
-                            style="@style/TransactionDetailsStyle"
+                            style="@style/Aw.Typography.TransactionDetailTitleText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             tools:text="1.2" />
 
                         <TextView
-                            style="@style/TransactionDetailsStyle"
+                            style="@style/Aw.Typography.TransactionDetailTitleText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/mini_4"
@@ -372,14 +362,14 @@
             </LinearLayout>
 
             <TextView
-                style="@style/TransactionDetailsSubTitleStyle"
+                style="@style/Aw.Typography.TransactionDetailLabelText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/subtitle_transaction_time" />
 
             <TextView
                 android:id="@+id/txn_time"
-                style="@style/TransactionDetailsStyle"
+                style="@style/Aw.Typography.TransactionDetailTitleText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="September 4, 2017 at 2:32:12 PM" />

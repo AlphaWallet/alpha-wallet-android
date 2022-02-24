@@ -29,7 +29,6 @@
         <item name="contentInsetRight">0dp</item>
         <item name="contentInsetStartWithNavigation">0dp</item>
         <item name="background">?colorSurface</item>
-        <!--        <item name="popupTheme">@style/AppTheme.PopupOverlay</item>-->
     </style>
 
     <style name="Aw.Component.TabLayout" parent="Widget.Design.TabLayout">

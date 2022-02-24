@@ -40,7 +40,6 @@
         <item name="actionMenuTextColor">@color/dove</item>
     </style>
 
-
     <!-- Splash Screen theme. -->
 
     <style name="SplashTheme" parent="AppTheme.NoActionBar">
@@ -62,43 +61,23 @@
         <item name="colorSurface">#FFFFFF</item>
     </style>
 
-    <style name="AppTheme.Toolbar.WhiteTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:textColor">@color/mine</item>
-        <item name="android:fontFamily">@font/font_semibold</item>
-        <item name="android:textSize">20sp</item>
-        <item name="colorSurface">#FFFFFF</item>
-    </style>
+<!--    <style name="AppTheme.Toolbar.WhiteTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">-->
+<!--        <item name="android:textColor">@color/mine</item>-->
+<!--        <item name="android:fontFamily">@font/font_semibold</item>-->
+<!--        <item name="android:textSize">20sp</item>-->
+<!--        <item name="colorSurface">#FFFFFF</item>-->
+<!--    </style>-->
 
-    <style name="AppTheme.WhiteToolbar" parent="ThemeOverlay.AppCompat.ActionBar">
-        <item name="colorControlNormal">@color/mine</item>
-    </style>
+<!--    <style name="AppTheme.WhiteToolbar" parent="ThemeOverlay.AppCompat.ActionBar">-->
+<!--        <item name="colorControlNormal">@color/mine</item>-->
+<!--    </style>-->
 
-    <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog">
-        <item name="android:windowBackground">@color/white</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:windowCloseOnTouchOutside">false</item>
-        <item name="colorSurface">#FFFFFF</item>
-    </style>
+<!--    <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog">-->
+<!--        <item name="android:windowBackground">@color/white</item>-->
+<!--        <item name="android:windowContentOverlay">@null</item>-->
+<!--        <item name="android:windowIsFloating">true</item>-->
+<!--        <item name="android:windowCloseOnTouchOutside">false</item>-->
+<!--        <item name="colorSurface">#FFFFFF</item>-->
+<!--    </style>-->
 
-
-
-    <style name="TransactionDetailsCopyTextStyle">
-        <item name="android:paddingTop">@dimen/dp5</item>
-        <item name="android:background">@color/transparent</item>
-        <item name="android:paddingEnd">@dimen/dp16</item>
-        <item name="android:paddingBottom">@dimen/dp5</item>
-    </style>
-
-    <style name="TransactionDetailsSubTitleStyle">
-        <item name="android:layout_marginTop">@dimen/big_margin</item>
-        <item name="android:textSize">@dimen/sp15</item>
-        <item name="android:textColor">@color/text_secondary</item>
-    </style>
-
-    <style name="TransactionDetailsStyle">
-        <item name="android:paddingTop">@dimen/dp5</item>
-        <item name="android:textSize">@dimen/sp17</item>
-        <item name="android:textColor">@color/text_primary</item>
-    </style>
 </resources>

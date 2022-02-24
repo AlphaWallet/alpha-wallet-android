@@ -110,7 +110,7 @@
 
                     <TextView
                         android:id="@+id/pending_time"
-                        style="@style/TransactionDetailsStyle"
+                        style="@style/Aw.Typography.TransactionDetailTitleText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/text_secondary"

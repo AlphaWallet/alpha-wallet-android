@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?colorSurface">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,8 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="@dimen/standard_16"
-        android:layout_marginEnd="@dimen/standard_16"
+        android:layout_margin="@dimen/standard_16"
         android:orientation="vertical"
         android:visibility="gone"
         tools:visibility="visible">
@@ -37,49 +37,26 @@
             style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/base_24"
+            android:layout_marginBottom="@dimen/standard_16"
             android:text="@string/create_a_new_wallet" />
 
-        <View
-            style="@style/Aw.Component.Separator"
-            android:layout_marginStart="@dimen/standard_16"
-            android:layout_marginTop="@dimen/base_24"
-            android:layout_marginEnd="@dimen/standard_16" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/cozy_20"
-            android:text="@string/already_have_a_wallet"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp17" />
-
-        <LinearLayout
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_import"
+            style="@style/Aw.Component.Button.Secondary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:orientation="horizontal"
-            android:padding="@dimen/standard_16">
+            android:text="@string/i_already_have_a_wallet" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_watch"
-                style="@style/Aw.Component.Button.Secondary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/mini_4"
-                android:layout_weight="1.0"
-                android:text="@string/watch" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_import"
-                style="@style/Aw.Component.Button.Secondary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/mini_4"
-                android:layout_weight="1.0"
-                android:text="@string/action_import" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_watch"
+            style="@style/Aw.Component.Button.Secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/mini_4"
+            android:layout_weight="1.0"
+            android:text="@string/watch"
+            android:visibility="gone" />
 
-        </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

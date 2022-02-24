@@ -54,6 +54,7 @@
             android:fontFamily="@font/font_semibold"
             android:paddingLeft="17dp"
             android:paddingRight="17dp"
+            android:paddingVertical="17dp"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="17sp" />

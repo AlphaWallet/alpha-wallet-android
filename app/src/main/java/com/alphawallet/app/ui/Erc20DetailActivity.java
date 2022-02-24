@@ -73,7 +73,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private Token token;
     private TokenCardMeta tokenMeta;
     private RecyclerView tokenView;
-    private CertifiedToolbarView certificateToolbar;
 
     private TokensAdapter tokenViewAdapter;
     private ActivityHistoryList activityHistoryList = null;
@@ -221,7 +220,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private void onSignature(XMLDsigDescriptor descriptor)
     {
-        certificateToolbar = findViewById(R.id.certified_toolbar);
+        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
         certificateToolbar.onSigData(descriptor, this);
     }
 

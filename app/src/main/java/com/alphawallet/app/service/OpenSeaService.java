@@ -1,7 +1,9 @@
 package com.alphawallet.app.service;
 
-import android.content.Context;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
+import android.util.Log;
+import android.util.LongSparseArray;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractType;
@@ -10,21 +12,19 @@ import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InterruptedIOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
@@ -42,9 +42,9 @@ public class OpenSeaService
     private static OkHttpClient httpClient;
     private static final int PAGE_SIZE = 50;
     private final Map<String, String> imageUrls = new HashMap<>();
-    private final List<Long> storedImagesForChain = new ArrayList<>();
     private static final TokenFactory tf = new TokenFactory();
-    private int pageOffset;
+    private final LongSparseArray<Long> networkCheckTimes = new LongSparseArray<>();
+    private final LongSparseArray<Integer> pageOffsets = new LongSparseArray<>();
 
     static {
         System.loadLibrary("keys");
@@ -53,7 +53,7 @@ public class OpenSeaService
     public static native String getOpenSeaKey();
 
     public OpenSeaService() {
-        pageOffset = 0;
+        pageOffsets.clear();
         httpClient = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
@@ -62,25 +62,30 @@ public class OpenSeaService
                 .build();
     }
 
-    public int getCurrentOffset()
-    {
-        return pageOffset;
-    }
-
     public Single<Token[]> getTokens(String address, long networkId, String networkName, TokensService tokensService)
     {
         return Single.fromCallable(() -> {
             int receivedTokens;
             int currentPage = 0;
-
             Map<String, Token> foundTokens = new HashMap<>();
+
+            long currentTime = System.currentTimeMillis();
+            if (!canCheckChain(networkId)) return new Token[0];
+            networkCheckTimes.put(networkId, currentTime);
+
+            int pageOffset = pageOffsets.get(networkId, 0);
+
+
+            Timber.tag("CHECKOPENSEA").d("Fetch from opensea : %s", networkName);
 
             do
             {
                 String jsonData = fetchTokensFromOpensea(address, networkId, pageOffset);
                 if (!verifyData(jsonData)) return foundTokens.values().toArray(new Token[0]); //on error return results found so far
                 JSONObject result = new JSONObject(jsonData);
-                JSONArray assets = result.getJSONArray("assets");
+                JSONArray assets;
+                if (result.has("assets")) assets = result.getJSONArray("assets");
+                else assets = result.getJSONArray("results");
                 receivedTokens = assets.length();
                 pageOffset += assets.length();
 
@@ -92,20 +97,21 @@ public class OpenSeaService
 
             if (receivedTokens < PAGE_SIZE)
             {
-                Timber.d("Reset OpenSeaAPI reads at: " + pageOffset);
-                pageOffset = 0;
+                Timber.d("Reset OpenSeaAPI reads at: %s", pageOffset);
+                pageOffsets.put(networkId, 0);
+            }
+            else
+            {
+                pageOffsets.put(networkId, pageOffset);
+                networkCheckTimes.put(networkId, currentTime - 55*DateUtils.SECOND_IN_MILLIS); //do another read within 5 seconds
             }
 
             //now write the contract images
-            if (!storedImagesForChain.contains(networkId))
+            for (Map.Entry<String, String> entry : imageUrls.entrySet())
             {
-                storedImagesForChain.add(networkId);
-                for (String keyAddr : imageUrls.keySet())
-                {
-                    tokensService.addTokenImageUrl(networkId, keyAddr, imageUrls.get(keyAddr));
-                }
-                imageUrls.clear();
+                tokensService.addTokenImageUrl(networkId, entry.getKey(), entry.getValue());
             }
+            imageUrls.clear();
 
             return foundTokens.values().toArray(new Token[0]);
         });
@@ -221,7 +227,7 @@ public class OpenSeaService
 
     private void addAssetImageToHashMap(Map<String, String> imageUrls, AssetContract assetContract, long networkId)
     {
-        if (storedImagesForChain.contains(networkId)) return; //already recorded the image
+        //if (storedImagesForChain.contains(networkId)) return; //already recorded the image
 
         String address = assetContract.getAddress();
         if (!imageUrls.containsKey(address) && !TextUtils.isEmpty(assetContract.getImageUrl()))
@@ -237,8 +243,9 @@ public class OpenSeaService
 
     public static final Map<Long, String> apiMap = new HashMap<Long, String>(){
         {
-            put(EthereumNetworkBase.MAINNET_ID, "https://api.opensea.io");
-            put(EthereumNetworkBase.RINKEBY_ID, "https://rinkeby-api.opensea.io");
+            put(EthereumNetworkBase.MAINNET_ID, "https://api.opensea.io/api/v1/assets/?owner=");
+            put(EthereumNetworkBase.RINKEBY_ID, "https://rinkeby-api.opensea.io/api/v1/assets/?owner=");
+            put(EthereumNetworkBase.MATIC_ID, "https://api.opensea.io/api/v2/assets/matic?owner_address=");
         }
     };
 
@@ -250,7 +257,6 @@ public class OpenSeaService
 
         StringBuilder sb = new StringBuilder();
         sb.append(apiBase);
-        sb.append("/api/v1/assets/?owner=");
         sb.append(address);
         sb.append("&limit=" + PAGE_SIZE);
         sb.append("&offset=");
@@ -288,8 +294,23 @@ public class OpenSeaService
         return jsonResult;
     }
 
-    public void resetOffsetRead()
+    public void resetOffsetRead(List<Long> networkFilter)
     {
-        pageOffset = 0;
+        long offsetTime = System.currentTimeMillis() - 57 * DateUtils.SECOND_IN_MILLIS;
+        for (long networkId : networkFilter)
+        {
+            if (com.alphawallet.app.repository.EthereumNetworkBase.hasOpenseaAPI(networkId))
+            {
+                networkCheckTimes.put(networkId, offsetTime);
+                offsetTime += 10 * DateUtils.SECOND_IN_MILLIS;
+            }
+        }
+        pageOffsets.clear();
+    }
+
+    public boolean canCheckChain(long networkId)
+    {
+        long lastCheckTime = networkCheckTimes.get(networkId, 0L);
+        return System.currentTimeMillis() > (lastCheckTime + DateUtils.MINUTE_IN_MILLIS);
     }
 }

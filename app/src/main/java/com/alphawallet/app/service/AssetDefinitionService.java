@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
@@ -1349,7 +1350,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             .flatMap(ethTx -> transactionRepository.storeRawTx(new Wallet(walletAddress), ethTx, blockTime))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(System.out::println, this::onError)
+                            .subscribe(t -> Timber.d(t.toString()), this::onError)
                             .isDisposed();
                 }
             }
@@ -2523,8 +2524,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return url;
     }
 
-    public String getFallbackUrlForToken(Token token)
+    public Pair<String, Boolean> getFallbackUrlForToken(Token token)
     {
+        boolean storedOverride = false;
         String correctedAddr = Keys.toChecksumAddress(token.getAddress());
 
         String tURL = getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
@@ -2532,8 +2534,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             tURL = Utils.getTWTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
         }
+        else
+        {
+            storedOverride = true;
+        }
 
-        return tURL;
+        return new Pair<>(tURL, storedOverride);
     }
 
     public void storeImageUrl(long chainId, String imageUrl)

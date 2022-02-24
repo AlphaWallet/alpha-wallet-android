@@ -10,11 +10,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Pair;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -33,10 +35,12 @@ import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomViewTarget;
+import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 
@@ -55,7 +59,6 @@ public class TokenIcon extends ConstraintLayout
 
     private TokensAdapterCallback tokensAdapterCallback;
     private Token token;
-    private final CustomViewTarget<ImageView, Drawable> viewTarget;
     private String tokenName;
     private StatusType currentStatus;
     private String fallbackIconUrl;
@@ -82,23 +85,6 @@ public class TokenIcon extends ConstraintLayout
         chainIconBackground = findViewById(R.id.chain_icon_background);
 
         bindViews();
-
-        viewTarget = new CustomViewTarget<ImageView, Drawable>(icon)
-        {
-            @Override
-            protected void onResourceCleared(@Nullable Drawable placeholder) { }
-
-            @Override
-            public void onLoadFailed(@Nullable Drawable errorDrawable) { }
-
-            @Override
-            public void onResourceReady(@NotNull Drawable bitmap, Transition<? super Drawable> transition)
-            {
-                textIcon.setVisibility(View.GONE);
-                icon.setVisibility(View.VISIBLE);
-                icon.setImageDrawable(bitmap);
-            }
-        };
     }
 
     private boolean getViewId(Context context, AttributeSet attrs)
@@ -138,11 +124,16 @@ public class TokenIcon extends ConstraintLayout
     public void bindData(Token token, @NotNull AssetDefinitionService assetDefinition)
     {
         if (token == null || (this.token != null && this.token.equals(token))) { return; } //stop update flicker
-        this.tokenName = token.getName(assetDefinition, token.getTokenCount());
-        //this.tokenName = token.getFullName(assetDefinition, token.getTokenCount());
-        this.fallbackIconUrl = assetDefinition.getFallbackUrlForToken(token);
 
-        bind(token, getIconUrl(token));
+        this.tokenName = token.getName(assetDefinition, token.getTokenCount());
+        Pair<String, Boolean> iconFallback = assetDefinition.getFallbackUrlForToken(token);
+        String mainIcon = iconFallback.second ? iconFallback.first : getPrimaryIconURL(token);
+        this.fallbackIconUrl = iconFallback.second ? getPrimaryIconURL(token) : iconFallback.first;
+
+        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
+        String tURL = Utils.getTokenImageUrl(correctedAddr);
+
+        bind(token, new IconItem(mainIcon, tURL, token.tokenInfo.chainId));
     }
 
     public void bindData(Token token)
@@ -212,12 +203,18 @@ public class TokenIcon extends ConstraintLayout
                     .load(iconItem.getUrl())
                     .placeholder(R.drawable.ic_token_eth)
                     .listener(requestListener)
-                    .into(viewTarget).getRequest();
+                    .into(new DrawableImageViewTarget(icon)).getRequest();
         }
         else
         {
             loadFromAltRepo();
         }
+    }
+
+    private String getPrimaryIconURL(Token token)
+    {
+        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
+        return Utils.getTokenImageUrl(correctedAddr);
     }
 
     private IconItem getIconUrl(Token token)
@@ -284,7 +281,7 @@ public class TokenIcon extends ConstraintLayout
                 .placeholder(R.drawable.ic_token_eth)
                 .apply(optionalCircleCrop)
                 .listener(requestListenerTW)
-                .into(viewTarget).getRequest());
+                .into(new DrawableImageViewTarget(icon)).getRequest());
     }
 
     /**

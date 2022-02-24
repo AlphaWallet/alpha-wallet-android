@@ -14,8 +14,8 @@
 	<color name="color_cod">@color/cod</color>
 
 	<!-- Functional -->
-	<color name="brand_accent">@color/color_azure</color>
-	<color name="text_on_brand_accent">@color/color_white</color>
+	<color name="brand_accent">@color/azure</color>
+	<color name="text_on_brand_accent">@color/white</color>
 
 	<!-- Most prominent text color -->
 	<color name="text_primary">@color/color_black</color>

@@ -31,8 +31,8 @@
         <item name="switchStyle">@style/Aw.Component.Switch</item>
         <item name="checkboxStyle">@style/Aw.Component.CheckBox</item>
         <item name="radioButtonStyle">@style/Aw.Component.RadioButton</item>
+        <item name="bottomSheetDialogTheme">@style/Aw.Component.BottomSheetDialog</item>
     </style>
-
 
     <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
@@ -101,11 +101,4 @@
         <item name="android:textSize">@dimen/sp17</item>
         <item name="android:textColor">@color/text_primary</item>
     </style>
-
-    <style name="FullscreenBottomSheetDialogStyle" parent="Theme.Design.Light.BottomSheetDialog">
-        <item name="android:windowIsFloating">false</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowSoftInputMode">adjustResize</item>
-    </style>
-
 </resources>

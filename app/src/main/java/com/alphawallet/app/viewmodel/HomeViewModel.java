@@ -21,7 +21,6 @@ import android.widget.Toast;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AnalyticsProperties;
@@ -456,7 +455,7 @@ public class HomeViewModel extends BaseViewModel {
 
         contentView.setOnCloseActionListener(listener);
 
-        dialog = new BottomSheetDialog(activity, R.style.FullscreenBottomSheetDialogStyle);
+        dialog = new BottomSheetDialog(activity, R.style.Aw_Component_BottomSheetDialog);
         dialog.setContentView(contentView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
@@ -576,7 +575,7 @@ public class HomeViewModel extends BaseViewModel {
     public void tryToShowEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable) {
         if (preferenceRepository.getLaunchCount() == 4) {
             EmailPromptView emailPromptView = new EmailPromptView(context, successOverlay, handler, onSuccessRunnable);
-            BottomSheetDialog emailPromptDialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);
+            BottomSheetDialog emailPromptDialog = new BottomSheetDialog(context, R.style.Aw_Component_BottomSheetDialog);
             emailPromptDialog.setContentView(emailPromptView);
             emailPromptDialog.setCancelable(true);
             emailPromptDialog.setCanceledOnTouchOutside(true);
@@ -614,7 +613,7 @@ public class HomeViewModel extends BaseViewModel {
                 }).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread()).subscribe((releases) -> {
 
-                    BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);
+                    BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.Aw_Component_BottomSheetDialog);
 
                     WhatsNewView view = new WhatsNewView(context, releases, v -> dialog.dismiss());
 

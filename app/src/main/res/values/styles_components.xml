@@ -6,6 +6,12 @@
         <item name="background">?colorSurface</item>
     </style>
 
+    <style name="Aw.Component.BottomSheetDialog" parent="Theme.MaterialComponents.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+
     <style name="Aw.Component.CheckBox" parent="Widget.AppCompat.CompoundButton.CheckBox">
         <item name="android:minWidth">0dp</item>
         <item name="android:minHeight">0dp</item>

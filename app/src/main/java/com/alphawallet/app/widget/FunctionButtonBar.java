@@ -64,7 +64,6 @@ import java.util.concurrent.Semaphore;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
 
 public class FunctionButtonBar extends LinearLayout implements AdapterView.OnItemClickListener, TokensAdapterCallback {
     private final Context context;
@@ -108,7 +107,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         secondaryButton = findViewById(R.id.secondary_button);
         moreButton = findViewById(R.id.more_button);
 
-        bottomSheet = new BottomSheetDialog(getContext(), R.style.FullscreenBottomSheetDialogStyle);
+        bottomSheet = new BottomSheetDialog(getContext(), R.style.Aw_Component_BottomSheetDialog);
         bottomSheet.setCancelable(true);
         bottomSheet.setCanceledOnTouchOutside(true);
         moreActionsListView = new ListView(getContext());

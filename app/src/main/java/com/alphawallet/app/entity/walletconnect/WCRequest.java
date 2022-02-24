@@ -96,6 +96,8 @@ public class WCRequest implements Parcelable
 
         dest.writeLong(id);
         dest.writeString(sessionId);
+        dest.writeInt(type.ordinal());
+        dest.writeLong(chainId);
 
         // WCEthTxn
         dest.writeByte( (byte) (tx != null ? 1 : 0) );
@@ -128,14 +130,6 @@ public class WCRequest implements Parcelable
             dest.writeList(peer.getIcons());
         }
 
-        // SignType
-        dest.writeByte((byte) (type != null ? 1 : 0));
-        if (type != null) {
-            dest.writeInt(type.ordinal());
-        }
-
-        dest.writeLong(chainId);
-
         // throwable TODO write stacktrace into parcel if possible
         dest.writeByte((byte) (throwable != null ? 1 : 0));
         if (throwable != null) {
@@ -147,6 +141,8 @@ public class WCRequest implements Parcelable
     protected WCRequest(Parcel in) {
         id = in.readLong();
         sessionId = in.readString();
+        type = SignType.values()[in.readInt()];
+        chainId = in.readLong();
 
         // WCEthTxn
         if (in.readByte() == 1) {
@@ -198,15 +194,6 @@ public class WCRequest implements Parcelable
         } else {
             this.peer = null;
         }
-
-        // SignType
-        if (in.readByte() == 1) {
-            this.type = SignType.values()[in.readInt()];
-        } else {
-            this.type = null;
-        }
-
-        chainId = in.readLong();
 
         if (in.readByte() == 1) {
             throwable = new Throwable(in.readString());

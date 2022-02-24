@@ -386,6 +386,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 //                    getPendingRequest();
                     WCRequest wcRequest1 = (WCRequest) intent.getParcelableExtra("wcrequest");
                     if (wcRequest1 != null) {
+                        executedPendingRequest(wcRequest1.id);
                         receiveRequest(wcRequest1);
                     } else {
                         // something went wrong
@@ -396,6 +397,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 //                    getPendingRequest();
                     WCRequest wcRequest2 = (WCRequest) intent.getParcelableExtra("wcrequest");
                     if (wcRequest2 != null) {
+                        executedPendingRequest(wcRequest2.id);
                         receiveRequest(wcRequest2);
                     } else {
                         // something went wrong
@@ -417,6 +419,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private void getPendingRequest()
     {
         viewModel.getPendingRequest(this, getSessionId());
+    }
+
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass")
+    private void executedPendingRequest(long id)
+    {
+        viewModel.removePendingRequest(this, id);
     }
 
     @Override

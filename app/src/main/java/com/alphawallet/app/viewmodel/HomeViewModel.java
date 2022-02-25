@@ -455,7 +455,7 @@ public class HomeViewModel extends BaseViewModel {
 
         contentView.setOnCloseActionListener(listener);
 
-        dialog = new BottomSheetDialog(activity, R.style.Aw_Component_BottomSheetDialog);
+        dialog = new BottomSheetDialog(activity);
         dialog.setContentView(contentView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
@@ -575,7 +575,7 @@ public class HomeViewModel extends BaseViewModel {
     public void tryToShowEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable) {
         if (preferenceRepository.getLaunchCount() == 4) {
             EmailPromptView emailPromptView = new EmailPromptView(context, successOverlay, handler, onSuccessRunnable);
-            BottomSheetDialog emailPromptDialog = new BottomSheetDialog(context, R.style.Aw_Component_BottomSheetDialog);
+            BottomSheetDialog emailPromptDialog = new BottomSheetDialog(context);
             emailPromptDialog.setContentView(emailPromptView);
             emailPromptDialog.setCancelable(true);
             emailPromptDialog.setCanceledOnTouchOutside(true);
@@ -613,7 +613,7 @@ public class HomeViewModel extends BaseViewModel {
                 }).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread()).subscribe((releases) -> {
 
-                    BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.Aw_Component_BottomSheetDialog);
+                    BottomSheetDialog dialog = new BottomSheetDialog(context);
 
                     WhatsNewView view = new WhatsNewView(context, releases, v -> dialog.dismiss());
 

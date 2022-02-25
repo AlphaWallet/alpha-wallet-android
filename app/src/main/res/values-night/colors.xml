@@ -12,4 +12,6 @@
 	<color name="color_mine">@color/white</color>
 	<color name="color_concrete">@color/mine</color>
 	<color name="color_cod">@color/white</color>
+
+	<color name="dialog_background">@color/mine</color>
 </resources>

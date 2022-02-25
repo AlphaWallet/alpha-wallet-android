@@ -16,7 +16,7 @@ public class TestNetDialog extends BottomSheetDialog {
 
     public TestNetDialog(@NonNull Context context, long chainId, TestNetDialogCallback callback)
     {
-        super(context, R.style.Aw_Component_BottomSheetDialog);
+        super(context);
         setCancelable(true);
         setCanceledOnTouchOutside(true);
         setContentView(R.layout.layout_dialog_testnet_confirmation);

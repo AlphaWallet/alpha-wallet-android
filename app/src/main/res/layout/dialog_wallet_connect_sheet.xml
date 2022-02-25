@@ -42,50 +42,14 @@
             android:layout_gravity="center"/>
     </LinearLayout>
 
-    <com.alphawallet.app.widget.DialogInfoItem
-        android:id="@+id/info_website"
+    <com.alphawallet.app.widget.WalletConnectRequestWidget
+        android:id="@+id/wallet_connect_widget"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp16"/>
+        android:layout_height="wrap_content"/>
 
-    <com.alphawallet.app.widget.DialogInfoItem
-        android:id="@+id/info_network"
+    <com.alphawallet.app.widget.FunctionButtonBar
+        android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        custom:showActionText="true"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury"/>
-
-    <LinearLayout
-        android:id="@+id/layout_buttons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingHorizontal="@dimen/dp16"
-        android:layout_marginTop="@dimen/dp16">
-
-        <Button
-            android:id="@+id/button_reject"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/dialog_reject"
-            style="@style/AwButton.Secondary"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:layout_marginEnd="@dimen/dp8"/>
-
-        <Button
-            android:id="@+id/button_approve"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/approve"
-            style="@style/AwButton.Primary"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:layout_marginStart="@dimen/dp8"/>
-    </LinearLayout>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

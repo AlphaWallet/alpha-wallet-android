@@ -8,7 +8,9 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
-    <View style="@style/Aw.Component.Separator" />
+    <View
+        style="@style/Aw.Component.Separator"
+        android:layout_below="@id/toolbar" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

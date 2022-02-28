@@ -1,5 +1,8 @@
 package com.alphawallet.app.entity.tokens;
 
+import static com.alphawallet.app.util.Utils.parseTokenId;
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+
 import android.app.Activity;
 import android.util.Pair;
 
@@ -33,9 +36,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.alphawallet.app.util.Utils.parseTokenId;
-import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 /**
  * Created by James on 3/10/2018.
@@ -342,26 +342,17 @@ public class ERC721Token extends Token
     @Override
     public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
     {
-        List<BigInteger> missingTokens = new ArrayList<>();
-        for (BigInteger oldTokenId : assetMap.keySet())
-        {
-            NFTAsset checkAsset = tokenBalanceAssets.get(oldTokenId);
-            if (checkAsset == null)
-            {
-                missingTokens.add(oldTokenId);
-            }
-            else
-            {
-                checkAsset.setBalance(BigDecimal.ONE);
-            }
-        }
-
         final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
 
-        //now check balance for each of the missing tokenIds (note that ERC1155 has a batch balance check, ERC721 does not)
-        for (BigInteger checkId : missingTokens)
+        //check all tokens in this contract
+        assetMap.putAll(tokenBalanceAssets);
+
+        //now check balance for all tokenIds (note that ERC1155 has a batch balance check, ERC721 does not)
+        for (Map.Entry<BigInteger, NFTAsset> entry : assetMap.entrySet())
         {
-            NFTAsset checkAsset = assetMap.get(checkId);
+            BigInteger checkId = entry.getKey();
+            NFTAsset checkAsset = entry.getValue();
+
             //check balance
             String owner = callSmartContractFunction(web3j, ownerOf(checkId), getAddress(), getWallet());
             if (owner == null) //play it safe. If there's no 'ownerOf' for an ERC721, it's something custom like ENS

@@ -91,7 +91,7 @@
         <!-- <item name="trackTint">@color/color_dusty</item> -->
     </style>
 
-    <style name="Aw.Component.Button" parent="Widget.MaterialComponents.Button">
+    <style name="Aw.Component.Button" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="android:elevation">0dp</item>
         <item name="android:ellipsize">end</item>
         <item name="android:fontFamily">@font/font_semibold</item>
@@ -141,6 +141,7 @@
         <item name="android:textColor">?colorOnSurface</item>
         <item name="iconPadding">0dp</item>
         <item name="iconGravity">textEnd</item>
+        <item name="iconTint">@color/text_primary</item>
     </style>
 
     <style name="Aw.Component.Button.TextIcon">
@@ -153,6 +154,8 @@
         <item name="iconTint">@color/brand_accent</item>
         <item name="android:layout_margin">@dimen/cozy_20</item>
         <item name="cornerRadius">5dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="strokeWidth">0dp</item>
     </style>
 
     <style name="Aw.Component.QrScannerTextView" parent="">

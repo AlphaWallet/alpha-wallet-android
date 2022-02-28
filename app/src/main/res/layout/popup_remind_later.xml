@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/dialog_background">
 
     <TextView
         android:id="@+id/popup_text"
@@ -9,9 +10,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:fontFamily="@font/font_regular"
-        android:paddingLeft="@dimen/standard_16"
+        android:paddingStart="@dimen/standard_16"
         android:paddingTop="@dimen/standard_16"
-        android:paddingRight="@dimen/giant_40"
+        android:paddingEnd="@dimen/giant_40"
         android:paddingBottom="@dimen/standard_16"
         android:text="@string/action_remind_later"
         android:textColor="@color/text_primary"

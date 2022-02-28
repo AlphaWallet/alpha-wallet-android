@@ -32,6 +32,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -49,6 +50,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
+import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportWalletActivity;
@@ -709,5 +711,12 @@ public class HomeViewModel extends BaseViewModel {
             localeRepository.setLocale(context, localeRepository.getActiveLocale());
         }
         currencyRepository.setDefaultCurrency(preferenceRepository.getDefaultCurrency());
+    }
+
+    public void sendMsgPumpToWC(Context context) {
+        Timber.d("Start WC service");
+        Intent si = new Intent(context, WalletConnectService.class);
+        si.setAction(String.valueOf(WalletConnectActions.MSG_PUMP.ordinal()));
+        context.startService(si);
     }
 }

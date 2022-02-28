@@ -15,12 +15,11 @@ import android.text.format.DateUtils;
 
 import androidx.annotation.Nullable;
 
-import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.walletconnect.WCClient;
-import com.alphawallet.app.walletconnect.entity.WCEthereumSignMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +55,7 @@ public class WalletConnectService extends Service
     public int onStartCommand(Intent intent, int flags, int startId)
     {
         Timber.tag(TAG).d("SERVICE STARTING");
+
         try
         {
             int actionVal = Integer.parseInt(intent.getAction());
@@ -83,19 +83,17 @@ public class WalletConnectService extends Service
                     String sessionId = intent.getStringExtra("session");
                     disconnectSession(sessionId);
                     break;
+                case MSG_PUMP:
+                    Timber.tag(TAG).d("SERVICE MSG PUMP");
+                    checkMessages();
+                    break;
             }
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
         return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
     }
 
     private final IBinder mBinder = new LocalBinder();
@@ -286,6 +284,7 @@ public class WalletConnectService extends Service
     //TODO: as user will get the intent in walletConnectActionReceiver (repeat for below)
     private void sendRequest(WCClient client, WCRequest rq)
     {
+        Timber.d("sendRequest: sessionId: %s", client.sessionId());
         signRequests.add(rq);
         //see if this connection is live, if so then bring WC request to foreground
         switchToWalletConnectApprove(client.sessionId(), rq);
@@ -294,6 +293,7 @@ public class WalletConnectService extends Service
 
     private void broadcastSessionEvent(String command, String sessionId)
     {
+        Timber.d("broadcastSessionEvent: sessionId: %s, command: %s", sessionId, command);
         Intent intent = new Intent(command);
         intent.putExtra("sessionid", sessionId);
         intent.putExtra("wcrequest", getPendingRequest(sessionId));     // pass WCRequest as parcelable in the intent

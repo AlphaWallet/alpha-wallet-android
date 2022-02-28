@@ -356,7 +356,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     }
                     else
                     {
-                        getPendingRequest();
+//                        getPendingRequest();
                         setClient(client);
                     }
                 });
@@ -382,23 +382,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             {
                 case C.WALLET_CONNECT_REQUEST:
                 case C.WALLET_CONNECT_NEW_SESSION:
-                    Timber.tag(TAG).d("MSG: WALLET CONNECT RQ");
-//                    getPendingRequest();
-                    WCRequest wcRequest1 = (WCRequest) intent.getParcelableExtra("wcrequest");
-                    if (wcRequest1 != null) {
-                        executedPendingRequest(wcRequest1.id);
-                        receiveRequest(wcRequest1);
-                    } else {
-                        // something went wrong
-                    }
-                    break;
                 case C.WALLET_CONNECT_FAIL:
-                    Timber.tag(TAG).d("MSG: FAIL CONNECTION");
+                    Timber.tag(TAG).d("MSG: %s", action);
 //                    getPendingRequest();
-                    WCRequest wcRequest2 = (WCRequest) intent.getParcelableExtra("wcrequest");
-                    if (wcRequest2 != null) {
-                        executedPendingRequest(wcRequest2.id);
-                        receiveRequest(wcRequest2);
+                    WCRequest wcRequest = (WCRequest) intent.getParcelableExtra("wcrequest");
+                    if (wcRequest != null) {
+                        executedPendingRequest(wcRequest.id);
+                        receiveRequest(wcRequest);
                     } else {
                         // something went wrong
                     }
@@ -415,11 +405,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         }
     };
-
-    private void getPendingRequest()
-    {
-        viewModel.getPendingRequest(this, getSessionId());
-    }
 
     @SuppressWarnings("MethodOnlyUsedFromInnerClass")
     private void executedPendingRequest(long id)

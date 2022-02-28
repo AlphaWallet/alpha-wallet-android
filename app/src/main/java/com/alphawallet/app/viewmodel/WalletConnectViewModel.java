@@ -490,30 +490,6 @@ public class WalletConnectViewModel extends BaseViewModel {
         return sessions;
     }
 
-    public void getPendingRequest(WalletConnectActivity activity, String sessionId)
-    {
-        ServiceConnection connection = new ServiceConnection()
-        {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service)
-            {
-                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
-                ((WalletConnectCallback)activity).receiveRequest(walletConnectService.getPendingRequest(sessionId));
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name)
-            {
-                //walletConnectService = null;
-                Timber.tag(TAG).d("Service disconnected");
-            }
-        };
-
-        Intent i = new Intent(activity, WalletConnectService.class);
-        i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
-        startServiceLocal(i, activity, connection);
-    }
-
     public void removePendingRequest(Activity activity, long id)
     {
         ServiceConnection connection = new ServiceConnection()

@@ -5,12 +5,17 @@
 
     <include layout="@layout/layout_url_bar_full" />
 
+    <View
+        android:id="@+id/separator"
+        style="@style/Aw.Component.Separator"
+        android:layout_below="@id/address_bar" />
+
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="@dimen/horizontal_toolbar_progress_height"
-        android:layout_below="@id/address_bar"
+        android:layout_below="@id/separator"
         android:indeterminate="false" />
 
     <View

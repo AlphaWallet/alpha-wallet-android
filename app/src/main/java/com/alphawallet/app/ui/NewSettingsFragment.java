@@ -28,7 +28,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.BuildConfig;
@@ -45,7 +44,6 @@ import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
-import com.google.android.material.card.MaterialCardView;
 
 import java.util.Locale;
 
@@ -225,8 +223,7 @@ public class NewSettingsFragment extends BaseFragment {
 
         darkModeSetting =
                 new SettingsItemView.Builder(getContext())
-                        .withType(SettingsItemView.Type.TOGGLE)
-                        .withIcon(R.drawable.ic_settings_notifications)
+                        .withIcon(R.drawable.ic_settings_darkmode)
                         .withTitle(R.string.title_dark_mode)
                         .withListener(this::onDarkModeSettingClicked)
                         .build();
@@ -539,10 +536,8 @@ public class NewSettingsFragment extends BaseFragment {
     }
 
     private void onDarkModeSettingClicked() {
-        if (darkModeSetting.getToggleState())
-            viewModel.setDarkModeState(1);
-        else
-            viewModel.setDarkModeState(0);
+        Intent intent = new Intent(getActivity(), SelectThemeActivity.class);
+        startActivity(intent);
     }
 
     private void onSupportSettingClicked() {

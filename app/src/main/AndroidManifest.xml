@@ -348,6 +348,10 @@
             android:label="NFT Transfer" />
 
         <activity
+            android:name=".ui.SelectThemeActivity"
+            android:label="Select Mode" />
+
+        <activity
             android:name=".ui.QRScanning.QRScanner"
             android:label="@string/qr_scanner" />
 

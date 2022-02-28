@@ -19,6 +19,7 @@
 
 	<color name="dialog_background">@color/white</color>
 	<color name="backup_background">@color/mine</color>
+	<color name="header_background">@color/color_alabaster</color>
 
 	<!-- Most prominent text color -->
 	<color name="text_primary">@color/color_black</color>

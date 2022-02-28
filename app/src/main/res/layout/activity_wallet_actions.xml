@@ -76,11 +76,14 @@
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/sp15" />
 
+            <View
+                style="@style/Aw.Component.Separator"
+                android:layout_marginTop="@dimen/dp20" />
+
             <com.alphawallet.app.widget.InputAddress
                 android:id="@+id/input_ens"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/cozy_20"
                 android:layout_marginBottom="@dimen/standard_16"
                 custom:ens="true"
                 custom:hint="@string/enter_ens"

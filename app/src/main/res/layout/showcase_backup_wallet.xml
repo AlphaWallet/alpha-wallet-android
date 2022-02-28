@@ -12,7 +12,7 @@
         android:layout_marginStart="@dimen/giant_40"
         android:layout_marginEnd="@dimen/giant_40"
         app:cardBackgroundColor="@color/dialog_background"
-        app:cardCornerRadius="4dp"
+        app:cardCornerRadius="@dimen/dialog_corner_radius"
         app:cardElevation="0dp">
 
         <LinearLayout

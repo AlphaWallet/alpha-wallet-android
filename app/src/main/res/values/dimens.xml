@@ -93,5 +93,6 @@
     <dimen name="hundred_100">100dp</dimen>
     <dimen name="horizontal_toolbar_progress_height">3dp</dimen>
     <dimen name="action_item_height">60dp</dimen>
+    <dimen name="dialog_corner_radius">4dp</dimen>
 
 </resources>

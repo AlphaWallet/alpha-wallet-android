@@ -90,8 +90,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/box_layout"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="@dimen/dp10"
-        android:layout_marginTop="4dp"
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginTop="@dimen/mini_4"
         android:layout_toStartOf="@id/text_paste"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -100,7 +100,7 @@
             android:id="@+id/avatar"
             android:layout_width="@dimen/dp25"
             android:layout_height="@dimen/dp25"
-            android:layout_marginEnd="@dimen/dp6"
+            android:layout_marginEnd="@dimen/tiny_8"
             android:visibility="visible" />
 
         <TextView
@@ -122,13 +122,14 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/box_layout"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="@dimen/dp10"
-        android:layout_marginTop="2dp"
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginTop="@dimen/mini_4"
         android:layout_toStartOf="@id/text_paste"
         android:fontFamily="@font/font_regular"
         android:textColor="@color/text_error"
         android:textSize="@dimen/sp12"
         android:visibility="gone"
-        tools:text="That address already exists" />
+        tools:text="That address already exists"
+        tools:visibility="visible" />
 
 </RelativeLayout>

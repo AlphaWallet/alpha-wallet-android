@@ -27,6 +27,8 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 
 import java.math.BigInteger;
 
+import timber.log.Timber;
+
 public class SignCallbackJSInterface
 {
     private final WebView webView;
@@ -120,7 +122,7 @@ public class SignCallbackJSInterface
             {
                 EthereumTypedMessage message = new EthereumTypedMessage(null, "", getDomainName(), callbackId);
                 onSignTypedMessageListener.onSignTypedMessage(message);
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
         });
     }
@@ -154,7 +156,7 @@ public class SignCallbackJSInterface
         }
         catch (JsonSyntaxException e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -170,7 +172,7 @@ public class SignCallbackJSInterface
         }
         catch (JsonSyntaxException e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 

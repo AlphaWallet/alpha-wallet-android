@@ -51,6 +51,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class TokenInfoFragment extends BaseFragment {
@@ -298,7 +299,7 @@ public class TokenInfoFragment extends BaseFragment {
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             return values;
@@ -321,7 +322,7 @@ public class TokenInfoFragment extends BaseFragment {
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         if (min == Double.MAX_VALUE) min = 0.0;
@@ -349,7 +350,7 @@ public class TokenInfoFragment extends BaseFragment {
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return 0.0;
@@ -364,7 +365,7 @@ public class TokenInfoFragment extends BaseFragment {
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return 0.0;

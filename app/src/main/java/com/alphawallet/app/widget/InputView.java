@@ -26,6 +26,8 @@ import com.alphawallet.app.R;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
 
+import timber.log.Timber;
+
 public class InputView extends LinearLayout {
     private final Context context;
 
@@ -82,7 +84,7 @@ public class InputView extends LinearLayout {
             }
             catch (Exception e)
             {
-                Log.e(getClass().getSimpleName(), e.getMessage(), e);
+                Timber.e(e, e.getMessage());
             }
         });
     }

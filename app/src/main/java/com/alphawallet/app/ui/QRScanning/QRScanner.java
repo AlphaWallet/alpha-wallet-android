@@ -54,6 +54,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
@@ -280,7 +281,7 @@ public class QRScanner extends BaseActivity
     // Handles the requesting of the camera permission.
     private void requestCameraPermission()
     {
-        Log.w("QR SCanner", "Camera permission is not granted. Requesting permission");
+       Timber.tag("QR SCanner").w("Camera permission is not granted. Requesting permission");
 
         final String[] permissions = new String[]{Manifest.permission.CAMERA};
         ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM); //always ask for permission to scan

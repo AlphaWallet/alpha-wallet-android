@@ -19,6 +19,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import timber.log.Timber;
 
 public class TokensMappingRepository {
 
@@ -68,7 +69,7 @@ public class TokensMappingRepository {
                     baseMappings.put(baseAddress.getAddressKey(), thisMapping.getGroup());
                 }
             } catch (Exception e) {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             return new Pair<>(sourceMap, baseMappings);

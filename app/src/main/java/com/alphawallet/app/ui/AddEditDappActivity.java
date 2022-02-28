@@ -21,7 +21,7 @@ import java.util.List;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
-
+import timber.log.Timber;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -119,7 +119,7 @@ public class AddEditDappActivity extends BaseActivity {
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
         finally
         {

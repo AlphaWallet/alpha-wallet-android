@@ -13,6 +13,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonSyntaxException
 import okhttp3.*
 import okio.ByteString
+import timber.log.Timber
 import java.util.*
 
 open class WCClient(
@@ -76,7 +77,7 @@ open class WCClient(
     var onPong: (peerId: String)-> Unit = { _ -> Unit }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
-        Log.d(TAG, "<< websocket opened >>")
+        Timber.d("<< websocket opened >>")
         isConnected = true
 
         listeners.forEach { it.onOpen(webSocket, response) }
@@ -94,9 +95,9 @@ open class WCClient(
     override fun onMessage(webSocket: WebSocket, text: String) {
         var decrypted: String? = null
         try {
-            Log.d(TAG, "<== message $text")
+            Timber.d("<== message $text")
             decrypted = decryptMessage(text)
-            Log.d(TAG, "<== decrypted $decrypted")
+            Timber.d("<== decrypted $decrypted")
             handleMessage(decrypted)
         } catch (e: JsonSyntaxException) {
             //...
@@ -108,7 +109,7 @@ open class WCClient(
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        Log.d(TAG,"<< websocket closed >>")
+        Timber.d("<< websocket closed >>")
         //resetState()
         onFailure(t)
 
@@ -116,18 +117,18 @@ open class WCClient(
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-        Log.d(TAG,"<< websocket closed >>")
+        Timber.d("<< websocket closed >>")
 
         listeners.forEach { it.onClosed(webSocket, code, reason) }
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        Log.d(TAG, "<== Received: $bytes")
+        Timber.d("<== Received: $bytes")
         listeners.forEach { it.onMessage(webSocket, bytes) }
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-        Log.d(TAG,"<< closing socket >>")
+        Timber.d("<< closing socket >>")
 
         //resetState()
         onDisconnect(code, reason)
@@ -174,7 +175,7 @@ open class WCClient(
     }
 
     fun sendPing():Boolean {
-        Log.d(TAG,"==> ping")
+        Timber.d("==> ping")
         return socket?.send("ping") ?: false
     }
 
@@ -317,13 +318,13 @@ open class WCClient(
                 payload = ""
         )
         val json = gson.toJson(message)
-        Log.d(TAG, "==> Subscribe: $json")
+        Timber.d("==> Subscribe: $json")
 
         return socket?.send(gson.toJson(message)) ?: false
     }
 
     private fun encryptAndSend(result: String): Boolean {
-        Log.d(TAG,"==> message $result")
+        Timber.d("==> message $result")
         val session = this.session
                 ?: throw IllegalStateException("Session is null")
         val payload = gson.toJson(WCCipher.encrypt(result.toByteArray(Charsets.UTF_8), session.key.toByteArray()))
@@ -334,10 +335,10 @@ open class WCClient(
         )
 
         val rpId = remotePeerId ?: session.topic
-        Log.d(TAG, "E&Send: $rpId")
+        Timber.d("E&Send: $rpId")
 
         val json = gson.toJson(message)
-        Log.d(TAG,"==> encrypted $json")
+        Timber.d("==> encrypted $json")
         return socket?.send(json) ?: false
     }
 

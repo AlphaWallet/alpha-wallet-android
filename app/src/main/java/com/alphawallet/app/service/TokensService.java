@@ -37,7 +37,6 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 
 import org.jetbrains.annotations.NotNull;
-import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -58,6 +57,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import timber.log.Timber;
 
 public class TokensService
 {
@@ -79,7 +79,6 @@ public class TokensService
     private ContractLocator focusToken;
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
     private final ConcurrentLinkedQueue<Long> baseTokenCheck;
-    private static long openSeaCheck;
     private long openSeaCheckId;
     private boolean appHasFocus;
     private boolean mainNetActive = true;
@@ -158,7 +157,7 @@ public class TokensService
 
     private void onCheckError(Throwable throwable, ContractAddress t)
     {
-        if (BuildConfig.DEBUG) throwable.printStackTrace();
+        Timber.e(throwable);
     }
 
     private void finishTokenCheck()
@@ -218,8 +217,7 @@ public class TokensService
             currentAddress = newWalletAddr.toLowerCase();
             stopUpdateCycle();
             addLockedTokens();
-            openSeaCheck = System.currentTimeMillis() + 3*DateUtils.SECOND_IN_MILLIS;
-            if (openseaService != null) openseaService.resetOffsetRead();
+            if (openseaService != null) openseaService.resetOffsetRead(networkFilter);
         }
     }
 
@@ -241,7 +239,6 @@ public class TokensService
         syncCount = 0;
 
         setupFilters();
-        openSeaCheck = System.currentTimeMillis() + 3*DateUtils.SECOND_IN_MILLIS;
 
         eventTimer = Single.fromCallable(() -> {
             startupPass();
@@ -427,10 +424,7 @@ public class TokensService
 
     public void onWalletRefreshSwipe()
     {
-        if (Utils.timeUntil(openSeaCheck) > DateUtils.MINUTE_IN_MILLIS && (openSeaQueryDisposable == null || openSeaQueryDisposable.isDisposed()))
-        {
-            openSeaCheck = System.currentTimeMillis() + 3 * DateUtils.SECOND_IN_MILLIS;
-        }
+        openseaService.resetOffsetRead(networkFilter);
     }
 
     private boolean isFocusToken(Token t)
@@ -577,16 +571,11 @@ public class TokensService
 
         if (t != null)
         {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Updating: " + t.tokenInfo.chainId + (t.isEthereum() ? " (Base Chain) ":"") + " : " + t.getAddress() + " : " + t.getFullName());
+            Timber.tag(TAG).d("Updating: " + t.tokenInfo.chainId + (t.isEthereum() ? " (Base Chain) ":"") + " : " + t.getAddress() + " : " + t.getFullName());
             balanceCheckDisposable = tokenRepository.updateTokenBalance(currentAddress, t)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(newBalance -> onBalanceChange(newBalance, t), this::onError);
-        }
-
-        if (System.currentTimeMillis() > openSeaCheck)
-        {
-            checkOpenSea();
         }
 
         checkPendingChains();
@@ -603,7 +592,7 @@ public class TokensService
 
         if (balanceChange && BuildConfig.DEBUG)
         {
-            Log.d(TAG, "Change Registered: * " + t.getFullName());
+            Timber.tag(TAG).d("Change Registered: * %s", t.getFullName());
         }
 
         //update check time
@@ -620,6 +609,8 @@ public class TokensService
         {
             checkERC20(t.tokenInfo.chainId);
         }
+
+        checkOpenSea(t.tokenInfo.chainId);
     }
 
     private void checkChainVisibility(Token t)
@@ -627,7 +618,7 @@ public class TokensService
         //Switch this token chain on
         if (!networkFilter.contains(t.tokenInfo.chainId) && EthereumNetworkRepository.hasRealValue(t.tokenInfo.chainId) == this.mainNetActive)
         {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Detected balance");
+            Timber.tag(TAG).d("Detected balance");
             //activate this filter
             networkFilter.add(t.tokenInfo.chainId);
             //now update the default filters
@@ -649,31 +640,24 @@ public class TokensService
 
     private void onError(Throwable throwable)
     {
-        if (BuildConfig.DEBUG) throwable.printStackTrace();
+        Timber.e(throwable);
     }
 
-    private void checkOpenSea()
+    private void checkOpenSea(long chainId)
     {
         if ((openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed())
-            || openseaService == null) return;
-        NetworkInfo info;
-        if (networkFilter.contains(MAINNET_ID))
-            info = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
-        else if (networkFilter.contains(RINKEBY_ID))
-            info = ethereumNetworkRepository.getNetworkByChain(RINKEBY_ID);
-        //else if (networkFilter.contains(MATIC_ID)) //TODO: Add polygon route when API is ready
-        //    info = ethereumNetworkRepository.getNetworkByChain(MATIC_ID);
-        else return;
+            || openseaService == null || !EthereumNetworkBase.hasOpenseaAPI(chainId)
+            || !openseaService.canCheckChain(chainId)) return;
 
-        if (info.chainId == transferCheckChain) return; //currently checking this chainId
+        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+
+        if (info.chainId == transferCheckChain) return; //currently checking this chainId in TransactionsNetworkClient
 
         final Wallet wallet = new Wallet(currentAddress);
-
-        if (BuildConfig.DEBUG)
-            Log.d(TAG, "Fetch from opensea : " + currentAddress + " : " + info.getShortName());
+        
+        Timber.tag(TAG).d("Fetch from opensea : " + currentAddress + " : " + info.getShortName());
 
         openSeaCheckId = info.chainId;
-        openSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS; //default update in 1 minute
 
         openSeaQueryDisposable = openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
                 .flatMap(tokens -> tokenRepository.checkInterface(tokens, wallet)) //check the token interface
@@ -694,24 +678,14 @@ public class TokensService
     {
         openSeaQueryDisposable = null;
         openSeaCheckId = 0;
-        if (BuildConfig.DEBUG) Log.d(TAG, "Checked " + info.name + " Opensea");
-        if (openseaService.getCurrentOffset() > 0)
-        {
-            if (BuildConfig.DEBUG) Log.d(TAG, "OpenSeaAPI offset:" + openseaService.getCurrentOffset());
-            openSeaCheck = System.currentTimeMillis() + 5 * DateUtils.SECOND_IN_MILLIS;
-        }
-        else
-        {
-            openSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS; //default update in 1 minute
-        }
+        Timber.tag(TAG).d("Checked " + info.name + " Opensea");
     }
 
     private void chuckError(@NotNull Throwable e)
     {
         openSeaCheckId = 0;
         openSeaQueryDisposable = null;
-        if (BuildConfig.DEBUG) e.printStackTrace();
-        openSeaCheck = System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS; //default update in 1 minute
+        Timber.e(e);
     }
 
     private void checkERC20(long chainId)
@@ -748,7 +722,7 @@ public class TokensService
     private void onERC20Error(Throwable throwable)
     {
         erc20CheckDisposable = null;
-        if (BuildConfig.DEBUG) throwable.printStackTrace();
+        Timber.e(throwable);
     }
 
     public void updateTickers()
@@ -906,7 +880,7 @@ public class TokensService
         Long chainId = baseTokenCheck.poll();
         if (chainId != null)
         {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Base Token Check: " + ethereumNetworkRepository.getNetworkByChain(chainId).name);
+            Timber.tag(TAG).d("Base Token Check: %s", ethereumNetworkRepository.getNetworkByChain(chainId).name);
             //return new TokenCardMeta(getToken(chainId, currentAddress));
             return createCurrencyToken(ethereumNetworkRepository.getNetworkByChain(chainId), new Wallet(currentAddress));
         }

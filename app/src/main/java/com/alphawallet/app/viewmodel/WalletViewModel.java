@@ -247,7 +247,7 @@ public class WalletViewModel extends BaseViewModel
         dialog.setContentView(actionsView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
-        BottomSheetBehavior behavior = BottomSheetBehavior.from((View) actionsView.getParent());
+        BottomSheetBehavior<?> behavior = BottomSheetBehavior.from((View) actionsView.getParent());
         dialog.setOnShowListener(dialog -> behavior.setPeekHeight(actionsView.getHeight()));
         dialog.show();
     }

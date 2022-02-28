@@ -51,6 +51,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
+import timber.log.Timber;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -431,7 +432,7 @@ public abstract class TokenscriptFunction
                         }
                         break;
                     default:
-                        System.out.println("NOT IMPLEMENTED: " + arg.parameterType);
+                        Timber.d("NOT IMPLEMENTED: " + arg.parameterType);
                         break;
                 }
             }
@@ -583,7 +584,7 @@ public abstract class TokenscriptFunction
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return transResult;
@@ -699,7 +700,7 @@ public abstract class TokenscriptFunction
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
             return null;
         }
     }
@@ -868,7 +869,7 @@ public abstract class TokenscriptFunction
                 else
                 {
                     BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
-                    if (BuildConfig.DEBUG) System.out.println("ATTR: " + attr.label + " : " + attr.name + " : " + attr.getSyntaxVal(attr.toString(val)));
+                    Timber.d("ATTR: " + attr.label + " : " + attr.name + " : " + attr.getSyntaxVal(attr.toString(val)));
                     return new TokenScriptResult.Attribute(attr.name, attr.label, val, attr.getSyntaxVal(attr.toString(val)));
                 }
             }

@@ -31,6 +31,7 @@ import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import timber.log.Timber;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
@@ -126,7 +127,7 @@ public class AlphaWalletService
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return dsigDescriptor;
@@ -154,7 +155,7 @@ public class AlphaWalletService
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             return result;
@@ -318,7 +319,7 @@ public class AlphaWalletService
                     okhttp3.Response response = httpClient.newCall(request).execute();
                     int resultCode = response.code();
                     if ((resultCode/100) == 2) result = true;
-                    Log.d("RESP", response.body().string());
+                    Timber.tag("RESP").d(response.body().string());
                 }
             }
             catch (Exception e)

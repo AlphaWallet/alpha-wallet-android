@@ -38,12 +38,13 @@ public class NFTAsset implements Parcelable
     private static final String IMAGE_PREVIEW = "image_preview_url";
     private static final String DESCRIPTION = "description";
     private static final String IMAGE_ORIGINAL_URL = "image_original_url";
-    private static final String[] IMAGE_DESIGNATORS = { IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW };
-    private static final String[] SVG_OVERRIDE = { IMAGE_ORIGINAL_URL, IMAGE, IMAGE_URL };
-    private static final String[] IMAGE_THUMBNAIL_DESIGNATORS = { IMAGE_PREVIEW, IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL };
+    private static final String IMAGE_ANIMATION = "animation_url";
+    private static final String[] IMAGE_DESIGNATORS = { IMAGE_ANIMATION, IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW };
+    private static final String[] SVG_OVERRIDE = { IMAGE_ORIGINAL_URL, IMAGE_ANIMATION, IMAGE, IMAGE_URL };
+    private static final String[] IMAGE_THUMBNAIL_DESIGNATORS = { IMAGE_PREVIEW, IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_ANIMATION };
     private static final String BACKGROUND_COLOUR = "background_color";
     private static final String EXTERNAL_LINK = "external_link";
-    private static final List<String> DESIRED_PARAMS = Arrays.asList(NAME, BACKGROUND_COLOUR, IMAGE_URL, IMAGE, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW, DESCRIPTION, EXTERNAL_LINK);
+    private static final List<String> DESIRED_PARAMS = Arrays.asList(NAME, BACKGROUND_COLOUR, IMAGE_URL, IMAGE, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW, DESCRIPTION, EXTERNAL_LINK, IMAGE_ANIMATION);
     private static final List<String> ATTRIBUTE_DESCRIPTOR = Arrays.asList("attributes", "traits");
 
     public enum Category {
@@ -109,6 +110,18 @@ public class NFTAsset implements Parcelable
         assetMap.putAll(asset.assetMap);
         attributeMap.putAll(asset.attributeMap);
         balance = asset.balance;
+
+        if (asset.tokenIdList != null)
+        {
+            tokenIdList = new ArrayList<>(tokenIdList);
+        }
+        else
+        {
+            tokenIdList = null;
+        }
+
+        isChecked = asset.isChecked;
+        exposeRadio = asset.exposeRadio;
     }
 
     public String getAssetValue(String key)
@@ -126,6 +139,12 @@ public class NFTAsset implements Parcelable
     public String getName()
     {
         return assetMap.get(NAME);
+    }
+
+    public boolean isAnimation()
+    {
+        String anim = assetMap.get(IMAGE_ANIMATION);
+        return anim != null;
     }
 
     public String getImage()
@@ -225,6 +244,7 @@ public class NFTAsset implements Parcelable
         {
             JSONObject jsonData = new JSONObject(metaData);
             Iterator<String> keys = jsonData.keys();
+
             while (keys.hasNext())
             {
                 String key = keys.next();

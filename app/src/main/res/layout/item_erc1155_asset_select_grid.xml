@@ -43,8 +43,8 @@
                     android:gravity="center"
                     android:textColor="@color/text_primary"
                     android:visibility="gone"
-                    tools:visibility="visible"
-                    tools:text="25" />
+                    tools:text="25"
+                    tools:visibility="visible" />
 
                 <ProgressBar
                     android:id="@+id/loading_spinner"
@@ -53,7 +53,7 @@
                     android:layout_centerInParent="true"
                     android:padding="@dimen/standard_16"
                     android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible" />
 
             </RelativeLayout>
 
@@ -85,8 +85,8 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="@dimen/sp15"
                     android:visibility="gone"
-                    tools:visibility="visible"
-                    tools:text="Subtitle" />
+                    tools:text="Subtitle"
+                    tools:visibility="visible" />
 
             </RelativeLayout>
         </LinearLayout>

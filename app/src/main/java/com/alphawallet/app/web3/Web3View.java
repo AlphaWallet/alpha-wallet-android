@@ -388,7 +388,7 @@ public class Web3View extends WebView {
     private void callbackToJS(long callbackId, String function, String param)
     {
         String callback = String.format(function, callbackId, param);
-        post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
+        post(() -> evaluateJavascript(callback, value ->Timber.tag("WEB_VIEW").d(value)));
     }
 
     public void onWalletActionSuccessful(long callbackId, String message)

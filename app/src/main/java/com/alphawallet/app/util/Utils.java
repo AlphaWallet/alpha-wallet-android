@@ -59,6 +59,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import timber.log.Timber;
+
 public class Utils {
 
     private static final String ISOLATE_NUMERIC = "(0?x?[0-9a-fA-F]+)";
@@ -316,7 +318,7 @@ public class Utils {
         }
         catch (IOException e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
         return false;
     }
@@ -829,7 +831,7 @@ public class Utils {
                 throw new IOException("Nothing is read.");
             }
         } catch (Exception ex) {
-            Log.d("READ_JS_TAG", "Ex", ex);
+            Timber.tag("READ_JS_TAG").d(ex, "Ex");
         }
         return new String(buffer);
     }

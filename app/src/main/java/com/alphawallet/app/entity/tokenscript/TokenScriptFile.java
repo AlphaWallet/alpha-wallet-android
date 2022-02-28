@@ -15,6 +15,8 @@ import com.alphawallet.app.R;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 
+import timber.log.Timber;
+
 public class TokenScriptFile extends File
 {
     private Context context;
@@ -63,7 +65,7 @@ public class TokenScriptFile extends File
             }
             catch (IOException e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);;
             }
         }
     }
@@ -77,7 +79,7 @@ public class TokenScriptFile extends File
         }
         catch (IOException e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return null;

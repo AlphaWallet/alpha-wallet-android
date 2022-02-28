@@ -143,6 +143,7 @@
             android:clickable="false"
             android:visibility="gone"
             tools:visibility="visible" />
+
     </FrameLayout>
 
 </RelativeLayout>

@@ -5,6 +5,8 @@ import com.alphawallet.token.tools.Numeric;
 
 import java.math.BigInteger;
 
+import timber.log.Timber;
+
 /**
  * Created by JB on 28/07/21
  */
@@ -39,7 +41,7 @@ public class WalletAddEthereumChainObject
         }
         catch (NumberFormatException e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
             return (0);
         }
     }

@@ -52,6 +52,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.realm.Realm;
+import timber.log.Timber;
 
 import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunctionArray;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
@@ -615,7 +616,7 @@ public class ERC1155Token extends Token
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return new BigDecimal(assets.keySet().size());

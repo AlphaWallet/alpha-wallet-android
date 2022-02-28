@@ -18,6 +18,7 @@
 	<color name="text_on_brand_accent">@color/white</color>
 
 	<color name="dialog_background">@color/white</color>
+	<color name="backup_background">@color/mine</color>
 
 	<!-- Most prominent text color -->
 	<color name="text_primary">@color/color_black</color>

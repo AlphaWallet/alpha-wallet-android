@@ -2,8 +2,10 @@
 <resources>
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
-        <!-- Customize your theme here. -->
+        <!-- App bar color -->
         <item name="colorPrimary">@color/color_white</item>
+        <!-- Status bar color -->
+        <item name="colorPrimaryDark">?colorPrimary</item>
         <item name="colorOnPrimary">@color/color_black</item>
         <item name="colorAccent">@color/brand_accent</item>
 
@@ -37,6 +39,7 @@
     <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="actionMenuTextColor">@color/dove</item>
     </style>
 

@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/standard_header_height"
-    android:background="@color/color_alabaster"
-    android:orientation="vertical"
-    android:paddingStart="@dimen/standard_16"
-    android:paddingEnd="@dimen/standard_16">
+    android:background="@color/header_background"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/text_header"
         style="@style/Aw.Typography.StandardHeaderText"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingEnd="@dimen/standard_16"
         tools:text="@string/recipient" />
 
-    <View style="@style/Aw.Component.Separator" />
+    <View
+        style="@style/Aw.Component.Separator"
+        android:layout_alignParentBottom="true" />
 
-</LinearLayout>
+</RelativeLayout>

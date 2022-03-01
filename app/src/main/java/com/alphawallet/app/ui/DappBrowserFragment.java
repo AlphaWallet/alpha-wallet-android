@@ -1643,12 +1643,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         if (web3 == null)
         {
             if (getActivity() != null) ((HomeActivity)getActivity()).resetFragment(WalletPage.DAPP_BROWSER);
+            loadOnInit = urlText;
         }
         else
         {
             // reset initial url, to avoid issues with initial load
             loadOnInit = null;
-
             cancelSearchSession();
             addToBackStack(DAPP_BROWSER);
             setUrlText(Utils.formatUrl(urlText));

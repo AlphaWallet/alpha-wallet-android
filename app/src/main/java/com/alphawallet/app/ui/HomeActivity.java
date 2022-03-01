@@ -773,7 +773,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void loadingComplete()
     {
         int lastId = viewModel.getLastFragmentId();
-        if (!TextUtils.isEmpty(openLink))
+        if (!TextUtils.isEmpty(openLink)) //delayed open link from intent - safe now that all fragments have been initialised
         {
             showPage(DAPP_BROWSER);
             DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
@@ -1235,6 +1235,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         try
         {
+            if (importData != null) importData = URLDecoder.decode(importData, "UTF-8");
             DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
             if (importData != null && importData.startsWith(NotificationService.AWSTARTUP))
             {
@@ -1257,13 +1258,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     String link = importData.substring(directLinkIndex + AW_MAGICLINK_DIRECT.length());
                     if (getSupportFragmentManager().getFragments().size() >= DAPP_BROWSER.ordinal())
                     {
-                        link = URLDecoder.decode(link, "UTF-8");
                         showPage(DAPP_BROWSER);
                         if (!dappFrag.isDetached()) dappFrag.loadDirect(link);
                     }
                     else
                     {
-                        openLink = link;
+                        openLink = link; //open link once fragments are initialised
                     }
                 }
                 else

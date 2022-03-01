@@ -40,7 +40,6 @@
 	<color name="button_secondary">@color/transparent</color>
 
 	<!-- For toolbars ?? TODO -->
-	<color name="toolbar_icon_tint">@color/color_green</color>
 
 	<!-- For buttons - azure / white (probably) TODO -->
 	<color name="icon_tint">@color/color_black</color>
@@ -49,9 +48,9 @@
 
 	<color name="separator">@color/color_mercury</color>
 
-	<color name="section_header"></color>
+<!--	<color name="section_header"></color>-->
 
-	<color name="seed_phrase"></color>
+<!--	<color name="seed_phrase"></color>-->
 
 
 

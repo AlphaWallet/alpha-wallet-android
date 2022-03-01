@@ -26,7 +26,6 @@
         <item name="android:colorBackground">@color/color_white</item>
         <item name="colorOnBackground">@color/color_black</item>
 
-
         <item name="toolbarStyle">@style/Aw.Component.Toolbar</item>
         <item name="appBarLayoutStyle">@style/Aw.Component.AppBarLayout</item>
         <item name="recyclerViewStyle">@style/Aw.Component.RecyclerView</item>
@@ -44,43 +43,7 @@
     </style>
 
     <!-- Splash Screen theme. -->
-
     <style name="SplashTheme" parent="AppTheme.NoActionBar">
         <item name="android:windowBackground">@drawable/background_splash</item>
     </style>
-
-
-    <style name="AppTheme.Toolbar" parent="ThemeOverlay.AppCompat.ActionBar">
-        <item name="colorControlNormal">@color/black</item>
-        <!--        <item name="color_dove">@color/transparent</item>-->
-        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
-        <item name="colorSurface">#FFFFFF</item>
-    </style>
-
-    <style name="AppTheme.Toolbar.Title" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:textColor">@color/dove</item>
-        <item name="android:fontFamily">@font/font_semibold</item>
-        <item name="android:textSize">20sp</item>
-        <item name="colorSurface">#FFFFFF</item>
-    </style>
-
-<!--    <style name="AppTheme.Toolbar.WhiteTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">-->
-<!--        <item name="android:textColor">@color/mine</item>-->
-<!--        <item name="android:fontFamily">@font/font_semibold</item>-->
-<!--        <item name="android:textSize">20sp</item>-->
-<!--        <item name="colorSurface">#FFFFFF</item>-->
-<!--    </style>-->
-
-<!--    <style name="AppTheme.WhiteToolbar" parent="ThemeOverlay.AppCompat.ActionBar">-->
-<!--        <item name="colorControlNormal">@color/mine</item>-->
-<!--    </style>-->
-
-<!--    <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog">-->
-<!--        <item name="android:windowBackground">@color/white</item>-->
-<!--        <item name="android:windowContentOverlay">@null</item>-->
-<!--        <item name="android:windowIsFloating">true</item>-->
-<!--        <item name="android:windowCloseOnTouchOutside">false</item>-->
-<!--        <item name="colorSurface">#FFFFFF</item>-->
-<!--    </style>-->
-
 </resources>

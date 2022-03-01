@@ -123,10 +123,10 @@ public class AWalletBottomNavigationView extends LinearLayout {
         settings.setImageResource(R.drawable.ic_tab_settings);
         activity.setImageResource(R.drawable.ic_tab_activity);
         //reset text colour
-        dappBrowserLabel.setTextColor(getContext().getColor(R.color.color_dove));
-        walletLabel.setTextColor(getContext().getColor(R.color.color_dove));
-        settingsLabel.setTextColor(getContext().getColor(R.color.color_dove));
-        activityLabel.setTextColor(getContext().getColor(R.color.color_dove));
+        dappBrowserLabel.setTextColor(getContext().getColor(R.color.text_secondary));
+        walletLabel.setTextColor(getContext().getColor(R.color.text_secondary));
+        settingsLabel.setTextColor(getContext().getColor(R.color.text_secondary));
+        activityLabel.setTextColor(getContext().getColor(R.color.text_secondary));
     }
 
     public void setSettingsBadgeCount(int count)

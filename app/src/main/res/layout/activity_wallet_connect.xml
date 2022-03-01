@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
                 android:text="@string/status"
-                android:textColor="@color/color_dove"
+                android:textColor="@color/text_secondary"
                 android:textSize="16sp" />
 
             <TextView
@@ -89,7 +89,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
                 android:text="@string/hint_contract_name"
-                android:textColor="@color/color_dove"
+                android:textColor="@color/text_secondary"
                 android:textSize="16sp" />
 
             <TextView
@@ -121,7 +121,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
                 android:text="@string/connected_to"
-                android:textColor="@color/color_dove"
+                android:textColor="@color/text_secondary"
                 android:textSize="16sp" />
 
             <TextView
@@ -152,7 +152,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_regular"
                 android:text="@string/subtitle_network"
-                android:textColor="@color/color_dove"
+                android:textColor="@color/text_secondary"
                 android:textSize="16sp" />
 
             <LinearLayout

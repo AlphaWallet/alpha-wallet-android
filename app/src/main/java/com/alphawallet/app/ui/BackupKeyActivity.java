@@ -412,7 +412,7 @@ public class BackupKeyActivity extends BaseActivity implements
 
     private void ResetInputBox() {
         verifyTextContainer.setStrokeColor(ContextCompat.getColor(this, R.color.dove));
-        verifyTextBox.setTextColor(getColor(R.color.color_dove));
+        verifyTextBox.setTextColor(getColor(R.color.text_secondary));
         verifyTextBox.setText(R.string.empty);
         TextView invalid = findViewById(R.id.text_invalid);
         invalid.setVisibility(View.GONE);
@@ -457,7 +457,7 @@ public class BackupKeyActivity extends BaseActivity implements
 
     private void seedIncorrect() {
         verifyTextContainer.setStrokeColor(ContextCompat.getColor(this, R.color.danger));
-        verifyTextBox.setTextColor(getColor(R.color.color_dove));
+        verifyTextBox.setTextColor(getColor(R.color.text_secondary));
         TextView invalid = findViewById(R.id.text_invalid);
         invalid.setVisibility(View.VISIBLE);
         Toast.makeText(this, R.string.invalid_phrase, Toast.LENGTH_LONG).show();

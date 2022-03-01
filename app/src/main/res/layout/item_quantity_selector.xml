@@ -68,7 +68,7 @@
             android:gravity="center"
             android:padding="10dp"
             android:text="1"
-            android:textColor="@color/color_dove"
+            android:textColor="@color/text_secondary"
             android:textSize="21sp" />
 
         <RelativeLayout

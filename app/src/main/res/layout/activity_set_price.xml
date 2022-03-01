@@ -59,7 +59,7 @@
                         android:fontFamily="@font/font_semibold"
                         android:gravity="center"
                         android:text="@string/learn_more_about_ethereum"
-                        android:textColor="@color/color_dove"
+                        android:textColor="@color/text_secondary"
                         android:textSize="18sp"
                         android:visibility="gone" />
 
@@ -114,7 +114,7 @@
                                         android:imeOptions="actionDone"
                                         android:inputType="numberDecimal"
                                         android:paddingStart="15dp"
-                                        android:textColor="@color/color_dove"
+                                        android:textColor="@color/text_secondary"
                                         android:textColorHint="@color/dusty"
                                         android:textSize="21sp" />
 
@@ -200,7 +200,7 @@
                                         android:gravity="center"
                                         android:padding="10dp"
                                         android:text="1"
-                                        android:textColor="@color/color_dove"
+                                        android:textColor="@color/text_secondary"
                                         android:textSize="21sp" />
 
                                     <RelativeLayout
@@ -238,7 +238,6 @@
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
                             android:layout_marginTop="20dp"
-                            android:background="@color/white"
                             android:orientation="vertical"
                             android:paddingLeft="10dp"
                             android:paddingRight="10dp">
@@ -249,15 +248,12 @@
                                 android:fontFamily="@font/font_light"
                                 android:gravity="center"
                                 android:text="@string/total_cost_label"
-                                android:textColor="@color/mine"
+                                android:textColor="@color/text_secondary"
                                 android:textSize="21sp" />
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
+                            <View style="@style/Aw.Component.Separator"
                                 android:layout_marginTop="10dp"
-                                android:layout_marginBottom="10dp"
-                                android:background="@color/mercury" />
+                                android:layout_marginBottom="10dp" />
 
                             <TextView
                                 android:id="@+id/eth_price"
@@ -266,15 +262,12 @@
                                 android:fontFamily="@font/font_bold"
                                 android:gravity="center"
                                 android:text="@string/eth_00"
-                                android:textColor="@color/color_dove"
+                                android:textColor="@color/text_primary"
                                 android:textSize="21sp" />
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
+                            <View style="@style/Aw.Component.Separator"
                                 android:layout_marginTop="10dp"
-                                android:layout_marginBottom="10dp"
-                                android:background="@color/mercury" />
+                                android:layout_marginBottom="10dp" />
 
                             <TextView
                                 android:id="@+id/fiat_price_txt"
@@ -284,7 +277,7 @@
                                 android:gravity="center"
                                 android:text="@string/equivalent_in_usd"
                                 android:textAllCaps="true"
-                                android:textColor="@color/dusty"
+                                android:textColor="@color/text_secondary"
                                 android:textSize="10sp" />
 
 
@@ -294,13 +287,12 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
                                 android:layout_marginTop="5dp"
-                                android:background="@drawable/background_round_grey"
                                 android:paddingLeft="20dp"
                                 android:paddingTop="10dp"
                                 android:paddingRight="20dp"
                                 android:paddingBottom="10dp"
                                 android:text="$0"
-                                android:textColor="@color/dusty"
+                                android:textColor="@color/text_primary"
                                 android:textSize="21sp" />
 
                         </LinearLayout>
@@ -391,7 +383,7 @@
                                         android:imeOptions="actionDone"
                                         android:inputType="datetime"
                                         android:paddingStart="15dp"
-                                        android:textColor="@color/color_dove"
+                                        android:textColor="@color/text_secondary"
                                         android:textColorHint="@color/dusty"
                                         android:textSize="18sp" />
 
@@ -457,7 +449,7 @@
                                         android:imeOptions="actionDone"
                                         android:inputType="time"
                                         android:paddingStart="15dp"
-                                        android:textColor="@color/color_dove"
+                                        android:textColor="@color/text_secondary"
                                         android:textColorHint="@color/dusty"
                                         android:textSize="18sp" />
 

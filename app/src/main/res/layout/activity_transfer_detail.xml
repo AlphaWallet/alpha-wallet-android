@@ -58,7 +58,7 @@
                         android:fontFamily="@font/font_regular"
                         android:text="@string/quantity_of_tickets"
                         android:textAllCaps="true"
-                        android:textColor="@color/color_dusty"
+                        android:textColor="@color/text_secondary"
                         android:textSize="@dimen/sp12" />
 
                     <LinearLayout
@@ -98,7 +98,7 @@
                             android:gravity="center"
                             android:padding="10dp"
                             android:text="1"
-                            android:textColor="@color/color_dove"
+                            android:textColor="@color/text_secondary"
                             android:textSize="21sp" />
 
                         <RelativeLayout
@@ -313,7 +313,7 @@
                                     android:imeOptions="actionDone"
                                     android:inputType="datetime"
                                     android:paddingStart="15dp"
-                                    android:textColor="@color/color_dove"
+                                    android:textColor="@color/text_secondary"
                                     android:textColorHint="@color/dusty"
                                     android:textSize="18sp" />
 
@@ -379,7 +379,7 @@
                                     android:imeOptions="actionDone"
                                     android:inputType="time"
                                     android:paddingStart="15dp"
-                                    android:textColor="@color/color_dove"
+                                    android:textColor="@color/text_secondary"
                                     android:textColorHint="@color/dusty"
                                     android:textSize="18sp" />
 

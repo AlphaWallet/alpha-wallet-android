@@ -46,7 +46,7 @@
             android:layout_gravity="center_horizontal"
             android:fontFamily="@font/font_bold"
             android:gravity="center"
-            android:textColor="@color/color_dove"
+            android:textColor="@color/text_secondary"
             android:textSize="20sp"
             android:visibility="gone" />
 
@@ -57,7 +57,7 @@
             android:layout_gravity="center_horizontal"
             android:fontFamily="@font/font_bold"
             android:gravity="center"
-            android:textColor="@color/color_dove"
+            android:textColor="@color/text_secondary"
             android:textSize="41sp"
             android:visibility="gone" />
 

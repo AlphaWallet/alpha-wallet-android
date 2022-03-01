@@ -44,7 +44,7 @@
             android:fontFamily="@font/font_regular"
             android:layout_marginTop="@dimen/dp5"
             android:text="@string/issuer"
-            android:textColor="@color/color_dove"
+            android:textColor="@color/text_secondary"
             tools:text="https://app.uniswap.org"
             android:textSize="@dimen/sp14"/>
 

@@ -41,7 +41,7 @@
             android:fontFamily="@font/font_bold"
             android:lines="1"
             android:text="dapp.com"
-            android:textColor="@color/color_dove"
+            android:textColor="@color/text_secondary"
             android:textSize="10sp" />
     </LinearLayout>
 
@@ -63,7 +63,7 @@
             android:paddingRight="10dp"
             android:paddingTop="10dp"
             android:text="@string/edit"
-            android:textColor="@color/color_dove"
+            android:textColor="@color/text_secondary"
             android:textSize="11sp" />
 
         <TextView

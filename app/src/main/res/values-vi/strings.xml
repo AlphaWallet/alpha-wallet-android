@@ -55,8 +55,6 @@
     <string name="label_old_gas_price">Giá Gas cũ</string>
     <string name="label_network_fee">Phí mạng (Lớn nhất)</string>
     <string name="button_ok">Đồng ý</string>
-    <string name="label_address">Address</string>
-    <string name="label_name">Name</string>
 
     <!-- Subtitles -->
     <string name="subtitle_from">Từ</string>

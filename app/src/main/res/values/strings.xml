@@ -55,8 +55,6 @@
     <string name="label_old_gas_price">Old Gas Price</string>
     <string name="label_network_fee">Network Fee (Maximum)</string>
     <string name="button_ok">OK</string>
-    <string name="label_address">Address</string>
-    <string name="label_name">Name</string>
 
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>

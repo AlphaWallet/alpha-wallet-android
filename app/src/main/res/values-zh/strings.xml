@@ -50,8 +50,6 @@
     <string name="label_old_gas_price">先前的燃油价格</string>
     <string name="label_network_fee">交易手续费</string>
     <string name="button_ok">确定</string>
-    <string name="label_address">Address</string>
-    <string name="label_name">Name</string>
     <!-- Subtitles -->
     <string name="subtitle_from">来源地址</string>
     <string name="subtitle_to">接收地址</string>

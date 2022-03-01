@@ -55,8 +55,6 @@
     <string name="label_old_gas_price">Ancien Prix du Gas</string>
     <string name="label_network_fee">Frais de réseau (Maximum)</string>
     <string name="button_ok">OK</string>
-    <string name="label_address">Address</string>
-    <string name="label_name">Name</string>
 
     <!-- Subtitles -->
     <string name="subtitle_from">De</string>

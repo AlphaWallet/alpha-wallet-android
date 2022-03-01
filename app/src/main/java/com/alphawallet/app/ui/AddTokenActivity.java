@@ -330,7 +330,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         List<Token> toSave = new ArrayList<>();
         for (TokenCardMeta tcm : selected)
         {
-            toSave.add(tokenList.get(tcm.getChain()));
+            Token matchingToken = tokenList.get(tcm.getChain());
+            if (matchingToken != null) toSave.add(matchingToken);
         }
 
         if (toSave.size() > 0)

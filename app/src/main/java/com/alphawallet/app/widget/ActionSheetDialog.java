@@ -434,7 +434,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 intent.putExtra(C.EXTRA_TXHASH, txHash);
                 intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
                 activity.startActivityForResult(intent, C.COMPLETED_TRANSACTION);
-                dismiss();
+                tryDismiss();
                 break;
 
             case SEND_TRANSACTION_WC:
@@ -443,9 +443,14 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             case CANCEL_TRANSACTION:
             case SIGN_TRANSACTION:
                 //return to dapp
-                dismiss();
+                tryDismiss();
                 break;
         }
+    }
+
+    private void tryDismiss()
+    {
+        if (isAttached && isShowing()) dismiss();
     }
 
     private void updateRealmTransactionFinishEstimate(String txHash)

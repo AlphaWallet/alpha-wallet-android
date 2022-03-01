@@ -39,7 +39,7 @@ public class NFTAsset implements Parcelable
     private static final String DESCRIPTION = "description";
     private static final String IMAGE_ORIGINAL_URL = "image_original_url";
     private static final String IMAGE_ANIMATION = "animation_url";
-    private static final String[] IMAGE_DESIGNATORS = { IMAGE_ANIMATION, IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW };
+    private static final String[] IMAGE_DESIGNATORS = { IMAGE, IMAGE_URL, IMAGE_ANIMATION, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW };
     private static final String[] SVG_OVERRIDE = { IMAGE_ORIGINAL_URL, IMAGE_ANIMATION, IMAGE, IMAGE_URL };
     private static final String[] IMAGE_THUMBNAIL_DESIGNATORS = { IMAGE_PREVIEW, IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_ANIMATION };
     private static final String BACKGROUND_COLOUR = "background_color";

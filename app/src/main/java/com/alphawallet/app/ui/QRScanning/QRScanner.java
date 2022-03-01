@@ -115,7 +115,15 @@ public class QRScanner extends BaseActivity
         myAddressButton = findViewById(R.id.my_address_button);
         browseButton = findViewById(R.id.browse_button);
 
+        setupToolbar();
+
         setupButtons();
+    }
+
+    private void setupToolbar() {
+        toolbar();
+        setTitle(getString(R.string.action_scan_dapp));
+        enableDisplayHomeAsUp(R.drawable.ic_close);
     }
 
     private void setupButtons()

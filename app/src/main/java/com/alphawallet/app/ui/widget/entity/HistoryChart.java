@@ -171,7 +171,7 @@ public class HistoryChart extends View
 
     private void init()
     {
-        paint.setColor(getResources().getColor(R.color.color_green, getContext().getTheme()));
+        paint.setColor(getResources().getColor(R.color.positive, getContext().getTheme()));
 
         Resources r = getResources();
         int strokeWidth = (int) TypedValue.applyDimension(
@@ -204,7 +204,7 @@ public class HistoryChart extends View
                         r.getDisplayMetrics()
                 )
         );
-        edgeValPaint.setColor(getResources().getColor(R.color.color_black, getContext().getTheme()));
+        edgeValPaint.setColor(getResources().getColor(R.color.text_legend, getContext().getTheme()));
 
     }
 
@@ -236,7 +236,7 @@ public class HistoryChart extends View
 
         //colour changes depending on first and last values
         path.reset();
-        int color = datasource.isGreen() ? R.color.color_green : R.color.danger;
+        int color = datasource.isGreen() ? R.color.positive : R.color.negative;
         paint.setColor(getResources().getColor(color,getContext().getTheme()));
 
 

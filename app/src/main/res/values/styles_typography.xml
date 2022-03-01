@@ -21,7 +21,6 @@
 
     <style name="Aw.Typography.ChartTabText" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">@dimen/sp17</item>
-        <item name="android:textColor">@color/text_secondary</item>
         <item name="android:padding">@dimen/dp10</item>
         <item name="android:fontFamily">@font/font_regular</item>
         <item name="textAllCaps">false</item>

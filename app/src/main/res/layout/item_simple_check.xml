@@ -28,8 +28,9 @@
         android:layout_marginStart="@dimen/cozy_20"
         android:layout_toEndOf="@+id/manage_btn"
         android:fontFamily="@font/font_regular"
-        android:textColor="@color/color_black"
-        android:textSize="@dimen/sp17" />
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/sp17"
+        tools:text="Name" />
 
     <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/checkbox"

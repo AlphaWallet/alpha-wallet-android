@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:custom="http://schemas.android.com/apk/res-auto">
+    android:layout_height="wrap_content">
 
     <com.alphawallet.app.widget.StandardHeader
         android:id="@+id/layout_header"
@@ -95,10 +95,11 @@
         android:layout_marginTop="2dp"
         android:layout_toStartOf="@id/text_paste"
         android:fontFamily="@font/font_regular"
-        android:textColor="@color/color_green"
+        android:textColor="@color/positive"
         android:textSize="@dimen/sp12"
         android:visibility="gone"
-        tools:text="Awesome Tokens" />
+        tools:text="Awesome Tokens"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/error_text"

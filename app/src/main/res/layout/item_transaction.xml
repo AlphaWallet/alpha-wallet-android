@@ -4,7 +4,6 @@
     android:id="@+id/layout_background"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/colorSurface"
     android:minHeight="80dp"
     android:orientation="horizontal"
     android:padding="@dimen/standard_16">

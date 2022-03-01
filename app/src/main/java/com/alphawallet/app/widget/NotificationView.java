@@ -11,9 +11,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
+import com.google.android.material.card.MaterialCardView;
 
 public class NotificationView extends LinearLayout {
-    private RelativeLayout layout;
+    private MaterialCardView layout;
     private TextView title;
     private TextView message;
     private Button primaryButton;
@@ -198,7 +199,7 @@ public class NotificationView extends LinearLayout {
     }
 
     public void setNotificationBackgroundColor(int backgroundColorRes) {
-        layout.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), backgroundColorRes));
+        layout.setCardBackgroundColor(backgroundColorRes);
     }
 
     public void setNotificationTextColor(int textColorRes) {

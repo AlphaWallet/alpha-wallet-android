@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_redeem"
-        android:title="@string/action_redeem"
-        app:showAsAction="always"
-        />
+        android:id="@+id/action_next"
+        android:title="@string/action_next"
+        app:iconTint="@color/icon_tint"
+        app:showAsAction="always" />
 </menu>

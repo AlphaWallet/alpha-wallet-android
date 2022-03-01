@@ -6,6 +6,6 @@
         android:id="@+id/action_scan"
         android:icon="@drawable/ic_camera_scan"
         android:title="@string/scan_qr"
-        app:showAsAction="always"
-        />
+        app:iconTint="@color/icon_tint"
+        app:showAsAction="always" />
 </menu>

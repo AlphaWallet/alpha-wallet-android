@@ -177,7 +177,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
             }
             catch (Exception e)
             {
-                Timber.e(e);
+                Timber.e(e, e.getMessage());
             }
         });
 
@@ -194,8 +194,6 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
                 ((Activity) context).startActivityForResult(intent, C.BARCODE_READER_REQUEST_CODE);
             });
         }
-
-
     }
 
     private void setImeOptions()

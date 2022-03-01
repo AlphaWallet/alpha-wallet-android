@@ -59,6 +59,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
+import timber.log.Timber;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -427,7 +428,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                             }
                             catch (Exception e)
                             {
-                                if (BuildConfig.DEBUG) e.printStackTrace();
+                                Timber.e(e);
                             }
                         }
 
@@ -442,7 +443,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                     showCameraDenied();
                     break;
                 default:
-                    Log.e("SEND", String.format(getString(R.string.barcode_error_format),
+                    Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
                                                 "Code: " + resultCode
                     ));
                     break;

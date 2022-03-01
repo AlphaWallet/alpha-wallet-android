@@ -52,6 +52,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.realm.Realm;
+import timber.log.Timber;
 
 import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunctionArray;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
@@ -160,14 +161,6 @@ public class ERC1155Token extends Token
     public List<Integer> getStandardFunctions()
     {
         return Arrays.asList(R.string.action_transfer);
-    }
-
-    @Override
-    public byte[] getTransferBytes(String to, List<BigInteger> tokenIds) throws NumberFormatException
-    {
-        Function txFunc = getTransferFunction(to, tokenIds);
-        String encodedFunction = FunctionEncoder.encode(txFunc);
-        return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
     @Override
@@ -623,7 +616,7 @@ public class ERC1155Token extends Token
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return new BigDecimal(assets.keySet().size());
@@ -774,5 +767,11 @@ public class ERC1155Token extends Token
         return getBaseTokenId(tokenId).compareTo(BigInteger.ZERO) > 0
                 && getNFTTokenId(tokenId).compareTo(BigInteger.valueOf(0xFFFF)) < 0
                 && getNFTTokenId(tokenId).compareTo(BigInteger.ZERO) > 0;
+    }
+
+    @Override
+    public boolean isBatchTransferAvailable()
+    {
+        return true;
     }
 }

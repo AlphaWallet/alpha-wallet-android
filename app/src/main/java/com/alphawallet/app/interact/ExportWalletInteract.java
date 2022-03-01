@@ -8,6 +8,7 @@ import com.alphawallet.app.entity.Wallet;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import timber.log.Timber;
 
 public class ExportWalletInteract {
 
@@ -18,7 +19,7 @@ public class ExportWalletInteract {
     }
 
     public Single<String> export(Wallet wallet, String keystorePassword, String backupPassword) {
-        if (BuildConfig.DEBUG) Log.d("RealmDebug", "export + " + wallet.address);
+        Timber.tag("RealmDebug").d("export + %s", wallet.address);
         return walletRepository
                     .exportWallet(wallet, keystorePassword, backupPassword)
                 .observeOn(AndroidSchedulers.mainThread());

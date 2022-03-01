@@ -87,7 +87,7 @@ public class WalletConnectService extends Service
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
         return START_STICKY;
     }

@@ -953,7 +953,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE))
             {
-                Log.w("HomeActivity", "Folder write permission is not granted. Requesting permission");
+                Timber.tag("HomeActivity").w("Folder write permission is not granted. Requesting permission");
                 ActivityCompat.requestPermissions(this, permissions, permissionTag);
                 return false;
             }
@@ -977,7 +977,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.ACCESS_NOTIFICATION_POLICY))
             {
-                Log.w("HomeActivity", "Notification permission is not granted. Requesting permission");
+                Timber.tag("HomeActivity").w("Notification permission is not granted. Requesting permission");
                 ActivityCompat.requestPermissions(this, permissions, permissionTag);
                 return false;
             }
@@ -1180,7 +1180,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 }
                 catch (Exception e)
                 {
-                    Log.e(getClass().getSimpleName(), "onMenuOpened...unable to set icons for overflow menu", e);
+                    Timber.e(e, "onMenuOpened...unable to set icons for overflow menu");
                 }
             }
         }

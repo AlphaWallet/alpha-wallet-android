@@ -291,6 +291,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     }
                     catch (Exception e)
                     {
+                        handledHashes.add(new TokenScriptFile(context, file.getAbsolutePath()).calcMD5());
                         handleFileLoadError(e, file);
                     }
                 } );

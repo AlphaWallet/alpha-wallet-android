@@ -167,7 +167,7 @@ public class TokensService
 
     private void finishAddToken(Token token)
     {
-        if (token.getInterfaceSpec() != ContractType.OTHER)
+        if (token != null && token.getInterfaceSpec() != ContractType.OTHER)
         {
             tokenStoreList.add(token);
         }
@@ -965,7 +965,7 @@ public class TokensService
     {
         for (Token t : tokenList)
         {
-            tokenStoreList.addFirst(t);
+            if (t != null) tokenStoreList.addFirst(t);
         }
     }
 

@@ -1,25 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.button.MaterialButton xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/name"
+    style="@style/Aw.Component.Button.Suggestion"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginStart="10dp"
-    android:background="@drawable/background_round_grey_4dp"
-    android:clickable="true"
-    android:foreground="?android:attr/selectableItemBackground"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:padding="@dimen/small_12">
+    tools:text="Text" />
 
-    <TextView
-        android:id="@+id/name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:fontFamily="@font/font_regular"
-        android:lines="1"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp17"
-        tools:text="Text" />
 
-</RelativeLayout>

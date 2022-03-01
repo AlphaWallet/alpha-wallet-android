@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.OnSuggestionClickListener;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class SuggestionsAdapter extends RecyclerView.Adapter<SuggestionsAdapter.
     private final OnSuggestionClickListener onSuggestionClickListener;
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        TextView name;
+        MaterialButton name;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -57,7 +58,7 @@ public class SuggestionsAdapter extends RecyclerView.Adapter<SuggestionsAdapter.
         String data = suggestionList.get(i);
         viewHolder.name.setText(data);
 
-        viewHolder.itemView.setOnClickListener(v -> {
+        viewHolder.name.setOnClickListener(v -> {
             String outputWord = data.replaceFirst(suggestion, "");
             onSuggestionClickListener.onSuggestionClick(outputWord);
         });

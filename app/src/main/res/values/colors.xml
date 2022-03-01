@@ -51,6 +51,9 @@
 	<color name="background_chart_tab_selected">@color/color_mine</color>
 	<color name="text_legend">@color/color_black</color>
 
+	<!-- Seed Word -->
+	<color name="text_seed_word">@color/text_primary</color>
+	<color name="text_seed_word_selected">@color/color_alabaster</color>
 
 	<!-- AlphaWallet Palette -->
 	<color name="pinkish_grey">#bdbdbd</color>

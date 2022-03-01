@@ -539,8 +539,7 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     private void onWordClick(TextView tv) {
-        tv.setTextColor(getColor(R.color.color_alabaster));
-        tv.setBackgroundResource(R.drawable.background_seed_word_selected);
+        tv.setSelected(true);
         tv.setOnClickListener(null);
         String currentText = verifyTextBox.getText().toString();
         if (currentText.length() > 0) currentText += " ";
@@ -596,16 +595,9 @@ public class BackupKeyActivity extends BaseActivity implements
                 new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, textViewHeight);
 
         params.setMargins(margin, margin, margin, margin);
-        TextView seedWord = new TextView(this);
-        seedWord.setMaxLines(1);
+        TextView seedWord = new TextView(this, null, R.attr.seedWordStyle);
         seedWord.setText(word);
-        seedWord.setTypeface(ResourcesCompat.getFont(this, R.font.font_regular));
-        seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
-        seedWord.setBackgroundResource(R.drawable.background_seed_word);
-        seedWord.setTextColor(MaterialColors.getColor(seedWord, R.attr.colorOnSurface));
         seedWord.setLayoutParams(params);
-        seedWord.setGravity(Gravity.CENTER);
-        seedWord.setPadding(padding, 0, padding, 0);
 
         return seedWord;
     }

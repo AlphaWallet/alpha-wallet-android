@@ -82,4 +82,5 @@
     <declare-styleable name="TokenIcon">
         <attr name="square" format="boolean" />
     </declare-styleable>
+    <attr name="seedWordStyle" format="reference" />
 </resources>

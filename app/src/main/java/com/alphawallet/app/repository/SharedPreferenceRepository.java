@@ -354,7 +354,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public int getTheme()
     {
-        return pref.getInt(THEME_KEY, 0);
+        return pref.getInt(THEME_KEY, C.THEME_AUTO);
     }
 
     @Override

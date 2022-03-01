@@ -118,7 +118,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         moreActionsListView.setAdapter(moreActionsAdapter);
         bottomSheet.setContentView(moreActionsListView);
         moreActionsListView.setOnItemClickListener(this);
-        moreActionsListView.setDivider(new ColorDrawable(ContextCompat.getColor(context, R.color.color_mercury)));
+        moreActionsListView.setDivider(new ColorDrawable(ContextCompat.getColor(context, R.color.separator)));
         moreActionsListView.setDividerHeight(Utils.dp2px(context, 1));
     }
 
@@ -314,7 +314,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         else
         {
             displayInvalidSelectionError();
-            flashButton(findViewById(buttonId));
             return false;
         }
     }
@@ -495,27 +494,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         v.setEnabled(false);
         handler.postDelayed(() -> {
             v.setEnabled(true);
-        }, 500);
-    }
-
-    /**
-     * Indicate token input error
-     *
-     * @param button
-     */
-    private void flashButton(final Button button)
-    {
-        if (button == null) return;
-        button.setBackgroundResource(R.drawable.button_primary_error);
-        handler.postDelayed(() -> {
-            if (button.hashCode() == primaryButton.hashCode())
-            {
-                button.setBackgroundResource(R.drawable.selector_button_primary);
-            }
-            else if (button.hashCode() == secondaryButton.hashCode())
-            {
-                button.setBackgroundResource(R.drawable.selector_button_secondary);
-            }
         }, 500);
     }
 

@@ -1,21 +1,51 @@
 package com.alphawallet.token.tools;
 
-import com.alphawallet.token.entity.*;
-import org.w3c.dom.*;
+import static org.w3c.dom.Node.ELEMENT_NODE;
+
+import com.alphawallet.token.entity.As;
+import com.alphawallet.token.entity.Attribute;
+import com.alphawallet.token.entity.ContractInfo;
+import com.alphawallet.token.entity.EthereumTransaction;
+import com.alphawallet.token.entity.EventDefinition;
+import com.alphawallet.token.entity.FunctionDefinition;
+import com.alphawallet.token.entity.MethodArg;
+import com.alphawallet.token.entity.NamedType;
+import com.alphawallet.token.entity.NonFungibleToken;
+import com.alphawallet.token.entity.ParseResult;
+import com.alphawallet.token.entity.TSAction;
+import com.alphawallet.token.entity.TSActivityView;
+import com.alphawallet.token.entity.TSOriginType;
+import com.alphawallet.token.entity.TSOrigins;
+import com.alphawallet.token.entity.TSSelection;
+import com.alphawallet.token.entity.TSTokenView;
+import com.alphawallet.token.entity.TSTokenViewHolder;
+import com.alphawallet.token.entity.TokenscriptContext;
+import com.alphawallet.token.entity.TokenscriptElement;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.EntityReference;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
-import static org.w3c.dom.Node.ELEMENT_NODE;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 public class TokenDefinition {
     protected Document xml;
@@ -323,7 +353,7 @@ public class TokenDefinition {
         holdingToken = null;
     }
 
-    public TokenDefinition(InputStream xmlAsset, Locale locale, ParseResult result) throws IOException, SAXException {
+    public TokenDefinition(InputStream xmlAsset, Locale locale, ParseResult result) throws IllegalArgumentException, IOException, SAXException {
         this.locale = locale;
         /* guard input from bad programs which creates Locale not following ISO 639 */
         if (locale.getLanguage().length() < 2 || locale.getLanguage().length() > 3) {

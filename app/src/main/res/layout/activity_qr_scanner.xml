@@ -18,18 +18,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center|bottom"
-        android:text=""
-        android:textColor="#ffffff" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_alignTop="@+id/scanner_view"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/double_large_64"
         android:text="@string/message_scan_camera"
-        android:textColor="@color/text_primary_inverse"
+        android:textColor="@color/white"
         android:textSize="@dimen/sp17" />
 
     <LinearLayout

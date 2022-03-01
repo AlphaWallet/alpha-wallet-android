@@ -1,7 +1,13 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.ETH_SYMBOL;
+import static com.alphawallet.app.entity.TransactionDecoder.FUNCTION_LENGTH;
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
+import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -20,11 +26,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ConfirmationType;
-import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
@@ -54,7 +57,6 @@ import com.alphawallet.app.widget.ActionSheetMode;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.EventDetailWidget;
 import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.token.entity.TSActivityView;
@@ -75,8 +77,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -84,13 +84,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import timber.log.Timber;
-
-import static com.alphawallet.app.C.ETH_SYMBOL;
-import static com.alphawallet.app.entity.TransactionDecoder.FUNCTION_LENGTH;
-import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
-import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
-import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 
 /**
@@ -114,7 +107,6 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     private final Map<String, String> args = new HashMap<>();
     private TSTokenView scriptViewData;
     private BigInteger tokenId;
-    private Realm realm;
     private final Handler handler = new Handler();
     private boolean isFromTokenHistory = false;
     private long pendingStart = 0;
@@ -175,20 +167,6 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     }
 
     @Override
-    public void onResume()
-    {
-        super.onResume();
-        initViews();
-        if (viewModel == null)
-        {
-            setupViewModel();
-        }
-
-        viewModel.getCurrentWallet();
-        viewModel.restartServices();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_activity, menu);
         return super.onCreateOptionsMenu(menu);
@@ -222,10 +200,23 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     }
 
     @Override
-    public void onDestroy()
+    public void onResume()
     {
-        super.onDestroy();
-        if (realm != null && !realm.isClosed()) realm.close();
+        super.onResume();
+        initViews();
+        if (viewModel == null)
+        {
+            setupViewModel();
+        }
+
+        viewModel.getCurrentWallet();
+        viewModel.restartServices();
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
         stopPendingUpdate();
     }
 
@@ -261,7 +252,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         }
         else
         {
-            handleTransaction(wallet);
+            handleTransaction();
         }
 
         setupFunctions();
@@ -288,7 +279,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         }
     }
 
-    private void handleTransaction(Wallet wallet)
+    private void handleTransaction()
     {
         Transaction transaction = viewModel.fetchTransaction(transactionHash);
         if (transaction == null) return;
@@ -328,12 +319,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             eventAmount.setText(transactionValue);
         }
 
-        if (transaction.isPending())
-        {
-            //listen for token completion
-            setupPendingListener(wallet);
-            pendingStart = transaction.timeStamp;
-        }
+        startPendingUpdate();
 
         String supplementalTxt = transaction.getSupplementalInfo(token.getWallet(), viewModel.getTokensService().getNetworkName(token.tokenInfo.chainId));
         if (!TextUtils.isEmpty(supplementalTxt))
@@ -348,14 +334,13 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         setChainName(transaction);
     }
 
-    private void setupPendingListener(Wallet wallet)
-    {
-        realm = viewModel.getRealmInstance(wallet);
-        startPendingUpdate();
-    }
-
     private void startPendingUpdate()
     {
+        Transaction transaction = viewModel.fetchTransaction(transactionHash);
+        if (transaction == null || !transaction.isPending()) return;
+
+        pendingStart = transaction.timeStamp;
+
         //now set up the transaction pending time
         LinearLayout txPending = findViewById(R.id.pending_time_layout);
         txPending.setVisibility(View.VISIBLE);
@@ -373,18 +358,23 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     private void checkForUpdate()
     {
-        RealmTransaction realmTransaction = realm.where(RealmTransaction.class)
-                .equalTo("hash", transactionHash)
-                .findFirst();
+        if (viewModel == null || token == null) return;
 
-        if (realmTransaction != null && !realmTransaction.isPending())
+        try (Realm realm = viewModel.getRealmInstance(new Wallet(viewModel.getTokenService().getCurrentAddress())))
         {
-            Transaction tx = TransactionsRealmCache.convert(realmTransaction);
-            //tx written, update icon
-            handler.post(() -> {
-                icon.setStatusIcon(token.getTxStatus(tx));
-            });
-            stopPendingUpdate();
+            RealmTransaction realmTransaction = realm.where(RealmTransaction.class)
+                    .equalTo("hash", transactionHash)
+                    .findFirst();
+
+            if (realmTransaction != null && !realmTransaction.isPending())
+            {
+                Transaction tx = TransactionsRealmCache.convert(realmTransaction);
+                //tx written, update icon
+                handler.post(() -> {
+                    icon.setStatusIcon(token.getTxStatus(tx));
+                });
+                stopPendingUpdate();
+            }
         }
     }
 

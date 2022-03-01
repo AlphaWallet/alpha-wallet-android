@@ -13,6 +13,7 @@
         android:layout_gravity="center"
         android:textColor="@color/text_primary"
         android:textSize="@dimen/sp36"
+        android:visibility="gone"
         tools:text="Title" />
 
     <TextView

@@ -198,6 +198,18 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style name="Aw.Component.WhatsNewEntry" parent="Widget.MaterialComponents.TextView">
+        <item name="android:fontFamily">@font/font_regular</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:paddingStart">@dimen/standard_16</item>
+        <item name="android:paddingEnd">@dimen/standard_16</item>
+        <item name="android:paddingBottom">@dimen/tiny_8</item>
+        <item name="android:textSize">@dimen/sp17</item>
+        <item name="android:drawableStart">@drawable/ic_icons_system_border_circle</item>
+        <item name="android:drawablePadding">@dimen/tiny_8</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.ActionBar">
         <item name="iconTint">@color/azure</item>
     </style>

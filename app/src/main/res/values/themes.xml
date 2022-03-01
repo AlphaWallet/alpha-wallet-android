@@ -34,6 +34,7 @@
         <item name="radioButtonStyle">@style/Aw.Component.RadioButton</item>
         <item name="bottomSheetDialogTheme">@style/Aw.Component.BottomSheetDialog</item>
         <item name="seedWordStyle">@style/Aw.Component.SeedWord</item>
+        <item name="whatsNewEntryStyle">@style/Aw.Component.WhatsNewEntry</item>
     </style>
 
     <style name="AppTheme.NoActionBar" parent="AppTheme">

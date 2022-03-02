@@ -36,9 +36,6 @@ import com.alphawallet.app.viewmodel.TokenAlertsViewModel;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.util.List;
-import java.util.Objects;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -147,28 +144,20 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
                 icon = ContextCompat.getDrawable(getActivity(), R.drawable.ic_close);
                 if (icon != null)
                 {
-                    icon.setTint(ContextCompat.getColor(getActivity(), R.color.icon_tint));
+                    icon.setTint(ContextCompat.getColor(getActivity(), R.color.text_error_inverse));
                 }
-                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.negative));
+                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.text_error));
 
                 textPaint.setTextAlign(Paint.Align.CENTER);
                 textPaint.setTypeface(ResourcesCompat.getFont(getContext(), R.font.font_semibold));
-
-                int textSize = (int) TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_SP,
-                        17,
-                        getActivity().getResources().getDisplayMetrics()
-                );
+                textPaint.setTextSize((int) getResources().getDimension(R.dimen.sp17));
+                textPaint.setColor(getResources().getColor(R.color.text_error_inverse, getContext().getTheme()));
 
                 swipeControlWidth = (int) TypedValue.applyDimension(
                         TypedValue.COMPLEX_UNIT_DIP,
                         120,
                         getActivity().getResources().getDisplayMetrics()
                 );
-
-
-                textPaint.setTextSize(textSize);
-                textPaint.setColor(getResources().getColor(R.color.white, getContext().getTheme()));
             }
         }
 

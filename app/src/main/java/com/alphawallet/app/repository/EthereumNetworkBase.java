@@ -732,7 +732,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
         else
         {
-            return R.color.mine;
+            return R.color.text_primary;
         }
     }
 

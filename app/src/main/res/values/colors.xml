@@ -14,6 +14,9 @@
 	<color name="color_cod">@color/cod</color>
 
 	<!-- Functional -->
+	<color name="surface">@color/color_white</color>
+	<color name="surface_inverse">@color/color_black</color>
+
 	<color name="brand_accent">@color/azure</color>
 	<color name="text_on_brand_accent">@color/white</color>
 

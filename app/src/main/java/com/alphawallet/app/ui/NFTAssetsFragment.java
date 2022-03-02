@@ -146,7 +146,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         recyclerView.removeItemDecoration(listItemDecoration);
         recyclerView.addItemDecoration(gridItemDecoration);
-        recyclerView.setBackgroundColor(MaterialColors.getColor(recyclerView, R.attr.colorSurface));
+        recyclerView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.surface));
         initAndAttachAdapter(true);
     }
 

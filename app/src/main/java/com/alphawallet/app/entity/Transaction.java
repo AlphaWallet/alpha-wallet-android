@@ -517,9 +517,9 @@ public class Transaction implements Parcelable
 			switch (supplementalTxt.charAt(1))
 			{
 				case '-':
-					return R.color.danger;
+					return R.color.negative;
 				case '+':
-					return R.color.green;
+					return R.color.positive;
 				default:
 					break;
 			}

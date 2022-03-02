@@ -147,9 +147,9 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
                 icon = ContextCompat.getDrawable(getActivity(), R.drawable.ic_close);
                 if (icon != null)
                 {
-                    icon.setTint(ContextCompat.getColor(getActivity(), R.color.white));
+                    icon.setTint(ContextCompat.getColor(getActivity(), R.color.icon_tint));
                 }
-                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.danger));
+                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.negative));
 
                 textPaint.setTextAlign(Paint.Align.CENTER);
                 textPaint.setTypeface(ResourcesCompat.getFont(getContext(), R.font.font_semibold));

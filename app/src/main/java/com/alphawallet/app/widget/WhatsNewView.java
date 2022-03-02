@@ -85,7 +85,7 @@ public class WhatsNewView extends ConstraintLayout {
                 ll.setOrientation(LinearLayout.HORIZONTAL);
 
                 TextView tv = new TextView(getContext());
-                tv.setText(entry);
+                tv.setText(entry.trim());
                 tv.setTextColor(ContextCompat.getColor(getContext(), R.color.black));
                 tv.setTypeface(ResourcesCompat.getFont(getContext(), R.font.font_regular));
                 tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
@@ -95,7 +95,11 @@ public class WhatsNewView extends ConstraintLayout {
                 ll.addView(iv);
                 ll.addView(tv);
                 if (index++ == 0) {
-                    iv.setVisibility(View.INVISIBLE);
+                    String first = tv.getText().toString();
+                    if (first.startsWith("- "))
+                    {
+                        tv.setText(first.substring(2).trim());
+                    }
                 }
                 holder.details.addView(ll);
                 LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)ll.getLayoutParams();

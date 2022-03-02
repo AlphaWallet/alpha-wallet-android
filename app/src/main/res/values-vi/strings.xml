@@ -887,4 +887,5 @@
     <string name="reload_metadata">Reload Metadata</string>
     <string name="label_market_price">Market Price:</string>
     <string name="i_already_have_a_wallet">I already have a Wallet</string>
+    <string name="title_select_theme">Select Mode</string>
 </resources>

@@ -25,7 +25,7 @@ public class SelectThemeActivity extends BaseActivity {
         initViewModel();
         initViews();
         toolbar();
-        setTitle("Select Mode");
+        setTitle(getString(R.string.title_select_theme));
     }
 
     private void initViewModel()

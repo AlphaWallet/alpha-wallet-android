@@ -48,8 +48,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 	private final TextView walletAddressSeparator;
 	private final TextView walletAddressText;
 	private final TextView wallet24hChange;
-	private final int greyColor;
-	private final int blackColor;
 	private final Realm realm;
 	private RealmResults<RealmWalletData> realmUpdate;
 
@@ -69,8 +67,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 		wallet24hChange = findViewById(R.id.wallet_24h_change);
 		clickCallback = callback;
 		manageWalletLayout = findViewById(R.id.layout_manage_wallet);
-		greyColor = parent.getContext().getColor(R.color.color_concrete);
-		blackColor = parent.getContext().getColor(R.color.color_mine);
 		this.realm = realm;
 	}
 
@@ -105,11 +101,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 			if (!TextUtils.isEmpty(walletBalance) && walletBalance.startsWith("*"))
 			{
 				walletBalance = walletBalance.substring(1);
-				walletBalanceText.setTextColor(greyColor);
-			}
-			else
-			{
-				walletBalanceText.setTextColor(blackColor);
 			}
 			walletBalanceText.setText(walletBalance);
 			walletBalanceCurrency.setText(wallet.balanceSymbol);

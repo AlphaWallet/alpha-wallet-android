@@ -550,7 +550,7 @@
     <string name="tokenscript_error_detail">Error in TokenScript element: %1$s</string>
     <string name="tokenscript_element_not_present">function input \'%1$s\' not found in HTML elements.</string>
     <string name="complete_tokenscript_value">Invalid input value: %1$s</string>
-    <string name="value">VALUE</string>
+    <string name="value">Value</string>
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">Unable to create key. Try enabling security on your phone.</string>
     <string name="what_is_seed_phrase">A seed phrase, seed recovery phrase or backup seed phrase is a list of words which store all the information needed to recover a crypto wallet. Wallet software will typically generate a seed phrase and instruct the user to write it down on paper.</string>

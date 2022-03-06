@@ -100,7 +100,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/tiny_8"
                     android:orientation="horizontal"
-                    android:visibility="gone">
+                    android:visibility="gone"
+                    tools:visibility="visible">
 
                     <ProgressBar
                         android:layout_width="wrap_content"
@@ -110,10 +111,9 @@
 
                     <TextView
                         android:id="@+id/pending_time"
-                        style="@style/Aw.Typography.TransactionDetailTitleText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/text_secondary"
+                        android:layout_gravity="center_vertical"
                         tools:text="@string/transaction_pending_for" />
 
                 </LinearLayout>

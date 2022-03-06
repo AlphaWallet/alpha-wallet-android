@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="Aw.Typography" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/font_regular</item>
+    </style>
+
+    <style name="Aw.Typography.Label">
+        <item name="android:textSize">@dimen/sp15</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <style name="Aw.Typography.Body">
+        <item name="android:textSize">@dimen/sp17</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="Aw.Typography.Body.Error">
+        <item name="android:textColor">@color/text_error</item>
+    </style>
 
     <style name="Aw.Typography.ToolbarTitle" parent="">
         <item name="android:fontFamily">@font/font_semibold</item>
@@ -29,17 +46,5 @@
         <item name="android:textAllCaps">true</item>
         <item name="android:textColor">@color/text_secondary</item>
         <item name="android:textSize">@dimen/sp15</item>
-    </style>
-
-    <style name="Aw.Typography.TransactionDetailTitleText" parent="">
-        <item name="android:paddingTop">@dimen/dp5</item>
-        <item name="android:textSize">@dimen/sp17</item>
-        <item name="android:textColor">@color/text_primary</item>
-    </style>
-
-    <style name="Aw.Typography.TransactionDetailLabelText" parent="">
-        <item name="android:layout_marginTop">@dimen/standard_16</item>
-        <item name="android:textSize">@dimen/sp15</item>
-        <item name="android:textColor">@color/text_secondary</item>
     </style>
 </resources>

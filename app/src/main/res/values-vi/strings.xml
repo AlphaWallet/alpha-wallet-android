@@ -549,7 +549,7 @@
     <string name="tokenscript_error_detail">Error in TokenScript element: %1$s</string>
     <string name="tokenscript_element_not_present">function input \'%1$s\' not found in HTML elements.</string>
     <string name="complete_tokenscript_value">Giá trị đầu vào không hợp lệ: %1$s</string>
-    <string name="value">VALUE</string>
+    <string name="value">Value</string>
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">Không thể tạo khóa. Thử bật bảo mật trên điện thoại của bạn.</string>
     <string name="what_is_seed_phrase">Cụm từ bí mật, cụm từ khôi phục bí mật hoặc cụm từ bí mật dự phòng là danh sách các từ lưu trữ tất cả thông tin cần thiết để khôi phục ví tiền điện tử. Phần mềm Wallet thường sẽ tạo ra một cụm từ bí mật và hướng dẫn người dùng viết nó ra giấy.</string>

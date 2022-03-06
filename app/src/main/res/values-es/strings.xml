@@ -533,7 +533,7 @@
     <string name="tokenscript_error_detail">Error en el elemento de TokenScript: %1$s</string>
     <string name="tokenscript_element_not_present">entrada de la función \"%1$s\" no encontrada en los elementos HTML.</string>
     <string name="complete_tokenscript_value">Valor de entrada no válido: %1$s</string>
-    <string name="value">VALOR</string>
+    <string name="value">Valor</string>
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">No ha sido posible crear la clave. Prueba a activar la seguridad en tu teléfono.</string>
     <string name="what_is_seed_phrase">Una frase semilla, frase semilla de recuperación o frase semilla de respaldo es una lista de palabras que almacena toda la información necesaria para recuperar un monedero criptográfico. Normalmente, el software del monedero genera una frase semilla e indica al usuario que la escriba en un papel.</string>

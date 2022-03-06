@@ -23,6 +23,7 @@
         <item name="android:colorBackground">@color/background</item>
         <item name="colorOnBackground">@color/background_inverse</item>
 
+        <item name="android:textViewStyle">@style/Aw.Typography.Body</item>
         <item name="toolbarStyle">@style/Aw.Component.Toolbar</item>
         <item name="appBarLayoutStyle">@style/Aw.Component.AppBarLayout</item>
         <item name="recyclerViewStyle">@style/Aw.Component.RecyclerView</item>

@@ -546,7 +546,7 @@
     <string name="tokenscript_error_detail">Erreur dans l\'élément TokenScript: %1$s</string>
     <string name="tokenscript_element_not_present">entrée de fonction \'%1$s\' introuvable dans les éléments HTML.</string>
     <string name="complete_tokenscript_value">Valeur d\'Entrée Invalide: %1$s</string>
-    <string name="value">VALEUR</string>
+    <string name="value">Valeur</string>
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">Impossible de créer la clé. Essayer d\'activer la sécurité de votre téléphone.</string>
     <string name="what_is_seed_phrase">Une phrase seed, une phrase de récupération seed ou une phrase seed de sauvegarde est une liste de mots qui stockent toutes les informations nécessaires pour récupérer un portefeuille cryptographique. Le logiciel de portefeuille génère généralement une phrase seed et demande à l\'utilisateur de l\'écrire sur papier.</string>

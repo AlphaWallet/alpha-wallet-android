@@ -17,9 +17,11 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="@dimen/standard_16">
+        android:paddingTop="@dimen/cozy_20"
+        android:paddingBottom="@dimen/cozy_20">
 
         <TextView
+            android:layout_marginStart="@dimen/standard_16"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1.1"
@@ -68,7 +70,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="@dimen/standard_16">
+            android:paddingVertical="@dimen/cozy_20">
 
             <View
                 android:layout_width="0dp"

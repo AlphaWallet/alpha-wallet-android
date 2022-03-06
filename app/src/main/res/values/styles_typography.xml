@@ -3,7 +3,7 @@
 
     <style name="Aw.Typography.ToolbarTitle" parent="">
         <item name="android:fontFamily">@font/font_semibold</item>
-        <item name="android:textColor">?colorOnSurface</item>
+        <item name="android:textColor">@color/text_primary</item>
         <item name="android:textSize">@dimen/sp20</item>
         <item name="android:gravity">center</item>
         <item name="android:ellipsize">end</item>
@@ -14,7 +14,7 @@
 
     <style name="Aw.Typography.TabText" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">@dimen/sp15</item>
-        <item name="android:textColor">?colorOnSurface</item>
+        <item name="android:textColor">@color/text_primary</item>
         <item name="android:fontFamily">@font/font_regular</item>
         <item name="textAllCaps">false</item>
     </style>
@@ -31,7 +31,7 @@
         <item name="android:gravity">center_vertical</item>
         <item name="android:lines">1</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:textColor">@color/color_dove</item>
+        <item name="android:textColor">@color/text_secondary</item>
         <item name="android:textSize">@dimen/sp15</item>
     </style>
 
@@ -54,7 +54,7 @@
     </style>
 
     <style name="Aw.Typography.TransactionDetailLabelText" parent="">
-        <item name="android:layout_marginTop">@dimen/big_margin</item>
+        <item name="android:layout_marginTop">@dimen/standard_16</item>
         <item name="android:textSize">@dimen/sp15</item>
         <item name="android:textColor">@color/text_secondary</item>
     </style>

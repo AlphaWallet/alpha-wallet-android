@@ -642,7 +642,6 @@ public class TransferTicketDetailActivity extends BaseActivity
         confirmationDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         confirmationDialog.setPrimaryButtonListener(v1 -> transferLinkFinal(universalLink));
         confirmationDialog.setSecondaryButtonListener(v1 -> confirmationDialog.dismiss());
-        confirmationDialog.showShareLink();
         confirmationDialog.show();
     }
 

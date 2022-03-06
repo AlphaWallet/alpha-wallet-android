@@ -10,7 +10,7 @@
         android:id="@+id/layout_header_amount"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@color/color_alabaster">
+        android:background="@color/header_background">
 
         <View
             style="@style/Aw.Component.Separator"
@@ -180,7 +180,7 @@
                 android:gravity="end"
                 android:lines="1"
                 android:text="@string/all_funds"
-                android:textColor="@color/brand_accent"
+                android:textColor="@color/brand"
                 android:textSize="@dimen/sp17"
                 android:visibility="visible" />
 

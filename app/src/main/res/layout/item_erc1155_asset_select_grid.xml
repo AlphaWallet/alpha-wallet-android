@@ -38,7 +38,7 @@
                     android:layout_height="48dp"
                     android:layout_centerInParent="true"
                     android:background="@drawable/value_amount_overlay"
-                    android:backgroundTint="@color/brand_accent"
+                    android:backgroundTint="@color/brand"
                     android:fontFamily="@font/font_bold"
                     android:gravity="center"
                     android:textColor="@color/text_primary"

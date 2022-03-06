@@ -3,28 +3,25 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
         <!-- App bar color -->
-        <item name="colorPrimary">@color/color_white</item>
+        <item name="colorPrimary">@color/surface</item>
         <!-- Status bar color -->
-        <item name="colorPrimaryDark">?colorPrimary</item>
-        <item name="colorOnPrimary">@color/color_black</item>
-        <item name="colorAccent">@color/brand_accent</item>
-
-        <item name="colorSurface">@color/color_white</item>
-        <item name="colorOnSurface">@color/color_black</item>
+        <item name="colorPrimaryDark">@color/surface</item>
+        <item name="colorOnPrimary">@color/surface_inverse</item>
+        <item name="colorAccent">@color/brand</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/surface_inverse</item>
 
         <!-- Controls (Switch, CheckBox, etc) -->
         <!-- Default state color -->
-        <item name="colorControlNormal">@color/color_black</item>
+        <item name="colorControlNormal">@color/control</item>
         <!-- Activated state color -->
-        <item name="colorControlActivated">@color/brand_accent</item>
+        <item name="colorControlActivated">@color/brand</item>
         <!-- Ripple color when control is tapped -->
-        <item name="colorControlHighlight">@color/brand_accent</item>
-
-        <item name="colorError">@color/danger</item>
-        <item name="colorOnError">@color/color_white</item>
-
-        <item name="android:colorBackground">@color/color_white</item>
-        <item name="colorOnBackground">@color/color_black</item>
+        <item name="colorControlHighlight">@color/brand</item>
+        <item name="colorError">@color/text_error</item>
+        <item name="colorOnError">@color/text_error_inverse</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorOnBackground">@color/background_inverse</item>
 
         <item name="toolbarStyle">@style/Aw.Component.Toolbar</item>
         <item name="appBarLayoutStyle">@style/Aw.Component.AppBarLayout</item>
@@ -35,13 +32,13 @@
         <item name="bottomSheetDialogTheme">@style/Aw.Component.BottomSheetDialog</item>
         <item name="seedWordStyle">@style/Aw.Component.SeedWord</item>
         <item name="whatsNewEntryStyle">@style/Aw.Component.WhatsNewEntry</item>
+        <item name="materialAlertDialogTheme">@style/Aw.Component.AlertDialog</item>
     </style>
 
     <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="actionMenuTextColor">@color/dove</item>
     </style>
 
     <!-- Splash Screen theme. -->

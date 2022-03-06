@@ -263,7 +263,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         double percentage = 0;
         try {
             percentage = Double.parseDouble(ticker.percentChange24h);
-            color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.danger : R.color.green);
+            color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.negative : R.color.positive);
             formattedPercents = ticker.percentChange24h.replace("-", "") + "%";
             root24Hours.setBackgroundResource(percentage < 0 ? R.drawable.background_24h_change_red : R.drawable.background_24h_change_green);
             text24Hours.setText(formattedPercents);

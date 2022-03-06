@@ -62,7 +62,7 @@
         android:layout_alignTop="@id/box_layout"
         android:layout_marginStart="@dimen/comfy_28"
         android:layout_marginTop="-9dp"
-        android:background="?colorSurface"
+        android:background="@color/surface"
         android:fontFamily="@font/font_semibold"
         android:paddingLeft="@dimen/mini_4"
         android:paddingRight="@dimen/mini_4"
@@ -81,7 +81,7 @@
         android:fontFamily="@font/font_semibold"
         android:padding="@dimen/mini_4"
         android:text="@string/paste"
-        android:textColor="@color/brand_accent"
+        android:textColor="@color/brand"
         android:textSize="@dimen/sp17"
         android:visibility="visible" />
 
@@ -111,7 +111,7 @@
         android:layout_marginTop="2dp"
         android:layout_toStartOf="@id/text_paste"
         android:fontFamily="@font/font_regular"
-        android:textColor="@color/danger"
+        android:textColor="@color/text_error"
         android:textSize="@dimen/sp12"
         android:visibility="gone"
         tools:text="That address already exists" />

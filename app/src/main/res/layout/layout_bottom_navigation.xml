@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/actionBarSize"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/background_bottom_navigation"
     android:elevation="0dp"
     android:orientation="vertical"
@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
                 android:text="@string/wallet_label"
-                android:textColor="@color/dove"
+                android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -61,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
                 android:text="@string/activity_label"
-                android:textColor="@color/dove"
+                android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -86,7 +86,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
                 android:text="@string/browser_label"
-                android:textColor="@color/dove"
+                android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -115,7 +115,7 @@
                 android:fontFamily="@font/font_semibold"
                 android:lineSpacingExtra="8sp"
                 android:text="@string/settings_label"
-                android:textColor="@color/dove"
+                android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
             <LinearLayout
@@ -135,10 +135,11 @@
                 android:fontFamily="@font/font_semibold"
                 android:gravity="center"
                 android:paddingBottom="2dp"
-                android:textColor="@color/white"
+                android:textColor="@color/text_error_inverse"
                 android:textSize="12sp"
+                android:visibility="gone"
                 tools:text="1"
-                android:visibility="gone" />
+                tools:visibility="visible" />
         </RelativeLayout>
 
     </LinearLayout>

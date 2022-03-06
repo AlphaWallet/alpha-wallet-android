@@ -29,7 +29,6 @@
             android:textColor="@color/text_secondary"
             android:textSize="@dimen/sp15" />
 
-
         <TextView
             android:id="@+id/text_asset_name"
             android:layout_width="0dp"

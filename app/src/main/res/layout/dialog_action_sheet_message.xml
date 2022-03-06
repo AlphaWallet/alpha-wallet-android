@@ -33,7 +33,7 @@
             android:fontFamily="@font/font_semibold"
             android:gravity="center_horizontal"
             android:text=""
-            android:textColor="@color/black"
+            android:textColor="@color/text_primary"
             android:textSize="@dimen/sp20"
             tools:text="Switch Chain Request" />
 
@@ -60,7 +60,7 @@
         android:fontFamily="@font/font_regular"
         android:gravity="center_horizontal"
         android:text=""
-        android:textColor="@color/black"
+        android:textColor="@color/text_primary"
         android:textSize="@dimen/sp15"
         tools:text="This site is requesting you to switch to the Mumbai Testnet (Test) chain with chain ID: 80001. This will reload the page." />
 

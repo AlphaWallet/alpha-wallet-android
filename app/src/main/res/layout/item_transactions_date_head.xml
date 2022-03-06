@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/color_alabaster"
+    android:background="@color/header_background"
     android:gravity="center"
     android:orientation="vertical">
 
@@ -14,9 +14,8 @@
         style="@style/Aw.Typography.StandardHeaderText"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_marginStart="@dimen/big_margin"
-        android:layout_marginEnd="@dimen/big_margin"
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginEnd="@dimen/standard_16"
         tools:text="Jan 09, 2017" />
 
-    <View style="@style/Aw.Component.Separator" />
 </LinearLayout>

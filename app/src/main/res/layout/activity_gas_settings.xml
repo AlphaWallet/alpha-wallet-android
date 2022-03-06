@@ -21,7 +21,8 @@
             android:id="@+id/gasSliderView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <FrameLayout
             android:id="@+id/layout_resend_note"
@@ -56,7 +57,8 @@
             android:paddingEnd="@dimen/dp11"
             android:text="@string/gas_message"
             android:textSize="@dimen/sp13"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <com.alphawallet.app.ui.widget.entity.GasWarningLayout
             android:id="@+id/gas_warning_bubble"
@@ -97,7 +99,7 @@
                         android:lineHeight="34sp"
                         android:lineSpacingExtra="14sp"
                         android:text="@string/low_gas_setting"
-                        android:textColor="@color/danger"
+                        android:textColor="@color/text_error"
                         android:textSize="@dimen/sp20"
                         android:textStyle="normal" />
                 </LinearLayout>
@@ -154,7 +156,7 @@
                         android:lineHeight="34sp"
                         android:lineSpacingExtra="14sp"
                         android:text="@string/insufficient_gas"
-                        android:textColor="@color/danger"
+                        android:textColor="@color/text_error"
                         android:textSize="20sp"
                         android:textStyle="normal" />
                 </LinearLayout>
@@ -166,7 +168,7 @@
                     android:autoLink="web"
                     android:text="@string/body_insufficient_warning"
                     android:textAlignment="center"
-                    android:textColor="@color/dove"
+                    android:textColor="@color/text_secondary"
                     android:textSize="15sp" />
             </LinearLayout>
         </com.alphawallet.app.ui.widget.entity.GasWarningLayout>

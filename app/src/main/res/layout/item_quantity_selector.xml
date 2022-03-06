@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:clickable="true"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clickable="true"
     android:orientation="vertical">
 
     <TextView
@@ -10,31 +10,31 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="30dp"
         android:layout_marginTop="20dp"
+        android:layout_marginBottom="30dp"
         android:fontFamily="@font/font_light"
         android:gravity="center"
         android:text="@string/select_quantity_tickets"
-        android:textColor="@color/mine"
+        android:textColor="@color/text_primary"
         android:textSize="25sp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="@dimen/mini_4"
         android:fontFamily="@font/font_regular"
         android:text="@string/quantity_of_tickets"
         android:textAllCaps="true"
-        android:textColor="@color/dusty"
-        android:textSize="10sp" />
+        android:textColor="@color/text_secondary"
+        android:textSize="@dimen/sp12" />
 
     <LinearLayout
         android:id="@+id/layout_ticket_quantity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="@dimen/cozy_20"
         android:background="@drawable/background_quantity"
         android:orientation="horizontal">
 
@@ -42,11 +42,8 @@
             android:id="@+id/layout_quantity_add"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginLeft="10dp"
-            android:paddingBottom="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingTop="10dp">
+            android:layout_marginLeft="@dimen/tiny_8"
+            android:padding="@dimen/tiny_8">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -69,18 +66,15 @@
             android:padding="10dp"
             android:text="1"
             android:textColor="@color/text_secondary"
-            android:textSize="21sp" />
+            android:textSize="@dimen/sp20" />
 
         <RelativeLayout
             android:id="@+id/layout_quantity_minus"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/tiny_8"
             android:layout_weight="2"
-            android:paddingBottom="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingTop="10dp">
+            android:padding="@dimen/tiny_8">
 
             <ImageView
                 android:layout_width="wrap_content"

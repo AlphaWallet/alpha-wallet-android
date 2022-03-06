@@ -9,7 +9,7 @@
         android:id="@+id/chain_name"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@color/color_alabaster"
+        android:background="@color/header_background"
         android:fontFamily="@font/font_semibold"
         android:gravity="center_vertical"
         android:paddingStart="@dimen/standard_16"

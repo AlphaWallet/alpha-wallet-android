@@ -141,7 +141,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 		//This sets the 24hr percentage change (rightmost value)
 		try {
 			wallet24hChange.setVisibility(View.VISIBLE);
-			int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.danger : R.color.green);
+			int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.negative : R.color.positive);
 			BigDecimal percentChangeBI = BigDecimal.valueOf(percentChange24h).setScale(3, RoundingMode.DOWN);
 			String formattedPercents = (percentChange24h < 0 ? "" : "+") + percentChangeBI + "%";
 			//wallet24hChange.setBackgroundResource(percentage < 0 ? R.drawable.background_24h_change_red : R.drawable.background_24h_change_green);

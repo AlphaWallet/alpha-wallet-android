@@ -10,7 +10,6 @@
         style="@style/Aw.Typography.ToolbarTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
         android:layout_gravity="center"
         tools:text="Activity Title" />
 

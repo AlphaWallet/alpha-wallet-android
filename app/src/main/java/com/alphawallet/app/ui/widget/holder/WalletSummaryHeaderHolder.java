@@ -75,7 +75,7 @@ public class WalletSummaryHeaderHolder extends BinderViewHolder<Wallet> implemen
 			double change24h = fiatValue - oldFiatValue;
 			double percentChange24h = fiatValue != 0 ? (change24h/oldFiatValue)*100.0 : 0.0;
 			summaryChange.setVisibility(View.VISIBLE);
-			int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.danger : R.color.green);
+			int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.negative : R.color.positive);
 			BigDecimal percentChangeBI = BigDecimal.valueOf(percentChange24h).setScale(3, RoundingMode.DOWN);
 			String changeTxt = TickerService.getCurrencyString(change24h);
 			String formattedPercents = (percentChange24h < 0 ? "" : "+") + percentChangeBI + "%";

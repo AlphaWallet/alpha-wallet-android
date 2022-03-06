@@ -740,9 +740,9 @@ public class WalletFragment extends BaseFragment implements
                 icon = ContextCompat.getDrawable(getActivity(), R.drawable.ic_hide_token);
                 if (icon != null)
                 {
-                    icon.setTint(ContextCompat.getColor(getActivity(), R.color.white));
+                    icon.setTint(ContextCompat.getColor(getActivity(), R.color.text_error_inverse));
                 }
-                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.danger));
+                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.text_error));
             }
         }
 

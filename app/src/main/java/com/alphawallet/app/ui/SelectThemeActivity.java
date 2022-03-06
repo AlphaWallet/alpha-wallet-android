@@ -14,7 +14,8 @@ import com.alphawallet.app.viewmodel.SelectThemeViewModel;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class SelectThemeActivity extends BaseActivity {
+public class SelectThemeActivity extends BaseActivity
+{
     private SelectThemeViewModel viewModel;
 
     @Override
@@ -58,19 +59,21 @@ public class SelectThemeActivity extends BaseActivity {
             radioGroup.check(R.id.radio_theme_auto);
         }
 
-        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+        radioGroup.setOnCheckedChangeListener((group, checkedId) ->
+        {
             if (checkedId == R.id.radio_theme_light)
             {
-                viewModel.setTheme(C.THEME_LIGHT);
+                viewModel.setTheme(getApplicationContext(), C.THEME_LIGHT);
             }
             else if (checkedId == R.id.radio_theme_dark)
             {
-                viewModel.setTheme(C.THEME_DARK);
+                viewModel.setTheme(getApplicationContext(), C.THEME_DARK);
             }
             else
             {
-                viewModel.setTheme(C.THEME_AUTO);
+                viewModel.setTheme(getApplicationContext(), C.THEME_AUTO);
             }
+            finish();
         });
     }
 }

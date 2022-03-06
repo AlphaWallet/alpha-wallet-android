@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -17,8 +17,8 @@
             android:id="@+id/progress_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
             tools:visibility="gone" />
 
         <com.alphawallet.app.widget.FunctionButtonBar
@@ -41,7 +41,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/listTickets"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content" />
 
                 <LinearLayout
                     android:id="@+id/layout_ticket_quantity"
@@ -54,7 +54,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:layout_marginBottom="@dimen/tiny_8"
+                        android:layout_marginBottom="@dimen/mini_4"
                         android:fontFamily="@font/font_regular"
                         android:text="@string/quantity_of_tickets"
                         android:textAllCaps="true"
@@ -72,11 +72,8 @@
                             android:id="@+id/layout_quantity_add"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:layout_marginLeft="10dp"
-                            android:paddingBottom="10dp"
-                            android:paddingLeft="10dp"
-                            android:paddingRight="10dp"
-                            android:paddingTop="10dp">
+                            android:layout_marginLeft="@dimen/tiny_8"
+                            android:padding="@dimen/tiny_8">
 
                             <ImageView
                                 android:layout_width="wrap_content"
@@ -92,25 +89,22 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:layout_marginLeft="20dp"
-                            android:layout_marginRight="20dp"
+                            android:layout_marginLeft="@dimen/cozy_20"
+                            android:layout_marginRight="@dimen/cozy_20"
                             android:fontFamily="@font/font_semibold"
                             android:gravity="center"
-                            android:padding="10dp"
+                            android:padding="@dimen/tiny_8"
                             android:text="1"
                             android:textColor="@color/text_secondary"
-                            android:textSize="21sp" />
+                            android:textSize="@dimen/sp20" />
 
                         <RelativeLayout
                             android:id="@+id/layout_quantity_minus"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="match_parent"
-                            android:layout_marginRight="10dp"
+                            android:layout_marginRight="@dimen/tiny_8"
                             android:layout_weight="2"
-                            android:paddingBottom="10dp"
-                            android:paddingLeft="10dp"
-                            android:paddingRight="10dp"
-                            android:paddingTop="10dp">
+                            android:padding="@dimen/tiny_8">
 
                             <ImageView
                                 android:layout_width="wrap_content"
@@ -127,82 +121,33 @@
                     android:id="@+id/input_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dp12"
-                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="@dimen/small_12"
+                    android:layout_marginBottom="@dimen/standard_16"
                     android:visibility="visible"
+                    custom:ens="true"
                     custom:hint="@string/recipient"
                     custom:label="@string/recipient_address"
-                    custom:show_header="true"
-                    custom:ens="true"/>
+                    custom:show_header="true" />
 
                 <LinearLayout
                     android:id="@+id/layout_choose_method"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginVertical="@dimen/tiny_8"
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <!--<TextView-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:fontFamily="@font/font_light"-->
-                        <!--android:layout_marginBottom="10dp"-->
-                        <!--android:gravity="center"-->
-                        <!--android:text="@string/transfer_method"-->
-                        <!--android:textColor="@color/mine"-->
-                        <!--android:textAllCaps="true"-->
-                        <!--android:textSize="10sp" />-->
-
-                    <!--<RadioGroup-->
-                        <!--android:id="@+id/radiogroup_method"-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="match_parent"-->
-                        <!--android:layout_marginStart="20dp">-->
-
-                        <!--<android.support.v7.widget.AppCompatRadioButton-->
-                            <!--android:id="@+id/radioBox12"-->
-                            <!--android:layout_width="wrap_content"-->
-                            <!--android:layout_height="wrap_content"-->
-                            <!--android:button="@drawable/selector_radio_check"-->
-                            <!--android:background="@drawable/selector_radio_check"-->
-                            <!--android:checked="false"-->
-                            <!--android:text="hello"-->
-                            <!--app:buttonTint="@color/transparent" />-->
-
-                        <!--<RadioButton-->
-                            <!--android:id="@+id/radio_pickup_link"-->
-                            <!--android:layout_width="wrap_content"-->
-                            <!--android:layout_height="wrap_content"-->
-                            <!--android:button="@drawable/selector_radio_check"-->
-                            <!--android:layout_weight="1"-->
-                            <!--android:fontFamily="@font/font_bold"-->
-                            <!--android:layout_marginBottom="10dp"-->
-                            <!--android:text="@string/generate_pick_up_link" />-->
-
-                        <!--<RadioButton-->
-                            <!--android:id="@+id/radio_transfer_now"-->
-                            <!--android:layout_width="wrap_content"-->
-                            <!--android:layout_height="wrap_content"-->
-                            <!--android:fontFamily="@font/font_bold"-->
-                            <!--android:button="@drawable/selector_radio_check"-->
-                            <!--android:layout_weight="1"-->
-                            <!--android:text="@string/transfer_now" />-->
-
-                    <!--</RadioGroup>-->
-
                     <RadioGroup
                         android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:paddingLeft="15dp"
-                        android:paddingRight="15dp"
-                        android:layout_height="match_parent">
+                        android:paddingRight="15dp">
 
                         <LinearLayout
-                            android:background="@color/white"
                             android:id="@+id/layout_link_pick"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:background="@color/white"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
                             android:padding="15dp">
@@ -212,7 +157,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:layout_marginEnd="15dp"
+                                android:layout_marginEnd="@dimen/standard_16"
                                 android:background="@drawable/selector_checkbox_round"
                                 android:checked="true"
                                 app:buttonTint="@color/transparent" />
@@ -220,29 +165,28 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="@font/font_light"
+                                android:fontFamily="@font/font_regular"
                                 android:gravity="center"
                                 android:text="@string/generate_pick_up_link"
-                                android:textColor="@color/mine"
-                                android:textSize="18sp" />
+                                android:textColor="@color/text_primary"
+                                android:textSize="@dimen/sp17" />
 
                         </LinearLayout>
 
                         <LinearLayout
                             android:id="@+id/layout_transfer_now"
-                            android:background="@color/white"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="15dp"
-                            android:gravity="center_vertical">
+                            android:padding="@dimen/standard_16">
 
                             <androidx.appcompat.widget.AppCompatRadioButton
                                 android:id="@+id/radio_transfer_now"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:layout_marginEnd="15dp"
+                                android:layout_marginEnd="@dimen/standard_16"
                                 android:background="@drawable/selector_checkbox_round"
                                 android:checked="false"
                                 android:text=""
@@ -251,11 +195,11 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="@font/font_light"
+                                android:fontFamily="@font/font_regular"
                                 android:gravity="center"
                                 android:text="@string/transfer_now"
-                                android:textColor="@color/mine"
-                                android:textSize="18sp" />
+                                android:textColor="@color/text_primary"
+                                android:textSize="@dimen/sp17" />
 
                         </LinearLayout>
 
@@ -263,15 +207,13 @@
 
                 </LinearLayout>
 
-
                 <LinearLayout
                     android:id="@+id/layout_date_picker"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp"
-                    android:orientation="vertical">
+                    android:layout_marginTop="@dimen/cozy_20"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="@dimen/standard_16">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -288,12 +230,12 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_horizontal"
-                                android:layout_marginBottom="5dp"
+                                android:layout_marginBottom="@dimen/mini_4"
                                 android:fontFamily="@font/font_regular"
                                 android:text="@string/link_expiry_date"
                                 android:textAllCaps="true"
-                                android:textColor="@color/dusty"
-                                android:textSize="10sp" />
+                                android:textColor="@color/text_secondary"
+                                android:textSize="@dimen/sp12" />
 
                             <RelativeLayout
                                 android:layout_width="match_parent"
@@ -312,17 +254,17 @@
                                     android:hint="DD/MM/YYYY"
                                     android:imeOptions="actionDone"
                                     android:inputType="datetime"
-                                    android:paddingStart="15dp"
-                                    android:textColor="@color/text_secondary"
-                                    android:textColorHint="@color/dusty"
-                                    android:textSize="18sp" />
+                                    android:paddingStart="@dimen/standard_16"
+                                    android:textColor="@color/text_primary"
+                                    android:textColorHint="@color/text_secondary"
+                                    android:textSize="@dimen/sp17" />
 
                                 <ImageView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_alignParentRight="true"
                                     android:layout_centerVertical="true"
-                                    android:layout_marginRight="15dp"
+                                    android:layout_marginRight="@dimen/standard_16"
                                     android:src="@drawable/ic_calendar" />
                             </RelativeLayout>
 
@@ -330,19 +272,18 @@
                                 android:id="@+id/error_date"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
+                                android:layout_marginTop="@dimen/mini_4"
                                 android:fontFamily="@font/font_regular"
                                 android:gravity="center"
                                 android:text="@string/error_date"
-                                android:textColor="@color/danger"
+                                android:textColor="@color/text_error"
                                 android:textSize="12sp"
                                 android:visibility="gone" />
                         </LinearLayout>
 
                         <View
                             android:layout_width="15dp"
-                            android:layout_height="match_parent"
-                            android:background="@color/white" />
+                            android:layout_height="match_parent" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -354,12 +295,12 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_horizontal"
-                                android:layout_marginBottom="5dp"
+                                android:layout_marginBottom="@dimen/mini_4"
                                 android:fontFamily="@font/font_regular"
                                 android:text="@string/link_expiry_time"
                                 android:textAllCaps="true"
-                                android:textColor="@color/dusty"
-                                android:textSize="10sp" />
+                                android:textColor="@color/text_secondary"
+                                android:textSize="@dimen/sp12" />
 
                             <RelativeLayout
                                 android:layout_width="match_parent"
@@ -378,17 +319,17 @@
                                     android:hint="@string/hint_time"
                                     android:imeOptions="actionDone"
                                     android:inputType="time"
-                                    android:paddingStart="15dp"
-                                    android:textColor="@color/text_secondary"
-                                    android:textColorHint="@color/dusty"
-                                    android:textSize="18sp" />
+                                    android:paddingStart="@dimen/standard_16"
+                                    android:textColor="@color/text_primary"
+                                    android:textColorHint="@color/text_secondary"
+                                    android:textSize="@dimen/sp17" />
 
                                 <ImageView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_alignParentRight="true"
                                     android:layout_centerVertical="true"
-                                    android:layout_marginRight="15dp"
+                                    android:layout_marginRight="@dimen/standard_16"
                                     android:src="@drawable/ic_clock" />
                             </RelativeLayout>
 
@@ -400,7 +341,7 @@
                                 android:fontFamily="@font/font_regular"
                                 android:gravity="center"
                                 android:text="@string/error_time"
-                                android:textColor="@color/danger"
+                                android:textColor="@color/text_error"
                                 android:textSize="12sp"
                                 android:visibility="gone" />
                         </LinearLayout>
@@ -410,12 +351,12 @@
                         android:id="@+id/text_valid_until"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_light"
-                        android:gravity="center"
                         android:layout_gravity="center"
-                        android:textColor="@color/mine"
-                        android:layout_marginTop="15dp"
-                        android:textSize="16sp" />
+                        android:layout_marginTop="@dimen/standard_16"
+                        android:fontFamily="@font/font_regular"
+                        android:gravity="center"
+                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/sp15" />
 
                     <include layout="@layout/item_universal_link_warning" />
 
@@ -427,13 +368,11 @@
 
     </RelativeLayout>
 
-
     <com.alphawallet.app.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?actionBarSize"
-        android:background="@color/white"
         tools:visibility="gone" />
 
 </LinearLayout>

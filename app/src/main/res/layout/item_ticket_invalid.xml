@@ -5,49 +5,47 @@
     android:id="@+id/layout_select_invalid"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/small_12"
     android:clickable="true"
-    android:layout_marginBottom="10dp"
+    android:focusable="true"
     android:orientation="horizontal">
 
-    <androidx.appcompat.widget.AppCompatRadioButton
+    <com.google.android.material.radiobutton.MaterialRadioButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
+        android:layout_marginHorizontal="@dimen/small_12"
         android:background="@drawable/selector_checkbox_round"
         android:checked="false"
-        android:text=""
-        android:layout_marginRight="15dp"
         android:visibility="gone"
-        app:buttonTint="@color/transparent" />
+        app:buttonTint="@color/transparent"
+        tools:visibility="visible" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="110dp"
-        android:orientation="vertical"
-        android:gravity="center"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:paddingBottom="20dp"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:paddingTop="15dp">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/cozy_20">
 
         <TextView
             android:id="@+id/text_ticket_range"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="21sp"
-            android:fontFamily="@font/font_light"
-            android:layout_marginBottom="5dp"
-            android:textColor="@color/black"
-            android:text="" />
+            android:layout_marginBottom="@dimen/mini_4"
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp20"
+            tools:text="Range" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:fontFamily="@font/font_light"
-            android:textColor="@color/danger"
-            android:text="@string/ticket_not_valid" />
+            android:fontFamily="@font/font_regular"
+            android:text="@string/ticket_not_valid"
+            android:textColor="@color/text_error"
+            android:textSize="@dimen/sp17" />
     </LinearLayout>
 
 </LinearLayout>

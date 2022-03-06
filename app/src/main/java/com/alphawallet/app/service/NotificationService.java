@@ -61,7 +61,7 @@ public class NotificationService
     void DisplayNotification(String title, String content, int priority)
     {
         checkNotificationPermission();
-        int color = context.getColor(R.color.brand_accent);
+        int color = context.getColor(R.color.brand);
 
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Intent openAppIntent = new Intent(context, HomeActivity.class);
@@ -91,7 +91,7 @@ public class NotificationService
     void displayPriceAlertNotification(String title, String content, int priority, Intent openAppIntent)
     {
         checkNotificationPermission();
-        int color = context.getColor(R.color.brand_accent);
+        int color = context.getColor(R.color.brand);
 
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 

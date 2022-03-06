@@ -110,7 +110,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         toolbar();
         layoutInputAmount = findViewById(R.id.layout_define_request);
         qrImageView = findViewById(R.id.qr_image);
-        qrImageView.setBackgroundResource(R.color.white);
+        qrImageView.setBackgroundResource(R.color.surface);
         ensFetchProgressBar = findViewById(R.id.ens_fetch_progress);
 
         if (viewModel == null) initViewModel();

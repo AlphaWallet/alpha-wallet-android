@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="@dimen/dp20">
+    android:padding="@dimen/cozy_20">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -20,12 +20,12 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/close_action"
             android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/standard_16"
+            android:layout_marginBottom="@dimen/standard_16"
             android:fontFamily="@font/font_bold"
             android:text="@string/switch_chain_request"
-            android:layout_marginTop="@dimen/dp16"
-            android:layout_marginBottom="@dimen/dp16"
-            android:textColor="@color/mine"
-            android:textSize="24sp" />
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp24" />
 
     </RelativeLayout>
 
@@ -34,13 +34,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginBottom="@dimen/dp25"
+        android:layout_marginBottom="@dimen/base_24"
         android:fontFamily="@font/font_regular"
         android:gravity="center_vertical"
         android:lineSpacingExtra="@dimen/dp5"
         android:text="@string/add_chain_dialog_message"
-        android:textColor="@color/black"
-        android:textSize="17sp" />
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/sp17" />
 
     <com.alphawallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"

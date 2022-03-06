@@ -79,8 +79,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/qr_image"
             custom:bold="true"
-            custom:gravity="center"
-            custom:textColor="?colorOnSurface" />
+            custom:gravity="center" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

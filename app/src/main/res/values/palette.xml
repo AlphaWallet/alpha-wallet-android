@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- AlphaWallet Palette -->
+	<color name="pinkish_grey">#bdbdbd</color>
+	<color name="pale_salmon">#fcbbb7</color>
+	<color name="very_light_pink">#ffebea</color>
+	<color name="black">#000000</color>
+	<color name="mine">#2f2f2f</color>
+	<color name="dove">#727272</color>
+	<color name="dusty">#999999</color>
+	<color name="silver">#c2c2c2</color>
+	<color name="mike">#dddddd</color>
+	<color name="alto">#e0e0e0</color>
+	<color name="mercury">#e9e9e9</color>
+	<color name="concrete">#f2f2f2</color>
+	<color name="alabaster">#fbfbfb</color>
+	<color name="white">#ffffff</color>
+	<color name="solitude">#e6f3ff</color>
+	<color name="azure">#007fed</color>
+	<color name="azure_hover">#1993fd</color>
+	<color name="cerulean">#00bfff</color>
+	<color name="green">#75b943</color>
+	<color name="emerald">#53d76b</color>
+	<color name="danger">#ff3b30</color>
+	<color name="radical">#fc3159</color>
+	<color name="pumpkin">#fd9426</color>
+	<color name="indigo">#595ad5</color>
+	<color name="elm">#197a84</color>
+	<color name="polar">#f3f9fd</color>
+	<color name="mystic">#b2c6d8</color>
+	<color name="bali">#8aa3b8</color>
+	<color name="science">#006bc8</color>
+	<color name="picton">#4bbcec</color>
+	<color name="cod">#141414</color>
+	<color name="aurora">#bbdda2</color>
+	<color name="vida">#4da322</color>
+	<color name="porcelain">#f0f3f4</color>
+	<color name="botticelli">#ccd9e3</color>
+	<color name="international">#ff5a00</color>
+	<color name="dodge">#0c84ff</color>
+	<color name="venus">#232323</color>
+	<color name="shark">#232325</color>
+	<color name="atlantis">#7cca42</color>
+
+	<!-- Functional Palette -->
+	<color name="transparent">#00000000</color>
+	<color name="translucent_white">#B3FFFFFF</color>
+	<color name="translucent_black">#1e000000</color>
+	<color name="translucent_gray">#66727272</color>
+	<color name="blur">#80000000</color>
+	<color name="translucent_red">#19ff3b30</color>
+	<color name="translucent_green">#1975b943</color>
+</resources>

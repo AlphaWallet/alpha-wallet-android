@@ -3,12 +3,17 @@
 
     <style name="Aw.Component.AppBarLayout" parent="Widget.Design.AppBarLayout">
         <item name="elevation">0dp</item>
-        <item name="background">?colorSurface</item>
+        <item name="background">@color/surface</item>
+    </style>
+
+    <style name="Aw.Component.AlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="colorSurface">@color/dialog_background</item>
+        <item name="colorPrimary">@color/brand</item>
     </style>
 
     <style name="Aw.Component.BottomSheetDialog" parent="Theme.MaterialComponents.BottomSheetDialog">
         <item name="android:windowIsFloating">false</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@color/transparent</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="bottomSheetStyle">@style/Aw.Component.BottomSheet</item>
     </style>
@@ -33,18 +38,18 @@
         <item name="contentInsetLeft">0dp</item>
         <item name="contentInsetRight">0dp</item>
         <item name="contentInsetStartWithNavigation">0dp</item>
-        <item name="background">?colorSurface</item>
+        <item name="background">@color/surface</item>
         <item name="navigationIconTint">@color/text_primary</item>
     </style>
 
     <style name="Aw.Component.TabLayout" parent="Widget.Design.TabLayout">
-        <item name="tabIndicatorColor">?colorAccent</item>
+        <item name="tabIndicatorColor">@color/brand</item>
         <item name="tabIndicatorHeight">3dp</item>
         <item name="tabPaddingStart">25dp</item>
         <item name="tabPaddingEnd">25dp</item>
-        <item name="tabBackground">?attr/colorSurface</item>
+        <item name="tabBackground">@color/surface</item>
         <item name="tabTextAppearance">@style/Aw.Typography.TabText</item>
-        <item name="tabSelectedTextColor">?colorAccent</item>
+        <item name="tabSelectedTextColor">@color/brand</item>
         <item name="tabTextColor">@color/text_secondary</item>
         <item name="tabIndicatorFullWidth">true</item>
     </style>
@@ -77,7 +82,7 @@
     </style>
 
     <style name="Aw.Component.RecyclerView" parent="">
-        <item name="android:background">?attr/colorSurface</item>
+        <item name="android:background">@color/surface</item>
     </style>
 
     <style name="Aw.Component.Separator" parent="Widget.MaterialComponents.TextView">
@@ -86,10 +91,14 @@
         <item name="android:background">@color/separator</item>
     </style>
 
+    <style name="Aw.Component.Separator.Large">
+        <item name="android:layout_height">50dp</item>
+    </style>
+
     <style name="Aw.Component.Switch" parent="Widget.AppCompat.CompoundButton.Switch">
         <!-- TODO: Create selectors for different states -->
-        <!-- <item name="thumbTint">@color/color_azure</item> -->
-        <!-- <item name="trackTint">@color/color_dusty</item> -->
+        <!-- <item name="thumbTint">@color/azure</item> -->
+        <!-- <item name="trackTint">@color/dusty</item> -->
     </style>
 
     <style name="Aw.Component.Button" parent="Widget.MaterialComponents.Button.OutlinedButton">
@@ -106,18 +115,6 @@
         <item name="cornerRadius">4dp</item>
     </style>
 
-    <style name="Aw.Component.Button.Suggestion">
-        <item name="android:lines">1</item>
-        <item name="android:backgroundTint">@color/color_mercury</item>
-        <item name="android:padding">@dimen/small_12</item>
-        <item name="android:minWidth">0dp</item>
-        <item name="android:fontFamily">@font/font_regular</item>
-        <item name="android:minHeight">0dp</item>
-        <item name="android:textColor">@color/text_primary</item>
-        <item name="android:textSize">@dimen/sp17</item>
-        <item name="strokeWidth">0dp</item>
-    </style>
-
     <style name="Aw.Component.Button.Primary">
         <item name="android:lines">1</item>
         <item name="android:backgroundTint">@color/button_primary</item>
@@ -126,16 +123,16 @@
 
     <style name="Aw.Component.Button.Primary.Dark">
         <item name="android:lines">1</item>
-        <item name="android:backgroundTint">@color/white</item>
+        <item name="android:backgroundTint">@color/surface</item>
         <item name="android:textColor">@color/text_primary</item>
     </style>
 
     <style name="Aw.Component.Button.Secondary">
         <item name="android:lines">1</item>
         <item name="android:backgroundTint">@color/button_secondary</item>
-        <item name="strokeColor">@color/text_primary</item>
+        <item name="strokeColor">@color/surface_inverse</item>
         <item name="strokeWidth">1dp</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">@color/surface_inverse</item>
     </style>
 
     <style name="Aw.Component.Button.Secondary.Dark">
@@ -147,27 +144,38 @@
     </style>
 
     <style name="Aw.Component.Button.Icon" parent="Aw.Component.Button.Secondary">
-        <item name="android:lines">1</item>
-        <item name="android:backgroundTint">@color/button_secondary</item>
-        <item name="strokeColor">?colorOnSurface</item>
-        <item name="strokeWidth">1dp</item>
-        <item name="android:textColor">?colorOnSurface</item>
+<!--        <item name="android:lines">1</item>-->
+<!--        <item name="android:backgroundTint">@color/button_secondary</item>-->
+<!--        <item name="strokeColor">@color/surface_inverse</item>-->
+<!--        <item name="strokeWidth">1dp</item>-->
         <item name="iconPadding">0dp</item>
         <item name="iconGravity">textEnd</item>
-        <item name="iconTint">@color/text_primary</item>
+        <item name="iconTint">@color/surface_inverse</item>
     </style>
 
     <style name="Aw.Component.Button.TextIcon">
-        <item name="android:backgroundTint">@color/color_concrete</item>
+        <item name="android:backgroundTint">@color/button_texticon</item>
         <item name="android:maxLines">2</item>
         <item name="android:padding">@dimen/standard_16</item>
         <item name="android:textSize">@dimen/sp17</item>
         <item name="iconPadding">@dimen/cozy_20</item>
         <item name="iconGravity">textEnd</item>
-        <item name="iconTint">@color/brand_accent</item>
+        <item name="iconTint">@color/brand</item>
         <item name="android:layout_margin">@dimen/cozy_20</item>
         <item name="cornerRadius">5dp</item>
         <item name="android:textColor">@color/text_primary</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+
+    <style name="Aw.Component.Button.Suggestion">
+        <item name="android:lines">1</item>
+        <item name="android:backgroundTint">@color/button_suggestion</item>
+        <item name="android:padding">@dimen/small_12</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:fontFamily">@font/font_regular</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/sp17</item>
         <item name="strokeWidth">0dp</item>
     </style>
 
@@ -175,15 +183,15 @@
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">@dimen/sp17</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:gravity">center_horizontal</item>
-        <item name="android:drawablePadding">@dimen/big_margin</item>
+        <item name="android:drawablePadding">@dimen/standard_16</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
         <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
-        <item name="android:paddingTop">@dimen/big_padding</item>
-        <item name="android:paddingBottom">@dimen/big_padding</item>
+        <item name="android:paddingTop">@dimen/standard_16</item>
+        <item name="android:paddingBottom">@dimen/standard_16</item>
     </style>
 
     <style name="Aw.Component.SeedWord" parent="Widget.MaterialComponents.TextView">
@@ -211,25 +219,4 @@
         <item name="android:gravity">center_vertical</item>
     </style>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.ActionBar">
-        <item name="iconTint">@color/azure</item>
-    </style>
-
-    <style name="AWLightAlertDialog" parent="Theme.MaterialComponents.Light.Dialog.Alert">
-        <item name="colorSurface">#FFFFFF</item>
-    </style>
-
-    <style name="AppTheme.Toolbar" parent="ThemeOverlay.AppCompat.ActionBar">
-        <item name="colorControlNormal">@color/black</item>
-        <!--        <item name="color_dove">@color/transparent</item>-->
-        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
-        <item name="colorSurface">#FFFFFF</item>
-    </style>
-
-    <style name="AppTheme.Toolbar.Title" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:textColor">@color/dove</item>
-        <item name="android:fontFamily">@font/font_semibold</item>
-        <item name="android:textSize">20sp</item>
-        <item name="colorSurface">#FFFFFF</item>
-    </style>
 </resources>

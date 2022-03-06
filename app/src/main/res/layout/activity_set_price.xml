@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -38,7 +39,7 @@
                         android:fontFamily="@font/font_light"
                         android:gravity="center"
                         android:text="@string/set_a_price"
-                        android:textColor="?colorOnSurface"
+                        android:textColor="@color/text_primary"
                         android:textSize="25sp" />
 
                     <TextView
@@ -47,9 +48,10 @@
                         android:fontFamily="@font/font_light"
                         android:gravity="center"
                         android:text="@string/set_price_subtext_abr"
-                        android:textColor="@color/mine"
+                        android:textColor="@color/text_primary"
                         android:textSize="16sp"
-                        android:visibility="gone" />
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -95,7 +97,7 @@
                                     android:fontFamily="@font/font_regular"
                                     android:text="@string/price_per_ticket"
                                     android:textAllCaps="true"
-                                    android:textColor="@color/dusty"
+                                    android:textColor="@color/text_secondary"
                                     android:textSize="10sp" />
 
                                 <RelativeLayout
@@ -115,7 +117,7 @@
                                         android:inputType="numberDecimal"
                                         android:paddingStart="15dp"
                                         android:textColor="@color/text_secondary"
-                                        android:textColorHint="@color/dusty"
+                                        android:textColorHint="@color/text_secondary"
                                         android:textSize="21sp" />
 
                                     <TextView
@@ -127,7 +129,7 @@
                                         android:layout_marginRight="15dp"
                                         android:fontFamily="@font/font_regular"
                                         android:text="@string/eth"
-                                        android:textColor="@color/dove" />
+                                        android:textColor="@color/text_secondary" />
                                 </RelativeLayout>
 
                                 <TextView
@@ -138,7 +140,7 @@
                                     android:fontFamily="@font/font_regular"
                                     android:gravity="center"
                                     android:text="@string/error_invalid_amount"
-                                    android:textColor="@color/danger"
+                                    android:textColor="@color/text_error"
                                     android:textSize="12sp"
                                     android:visibility="gone" />
 
@@ -147,7 +149,7 @@
                             <View
                                 android:layout_width="15dp"
                                 android:layout_height="match_parent"
-                                android:background="@color/white" />
+                                android:background="@color/surface" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -163,7 +165,7 @@
                                     android:fontFamily="@font/font_regular"
                                     android:text="@string/quantity_of_tickets"
                                     android:textAllCaps="true"
-                                    android:textColor="@color/dusty"
+                                    android:textColor="@color/text_secondary"
                                     android:textSize="10sp" />
 
                                 <LinearLayout
@@ -227,7 +229,7 @@
                                     android:fontFamily="@font/font_regular"
                                     android:gravity="center"
                                     android:text="@string/error_invalid_quantity"
-                                    android:textColor="@color/danger"
+                                    android:textColor="@color/text_error"
                                     android:textSize="12sp"
                                     android:visibility="gone" />
                             </LinearLayout>
@@ -251,7 +253,8 @@
                                 android:textColor="@color/text_secondary"
                                 android:textSize="21sp" />
 
-                            <View style="@style/Aw.Component.Separator"
+                            <View
+                                style="@style/Aw.Component.Separator"
                                 android:layout_marginTop="10dp"
                                 android:layout_marginBottom="10dp" />
 
@@ -265,7 +268,8 @@
                                 android:textColor="@color/text_primary"
                                 android:textSize="21sp" />
 
-                            <View style="@style/Aw.Component.Separator"
+                            <View
+                                style="@style/Aw.Component.Separator"
                                 android:layout_marginTop="10dp"
                                 android:layout_marginBottom="10dp" />
 
@@ -303,7 +307,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:visibility="gone">
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <TextView
                             android:id="@+id/text_confirm_quantity"
@@ -311,7 +316,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:fontFamily="@font/font_bold"
-                            android:textColor="?colorSurface"
+                            android:textColor="@color/text_primary"
                             android:textSize="20sp" />
 
                         <TextView
@@ -320,8 +325,9 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:fontFamily="@font/font_bold"
-                            android:textColor="?colorSurface"
-                            android:textSize="20sp" />
+                            android:textColor="@color/text_primary"
+                            android:textSize="20sp"
+                            tools:text="1000" />
 
                         <TextView
                             android:id="@+id/text_confirm_total_cost"
@@ -330,8 +336,9 @@
                             android:layout_gravity="center"
                             android:layout_marginBottom="10dp"
                             android:fontFamily="@font/font_bold"
-                            android:textColor="?colorSurface"
-                            android:textSize="20sp" />
+                            android:textColor="@color/text_primary"
+                            android:textSize="20sp"
+                            tools:text="1000" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -362,7 +369,7 @@
                                     android:fontFamily="@font/font_regular"
                                     android:text="@string/link_expiry_date"
                                     android:textAllCaps="true"
-                                    android:textColor="@color/dusty"
+                                    android:textColor="@color/text_secondary"
                                     android:textSize="10sp" />
 
                                 <RelativeLayout
@@ -384,7 +391,7 @@
                                         android:inputType="datetime"
                                         android:paddingStart="15dp"
                                         android:textColor="@color/text_secondary"
-                                        android:textColorHint="@color/dusty"
+                                        android:textColorHint="@color/text_secondary"
                                         android:textSize="18sp" />
 
                                     <ImageView
@@ -404,7 +411,7 @@
                                     android:fontFamily="@font/font_regular"
                                     android:gravity="center"
                                     android:text="@string/error_date"
-                                    android:textColor="@color/danger"
+                                    android:textColor="@color/text_error"
                                     android:textSize="12sp"
                                     android:visibility="gone" />
                             </LinearLayout>
@@ -412,7 +419,7 @@
                             <View
                                 android:layout_width="15dp"
                                 android:layout_height="match_parent"
-                                android:background="@color/white" />
+                                android:background="@color/surface" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -428,7 +435,7 @@
                                     android:fontFamily="@font/font_regular"
                                     android:text="@string/link_expiry_time"
                                     android:textAllCaps="true"
-                                    android:textColor="@color/dusty"
+                                    android:textColor="@color/text_secondary"
                                     android:textSize="10sp" />
 
                                 <RelativeLayout
@@ -450,7 +457,7 @@
                                         android:inputType="time"
                                         android:paddingStart="15dp"
                                         android:textColor="@color/text_secondary"
-                                        android:textColorHint="@color/dusty"
+                                        android:textColorHint="@color/text_secondary"
                                         android:textSize="18sp" />
 
                                     <ImageView
@@ -470,7 +477,7 @@
                                     android:fontFamily="@font/font_regular"
                                     android:gravity="center"
                                     android:text="@string/error_time"
-                                    android:textColor="@color/danger"
+                                    android:textColor="@color/text_error"
                                     android:textSize="12sp"
                                     android:visibility="gone" />
                             </LinearLayout>

@@ -24,10 +24,7 @@
 
             <View style="@style/Aw.Component.Separator" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@color/color_alabaster" />
+            <View style="@style/Aw.Component.Separator.Large" />
 
             <LinearLayout
                 android:id="@+id/layout_backup_method"

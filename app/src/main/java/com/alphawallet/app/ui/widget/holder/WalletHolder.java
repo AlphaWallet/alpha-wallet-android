@@ -50,8 +50,6 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	private final TextView walletAddressText;
 	private final TextView wallet24hChange;
 	private final ImageView walletSelectedIcon;
-	private final int greyColor;
-	private final int blackColor;
 	private final Realm realm;
 	private RealmResults<RealmWalletData> realmUpdate;
 
@@ -72,8 +70,6 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		wallet24hChange = findViewById(R.id.wallet_24h_change);
 		clickCallback = callback;
 		manageWalletLayout = findViewById(R.id.layout_manage_wallet);
-		greyColor = parent.getContext().getColor(R.color.concrete);
-		blackColor = parent.getContext().getColor(R.color.mine);
 		this.realm = realm;
 	}
 
@@ -108,11 +104,6 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 			if (!TextUtils.isEmpty(walletBalance) && walletBalance.startsWith("*"))
 			{
 				walletBalance = walletBalance.substring(1);
-				walletBalanceText.setTextColor(greyColor);
-			}
-			else
-			{
-				walletBalanceText.setTextColor(blackColor);
 			}
 			walletBalanceText.setText(walletBalance);
 			walletBalanceCurrency.setText(wallet.balanceSymbol);
@@ -151,7 +142,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	{
 		//This sets the 24hr percentage change (rightmost value)
 		try {
-			int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.danger : R.color.green);
+			int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.negative : R.color.positive);
 			BigDecimal percentChangeBI = BigDecimal.valueOf(percentChange24h).setScale(3, RoundingMode.DOWN);
 			String formattedPercents = (percentChange24h < 0 ? "-" : "+") + percentChangeBI + "%";
 			//wallet24hChange.setBackgroundResource(percentage < 0 ? R.drawable.background_24h_change_red : R.drawable.background_24h_change_green);
@@ -170,7 +161,6 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 			//update balance
 			if (realmWallets.size() == 0) return;
 			RealmWalletData realmWallet = realmWallets.first();
-			walletBalanceText.setTextColor(blackColor);
 			walletBalanceText.setText(realmWallet.getBalance());
 			String ensName = realmWallet.getENSName();
 			String name = realmWallet.getName();

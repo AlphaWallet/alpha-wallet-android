@@ -525,7 +525,7 @@ public class Transaction implements Parcelable
 			}
 		}
 
-		return R.color.black;
+		return R.color.text_primary;
 	}
 
 	public String getDestination(Token token)

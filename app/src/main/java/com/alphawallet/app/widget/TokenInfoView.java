@@ -60,7 +60,7 @@ public class TokenInfoView extends LinearLayout {
         String prefix = hasPrefix && v > 0 ? "+" : "";
         value.setText(prefix + TickerService.getFullCurrencyString(v));
 
-        int color = ContextCompat.getColor(getContext(), v < 0 ? R.color.danger : R.color.green);
+        int color = ContextCompat.getColor(getContext(), v < 0 ? R.color.negative : R.color.positive);
         value.setTextColor(color);
     }
 
@@ -83,7 +83,7 @@ public class TokenInfoView extends LinearLayout {
     public void setLink()
     {
         isLink = true;
-        value.setTextColor(ContextCompat.getColor(getContext(), R.color.azure));
+        value.setTextColor(ContextCompat.getColor(getContext(), R.color.brand));
         value.setOnClickListener(v -> {
             String url = value.getText().toString();
             if (url.startsWith("http"))

@@ -464,8 +464,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         layoutNavigation = view.findViewById(R.id.layout_navigator);
 
         View home = view.findViewById(R.id.home);
-
-        home.setOnClickListener(v -> homePressed());
+        if (home != null) home.setOnClickListener(v -> homePressed());
 
         //If you are wondering about the strange way the menus are inflated - this is required to ensure
         //that the menu text gets created with the correct localisation under every circumstance
@@ -479,7 +478,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             inflater.inflate(R.menu.menu_bookmarks, toolbar.getMenu());
         }
         refresh = view.findViewById(R.id.refresh);
-
 
         RelativeLayout layout = view.findViewById(R.id.address_bar_layout);
         layout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);

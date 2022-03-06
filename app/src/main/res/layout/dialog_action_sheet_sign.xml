@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -13,62 +13,60 @@
 
         <ImageView
             android:id="@+id/image_close"
-            android:contentDescription="@string/action_close"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dp16"
-            android:padding="5dp"
             android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/dp16"
             android:background="@color/transparent"
-            android:src="@drawable/ic_close" />
+            android:contentDescription="@string/action_close"
+            android:padding="5dp"
+            android:src="@drawable/ic_close"
+            app:tint="@color/icon_tint" />
 
         <TextView
             android:id="@+id/text_sign_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/image_close"
-            android:layout_toStartOf="@id/logo"
-            android:text="@string/dialog_title_sign_message"
-            android:textColor="@color/black"
-            android:fontFamily="@font/font_semibold"
             android:layout_centerVertical="true"
-            android:gravity="center_horizontal"
             android:layout_marginTop="@dimen/dp8"
             android:layout_marginBottom="@dimen/dp8"
-            android:textSize="@dimen/sp20"/>
+            android:layout_toStartOf="@id/logo"
+            android:layout_toEndOf="@id/image_close"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="center_horizontal"
+            android:text="@string/dialog_title_sign_message"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp20" />
 
         <ImageView
             android:id="@+id/logo"
-            android:contentDescription="@string/app_name"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/ic_launcher_foreground"
-            android:layout_marginEnd="10dp"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_marginEnd="10dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_launcher_foreground" />
 
     </RelativeLayout>
 
     <com.alphawallet.app.widget.AddressDetailView
         android:id="@+id/requester"
-        custom:label="@string/requester_url"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        custom:label="@string/requester_url" />
 
     <com.alphawallet.app.widget.SignDataWidget
         android:id="@+id/sign_widget"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+    <View style="@style/Aw.Component.Separator" />
 
     <com.alphawallet.app.widget.ConfirmationWidget
         android:id="@+id/confirmation_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
     <com.alphawallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"

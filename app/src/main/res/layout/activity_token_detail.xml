@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:custom="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
@@ -22,8 +22,8 @@
             android:id="@+id/scroll_details"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible"
-            android:layout_above="@id/layoutButtons">
+            android:layout_above="@id/layoutButtons"
+            android:visibility="visible">
 
             <RelativeLayout
                 android:id="@+id/layout_asset"
@@ -33,47 +33,47 @@
 
                 <com.alphawallet.app.widget.NFTImageView
                     android:id="@+id/layout_image"
-                    android:layout_alignParentTop="true"
                     android:layout_width="match_parent"
                     android:layout_height="350dp"
-                    custom:webview_height="350"
+                    android:layout_alignParentTop="true"
+                    android:gravity="center"
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
-                    android:gravity="center"/>
+                    custom:webview_height="350" />
 
                 <LinearLayout
                     android:id="@+id/layout_details"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/layout_image"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginTop="@dimen/standard_16"
                     android:orientation="horizontal"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="8dp">
+                    android:paddingLeft="@dimen/tiny_8"
+                    android:paddingRight="@dimen/tiny_8">
 
                     <TextView
                         android:id="@+id/id"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="12dp"
+                        android:layout_marginRight="@dimen/small_12"
                         android:drawableLeft="@drawable/ic_token_id"
                         android:drawablePadding="5dp"
                         android:fontFamily="@font/font_semibold"
                         android:gravity="center_vertical"
-                        android:textColor="@color/dusty"
-                        android:textSize="13sp" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/sp13" />
 
                     <TextView
                         android:id="@+id/generation"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="12dp"
+                        android:layout_marginRight="@dimen/small_12"
                         android:drawableLeft="@drawable/ic_generation"
                         android:drawablePadding="5dp"
                         android:fontFamily="@font/font_semibold"
                         android:gravity="center_vertical"
-                        android:textColor="@color/dusty"
-                        android:textSize="13sp" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/sp13" />
 
                     <TextView
                         android:id="@+id/cooldown"
@@ -83,8 +83,8 @@
                         android:drawablePadding="5dp"
                         android:fontFamily="@font/font_semibold"
                         android:gravity="center_vertical"
-                        android:textColor="@color/dusty"
-                        android:textSize="13sp" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/sp13" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -92,27 +92,28 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/layout_details"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="@dimen/cozy_20"
                     android:orientation="vertical"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp">
+                    android:paddingHorizontal="@dimen/standard_16">
 
                     <TextView
                         android:id="@+id/name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="11dp"
+                        android:layout_marginBottom="@dimen/small_12"
                         android:fontFamily="@font/font_bold"
-                        android:textColor="@color/dove"
-                        android:textSize="18sp" />
+                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/sp17"
+                        custom:text="Name" />
 
                     <TextView
                         android:id="@+id/description"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/font_regular"
-                        android:textColor="@color/dove"
-                        android:textSize="12sp" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/sp15"
+                        custom:text="Description" />
 
                 </LinearLayout>
 
@@ -120,25 +121,26 @@
                     android:id="@+id/attributes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/layout_name_desc"/>
+                    android:layout_below="@id/layout_name_desc" />
 
                 <TextView
                     android:id="@+id/open_external"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/attributes"
-                    android:layout_marginTop="20dp"
-                    android:drawablePadding="5dp"
-                    app:drawableRightCompat="@drawable/ic_forward"
+                    android:layout_marginTop="@dimen/cozy_20"
+                    android:drawablePadding="@dimen/mini_4"
                     android:fontFamily="@font/font_semibold"
                     android:gravity="center_vertical"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp"
-                    android:textColor="@color/dove"
-                    android:textSize="16sp" />
-
+                    android:paddingLeft="@dimen/standard_16"
+                    android:paddingRight="@dimen/standard_16"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/sp17"
+                    app:drawableRightCompat="@drawable/ic_forward"
+                    custom:text="Open Link" />
 
             </RelativeLayout>
+
         </ScrollView>
 
     </RelativeLayout>

@@ -1,144 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<!-- Application Palette -->
-	<color name="color_white">@color/white</color>
-	<color name="color_black">@color/black</color>
-	<color name="color_azure">@color/azure</color>
-	<color name="color_dove">@color/dove</color>
-	<color name="color_dusty">@color/dusty</color>
-	<color name="color_green">@color/green</color>
-	<color name="color_alabaster">@color/alabaster</color>
-	<color name="color_mercury">@color/mercury</color>
-	<color name="color_mine">@color/mine</color>
-	<color name="color_concrete">@color/concrete</color>
-	<color name="color_cod">@color/cod</color>
+	<color name="background">@color/white</color>
+	<color name="background_inverse">@color/black</color>
 
-	<!-- Functional -->
-	<color name="surface">@color/color_white</color>
-	<color name="surface_inverse">@color/color_black</color>
+	<color name="surface">@color/white</color>
+	<color name="surface_inverse">@color/black</color>
 
-	<color name="brand_accent">@color/azure</color>
-	<color name="text_on_brand_accent">@color/white</color>
+	<color name="control">@color/black</color>
+	<color name="control_activated">@color/brand</color>
 
-	<color name="dialog_background">@color/white</color>
-	<color name="backup_background">@color/mine</color>
-	<color name="header_background">@color/color_alabaster</color>
+	<color name="brand">@color/azure</color> <!-- TODO: Make fixed -->
+	<color name="brand_inverse">@color/white</color> <!-- TODO: Make fixed -->
+
+	<color name="accent">@color/azure</color> <!-- TODO: Make fixed -->
+	<color name="accent_inverse">@color/white</color> <!-- TODO: Make fixed -->
 
 	<!-- Most prominent text color -->
-	<color name="text_primary">@color/color_black</color>
-	<color name="text_primary_inverse">@color/color_white</color>
+	<color name="text_primary">@color/black</color>
+	<color name="text_primary_inverse">@color/white</color>
+
 	<!-- Secondary text color for subtitles -->
-	<color name="text_secondary">@color/color_dove</color>
-	<color name="text_secondary_inverse">@color/color_dusty</color>
-	<!-- Tertiary text color -->
-	<color name="text_tertiary">@color/color_mine</color>
+	<color name="text_secondary">@color/dove</color>
+	<color name="text_secondary_inverse">@color/white</color>
 
-	<color name="text_error">@color/danger</color>
-	<color name="text_error_inverse">@color/color_white</color>
+	<!-- Error colors -->
+	<color name="text_error">@color/danger</color> <!-- TODO: Make fixed -->
+	<color name="text_error_inverse">@color/white</color> <!-- TODO: Make fixed -->
 
-	<color name="positive">@color/color_green</color>
-	<color name="negative">@color/danger</color>
-
-	<color name="button_primary">@color/color_cod</color>
+	<!-- Main buttons -->
+	<color name="button_primary">@color/cod</color>
 	<color name="button_secondary">@color/transparent</color>
 
-	<!-- For buttons - azure / white (probably) TODO -->
-	<color name="icon_tint">@color/color_black</color>
-	<color name="icon_tint_inverse">@color/color_white</color>
-	<color name="icon_tint_accent">@color/color_azure</color>
+	<!-- TextIcon button -->
+	<color name="button_texticon">@color/concrete</color>
 
-	<color name="separator">@color/color_mercury</color>
+	<!-- Suggestion button -->
+	<color name="button_suggestion">@color/mercury</color>
+
+	<!-- Icons, toolbar icons -->
+	<color name="icon_tint">@color/black</color>
+	<color name="icon_tint_inverse">@color/white</color>
+
+	<!-- Popup menus, dialogs -->
+	<color name="dialog_background">@color/white</color> <!-- TODO: Make fixed -->
+
+	<!-- Warning dialog -->
+	<color name="warning_background">@color/mine</color> <!-- TODO: Make fixed -->
+
+	<!-- Headers -->
+	<color name="header_background">@color/alabaster</color>
+
+	<!-- Separator -->
+	<color name="separator">@color/mercury</color>
+
+	<!-- Address Bar -->
+	<color name="search_bar">@color/concrete</color>
 
 	<!-- History Chart -->
-	<color name="background_chart_tab">@color/color_white</color>
-	<color name="background_chart_tab_selected">@color/color_mine</color>
-	<color name="text_legend">@color/color_black</color>
+	<color name="chart_tab">@color/white</color>
+	<color name="chart_tab_selected">@color/mine</color>
+	<color name="chart_legend">@color/black</color>
+	<color name="chart_line">@color/mine</color>
 
 	<!-- Seed Word -->
-	<color name="background_seed_word">@color/color_concrete</color>
-	<color name="background_seed_word_selected">@color/color_alabaster</color>
-	<color name="stroke_seed_word">@color/mike</color>
-	<color name="text_seed_word">@color/text_primary</color>
-	<color name="text_seed_word_selected">@color/color_alabaster</color>
+	<color name="seed_word">@color/concrete</color>
+	<color name="seed_word_selected">@color/alabaster</color>
+	<color name="seed_word_stroke">@color/mike</color> <!-- TODO: Fixed -->
+	<color name="seed_word_text">@color/text_primary</color>
+	<color name="seed_word_text_selected">@color/alabaster</color>
 
-	<!-- AlphaWallet Palette -->
-	<color name="pinkish_grey">#bdbdbd</color>
-	<color name="pale_salmon">#fcbbb7</color>
-	<color name="very_light_pink">#ffebea</color>
-	<color name="black">#000000</color>
-	<color name="mine">#2f2f2f</color>
-	<color name="dove">#727272</color>
-	<color name="dusty">#999999</color>
-	<color name="silver">#c2c2c2</color>
-	<color name="mike">#dddddd</color>
-	<color name="alto">#e0e0e0</color>
-	<color name="mercury">#e9e9e9</color>
-	<color name="concrete">#f2f2f2</color>
-	<color name="alabaster">#fbfbfb</color>
-	<color name="white">#ffffff</color>
-	<color name="solitude">#e6f3ff</color>
-	<color name="azure">#007fed</color>
-	<color name="azure_hover">#1993fd</color>
-	<color name="cerulean">#00bfff</color>
-	<color name="green">#75b943</color>
-	<color name="emerald">#53d76b</color>
-	<color name="danger">#ff3b30</color>
-	<color name="radical">#fc3159</color>
-	<color name="pumpkin">#fd9426</color>
-	<color name="indigo">#595ad5</color>
-	<color name="elm">#197a84</color>
-	<color name="polar">#f3f9fd</color>
-	<color name="mystic">#b2c6d8</color>
-	<color name="bali">#8aa3b8</color>
-	<color name="science">#006bc8</color>
-	<color name="picton">#4bbcec</color>
-	<color name="cod">#141414</color>
-	<color name="aurora">#bbdda2</color>
-	<color name="vida">#4da322</color>
-	<color name="porcelain">#f0f3f4</color>
-	<color name="botticelli">#ccd9e3</color>
-	<color name="international">#ff5a00</color>
-	<color name="dodge">#0c84ff</color>
-	<color name="venus">#232323</color>
-	<color name="shark">#232325</color>
-	<color name="atlantis">#7cca42</color>
-
-	<!-- Network Palette  -->
-	<color name="mainnet">#2986AF</color>
-	<color name="ropsten">#FF4A8D</color>
-	<color name="kovan">#70578D</color>
-	<color name="rinkeby">#F6C343</color>
-	<color name="sokol">#6B35A2</color>
-	<color name="xdai">#48A9A6</color>
-	<color name="classic">#378937</color>
-	<color name="poa">#5838A3</color>
-	<color name="goerli">#BBAE9A</color>
-	<color name="artis_sigma1">#53A271</color>
-	<color name="artis_tau1">#F97599</color>
-	<color name="binance_test">#ffca2f</color>
-	<color name="binance_main">#f3ba2f</color>
-	<color name="heco_test">#5F9FFF</color>
-	<color name="heco_main">#3F7FFF</color>
-	<color name="avalanche_main">#FF2938</color>
-	<color name="avalanche_test">#92A6B8</color>
-	<color name="polygon_main">#8247E5</color>
-	<color name="polygon_test">#2BBDF7</color>
-	<color name="fantom_main">#022069</color>
-	<color name="fantom_test">#92A6B8</color>
-	<color name="optimistic_main">#FF0420</color>
-	<color name="optimistic_test">#B2C6D8</color>
-	<color name="cronos_test">#002D74</color>
-	<color name="arbitrum_main">#28A0F0</color>
-	<color name="arbitrum_test">#40678c</color>
-	<color name="palm_main">#83488c</color>
-	<color name="palm_test">#93589c</color>
-
-	<!-- Functional Palette -->
-	<color name="transparent">#00000000</color>
-	<color name="translucent_white">#B3FFFFFF</color>
-	<color name="translucent_black">#1e000000</color>
-	<color name="translucent_dove">#66727272</color>
-	<color name="blur">#80000000</color>
-	<color name="danger_10_percent">#19ff3b30</color>
-	<color name="green_10_percent">#1975b943</color>
+	<!-- Number value indicators -->
+	<color name="positive">@color/green</color> <!-- TODO: Fixed -->
+	<color name="negative">@color/danger</color> <!-- TODO: Fixed -->
 </resources>

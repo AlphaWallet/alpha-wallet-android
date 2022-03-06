@@ -13,7 +13,8 @@
         android:animateLayoutChanges="true"
         android:focusable="true"
         android:focusableInTouchMode="true"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/mini_4">
 
         <LinearLayout
             android:id="@+id/layout_navigator"
@@ -21,8 +22,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_marginStart="@dimen/mini_4"
-            android:layout_marginEnd="@dimen/mini_4"
             android:animateLayoutChanges="true"
             android:orientation="horizontal">
 
@@ -46,42 +45,59 @@
 
         </LinearLayout>
 
-        <AutoCompleteTextView
-            android:id="@+id/url_tv"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/url_tv_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/mini_4"
             android:layout_marginEnd="@dimen/mini_4"
             android:layout_toStartOf="@id/network_holder"
             android:layout_toEndOf="@id/layout_navigator"
-            android:animateLayoutChanges="true"
-            android:background="@drawable/background_address_bar"
-            android:clickable="true"
-            android:completionThreshold="1"
-            android:dropDownAnchor="@id/anchor"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:fontFamily="@font/font_regular"
-            android:hint="@string/search_or_type_web_address"
-            android:imeOptions="actionGo"
-            android:inputType="textUri"
-            android:padding="@dimen/tiny_8"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_secondary"
-            android:textSize="@dimen/sp17" />
+            android:elevation="0dp"
+            app:cardBackgroundColor="@color/search_bar"
+            app:cardCornerRadius="5dp">
 
-        <ImageView
-            android:id="@+id/clear_url"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignEnd="@id/url_tv"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="@dimen/mini_4"
-            android:padding="@dimen/mini_4"
-            android:src="@drawable/ic_clear"
-            android:visibility="gone"
-            app:tint="@color/text_secondary"
-            tools:visibility="visible" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <AutoCompleteTextView
+                    android:id="@+id/url_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:animateLayoutChanges="true"
+                    android:background="@color/transparent"
+                    android:clickable="true"
+                    android:completionThreshold="1"
+                    android:dropDownAnchor="@id/anchor"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:fontFamily="@font/font_regular"
+                    android:hint="@string/search_or_type_web_address"
+                    android:imeOptions="actionGo"
+                    android:inputType="textUri"
+                    android:padding="@dimen/tiny_8"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="@dimen/sp17" />
+
+                <ImageView
+                    android:id="@+id/clear_url"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignEnd="@id/url_tv"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="@dimen/mini_4"
+                    android:padding="@dimen/mini_4"
+                    android:src="@drawable/ic_clear"
+                    android:visibility="gone"
+                    app:tint="@color/text_secondary"
+                    tools:visibility="visible" />
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+
 
         <LinearLayout
             android:id="@+id/network_holder"

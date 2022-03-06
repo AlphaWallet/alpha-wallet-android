@@ -1,38 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/small_12"
     android:clickable="true"
     android:orientation="vertical"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:layout_marginBottom="10dp">
+    android:padding="@dimen/standard_16">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/amount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
-            android:fontFamily="@font/font_light"
+            android:layout_marginEnd="@dimen/tiny_8"
+            android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:text="5"
-            android:textColor="@color/mine"
-            android:textSize="25sp" />
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp24"
+            tools:text="5" />
 
         <TextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_light"
-            android:text="FIFA 2018 Final"
-            android:textColor="@color/mine"
-            android:textSize="25sp" />
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp24"
+            tools:text="FIFA 2018 Final" />
     </LinearLayout>
 
     <LinearLayout
@@ -44,20 +43,20 @@
             android:id="@+id/textViewIssuerPlaceholderTokenDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
+            android:fontFamily="@font/font_regular"
             android:text="@string/issuer"
             android:textColor="@color/text_secondary"
-            android:textSize="11sp" />
+            android:textSize="@dimen/sp15" />
 
         <TextView
             android:id="@+id/textViewIssuer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tiny_8"
             android:fontFamily="@font/font_semibold"
-            android:layout_marginStart="4dp"
             android:text=""
             android:textColor="@color/text_secondary"
-            android:textSize="11sp" />
+            android:textSize="@dimen/sp15" />
 
     </LinearLayout>
 

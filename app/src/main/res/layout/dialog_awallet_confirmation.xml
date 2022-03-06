@@ -3,84 +3,89 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="40dp"
+    android:layout_margin="@dimen/giant_40"
+    android:background="@color/dialog_background"
     android:orientation="vertical"
-    android:paddingTop="30dp"
-    android:paddingBottom="30dp">
+    android:paddingTop="@dimen/base_24"
+    android:paddingBottom="@dimen/base_24">
 
     <TextView
         android:id="@+id/dialog_main_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="20dp"
-        android:fontFamily="@font/font_light"
+        android:fontFamily="@font/font_semibold"
         android:gravity="center"
-        android:textColor="@color/mine"
-        android:textSize="25sp" />
-
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/sp17"
+        tools:text="Main Text" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
-        android:background="@color/mercury"
+        android:layout_marginBottom="@dimen/standard_16"
         android:orientation="vertical"
-        android:padding="30dp">
+        android:padding="@dimen/standard_16">
 
         <TextView
             android:id="@+id/dialog_small_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:fontFamily="@font/font_light"
+            android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:textColor="@color/mine"
-            android:textSize="16sp"
-            android:visibility="gone" />
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp15"
+            android:visibility="gone"
+            tools:text="Small text"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/dialog_medium_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:fontFamily="@font/font_bold"
+            android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:textColor="@color/text_secondary"
-            android:textSize="20sp"
-            android:visibility="gone" />
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp15"
+            android:visibility="gone"
+            tools:text="Medium Text"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/dialog_big_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:fontFamily="@font/font_bold"
+            android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:textColor="@color/text_secondary"
-            android:textSize="41sp"
-            android:visibility="gone" />
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp15"
+            android:visibility="gone"
+            tools:text="Large Text"
+            tools:visibility="visible" />
 
     </LinearLayout>
-
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="30dp"
-        android:paddingRight="30dp">
+        android:paddingStart="@dimen/cozy_20"
+        android:paddingEnd="@dimen/cozy_20">
 
         <TextView
             android:id="@+id/dialog_extra_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="20dp"
-            android:fontFamily="@font/font_light"
+            android:layout_marginBottom="@dimen/cozy_20"
+            android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:textColor="@color/mine"
-            android:textSize="25sp" />
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/sp15"
+            tools:text="Extra Text" />
 
         <!-- TODO: Convert to new button styles -->
         <LinearLayout
@@ -88,48 +93,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:background="?colorOnSurface"
             android:gravity="center">
 
-            <androidx.appcompat.widget.AppCompatButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/dialog_button1"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="wrap_content"
+                style="@style/Aw.Component.Button.Primary"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/transparent"
-                android:fontFamily="@font/font_regular"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
                 android:textAllCaps="false"
-                android:textColor="?colorSurface"
-                android:textSize="20sp"
                 tools:text="Action" />
-
-            <ImageView
-                android:id="@+id/image_share"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="5dp"
-                android:background="@drawable/ic_share_light_24dp"
-                android:contentDescription="@string/action_share"
-                android:visibility="gone" />
 
         </LinearLayout>
 
         <Button
             android:id="@+id/dialog_button2"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/Aw.Component.Button.Secondary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:background="@color/white"
-            android:fontFamily="@font/font_regular"
-            android:paddingLeft="20dp"
-            android:paddingTop="10dp"
-            android:paddingRight="20dp"
-            android:textAllCaps="false"
-            android:textColor="@color/danger"
-            android:textSize="20sp" />
+            tools:text="Secondary" />
     </LinearLayout>
 </LinearLayout>

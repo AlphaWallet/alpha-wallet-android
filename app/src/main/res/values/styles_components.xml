@@ -6,6 +6,20 @@
         <item name="background">@color/surface</item>
     </style>
 
+    <style name="Aw.Component.ActionItem" parent="Widget.MaterialComponents.TextView">
+        <item name="android:fontFamily">@font/font_regular</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">@dimen/cozy_20</item>
+        <item name="android:paddingEnd">@dimen/cozy_20</item>
+        <item name="android:paddingTop">@dimen/cozy_20</item>
+        <item name="android:paddingBottom">@dimen/cozy_20</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/sp17</item>
+    </style>
+
     <style name="Aw.Component.AlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
         <item name="colorSurface">@color/dialog_background</item>
         <item name="colorPrimary">@color/brand</item>

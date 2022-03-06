@@ -31,18 +31,6 @@
         <item name="android:textSize">@dimen/sp15</item>
     </style>
 
-    <style name="Aw.Typography.ActionItemText" parent="">
-        <item name="android:fontFamily">@font/font_regular</item>
-        <item name="android:layout_height">@dimen/action_item_height</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:paddingStart">@dimen/cozy_20</item>
-        <item name="android:paddingEnd">@dimen/cozy_20</item>
-        <item name="android:textColor">@color/text_primary</item>
-        <item name="android:textSize">@dimen/sp17</item>
-    </style>
-
     <style name="Aw.Typography.TransactionDetailTitleText" parent="">
         <item name="android:paddingTop">@dimen/dp5</item>
         <item name="android:textSize">@dimen/sp17</item>

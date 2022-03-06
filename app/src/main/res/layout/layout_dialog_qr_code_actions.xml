@@ -5,35 +5,35 @@
 
     <TextView
         android:id="@+id/send_to_this_address_action"
-        style="@style/Aw.Typography.ActionItemText"
+        style="@style/Aw.Component.ActionItem"
         android:text="@string/action_send_to_this_address" />
 
     <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/add_custom_token_action"
-        style="@style/Aw.Typography.ActionItemText"
+        style="@style/Aw.Component.ActionItem"
         android:text="@string/title_add_token" />
 
     <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/watch_account_action"
-        style="@style/Aw.Typography.ActionItemText"
+        style="@style/Aw.Component.ActionItem"
         android:text="@string/action_watch_account" />
 
     <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/open_in_etherscan_action"
-        style="@style/Aw.Typography.ActionItemText"
+        style="@style/Aw.Component.ActionItem"
         android:text="@string/action_open_etherscan" />
 
     <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/close_action"
-        style="@style/Aw.Typography.ActionItemText"
+        style="@style/Aw.Component.ActionItem"
         android:text="@string/action_cancel" />
 
 </LinearLayout>

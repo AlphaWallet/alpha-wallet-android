@@ -12,18 +12,15 @@
         <item name="android:lines">1</item>
     </style>
 
-    <style name="Aw.Typography.TabText" parent="TextAppearance.Design.Tab">
+    <style name="Aw.Typography.Tab" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">@dimen/sp15</item>
-        <item name="android:textColor">@color/text_primary</item>
         <item name="android:fontFamily">@font/font_regular</item>
         <item name="textAllCaps">false</item>
     </style>
 
-    <style name="Aw.Typography.ChartTabText" parent="TextAppearance.Design.Tab">
+    <style name="Aw.Typography.Tab.Chart" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">@dimen/sp17</item>
-        <item name="android:padding">@dimen/dp10</item>
-        <item name="android:fontFamily">@font/font_regular</item>
-        <item name="textAllCaps">false</item>
+        <item name="android:padding">@dimen/small_12</item>
     </style>
 
     <style name="Aw.Typography.StandardHeaderText" parent="">

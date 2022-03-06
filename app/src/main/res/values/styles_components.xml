@@ -48,7 +48,7 @@
         <item name="tabPaddingStart">25dp</item>
         <item name="tabPaddingEnd">25dp</item>
         <item name="tabBackground">@color/surface</item>
-        <item name="tabTextAppearance">@style/Aw.Typography.TabText</item>
+        <item name="tabTextAppearance">@style/Aw.Typography.Tab</item>
         <item name="tabSelectedTextColor">@color/brand</item>
         <item name="tabTextColor">@color/text_secondary</item>
         <item name="tabIndicatorFullWidth">true</item>
@@ -75,7 +75,7 @@
         <item name="tabIndicatorHeight">0dp</item>
         <item name="tabPaddingStart">@dimen/cozy_20</item>
         <item name="tabPaddingEnd">@dimen/cozy_20</item>
-        <item name="tabTextAppearance">@style/Aw.Typography.ChartTabText</item>
+        <item name="tabTextAppearance">@style/Aw.Typography.Tab.Chart</item>
         <item name="tabBackground">@drawable/selector_chart_tab_background</item>
         <item name="tabRippleColor">@null</item>
         <item name="tabTextColor">@color/selector_chart_tab_text</item>

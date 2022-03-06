@@ -20,7 +20,7 @@ public class TransactionDateHolder extends BinderViewHolder<Date> {
     public TransactionDateHolder(int resId, ViewGroup parent) {
         super(resId, parent);
 
-        title = findViewById(R.id.title);
+        title = findViewById(R.id.text_header);
     }
 
     @Override

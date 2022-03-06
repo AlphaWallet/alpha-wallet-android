@@ -6,37 +6,11 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <RelativeLayout
-        android:id="@+id/layout_header_amount"
+    <com.alphawallet.app.widget.StandardHeader
+        android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@color/header_background">
-
-        <View
-            style="@style/Aw.Component.Separator"
-            android:layout_alignParentTop="true" />
-
-        <TextView
-            android:id="@+id/text_header"
-            style="@style/Aw.Typography.StandardHeaderText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:paddingStart="@dimen/standard_16"
-            android:paddingEnd="@dimen/standard_16"
-            android:text="@string/amount" />
-
-        <com.alphawallet.app.widget.ChainName
-            android:id="@+id/chain_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/standard_16" />
-
-    </RelativeLayout>
+        android:layout_height="wrap_content"
+        app:headerText="@string/amount" />
 
     <View style="@style/Aw.Component.Separator" />
 

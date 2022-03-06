@@ -23,9 +23,8 @@
         <item name="android:padding">@dimen/small_12</item>
     </style>
 
-    <style name="Aw.Typography.StandardHeaderText" parent="">
+    <style name="Aw.Typography.StandardHeader" parent="TextAppearance.AppCompat">
         <item name="android:fontFamily">@font/font_semibold</item>
-        <item name="android:gravity">center_vertical</item>
         <item name="android:lines">1</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textColor">@color/text_secondary</item>

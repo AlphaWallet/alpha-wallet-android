@@ -14,6 +14,7 @@ import com.alphawallet.app.R;
 public class StandardHeader extends LinearLayout
 {
     private TextView headerText;
+    private ChainName chainName;
 
     public StandardHeader(Context context, AttributeSet attrs)
     {
@@ -34,6 +35,8 @@ public class StandardHeader extends LinearLayout
         {
             int headerId = a.getResourceId(R.styleable.StandardHeader_headerText, R.string.empty);
             headerText = findViewById(R.id.text_header);
+            chainName = findViewById(R.id.chain_name);
+
             headerText.setText(headerId);
         }
         finally
@@ -48,5 +51,10 @@ public class StandardHeader extends LinearLayout
 
     public void setText(int resId) {
         headerText.setText(resId);
+    }
+
+    public ChainName getChainName()
+    {
+        return chainName;
     }
 }

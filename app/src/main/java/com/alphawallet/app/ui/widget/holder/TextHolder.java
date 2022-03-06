@@ -20,7 +20,7 @@ public class TextHolder extends BinderViewHolder<String>
     public TextHolder(int resId, ViewGroup parent)
     {
         super(resId, parent);
-        text = findViewById(R.id.text);
+        text = findViewById(R.id.text_header);
     }
 
     @Override

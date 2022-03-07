@@ -175,6 +175,11 @@
                                 tools:text="1.659%" />
                         </LinearLayout>
 
+                        <ProgressBar
+                            android:id="@+id/ticker_progress"
+                            android:layout_width="@dimen/token_icon_small"
+                            android:layout_height="@dimen/token_icon_small" />
+
                     </LinearLayout>
 
                 </LinearLayout>

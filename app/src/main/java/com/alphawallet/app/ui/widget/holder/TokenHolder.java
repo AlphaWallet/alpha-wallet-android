@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -61,6 +62,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TokensService tokensService;
     private final RelativeLayout tokenLayout;
     private final MaterialCheckBox selectToken;
+    private final ProgressBar tickerProgress;
 
     public Token token;
     private TokensAdapterCallback tokensAdapterCallback;
@@ -81,6 +83,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         extendedInfo = findViewById(R.id.layout_extended_info);
         layoutAppreciation = findViewById(R.id.layout_appreciation);
         selectToken = findViewById(R.id.select_token);
+        tickerProgress = findViewById(R.id.ticker_progress);
+
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
@@ -192,12 +196,16 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         if ((System.currentTimeMillis() - ticker.updateTime) > TICKER_PERIOD_VALIDITY)
         {
-            layoutAppreciation.setForeground(AppCompatResources.getDrawable(getContext(), R.color.translucent_white));
+            root24Hours.setVisibility(View.GONE);
+            textAppreciation.setVisibility(View.GONE);
+            tickerProgress.setVisibility(View.VISIBLE);
             balanceCurrency.setAlpha(0.3f);
         }
         else
         {
-            layoutAppreciation.setForeground(null);
+            tickerProgress.setVisibility(View.GONE);
+            root24Hours.setVisibility(View.VISIBLE);
+            textAppreciation.setVisibility(View.VISIBLE);
             balanceCurrency.setAlpha(1.0f);
         }
     }

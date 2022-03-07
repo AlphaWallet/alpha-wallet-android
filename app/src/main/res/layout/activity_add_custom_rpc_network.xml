@@ -80,22 +80,19 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="@dimen/sp17" />
 
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/checkbox_testnet"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_marginEnd="@dimen/small_12"
+                    android:layout_height="wrap_content" />
+
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/testnet_switch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"
-                    android:layout_marginEnd="@dimen/standard_16"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:visibility="visible" />
-
-                <View
-                    android:id="@+id/view_click_hider"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="end"
-                    android:background="@color/transparent"
+                    android:layout_marginEnd="@dimen/small_12"
                     android:clickable="true"
                     android:focusable="true"
                     android:visibility="gone" />

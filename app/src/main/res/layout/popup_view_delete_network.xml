@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/text_primary_inverse"
+    android:background="@color/dialog_background"
     android:orientation="vertical">
 
     <TextView
@@ -10,27 +10,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:fontFamily="@font/font_regular"
         android:paddingStart="@dimen/standard_16"
         android:paddingTop="@dimen/standard_16"
         android:paddingEnd="@dimen/giant_40"
         android:paddingBottom="@dimen/standard_16"
-        android:text="@string/action_view"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp17" />
+        android:text="@string/action_view" />
 
     <TextView
         android:id="@+id/popup_delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:fontFamily="@font/font_regular"
         android:paddingStart="@dimen/standard_16"
         android:paddingTop="@dimen/standard_16"
         android:paddingEnd="@dimen/giant_40"
         android:paddingBottom="@dimen/standard_16"
-        android:text="@string/action_remove"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp17" />
+        android:text="@string/action_remove" />
 
 </LinearLayout>

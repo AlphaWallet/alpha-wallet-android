@@ -184,9 +184,10 @@ public class AWEnsResolver extends EnsResolver
     {
         String apiBase = OpenSeaService.apiMap.get(chainId);
         if (apiBase == null) return null;
+        apiBase = apiBase.substring(0, apiBase.lastIndexOf("asset") + 5);
 
         Request.Builder requestB = new Request.Builder()
-                    .url(apiBase + "/api/v1/asset/" + tokenAddress + "/" + tokenId)
+                    .url(apiBase + "/" + tokenAddress + "/" + tokenId)
                     .get();
 
         String apiKey = getOpenSeaKey();

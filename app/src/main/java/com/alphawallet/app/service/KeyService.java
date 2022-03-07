@@ -126,7 +126,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     private Wallet currentWallet;
 
     private AuthenticationLevel authLevel;
-    private final SignTransactionDialog signDialog;
+    private SignTransactionDialog signDialog;
     private AWalletAlertDialog alertDialog;
     private CreateWalletCallbackInterface callbackInterface;
     private ImportWalletCallback importCallback;
@@ -147,7 +147,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         this.context = ctx;
         this.analyticsService = analyticsService;
         checkSecurity();
-        signDialog = new SignTransactionDialog(context);
     }
 
     /**
@@ -440,7 +439,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     public void resetSigningDialog()
     {
-        signDialog.close();
+        if (signDialog != null) signDialog.close();
+        signDialog = null;
     }
 
     private synchronized String unpackMnemonic() throws KeyServiceException, UserNotAuthenticatedException
@@ -782,6 +782,9 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 break;
         }
 
+        resetSigningDialog();
+
+        signDialog = new SignTransactionDialog(context);
         signDialog.getAuthentication(this, activity, operation);
         requireAuthentication = false;
     }

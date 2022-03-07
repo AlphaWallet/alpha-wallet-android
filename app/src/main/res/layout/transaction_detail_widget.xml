@@ -21,14 +21,12 @@
         android:paddingBottom="@dimen/cozy_20">
 
         <TextView
-            android:layout_marginStart="@dimen/standard_16"
+            style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/standard_16"
             android:layout_weight="1.1"
-            android:fontFamily="@font/font_regular"
             android:gravity="start"
-            android:text="@string/title_transaction_details"
-            android:textColor="@color/text_secondary"
             android:textSize="@dimen/sp15" />
 
         <TextView
@@ -38,10 +36,7 @@
             android:layout_marginStart="@dimen/small_12"
             android:layout_marginEnd="@dimen/small_12"
             android:layout_weight="3.1"
-            android:fontFamily="@font/font_regular"
             android:gravity="start"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="Destination: 0xabcdef" />
 
         <ImageView
@@ -72,10 +67,13 @@
             android:orientation="horizontal"
             android:paddingVertical="@dimen/cozy_20">
 
-            <View
+            <TextView
+                style="@style/Aw.Typography.Label"
                 android:layout_width="0dp"
-                android:layout_height="1dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/standard_16"
                 android:layout_weight="3.45"
+                android:text="@string/title_transaction_details"
                 android:visibility="visible" />
 
             <ImageView
@@ -103,10 +101,7 @@
                 android:layout_marginEnd="@dimen/standard_16"
                 android:clickable="false"
                 android:focusable="false"
-                android:fontFamily="@font/font_regular"
                 android:gravity="start"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp17"
                 tools:text="0x6EBaF477F83E055589C1188bCC6DDCCD8C9B131a" />
 
         </ScrollView>

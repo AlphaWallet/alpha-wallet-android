@@ -14,16 +14,14 @@
         android:orientation="horizontal">
 
         <TextView
+            style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/standard_16"
             android:layout_weight="1.1"
-            android:fontFamily="@font/font_regular"
             android:gravity="start"
             android:lines="1"
-            android:text="@string/speed_gas"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15" />
+            android:text="@string/speed_gas" />
 
         <LinearLayout
             android:id="@+id/layout_gas_warning"
@@ -42,12 +40,11 @@
 
             <TextView
                 android:id="@+id/text_warning"
+                style="@style/Aw.Typography.Body.Error"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
-                android:text="@string/insufficient_gas"
-                android:textColor="@color/text_error"
-                android:textSize="@dimen/sp17" />
+                android:text="@string/insufficient_gas" />
 
         </LinearLayout>
 
@@ -68,12 +65,11 @@
 
             <TextView
                 android:id="@+id/text_speed_warning"
+                style="@style/Aw.Typography.Body.Error"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
-                android:text="@string/speed_too_low"
-                android:textColor="@color/text_error"
-                android:textSize="@dimen/sp17" />
+                android:text="@string/speed_too_low" />
 
         </LinearLayout>
 
@@ -81,6 +77,7 @@
             android:id="@+id/text_speed"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/tiny_8"
             android:layout_weight="3.1"
             android:fontFamily="@font/font_semibold"
             android:gravity="start"
@@ -92,6 +89,7 @@
             android:id="@+id/edit_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/small_12"
             android:layout_weight="0.6"
             android:fontFamily="@font/font_semibold"
             android:gravity="center_horizontal"
@@ -117,15 +115,13 @@
 
         <TextView
             android:id="@+id/text_time_estimate"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/standard_16"
             android:layout_marginTop="@dimen/mini_4"
             android:layout_weight="3.4"
-            android:fontFamily="@font/font_regular"
             android:gravity="start"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15"
             tools:text="&lt; 0.003 ETH ($0.55 USD)≈2 minutes" />
 
     </LinearLayout>
@@ -134,11 +130,8 @@
         android:id="@+id/text_speedup_note"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/font_regular"
         android:padding="@dimen/cozy_20"
         android:textAlignment="center"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp17"
         android:visibility="gone"
         tools:text="@string/text_speedup_note"
         tools:visibility="visible" />

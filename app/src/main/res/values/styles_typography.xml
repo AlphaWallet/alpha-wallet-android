@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="Aw.Typography" parent="TextAppearance.AppCompat">
         <item name="android:fontFamily">@font/font_regular</item>
     </style>
 
     <style name="Aw.Typography.Label">
+        <item name="android:textSize">@dimen/sp15</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <style name="Aw.Typography.Sub">
         <item name="android:textSize">@dimen/sp15</item>
         <item name="android:textColor">@color/text_secondary</item>
     </style>

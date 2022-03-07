@@ -21,14 +21,12 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
@@ -37,7 +35,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -46,8 +43,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentOnAttachListener;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
@@ -87,7 +82,6 @@ import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 
-import net.yslibrary.android.keyboardvisibilityevent.AutoActivityLifecycleCallback;
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import java.io.File;
@@ -96,9 +90,7 @@ import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.util.List;
 
-import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
-
 import timber.log.Timber;
 
 @AndroidEntryPoint
@@ -222,19 +214,23 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewPager.setUserInputEnabled(false);      // i think this replicates lockPages(true)
         viewPager.setAdapter(pager2Adapter);
         viewPager.setOffscreenPageLimit(WalletPage.values().length);
-        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback()
+        {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels);
             }
 
             @Override
-            public void onPageSelected(int position) {
+            public void onPageSelected(int position)
+            {
                 super.onPageSelected(position);
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
+            public void onPageScrollStateChanged(int state)
+            {
                 super.onPageScrollStateChanged(state);
             }
         });
@@ -254,7 +250,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         KeyboardVisibilityEvent.setEventListener(
-                this, isOpen -> {
+                this, isOpen ->
+                {
                     if (isOpen)
                     {
                         setNavBarVisibility(View.GONE);
@@ -301,7 +298,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
             checkIntents(importData, importPath, intent);
         }
-        
+
         Intent i = new Intent(this, PriceAlertsService.class);
         startService(i);
     }
@@ -310,21 +307,24 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         //TODO: Move all fragment comms to this model - see all instances of ((HomeActivity)getActivity()).
         getSupportFragmentManager()
-                .setFragmentResultListener(RESET_TOKEN_SERVICE, this, (requestKey, b) -> {
+                .setFragmentResultListener(RESET_TOKEN_SERVICE, this, (requestKey, b) ->
+                {
                     viewModel.restartTokensService();
                     //trigger wallet adapter reset
                     resetTokens();
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(RESET_WALLET, this, (requestKey, b) -> {
+                .setFragmentResultListener(RESET_WALLET, this, (requestKey, b) ->
+                {
                     viewModel.restartTokensService();
                     resetTokens();
                     showPage(WALLET);
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(CHANGE_CURRENCY, this, (k, b) -> {
+                .setFragmentResultListener(CHANGE_CURRENCY, this, (k, b) ->
+                {
                     resetTokens();
                     showPage(WALLET);
                 });
@@ -333,7 +333,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .setFragmentResultListener(RESET_TOOLBAR, this, (requestKey, b) -> invalidateOptionsMenu());
 
         getSupportFragmentManager()
-                .setFragmentResultListener(ADDED_TOKEN, this, (requestKey, b) -> {
+                .setFragmentResultListener(ADDED_TOKEN, this, (requestKey, b) ->
+                {
                     List<ContractLocator> contractList = b.getParcelableArrayList(ADDED_TOKEN);
                     if (contractList != null)
                     {
@@ -345,7 +346,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .setFragmentResultListener(SHOW_BACKUP, this, (requestKey, b) -> showBackupWalletDialog(b.getBoolean(SHOW_BACKUP, false)));
 
         getSupportFragmentManager()
-                .setFragmentResultListener(C.HANDLE_BACKUP, this, (requestKey, b) -> {
+                .setFragmentResultListener(C.HANDLE_BACKUP, this, (requestKey, b) ->
+                {
                     if (b.getBoolean(C.HANDLE_BACKUP))
                     {
                         backupWalletSuccess(b.getString("Key"));
@@ -357,18 +359,21 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(C.TOKEN_CLICK, this, (requestKey, b) -> {
+                .setFragmentResultListener(C.TOKEN_CLICK, this, (requestKey, b) ->
+                {
                     tokenClicked = true;
                     handler.postDelayed(() -> tokenClicked = false, 10000);
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(CHANGED_LOCALE, this, (requestKey, b) -> {
+                .setFragmentResultListener(CHANGED_LOCALE, this, (requestKey, b) ->
+                {
                     viewModel.restartHomeActivity(getApplicationContext());
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(SETTINGS_INSTANTIATED, this, (k, b) -> {
+                .setFragmentResultListener(SETTINGS_INSTANTIATED, this, (k, b) ->
+                {
                     loadingComplete();
                 });
     }
@@ -414,7 +419,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         successOverlay = findViewById(R.id.layout_success_overlay);
         successImage = findViewById(R.id.success_image);
 
-        successOverlay.setOnClickListener(view -> {
+        successOverlay.setOnClickListener(view ->
+        {
             //dismiss big green tick
             successOverlay.setVisibility(View.GONE);
         });
@@ -427,20 +433,31 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             //check if wallet was imported - in which case no need to display
             if (!walletImported)
             {
-                int lighterBackground = Color.argb(102, 0, 0, 0); //40% opacity
+                int background = ContextCompat.getColor(getApplicationContext(), R.color.blur);
+                int statusBarColor = getWindow().getStatusBarColor();
                 backupWalletDialog = TutoShowcase.from(this);
                 backupWalletDialog.setContentView(R.layout.showcase_backup_wallet)
-                        .setBackgroundColor(lighterBackground)
-                        .onClickContentView(R.id.btn_close, view -> {
+                        .setBackgroundColor(background)
+                        .onClickContentView(R.id.btn_close, view ->
+                        {
+                            getWindow().setStatusBarColor(statusBarColor);
+                            backupWalletDialog.dismiss();
+                        })
+                        .onClickContentView(R.id.showcase_layout, view ->
+                        {
+                            getWindow().setStatusBarColor(statusBarColor);
                             backupWalletDialog.dismiss();
                         })
                         .on(R.id.settings_tab)
                         .addCircle()
-                        .onClick(v -> {
+                        .onClick(v ->
+                        {
+                            getWindow().setStatusBarColor(statusBarColor);
                             backupWalletDialog.dismiss();
                             showPage(SETTINGS);
-                        })
-                        .show();
+                        });
+                backupWalletDialog.show();
+                getWindow().setStatusBarColor(background);
             }
             viewModel.setFindWalletAddressDialogShown(true);
         }
@@ -479,7 +496,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
         initViews();
 
-        handler.post(() -> {
+        handler.post(() ->
+        {
             //check clipboard
             String magicLink = ImportTokenActivity.getMagiclinkFromClipboard(this);
             if (magicLink != null)
@@ -565,7 +583,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void onDestroy()
     {
-        if (getSelectedItem() != null) viewModel.storeCurrentFragmentId(getSelectedItem().ordinal());
+        if (getSelectedItem() != null)
+            viewModel.storeCurrentFragmentId(getSelectedItem().ordinal());
         super.onDestroy();
         viewModel.onClean();
         if (homeReceiver != null)
@@ -657,7 +676,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 cDialog.setCancelable(true);
                 cDialog.setSmallText("Using an old version of Alphawallet. Please update from the Play Store or Alphawallet website.");
                 cDialog.setPrimaryButtonText(R.string.ok);
-                cDialog.setPrimaryButtonListener(v -> {
+                cDialog.setPrimaryButtonListener(v ->
+                {
                     cDialog.dismiss();
                 });
                 dialog = cDialog;
@@ -685,14 +705,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         handler.removeCallbacksAndMessages(null); //remove any previous error call, only use final error
         // This is in a runnable because the error will come from non main thread process
-        handler.postDelayed(() -> {
+        handler.postDelayed(() ->
+        {
             hideDialog();
             AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
             aDialog.setTitle(getString(R.string.tokenscript_file_error));
             aDialog.setMessage(message);
             aDialog.setIcon(AWalletAlertDialog.ERROR);
             aDialog.setButtonText(R.string.button_ok);
-            aDialog.setButtonListener(v -> {
+            aDialog.setButtonListener(v ->
+            {
                 aDialog.dismiss();
             });
             dialog = aDialog;
@@ -803,13 +825,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private class ScreenSlidePagerAdapter extends FragmentStateAdapter
     {
-        public ScreenSlidePagerAdapter(@NonNull FragmentActivity fragmentActivity) {
+        public ScreenSlidePagerAdapter(@NonNull FragmentActivity fragmentActivity)
+        {
             super(fragmentActivity);
         }
 
         @NonNull
         @Override
-        public Fragment createFragment(int position) {
+        public Fragment createFragment(int position)
+        {
             switch (WalletPage.values()[position])
             {
                 case WALLET:
@@ -830,7 +854,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         @Override
-        public int getItemCount() {
+        public int getItemCount()
+        {
             return WalletPage.values().length;
         }
 
@@ -845,13 +870,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             {
                 default:
                 case WALLET:
-                    return (BaseFragment)walletFragment;
+                    return (BaseFragment) walletFragment;
                 case ACTIVITY:
-                    return (BaseFragment)activityFragment;
+                    return (BaseFragment) activityFragment;
                 case DAPP_BROWSER:
-                    return (BaseFragment)dappBrowserFragment;
+                    return (BaseFragment) dappBrowserFragment;
                 case SETTINGS:
-                    return (BaseFragment)settingsFragment;
+                    return (BaseFragment) settingsFragment;
             }
         }
         else return (BaseFragment) getSupportFragmentManager().getFragments().get(page.ordinal());
@@ -871,7 +896,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         String newBuild = "New version: " + build;
         dialog.setMediumText(newBuild);
         dialog.setPrimaryButtonText(R.string.confirm_update);
-        dialog.setPrimaryButtonListener(v -> {
+        dialog.setPrimaryButtonListener(v ->
+        {
             if (checkWritePermission(RC_DOWNLOAD_EXTERNAL_WRITE_PERM))
             {
                 viewModel.downloadAndInstall(build, this);
@@ -886,7 +912,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             dialog.setSecondaryButtonText(R.string.dialog_later);
         }
-        dialog.setSecondaryButtonListener(v -> {
+        dialog.setSecondaryButtonListener(v ->
+        {
             //only dismiss twice before we stop warning.
             viewModel.setUpdateAsksCount(asks);
             dialog.dismiss();
@@ -1024,7 +1051,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         boolean hasPermission = true;
         for (int i = 0; i < permissions.length; i++)
         {
-            if (grantResults[i] == -1) { hasPermission = false; break; }
+            if (grantResults[i] == -1)
+            {
+                hasPermission = false;
+                break;
+            }
         }
 
         return hasPermission;
@@ -1037,7 +1068,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         aDialog.setTitle(R.string.install_error);
         aDialog.setMessage(R.string.require_write_permission);
         aDialog.setButtonText(R.string.action_cancel);
-        aDialog.setButtonListener(v -> {
+        aDialog.setButtonListener(v ->
+        {
             aDialog.dismiss();
         });
         aDialog.show();
@@ -1135,7 +1167,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 if (data != null && resultCode == Activity.RESULT_OK && data.hasExtra(C.DAPP_URL_LOAD))
                 {
                     ((DappBrowserFragment) getFragment(DAPP_BROWSER)).switchNetworkAndLoadUrl(data.getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID),
-                                data.getStringExtra(C.DAPP_URL_LOAD));
+                            data.getStringExtra(C.DAPP_URL_LOAD));
                     showPage(DAPP_BROWSER);
                 }
                 else if (data != null && resultCode == Activity.RESULT_OK && data.hasExtra(C.EXTRA_TXHASH))
@@ -1222,14 +1254,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.actionSheetConfirm(mode);
     }
 
-    private void hideSystemUI() {
+    private void hideSystemUI()
+    {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         WindowInsetsControllerCompat inset = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
         inset.setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         inset.hide(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
     }
 
-    private void showSystemUI() {
+    private void showSystemUI()
+    {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         WindowInsetsControllerCompat inset = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
         inset.show(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());

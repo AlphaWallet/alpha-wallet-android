@@ -38,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by JB on 15/10/2021.
@@ -147,7 +148,7 @@ public class UserAvatar extends LinearLayout
     private void onError(Throwable throwable)
     {
         setBlockie(walletAddress);
-        if (BuildConfig.DEBUG) throwable.printStackTrace();
+        Timber.e(throwable);
     }
 
     @Override

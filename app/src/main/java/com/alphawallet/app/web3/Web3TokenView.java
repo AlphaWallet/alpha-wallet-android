@@ -55,6 +55,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import timber.log.Timber;
 
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
@@ -191,7 +192,7 @@ public class Web3TokenView extends WebView
     @JavascriptInterface
     public void onValue(String data)
     {
-        System.out.println(data);
+        Timber.d(data);
     }
 
     public void setWalletAddress(@NonNull Address address)
@@ -238,7 +239,7 @@ public class Web3TokenView extends WebView
     }
 
     public void callToJS(String function) {
-        post(() -> evaluateJavascript(function, value -> Log.d("WEB_VIEW", value)));
+        post(() -> evaluateJavascript(function, value -> Timber.tag("WEB_VIEW").d(value)));
     }
 
     @JavascriptInterface
@@ -250,7 +251,7 @@ public class Web3TokenView extends WebView
     @JavascriptInterface
     public void callbackToJS(long callbackId, String function, String param) {
         String callback = String.format(function, callbackId, param);
-        post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
+        post(() -> evaluateJavascript(callback, value -> Timber.tag("WEB_VIEW").d(value)));
     }
 
     public void setOnSignPersonalMessageListener(@Nullable OnSignPersonalMessageListener onSignPersonalMessageListener) {
@@ -406,7 +407,7 @@ public class Web3TokenView extends WebView
 
     private void loadingError(Throwable e)
     {
-        if (BuildConfig.DEBUG) e.printStackTrace();
+        Timber.e(e);
     }
 
     private void renderTicketHolder(Token token, TokenDefinition td, TicketRange range, AssetDefinitionService assetService, boolean iconified)

@@ -57,8 +57,8 @@ public class SetWatchWalletFragment extends ImportFragment implements AddressRea
     {
         View.inflate(getActivity(), R.layout.fragment_watch_wallet, null);
 
-        watchAddress = getActivity().findViewById(R.id.input_watch_address);
-        importButton = getActivity().findViewById(R.id.import_action_ww);
+        watchAddress = getView().findViewById(R.id.input_watch_address);
+        importButton = getView().findViewById(R.id.import_action_ww);
         importButton.setOnClickListener(this);
         updateButtonState(false);
         watchAddress.setAddressCallback(this);
@@ -120,7 +120,7 @@ public class SetWatchWalletFragment extends ImportFragment implements AddressRea
     public void setAddress(String address)
     {
         if (address == null || getActivity() == null) return;
-        watchAddress = getActivity().findViewById(R.id.input_watch_address);
+        watchAddress = getView().findViewById(R.id.input_watch_address);
         watchAddress.setAddress(address);
     }
 

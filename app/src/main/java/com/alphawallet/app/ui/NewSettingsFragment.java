@@ -7,6 +7,7 @@ import static com.alphawallet.app.C.CHANGE_CURRENCY;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.C.RESET_WALLET;
+import static com.alphawallet.app.C.SETTINGS_INSTANTIATED;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_HD_KEY;
 import static com.alphawallet.app.entity.BackupOperationType.BACKUP_KEYSTORE_KEY;
 import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
@@ -111,6 +112,8 @@ public class NewSettingsFragment extends BaseFragment {
         initNotificationView(view);
 
         checkPendingUpdate(view);
+
+        getParentFragmentManager().setFragmentResult(SETTINGS_INSTANTIATED, new Bundle());
 
         return view;
     }

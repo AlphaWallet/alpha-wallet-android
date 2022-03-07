@@ -40,6 +40,8 @@ import com.alphawallet.app.util.Utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import timber.log.Timber;
+
 /**
  * Created by JB on 28/10/2020.
  */
@@ -166,7 +168,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
             }
             catch (Exception e)
             {
-                Log.e(getClass().getSimpleName(), e.getMessage(), e);
+                Timber.e(e, e.getMessage());
             }
         });
 

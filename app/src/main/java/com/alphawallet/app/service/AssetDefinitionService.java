@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
@@ -111,6 +112,7 @@ import io.realm.exceptions.RealmException;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import timber.log.Timber;
 
 
 /**
@@ -196,7 +198,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (InterruptedException e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         List<String> handledHashes = checkRealmScriptsForChanges();
@@ -257,7 +259,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return handledHashes;
@@ -289,6 +291,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     }
                     catch (Exception e)
                     {
+                        handledHashes.add(new TokenScriptFile(context, file.getAbsolutePath()).calcMD5());
                         handleFileLoadError(e, file);
                     }
                 } );
@@ -334,7 +337,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -363,13 +366,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
     private void handleFileLoadError(Throwable throwable, File file)
     {
-        if (BuildConfig.DEBUG) System.out.println("ERROR WHILE PARSING: " + file.getName() + " : " + throwable.getMessage());
+        Timber.d("ERROR WHILE PARSING: " + file.getName() + " : " + throwable.getMessage());
     }
 
     private TokenDefinition fileLoadComplete(List<ContractLocator> originContracts, TokenScriptFile file, TokenDefinition td)
@@ -410,7 +413,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return td;
@@ -488,7 +491,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         if (fileList.size() == 0) finishLoading();
@@ -727,7 +730,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return result;
@@ -806,7 +809,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (InterruptedException e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
         finally
         {
@@ -888,12 +891,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void loadComplete(TokenDefinition td)
     {
-        if (BuildConfig.DEBUG && td.holdingToken != null) System.out.println("TS LOAD: " + td.getTokenName(1));
+        Timber.d("TS LOAD: %s", td.getTokenName(1));
     }
 
     private void onError(Throwable throwable)
     {
-        if (BuildConfig.DEBUG) throwable.printStackTrace();
+        Timber.e(throwable);
     }
 
     private TokenDefinition parseFile(InputStream xmlInputStream) throws Exception
@@ -931,7 +934,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return Single.fromCallable(TokenDefinition::new);
@@ -1043,7 +1046,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
             finally
             {
@@ -1116,7 +1119,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 return true;
             }
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
         return false;
     }
@@ -1130,7 +1133,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return td;
@@ -1164,7 +1167,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return null;
@@ -1287,7 +1290,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 //                .subscribeOn(Schedulers.io())
 //                .observeOn(AndroidSchedulers.mainThread())
 //                .subscribe(log -> {
-//            System.out.println("log.toString(): " +  log.toString());
+//            Timber.d("log.toString(): " +  log.toString());
 //            //TODO here: callback to event service listener
 //        }, this::onLogError);
     }
@@ -1348,7 +1351,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             .flatMap(ethTx -> transactionRepository.storeRawTx(new Wallet(walletAddress), ethTx, blockTime))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(System.out::println, this::onError)
+                            .subscribe(t -> Timber.d(t.toString()), this::onError)
                             .isDisposed();
                 }
             }
@@ -2522,8 +2525,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return url;
     }
 
-    public String getFallbackUrlForToken(Token token)
+    public Pair<String, Boolean> getFallbackUrlForToken(Token token)
     {
+        boolean storedOverride = false;
         String correctedAddr = Keys.toChecksumAddress(token.getAddress());
 
         String tURL = getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
@@ -2531,8 +2535,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             tURL = Utils.getTWTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
         }
+        else
+        {
+            storedOverride = true;
+        }
 
-        return tURL;
+        return new Pair<>(tURL, storedOverride);
     }
 
     public void storeImageUrl(long chainId, String imageUrl)

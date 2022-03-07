@@ -334,15 +334,15 @@
             android:label="@string/title_activity_add_custom_rpcnetwork"/>
 
         <activity
-            android:name=".ui.Erc1155Activity"
-            android:label="ERC1155 Master Activity" />
+            android:name=".ui.NFTActivity"
+            android:label="ERC721 Master Activity" />
 
         <activity
             android:name=".ui.Erc1155AssetSelectActivity"
             android:label="ERC1155 Asset Selection" />
 
         <activity
-            android:name=".ui.Erc1155AssetDetailActivity"
+            android:name=".ui.NFTAssetDetailActivity"
             android:label="ERC1155 Asset Details" />
 
         <activity

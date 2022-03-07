@@ -62,12 +62,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
@@ -283,7 +282,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                     showCameraDenied();
                     break;
                 default:
-                    Log.e("SEND", String.format(getString(R.string.barcode_error_format),
+                    Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
                                                 "Code: " + resultCode
                     ));
                     break;
@@ -498,8 +497,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         Token base = viewModel.getToken(token.tokenInfo.chainId, wallet.address);
         //validate that we have sufficient balance
         if ((token.isEthereum() && token.balance.subtract(value).compareTo(BigDecimal.ZERO) > 0) // if sending base ethereum then check we have more than just the value
-             || (hasGasOverride(token.tokenInfo.chainId) && token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0) //allow for chains with no gas requirement
-             || (base.balance.compareTo(BigDecimal.ZERO) > 0 && token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0)) // contract token, check gas and sufficient token balance
+             || (token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0)) // contract token, check sufficient token balance (gas widget will check sufficient gas)
         {
             sendAmount = value;
             sendGasPrice = gasPrice;
@@ -569,7 +567,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
-        Log.w(this.getLocalClassName(), throwable.getMessage());
+        Timber.w(throwable.getMessage());
         checkConfirm(BigInteger.ZERO, transactionBytes, txSendAddress, resolvedAddress);
     }
 

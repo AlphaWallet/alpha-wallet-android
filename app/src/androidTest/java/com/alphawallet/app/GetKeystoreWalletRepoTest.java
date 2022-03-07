@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.observers.TestObserver;
+import timber.log.Timber;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -129,7 +130,7 @@ public class GetKeystoreWalletRepoTest {
 		subscriber.awaitTerminalEvent();
 		subscriber.assertComplete();
 		assertEquals(subscriber.valueCount(), 1);
-		Log.d("EXPORT_ACC", "Val: " + subscriber.values().get(0));
+		Timber.tag("EXPORT_ACC").d("Val: " + subscriber.values().get(0));
 		String val = subscriber.values().get(0);
 		try {
 			JSONObject json = new JSONObject(val);

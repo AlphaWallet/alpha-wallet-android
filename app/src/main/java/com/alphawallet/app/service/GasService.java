@@ -44,6 +44,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import timber.log.Timber;
 
 /**
  * Created by JB on 18/11/2020.
@@ -112,7 +113,7 @@ public class GasService implements ContractGasProvider
     {
         if (networkRepository.getNetworkByChain(chainId) == null)
         {
-            if (BuildConfig.DEBUG) System.out.println("Network error, no chain, trying to pick: " + chainId);
+            Timber.d("Network error, no chain, trying to pick: %s", chainId);
         }
         else if (EthereumNetworkRepository.hasGasOverride(chainId))
         {
@@ -134,7 +135,7 @@ public class GasService implements ContractGasProvider
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(updated -> {
-                    if (BuildConfig.DEBUG) System.out.println("Updated gas prices: " + updated);
+                    Timber.d("Updated gas prices: %s", updated);
                     }, Throwable::printStackTrace)
                 .isDisposed();
     }
@@ -264,7 +265,7 @@ public class GasService implements ContractGasProvider
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             return update;
@@ -305,11 +306,7 @@ public class GasService implements ContractGasProvider
         updateChainId(chainId);
         String finalTxData = txData;
 
-        if (transactionBytes == null || transactionBytes.length == 0)
-        {
-            return Single.fromCallable(() -> BigInteger.valueOf(GAS_LIMIT_MIN));
-        }
-        else if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
+        if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
                     .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), finalTxData))

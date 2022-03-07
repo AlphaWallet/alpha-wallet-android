@@ -887,4 +887,11 @@
     <string name="token_name_hint">တိုကင်နာမည်</string>
     <string name="version">ဗားရှင်း</string>
     <string name="error_seed_phrase_must_words">မျိုးစေ့ထားသောစကားစုများတွင်စကားလုံးများသာပါ 0 င်နိုင်သည်</string>
+    <string name="label_token_id">Token #</string>
+    <string name="label_external_link">External Link</string>
+    <string name="label_description">Description</string>
+    <string name="label_details">Details</string>
+    <string name="switch_to_grid_view">Switch to Grid View</string>
+    <string name="switch_to_list_view">Switch to List View</string>
+    <string name="reload_metadata">Reload Metadata</string>
 </resources>

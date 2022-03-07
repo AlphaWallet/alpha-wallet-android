@@ -32,6 +32,7 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import timber.log.Timber;
 
 /**
  * Created by James on 29/05/2019.
@@ -88,7 +89,7 @@ public class AWEnsResolver extends EnsResolver
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
                 // no action
             }
             return ensName;
@@ -207,7 +208,7 @@ public class AWEnsResolver extends EnsResolver
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return null;
@@ -301,7 +302,7 @@ public class AWEnsResolver extends EnsResolver
     public Single<String> resolveENSAddress(String ensName)
     {
         return Single.fromCallable(() -> {
-            if (BuildConfig.DEBUG) System.out.println("Verify: " + ensName);
+            Timber.d("Verify: " + ensName);
             String address = "";
             if (!isValidEnsName(ensName)) return "";
             try
@@ -310,7 +311,7 @@ public class AWEnsResolver extends EnsResolver
             }
             catch (Exception e)
             {
-                System.out.println("Verify: error: " + e.getMessage());
+                Timber.d("Verify: error: " + e.getMessage());
                 // no action
             }
             return address;
@@ -361,7 +362,7 @@ public class AWEnsResolver extends EnsResolver
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) Log.d("ENS", e.getMessage());
+            Timber.tag("ENS").d(e.getMessage());
         }
 
         return "";

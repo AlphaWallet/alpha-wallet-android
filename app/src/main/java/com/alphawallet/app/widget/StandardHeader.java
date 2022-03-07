@@ -3,10 +3,12 @@ package com.alphawallet.app.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 /**
  * Created by JB on 26/08/2021.
@@ -15,6 +17,7 @@ public class StandardHeader extends LinearLayout
 {
     private TextView headerText;
     private ChainName chainName;
+    private SwitchMaterial switchMaterial;
 
     public StandardHeader(Context context, AttributeSet attrs)
     {
@@ -34,10 +37,32 @@ public class StandardHeader extends LinearLayout
         try
         {
             int headerId = a.getResourceId(R.styleable.StandardHeader_headerText, R.string.empty);
+            boolean showSwitch = a.getBoolean(R.styleable.StandardHeader_showSwitch, false);
+            boolean showChainName = a.getBoolean(R.styleable.StandardHeader_showChain, false);
+
             headerText = findViewById(R.id.text_header);
             chainName = findViewById(R.id.chain_name);
+            switchMaterial = findViewById(R.id.switch_material);
 
             headerText.setText(headerId);
+
+            if (showSwitch)
+            {
+                switchMaterial.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                switchMaterial.setVisibility(View.GONE);
+            }
+
+            if (showChainName)
+            {
+                chainName.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                chainName.setVisibility(View.GONE);
+            }
         }
         finally
         {
@@ -45,16 +70,23 @@ public class StandardHeader extends LinearLayout
         }
     }
 
-    public void setText(String text) {
+    public void setText(String text)
+    {
         headerText.setText(text);
     }
 
-    public void setText(int resId) {
+    public void setText(int resId)
+    {
         headerText.setText(resId);
     }
 
     public ChainName getChainName()
     {
         return chainName;
+    }
+
+    public SwitchMaterial getSwitch()
+    {
+        return switchMaterial;
     }
 }

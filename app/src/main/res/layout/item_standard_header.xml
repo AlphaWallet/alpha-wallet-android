@@ -26,6 +26,18 @@
         android:visibility="gone"
         tools:visibility="visible" />
 
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switch_material"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="@dimen/tiny_8"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <View
         style="@style/Aw.Component.Separator"
         android:layout_alignParentBottom="true" />

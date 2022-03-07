@@ -5,7 +5,7 @@
     android:id="@+id/layout_list_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="60dp"
+    android:paddingVertical="@dimen/small_12"
     android:paddingStart="@dimen/small_12"
     android:paddingEnd="@dimen/tiny_8">
 

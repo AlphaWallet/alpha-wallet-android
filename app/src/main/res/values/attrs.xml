@@ -36,6 +36,8 @@
     </declare-styleable>
     <declare-styleable name="StandardHeader">
         <attr name="headerText" format="string"/>
+        <attr name="showSwitch" format="boolean"/>
+        <attr name="showChain" format="boolean"/>
     </declare-styleable>
     <declare-styleable name="InputView">
         <attr name="label" format="integer" />

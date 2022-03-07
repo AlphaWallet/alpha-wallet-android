@@ -110,9 +110,8 @@
     </style>
 
     <style name="Aw.Component.Switch" parent="Widget.AppCompat.CompoundButton.Switch">
-        <!-- TODO: Create selectors for different states -->
-        <!-- <item name="thumbTint">@color/azure</item> -->
-        <!-- <item name="trackTint">@color/dusty</item> -->
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
     </style>
 
     <style name="Aw.Component.Button" parent="Widget.MaterialComponents.Button.OutlinedButton">

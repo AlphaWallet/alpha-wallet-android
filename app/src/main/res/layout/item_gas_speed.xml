@@ -94,25 +94,21 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:orientation="horizontal"
-        android:paddingEnd="12dp">
+        android:paddingEnd="@dimen/tiny_8">
 
         <TextView
             android:id="@+id/text_speed_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginEnd="8dp"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
+            android:layout_marginEnd="@dimen/tiny_8"
             tools:text=" ≈ 2 minutes" />
 
-        <ImageView
-            android:id="@+id/checkbox"
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/selector_radio" />
+            android:layout_gravity="center_vertical" />
 
     </LinearLayout>
 </RelativeLayout>

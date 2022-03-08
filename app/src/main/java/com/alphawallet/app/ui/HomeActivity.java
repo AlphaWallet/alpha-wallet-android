@@ -143,9 +143,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private void onMoveToForeground()
     {
         Timber.tag("LIFE").d("AlphaWallet into foreground");
-        if (viewModel != null) viewModel.checkTransactionEngine();
+        if (viewModel != null)
+        {
+            viewModel.checkTransactionEngine();
+            viewModel.sendMsgPumpToWC(this);
+        }
         isForeground = true;
-        if (viewModel != null) viewModel.sendMsgPumpToWC(this);
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)

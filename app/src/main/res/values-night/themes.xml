@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppTheme.NoActionBar" parent="AppTheme">
+    <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 
-    <style name="SplashTheme" parent="AppTheme.NoActionBar">
+    <style name="AppTheme.NoActionBar.Splash">
         <item name="android:windowBackground">@drawable/background_splash</item>
     </style>
 </resources>

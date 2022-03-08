@@ -42,7 +42,37 @@
 	<color name="shark">#232325</color>
 	<color name="atlantis">#7cca42</color>
 
-	<!-- Functional Palette -->
+	<!-- Network Palette  -->
+	<color name="mainnet">#2986AF</color>
+	<color name="ropsten">#FF4A8D</color>
+	<color name="kovan">#70578D</color>
+	<color name="rinkeby">#F6C343</color>
+	<color name="sokol">#6B35A2</color>
+	<color name="xdai">#48A9A6</color>
+	<color name="classic">#378937</color>
+	<color name="poa">#5838A3</color>
+	<color name="goerli">#BBAE9A</color>
+	<color name="artis_sigma1">#53A271</color>
+	<color name="artis_tau1">#F97599</color>
+	<color name="binance_test">#ffca2f</color>
+	<color name="binance_main">#f3ba2f</color>
+	<color name="heco_test">#5F9FFF</color>
+	<color name="heco_main">#3F7FFF</color>
+	<color name="avalanche_main">#FF2938</color>
+	<color name="avalanche_test">#92A6B8</color>
+	<color name="polygon_main">#8247E5</color>
+	<color name="polygon_test">#2BBDF7</color>
+	<color name="fantom_main">#022069</color>
+	<color name="fantom_test">#92A6B8</color>
+	<color name="optimistic_main">#FF0420</color>
+	<color name="optimistic_test">#B2C6D8</color>
+	<color name="cronos_test">#002D74</color>
+	<color name="arbitrum_main">#28A0F0</color>
+	<color name="arbitrum_test">#40678c</color>
+	<color name="palm_main">#83488c</color>
+	<color name="palm_test">#93589c</color>
+
+	<!-- Misc Palette -->
 	<color name="transparent">#00000000</color>
 	<color name="translucent_white">#B3FFFFFF</color>
 	<color name="translucent_black">#1e000000</color>

@@ -1,23 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
-        <!-- App bar color -->
         <item name="colorPrimary">@color/surface</item>
-        <!-- Status bar color -->
         <item name="colorPrimaryDark">@color/surface</item>
         <item name="colorOnPrimary">@color/surface_inverse</item>
         <item name="colorAccent">@color/brand</item>
         <item name="colorSurface">@color/surface</item>
         <item name="colorOnSurface">@color/surface_inverse</item>
-
-        <!-- Controls (Switch, CheckBox, etc) -->
-        <!-- Default state color -->
         <item name="colorControlNormal">@color/control</item>
-        <!-- Activated state color -->
-        <item name="colorControlActivated">@color/brand</item>
-        <!-- Ripple color when control is tapped -->
-        <item name="colorControlHighlight">@color/brand</item>
+        <item name="colorControlActivated">@color/control_activated</item>
+        <item name="colorControlHighlight">@color/control_highlight</item>
         <item name="colorError">@color/text_error</item>
         <item name="colorOnError">@color/text_error_inverse</item>
         <item name="android:colorBackground">@color/background</item>
@@ -27,6 +19,7 @@
         <item name="toolbarStyle">@style/Aw.Component.Toolbar</item>
         <item name="appBarLayoutStyle">@style/Aw.Component.AppBarLayout</item>
         <item name="recyclerViewStyle">@style/Aw.Component.RecyclerView</item>
+        <item name="materialButtonStyle">@style/Aw.Component.Button.Primary</item>
         <item name="switchStyle">@style/Aw.Component.Switch</item>
         <item name="checkboxStyle">@style/Aw.Component.CheckBox</item>
         <item name="radioButtonStyle">@style/Aw.Component.RadioButton</item>
@@ -36,14 +29,13 @@
         <item name="materialAlertDialogTheme">@style/Aw.Component.AlertDialog</item>
     </style>
 
-    <style name="AppTheme.NoActionBar" parent="AppTheme">
+    <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <!-- Splash Screen theme. -->
-    <style name="SplashTheme" parent="AppTheme.NoActionBar">
+    <style name="AppTheme.NoActionBar.Splash">
         <item name="android:windowBackground">@drawable/background_splash</item>
     </style>
 </resources>

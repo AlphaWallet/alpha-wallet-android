@@ -34,12 +34,12 @@
         android:theme="@style/AppTheme.NoActionBar"
         android:usesCleartextTraffic="true"
         tools:replace="android:name, android:theme, android:allowBackup">
-        
+
         <activity
             android:name=".ui.HomeActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:theme="@style/SplashTheme"
+            android:theme="@style/AppTheme.NoActionBar.Splash"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -146,7 +146,7 @@
 
         <activity
             android:name=".ui.SplashActivity"
-            android:theme="@style/SplashTheme" />
+            android:theme="@style/AppTheme.NoActionBar.Splash" />
 
         <service
             android:name=".service.WalletConnectService"
@@ -227,23 +227,6 @@
         <activity
             android:name=".ui.FunctionActivity"
             android:label="@string/token_function" />
-
-        <!--<service android:name="AlphaWalletFirebaseMessagingService">-->
-        <!--<intent-filter>-->
-        <!--<action android:name="com.google.firebase.MESSAGING_EVENT" />-->
-        <!--</intent-filter>-->
-        <!--</service>-->
-
-        <!--<meta-data-->
-        <!--android:name="preloaded_fonts"-->
-        <!--android:resource="@array/preloaded_fonts" />-->
-
-        <!--<meta-data-->
-        <!--android:name="com.google.firebase.messaging.default_notification_icon"-->
-        <!--android:resource="@mipmap/ic_alpha" />-->
-
-        <!--<meta-data-->
-        <!--android:name="com.google.firebase.messaging.default_notification_color"-->
 
         <activity
             android:name=".ui.WalletActionsActivity"

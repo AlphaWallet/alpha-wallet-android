@@ -61,7 +61,6 @@
         <item name="tabIndicatorHeight">3dp</item>
         <item name="tabPaddingStart">25dp</item>
         <item name="tabPaddingEnd">25dp</item>
-        <item name="tabBackground">@color/surface</item>
         <item name="tabTextAppearance">@style/Aw.Typography.Tab</item>
         <item name="tabSelectedTextColor">@color/control_activated</item>
         <item name="tabTextColor">@color/text_secondary</item>
@@ -83,7 +82,6 @@
     <style name="Aw.Component.ChartTabLayout" parent="Widget.Design.TabLayout">
         <item name="android:layout_margin">@dimen/standard_16</item>
         <item name="tabGravity">center</item>
-        <item name="tabIndicatorColor">@color/text_primary</item>
         <item name="tabIndicatorFullWidth">true</item>
         <item name="tabMode">fixed</item>
         <item name="tabIndicatorHeight">0dp</item>

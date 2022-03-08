@@ -154,7 +154,7 @@
                 android:gravity="end"
                 android:lines="1"
                 android:text="@string/all_funds"
-                android:textColor="@color/brand"
+                android:textColor="@color/control_activated"
                 android:textSize="@dimen/sp17"
                 android:visibility="visible" />
 

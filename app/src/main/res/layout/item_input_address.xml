@@ -83,7 +83,7 @@
         android:fontFamily="@font/font_semibold"
         android:padding="@dimen/mini_4"
         android:text="@string/paste"
-        android:textColor="@color/brand"
+        android:textColor="@color/control_activated"
         android:textSize="@dimen/sp17"
         android:visibility="visible" />
 

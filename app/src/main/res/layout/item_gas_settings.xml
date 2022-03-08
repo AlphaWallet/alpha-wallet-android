@@ -96,7 +96,7 @@
             android:lines="1"
             android:orientation="horizontal"
             android:text="@string/edit"
-            android:textColor="@color/brand"
+            android:textColor="@color/control_activated"
             android:textSize="@dimen/sp17"
             android:visibility="visible" />
 

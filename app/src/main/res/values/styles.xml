@@ -57,13 +57,13 @@
     </style>
 
     <style name="Aw.Component.TabLayout" parent="Widget.Design.TabLayout">
-        <item name="tabIndicatorColor">@color/brand</item>
+        <item name="tabIndicatorColor">@color/control_activated</item>
         <item name="tabIndicatorHeight">3dp</item>
         <item name="tabPaddingStart">25dp</item>
         <item name="tabPaddingEnd">25dp</item>
         <item name="tabBackground">@color/surface</item>
         <item name="tabTextAppearance">@style/Aw.Typography.Tab</item>
-        <item name="tabSelectedTextColor">@color/brand</item>
+        <item name="tabSelectedTextColor">@color/control_activated</item>
         <item name="tabTextColor">@color/text_secondary</item>
         <item name="tabIndicatorFullWidth">true</item>
     </style>
@@ -173,7 +173,7 @@
         <item name="android:textSize">@dimen/sp17</item>
         <item name="iconPadding">@dimen/cozy_20</item>
         <item name="iconGravity">textEnd</item>
-        <item name="iconTint">@color/brand</item>
+        <item name="iconTint">@color/control_activated</item>
         <item name="android:layout_margin">@dimen/cozy_20</item>
         <item name="cornerRadius">5dp</item>
         <item name="android:textColor">@color/text_primary</item>

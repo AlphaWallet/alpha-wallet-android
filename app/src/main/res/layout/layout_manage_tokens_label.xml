@@ -31,7 +31,7 @@
         android:fontFamily="@font/font_regular"
         android:gravity="end"
         android:text="@string/ignore"
-        android:textColor="@color/brand"
+        android:textColor="@color/control_activated"
         android:textSize="@dimen/sp17"
         android:visibility="gone"
         tools:visibility="visible" />

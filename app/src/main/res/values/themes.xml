@@ -4,7 +4,7 @@
         <item name="colorPrimary">@color/surface</item>
         <item name="colorPrimaryDark">@color/surface</item>
         <item name="colorOnPrimary">@color/surface_inverse</item>
-        <item name="colorAccent">@color/brand</item>
+        <item name="colorAccent">@color/accent</item>
         <item name="colorSurface">@color/surface</item>
         <item name="colorOnSurface">@color/surface_inverse</item>
         <item name="colorControlNormal">@color/control</item>

@@ -1,73 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="ic_launcher_background">@color/white</color>
+    <color name="ic_launcher_background">@color/white</color>
 
-	<color name="brand">@color/azure</color>
-	<color name="brand_inverse">@color/white</color>
-	<color name="accent">@color/azure</color>
-	<color name="accent_inverse">@color/white</color>
+    <color name="brand">@color/azure</color>
+    <color name="brand_inverse">@color/white</color>
+    <color name="accent">@color/azure</color>
+    <color name="accent_inverse">@color/white</color>
 
-	<color name="background">@color/white</color>
-	<color name="background_inverse">@color/black</color>
+    <color name="background">@color/white</color>
+    <color name="background_inverse">@color/black</color>
 
-	<color name="surface">@color/white</color>
-	<color name="surface_inverse">@color/black</color>
+    <color name="surface">@color/white</color>
+    <color name="surface_inverse">@color/black</color>
+    <color name="surface_secondary">@color/white</color>
+    <color name="surface_secondary_inverse">@color/black</color>
 
-	<color name="control">@color/black</color>
-	<color name="control_activated">@color/brand</color>
-	<color name="control_highlight">@color/brand</color>
+    <color name="control">@color/black</color>
+    <color name="control_activated">@color/brand</color>
+    <color name="control_highlight">@color/brand</color>
 
-	<color name="text_primary">@color/black</color>
-	<color name="text_primary_inverse">@color/white</color>
-	<color name="text_secondary">@color/dove</color>
-	<color name="text_secondary_inverse">@color/white</color>
-	<color name="text_error">@color/danger</color>
-	<color name="text_error_inverse">@color/white</color>
+    <color name="text_primary">@color/black</color>
+    <color name="text_primary_inverse">@color/white</color>
+    <color name="text_secondary">@color/dove</color>
+    <color name="text_secondary_inverse">@color/white</color>
+    <color name="text_error">@color/danger</color>
+    <color name="text_error_inverse">@color/white</color>
 
-	<!-- Number value indicators -->
-	<color name="positive">@color/green</color>
-	<color name="negative">@color/danger</color>
+    <!-- Number value indicators -->
+    <color name="positive">@color/green</color>
+    <color name="negative">@color/danger</color>
 
-	<!-- Components -->
-	<!-- Main buttons -->
-	<color name="button_primary">@color/cod</color>
-	<color name="button_secondary">@color/transparent</color>
+    <!-- ========== -->
+    <!-- Components -->
+    <!-- ========== -->
 
-	<!-- TextIcon button -->
-	<color name="button_texticon">@color/concrete</color>
+    <!-- Buttons -->
+    <color name="button_primary">@color/cod</color>
+    <color name="button_secondary">@color/transparent</color>
+    <color name="button_texticon">@color/concrete</color>
+    <color name="button_suggestion">@color/mercury</color>
 
-	<!-- Suggestion button -->
-	<color name="button_suggestion">@color/mercury</color>
+    <!-- Icons, toolbar icons -->
+    <color name="icon_tint">@color/black</color>
+    <color name="icon_tint_inverse">@color/white</color>
 
-	<!-- Icons, toolbar icons -->
-	<color name="icon_tint">@color/black</color>
-	<color name="icon_tint_inverse">@color/white</color>
+    <!-- Warning dialog -->
+    <color name="warning_background">@color/mine</color>
 
-	<!-- Popup menus, dialogs -->
-	<color name="dialog_background">@color/white</color>
+    <!-- Headers -->
+    <color name="header_background">@color/alabaster</color>
 
-	<!-- Warning dialog -->
-	<color name="warning_background">@color/mine</color>
+    <!-- Separator -->
+    <color name="separator">@color/mercury</color>
 
-	<!-- Headers -->
-	<color name="header_background">@color/alabaster</color>
+    <!-- Address/Search Bar Background -->
+    <color name="search_bar">@color/concrete</color>
 
-	<!-- Separator -->
-	<color name="separator">@color/mercury</color>
+    <!-- History Chart -->
+    <color name="chart_tab">@color/white</color>
+    <color name="chart_tab_selected">@color/mine</color>
+    <color name="chart_legend">@color/black</color>
+    <color name="chart_line">@color/mine</color>
 
-	<!-- Address Bar -->
-	<color name="search_bar">@color/concrete</color>
-
-	<!-- History Chart -->
-	<color name="chart_tab">@color/white</color>
-	<color name="chart_tab_selected">@color/mine</color>
-	<color name="chart_legend">@color/black</color>
-	<color name="chart_line">@color/mine</color>
-
-	<!-- Seed Word -->
-	<color name="seed_word">@color/concrete</color>
-	<color name="seed_word_selected">@color/alabaster</color>
-	<color name="seed_word_stroke">@color/mike</color>
-	<color name="seed_word_text">@color/text_primary</color>
-	<color name="seed_word_text_selected">@color/alabaster</color>
+    <!-- Seed Word -->
+    <color name="seed_word">@color/concrete</color>
+    <color name="seed_word_selected">@color/alabaster</color>
+    <color name="seed_word_stroke">@color/mike</color>
+    <color name="seed_word_text">@color/text_primary</color>
+    <color name="seed_word_text_selected">@color/alabaster</color>
 </resources>

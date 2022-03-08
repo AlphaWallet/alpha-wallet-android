@@ -10,7 +10,7 @@
     android:clickable="true"
     android:focusable="true"
     android:orientation="vertical"
-    app:cardBackgroundColor="@color/dialog_background"
+    app:cardBackgroundColor="@color/surface_secondary"
     app:cardCornerRadius="@dimen/dialog_corner_radius"
     app:cardElevation="0dp"
     app:strokeWidth="0dp">

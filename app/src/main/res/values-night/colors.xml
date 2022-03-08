@@ -12,6 +12,8 @@
 
 	<color name="surface">@color/cod</color>
 	<color name="surface_inverse">@color/white</color>
+	<color name="surface_secondary">@color/mine</color>
+	<color name="surface_secondary_inverse">@color/white</color>
 
 	<color name="control">@color/white</color>
 	<color name="control_activated">@color/brand</color>
@@ -42,9 +44,6 @@
 	<!-- Icons, toolbar icons -->
 	<color name="icon_tint">@color/white</color>
 	<color name="icon_tint_inverse">@color/cod</color>
-
-	<!-- Popup menus, dialogs -->
-	<color name="dialog_background">@color/mine</color>
 
 	<!-- Warning dialog -->
 	<color name="warning_background">@color/mine</color>

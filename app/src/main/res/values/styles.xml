@@ -21,7 +21,7 @@
     </style>
 
     <style name="Aw.Component.AlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
-        <item name="colorSurface">@color/dialog_background</item>
+        <item name="colorSurface">@color/surface_secondary</item>
         <item name="colorPrimary">@color/brand</item>
     </style>
 
@@ -33,7 +33,7 @@
     </style>
 
     <style name="Aw.Component.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
-        <item name="backgroundTint">@color/dialog_background</item>
+        <item name="backgroundTint">@color/surface_secondary</item>
     </style>
 
     <style name="Aw.Component.CheckBox" parent="Widget.AppCompat.CompoundButton.CheckBox">

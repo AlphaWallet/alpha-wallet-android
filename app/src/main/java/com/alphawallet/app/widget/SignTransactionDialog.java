@@ -183,7 +183,6 @@ public class SignTransactionDialog
         }
     }
 
-
     public void close()
     {
         if (biometricPrompt != null)

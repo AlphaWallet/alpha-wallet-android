@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">@color/white</color>
 
     <color name="brand">@color/azure</color>
     <color name="brand_inverse">@color/white</color>

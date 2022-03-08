@@ -602,6 +602,9 @@
     <string name="card_view_not_found_error">未找到%1$s</string>
     <string name="tokenscript_management">TokenScript 管理</string>
     <string name="subtitle_network">网络</string>
+    <string name="private_eth_txn">Private ETH Transactions</string>
+    <string name="eden">Eden</string>
+    <string name="ethermine">Ethermine</string>
     <!-- Gas Slider -->
     <string name="speed_gas">速度（燃料）</string>
     <string name="slow">慢</string>

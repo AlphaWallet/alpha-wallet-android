@@ -357,6 +357,9 @@
             android:name=".ui.QRScanning.QRScanner"
             android:label="@string/qr_scanner" />
 
+        <activity android:name=".ui.SelectPrivateTxnActivity"
+            android:label="@string/private_eth_txn" />
+
         <service
             android:name=".service.PriceAlertsService"
             android:enabled="true"

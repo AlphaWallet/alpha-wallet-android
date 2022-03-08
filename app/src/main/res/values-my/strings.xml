@@ -625,6 +625,9 @@
     <string name="card_view_not_found_error">%1$s ကိုရှာမတွေ့ပါ</string>
     <string name="tokenscript_management">TokenScriptကို စီမံခန့်ခွဲခြင်း</string>
     <string name="subtitle_network">Network</string>
+    <string name="private_eth_txn">Private ETH Transactions</string>
+    <string name="eden">Eden</string>
+    <string name="ethermine">Ethermine</string>
 
     <!-- Gas Slider -->
     <string name="speed_gas">Speed (Gas)</string>

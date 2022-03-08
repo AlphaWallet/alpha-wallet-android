@@ -616,6 +616,9 @@
     <string name="card_view_not_found_error">%1$s pas trouvé</string>
     <string name="tokenscript_management">Gestion TokenScript</string>
     <string name="subtitle_network">Réseau</string>
+    <string name="private_eth_txn">Private ETH Transactions</string>
+    <string name="eden">Eden</string>
+    <string name="ethermine">Ethermine</string>
 
     <!-- Gas Slider -->
     <string name="speed_gas">Vitesse (Gas)</string>

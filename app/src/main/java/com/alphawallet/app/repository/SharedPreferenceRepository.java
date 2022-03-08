@@ -44,6 +44,8 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
 
+    private static final String PRIVATE_ETH_NETWORK = "private_eth_network";
+
     private final SharedPreferences pref;
 
     public SharedPreferenceRepository(Context context) {
@@ -348,5 +350,15 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setLastVersionCode(int code) {
         pref.edit().putInt(LAST_VERSION_CODE, code).apply();
+    }
+
+    @Override
+    public int getSelectedPrivateEthNetwork() {
+        return pref.getInt(PRIVATE_ETH_NETWORK, 0);
+    }
+
+    @Override
+    public void setSelectedPrivateEthNetwork(int ordinal) {
+        pref.edit().putInt(PRIVATE_ETH_NETWORK, ordinal).apply();
     }
 }

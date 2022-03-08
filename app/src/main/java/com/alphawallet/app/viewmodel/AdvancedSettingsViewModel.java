@@ -6,6 +6,7 @@ import android.os.Environment;
 
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.entity.LocaleItem;
+import com.alphawallet.app.entity.PrivateEthTxnNetwork;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
@@ -122,5 +123,13 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     public void stopChainActivity()
     {
         transactionsService.stopActivity();
+    }
+
+    public void setPrivateEthNetwork(PrivateEthTxnNetwork network) {
+        preferenceRepository.setSelectedPrivateEthNetwork(network.ordinal());
+    }
+
+    public PrivateEthTxnNetwork getPrivateEthNetwork() {
+        return PrivateEthTxnNetwork.values()[preferenceRepository.getSelectedPrivateEthNetwork()];
     }
 }

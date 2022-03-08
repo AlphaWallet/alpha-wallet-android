@@ -51,7 +51,7 @@
         android:id="@+id/view_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/translucent_white"
+        android:background="@color/translucent_light"
         android:visibility="gone"
         tools:visibility="visible" />
 

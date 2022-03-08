@@ -97,7 +97,7 @@
         android:id="@+id/layout_success_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blur"
+        android:background="@color/translucent_dark"
         android:gravity="center"
         android:visibility="gone">
 

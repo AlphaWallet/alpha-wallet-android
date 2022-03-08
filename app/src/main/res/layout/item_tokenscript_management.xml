@@ -105,7 +105,7 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/main_wrapper"
         android:layout_alignBottom="@id/main_wrapper"
-        android:background="@color/translucent_white"
+        android:background="@color/translucent_light"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone"

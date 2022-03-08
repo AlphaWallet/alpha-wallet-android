@@ -73,11 +73,11 @@
 	<color name="palm_test">#93589c</color>
 
 	<!-- Misc Palette -->
+	<color name="positive">@color/green</color>
+	<color name="negative">@color/danger</color>
 	<color name="transparent">#00000000</color>
-	<color name="translucent_white">#B3FFFFFF</color>
-	<color name="translucent_black">#1e000000</color>
-	<color name="translucent_gray">#66727272</color>
-	<color name="blur">#80000000</color>
+	<color name="translucent_light">#B3FFFFFF</color>
+	<color name="translucent_dark">#80000000</color>
 	<color name="translucent_red">#19ff3b30</color>
 	<color name="translucent_green">#1975b943</color>
 </resources>

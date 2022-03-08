@@ -433,7 +433,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             //check if wallet was imported - in which case no need to display
             if (!walletImported)
             {
-                int background = ContextCompat.getColor(getApplicationContext(), R.color.blur);
+                int background = ContextCompat.getColor(getApplicationContext(), R.color.translucent_dark);
                 int statusBarColor = getWindow().getStatusBarColor();
                 backupWalletDialog = TutoShowcase.from(this);
                 backupWalletDialog.setContentView(R.layout.showcase_backup_wallet)

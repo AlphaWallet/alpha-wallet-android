@@ -25,11 +25,7 @@
     <color name="text_secondary_inverse">@color/white</color>
     <color name="text_error">@color/danger</color>
     <color name="text_error_inverse">@color/white</color>
-
-    <!-- Number value indicators -->
-    <color name="positive">@color/green</color>
-    <color name="negative">@color/danger</color>
-
+    
     <!-- ========== -->
     <!-- Components -->
     <!-- ========== -->

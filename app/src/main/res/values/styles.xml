@@ -157,10 +157,6 @@
     </style>
 
     <style name="Aw.Component.Button.Icon" parent="Aw.Component.Button.Secondary">
-<!--        <item name="android:lines">1</item>-->
-<!--        <item name="android:backgroundTint">@color/button_secondary</item>-->
-<!--        <item name="strokeColor">@color/surface_inverse</item>-->
-<!--        <item name="strokeWidth">1dp</item>-->
         <item name="iconPadding">0dp</item>
         <item name="iconGravity">textEnd</item>
         <item name="iconTint">@color/surface_inverse</item>

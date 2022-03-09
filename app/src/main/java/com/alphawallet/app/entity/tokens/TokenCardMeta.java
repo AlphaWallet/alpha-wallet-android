@@ -49,8 +49,8 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress);
         this.lastUpdate = timeStamp;
         this.type = type;
-        this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum());
         this.balance = balance;
+        this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum());
         this.filterText = symbol + "'" + name;
         this.group = group;
     }
@@ -61,8 +61,8 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.lastUpdate = timeStamp;
         this.lastTxUpdate = lastTxUpdate;
         this.type = type;
-        this.nameWeight = 1000;
         this.balance = balance;
+        this.nameWeight = 1000;
         this.filterText = null;
         this.group = group;
     }
@@ -73,8 +73,8 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.lastUpdate = token.updateBlancaTime;
         this.lastTxUpdate = token.lastTxCheck;
         this.type = token.getInterfaceSpec();
-        this.nameWeight = calculateTokenNameWeight(token.tokenInfo.chainId, token.tokenInfo.address, null, token.getName(), token.getSymbol(), isEthereum());
         this.balance = token.balance.toString();
+        this.nameWeight = calculateTokenNameWeight(token.tokenInfo.chainId, token.tokenInfo.address, null, token.getName(), token.getSymbol(), isEthereum());
         this.filterText = filterText;
         this.group = token.group;
         this.isEnabled = TextUtils.isEmpty(filterText) || !filterText.equals(CHECK_MARK);
@@ -85,7 +85,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         tokenId = in.readString();
         lastUpdate = in.readLong();
         lastTxUpdate = in.readLong();
-        nameWeight = in.readInt();
+        nameWeight = in.readLong();
         type = ContractType.values()[in.readInt()];
         balance = in.readString();
         filterText = in.readString();
@@ -140,7 +140,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     public boolean hasPositiveBalance()
     {
-        return !balance.equals("0");
+        return balance != null && !balance.equals("0");
     }
 
     public boolean hasValidName()
@@ -184,7 +184,10 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
             return CHAIN_ITEM_WEIGHT + 1 + EthereumNetworkBase.getChainOrdinal(chainId);
         }
 
-        if (TextUtils.isEmpty(name)) return Long.MAX_VALUE;
+        if (TextUtils.isEmpty(name))
+        {
+            return hasPositiveBalance() ? Long.MAX_VALUE - tokenAddress.hashCode() : Long.MAX_VALUE;
+        }
 
         int i = 4;
         int pos = 0;

@@ -47,6 +47,7 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import timber.log.Timber;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
@@ -184,7 +185,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
             finally
             {
@@ -421,7 +422,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
         }
 
@@ -450,7 +451,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 {
                     long oldestBlockRead = getOldestBlockRead(instance, network.chainId, oldestTxTime);
                     long oldestPossibleBlock = getFirstTransactionBlock(instance, network.chainId, walletAddress);
-                    if (BuildConfig.DEBUG) System.out.println("DIAGNOSE: " + oldestBlockRead + " : " + oldestPossibleBlock);
+                    Timber.d("DIAGNOSE: " + oldestBlockRead + " : " + oldestPossibleBlock);
                     if (oldestBlockRead > 0 && oldestBlockRead != oldestPossibleBlock)
                     {
                         syncDownwards(null, instance, walletAddress, network, walletAddress, oldestBlockRead);
@@ -512,7 +513,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
             return eventCount;
         }).observeOn(Schedulers.io());
@@ -538,7 +539,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 token = createNewERC721Token(eventMap.get(contract).get(0), networkInfo, walletAddress, false);
                 newToken = true;
-                if (BuildConfig.DEBUG) Log.d(TAG, "Discover NFT: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
+                Timber.tag(TAG).d("Discover NFT: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
             }
             else if (tokenDecimal >= 0 && token == null)
             {
@@ -547,12 +548,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                         tokenDecimal > 0 ? ContractType.ERC20 : ContractType.MAYBE_ERC20);
                 token.setTokenWallet(walletAddress);
                 newToken = true;
-                if (BuildConfig.DEBUG) Log.d(TAG, "Discover ERC20: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
+                Timber.tag(TAG).d("Discover ERC20: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
             }
             else if (token == null)
             {
                 svs.addUnknownTokenToCheck(new ContractAddress(networkInfo.chainId, ev0.contractAddress));
-                if (BuildConfig.DEBUG) Log.d(TAG, "Discover unknown: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
+                Timber.tag(TAG).d("Discover unknown: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
                 continue;
             }
 
@@ -722,7 +723,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
             return new EtherscanTransaction[0];
         }
 
@@ -969,7 +970,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         else
         {
-            if (BuildConfig.DEBUG) System.out.println("Prevented collision: " + tokenAddress);
+            Timber.d("Prevented collision: %s", tokenAddress);
         }
     }
 

@@ -42,6 +42,7 @@ import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.Sort;
+import timber.log.Timber;
 
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
@@ -352,7 +353,7 @@ public class InputAmount extends LinearLayout
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
             // continue with old value
         }
     }

@@ -20,7 +20,6 @@ import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.MemPoolInteract;
 import com.alphawallet.app.interact.SignatureGenerateInteract;
-import com.alphawallet.app.router.AssetDisplayRouter;
 
 import com.alphawallet.app.service.KeyService;
 import org.web3j.abi.datatypes.generated.Uint16;

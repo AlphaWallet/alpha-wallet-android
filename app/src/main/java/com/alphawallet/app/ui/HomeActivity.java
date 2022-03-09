@@ -37,7 +37,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -46,8 +45,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentOnAttachListener;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
@@ -87,7 +84,6 @@ import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 
-import net.yslibrary.android.keyboardvisibilityevent.AutoActivityLifecycleCallback;
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import java.io.File;
@@ -96,7 +92,6 @@ import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.util.List;
 
-import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 import timber.log.Timber;
@@ -148,7 +143,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private void onMoveToForeground()
     {
         Timber.tag("LIFE").d("AlphaWallet into foreground");
-        if (viewModel != null) viewModel.checkTransactionEngine();
+        if (viewModel != null)
+        {
+            viewModel.checkTransactionEngine();
+            viewModel.sendMsgPumpToWC(this);
+        }
         isForeground = true;
     }
 
@@ -777,7 +776,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void loadingComplete()
     {
         int lastId = viewModel.getLastFragmentId();
-        if (!TextUtils.isEmpty(openLink))
+        if (!TextUtils.isEmpty(openLink)) //delayed open link from intent - safe now that all fragments have been initialised
         {
             showPage(DAPP_BROWSER);
             DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
@@ -953,7 +952,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE))
             {
-                Log.w("HomeActivity", "Folder write permission is not granted. Requesting permission");
+                Timber.tag("HomeActivity").w("Folder write permission is not granted. Requesting permission");
                 ActivityCompat.requestPermissions(this, permissions, permissionTag);
                 return false;
             }
@@ -977,7 +976,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.ACCESS_NOTIFICATION_POLICY))
             {
-                Log.w("HomeActivity", "Notification permission is not granted. Requesting permission");
+                Timber.tag("HomeActivity").w("Notification permission is not granted. Requesting permission");
                 ActivityCompat.requestPermissions(this, permissions, permissionTag);
                 return false;
             }
@@ -1180,7 +1179,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 }
                 catch (Exception e)
                 {
-                    Log.e(getClass().getSimpleName(), "onMenuOpened...unable to set icons for overflow menu", e);
+                    Timber.e(e, "onMenuOpened...unable to set icons for overflow menu");
                 }
             }
         }
@@ -1239,6 +1238,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         try
         {
+            if (importData != null) importData = URLDecoder.decode(importData, "UTF-8");
             DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
             if (importData != null && importData.startsWith(NotificationService.AWSTARTUP))
             {
@@ -1261,13 +1261,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     String link = importData.substring(directLinkIndex + AW_MAGICLINK_DIRECT.length());
                     if (getSupportFragmentManager().getFragments().size() >= DAPP_BROWSER.ordinal())
                     {
-                        link = URLDecoder.decode(link, "UTF-8");
                         showPage(DAPP_BROWSER);
                         if (!dappFrag.isDetached()) dappFrag.loadDirect(link);
                     }
                     else
                     {
-                        openLink = link;
+                        openLink = link; //open link once fragments are initialised
                     }
                 }
                 else

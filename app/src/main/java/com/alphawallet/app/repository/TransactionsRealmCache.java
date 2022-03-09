@@ -35,6 +35,7 @@ import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import timber.log.Timber;
 
 public class TransactionsRealmCache implements TransactionLocalSource {
 
@@ -127,7 +128,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                         .sort("timeStamp", Sort.DESCENDING)
                         .equalTo("chainId", chainId)
                         .findAll();
-                Log.d(TAG, "Found " + txs.size() + " TX Results");
+                Timber.tag("TRC").d( "Found %s TX Results", txs.size());
 
                 for (RealmTransaction item : txs)
                 {
@@ -159,7 +160,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 RealmResults<RealmAuxData> evs = instance.where(RealmAuxData.class)
                         .endsWith("instanceKey", EVENT_CARDS)
                         .findAll();
-                Log.d(TAG, "Found " + evs.size() + " TX Results");
+                Timber.tag("TRC").d( "Found %s TX Results", evs.size());
                 for (RealmAuxData item : evs)
                 {
                     if (!networkFilters.contains(item.getChainId())) continue;
@@ -185,7 +186,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             try (Realm instance = realmManager.getRealmInstance(wallet))
             {
                 final RealmResults<RealmTransaction> txs = generateRealmQuery(instance, fetchTime, fetchLimit).findAll();
-                if (BuildConfig.DEBUG) Log.d(TAG, "Found " + txs.size() + " TX Results");
+                Timber.tag("TRC").d( "Found %s TX Results", txs.size());
                 fixBadTXValues(instance, fetchTime, fetchLimit);
 
                 for (RealmTransaction item : txs)
@@ -280,7 +281,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         catch (Exception e)
         {
             //do not record
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -329,7 +330,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         catch (Exception e)
         {
             //do not record
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -371,7 +372,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             if (databaseFile != null && databaseFile.exists())

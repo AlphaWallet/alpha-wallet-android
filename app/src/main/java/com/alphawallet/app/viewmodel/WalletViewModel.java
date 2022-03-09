@@ -1,7 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
 import static com.alphawallet.app.C.EXTRA_ADDRESS;
-import static com.alphawallet.app.repository.TokensRealmSource.TOKENS_MAPPING_DB;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.widget.CopyTextView.KEY_ADDRESS;
 
@@ -21,7 +20,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
@@ -30,11 +28,8 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.repository.OnRampRepository;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.repository.entity.RealmTokenMapping;
-import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
@@ -72,7 +67,6 @@ public class WalletViewModel extends BaseViewModel
 
     private final FetchTokensInteract fetchTokensInteract;
     private final TokenDetailRouter tokenDetailRouter;
-    private final AssetDisplayRouter assetDisplayRouter;
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
@@ -89,7 +83,6 @@ public class WalletViewModel extends BaseViewModel
     WalletViewModel(
             FetchTokensInteract fetchTokensInteract,
             TokenDetailRouter tokenDetailRouter,
-            AssetDisplayRouter assetDisplayRouter,
             GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
@@ -102,7 +95,6 @@ public class WalletViewModel extends BaseViewModel
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
-        this.assetDisplayRouter = assetDisplayRouter;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
@@ -255,7 +247,7 @@ public class WalletViewModel extends BaseViewModel
         dialog.setContentView(actionsView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
-        BottomSheetBehavior behavior = BottomSheetBehavior.from((View) actionsView.getParent());
+        BottomSheetBehavior<?> behavior = BottomSheetBehavior.from((View) actionsView.getParent());
         dialog.setOnShowListener(dialog -> behavior.setPeekHeight(actionsView.getHeight()));
         dialog.show();
     }
@@ -293,7 +285,7 @@ public class WalletViewModel extends BaseViewModel
                 break;
 
             case ERC1155:
-                tokenDetailRouter.openERC1155(activity, token, defaultWallet.getValue(), hasDefinition);
+                tokenDetailRouter.open(activity, token, defaultWallet.getValue(), hasDefinition);
                 break;
 
             case ERC721:
@@ -302,7 +294,7 @@ public class WalletViewModel extends BaseViewModel
             case ERC721_LEGACY:
             case ERC721_TICKET:
             case ERC721_UNDETERMINED:
-                assetDisplayRouter.open(activity, token, defaultWallet.getValue()); //TODO: Fold this into tokenDetailRouter
+                tokenDetailRouter.open(activity, token, defaultWallet.getValue(), false); //TODO: Fold this into tokenDetailRouter
                 break;
 
             case NOT_SET:

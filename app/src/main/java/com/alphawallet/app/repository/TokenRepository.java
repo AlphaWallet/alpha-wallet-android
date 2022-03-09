@@ -397,6 +397,7 @@ public class TokenRepository implements TokenRepositoryType {
                     {
                         case ETHEREUM:
                             balance = getEthBalance(wallet, token.tokenInfo.chainId);
+                            if (token.getBalanceRaw().equals(BigDecimal.ZERO) && balance.equals(BigDecimal.valueOf(-1))) balance = BigDecimal.ZERO; //protect against network loss
                             break;
                         case ERC875:
                         case ERC875_LEGACY:
@@ -557,12 +558,6 @@ public class TokenRepository implements TokenRepositoryType {
 
     private BigDecimal getEthBalance(Wallet wallet, long chainId)
     {
-        //in case chain has an override
-        if (EthereumNetworkRepository.getChainOverrideAddress(chainId).length() > 0)
-        {
-            return checkUint256Balance(wallet, chainId, EthereumNetworkRepository.getChainOverrideAddress(chainId));
-        }
-
         try {
             return new BigDecimal(getService(chainId).ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
                     .send()

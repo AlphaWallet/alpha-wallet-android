@@ -1643,12 +1643,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         if (web3 == null)
         {
             if (getActivity() != null) ((HomeActivity)getActivity()).resetFragment(WalletPage.DAPP_BROWSER);
+            loadOnInit = urlText;
         }
         else
         {
             // reset initial url, to avoid issues with initial load
             loadOnInit = null;
-
             cancelSearchSession();
             addToBackStack(DAPP_BROWSER);
             setUrlText(Utils.formatUrl(urlText));
@@ -1691,7 +1691,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
             addressRecovered = "0x" + Keys.getAddress(recoveredKey);
-            if (BuildConfig.DEBUG) System.out.println("Recovered: " + addressRecovered);
+            Timber.d("Recovered: " + addressRecovered);
         }
         catch (SignatureException e)
         {
@@ -2011,7 +2011,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void RefreshEvent()
     {
         //determine scroll position
-        Log.i("Touch", "SCROLL: " + web3.getScrollY());
+        Timber.tag("Touch").i("SCROLL: %s", web3.getScrollY());
         if (web3.getScrollY() == 0)
         {
             loadUrl(web3.getUrl());

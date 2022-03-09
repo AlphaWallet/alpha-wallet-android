@@ -50,7 +50,7 @@
         android:textColor="@color/azure"
         android:fontFamily="@font/font_semibold"
         android:textSize="@dimen/sp16"
-        android:layout_marginEnd="@dimen/dp16"
+        android:layout_marginEnd="@dimen/dp18"
         app:layout_constraintTop_toBottomOf="@id/line"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

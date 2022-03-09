@@ -37,7 +37,7 @@ public class WalletConnectRequestWidget extends LinearLayout {
         network.setLabel(getContext().getString(R.string.subtitle_network));
         network.setMessage(EthereumNetworkBase.getShortChainName(chainIdOverride));
         network.setMessageTextColor(EthereumNetworkBase.getChainColour(chainIdOverride));
-        network.setActionText(getContext().getString(R.string.request_change_chain));
+        network.setActionText(getContext().getString(R.string.edit));
 
         network.setActionListener(v -> {
             callback.openChainSelection();

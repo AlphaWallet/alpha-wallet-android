@@ -661,7 +661,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 if (result.getData() == null) return;
                 chainIdOverride = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
                 Toast.makeText(this, getText(R.string.hint_network_name) + " " + EthereumNetworkBase.getShortChainName(chainIdOverride), Toast.LENGTH_LONG).show();
-//                onSessionRequest(0L, remotePeerMeta, chainIdOverride);
                 walletConnectDialog.updateChain(chainIdOverride);
             });
 
@@ -696,61 +695,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         walletConnectDialog = new ActionSheetDialog(this, peer, chainId, displayIcon, this);
         walletConnectDialog.show();
-        walletConnectDialog.setOnDismissListener( d -> {
-            client.rejectSession(getString(R.string.message_reject_request));
-            finish();
-        });
-
-//        walletConnectInfoSheet = new WalletConnectInfoSheet(this,
-//                displayIcon,
-//                peer,
-//                chainIdOverride,
-//                new WalletConnectSheetCallback() {
-//                    @Override
-//                    public void onClickApprove(long selectedChain) {
-//                        client.approveSession(Arrays.asList(accounts), selectedChain);
-//                        //update client in service
-//                        viewModel.putClient(WalletConnectActivity.this, getSessionId(), client);
-//                        viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(),
-//                                new Gson().toJson(session), new Gson().toJson(peer), selectedChain);
-//                        progressBar.setVisibility(View.GONE);
-//                        functionBar.setVisibility(View.VISIBLE);
-//                        infoLayout.setVisibility(View.VISIBLE);
-//                        setupClient(getSessionId());
-//                        if (fromDappBrowser)
-//                        {
-//                            //switch back to dappBrowser
-//                            switchToDappBrowser();
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onClickReject() {
-//                        client.rejectSession(getString(R.string.message_reject_request));
-//                        finish();
-//                    }
-//
-//                    @Override
-//                    public void onClickChainId() {
-//                        //pop open the selection dialog
-//                        Intent intent = new Intent(WalletConnectActivity.this, SelectNetworkActivity.class);
-//                        intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
-//                        intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
-//                        getNetwork.launch(intent);
-//                    }
-//                }
-//        );
-
-    }
-
-    private Spannable buildMessage(String url, long networkId)
-    {
-        StyledStringBuilder sb = new StyledStringBuilder();
-        sb.append(url);
-        sb.startStyleGroup().append("\n\n").append(EthereumNetworkBase.getShortChainName(networkId));
-        sb.setColor(ContextCompat.getColor(this, EthereumNetworkBase.getChainColour(networkId)));
-        sb.applyStyles();
-        return sb;
+        walletConnectDialog.fullExpand();
     }
 
     private void onEthSign(Long id, WCEthereumSignMessage message)
@@ -1241,27 +1186,33 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     }
 
     @Override
-    public void notifyWalletConnectApproval(boolean isApproved, long selectedChain) {
-        ActionSheetCallback.super.notifyWalletConnectApproval(isApproved, selectedChain);
-        if (isApproved) {
-            client.approveSession(Collections.singletonList(viewModel.getWallet().address), selectedChain);
-            //update client in service
-            viewModel.putClient(WalletConnectActivity.this, getSessionId(), client);
-            viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(),
-                    new Gson().toJson(session), new Gson().toJson(remotePeerMeta), selectedChain);
-            progressBar.setVisibility(View.GONE);
-            functionBar.setVisibility(View.VISIBLE);
-            infoLayout.setVisibility(View.VISIBLE);
-            setupClient(getSessionId());
-            if (fromDappBrowser)
-            {
-                //switch back to dappBrowser
-                switchToDappBrowser();
-            }
-        } else {
-            client.rejectSession(getString(R.string.message_reject_request));
-            finish();
+    public void notifyWalletConnectApproval(long selectedChain)
+    {
+        client.approveSession(Collections.singletonList(viewModel.getWallet().address), selectedChain);
+        //update client in service
+        viewModel.putClient(WalletConnectActivity.this, getSessionId(), client);
+        viewModel.createNewSession(getSessionId(), client.getPeerId(), client.getRemotePeerId(),
+                new Gson().toJson(session), new Gson().toJson(remotePeerMeta), selectedChain);
+        chainName.setChainID(selectedChain);
+        chainIcon.setVisibility(View.VISIBLE);
+        chainIcon.bindData(viewModel.getTokensService().getServiceToken(selectedChain));
+        progressBar.setVisibility(View.GONE);
+        functionBar.setVisibility(View.VISIBLE);
+        infoLayout.setVisibility(View.VISIBLE);
+        chainIdOverride = selectedChain;
+        setupClient(getSessionId()); //should populate this activity
+        if (fromDappBrowser)
+        {
+            //switch back to dappBrowser
+            switchToDappBrowser();
         }
+    }
+
+    @Override
+    public void denyWalletConnect()
+    {
+        client.rejectSession(getString(R.string.message_reject_request));
+        finish();
     }
 
     @Override

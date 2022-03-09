@@ -20,6 +20,7 @@ public interface ActionSheetCallback
 
     default void buttonClick(long callbackId, Token baseToken) { }; //for message only actionsheet
 
-    default void notifyWalletConnectApproval(boolean isApproved, long chainId) { };    // used by WalletConnectRequest
+    default void notifyWalletConnectApproval(long chainId) { };    // used by WalletConnectRequest
+    default void denyWalletConnect() { };
     default void openChainSelection() { };      // used by WalletConnectRequest
 }

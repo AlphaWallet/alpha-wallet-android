@@ -263,6 +263,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         tokensService = null;
         candidateTransaction = null;
         callbackId = 0;
+        isAttached = true;
 
         Glide.with(activity)
                 .load(iconUrl)
@@ -273,16 +274,16 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         title.setText(wcPeerMeta.getName());
 
         cancelButton.setOnClickListener( v -> {
-            actionSheetCallback.notifyWalletConnectApproval(false, -1);
+            actionSheetCallback.denyWalletConnect();
         });
 
-        walletConnectRequestWidget.setupWidget((ComponentActivity) activity, wcPeerMeta, chainIdOverride, actionSheetCallback::openChainSelection);
+        walletConnectRequestWidget.setupWidget(wcPeerMeta, chainIdOverride, actionSheetCallback::openChainSelection);
 
         ArrayList<Integer> functionList = new ArrayList<>();
         functionList.add(R.string.approve);
         functionList.add(R.string.dialog_reject);
         functionBar.setupFunctions(this, functionList);
-
+        functionBar.revealButtons();
     }
 
     public void setSignOnly()
@@ -383,10 +384,14 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 actionSheetCallback.buttonClick(callbackId, token);
                 break;
             case WALLET_CONNECT_REQUEST:
-                if (id == R.string.approve) {
-                    actionSheetCallback.notifyWalletConnectApproval(true, walletConnectRequestWidget.getChainIdOverride());
-                } else {
-                    actionSheetCallback.notifyWalletConnectApproval(false, -1);
+                if (id == R.string.approve)
+                {
+                    actionSheetCallback.notifyWalletConnectApproval(walletConnectRequestWidget.getChainIdOverride());
+                    tryDismiss();
+                }
+                else
+                {
+                    actionSheetCallback.denyWalletConnect();
                 }
                 break;
         }

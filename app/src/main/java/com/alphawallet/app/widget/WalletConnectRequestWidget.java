@@ -1,11 +1,8 @@
 package com.alphawallet.app.widget;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
-
-import androidx.activity.ComponentActivity;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -16,8 +13,6 @@ import timber.log.Timber;
 
 public class WalletConnectRequestWidget extends LinearLayout {
 
-    private Activity activity;
-    private WCPeerMeta wcPeerMeta;
     private long chainIdOverride;
     private WalletConnectWidgetCallback callback;
 
@@ -31,27 +26,26 @@ public class WalletConnectRequestWidget extends LinearLayout {
         network = findViewById(R.id.info_network);
     }
 
-    public void setupWidget(ComponentActivity activity, WCPeerMeta wcPeerMeta, long chainId, WalletConnectWidgetCallback callback) {
+    public void setupWidget(WCPeerMeta wcPeerMeta, long chainId, WalletConnectWidgetCallback callback) {
         Timber.d("setupWidget: ");
-        this.activity = activity;
-        this.wcPeerMeta = wcPeerMeta;
         this.chainIdOverride = chainId;
         this.callback = callback;
 
-        website.setLabel("Website");
+        website.setLabel(getContext().getString(R.string.website_text));
         website.setMessage(wcPeerMeta.getUrl());
 
-        network.setLabel("Network");
+        network.setLabel(getContext().getString(R.string.subtitle_network));
         network.setMessage(EthereumNetworkBase.getShortChainName(chainIdOverride));
         network.setMessageTextColor(EthereumNetworkBase.getChainColour(chainIdOverride));
-        network.setActionText(getContext().getString(R.string.edit));
+        network.setActionText(getContext().getString(R.string.request_change_chain));
 
         network.setActionListener(v -> {
             callback.openChainSelection();
         });
     }
 
-    public void updateChain(long chainIdOverride) {
+    public void updateChain(long chainIdOverride)
+    {
         this.chainIdOverride = chainIdOverride;
         network.setMessage(EthereumNetworkBase.getShortChainName(chainIdOverride));
         network.setMessageTextColor(EthereumNetworkBase.getChainColour(chainIdOverride));

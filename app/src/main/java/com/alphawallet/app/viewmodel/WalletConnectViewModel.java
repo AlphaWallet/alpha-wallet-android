@@ -25,6 +25,7 @@ import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.CreateTransactionInteract;
+import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.WalletConnectInteract;
@@ -78,6 +79,7 @@ public class WalletConnectViewModel extends BaseViewModel
     private final KeyService keyService;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GenericWalletInteract genericWalletInteract;
+    private final FetchWalletsInteract fetchWalletsInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final WalletConnectInteract walletConnectInteract;
     private final RealmManager realmManager;
@@ -100,7 +102,7 @@ public class WalletConnectViewModel extends BaseViewModel
     @Inject
     WalletConnectViewModel(KeyService keyService,
                            FindDefaultNetworkInteract findDefaultNetworkInteract,
-                           CreateTransactionInteract createTransactionInteract,
+                           FetchWalletsInteract fetchWalletsInteract, CreateTransactionInteract createTransactionInteract,
                            GenericWalletInteract genericWalletInteract,
                            WalletConnectInteract walletConnectInteract, RealmManager realmManager,
                            GasService gasService,
@@ -112,6 +114,7 @@ public class WalletConnectViewModel extends BaseViewModel
     {
         this.keyService = keyService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.fetchWalletsInteract = fetchWalletsInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.walletConnectInteract = walletConnectInteract;
@@ -271,22 +274,27 @@ public class WalletConnectViewModel extends BaseViewModel
         }
     }
 
-    public void sendTransaction(final Web3Transaction finalTx, long chainId, SendTransactionInterface callback)
+    public void sendTransaction(final Web3Transaction finalTx, Wallet wallet, long chainId, SendTransactionInterface callback)
     {
         if (finalTx.isConstructor())
         {
             disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                    .createWithSig(wallet, finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.signature),
                             error -> callback.transactionError(finalTx.leafPosition, error));
         }
         else
         {
             disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), finalTx, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                    .createWithSig(wallet, finalTx, chainId)
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.signature),
                             error -> callback.transactionError(finalTx.leafPosition, error));
         }
+    }
+
+    public void sendTransaction(final Web3Transaction finalTx, long chainId, SendTransactionInterface callback)
+    {
+        sendTransaction(finalTx, defaultWallet.getValue(), chainId, callback);
     }
 
     public Single<BigInteger> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount, BigInteger defaultLimit)
@@ -703,7 +711,13 @@ public class WalletConnectViewModel extends BaseViewModel
         return ethereumNetworkRepository.getNetworkByChain(chainId) != null;
     }
 
-    public TokensService getTokenService() {
+    public TokensService getTokenService()
+    {
         return tokensService;
+    }
+
+    public Wallet findWallet(String address)
+    {
+        return fetchWalletsInteract.getWallet(address).blockingGet();
     }
 }

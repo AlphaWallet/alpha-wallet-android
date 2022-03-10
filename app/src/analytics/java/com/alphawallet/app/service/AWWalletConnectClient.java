@@ -10,10 +10,12 @@ import android.widget.Toast;
 
 import com.alphawallet.app.App;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
+import com.alphawallet.app.walletconnect.SendTransactionDialogBuilder;
 import com.alphawallet.app.walletconnect.SignTypedDataDialogBuilder;
 import com.alphawallet.app.walletconnect.entity.BaseRequest;
 import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
@@ -36,6 +38,8 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
 {
+    public static Intent data;
+    public static AuthenticationCallback authCallback;
     private final WalletConnectInteract walletConnectInteract;
     public static WalletConnect.Model.SessionProposal sessionProposal;
 
@@ -90,6 +94,11 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
 
     private Dialog createDialog(String method, @NonNull WalletConnect.Model.SessionRequest sessionRequest, WalletConnect.Model.SettledSession settledSession, Activity topActivity)
     {
+        if ("eth_sendTransaction".equals(method))
+        {
+            return new SendTransactionDialogBuilder(topActivity, sessionRequest, settledSession).build(this);
+        }
+
         BaseRequest request = null;
         if ("personal_sign".equals(method))
         {

@@ -6,6 +6,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AuthenticationFailType;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.viewmodel.BaseViewModel;
@@ -115,7 +116,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         //Interpret the return code; if it's within the range of values possible to return from PIN confirmation then separate out
         //the task code from the return value. We have to do it this way because there's no way to send a bundle across the PIN dialog
         //and out through the PIN dialog's return back to here
-        if (AWWalletConnectClient.viewModel == null)
+        if (AWWalletConnectClient.authCallback == null)
         {
             return;
         }
@@ -123,9 +124,9 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10) {
             Operation taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
             if (resultCode == RESULT_OK) {
-                AWWalletConnectClient.viewModel.completeAuthentication(taskCode);
+                AWWalletConnectClient.authCallback.authenticatePass(taskCode);
             } else {
-                AWWalletConnectClient.viewModel.failedAuthentication(taskCode);
+                AWWalletConnectClient.authCallback.authenticateFail("", AuthenticationFailType.PIN_FAILED, taskCode);
             }
         }
     }

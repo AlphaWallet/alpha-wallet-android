@@ -71,7 +71,6 @@ import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.token.tools.Numeric;
 
 import org.jetbrains.annotations.NotNull;
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -83,8 +82,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;

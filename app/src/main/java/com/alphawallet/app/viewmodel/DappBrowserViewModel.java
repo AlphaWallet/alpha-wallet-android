@@ -254,14 +254,14 @@ public class DappBrowserViewModel extends BaseViewModel  {
         {
             disposable = createTransactionInteract
                     .createWithSig(defaultWallet.getValue(), finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.signature),
                             error -> callback.transactionError(finalTx.leafPosition, error));
         }
         else
         {
             disposable = createTransactionInteract
                     .createWithSig(defaultWallet.getValue(), finalTx, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.signature),
                             error -> callback.transactionError(finalTx.leafPosition, error));
         }
     }

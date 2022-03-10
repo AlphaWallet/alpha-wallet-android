@@ -57,7 +57,6 @@ import com.alphawallet.app.widget.ActionSheetMode;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.EventDetailWidget;
 import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.token.entity.TSActivityView;
 import com.alphawallet.token.entity.TSTokenView;

@@ -146,8 +146,6 @@ import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -1101,14 +1099,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
 
         return true;
-    }
-
-    public void setCurrentGasIndex(int gasSelectionIndex, BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime, long customNonce)
-    {
-        /*if (confirmationDialog != null && confirmationDialog.isShowing())
-        {
-            confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
-        }*/
     }
 
     @Override

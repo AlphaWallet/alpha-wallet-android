@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -23,6 +24,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
+import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
@@ -38,6 +40,11 @@ import java.math.BigInteger;
 
 import io.realm.Realm;
 import io.realm.RealmQuery;
+import timber.log.Timber;
+
+import static com.alphawallet.app.C.DEFAULT_GAS_PRICE;
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by JB on 19/11/2020.
@@ -66,6 +73,7 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
 
     private TXSpeed currentGasSpeedIndex = TXSpeed.STANDARD;
     private long customNonce = -1;
+    private OnGasSelectedCallback onGasSelectedCallback;
     private boolean isSendingAll;
     private BigInteger resendGasPrice = BigInteger.ZERO;
 
@@ -80,9 +88,32 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
         speedWarning = findViewById(R.id.layout_speed_warning);
     }
 
+    @Override
+    protected void onWindowVisibilityChanged(int visibility)
+    {
+        super.onWindowVisibilityChanged(visibility);
+        Log.d("seaborn", "visible: " + visibility);
+        if (visibility == VISIBLE && AWWalletConnectClient.data != null)
+        {
+            Intent data = AWWalletConnectClient.data;
+
+            int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
+            long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
+            BigInteger customGasPrice = data.hasExtra(C.EXTRA_GAS_PRICE) ?
+                    new BigInteger(data.getStringExtra(C.EXTRA_GAS_PRICE)) : BigInteger.ZERO; //may not have set a custom gas price
+            BigInteger maxPriorityFee = data.hasExtra(C.EXTRA_MIN_GAS_PRICE) ?
+                    new BigInteger(data.getStringExtra(C.EXTRA_MIN_GAS_PRICE)) : BigInteger.ZERO;
+            BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
+            long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
+
+            setCurrentGasIndex(gasSelectionIndex, customGasPrice, maxPriorityFee, customGasLimit, expectedTxTime, customNonce);
+        }
+        AWWalletConnectClient.data = null;
+    }
     //For legacy transaction, either we are sending all or the chain doesn't support EIP1559
     //Since these chains are not so well used, we will compromise and send at the standard gas rate
     //That is - not allow selection of gas price
+
     public void setupWidget(TokensService svs, Token t, Web3Transaction tx, StandardFunctionInterface sfi, ActivityResultLauncher<Intent> gasSelectLauncher)
     {
         tokensService = svs;
@@ -94,6 +125,7 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
         isSendingAll = isSendingAll(tx);
         initialGasPrice = tx.gasPrice;
         customNonce = tx.nonce;
+        this.onGasSelectedCallback = onGasSelectedCallback;
 
         if (tx.gasLimit.equals(BigInteger.ZERO)) //dapp didn't specify a limit, use default limits until node returns an estimate (see setGasEstimate())
         {

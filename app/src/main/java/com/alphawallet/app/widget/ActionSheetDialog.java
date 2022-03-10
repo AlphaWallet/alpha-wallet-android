@@ -6,12 +6,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
@@ -21,7 +21,6 @@ import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
@@ -364,20 +363,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         detailWidget.setVisibility(View.VISIBLE);
     }
 
-    public void setCurrentGasIndex(ActivityResult result)
-    {
-        if (result == null || result.getData() == null) return;
-        int gasSelectionIndex = result.getData().getIntExtra(C.EXTRA_SINGLE_ITEM, TXSpeed.STANDARD.ordinal());
-        long customNonce = result.getData().getLongExtra(C.EXTRA_NONCE, -1);
-        BigInteger maxFeePerGas = result.getData().hasExtra(C.EXTRA_GAS_PRICE) ?
-                new BigInteger(result.getData().getStringExtra(C.EXTRA_GAS_PRICE)) : BigInteger.ZERO;
-        BigInteger maxPriorityFee = result.getData().hasExtra(C.EXTRA_MIN_GAS_PRICE) ?
-                new BigInteger(result.getData().getStringExtra(C.EXTRA_MIN_GAS_PRICE)) : BigInteger.ZERO;
-        BigDecimal customGasLimit = new BigDecimal(result.getData().getStringExtra(C.EXTRA_GAS_LIMIT));
-        long expectedTxTime = result.getData().getLongExtra(C.EXTRA_AMOUNT, 0);
-        gasWidgetInterface.setCurrentGasIndex(gasSelectionIndex, maxFeePerGas, maxPriorityFee, customGasLimit, expectedTxTime, customNonce);
-    }
-
     private boolean isSendingTransaction()
     {
         return (mode != ActionSheetMode.SIGN_MESSAGE && mode != ActionSheetMode.SIGN_TRANSACTION);
@@ -703,6 +688,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             @Override
             public void gotAuthorisation(boolean gotAuth)
             {
+                Log.d("seaborn", "gotAuthorisation: " + gotAuth);
                 actionCompleted = true;
                 if (!gotAuth) { cancelAuthentication(); return; }
                 confirmationWidget.startProgressCycle(4);
@@ -809,4 +795,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         return false;
     }
+}
+
+interface OnGasSelectedCallback {
+    void onSelected();
 }

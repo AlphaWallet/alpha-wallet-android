@@ -22,6 +22,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.AuthenticationFailType;
 import com.alphawallet.app.entity.Operation;
+import com.alphawallet.app.service.AWWalletConnectClient;
 
 import java.security.ProviderException;
 import java.util.concurrent.Executor;
@@ -175,6 +176,7 @@ public class SignTransactionDialog
         {
             Intent intent = km.createConfirmDeviceCredentialIntent(activity.getString(R.string.unlock_private_key), "");
             intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            AWWalletConnectClient.authCallback = authCallback;
             activity.startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + callBackId.ordinal());
         }
         else

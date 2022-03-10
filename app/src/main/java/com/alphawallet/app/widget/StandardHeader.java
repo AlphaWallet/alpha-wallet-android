@@ -18,6 +18,7 @@ public class StandardHeader extends LinearLayout
     private TextView headerText;
     private ChainName chainName;
     private SwitchMaterial switchMaterial;
+    private View separator;
 
     public StandardHeader(Context context, AttributeSet attrs)
     {
@@ -43,6 +44,7 @@ public class StandardHeader extends LinearLayout
             headerText = findViewById(R.id.text_header);
             chainName = findViewById(R.id.chain_name);
             switchMaterial = findViewById(R.id.switch_material);
+            separator = findViewById(R.id.separator);
 
             headerText.setText(headerId);
 
@@ -88,5 +90,10 @@ public class StandardHeader extends LinearLayout
     public SwitchMaterial getSwitch()
     {
         return switchMaterial;
+    }
+
+    public void hideSeparator()
+    {
+        separator.setVisibility(View.GONE);
     }
 }

@@ -5,12 +5,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <View style="@style/Aw.Component.Separator" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/background_bottom_border"
         android:visibility="gone" />
 
     <LinearLayout

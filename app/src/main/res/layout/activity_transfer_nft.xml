@@ -8,6 +8,8 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
+    <View style="@style/Aw.Component.Separator" />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -38,13 +40,14 @@
                 android:id="@+id/input_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/small_12"
                 android:layout_marginBottom="@dimen/standard_16"
                 android:visibility="visible"
                 custom:ens="true"
                 custom:hint="@string/recipient"
                 custom:label="@string/recipient"
                 custom:show_header="true" />
+
+            <View style="@style/Aw.Component.Separator" />
 
             <com.alphawallet.app.widget.StandardHeader
                 android:id="@+id/layout_header"
@@ -55,7 +58,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/listTickets"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_bottom_border" />
 
         </LinearLayout>
 

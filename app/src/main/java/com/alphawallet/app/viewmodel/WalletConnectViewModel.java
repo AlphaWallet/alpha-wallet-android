@@ -250,28 +250,17 @@ public class WalletConnectViewModel extends BaseViewModel
                         error -> dAppFunction.DAppError(error, message));
     }
 
-    public void signTransaction(Context ctx, Web3Transaction w3tx, DAppFunction dAppFunction, String requesterURL, long chainId)
+    public void signTransaction(Context ctx, Web3Transaction w3tx, DAppFunction dAppFunction, String requesterURL, long chainId, Wallet fromWallet)
     {
         resetSignDialog();
         EthereumMessage etm = new EthereumMessage(w3tx.getFormattedTransaction(ctx, chainId, getNetworkSymbol(chainId)).toString(),
                 requesterURL, w3tx.leafPosition, SignMessageType.SIGN_MESSAGE);
 
-        if (w3tx.isConstructor())
-        {
-            disposable = createTransactionInteract.signTransaction(defaultWallet.getValue(), w3tx, chainId)
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
-                            error -> dAppFunction.DAppError(error, etm));
-        }
-        else
-        {
-            disposable = createTransactionInteract.signTransaction(defaultWallet.getValue(), w3tx, chainId)
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
-                            error -> dAppFunction.DAppError(error, etm));
-        }
+        disposable = createTransactionInteract.signTransaction(fromWallet, w3tx, chainId)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
+                        error -> dAppFunction.DAppError(error, etm));
     }
 
     public void sendTransaction(final Web3Transaction finalTx, Wallet wallet, long chainId, SendTransactionInterface callback)

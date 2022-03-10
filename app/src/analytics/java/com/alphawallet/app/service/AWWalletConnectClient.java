@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.alphawallet.app.App;
 import com.alphawallet.app.R;
@@ -15,15 +14,11 @@ import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
-import com.alphawallet.app.walletconnect.SendTransactionDialogBuilder;
-import com.alphawallet.app.walletconnect.SignTypedDataDialogBuilder;
+import com.alphawallet.app.walletconnect.TransactionDialogBuilder;
 import com.alphawallet.app.walletconnect.entity.BaseRequest;
 import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
 import com.alphawallet.app.walletconnect.entity.SignTypedDataRequest;
 import com.alphawallet.app.widget.SignMethodDialog;
-import com.alphawallet.token.entity.EthereumMessage;
-import com.alphawallet.token.entity.SignMessageType;
-import com.alphawallet.token.entity.Signable;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
@@ -94,9 +89,11 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
 
     private Dialog createDialog(String method, @NonNull WalletConnect.Model.SessionRequest sessionRequest, WalletConnect.Model.SettledSession settledSession, Activity topActivity)
     {
-        if ("eth_sendTransaction".equals(method))
+        boolean sendTransaction = "eth_sendTransaction".equals(method);
+        boolean signTransaction = "eth_signTransaction".equals(method);
+        if (sendTransaction || signTransaction)
         {
-            return new SendTransactionDialogBuilder(topActivity, sessionRequest, settledSession).build(this);
+            return new TransactionDialogBuilder(topActivity, sessionRequest, settledSession).build(this, signTransaction);
         }
 
         BaseRequest request = null;

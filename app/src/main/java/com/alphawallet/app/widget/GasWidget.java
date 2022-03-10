@@ -40,11 +40,6 @@ import java.math.BigInteger;
 
 import io.realm.Realm;
 import io.realm.RealmQuery;
-import timber.log.Timber;
-
-import static com.alphawallet.app.C.DEFAULT_GAS_PRICE;
-import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by JB on 19/11/2020.

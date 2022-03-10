@@ -3,8 +3,12 @@
 
     <color name="brand">@color/azure</color>
     <color name="brand_inverse">@color/white</color>
-    <color name="accent">@color/azure</color>
+
+    <color name="accent">@color/brand</color>
     <color name="accent_inverse">@color/white</color>
+
+    <color name="error">@color/danger</color>
+    <color name="error_inverse">@color/white</color>
 
     <color name="background">@color/white</color>
     <color name="background_inverse">@color/black</color>
@@ -22,8 +26,6 @@
     <color name="text_primary_inverse">@color/white</color>
     <color name="text_secondary">@color/dove</color>
     <color name="text_secondary_inverse">@color/white</color>
-    <color name="text_error">@color/danger</color>
-    <color name="text_error_inverse">@color/white</color>
 
     <!-- ========== -->
     <!-- Components -->
@@ -34,10 +36,6 @@
     <color name="button_secondary">@color/transparent</color>
     <color name="button_texticon">@color/concrete</color>
     <color name="button_suggestion">@color/mercury</color>
-
-    <!-- Icons, toolbar icons -->
-    <color name="icon_tint">@color/black</color>
-    <color name="icon_tint_inverse">@color/white</color>
 
     <!-- Warning dialog -->
     <color name="warning_background">@color/mine</color>
@@ -63,4 +61,5 @@
     <color name="seed_word_stroke">@color/mike</color>
     <color name="seed_word_text">?android:textColorPrimary</color>
     <color name="seed_word_text_selected">@color/alabaster</color>
+
 </resources>

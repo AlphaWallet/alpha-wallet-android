@@ -127,15 +127,14 @@
                                     android:layout_marginTop="5dp"
                                     android:gravity="center"
                                     android:text="@string/error_invalid_amount"
-                                    android:textColor="@color/text_error"
+                                    android:textColor="?colorError"
                                     android:visibility="gone" />
 
                             </LinearLayout>
 
                             <View
                                 android:layout_width="15dp"
-                                android:layout_height="match_parent"
-                                android:background="@color/surface" />
+                                android:layout_height="match_parent" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -208,7 +207,7 @@
                                     android:layout_marginTop="5dp"
                                     android:gravity="center"
                                     android:text="@string/error_invalid_quantity"
-                                    android:textColor="@color/text_error"
+                                    android:textColor="?colorError"
                                     android:visibility="gone" />
                             </LinearLayout>
                         </LinearLayout>
@@ -355,14 +354,13 @@
                                     android:layout_marginTop="5dp"
                                     android:gravity="center"
                                     android:text="@string/error_date"
-                                    android:textColor="@color/text_error"
+                                    android:textColor="?colorError"
                                     android:visibility="gone" />
                             </LinearLayout>
 
                             <View
                                 android:layout_width="15dp"
-                                android:layout_height="match_parent"
-                                android:background="@color/surface" />
+                                android:layout_height="match_parent" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -413,7 +411,7 @@
                                     android:layout_marginTop="@dimen/mini_4"
                                     android:gravity="center"
                                     android:text="@string/error_time"
-                                    android:textColor="@color/text_error"
+                                    android:textColor="?colorError"
                                     android:visibility="gone"
                                     tools:visibility="visible" />
 

@@ -59,7 +59,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="@dimen/tiny_8"
                     android:src="@drawable/ic_expand_more"
-                    app:tint="@color/icon_tint" />
+                    app:tint="?colorControlNormal" />
 
             </LinearLayout>
 
@@ -133,7 +133,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="end"
                 android:text="@string/error_insufficient_funds"
-                android:textColor="@color/text_error"
+                android:textColor="?colorError"
                 android:visibility="gone"
                 tools:visibility="visible" />
 

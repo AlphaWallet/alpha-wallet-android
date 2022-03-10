@@ -29,7 +29,7 @@
             android:background="@color/transparent"
             android:src="@drawable/ic_menu"
             android:visibility="gone"
-            app:tint="@color/icon_tint"
+            app:tint="?colorControlNormal"
             tools:visibility="visible" />
 
         <com.alphawallet.app.widget.UserAvatar
@@ -115,7 +115,7 @@
         android:layout_centerVertical="true"
         android:src="@drawable/ic_copy"
         android:visibility="visible"
-        app:tint="@color/control_activated" />
+        app:tint="?colorControlActivated" />
 
     <LinearLayout
         android:id="@+id/wallet_click_layer"

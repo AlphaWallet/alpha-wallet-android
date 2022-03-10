@@ -186,7 +186,7 @@ public class InputAmount extends LinearLayout
         if (showError)
         {
             errorText.setVisibility(View.VISIBLE);
-            editText.setTextColor(context.getColor(R.color.text_error));
+            editText.setTextColor(context.getColor(R.color.error));
         }
         else
         {

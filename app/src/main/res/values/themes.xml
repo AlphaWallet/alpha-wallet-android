@@ -1,29 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
         <item name="colorPrimary">@color/brand</item>
+        <item name="colorPrimaryVariant">@color/brand</item>
         <item name="colorPrimaryDark">@color/surface</item>
         <item name="colorOnPrimary">@color/brand_inverse</item>
+        <item name="colorSecondary">@color/brand</item>
+        <item name="colorOnSecondary">@color/brand</item>
+        <item name="colorSecondaryVariant">@color/brand</item>
         <item name="colorAccent">@color/accent</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorOnBackground">@color/background_inverse</item>
+        <item name="colorBackgroundFloating">@color/surface_secondary</item>
         <item name="colorSurface">@color/surface</item>
         <item name="colorOnSurface">@color/surface_inverse</item>
         <item name="colorControlNormal">@color/control</item>
         <item name="colorControlActivated">@color/control_activated</item>
         <item name="colorControlHighlight">@color/control_highlight</item>
-        <item name="colorError">@color/text_error</item>
-        <item name="colorOnError">@color/text_error_inverse</item>
-        <item name="android:colorBackground">@color/background</item>
-        <item name="colorOnBackground">@color/background_inverse</item>
-
-        <item name="colorBackgroundFloating">@color/surface_secondary</item>
+        <item name="colorError">@color/error</item>
+        <item name="colorOnError">@color/error_inverse</item>
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
         <item name="android:textColorSecondaryInverse">@color/text_secondary_inverse</item>
+
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textColorHint">@color/text_secondary</item>
         <item name="android:textColorHintInverse">@color/text_secondary_inverse</item>
-
         <item name="android:textViewStyle">@style/Aw.Typography</item>
         <item name="toolbarStyle">@style/Aw.Component.Toolbar</item>
         <item name="appBarLayoutStyle">@style/Aw.Component.AppBarLayout</item>
@@ -48,10 +52,16 @@
         <item name="android:windowBackground">@drawable/background_splash</item>
     </style>
 
-    <style name="AppTheme.Overlay.Dark" parent="">
+    <style name="AppTheme.DarkOverlay">
+        <item name="android:colorBackground">@color/cod</item>
+        <item name="colorBackgroundFloating">@color/mine</item>
+        <item name="colorSurface">@color/cod</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorControlNormal">@color/white</item>
         <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:textColorPrimaryInverse">@color/black</item>
-        <item name="android:textColorSecondary">@color/white</item>
-        <item name="android:textColorSecondaryInverse">@color/dove</item>
+        <item name="android:textColorPrimaryInverse">@color/cod</item>
+        <item name="android:textColorSecondary">@color/dusty</item>
+        <item name="android:textColorSecondaryInverse">@color/cod</item>
     </style>
+
 </resources>

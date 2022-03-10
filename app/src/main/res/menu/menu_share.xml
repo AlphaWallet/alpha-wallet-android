@@ -6,6 +6,6 @@
         android:id="@+id/action_share"
         android:icon="@drawable/ic_share_dark_24dp"
         android:title="@string/action_share"
-        app:iconTint="@color/icon_tint"
+        app:iconTint="?colorControlNormal"
         app:showAsAction="always" />
 </menu>

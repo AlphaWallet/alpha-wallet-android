@@ -5,6 +5,6 @@
     <item
         android:id="@+id/action_redeem"
         android:title="@string/action_redeem"
-        app:iconTint="@color/icon_tint"
+        app:iconTint="?colorControlNormal"
         app:showAsAction="always" />
 </menu>

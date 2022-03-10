@@ -5,6 +5,6 @@
     <item
         android:id="@+id/action_next"
         android:title="@string/action_next"
-        app:iconTint="@color/icon_tint"
+        app:iconTint="?colorControlNormal"
         app:showAsAction="always" />
 </menu>

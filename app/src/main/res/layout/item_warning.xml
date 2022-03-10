@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/standard_16"
-    android:theme="@style/AppTheme.Overlay.Dark"
+    android:theme="@style/AppTheme.DarkOverlay"
     android:animateLayoutChanges="true"
     android:elevation="2dp"
     android:orientation="vertical">

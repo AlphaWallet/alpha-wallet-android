@@ -578,7 +578,7 @@ public class WalletFragment extends BaseFragment implements
                 wData.title = getString(R.string.wallet_not_backed_up);
                 wData.detail = getString(R.string.not_backed_up_detail);
                 wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
-                wData.colour = R.color.text_error;
+                wData.colour = R.color.error;
                 wData.wallet = viewModel.getWallet();
                 adapter.addWarning(wData);
                 break;
@@ -740,9 +740,9 @@ public class WalletFragment extends BaseFragment implements
                 icon = ContextCompat.getDrawable(getActivity(), R.drawable.ic_hide_token);
                 if (icon != null)
                 {
-                    icon.setTint(ContextCompat.getColor(getActivity(), R.color.text_error_inverse));
+                    icon.setTint(ContextCompat.getColor(getActivity(), R.color.error_inverse));
                 }
-                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.text_error));
+                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.error));
             }
         }
 

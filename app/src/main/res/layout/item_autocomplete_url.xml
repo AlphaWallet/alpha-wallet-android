@@ -4,7 +4,7 @@
     android:id="@+id/url"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/surface_secondary"
+    android:background="?colorBackgroundFloating"
     android:paddingStart="@dimen/standard_16"
     android:paddingTop="@dimen/small_12"
     android:paddingEnd="@dimen/standard_16"

@@ -613,7 +613,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             if (client == null || !client.isConnected())
             {
                 statusText.setText(R.string.not_connected);
-                statusText.setTextColor(getColor(R.color.text_error));
+                statusText.setTextColor(getColor(R.color.error));
             }
             else
             {

@@ -124,7 +124,7 @@
             android:layout_gravity="center"
             android:src="@drawable/ic_arrow_right"
             android:visibility="gone"
-            app:tint="@color/icon_tint"
+            app:tint="?colorControlNormal"
             tools:visibility="visible" />
 
         <com.google.android.material.checkbox.MaterialCheckBox

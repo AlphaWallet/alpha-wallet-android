@@ -258,7 +258,7 @@
                                 android:layout_marginTop="@dimen/mini_4"
                                 android:gravity="center"
                                 android:text="@string/error_date"
-                                android:textColor="@color/text_error"
+                                android:textColor="?colorError"
                                 android:visibility="gone"
                                 tools:visibility="visible" />
                         </LinearLayout>
@@ -317,7 +317,7 @@
                                 android:layout_marginTop="@dimen/mini_4"
                                 android:gravity="center"
                                 android:text="@string/error_time"
-                                android:textColor="@color/text_error"
+                                android:textColor="?colorError"
                                 android:visibility="gone"
                                 tools:visibility="visible" />
 

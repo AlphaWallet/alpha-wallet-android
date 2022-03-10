@@ -10,7 +10,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/text_error"
+        android:background="?colorError"
         android:orientation="vertical"
         android:padding="@dimen/standard_16">
 
@@ -21,7 +21,7 @@
             android:layout_gravity="center"
             android:text="@string/label_important"
             android:textAllCaps="true"
-            android:textColor="@color/text_error_inverse" />
+            android:textColor="?colorOnError" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -29,7 +29,7 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:text="@string/universal_link_notice"
-            android:textColor="@color/text_error_inverse" />
+            android:textColor="?colorOnError" />
 
     </LinearLayout>
 

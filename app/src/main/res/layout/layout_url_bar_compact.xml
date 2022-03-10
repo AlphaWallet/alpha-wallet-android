@@ -24,7 +24,7 @@
             android:alpha="0.3"
             android:padding="@dimen/mini_4"
             android:src="@drawable/ic_browser_back"
-            app:tint="@color/icon_tint" />
+            app:tint="?colorControlNormal" />
 
         <ImageView
             android:id="@+id/next"
@@ -35,7 +35,7 @@
             android:alpha="0.3"
             android:padding="@dimen/mini_4"
             android:src="@drawable/ic_browser_next"
-            app:tint="@color/icon_tint" />
+            app:tint="?colorControlNormal" />
 
         <ImageView
             android:id="@+id/refresh"
@@ -46,7 +46,7 @@
             android:enabled="true"
             android:padding="@dimen/mini_4"
             android:src="@drawable/refresh_spinner_dark"
-            app:tint="@color/icon_tint" />
+            app:tint="?colorControlNormal" />
 
         <!-- These are here to simplify source code -->
         <ImageView

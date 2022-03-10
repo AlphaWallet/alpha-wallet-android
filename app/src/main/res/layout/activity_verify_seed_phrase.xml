@@ -61,7 +61,7 @@
             android:layout_marginStart="@dimen/small_12"
             android:padding="@dimen/tiny_8"
             android:text="@string/invalid_phrase"
-            android:textColor="@color/text_error"
+            android:textColor="?colorError"
             android:visibility="invisible"
             tools:visibility="visible" />
 

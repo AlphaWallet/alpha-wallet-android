@@ -31,7 +31,7 @@
             android:paddingStart="@dimen/small_12"
             android:src="@drawable/ic_menu"
             android:visibility="gone"
-            app:tint="@color/icon_tint"
+            app:tint="?colorControlNormal"
             tools:visibility="visible" />
 
         <com.alphawallet.app.widget.UserAvatar
@@ -130,7 +130,7 @@
         android:layout_centerVertical="true"
         android:layout_gravity="center"
         android:src="@drawable/ic_arrow_right"
-        app:tint="@color/icon_tint" />
+        app:tint="?colorControlNormal" />
 
     <LinearLayout
         android:id="@+id/wallet_click_layer"

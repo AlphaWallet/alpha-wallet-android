@@ -17,7 +17,7 @@
         android:background="@color/transparent"
         android:src="@drawable/ic_menu"
         android:visibility="gone"
-        app:tint="@color/icon_tint"
+        app:tint="?colorControlNormal"
         tools:visibility="visible" />
 
     <TextView

@@ -15,7 +15,7 @@
         android:maxLines="1"
         android:padding="2dp"
         android:text="@string/ethereum"
-        android:textColor="@color/white"
+        android:textColor="?colorOnPrimary"
         android:visibility="visible" />
 
 </LinearLayout>

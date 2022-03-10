@@ -32,7 +32,7 @@
                 android:alpha="0.3"
                 android:padding="5dp"
                 android:src="@drawable/ic_browser_back"
-                app:tint="@color/icon_tint" />
+                app:tint="?colorControlNormal" />
 
             <ImageView
                 android:id="@+id/next"
@@ -41,7 +41,7 @@
                 android:alpha="0.3"
                 android:padding="5dp"
                 android:src="@drawable/ic_browser_next"
-                app:tint="@color/icon_tint" />
+                app:tint="?colorControlNormal" />
 
         </LinearLayout>
 
@@ -112,7 +112,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_home"
-                app:tint="@color/icon_tint" />
+                app:tint="?colorControlNormal" />
         </LinearLayout>
 
     </RelativeLayout>

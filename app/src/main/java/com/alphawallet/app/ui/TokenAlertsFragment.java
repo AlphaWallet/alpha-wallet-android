@@ -144,14 +144,14 @@ public class TokenAlertsFragment extends BaseFragment implements View.OnClickLis
                 icon = ContextCompat.getDrawable(getActivity(), R.drawable.ic_close);
                 if (icon != null)
                 {
-                    icon.setTint(ContextCompat.getColor(getActivity(), R.color.text_error_inverse));
+                    icon.setTint(ContextCompat.getColor(getActivity(), R.color.error_inverse));
                 }
-                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.text_error));
+                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.error));
 
                 textPaint.setTextAlign(Paint.Align.CENTER);
                 textPaint.setTypeface(ResourcesCompat.getFont(getContext(), R.font.font_semibold));
                 textPaint.setTextSize((int) getResources().getDimension(R.dimen.sp17));
-                textPaint.setColor(getResources().getColor(R.color.text_error_inverse, getContext().getTheme()));
+                textPaint.setColor(getResources().getColor(R.color.error_inverse, getContext().getTheme()));
 
                 swipeControlWidth = (int) TypedValue.applyDimension(
                         TypedValue.COMPLEX_UNIT_DIP,

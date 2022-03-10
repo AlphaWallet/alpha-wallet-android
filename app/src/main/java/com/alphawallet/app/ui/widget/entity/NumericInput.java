@@ -76,7 +76,7 @@ public class NumericInput extends AppCompatAutoCompleteTextView implements TextW
         final Matcher addressMatch = numberFormatMatcher.matcher(s.toString());
         if (!addressMatch.find())
         {
-            setTextColor(getResources().getColor(R.color.text_error));
+            setTextColor(getResources().getColor(R.color.error));
         }
         else
         {

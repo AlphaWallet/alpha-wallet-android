@@ -7,6 +7,6 @@
         android:icon="@drawable/ic_network_2"
         android:orderInCategory="20"
         android:title="@string/action_networks"
-        app:iconTint="@color/icon_tint"
+        app:iconTint="?colorControlNormal"
         app:showAsAction="always" />
 </menu>

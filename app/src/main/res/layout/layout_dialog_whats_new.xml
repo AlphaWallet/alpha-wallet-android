@@ -14,7 +14,7 @@
         android:src="@drawable/ic_close"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/icon_tint" />
+        app:tint="?colorControlNormal" />
 
     <TextView
         style="@style/Aw.Typography.Title.Large.Bold"
@@ -32,7 +32,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/standard_16"
-        android:background="@color/surface_secondary"
+        android:background="?colorBackgroundFloating"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

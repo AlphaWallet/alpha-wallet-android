@@ -31,7 +31,7 @@
                 android:visibility="visible"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/icon_tint" />
+                app:tint="?colorControlNormal" />
 
             <ImageView
                 android:id="@+id/st_clear"
@@ -41,7 +41,7 @@
                 android:src="@drawable/ic_close"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/icon_tint" />
+                app:tint="?colorControlNormal" />
 
             <View
                 android:id="@+id/click_back"

@@ -81,7 +81,6 @@
             android:layout_height="100dp"
             android:layout_alignParentBottom="true"
             android:layout_gravity="center"
-            android:background="@color/white"
             android:gravity="center"
             android:orientation="horizontal"
             android:padding="20dp">

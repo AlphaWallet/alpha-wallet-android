@@ -21,7 +21,7 @@
             android:contentDescription="@string/action_close"
             android:padding="5dp"
             android:src="@drawable/ic_close"
-            app:tint="@color/icon_tint" />
+            app:tint="?colorControlNormal" />
 
         <TextView
             style="@style/Aw.Typography.SemiBold"

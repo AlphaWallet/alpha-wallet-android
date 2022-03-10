@@ -135,7 +135,7 @@
                 android:fontFamily="@font/font_semibold"
                 android:gravity="center"
                 android:paddingBottom="2dp"
-                android:textColor="@color/text_error_inverse"
+                android:textColor="?colorOnError"
                 android:textSize="12sp"
                 android:visibility="gone"
                 tools:text="1"

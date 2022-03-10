@@ -7,7 +7,7 @@
         android:icon="@drawable/ic_camera_scan"
         android:orderInCategory="1"
         android:title="@string/action_scan_dapp"
-        app:iconTint="@color/icon_tint"
+        app:iconTint="?colorControlNormal"
         app:showAsAction="always" />
 
     <item
@@ -15,6 +15,6 @@
         android:icon="@drawable/ic_menu"
         android:orderInCategory="20"
         android:title="@string/my_wallet_address"
-        app:iconTint="@color/icon_tint"
+        app:iconTint="?colorControlNormal"
         app:showAsAction="always" />
 </menu>

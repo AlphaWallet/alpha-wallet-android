@@ -286,7 +286,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         {
             case ERROR:
                 boxLayout.setBackgroundResource(R.drawable.background_input_error);
-                labelText.setTextColor(context.getColor(R.color.text_error));
+                labelText.setTextColor(context.getColor(R.color.error));
                 break;
             case UNSELECTED:
                 boxLayout.setBackgroundResource(R.drawable.background_password_entry);

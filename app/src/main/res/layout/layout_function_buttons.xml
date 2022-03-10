@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="DEBUG"
-            android:textColor="@color/text_error"
+            android:textColor="?colorError"
             android:textSize="10sp"
             android:visibility="gone"
             tools:ignore="HardcodedText,SmallSp"
@@ -66,7 +66,6 @@
                 android:layout_height="30dp"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="@dimen/tiny_8"
-                android:indeterminateTint="@color/icon_tint_inverse"
                 android:translationZ="20dp"
                 android:visibility="gone"
                 tools:visibility="visible" />

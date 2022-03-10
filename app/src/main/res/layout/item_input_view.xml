@@ -59,7 +59,7 @@
         android:layout_alignTop="@id/box_layout"
         android:layout_marginStart="@dimen/comfy_28"
         android:layout_marginTop="-9dp"
-        android:background="@color/surface"
+        android:background="?colorSurface"
         android:paddingLeft="@dimen/mini_4"
         android:paddingRight="@dimen/mini_4"
         android:visibility="visible"
@@ -102,7 +102,7 @@
         android:layout_marginStart="@dimen/standard_16"
         android:layout_marginTop="@dimen/mini_4"
         android:layout_toStartOf="@id/text_paste"
-        android:textColor="@color/text_error"
+        android:textColor="?colorError"
         android:visibility="gone"
         tools:text="That address already exists"
         tools:visibility="visible" />

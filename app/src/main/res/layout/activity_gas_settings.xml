@@ -98,7 +98,7 @@
                         android:lineHeight="34sp"
                         android:lineSpacingExtra="14sp"
                         android:text="@string/low_gas_setting"
-                        android:textColor="@color/text_error" />
+                        android:textColor="?colorError" />
                 </LinearLayout>
 
                 <TextView
@@ -153,7 +153,7 @@
                         android:lineHeight="34sp"
                         android:lineSpacingExtra="14sp"
                         android:text="@string/insufficient_gas"
-                        android:textColor="@color/text_error" />
+                        android:textColor="?colorError" />
 
                 </LinearLayout>
 

@@ -45,7 +45,7 @@
             android:background="@color/transparent"
             android:padding="@dimen/mini_4"
             android:src="@drawable/ic_expand_more"
-            app:tint="@color/icon_tint" />
+            app:tint="?colorControlNormal" />
 
     </LinearLayout>
 

@@ -618,7 +618,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             gasWarning.setVisibility(View.VISIBLE);
 
             EditText gas_price_entry = findViewById(R.id.gas_price_entry);
-            gas_price_entry.setTextColor(getColor(R.color.text_error));
+            gas_price_entry.setTextColor(getColor(R.color.error));
             gas_price_entry.setBackground(ContextCompat.getDrawable(this, R.drawable.background_text_edit_error));
         }
     }

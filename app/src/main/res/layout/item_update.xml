@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/standard_16"
     android:elevation="0dp"
-    android:theme="@style/AppTheme.Overlay.Dark"
+    android:theme="@style/AppTheme.DarkOverlay"
     app:cardBackgroundColor="@color/mine"
     app:contentPadding="@dimen/standard_16"
     app:strokeWidth="0dp">

@@ -3,8 +3,11 @@
 
     <color name="brand">@color/dodge</color>
     <color name="brand_inverse">@color/white</color>
-    <color name="accent">@color/dodge</color>
+    <color name="accent">@color/brand</color>
     <color name="accent_inverse">@color/white</color>
+
+    <color name="error">@color/danger</color>
+    <color name="error_inverse">@color/white</color>
 
     <color name="background">@color/cod</color>
     <color name="background_inverse">@color/white</color>
@@ -22,27 +25,14 @@
     <color name="text_primary_inverse">@color/cod</color>
     <color name="text_secondary">@color/dusty</color>
     <color name="text_secondary_inverse">@color/cod</color>
-    <color name="text_error">@color/danger</color>
-    <color name="text_error_inverse">@color/white</color>
 
-    <!-- Number value indicators -->
-    <color name="positive">@color/green</color>
-    <color name="negative">@color/danger</color>
 
     <!-- Components -->
-    <!-- Main buttons -->
+    <!-- Buttons -->
     <color name="button_primary">@color/white</color>
     <color name="button_secondary">@color/transparent</color>
-
-    <!-- TextIcon button -->
     <color name="button_texticon">@color/mine</color>
-
-    <!-- Suggestion button -->
     <color name="button_suggestion">@color/venus</color>
-
-    <!-- Icons, toolbar icons -->
-    <color name="icon_tint">@color/white</color>
-    <color name="icon_tint_inverse">@color/cod</color>
 
     <!-- Warning dialog -->
     <color name="warning_background">@color/mine</color>

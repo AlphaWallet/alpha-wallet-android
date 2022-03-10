@@ -12,7 +12,7 @@
         android:layout_centerInParent="true"
         android:layout_marginStart="@dimen/giant_40"
         android:layout_marginEnd="@dimen/giant_40"
-        app:cardBackgroundColor="@color/surface_secondary"
+        app:cardBackgroundColor="?colorBackgroundFloating"
         app:cardCornerRadius="@dimen/dialog_corner_radius"
         app:cardElevation="0dp">
 
@@ -60,6 +60,6 @@
         android:layout_marginEnd="@dimen/small_12"
         android:rotation="180"
         android:src="@drawable/showcase_dialog_tail"
-        app:tint="@color/surface_secondary" />
+        app:tint="?colorBackgroundFloating" />
 
 </RelativeLayout>

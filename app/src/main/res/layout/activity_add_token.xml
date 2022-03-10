@@ -50,7 +50,7 @@
             android:layout_height="36dp"
             android:background="@drawable/blue_circle"
             android:gravity="center"
-            android:textColor="@color/white"
+            android:textColor="?colorOnPrimary"
             tools:text="1" />
 
     </LinearLayout>

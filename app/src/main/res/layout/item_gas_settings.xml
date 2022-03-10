@@ -45,7 +45,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/insufficient_gas"
-                android:textColor="@color/text_error" />
+                android:textColor="?colorError" />
 
         </LinearLayout>
 
@@ -71,7 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/speed_too_low"
-                android:textColor="@color/text_error" />
+                android:textColor="?colorError" />
 
         </LinearLayout>
 

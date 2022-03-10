@@ -60,29 +60,27 @@
 
             <TextView
                 android:id="@+id/balance"
+                style="@style/Aw.Typography.Caption"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/mini_4"
                 android:clickable="false"
                 android:focusable="false"
-                android:fontFamily="@font/font_regular"
                 android:gravity="center_vertical"
-                android:text="0.0"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp15" />
+                android:text="0.0" />
 
             <TextView
                 android:id="@+id/symbol"
+                style="@style/Aw.Typography.Caption"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="false"
                 android:focusable="false"
-                android:fontFamily="@font/font_regular"
                 android:gravity="center_vertical"
-                android:text="@string/eth"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp15" />
+                android:text="@string/eth" />
 
         </LinearLayout>
+
     </FrameLayout>
+
 </RelativeLayout>

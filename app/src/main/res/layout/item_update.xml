@@ -1,50 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_update"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/standard_16"
-    android:animateLayoutChanges="true"
-    android:background="@color/text_primary"
-    android:gravity="start"
-    android:orientation="vertical"
-    android:padding="@dimen/standard_16">
-
-    <TextView
-        android:id="@+id/text_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/small_12"
-        android:fontFamily="@font/font_regular"
-        android:text="@string/new_version_title"
-        android:textColor="@color/text_primary_inverse"
-        android:textSize="@dimen/sp20" />
+    android:elevation="0dp"
+    android:theme="@style/AppTheme.Overlay.Dark"
+    app:cardBackgroundColor="@color/mine"
+    app:contentPadding="@dimen/standard_16"
+    app:strokeWidth="0dp">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:animateLayoutChanges="true"
+        android:gravity="start"
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/text_detail_current"
+            android:id="@+id/text_title"
+            style="@style/Aw.Typography.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary_inverse"
-            android:textSize="@dimen/sp15"
-            tools:text="Installed: 123" />
+            android:layout_marginBottom="@dimen/small_12"
+            android:text="@string/new_version_title" />
 
-        <TextView
-            android:id="@+id/text_detail_available"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/small_12"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary_inverse"
-            android:textSize="@dimen/sp15"
-            tools:text="Available: 130" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/text_detail_current"
+                style="@style/Aw.Typography.Sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Installed: 123" />
+
+            <TextView
+                android:id="@+id/text_detail_available"
+                style="@style/Aw.Typography.Sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/small_12"
+                tools:text="Available: 130" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

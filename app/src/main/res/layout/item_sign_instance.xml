@@ -20,9 +20,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/standard_16"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="Dec 20 2020" />
 
         <TextView
@@ -31,21 +28,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:ellipsize="end"
-            android:fontFamily="@font/font_regular"
             android:gravity="end"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="Message" />
 
     </LinearLayout>
 
     <TextView
         android:id="@+id/details"
+        style="@style/Aw.Typography.Caption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/font_regular"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp15"
         tools:text="Details" />
 
 </LinearLayout>

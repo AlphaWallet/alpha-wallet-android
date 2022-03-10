@@ -16,24 +16,20 @@
         android:orientation="horizontal">
 
         <TextView
+            style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:fontFamily="@font/font_regular"
             android:gravity="start"
-            android:text="@string/amount"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15" />
+            android:text="@string/amount" />
 
         <TextView
             android:id="@+id/text_amount"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/small_12"
             android:layout_weight="3.5"
-            android:fontFamily="@font/font_regular"
             android:gravity="start"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="1.234 ETH ≈ 500.23 USD" />
 
         <androidx.recyclerview.widget.RecyclerView

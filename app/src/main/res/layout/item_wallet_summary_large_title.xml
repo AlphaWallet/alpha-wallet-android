@@ -16,26 +16,23 @@
             android:orientation="horizontal">
 
             <TextView
+                style="@style/Aw.Typography.Title.XLarge.Bold"
                 android:id="@+id/summary_balance"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:layout_weight="1"
-                android:fontFamily="@font/font_bold"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp36"
                 tools:text="$27,890.23" />
 
         </LinearLayout>
 
         <TextView
+            style="@style/Aw.Typography.Title"
             android:id="@+id/summary_change"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:fontFamily="@font/font_regular"
             android:textColor="@color/positive"
-            android:textSize="@dimen/sp20"
             tools:text="+2.53% ($405.12) Today" />
     </LinearLayout>
 

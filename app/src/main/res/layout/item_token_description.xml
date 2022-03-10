@@ -18,20 +18,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/tiny_8"
-            android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp24"
             tools:text="5" />
 
         <TextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp24"
             tools:text="FIFA 2018 Final" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -41,22 +36,19 @@
 
         <TextView
             android:id="@+id/textViewIssuerPlaceholderTokenDescription"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:text="@string/issuer"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15" />
+            android:layout_marginEnd="@dimen/mini_4"
+            android:text="@string/issuer" />
 
         <TextView
             android:id="@+id/textViewIssuer"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/tiny_8"
-            android:fontFamily="@font/font_semibold"
-            android:text=""
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15" />
+            android:text="" />
 
     </LinearLayout>
 

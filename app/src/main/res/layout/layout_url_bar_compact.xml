@@ -62,9 +62,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_secondary"
-            android:textSize="0sp"
             android:visibility="gone" />
 
     </RelativeLayout>
@@ -80,19 +77,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/mini_4"
-            android:fontFamily="@font/font_regular"
-            android:text="0.0"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp16" />
+            android:text="0.0" />
 
         <TextView
             android:id="@+id/symbol"
+            style="@style/Aw.Typography.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
-            android:text="@string/eth"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp16" />
+            android:text="@string/eth" />
 
     </LinearLayout>
 </com.google.android.material.appbar.MaterialToolbar>

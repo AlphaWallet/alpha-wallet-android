@@ -66,7 +66,7 @@
     <color name="seed_word">@color/mine</color>
     <color name="seed_word_selected">@color/venus</color>
     <color name="seed_word_stroke">@color/mike</color>
-    <color name="seed_word_text">@color/text_primary</color>
+    <color name="seed_word_text">?android:textColorPrimary</color>
     <color name="seed_word_text_selected">@color/venus</color>
 
 </resources>

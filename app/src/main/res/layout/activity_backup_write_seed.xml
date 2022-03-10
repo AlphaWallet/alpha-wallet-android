@@ -9,17 +9,15 @@
 
     <TextView
         android:id="@+id/text_title"
+        style="@style/Aw.Typography.Headline"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
-        android:fontFamily="@font/font_regular"
         android:gravity="center_horizontal"
         android:paddingStart="@dimen/cozy_20"
         android:paddingEnd="@dimen/cozy_20"
         android:text="@string/write_down_seed_phrase"
-        android:textAlignment="center"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp28" />
+        android:textAlignment="center" />
 
     <com.google.android.flexbox.FlexboxLayout
         android:id="@+id/layout_word_holder"

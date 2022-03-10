@@ -53,38 +53,35 @@
 
                     <TextView
                         android:id="@+id/id"
+                        style="@style/Aw.Typography.Sub"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="@dimen/small_12"
+                        android:layout_marginEnd="@dimen/small_12"
                         android:drawableLeft="@drawable/ic_token_id"
                         android:drawablePadding="5dp"
-                        android:fontFamily="@font/font_semibold"
                         android:gravity="center_vertical"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/sp13" />
+                        custom:text="1234" />
 
                     <TextView
                         android:id="@+id/generation"
+                        style="@style/Aw.Typography.Sub"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="@dimen/small_12"
+                        android:layout_marginEnd="@dimen/small_12"
                         android:drawableLeft="@drawable/ic_generation"
-                        android:drawablePadding="5dp"
-                        android:fontFamily="@font/font_semibold"
+                        android:drawablePadding="@dimen/mini_4"
                         android:gravity="center_vertical"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/sp13" />
+                        custom:text="1" />
 
                     <TextView
                         android:id="@+id/cooldown"
+                        style="@style/Aw.Typography.Sub"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:drawableLeft="@drawable/ic_cooldown"
-                        android:drawablePadding="5dp"
-                        android:fontFamily="@font/font_semibold"
+                        android:drawablePadding="@dimen/mini_4"
                         android:gravity="center_vertical"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/sp13" />
+                        custom:text="10" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -98,21 +95,17 @@
 
                     <TextView
                         android:id="@+id/name"
+                        style="@style/Aw.Typography.Title.SemiBold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/small_12"
-                        android:fontFamily="@font/font_bold"
-                        android:textColor="@color/text_primary"
-                        android:textSize="@dimen/sp17"
                         custom:text="Name" />
 
                     <TextView
                         android:id="@+id/description"
+                        style="@style/Aw.Typography.Sub"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_regular"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/sp15"
                         custom:text="Description" />
 
                 </LinearLayout>
@@ -125,17 +118,15 @@
 
                 <TextView
                     android:id="@+id/open_external"
+                    style="@style/Aw.Typography.SemiBold"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/attributes"
                     android:layout_marginTop="@dimen/cozy_20"
                     android:drawablePadding="@dimen/mini_4"
-                    android:fontFamily="@font/font_semibold"
                     android:gravity="center_vertical"
                     android:paddingLeft="@dimen/standard_16"
                     android:paddingRight="@dimen/standard_16"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="@dimen/sp17"
                     app:drawableRightCompat="@drawable/ic_forward"
                     custom:text="Open Link" />
 

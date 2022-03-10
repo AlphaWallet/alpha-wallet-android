@@ -51,15 +51,12 @@
                     android:orientation="vertical">
 
                     <TextView
+                        style="@style/Aw.Typography.Label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="@dimen/mini_4"
-                        android:fontFamily="@font/font_regular"
-                        android:text="@string/quantity_of_tickets"
-                        android:textAllCaps="true"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/sp12" />
+                        android:text="@string/quantity_of_tickets" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -83,20 +80,17 @@
                                 android:src="@drawable/ic_add_plus" />
                         </RelativeLayout>
 
-
                         <TextView
                             android:id="@+id/text_quantity"
+                            style="@style/Aw.Typography.Title.SemiBold"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_marginLeft="@dimen/cozy_20"
                             android:layout_marginRight="@dimen/cozy_20"
-                            android:fontFamily="@font/font_semibold"
                             android:gravity="center"
                             android:padding="@dimen/tiny_8"
-                            android:text="1"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/sp20" />
+                            android:text="1" />
 
                         <RelativeLayout
                             android:id="@+id/layout_quantity_minus"
@@ -165,11 +159,8 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="@font/font_regular"
                                 android:gravity="center"
-                                android:text="@string/generate_pick_up_link"
-                                android:textColor="@color/text_primary"
-                                android:textSize="@dimen/sp17" />
+                                android:text="@string/generate_pick_up_link" />
 
                         </LinearLayout>
 
@@ -195,11 +186,8 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="@font/font_regular"
                                 android:gravity="center"
-                                android:text="@string/transfer_now"
-                                android:textColor="@color/text_primary"
-                                android:textSize="@dimen/sp17" />
+                                android:text="@string/transfer_now" />
 
                         </LinearLayout>
 
@@ -227,15 +215,12 @@
                             android:orientation="vertical">
 
                             <TextView
+                                style="@style/Aw.Typography.Label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_horizontal"
                                 android:layout_marginBottom="@dimen/mini_4"
-                                android:fontFamily="@font/font_regular"
-                                android:text="@string/link_expiry_date"
-                                android:textAllCaps="true"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="@dimen/sp12" />
+                                android:text="@string/link_expiry_date" />
 
                             <RelativeLayout
                                 android:layout_width="match_parent"
@@ -243,6 +228,7 @@
 
                                 <EditText
                                     android:id="@+id/edit_expiry_date"
+                                    style="@style/Aw.Typography.Title.SemiBold"
                                     android:layout_width="match_parent"
                                     android:layout_height="47dp"
                                     android:layout_alignParentLeft="true"
@@ -250,14 +236,10 @@
                                     android:background="@drawable/background_quantity"
                                     android:digits="1234567890a"
                                     android:focusable="false"
-                                    android:fontFamily="@font/font_semibold"
                                     android:hint="DD/MM/YYYY"
                                     android:imeOptions="actionDone"
                                     android:inputType="datetime"
-                                    android:paddingStart="@dimen/standard_16"
-                                    android:textColor="@color/text_primary"
-                                    android:textColorHint="@color/text_secondary"
-                                    android:textSize="@dimen/sp17" />
+                                    android:paddingStart="@dimen/standard_16" />
 
                                 <ImageView
                                     android:layout_width="wrap_content"
@@ -270,15 +252,15 @@
 
                             <TextView
                                 android:id="@+id/error_date"
+                                style="@style/Aw.Typography.Small"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/mini_4"
-                                android:fontFamily="@font/font_regular"
                                 android:gravity="center"
                                 android:text="@string/error_date"
                                 android:textColor="@color/text_error"
-                                android:textSize="12sp"
-                                android:visibility="gone" />
+                                android:visibility="gone"
+                                tools:visibility="visible" />
                         </LinearLayout>
 
                         <View
@@ -292,15 +274,12 @@
                             android:orientation="vertical">
 
                             <TextView
+                                style="@style/Aw.Typography.Label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_horizontal"
                                 android:layout_marginBottom="@dimen/mini_4"
-                                android:fontFamily="@font/font_regular"
-                                android:text="@string/link_expiry_time"
-                                android:textAllCaps="true"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="@dimen/sp12" />
+                                android:text="@string/link_expiry_time" />
 
                             <RelativeLayout
                                 android:layout_width="match_parent"
@@ -308,6 +287,7 @@
 
                                 <EditText
                                     android:id="@+id/edit_expiry_time"
+                                    style="@style/Aw.Typography.Title.SemiBold"
                                     android:layout_width="match_parent"
                                     android:layout_height="47dp"
                                     android:layout_alignParentLeft="true"
@@ -315,14 +295,10 @@
                                     android:layout_centerVertical="true"
                                     android:background="@drawable/background_quantity"
                                     android:focusable="false"
-                                    android:fontFamily="@font/font_semibold"
                                     android:hint="@string/hint_time"
                                     android:imeOptions="actionDone"
                                     android:inputType="time"
-                                    android:paddingStart="@dimen/standard_16"
-                                    android:textColor="@color/text_primary"
-                                    android:textColorHint="@color/text_secondary"
-                                    android:textSize="@dimen/sp17" />
+                                    android:paddingStart="@dimen/standard_16" />
 
                                 <ImageView
                                     android:layout_width="wrap_content"
@@ -335,28 +311,29 @@
 
                             <TextView
                                 android:id="@+id/error_time"
+                                style="@style/Aw.Typography.Small"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:fontFamily="@font/font_regular"
+                                android:layout_marginTop="@dimen/mini_4"
                                 android:gravity="center"
                                 android:text="@string/error_time"
                                 android:textColor="@color/text_error"
-                                android:textSize="12sp"
-                                android:visibility="gone" />
+                                android:visibility="gone"
+                                tools:visibility="visible" />
+
                         </LinearLayout>
+
                     </LinearLayout>
 
                     <TextView
                         android:id="@+id/text_valid_until"
+                        style="@style/Aw.Typography.Caption"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginTop="@dimen/standard_16"
-                        android:fontFamily="@font/font_regular"
                         android:gravity="center"
-                        android:textColor="@color/text_primary"
-                        android:textSize="@dimen/sp15" />
+                        tools:text="Valid until" />
 
                     <include layout="@layout/item_universal_link_warning" />
 

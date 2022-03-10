@@ -17,16 +17,14 @@
             app:tint="@color/icon_tint" />
 
         <TextView
+            style="@style/Aw.Typography.Title.Large.Bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/close_action"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/standard_16"
             android:layout_marginBottom="@dimen/standard_16"
-            android:fontFamily="@font/font_bold"
-            android:text="@string/title_dialog_what_testnet"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp24" />
+            android:text="@string/title_dialog_what_testnet" />
 
     </RelativeLayout>
 
@@ -36,12 +34,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginBottom="@dimen/base_24"
-        android:fontFamily="@font/font_regular"
         android:gravity="center_vertical"
         android:lineSpacingExtra="@dimen/dp5"
-        android:text="@string/message_dialog_testnet"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp17" />
+        android:text="@string/message_dialog_testnet" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/enable_testnet_action"

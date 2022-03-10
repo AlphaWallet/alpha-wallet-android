@@ -31,21 +31,17 @@
 
         <TextView
             android:id="@+id/text_ticket_range"
+            style="@style/Aw.Typography.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/mini_4"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp20"
             tools:text="Range" />
 
         <TextView
+            style="@style/Aw.Typography.Error"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:text="@string/ticket_not_valid"
-            android:textColor="@color/text_error"
-            android:textSize="@dimen/sp17" />
+            android:text="@string/ticket_not_valid" />
     </LinearLayout>
 
 </LinearLayout>

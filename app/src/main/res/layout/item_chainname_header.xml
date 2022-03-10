@@ -1,25 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/chain_name"
+    <com.alphawallet.app.widget.StandardHeader
+        android:id="@+id/header_chain_name"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@color/header_background"
-        android:fontFamily="@font/font_semibold"
-        android:gravity="center_vertical"
-        android:paddingStart="@dimen/standard_16"
-        android:paddingEnd="@dimen/standard_16"
-        android:textAllCaps="true"
-        android:textColor="@color/text_secondary"
-        android:textSize="@dimen/sp15"
-        tools:text="Ethereum Mainnet" />
-
-    <View style="@style/Aw.Component.Separator" />
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
 

@@ -44,13 +44,11 @@
 
                 <TextView
                     android:id="@+id/backup_text"
+                    style="@style/Aw.Typography.Sub"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/standard_16"
-                    android:fontFamily="@font/font_regular"
-                    android:text="@string/seed_phrase_loss_warning"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="@dimen/sp15" />
+                    android:text="@string/seed_phrase_loss_warning" />
 
             </LinearLayout>
 
@@ -65,13 +63,11 @@
                 app:settingType="default" />
 
             <TextView
+                style="@style/Aw.Typography.Sub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/standard_16"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/delete_lose_funds_warning"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/sp15" />
+                android:text="@string/delete_lose_funds_warning" />
 
             <View
                 style="@style/Aw.Component.Separator"

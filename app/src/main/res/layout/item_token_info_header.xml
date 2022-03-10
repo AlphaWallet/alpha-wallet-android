@@ -25,21 +25,17 @@
 
         <TextView
             android:id="@+id/token_amount"
+            style="@style/Aw.Typography.Title.XLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/small_12"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp36"
             tools:text="0" />
 
         <TextView
             android:id="@+id/token_symbol"
+            style="@style/Aw.Typography.Title.XLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp36"
             tools:text="ETH" />
     </LinearLayout>
 
@@ -54,28 +50,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/mini_4"
-            android:fontFamily="@font/font_regular"
-            android:text="@string/label_market_price"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp17" />
+            android:text="@string/label_market_price" />
 
         <TextView
             android:id="@+id/market_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/mini_4"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="$0.00" />
 
         <TextView
             android:id="@+id/price_change"
+            style="@style/Aw.Typography.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
             android:textColor="@color/positive"
-            android:textSize="@dimen/sp17"
             tools:text="(+0.00%)" />
     </LinearLayout>
 

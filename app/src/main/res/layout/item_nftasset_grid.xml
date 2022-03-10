@@ -16,15 +16,13 @@
         android:src="@drawable/ic_token_eth" />
 
     <TextView
+        style="@style/Aw.Typography.Caption"
         android:id="@+id/count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/mini_4"
-        android:fontFamily="@font/font_semibold"
         android:singleLine="true"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp15"
         tools:text="x200" />
 
 </LinearLayout>

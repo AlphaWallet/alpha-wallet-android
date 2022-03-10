@@ -2,12 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="40dp"
-    android:layout_marginBottom="10dp"
+    android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingLeft="@dimen/standard_16"
-    android:paddingRight="@dimen/standard_16">
+    android:paddingHorizontal="@dimen/standard_16"
+    android:paddingVertical="@dimen/small_12">
 
     <ImageView
         android:id="@+id/icon"
@@ -18,7 +17,7 @@
     <LinearLayout
         android:id="@+id/url_layout"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/tiny_8"
         android:layout_toStartOf="@id/controls"
         android:layout_toEndOf="@+id/icon"
@@ -30,41 +29,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:fontFamily="@font/font_regular"
             android:lines="1"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15"
             tools:text="DApp" />
 
         <TextView
             android:id="@+id/url"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:fontFamily="@font/font_semibold"
             android:lines="1"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp12"
             tools:text="dapp.com" />
+
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/controls"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/remove"
+            style="@style/Aw.Typography.Control"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
             android:padding="@dimen/small_12"
-            android:text="@string/action_remove"
-            android:textColor="@color/text_error"
-            android:textSize="@dimen/sp15" />
+            android:text="@string/action_remove" />
 
     </LinearLayout>
 

@@ -17,19 +17,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp">
+            android:paddingHorizontal="@dimen/standard_16">
 
             <TextView
                 android:id="@+id/title"
+                style="@style/Aw.Typography.Title.SemiBold"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
-                android:fontFamily="@font/font_semibold"
                 android:gravity="center"
-                android:text="@string/edit_dapp"
-                android:textColor="@color/text_secondary"
-                android:textSize="20sp" />
+                android:text="@string/edit_dapp" />
 
             <ImageView
                 android:id="@+id/icon"
@@ -38,58 +35,44 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="15dp"
                 android:layout_marginBottom="15dp"
-                android:src="@drawable/ic_logo_vertical" />
+                android:src="@drawable/ic_launcher_foreground" />
 
             <TextView
+                style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/dapp_title"
-                android:textColor="@color/text_secondary"
-                android:textSize="16sp" />
+                android:layout_marginBottom="@dimen/mini_4"
+                android:text="@string/dapp_title" />
 
             <EditText
                 android:id="@+id/dapp_title"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
                 android:completionThreshold="1"
-                android:fontFamily="@font/font_regular"
                 android:imeOptions="actionDone"
                 android:inputType="text"
                 android:lines="1"
                 android:maxLines="1"
-                android:paddingStart="15dp"
-                android:paddingEnd="15dp"
-                android:textColor="@color/text_secondary"
-                android:textColorHint="@color/text_secondary"
-                android:textSize="16sp" />
+                android:paddingHorizontal="@dimen/standard_16" />
 
             <TextView
+                style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="5dp"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/dapp_address"
-                android:textColor="@color/text_secondary"
-                android:textSize="16sp" />
+                android:layout_marginTop="@dimen/cozy_20"
+                android:layout_marginBottom="@dimen/mini_4"
+                android:text="@string/dapp_address" />
 
             <EditText
                 android:id="@+id/dapp_url"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
                 android:completionThreshold="1"
-                android:fontFamily="@font/font_regular"
                 android:imeOptions="actionDone"
                 android:inputType="textUri"
                 android:lines="1"
                 android:maxLines="1"
-                android:paddingStart="15dp"
-                android:paddingEnd="15dp"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_secondary"
-                android:textSize="16sp" />
+                android:paddingHorizontal="@dimen/standard_16" />
         </LinearLayout>
 
         <LinearLayout

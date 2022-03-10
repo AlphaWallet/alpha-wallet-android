@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -99,7 +101,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
         setContentView(R.layout.activity_gas_settings);
         toolbar();
-        setTitle(R.string.set_speed_title);
+        setTitle(getString(R.string.set_speed_title));
 
         gasSliderView = findViewById(R.id.gasSliderView);
         recyclerView = findViewById(R.id.list);
@@ -307,7 +309,20 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             holder.speedName.setVisibility(View.VISIBLE);
             holder.warning.setVisibility(View.GONE);
 
+            holder.radio.setOnCheckedChangeListener((compoundButton, checked) ->
+            {
+                if (checked)
+                {
+                    holder.speedName.setTypeface(ResourcesCompat.getFont(getApplicationContext(), R.font.font_bold));
+                }
+                else
+                {
+                    holder.speedName.setTypeface(ResourcesCompat.getFont(getApplicationContext(), R.font.font_regular));
+                }
+            });
+
             holder.radio.setChecked(position == currentGasSpeedIndex);
+
             holder.itemLayout.setOnClickListener(v ->
             {
                 if (position == customIndex && currentGasSpeedIndex != customIndex)

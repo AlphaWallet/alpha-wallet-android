@@ -26,22 +26,18 @@
 
         <TextView
             android:id="@+id/session_name"
+            style="@style/Aw.Typography.Title.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="Uniswap" />
 
         <TextView
             android:id="@+id/session_url"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp5"
-            android:fontFamily="@font/font_regular"
             android:text="@string/issuer"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp14"
             tools:text="https://app.uniswap.org" />
 
     </LinearLayout>

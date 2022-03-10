@@ -15,14 +15,12 @@
         android:orientation="horizontal">
 
         <TextView
+            style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:fontFamily="@font/font_regular"
             android:gravity="start"
-            android:text="@string/balance"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15" />
+            android:text="@string/balance" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/relativeLayout2"
@@ -48,23 +46,18 @@
                 android:id="@+id/text_balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
                 android:gravity="start"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp17"
                 custom:layout_constraintStart_toEndOf="@id/token_icon"
                 custom:layout_constraintTop_toTopOf="parent"
                 tools:text="35.4236 ETH" />
 
             <TextView
+                style="@style/Aw.Typography.Sub"
                 android:id="@+id/text_new_balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/mini_4"
-                android:fontFamily="@font/font_regular"
                 android:gravity="start"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/sp15"
                 custom:layout_constraintStart_toEndOf="@id/token_icon"
                 custom:layout_constraintTop_toBottomOf="@id/text_balance"
                 tools:text="(New: 31.1818 ETH)" />

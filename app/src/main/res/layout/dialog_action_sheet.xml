@@ -24,6 +24,7 @@
             app:tint="@color/icon_tint" />
 
         <TextView
+            style="@style/Aw.Typography.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -31,11 +32,8 @@
             android:layout_marginBottom="@dimen/dp8"
             android:layout_toStartOf="@id/logo"
             android:layout_toEndOf="@id/image_close"
-            android:fontFamily="@font/font_semibold"
             android:gravity="center_horizontal"
-            android:text="@string/confirm_transaction"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp20" />
+            android:text="@string/confirm_transaction" />
 
         <ImageView
             android:id="@+id/logo"

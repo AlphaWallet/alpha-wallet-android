@@ -15,16 +15,14 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_close"
-            app:tint="@color/text_primary" />
+            app:tint="@color/icon_tint" />
 
         <TextView
+            style="@style/Aw.Typography.Title.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:fontFamily="@font/font_semibold"
-            android:text="@string/title_dialog_add_account"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17" />
+            android:text="@string/title_dialog_add_account" />
 
     </RelativeLayout>
 

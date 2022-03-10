@@ -34,14 +34,14 @@
 
                 <TextView
                     android:id="@+id/text_count"
+                    style="@style/Aw.Typography.Title.SemiBold"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_centerInParent="true"
                     android:background="@drawable/value_amount_overlay"
                     android:backgroundTint="@color/brand"
-                    android:fontFamily="@font/font_bold"
                     android:gravity="center"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/brand_inverse"
                     android:visibility="gone"
                     tools:text="25"
                     tools:visibility="visible" />
@@ -71,19 +71,16 @@
                     android:ellipsize="end"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/sp18"
                     tools:text="Title" />
 
                 <TextView
                     android:id="@+id/subtitle"
+                    style="@style/Aw.Typography.Sub"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/title"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="@dimen/sp15"
                     android:visibility="gone"
                     tools:text="Subtitle"
                     tools:visibility="visible" />

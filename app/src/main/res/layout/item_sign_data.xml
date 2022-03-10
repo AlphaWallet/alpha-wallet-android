@@ -17,15 +17,13 @@
 
         <TextView
             android:id="@+id/text_message_title"
+            style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/small_12"
             android:layout_weight="0.8"
-            android:fontFamily="@font/font_regular"
             android:gravity="start"
-            android:text="@string/message_to_sign"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15" />
+            android:text="@string/message_to_sign" />
 
         <ScrollView
             android:id="@+id/scroll_view"
@@ -38,26 +36,22 @@
 
             <TextView
                 android:id="@+id/text_sign_data_max"
+                style="@style/Aw.Typography.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
                 android:gravity="start"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp15"
                 tools:text="Message:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337" />
 
         </ScrollView>
 
         <TextView
             android:id="@+id/text_sign_data"
+            style="@style/Aw.Typography.Caption"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3.1"
-            android:fontFamily="@font/font_regular"
             android:gravity="start"
             android:maxLines="4"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp15"
             android:visibility="visible"
             tools:text="Message:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337" />
 

@@ -71,14 +71,11 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:fontFamily="@font/font_semibold"
                     android:gravity="center_vertical"
                     android:paddingStart="@dimen/standard_16"
                     android:paddingEnd="@dimen/standard_16"
                     android:text="@string/this_is_testnet"
-                    android:textAllCaps="false"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="@dimen/sp17" />
+                    android:textAllCaps="false"/>
 
                 <com.google.android.material.checkbox.MaterialCheckBox
                     android:id="@+id/checkbox_testnet"

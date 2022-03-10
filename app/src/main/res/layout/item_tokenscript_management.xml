@@ -23,9 +23,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:fontFamily="@font/font_regular"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp17"
                 tools:text="Setting Title" />
 
             <TextView
@@ -36,9 +33,6 @@
                 android:layout_centerVertical="true"
                 android:layout_marginStart="@dimen/small_12"
                 android:layout_toEndOf="@id/token_definition_name"
-                android:fontFamily="@font/font_regular"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp17"
                 tools:text="Token Name" />
 
             <ImageView
@@ -55,14 +49,12 @@
 
         <TextView
             android:id="@+id/token_file"
+            style="@style/Aw.Typography.Caption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:fontFamily="@font/font_regular"
             android:maxLines="1"
             android:paddingVertical="@dimen/tiny_8"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp15"
             tools:text="Setting Title" />
 
         <RelativeLayout
@@ -71,17 +63,15 @@
 
             <TextView
                 android:id="@+id/token_address"
+                style="@style/Aw.Typography.Small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:ellipsize="end"
-                android:fontFamily="@font/font_regular"
                 android:lines="1"
                 android:maxLines="1"
                 android:paddingVertical="@dimen/tiny_8"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp12"
                 tools:text="Setting Subtitle" />
 
             <com.alphawallet.app.widget.ChainName

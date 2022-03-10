@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/standard_16"
         android:numStars="5"
-        android:progressBackgroundTint="@color/text_secondary"
+        android:progressBackgroundTint="?android:textColorSecondary"
         android:progressTint="@color/brand"
         android:stepSize="1"
         app:layout_constraintBottom_toBottomOf="parent"

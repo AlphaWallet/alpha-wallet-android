@@ -71,8 +71,6 @@
                 android:imeOptions="flagNoExtractUi|actionSearch"
                 android:inputType="text"
                 android:maxLines="1"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_secondary"
                 app:layout_constraintEnd_toStartOf="@id/st_clear"
                 app:layout_constraintStart_toEndOf="@id/st_backArrow" />
 

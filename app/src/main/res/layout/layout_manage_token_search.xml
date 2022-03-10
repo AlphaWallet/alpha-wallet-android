@@ -21,7 +21,7 @@
             android:layout_height="@dimen/base_24"
             android:layout_marginStart="@dimen/small_12"
             android:src="@drawable/ic_search_small"
-            app:tint="@color/text_secondary" />
+            app:tint="?android:textColorSecondary" />
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/edit_search"
@@ -36,10 +36,7 @@
             android:imeOptions="actionSearch"
             android:inputType="textFilter"
             android:maxLength="20"
-            android:maxLines="1"
-            android:textColor="@color/text_secondary"
-            android:textColorHint="@color/text_secondary"
-            android:textSize="@dimen/sp17" />
+            android:maxLines="1" />
 
     </LinearLayout>
 
@@ -51,4 +48,5 @@
         android:layout_marginStart="@dimen/tiny_8"
         android:layout_marginEnd="@dimen/tiny_8"
         android:background="@color/transparent" />
+
 </FrameLayout>

@@ -6,17 +6,16 @@
 
     <TextView
         android:id="@+id/title"
+        style="@style/Aw.Typography.Title.Large.Bold"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/standard_16"
         android:layout_marginTop="@dimen/standard_16"
         android:layout_marginEnd="@dimen/standard_16"
         android:layout_marginBottom="@dimen/tiny_8"
-        android:fontFamily="@font/font_bold"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp24"
         tools:text="Header Title" />
 
-    <View style="@style/Aw.Component.Separator"
+    <View
+        style="@style/Aw.Component.Separator"
         android:layout_gravity="bottom" />
 </FrameLayout>

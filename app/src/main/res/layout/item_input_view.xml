@@ -29,7 +29,6 @@
             android:layout_alignParentStart="true"
             android:layout_toStartOf="@id/img_scan_qr"
             android:background="@color/transparent"
-            android:fontFamily="@font/font_regular"
             android:inputType="text"
             android:lines="1"
             android:maxLines="1"
@@ -37,9 +36,6 @@
             android:paddingTop="@dimen/small_12"
             android:paddingEnd="@dimen/tiny_8"
             android:paddingBottom="@dimen/small_12"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_secondary"
-            android:textSize="@dimen/sp17"
             tools:hint="Hint" />
 
         <ImageButton
@@ -57,36 +53,33 @@
 
     <TextView
         android:id="@+id/label"
+        style="@style/Aw.Typography.Label.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/box_layout"
         android:layout_marginStart="@dimen/comfy_28"
         android:layout_marginTop="-9dp"
         android:background="@color/surface"
-        android:fontFamily="@font/font_semibold"
         android:paddingLeft="@dimen/mini_4"
         android:paddingRight="@dimen/mini_4"
-        android:textColor="@color/text_secondary"
-        android:textSize="@dimen/sp13"
         android:visibility="visible"
         tools:text="Token Name" />
 
     <TextView
         android:id="@+id/text_paste"
+        style="@style/Aw.Typography.Control"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/box_layout"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="@dimen/small_12"
-        android:fontFamily="@font/font_semibold"
         android:padding="@dimen/mini_4"
         android:text="@string/paste"
-        android:textColor="@color/control_activated"
-        android:textSize="@dimen/sp17"
         android:visibility="visible" />
 
     <TextView
         android:id="@+id/status_text"
+        style="@style/Aw.Typography.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/box_layout"
@@ -94,15 +87,14 @@
         android:layout_marginStart="@dimen/standard_16"
         android:layout_marginTop="@dimen/mini_4"
         android:layout_toStartOf="@id/text_paste"
-        android:fontFamily="@font/font_regular"
         android:textColor="@color/positive"
-        android:textSize="@dimen/sp12"
         android:visibility="gone"
         tools:text="Awesome Tokens"
         tools:visibility="visible" />
 
     <TextView
         android:id="@+id/error_text"
+        style="@style/Aw.Typography.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/box_layout"
@@ -110,9 +102,7 @@
         android:layout_marginStart="@dimen/standard_16"
         android:layout_marginTop="@dimen/mini_4"
         android:layout_toStartOf="@id/text_paste"
-        android:fontFamily="@font/font_regular"
         android:textColor="@color/text_error"
-        android:textSize="@dimen/sp12"
         android:visibility="gone"
         tools:text="That address already exists"
         tools:visibility="visible" />

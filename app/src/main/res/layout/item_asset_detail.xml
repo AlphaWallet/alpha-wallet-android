@@ -19,25 +19,21 @@
         android:orientation="horizontal">
 
         <TextView
+            style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/standard_16"
             android:layout_weight="1"
-            android:fontFamily="@font/font_regular"
             android:gravity="start"
-            android:text="@string/token_text"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15" />
+            android:text="@string/token_text" />
 
         <TextView
             android:id="@+id/text_asset_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/small_12"
             android:layout_weight="3.5"
-            android:fontFamily="@font/font_regular"
             android:gravity="start"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="Self Portrait (2021)" />
 
         <ImageView
@@ -79,22 +75,18 @@
 
         <TextView
             android:id="@+id/text_asset_name_details"
+            style="@style/Aw.Typography.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginTop="@dimen/small_12"
             android:layout_weight="3.5"
-            android:fontFamily="@font/font_semibold"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="Self Portrait (2021)" />
 
         <TextView
             android:id="@+id/text_asset_description"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15"
             tools:text="A narcissist drew herself." />
     </LinearLayout>
 </LinearLayout>

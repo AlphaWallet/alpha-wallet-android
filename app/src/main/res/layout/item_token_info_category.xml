@@ -10,14 +10,12 @@
 
     <TextView
         android:id="@+id/title"
+        style="@style/Aw.Typography.Title.Large.Bold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:ellipsize="end"
-        android:fontFamily="@font/font_bold"
         android:singleLine="true"
-        android:text="@string/token_info_portfolio"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp24" />
+        android:text="@string/token_info_portfolio" />
 
 </RelativeLayout>

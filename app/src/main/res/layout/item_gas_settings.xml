@@ -10,15 +10,15 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/cozy_20"
+        android:layout_marginHorizontal="@dimen/standard_16"
+        android:layout_marginTop="@dimen/standard_16"
         android:orientation="horizontal">
 
         <TextView
             style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/standard_16"
-            android:layout_weight="1.1"
+            android:layout_weight="1"
             android:gravity="start"
             android:lines="1"
             android:text="@string/speed_gas" />
@@ -27,7 +27,8 @@
             android:id="@+id/layout_gas_warning"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.1"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_weight="3"
             android:orientation="horizontal"
             android:visibility="gone"
             tools:visibility="gone">
@@ -40,11 +41,11 @@
 
             <TextView
                 android:id="@+id/text_warning"
-                style="@style/Aw.Typography.Body.Error"
+                style="@style/Aw.Typography.SemiBold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/insufficient_gas" />
+                android:text="@string/insufficient_gas"
+                android:textColor="@color/text_error" />
 
         </LinearLayout>
 
@@ -52,7 +53,8 @@
             android:id="@+id/layout_speed_warning"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.1"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_weight="3"
             android:orientation="horizontal"
             android:visibility="gone"
             tools:visibility="gone">
@@ -65,39 +67,34 @@
 
             <TextView
                 android:id="@+id/text_speed_warning"
-                style="@style/Aw.Typography.Body.Error"
+                style="@style/Aw.Typography.SemiBold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/speed_too_low" />
+                android:text="@string/speed_too_low"
+                android:textColor="@color/text_error" />
 
         </LinearLayout>
 
         <TextView
             android:id="@+id/text_speed"
+            style="@style/Aw.Typography.SemiBold"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/tiny_8"
-            android:layout_weight="3.1"
-            android:fontFamily="@font/font_semibold"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_weight="3"
             android:gravity="start"
-            android:text="@string/speed_average"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17" />
+            android:text="@string/speed_average" />
 
         <TextView
             android:id="@+id/edit_text"
+            style="@style/Aw.Typography.Control"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/small_12"
             android:layout_weight="0.6"
-            android:fontFamily="@font/font_semibold"
             android:gravity="center_horizontal"
             android:lines="1"
             android:orientation="horizontal"
             android:text="@string/edit"
-            android:textColor="@color/control_activated"
-            android:textSize="@dimen/sp17"
             android:visibility="visible" />
 
     </LinearLayout>
@@ -105,6 +102,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/standard_16"
         android:layout_marginBottom="@dimen/standard_16"
         android:orientation="horizontal">
 
@@ -118,11 +116,16 @@
             style="@style/Aw.Typography.Sub"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/standard_16"
+            android:layout_marginHorizontal="@dimen/small_12"
             android:layout_marginTop="@dimen/mini_4"
-            android:layout_weight="3.4"
+            android:layout_weight="3"
             android:gravity="start"
             tools:text="&lt; 0.003 ETH ($0.55 USD)≈2 minutes" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="0.6" />
 
     </LinearLayout>
 
@@ -130,7 +133,6 @@
         android:id="@+id/text_speedup_note"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/cozy_20"
         android:textAlignment="center"
         android:visibility="gone"
         tools:text="@string/text_speedup_note"

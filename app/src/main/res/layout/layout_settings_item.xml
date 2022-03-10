@@ -31,21 +31,16 @@
             android:id="@+id/setting_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="Setting Title" />
 
         <TextView
+            style="@style/Aw.Typography.Sub"
             android:id="@+id/setting_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="middle"
-            android:fontFamily="@font/font_regular"
             android:lines="1"
             android:maxLines="1"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15"
             android:visibility="gone"
             tools:text="Setting Subtitle"
             tools:visibility="visible" />

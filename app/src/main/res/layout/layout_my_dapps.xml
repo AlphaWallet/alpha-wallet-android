@@ -15,16 +15,14 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/giant_40"
             android:layout_marginBottom="@dimen/base_24"
-            android:src="@drawable/ic_logo_vertical" />
+            android:src="@drawable/ic_launcher_foreground" />
 
         <TextView
+            style="@style/Aw.Typography.Title.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:fontFamily="@font/font_regular"
-            android:text="@string/my_dapps"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp20" />
+            android:text="@string/my_dapps" />
 
         <TextView
             android:id="@+id/no_dapps"
@@ -32,13 +30,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/giant_40"
-            android:fontFamily="@font/font_regular"
             android:gravity="center"
             android:paddingLeft="@dimen/giant_40"
             android:paddingRight="@dimen/giant_40"
             android:text="@string/you_have_no_dapps_displayed_yet_start_by_surfing_the_browser"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             android:visibility="gone"
             tools:visibility="visible" />
 

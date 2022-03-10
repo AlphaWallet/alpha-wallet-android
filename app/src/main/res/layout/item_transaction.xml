@@ -33,44 +33,37 @@
                 android:id="@+id/type"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
                 android:maxLines="2"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp17"
                 tools:text="Received Chain" />
 
         </LinearLayout>
 
         <TextView
             android:id="@+id/value"
+            style="@style/Aw.Typography.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/value_layout"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:fontFamily="@font/font_semibold"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="+ 70,000,000,000.3455 ETH" />
 
         <TextView
             android:id="@+id/supplimental"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/address"
             android:layout_marginStart="@dimen/mini_4"
             android:layout_marginEnd="@dimen/mini_4"
             android:layout_toStartOf="@id/text_tx_time"
-            android:fontFamily="@font/font_regular"
             android:maxLines="1"
-            android:textAppearance="?attr/textAppearanceListItem"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15"
             android:visibility="visible"
             tools:text="+1.0 ETH" />
 
         <TextView
             android:id="@+id/address"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/value_layout"
@@ -78,23 +71,17 @@
             android:layout_marginTop="@dimen/mini_4"
             android:layout_toStartOf="@id/supplimental"
             android:ellipsize="end"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15"
             tools:text="0x123456778 ... 3434" />
 
         <TextView
             android:id="@+id/text_tx_time"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/address"
             android:layout_alignParentEnd="true"
             android:layout_gravity="center_vertical"
-            android:fontFamily="@font/font_regular"
             android:maxLines="1"
-            android:textAppearance="?attr/textAppearanceListItem"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15"
             android:visibility="visible"
             tools:text="11:53 pm" />
 

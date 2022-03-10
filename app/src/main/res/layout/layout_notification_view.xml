@@ -23,13 +23,11 @@
 
         <TextView
             android:id="@+id/title"
+            style="@style/Aw.Typography.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_marginBottom="@dimen/standard_16"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp24"
             tools:text="Notification Title" />
 
         <TextView
@@ -38,9 +36,6 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/title"
             android:layout_marginEnd="@dimen/base_24"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="This is a notification" />
 
         <LinearLayout

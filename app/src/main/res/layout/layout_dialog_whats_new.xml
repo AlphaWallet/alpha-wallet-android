@@ -17,14 +17,12 @@
         app:tint="@color/icon_tint" />
 
     <TextView
+        style="@style/Aw.Typography.Title.Large.Bold"
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="58dp"
-        android:fontFamily="@font/font_bold"
+        android:layout_marginTop="@dimen/double_comfy_56"
         android:text="@string/whats_new"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

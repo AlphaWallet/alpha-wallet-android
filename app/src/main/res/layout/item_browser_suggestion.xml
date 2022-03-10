@@ -20,23 +20,18 @@
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/icon"
         android:ellipsize="end"
-        android:fontFamily="@font/font_regular"
         android:lines="1"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp17"
         tools:text="State of the DApps" />
 
     <TextView
         android:id="@+id/description"
+        style="@style/Aw.Typography.Sub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/name"
         android:layout_toEndOf="@id/icon"
         android:ellipsize="end"
-        android:fontFamily="@font/font_regular"
         android:lines="1"
-        android:textColor="@color/text_secondary"
-        android:textSize="@dimen/sp15"
         tools:text="List of 2676 DApps" />
 
 </RelativeLayout>

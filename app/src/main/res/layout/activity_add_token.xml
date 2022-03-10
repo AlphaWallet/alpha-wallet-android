@@ -42,8 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/dp15"
-            android:text="@string/chains_to_scan"
-            android:textSize="@dimen/sp16" />
+            android:text="@string/chains_to_scan" />
 
         <TextView
             android:id="@+id/text_check_counter"
@@ -52,7 +51,6 @@
             android:background="@drawable/blue_circle"
             android:gravity="center"
             android:textColor="@color/white"
-            android:textSize="@dimen/sp18"
             tools:text="1" />
 
     </LinearLayout>

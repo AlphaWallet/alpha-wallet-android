@@ -7,27 +7,22 @@
 
     <TextView
         android:id="@+id/text_quantity_select"
+        style="@style/Aw.Typography.Title.SemiBold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="30dp"
-        android:fontFamily="@font/font_light"
         android:gravity="center"
-        android:text="@string/select_quantity_tickets"
-        android:textColor="@color/text_primary"
-        android:textSize="25sp" />
+        android:text="@string/select_quantity_tickets" />
 
     <TextView
+        style="@style/Aw.Typography.Sub"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="@dimen/mini_4"
-        android:fontFamily="@font/font_regular"
-        android:text="@string/quantity_of_tickets"
-        android:textAllCaps="true"
-        android:textColor="@color/text_secondary"
-        android:textSize="@dimen/sp12" />
+        android:text="@string/quantity_of_tickets" />
 
     <LinearLayout
         android:id="@+id/layout_ticket_quantity"
@@ -56,17 +51,15 @@
 
         <TextView
             android:id="@+id/text_quantity"
+            style="@style/Aw.Typography.Title.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:fontFamily="@font/font_semibold"
             android:gravity="center"
             android:padding="10dp"
-            android:text="1"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp20" />
+            android:text="1" />
 
         <RelativeLayout
             android:id="@+id/layout_quantity_minus"

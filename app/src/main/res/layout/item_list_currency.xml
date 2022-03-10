@@ -27,21 +27,17 @@
 
         <TextView
             android:id="@+id/code"
+            style="@style/Aw.Typography.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/standard_16"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp20"
             tools:text="AUD" />
 
         <TextView
             android:id="@+id/name"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15"
             tools:text="AUD" />
     </LinearLayout>
 

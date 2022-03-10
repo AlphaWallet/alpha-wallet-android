@@ -40,10 +40,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/standard_16"
                     android:layout_marginBottom="@dimen/tiny_8"
-                    android:fontFamily="@font/font_regular"
-                    android:text="Light"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/sp17" />
+                    android:text="Light" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/radio_theme_light"
@@ -70,10 +67,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/standard_16"
                     android:layout_marginBottom="@dimen/tiny_8"
-                    android:fontFamily="@font/font_regular"
-                    android:text="Dark"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/sp17" />
+                    android:text="Dark" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/radio_theme_dark"
@@ -100,10 +94,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/standard_16"
                     android:layout_marginBottom="@dimen/tiny_8"
-                    android:fontFamily="@font/font_regular"
-                    android:text="Auto"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/sp17" />
+                    android:text="Auto" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/radio_theme_auto"

@@ -3,30 +3,88 @@
 
     <style name="Aw.Typography" parent="TextAppearance.AppCompat">
         <item name="android:fontFamily">@font/font_regular</item>
+        <item name="android:textSize">@dimen/sp17</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:textColorHint">?android:textColorSecondary</item>
     </style>
 
-    <style name="Aw.Typography.Label">
-        <item name="android:textSize">@dimen/sp15</item>
-        <item name="android:textColor">@color/text_secondary</item>
+    <style name="Aw.Typography.SemiBold">
+        <item name="android:fontFamily">@font/font_semibold</item>
+    </style>
+
+    <style name="Aw.Typography.Headline">
+        <item name="android:textSize">@dimen/sp28</item>
+    </style>
+
+    <style name="Aw.Typography.Title">
+        <item name="android:textSize">@dimen/sp20</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+
+    <style name="Aw.Typography.Title.SemiBold">
+        <item name="fontFamily">@font/font_semibold</item>
+        <item name="android:textSize">@dimen/sp20</item>
+    </style>
+
+    <style name="Aw.Typography.Title.Large">
+        <item name="android:textSize">@dimen/sp24</item>
+    </style>
+
+    <style name="Aw.Typography.Title.Large.Bold">
+        <item name="fontFamily">@font/font_bold</item>
+    </style>
+
+    <style name="Aw.Typography.Title.XLarge">
+        <item name="android:textSize">@dimen/sp36</item>
+    </style>
+
+    <style name="Aw.Typography.Title.XLarge.Bold">
+        <item name="fontFamily">@font/font_bold</item>
     </style>
 
     <style name="Aw.Typography.Sub">
         <item name="android:textSize">@dimen/sp15</item>
-        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textColor">?android:textColorSecondary</item>
     </style>
 
-    <style name="Aw.Typography.Body">
-        <item name="android:textSize">@dimen/sp17</item>
-        <item name="android:textColor">@color/text_primary</item>
+    <style name="Aw.Typography.Sub.Small">
+        <item name="android:textSize">@dimen/sp13</item>
     </style>
 
-    <style name="Aw.Typography.Body.Error">
-        <item name="android:textColor">@color/text_error</item>
+    <style name="Aw.Typography.Caption">
+        <item name="android:textSize">@dimen/sp15</item>
     </style>
 
-    <style name="Aw.Typography.ToolbarTitle" parent="">
+    <style name="Aw.Typography.Caption.SemiBold">
         <item name="android:fontFamily">@font/font_semibold</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/sp15</item>
+    </style>
+
+    <style name="Aw.Typography.Label">
+        <item name="android:textSize">@dimen/sp15</item>
+        <item name="android:textColor">?android:textColorSecondary</item>
+    </style>
+
+    <style name="Aw.Typography.Label.Small">
+        <item name="fontFamily">@font/font_semibold</item>
+        <item name="android:textSize">@dimen/sp13</item>
+    </style>
+
+    <style name="Aw.Typography.Control">
+        <item name="android:textColor">?colorControlActivated</item>
+        <item name="android:fontFamily">@font/font_semibold</item>
+    </style>
+
+    <style name="Aw.Typography.Small">
+        <item name="android:textSize">@dimen/sp12</item>
+    </style>
+
+    <style name="Aw.Typography.Error">
+        <item name="android:textColor">?colorError</item>
+    </style>
+
+    <style name="Aw.Typography.Toolbar">
+        <item name="android:fontFamily">@font/font_semibold</item>
         <item name="android:textSize">@dimen/sp20</item>
         <item name="android:gravity">center</item>
         <item name="android:ellipsize">end</item>
@@ -50,7 +108,7 @@
         <item name="android:fontFamily">@font/font_semibold</item>
         <item name="android:lines">1</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textColor">?android:textColorSecondary</item>
         <item name="android:textSize">@dimen/sp15</item>
     </style>
 </resources>

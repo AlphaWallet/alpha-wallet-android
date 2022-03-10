@@ -26,24 +26,20 @@
             android:paddingEnd="@dimen/base_24">
 
             <TextView
+                style="@style/Aw.Typography.SemiBold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/cozy_20"
-                android:fontFamily="@font/font_semibold"
                 android:gravity="center_horizontal"
-                android:text="@string/title_back_up_your_wallet"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp17" />
+                android:text="@string/title_back_up_your_wallet" />
 
             <TextView
+                style="@style/Aw.Typography.Sub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/base_24"
-                android:fontFamily="@font/font_regular"
                 android:gravity="center_horizontal"
-                android:text="@string/nudge_user_to_backup_wallet"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/sp17" />
+                android:text="@string/nudge_user_to_backup_wallet" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_close"

@@ -17,17 +17,15 @@
 
         <TextView
             android:id="@+id/text_title"
+            style="@style/Aw.Typography.Headline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:fontFamily="@font/font_regular"
             android:gravity="center_horizontal"
             android:paddingStart="@dimen/base_24"
             android:paddingEnd="@dimen/base_24"
             android:text="@string/verify_seed_phrase"
-            android:textAlignment="center"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp28" />
+            android:textAlignment="center" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/container"
@@ -39,7 +37,7 @@
             android:layout_marginEnd="@dimen/standard_16"
             app:cardBackgroundColor="@color/transparent"
             app:cardElevation="0dp"
-            app:strokeColor="@color/text_secondary"
+            app:strokeColor="?android:textColorSecondary"
             app:strokeWidth="1dp">
 
             <TextView
@@ -49,13 +47,12 @@
                 android:layout_gravity="center_horizontal"
                 android:minHeight="110dp"
                 android:padding="@dimen/standard_16"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/sp17"
                 tools:text="Verify" />
+
         </com.google.android.material.card.MaterialCardView>
 
-
         <TextView
+            style="@style/Aw.Typography.Caption"
             android:id="@+id/text_invalid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -65,7 +62,6 @@
             android:padding="@dimen/tiny_8"
             android:text="@string/invalid_phrase"
             android:textColor="@color/text_error"
-            android:textSize="@dimen/sp15"
             android:visibility="invisible"
             tools:visibility="visible" />
 

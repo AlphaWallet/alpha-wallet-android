@@ -7,24 +7,20 @@
     android:padding="@dimen/standard_16">
 
     <TextView
+        style="@style/Aw.Typography.Title.XLarge.Bold"
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:fontFamily="@font/font_bold"
         android:text="@string/unknown_balance_without_symbol"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp36"
         tools:text="$1,000.00" />
 
     <TextView
+        style="@style/Aw.Typography.Title"
         android:id="@+id/subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:fontFamily="@font/font_regular"
         android:text="@string/unknown_balance_without_symbol"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp20"
         tools:text="+100.00 Today" />
 </LinearLayout>

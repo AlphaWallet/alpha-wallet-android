@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -16,13 +17,14 @@
 
     <TextView
         android:id="@+id/text_message"
+        style="@style/Aw.Typography.Title"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/cozy_20"
         android:gravity="center"
         android:paddingLeft="@dimen/base_24"
         android:paddingRight="@dimen/base_24"
         android:text="@string/show_qr_code_to_redemption_booth"
-        android:textColor="@color/text_primary"
         android:visibility="visible"
         app:autoSizeMaxTextSize="20sp"
         app:autoSizeMinTextSize="9sp"
@@ -34,10 +36,10 @@
 
     <TextView
         android:id="@+id/textAddIDs"
+        style="@style/Aw.Typography.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/add_ids_to_redeem"
-        android:textColor="@color/text_primary"
         android:visibility="gone"
         app:autoSizeMaxTextSize="20sp"
         app:autoSizeMinTextSize="12sp"
@@ -46,7 +48,8 @@
         app:layout_constraintBottom_toTopOf="@+id/advanced_options"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include" />
+        app:layout_constraintTop_toBottomOf="@+id/include"
+        tools:visibility="visible" />
 
     <ImageView
         android:id="@+id/qr_image"

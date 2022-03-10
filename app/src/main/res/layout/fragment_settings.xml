@@ -9,6 +9,8 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
+    <View style="@style/Aw.Component.Separator" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -77,21 +79,19 @@
                 android:paddingRight="@dimen/standard_16">
 
                 <TextView
+                    style="@style/Aw.Typography.Label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:text="@string/version"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="@dimen/sp15" />
+                    android:text="@string/version" />
 
                 <TextView
                     android:id="@+id/text_version"
+                    style="@style/Aw.Typography.Sub"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="@dimen/sp13" />
+                    android:layout_centerVertical="true" />
 
             </RelativeLayout>
 
@@ -106,13 +106,11 @@
                 android:paddingRight="@dimen/standard_16">
 
                 <TextView
+                    style="@style/Aw.Typography.Label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:fontFamily="@font/font_regular"
-                    android:text="@string/tokenscript_compatibility"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="@dimen/sp15" />
+                    android:text="@string/tokenscript_compatibility" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -121,22 +119,24 @@
                     android:layout_centerVertical="true">
 
                     <TextView
+                        style="@style/Aw.Typography.Sub"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/version"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/sp15" />
+                        android:text="@string/version" />
 
                     <TextView
                         android:id="@+id/text_tokenscript_compatibility"
+                        style="@style/Aw.Typography.Sub"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/tiny_8"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/sp13" />
+                        android:layout_marginStart="@dimen/tiny_8" />
 
                 </LinearLayout>
+
             </RelativeLayout>
+
         </LinearLayout>
+
     </ScrollView>
+
 </LinearLayout>

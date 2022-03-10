@@ -7,7 +7,7 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/toolbar_title"
-        style="@style/Aw.Typography.ToolbarTitle"
+        style="@style/Aw.Typography.Toolbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

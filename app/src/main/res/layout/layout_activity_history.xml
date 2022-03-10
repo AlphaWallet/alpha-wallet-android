@@ -32,10 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:fontFamily="@font/font_regular"
-            android:text="@string/no_transactions_yet"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17" />
+            android:text="@string/no_transactions_yet" />
     </LinearLayout>
 
     <ProgressBar

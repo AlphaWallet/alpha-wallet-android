@@ -25,10 +25,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/alerts_will_appear_here"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/sp17" />
+                android:text="@string/alerts_will_appear_here" />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView

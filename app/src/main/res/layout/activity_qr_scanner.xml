@@ -13,7 +13,7 @@
         android:id="@+id/scanner_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar"/>
+        android:layout_below="@id/toolbar" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -22,8 +22,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/double_large_64"
         android:text="@string/message_scan_camera"
-        android:textColor="@color/white"
-        android:textSize="@dimen/sp17" />
+        android:textColor="@color/white" />
 
     <LinearLayout
         android:layout_width="match_parent"

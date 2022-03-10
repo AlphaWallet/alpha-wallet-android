@@ -6,13 +6,11 @@
     android:orientation="horizontal">
 
     <TextView
+        style="@style/Aw.Typography.Title.Large.Bold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/font_semibold"
         android:gravity="center_vertical"
         android:padding="@dimen/standard_16"
-        android:text="@string/activity_label"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp24" />
+        android:text="@string/activity_label" />
 
 </LinearLayout>

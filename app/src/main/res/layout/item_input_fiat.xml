@@ -42,12 +42,10 @@
 
                 <TextView
                     android:id="@+id/symbol"
+                    style="@style/Aw.Typography.Title.XLarge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_regular"
                     android:textAllCaps="true"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/sp32"
                     tools:text="USD" />
 
                 <ImageView
@@ -64,11 +62,11 @@
 
             <com.alphawallet.app.ui.widget.entity.NumericInput
                 android:id="@+id/amount_entry"
+                style="@style/Aw.Typography.Title.XLarge"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/transparent"
                 android:completionThreshold="1"
-                android:fontFamily="@font/font_regular"
                 android:gravity="end"
                 android:hint="0"
                 android:imeOptions="actionDone"
@@ -76,10 +74,7 @@
                 android:lines="1"
                 android:maxLines="1"
                 android:paddingStart="@dimen/mini_4"
-                android:paddingEnd="@dimen/mini_4"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_secondary"
-                android:textSize="@dimen/sp36" />
+                android:paddingEnd="@dimen/mini_4" />
 
         </LinearLayout>
 
@@ -91,19 +86,17 @@
 
             <TextView
                 android:id="@+id/subtext_label"
+                style="@style/Aw.Typography.Sub.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/current_price"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/sp12" />
+                android:text="@string/current_price" />
 
             <TextView
                 android:id="@+id/subtext_value"
+                style="@style/Aw.Typography.Sub.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/mini_4"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/sp12"
                 tools:text="$4444.43" />
 
         </LinearLayout>

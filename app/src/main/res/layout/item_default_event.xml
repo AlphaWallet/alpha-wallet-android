@@ -25,21 +25,17 @@
 
         <TextView
             android:id="@+id/text_title"
+            style="@style/Aw.Typography.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp20"
             tools:text="Sent" />
 
         <TextView
             android:id="@+id/text_title_symbol"
+            style="@style/Aw.Typography.Title.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/mini_4"
-            android:fontFamily="@font/font_semibold"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp20"
             tools:text="awDAI" />
 
     </LinearLayout>
@@ -49,9 +45,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/standard_16"
-        android:fontFamily="@font/font_regular"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp17"
         tools:text="Sent 4.23 awDAI to 0x123456789abcdef1234567890123456789abcdef" />
 
     <TextView
@@ -61,9 +54,6 @@
         android:layout_gravity="center_vertical"
         android:layout_marginStart="@dimen/standard_16"
         android:layout_marginEnd="@dimen/standard_16"
-        android:fontFamily="@font/font_regular"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp16"
         android:visibility="gone"
         tools:text="+1.0 ETH"
         tools:visibility="visible" />

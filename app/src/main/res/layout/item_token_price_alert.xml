@@ -29,10 +29,7 @@
             android:layout_height="wrap_content"
             android:animateLayoutChanges="true"
             android:ellipsize="end"
-            android:fontFamily="@font/font_regular"
             android:singleLine="true"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="Above $17,500" />
     </LinearLayout>
 

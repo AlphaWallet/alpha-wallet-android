@@ -7,7 +7,6 @@
     </style>
 
     <style name="Aw.Component.ActionItem" parent="Widget.MaterialComponents.TextView">
-        <item name="android:fontFamily">@font/font_regular</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_gravity">center_vertical</item>
@@ -16,7 +15,7 @@
         <item name="android:paddingEnd">@dimen/cozy_20</item>
         <item name="android:paddingTop">@dimen/cozy_20</item>
         <item name="android:paddingBottom">@dimen/cozy_20</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
         <item name="android:textSize">@dimen/sp17</item>
     </style>
 
@@ -30,6 +29,7 @@
         <item name="android:statusBarColor">@color/transparent</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="bottomSheetStyle">@style/Aw.Component.BottomSheet</item>
+        <item name="colorControlActivated">@color/control_activated</item>
     </style>
 
     <style name="Aw.Component.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
@@ -53,17 +53,18 @@
         <item name="contentInsetRight">0dp</item>
         <item name="contentInsetStartWithNavigation">0dp</item>
         <item name="background">@color/surface</item>
-        <item name="navigationIconTint">@color/text_primary</item>
+<!--        <item name="navigationIconTint">@color/icon_tint</item>-->
+        <item name="navigationIconTint">?colorControlNormal</item>
     </style>
 
     <style name="Aw.Component.TabLayout" parent="Widget.Design.TabLayout">
-        <item name="tabIndicatorColor">@color/control_activated</item>
+        <item name="tabIndicatorColor">?colorControlActivated</item>
         <item name="tabIndicatorHeight">3dp</item>
         <item name="tabPaddingStart">25dp</item>
         <item name="tabPaddingEnd">25dp</item>
         <item name="tabTextAppearance">@style/Aw.Typography.Tab</item>
-        <item name="tabSelectedTextColor">@color/control_activated</item>
-        <item name="tabTextColor">@color/text_secondary</item>
+        <item name="tabSelectedTextColor">?colorControlActivated</item>
+        <item name="tabTextColor">?android:textColorSecondary</item>
         <item name="tabIndicatorFullWidth">true</item>
     </style>
 
@@ -129,35 +130,21 @@
     <style name="Aw.Component.Button.Primary">
         <item name="android:lines">1</item>
         <item name="android:backgroundTint">@color/button_primary</item>
-        <item name="android:textColor">@color/text_primary_inverse</item>
-    </style>
-
-    <style name="Aw.Component.Button.Primary.Dark">
-        <item name="android:lines">1</item>
-        <item name="android:backgroundTint">@color/surface</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">?android:textColorPrimaryInverse</item>
     </style>
 
     <style name="Aw.Component.Button.Secondary">
         <item name="android:lines">1</item>
         <item name="android:backgroundTint">@color/button_secondary</item>
-        <item name="strokeColor">@color/surface_inverse</item>
+        <item name="strokeColor">?android:textColorPrimary</item>
         <item name="strokeWidth">1dp</item>
-        <item name="android:textColor">@color/surface_inverse</item>
-    </style>
-
-    <style name="Aw.Component.Button.Secondary.Dark">
-        <item name="android:lines">1</item>
-        <item name="android:backgroundTint">@color/button_secondary</item>
-        <item name="strokeColor">@color/white</item>
-        <item name="strokeWidth">1dp</item>
-        <item name="android:textColor">@color/white</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
     </style>
 
     <style name="Aw.Component.Button.Icon" parent="Aw.Component.Button.Secondary">
         <item name="iconPadding">0dp</item>
         <item name="iconGravity">textEnd</item>
-        <item name="iconTint">@color/surface_inverse</item>
+        <item name="iconTint">?android:textColorPrimary</item>
     </style>
 
     <style name="Aw.Component.Button.TextIcon">
@@ -167,22 +154,19 @@
         <item name="android:textSize">@dimen/sp17</item>
         <item name="iconPadding">@dimen/cozy_20</item>
         <item name="iconGravity">textEnd</item>
-        <item name="iconTint">@color/control_activated</item>
+        <item name="iconTint">?colorControlActivated</item>
         <item name="android:layout_margin">@dimen/cozy_20</item>
         <item name="cornerRadius">5dp</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
         <item name="strokeWidth">0dp</item>
     </style>
 
-    <style name="Aw.Component.Button.Suggestion">
+    <style name="Aw.Component.Button.Suggestion" parent="Aw.Typography">
         <item name="android:lines">1</item>
         <item name="android:backgroundTint">@color/button_suggestion</item>
         <item name="android:padding">@dimen/small_12</item>
         <item name="android:minWidth">0dp</item>
-        <item name="android:fontFamily">@font/font_regular</item>
         <item name="android:minHeight">0dp</item>
-        <item name="android:textColor">@color/text_primary</item>
-        <item name="android:textSize">@dimen/sp17</item>
         <item name="strokeWidth">0dp</item>
     </style>
 
@@ -214,16 +198,17 @@
         <item name="android:gravity">center</item>
     </style>
 
-    <style name="Aw.Component.WhatsNewEntry" parent="Widget.MaterialComponents.TextView">
-        <item name="android:fontFamily">@font/font_regular</item>
-        <item name="android:textColor">@color/text_primary</item>
+    <style name="Aw.Component.WhatsNewEntry" parent="Aw.Component.TextView">
         <item name="android:paddingStart">@dimen/standard_16</item>
         <item name="android:paddingEnd">@dimen/standard_16</item>
         <item name="android:paddingBottom">@dimen/tiny_8</item>
-        <item name="android:textSize">@dimen/sp17</item>
         <item name="android:drawableStart">@drawable/ic_icons_system_border_circle</item>
         <item name="android:drawablePadding">@dimen/tiny_8</item>
         <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="Aw.Component.TextView" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textAppearance">@style/Aw.Typography</item>
     </style>
 
 </resources>

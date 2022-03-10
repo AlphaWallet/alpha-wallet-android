@@ -28,10 +28,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:fontFamily="@font/font_regular"
                 android:text=""
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp17"
                 android:visibility="visible"
                 tools:text="Network" />
 
@@ -45,14 +42,12 @@
 
             <TextView
                 android:id="@+id/textImport"
+                style="@style/Aw.Typography.Title.SemiBold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="@dimen/small_12"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/importing_tickets"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp20" />
+                android:text="@string/importing_tickets" />
 
             <LinearLayout
                 android:id="@+id/cost_layout"
@@ -68,54 +63,34 @@
 
                 <TextView
                     android:id="@+id/text_total_cost"
+                    style="@style/Aw.Typography.Label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="@string/total_cost_label"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/sp20" />
-
-                <View
-                    style="@style/Aw.Component.Separator"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp" />
+                    android:text="@string/total_cost_label" />
 
                 <TextView
                     android:id="@+id/textImportPrice"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="0.00 ETH"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/sp20" />
-
-                <View
-                    style="@style/Aw.Component.Separator"
-                    android:layout_marginTop="@dimen/tiny_8"
-                    android:layout_marginBottom="@dimen/tiny_8" />
+                    android:text="0.00 ETH" />
 
                 <TextView
                     android:id="@+id/fiat_price_txt"
+                    style="@style/Aw.Typography.Sub"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_regular"
+                    android:layout_marginTop="@dimen/standard_16"
                     android:gravity="center"
-                    android:text="@string/equivalent_in_usd"
-                    android:textAllCaps="true"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="@dimen/sp12" />
+                    android:text="@string/equivalent_in_usd" />
 
                 <TextView
                     android:id="@+id/textImportPriceUSD"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginTop="@dimen/tiny_8"
-                    android:paddingTop="@dimen/tiny_8"
-                    android:paddingBottom="@dimen/tiny_8"
-                    android:text="$0"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/sp20" />
+                    android:text="$0" />
 
             </LinearLayout>
 

@@ -17,7 +17,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/cozy_20"
-            android:textSize="@dimen/sp17"
             android:visibility="visible"
             custom:imeOptions="actionDone"
             custom:inputType="textNoSuggestions"
@@ -45,6 +44,7 @@
 
         <TextView
             android:id="@+id/text_non_english_hint"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/base_24"
@@ -52,9 +52,7 @@
             android:autoLink="web"
             android:gravity="center_horizontal"
             android:linksClickable="true"
-            android:text="@string/seed_phrase_conversion_message"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15" />
+            android:text="@string/seed_phrase_conversion_message" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/import_action"

@@ -49,26 +49,22 @@
 
                     <TextView
                         android:id="@+id/eth_data"
+                        style="@style/Aw.Typography.Title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/standard_16"
                         android:layout_weight="1"
                         android:ellipsize="end"
-                        android:fontFamily="@font/font_regular"
                         android:singleLine="true"
-                        android:textColor="@color/text_primary"
-                        android:textSize="@dimen/sp20"
                         tools:text="Ethereum" />
 
                     <TextView
                         android:id="@+id/balance_currency"
+                        style="@style/Aw.Typography.Title.SemiBold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:fontFamily="@font/font_semibold"
                         android:text="@string/unknown_balance_without_symbol"
-                        android:textColor="@color/text_primary"
-                        android:textSize="@dimen/sp20"
                         android:visibility="gone"
                         tools:text="$208.26"
                         tools:visibility="visible" />
@@ -93,34 +89,29 @@
 
                         <TextView
                             android:id="@+id/issuerPlaceholder"
+                            style="@style/Aw.Typography.Sub"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:fontFamily="@font/font_semibold"
+                            android:layout_marginEnd="@dimen/mini_4"
                             android:text="@string/issuer"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/sp15"
                             android:visibility="gone"
                             tools:visibility="visible" />
 
                         <TextView
                             android:id="@+id/issuer"
+                            style="@style/Aw.Typography.Sub"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/mini_4"
-                            android:fontFamily="@font/font_semibold"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/sp15"
                             android:visibility="gone" />
 
                         <TextView
                             android:id="@+id/balance_coin"
+                            style="@style/Aw.Typography.Sub"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
-                            android:fontFamily="@font/font_regular"
                             android:text="@string/unknown_balance_without_symbol"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="@dimen/sp15"
                             android:visibility="gone"
                             tools:text="0.01234 ETH"
                             tools:visibility="visible" />
@@ -138,13 +129,12 @@
 
                         <TextView
                             android:id="@+id/text_appreciation"
+                            style="@style/Aw.Typography.Sub"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_marginEnd="@dimen/tiny_8"
-                            android:fontFamily="@font/font_regular"
                             android:text="@string/unknown_balance_without_symbol"
-                            android:textSize="@dimen/sp15"
                             tools:text="$3.47" />
 
                         <LinearLayout
@@ -165,13 +155,12 @@
 
                             <TextView
                                 android:id="@+id/text_24_hrs"
+                                style="@style/Aw.Typography.Sub"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_horizontal"
                                 android:layout_marginEnd="2dp"
-                                android:fontFamily="@font/font_regular"
                                 android:text="@string/unknown_balance_without_symbol"
-                                android:textSize="@dimen/sp15"
                                 tools:text="1.659%" />
                         </LinearLayout>
 

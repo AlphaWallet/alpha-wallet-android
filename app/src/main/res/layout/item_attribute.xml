@@ -25,21 +25,17 @@
         android:orientation="vertical">
 
         <TextView
+            style="@style/Aw.Typography.SemiBold"
             android:id="@+id/value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp15"
             tools:text="Value" />
 
         <TextView
+            style="@style/Aw.Typography.Sub"
             android:id="@+id/trait"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15"
             tools:text="Attribute" />
 
     </LinearLayout>

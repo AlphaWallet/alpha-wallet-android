@@ -15,7 +15,16 @@
         <item name="android:colorBackground">@color/background</item>
         <item name="colorOnBackground">@color/background_inverse</item>
 
-        <item name="android:textViewStyle">@style/Aw.Typography.Body</item>
+        <item name="colorBackgroundFloating">@color/surface_secondary</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textColorSecondaryInverse">@color/text_secondary_inverse</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_secondary</item>
+        <item name="android:textColorHintInverse">@color/text_secondary_inverse</item>
+
+        <item name="android:textViewStyle">@style/Aw.Typography</item>
         <item name="toolbarStyle">@style/Aw.Component.Toolbar</item>
         <item name="appBarLayoutStyle">@style/Aw.Component.AppBarLayout</item>
         <item name="recyclerViewStyle">@style/Aw.Component.RecyclerView</item>
@@ -37,5 +46,12 @@
 
     <style name="AppTheme.NoActionBar.Splash">
         <item name="android:windowBackground">@drawable/background_splash</item>
+    </style>
+
+    <style name="AppTheme.Overlay.Dark" parent="">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorPrimaryInverse">@color/black</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="android:textColorSecondaryInverse">@color/dove</item>
     </style>
 </resources>

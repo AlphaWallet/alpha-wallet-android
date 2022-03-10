@@ -14,15 +14,13 @@
 
         <TextView
             android:id="@+id/label"
+            style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="start|center_vertical"
             android:layout_weight="0.4"
             android:ellipsize="end"
-            android:fontFamily="@font/font_regular"
             android:singleLine="true"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp15"
             tools:text="Balance" />
 
         <TextView
@@ -31,11 +29,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
             android:ellipsize="end"
-            android:fontFamily="@font/font_regular"
             android:gravity="end|center_vertical"
             android:singleLine="true"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="0.00" />
 
         <TextView
@@ -44,11 +39,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
             android:ellipsize="end"
-            android:fontFamily="@font/font_regular"
             android:gravity="end|center_vertical"
             android:maxLines="2"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp16"
             android:visibility="gone"
             tools:text="The smallest of the seven inhabited Aeolian Islands"
             tools:visibility="visible" />

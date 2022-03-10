@@ -74,14 +74,10 @@
                     android:dropDownAnchor="@id/anchor"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
-                    android:fontFamily="@font/font_regular"
                     android:hint="@string/search_or_type_web_address"
                     android:imeOptions="actionGo"
                     android:inputType="textUri"
-                    android:padding="@dimen/tiny_8"
-                    android:textColor="@color/text_primary"
-                    android:textColorHint="@color/text_secondary"
-                    android:textSize="@dimen/sp17" />
+                    android:padding="@dimen/tiny_8" />
 
                 <ImageView
                     android:id="@+id/clear_url"
@@ -93,11 +89,12 @@
                     android:padding="@dimen/mini_4"
                     android:src="@drawable/ic_clear"
                     android:visibility="gone"
-                    app:tint="@color/text_secondary"
+                    app:tint="?android:textColorSecondary"
                     tools:visibility="visible" />
-            </RelativeLayout>
-        </com.google.android.material.card.MaterialCardView>
 
+            </RelativeLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
             android:id="@+id/network_holder"

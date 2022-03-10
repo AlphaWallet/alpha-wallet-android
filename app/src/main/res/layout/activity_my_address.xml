@@ -36,12 +36,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/base_24"
-            android:fontFamily="@font/font_regular"
             android:gravity="center"
             android:paddingTop="@dimen/cozy_20"
             android:text="@string/scan_qr_label"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -74,7 +71,6 @@
                 custom:bold="true"
                 custom:removePadding="true"
                 custom:text="@string/ethereum"
-                custom:textColor="@color/text_primary"
                 tools:visibility="visible" />
 
             <com.alphawallet.app.widget.CopyTextView
@@ -82,8 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                custom:bold="true"
-                custom:textColor="@color/text_primary" />
+                custom:bold="true" />
 
         </LinearLayout>
 

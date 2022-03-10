@@ -44,6 +44,7 @@ import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.Locale;
 
@@ -79,8 +80,8 @@ public class NewSettingsFragment extends BaseFragment {
     private ImageView backupMenuButton;
     private View backupPopupAnchor;
     private NotificationView notificationView;
+    private MaterialCardView updateLayout;
     private int pendingUpdate = 0;
-    private LinearLayout updateLayout;
 
     private Wallet wallet;
 

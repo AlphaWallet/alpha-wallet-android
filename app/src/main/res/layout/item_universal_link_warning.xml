@@ -15,24 +15,22 @@
         android:padding="@dimen/standard_16">
 
         <TextView
+            style="@style/Aw.Typography.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:fontFamily="@font/font_bold"
             android:text="@string/label_important"
             android:textAllCaps="true"
-            android:textColor="@color/text_error_inverse"
-            android:textSize="@dimen/sp17" />
+            android:textColor="@color/text_error_inverse" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:fontFamily="@font/font_regular"
             android:gravity="center"
             android:text="@string/universal_link_notice"
-            android:textColor="@color/text_error_inverse"
-            android:textSize="@dimen/sp17" />
+            android:textColor="@color/text_error_inverse" />
 
     </LinearLayout>
+
 </LinearLayout>

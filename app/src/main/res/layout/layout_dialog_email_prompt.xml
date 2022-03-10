@@ -5,15 +5,13 @@
     android:orientation="vertical">
 
     <TextView
+        style="@style/Aw.Typography.Title.Large.Bold"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/cozy_20"
         android:layout_marginTop="@dimen/huge_36"
         android:layout_marginEnd="@dimen/cozy_20"
-        android:fontFamily="@font/font_bold"
-        android:text="@string/stay_updated"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp24" />
+        android:text="@string/stay_updated" />
 
     <TextView
         android:layout_width="match_parent"
@@ -21,10 +19,7 @@
         android:layout_marginStart="@dimen/cozy_20"
         android:layout_marginTop="@dimen/standard_16"
         android:layout_marginEnd="@dimen/cozy_20"
-        android:fontFamily="@font/font_regular"
-        android:text="@string/email_prompt_hint"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp17" />
+        android:text="@string/email_prompt_hint" />
 
     <com.alphawallet.app.widget.InputView
         android:id="@+id/email_input"

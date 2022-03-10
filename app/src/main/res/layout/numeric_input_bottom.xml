@@ -21,26 +21,22 @@
 
         <TextView
             android:id="@+id/select_amount"
+            style="@style/Aw.Typography.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:fontFamily="@font/font_semibold"
             android:gravity="top|center_horizontal"
             android:text="@string/select_amount"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             android:visibility="visible" />
 
         <TextView
             android:id="@+id/select_amount_max"
+            style="@style/Aw.Typography.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginStart="@dimen/mini_4"
-            android:fontFamily="@font/font_semibold"
             android:lines="1"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             android:visibility="visible"
             tools:text="(max. 200)" />
 
@@ -84,17 +80,14 @@
 
         <com.alphawallet.app.ui.widget.entity.NumericInput
             android:id="@+id/number"
+            style="@style/Aw.Typography.Title.Large.Bold"
             android:layout_width="90dp"
             android:layout_height="wrap_content"
             android:background="@color/transparent"
             android:completionThreshold="1"
-            android:fontFamily="@font/font_bold"
             android:gravity="center"
             android:imeOptions="actionDone"
             android:inputType="numberDecimal"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_secondary"
-            android:textSize="@dimen/sp24"
             tools:text="25" />
 
         <Button

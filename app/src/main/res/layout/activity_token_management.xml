@@ -37,10 +37,7 @@
             android:hint="@string/search_for_tokens"
             android:inputType="textFilter"
             android:maxLength="20"
-            android:maxLines="1"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_secondary"
-            android:textSize="@dimen/sp17" />
+            android:maxLines="1" />
 
     </LinearLayout>
 

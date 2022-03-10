@@ -4,10 +4,7 @@
     android:id="@android:id/text1"
     android:layout_width="match_parent"
     android:layout_height="60dp"
-    android:fontFamily="@font/font_regular"
     android:gravity="center_vertical"
     android:paddingStart="@dimen/cozy_20"
     android:paddingEnd="@dimen/cozy_20"
-    android:textColor="@color/text_primary"
-    android:textSize="@dimen/sp17"
     tools:text="Action" />

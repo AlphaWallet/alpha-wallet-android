@@ -11,13 +11,11 @@
 
     <TextView
         android:id="@+id/dialog_main_text"
+        style="@style/Aw.Typography.SemiBold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:fontFamily="@font/font_semibold"
         android:gravity="center"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/sp17"
         tools:text="Main Text" />
 
     <LinearLayout
@@ -32,10 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp15"
             android:visibility="gone"
             tools:text="Small text"
             tools:visibility="visible" />
@@ -45,10 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp15"
             android:visibility="gone"
             tools:text="Medium Text"
             tools:visibility="visible" />
@@ -58,10 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp15"
             android:visibility="gone"
             tools:text="Large Text"
             tools:visibility="visible" />
@@ -81,13 +70,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/cozy_20"
-            android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp15"
             tools:text="Extra Text" />
 
-        <!-- TODO: Convert to new button styles -->
         <LinearLayout
             android:id="@+id/dialog_button1_container"
             android:layout_width="match_parent"
@@ -105,7 +90,7 @@
 
         </LinearLayout>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/dialog_button2"
             style="@style/Aw.Component.Button.Secondary"
             android:layout_width="match_parent"
@@ -113,4 +98,5 @@
             android:layout_gravity="center_horizontal"
             tools:text="Secondary" />
     </LinearLayout>
+
 </LinearLayout>

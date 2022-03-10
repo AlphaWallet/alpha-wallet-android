@@ -18,7 +18,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/cozy_20"
-            android:textSize="@dimen/sp17"
             custom:imeOptions="actionDone"
             custom:label="@string/enter_private_key"
             custom:lines="2"
@@ -26,11 +25,11 @@
 
         <TextView
             android:id="@+id/text_privatekey_hint"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/standard_16"
-            android:text="@string/suggestion_private_key"
-            android:textColor="@color/text_secondary" />
+            android:text="@string/suggestion_private_key" />
 
     </LinearLayout>
 
@@ -43,6 +42,7 @@
         android:orientation="vertical">
 
         <TextView
+            style="@style/Aw.Typography.Caption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/base_24"
@@ -52,8 +52,6 @@
             android:gravity="center_horizontal"
             android:linksClickable="true"
             android:text="@string/import_from_cloud"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp15"
             tools:text="@string/import_from_cloud" />
 
         <com.google.android.material.button.MaterialButton

@@ -22,9 +22,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             tools:text="Question" />
 
         <ImageView
@@ -46,11 +43,9 @@
 
         <TextView
             android:id="@+id/text_answer"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/sp17"
             tools:text="Answer" />
     </LinearLayout>
 </LinearLayout>

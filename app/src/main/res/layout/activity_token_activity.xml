@@ -27,13 +27,12 @@
                 android:orientation="vertical">
 
                 <TextView
+                    style="@style/Aw.Typography.Caption"
                     android:id="@+id/event_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/mini_4"
                     android:layout_marginBottom="@dimen/standard_16"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/sp15"
                     tools:text="10:57 PM | July 22, 2020" />
 
                 <com.alphawallet.app.widget.TokenIcon
@@ -52,22 +51,18 @@
 
                     <TextView
                         android:id="@+id/event_action"
+                        style="@style/Aw.Typography.Title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_semibold"
                         android:gravity="center"
-                        android:textColor="@color/text_primary"
-                        android:textSize="@dimen/sp20"
                         tools:text="Sent" />
 
                     <TextView
                         android:id="@+id/event_action_symbol"
+                        style="@style/Aw.Typography.Title.SemiBold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/mini_4"
-                        android:fontFamily="@font/font_semibold"
-                        android:textColor="@color/text_primary"
-                        android:textSize="@dimen/sp20"
                         android:visibility="gone"
                         tools:text="ETH" />
 
@@ -75,14 +70,12 @@
 
                 <TextView
                     android:id="@+id/event_amount"
+                    style="@style/Aw.Typography.Title.Large.Bold"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="@dimen/standard_16"
-                    android:fontFamily="@font/font_semibold"
                     android:gravity="center_horizontal"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/sp24"
                     tools:text="+ 1.234 ETH" />
 
                 <com.alphawallet.app.widget.ChainName

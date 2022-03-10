@@ -35,12 +35,11 @@
                 android:src="@drawable/ic_ethereum" />
 
             <TextView
+                style="@style/Aw.Typography.Caption"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/contract_address"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/sp15" />
+                android:text="@string/contract_address" />
 
         </LinearLayout>
 
@@ -49,12 +48,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp25"
-            android:fontFamily="@font/font_regular"
             android:gravity="center"
             android:paddingTop="@dimen/cozy_20"
             android:text="@string/scan_qr_label"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/sp17"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

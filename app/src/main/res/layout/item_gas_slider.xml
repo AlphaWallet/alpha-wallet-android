@@ -26,9 +26,7 @@
             android:max="90"
             android:paddingTop="@dimen/tiny_8"
             android:paddingBottom="@dimen/tiny_8"
-            android:progress="10"
-            android:progressTint="@color/brand"
-            android:thumbTint="@color/brand" />
+            android:progress="10" />
 
         <EditText
             android:id="@+id/gas_price_entry"
@@ -66,9 +64,7 @@
             android:max="90"
             android:paddingTop="@dimen/tiny_8"
             android:paddingBottom="@dimen/tiny_8"
-            android:progress="10"
-            android:progressTint="@color/brand"
-            android:thumbTint="@color/brand" />
+            android:progress="10" />
 
         <EditText
             android:id="@+id/gas_limit_entry"

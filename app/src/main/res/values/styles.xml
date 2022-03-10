@@ -3,7 +3,7 @@
 
     <style name="Aw.Component.AppBarLayout" parent="Widget.Design.AppBarLayout">
         <item name="elevation">0dp</item>
-        <item name="background">@color/surface</item>
+        <item name="android:background">?colorSurface</item>
     </style>
 
     <style name="Aw.Component.ActionItem" parent="Widget.MaterialComponents.TextView">
@@ -21,7 +21,6 @@
 
     <style name="Aw.Component.AlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
         <item name="colorSurface">@color/surface_secondary</item>
-        <item name="colorPrimary">@color/brand</item>
     </style>
 
     <style name="Aw.Component.BottomSheetDialog" parent="Theme.MaterialComponents.BottomSheetDialog">

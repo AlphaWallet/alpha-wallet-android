@@ -26,6 +26,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -110,6 +111,15 @@ public class StructuredDataEncoder {
 
     public String encodeStruct(String structName) {
         HashMap<String, List<StructuredData.Entry>> types = jsonMessageObject.getTypes();
+        if (!types.containsKey("EIP712Domain"))
+        {
+            //{ name: "name", type: "string" }, { name: "version", type: "string" }, { name: "verifyingContract", type: "address" },
+            types.put("EIP712Domain", Arrays.asList(
+                    new StructuredData.Entry("name", "string"),
+                    new StructuredData.Entry("version", "string"),
+                    new StructuredData.Entry("verifyingContract", "address")
+            ));
+        }
 
         StringBuilder structRepresentation = new StringBuilder(structName + "(");
         for (StructuredData.Entry entry : types.get(structName)) {

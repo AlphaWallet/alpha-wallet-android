@@ -18,7 +18,6 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.util.Patterns;
 import android.util.TypedValue;
 import android.webkit.URLUtil;
@@ -26,7 +25,6 @@ import android.webkit.URLUtil;
 import androidx.annotation.ColorInt;
 import androidx.annotation.RawRes;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
@@ -203,7 +201,7 @@ public class Utils {
                 return R.string.dialog_title_sign_personal_message;
             case SIGN_TYPED_DATA:
             case SIGN_TYPED_DATA_V3:
-            case SIGN_TYPES_DATA_V4:
+            case SIGN_TYPED_DATA_V4:
                 return R.string.dialog_title_sign_typed_message;
         }
     }

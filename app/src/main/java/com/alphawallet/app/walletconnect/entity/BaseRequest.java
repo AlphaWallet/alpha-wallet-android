@@ -1,7 +1,5 @@
 package com.alphawallet.app.walletconnect.entity;
 
-import com.alphawallet.token.entity.EthereumMessage;
-import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 
 import java.util.List;
@@ -18,7 +16,11 @@ public abstract class BaseRequest
     {
         this.rawParams = rawParams;
         this.type = type;
-        params = asList(unwrap().split(", "));
+//        Type listType = new TypeToken<List<String>>(){}.getType();
+//        params = new Gson().fromJson(rawParams, listType); // Once WC team fixed the params format, can use this
+        String unwrapped = unwrap();
+        int index = unwrapped.indexOf(", ");
+        params = asList(unwrapped.substring(0, index), unwrapped.substring(index + 2));
     }
 
     protected String unwrap()

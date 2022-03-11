@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         custom:cardCornerRadius="8dp"
         custom:cardElevation="0dp"
-        custom:strokeColor="@color/separator"
+        custom:strokeColor="?colorSurfaceQuaternary"
         custom:strokeWidth="1dp">
 
         <LinearLayout

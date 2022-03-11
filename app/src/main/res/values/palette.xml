@@ -38,8 +38,16 @@
     <color name="background_inverse">@color/black</color>
     <!-- ?colorSurface -->
     <color name="surface">@color/white</color>
+    <!-- ?colorSurfaceSecondary -->
+    <color name="surface_secondary">@color/alabaster</color>
+    <!-- ?colorSurfaceTertiary -->
+    <color name="surface_tertiary">@color/concrete</color>
+    <!-- ?colorSurfaceQuaternary -->
+    <color name="surface_quaternary">@color/mercury</color>
     <!-- ?colorOnSurface -->
     <color name="surface_inverse">@color/black</color>
+    <!-- ?colorSurfaceDark -->
+    <color name="surface_dark">@color/mine</color>
     <!-- ?colorBackgroundFloating -->
     <color name="background_floating">@color/white</color>
     <!-- ?colorControlNormal -->

@@ -1,36 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- ========== -->
-    <!-- Components -->
-    <!-- ========== -->
-
-    <!-- Buttons -->
-    <color name="button_texticon">@color/mine</color>
-    <color name="button_suggestion">@color/venus</color>
-
-    <!-- Warning dialog -->
-    <color name="warning_background">@color/mine</color>
-
-    <!-- Headers -->
-    <color name="header_background">@color/venus</color>
-
-    <!-- Separator -->
-    <color name="separator">@color/venus</color>
-
-    <!-- Address/Search Bar Background -->
-    <color name="search_bar">@color/mine</color>
-
-    <!-- History Chart -->
-    <color name="chart_tab">@color/cod</color>
-    <color name="chart_tab_selected">@color/white</color>
-    <color name="chart_legend">@color/white</color>
-    <color name="chart_line">@color/white</color>
-
-    <!-- Seed Word -->
-    <color name="seed_word">@color/mine</color>
-    <color name="seed_word_selected">@color/venus</color>
-    <color name="seed_word_stroke">@color/mike</color>
-    <color name="seed_word_text">@color/text_primary</color>
-    <color name="seed_word_text_selected">@color/venus</color>
-
 </resources>

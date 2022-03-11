@@ -118,7 +118,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         moreActionsListView.setAdapter(moreActionsAdapter);
         bottomSheet.setContentView(moreActionsListView);
         moreActionsListView.setOnItemClickListener(this);
-        moreActionsListView.setDivider(new ColorDrawable(ContextCompat.getColor(context, R.color.separator)));
+        moreActionsListView.setDivider(new ColorDrawable(Utils.getColorFromAttr(getContext(), R.attr.colorSurfaceQuaternary)));
         moreActionsListView.setDividerHeight(Utils.dp2px(context, 1));
     }
 

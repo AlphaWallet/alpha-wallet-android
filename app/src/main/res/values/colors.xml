@@ -9,37 +9,4 @@
     <color name="translucent_red">#19ff3b30</color>
     <color name="translucent_green">#1975b943</color>
 
-    <!-- ========== -->
-    <!-- Components -->
-    <!-- ========== -->
-
-    <!-- Buttons -->
-    <color name="button_texticon">@color/concrete</color>
-    <color name="button_suggestion">@color/mercury</color>
-
-    <!-- Warning dialog -->
-    <color name="warning_background">@color/mine</color>
-
-    <!-- Headers -->
-    <color name="header_background">@color/alabaster</color>
-
-    <!-- Separator -->
-    <color name="separator">@color/mercury</color>
-
-    <!-- Address/Search Bar Background -->
-    <color name="search_bar">@color/concrete</color>
-
-    <!-- History Chart -->
-    <color name="chart_tab">@color/white</color>
-    <color name="chart_tab_selected">@color/mine</color>
-    <color name="chart_legend">@color/black</color>
-    <color name="chart_line">@color/mine</color>
-
-    <!-- Seed Word -->
-    <color name="seed_word">@color/concrete</color>
-    <color name="seed_word_selected">@color/alabaster</color>
-    <color name="seed_word_stroke">@color/mike</color>
-    <color name="seed_word_text">@color/text_primary</color>
-    <color name="seed_word_text_selected">@color/alabaster</color>
-
 </resources>

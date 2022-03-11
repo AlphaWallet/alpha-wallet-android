@@ -74,7 +74,7 @@
                 android:id="@+id/layout_version"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="@color/header_background"
+                android:background="?colorSurfaceSecondary"
                 android:paddingLeft="@dimen/standard_16"
                 android:paddingRight="@dimen/standard_16">
 
@@ -101,7 +101,7 @@
                 android:id="@+id/layout_tokenscript_compatibility"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="@color/header_background"
+                android:background="?colorSurfaceSecondary"
                 android:paddingLeft="@dimen/standard_16"
                 android:paddingRight="@dimen/standard_16">
 

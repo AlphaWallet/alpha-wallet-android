@@ -8,7 +8,11 @@
     <color name="background">@color/cod</color>
     <color name="background_inverse">@color/white</color>
     <color name="surface">@color/cod</color>
+    <color name="surface_secondary">@color/venus</color>
+    <color name="surface_tertiary">@color/mine</color>
+    <color name="surface_quaternary">@color/venus</color>
     <color name="surface_inverse">@color/white</color>
+    <color name="surface_dark">@color/white</color>
     <color name="background_floating">@color/mine</color>
     <color name="control">@color/white</color>
     <color name="control_activated">@color/accent</color>

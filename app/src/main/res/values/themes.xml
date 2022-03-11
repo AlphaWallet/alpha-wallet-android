@@ -56,6 +56,16 @@
         <!-- The color applied to secondary text for inverted backgrounds -->
         <item name="android:textColorSecondaryInverse">@color/text_secondary_inverse</item>
 
+        <!-- Custom color references -->
+        <!-- The color applied to headers -->
+        <item name="colorSurfaceSecondary">@color/surface_secondary</item>
+        <!-- The color applied to search bars, text icon button -->
+        <item name="colorSurfaceTertiary">@color/surface_tertiary</item>
+        <!-- The color applied to separators -->
+        <item name="colorSurfaceQuaternary">@color/surface_quaternary</item>
+        <!-- The color applied to chart tabs -->
+        <item name="colorSurfaceDark">@color/surface_dark</item>
+
         <!-- Default Component Styles -->
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textColorHint">@color/text_secondary</item>

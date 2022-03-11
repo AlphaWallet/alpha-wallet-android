@@ -18,6 +18,8 @@ import androidx.annotation.Nullable;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.util.Utils;
+import com.google.android.material.color.MaterialColors;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -193,7 +195,7 @@ public class HistoryChart extends View
         paint.setStrokeWidth(strokeWidth);
         paint.setDither(true);
 
-        greyPaint.setColor(getResources().getColor(R.color.chart_line, getContext().getTheme()));
+        greyPaint.setColor(Utils.getColorFromAttr(getContext(), R.attr.colorSurfaceDark));
         greyPaint.setStrokeWidth(1);
 
         noDataTextPaint.setTextAlign(Paint.Align.CENTER);

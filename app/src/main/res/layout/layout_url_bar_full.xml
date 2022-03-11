@@ -55,7 +55,7 @@
             android:layout_toStartOf="@id/network_holder"
             android:layout_toEndOf="@id/layout_navigator"
             android:elevation="0dp"
-            app:cardBackgroundColor="@color/search_bar"
+            app:cardBackgroundColor="?colorSurfaceTertiary"
             app:cardCornerRadius="5dp">
 
             <RelativeLayout

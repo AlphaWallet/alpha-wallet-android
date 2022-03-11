@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/standard_header_height"
-    android:background="@color/header_background"
+    android:background="?colorSurfaceSecondary"
     android:orientation="vertical">
 
     <TextView

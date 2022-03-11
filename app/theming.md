@@ -112,7 +112,7 @@ You may need to create a new color reference if any of the existing colors do no
 ### Rebranding or customizing the theme
 AlphaWallet is one of the best Ethereum wallets to fork, so we have provided an easy way for you to customize it.
 
-##### Chaging fonts
+##### Changing fonts
 In `app/src/main/res/font`, simply replace the following files with your preferred font:
 
 * font_light.ttf
@@ -122,7 +122,7 @@ In `app/src/main/res/font`, simply replace the following files with your preferr
 
 > Important: Make sure you use the same filename for each of them.
 
-##### Chaging app colors
+##### Changing app colors
 There are two steps to change the app's color palette
 1. Add your own set of colors in [`values/palette.xml`]()
    Example:

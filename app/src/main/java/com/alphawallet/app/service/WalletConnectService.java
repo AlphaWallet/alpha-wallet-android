@@ -12,11 +12,10 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
@@ -56,6 +55,7 @@ public class WalletConnectService extends Service
     public int onStartCommand(Intent intent, int flags, int startId)
     {
         Timber.tag(TAG).d("SERVICE STARTING");
+
         try
         {
             int actionVal = Integer.parseInt(intent.getAction());
@@ -83,6 +83,10 @@ public class WalletConnectService extends Service
                     String sessionId = intent.getStringExtra("session");
                     disconnectSession(sessionId);
                     break;
+                case MSG_PUMP:
+                    Timber.tag(TAG).d("SERVICE MSG PUMP");
+                    checkMessages();
+                    break;
             }
         }
         catch (Exception e)
@@ -90,12 +94,6 @@ public class WalletConnectService extends Service
             Timber.e(e);
         }
         return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
     }
 
     private final IBinder mBinder = new LocalBinder();
@@ -147,6 +145,19 @@ public class WalletConnectService extends Service
         {
             WCClient client = clientMap.get(sessionId);
             if (client != null) client.killSession();
+        }
+    }
+
+    //executed a pending request, remove from the queue
+    public void removePendingRequest(long id)
+    {
+        for (WCRequest rq : signRequests)
+        {
+            if (rq.id == id)
+            {
+                signRequests.remove(rq);
+                break;
+            }
         }
     }
 
@@ -246,37 +257,46 @@ public class WalletConnectService extends Service
         client.setOnEthSign((id, message) -> {
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
-            signRequests.add(new WCRequest(client.sessionId(), id, message));
-            //see if this connection is live, if so then bring WC request to foreground
-            switchToWalletConnectApprove(client.sessionId());
+            WCRequest rq = new WCRequest(client.sessionId(), id, message);
             Timber.tag(TAG).d("Sign Request: %s", message.toString());
-            startMessagePump();
+            sendRequest(client, rq);
             return Unit.INSTANCE;
         });
 
         client.setOnEthSignTransaction((id, transaction) -> {
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
-            signRequests.add(new WCRequest(client.sessionId(), id, transaction, true, client.chainIdVal()));
-            switchToWalletConnectApprove(client.sessionId());
-            startMessagePump();
+            WCRequest rq = new WCRequest(client.sessionId(), id, transaction, true, client.chainIdVal());
+            sendRequest(client, rq);
             return Unit.INSTANCE;
         });
 
         client.setOnEthSendTransaction((id, transaction) -> {
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
-            signRequests.add(new WCRequest(client.sessionId(), id, transaction, false, client.chainIdVal()));
-            switchToWalletConnectApprove(client.sessionId());
-            startMessagePump();
+            WCRequest rq = new WCRequest(client.sessionId(), id, transaction, false, client.chainIdVal());
+            sendRequest(client, rq);
             return Unit.INSTANCE;
         });
     }
 
+    //TODO: Can we determine if AlphaWallet is running? If it is, no need to add this to the queue,
+    //TODO: as user will get the intent in walletConnectActionReceiver (repeat for below)
+    private void sendRequest(WCClient client, WCRequest rq)
+    {
+        Timber.d("sendRequest: sessionId: %s", client.sessionId());
+        signRequests.add(rq);
+        //see if this connection is live, if so then bring WC request to foreground
+        switchToWalletConnectApprove(client.sessionId(), rq);
+        startMessagePump();
+    }
+
     private void broadcastSessionEvent(String command, String sessionId)
     {
+        Timber.d("broadcastSessionEvent: sessionId: %s, command: %s", sessionId, command);
         Intent intent = new Intent(command);
         intent.putExtra("sessionid", sessionId);
+        intent.putExtra("wcrequest", getPendingRequest(sessionId));     // pass WCRequest as parcelable in the intent
         sendBroadcast(intent);
     }
 
@@ -287,7 +307,7 @@ public class WalletConnectService extends Service
         sendBroadcast(intent);
     }
 
-    private void switchToWalletConnectApprove(String sessionId)
+    private void switchToWalletConnectApprove(String sessionId, WCRequest rq)
     {
         WCClient cc = clientMap.get(sessionId);
 
@@ -295,6 +315,7 @@ public class WalletConnectService extends Service
         {
             Intent intent = new Intent(WALLET_CONNECT_REQUEST);
             intent.putExtra("sessionid", sessionId);
+            intent.putExtra("wcrequest", rq);
             sendBroadcast(intent);
 
             Timber.tag(TAG).d("Connected clients: %s", clientMap.size());
@@ -393,7 +414,7 @@ public class WalletConnectService extends Service
             WCClient cc = clientMap.get(rq.sessionId);
             if (cc != null)
             {
-                switchToWalletConnectApprove(rq.sessionId);
+                switchToWalletConnectApprove(rq.sessionId, rq);
             }
         }
         else if (messagePump != null && !messagePump.isDisposed())

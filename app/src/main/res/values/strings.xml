@@ -695,7 +695,7 @@
     <string name="activity_approved">Approved</string>
     <string name="activity_approval_granted">Approval granted</string>
     <string name="tokenscript_call">TokenScript call:</string>
-    <string name="testnet" translatable="false">Testnet</string>
+    <string name="testnet">Testnet</string>
     <string name="today">Today</string>
     <string name="go_to_token">Go to Token</string>
     <string name="invalid_walletconnect_session">Invalid WalletConnect Session</string>
@@ -899,4 +899,5 @@
     <string name="i_already_have_a_wallet">I already have a Wallet</string>
     <string name="title_select_theme">Select Mode</string>
     <string name="title_network_info">Network Info</string>
+    <string name="website_text">Website</string>
 </resources>

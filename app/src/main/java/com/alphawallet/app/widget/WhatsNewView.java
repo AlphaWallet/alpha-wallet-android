@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -85,15 +86,25 @@ public class WhatsNewView extends ConstraintLayout
             String[] body = release.getBody().split("\r\n- ");
             holder.details.removeAllViews();
             int index = 0;
-            for (String entry : body)
-            {
-                TextView t = new TextView(getContext(), null, R.attr.whatsNewEntryStyle);
-                t.setText(entry.trim());
-                if (index++ == 0)
-                {
-                    t.setCompoundDrawables(null, null, null, null);
+            for (String entry : body) {
+//                LinearLayout ll = new LinearLayout(getContext());
+
+//                ll.setOrientation(LinearLayout.HORIZONTAL);
+
+                TextView tv = new TextView(getContext(), null, R.attr.whatsNewEntryStyle);
+                tv.setText(entry.trim());
+//                ImageView iv = new ImageView(getContext());
+//                iv.setImageDrawable(getContext().getDrawable(R.drawable.ic_icons_system_border_circle));
+//                ll.addView(iv);
+//                ll.addView(tv);
+                if (index++ == 0) {
+                    String first = tv.getText().toString();
+                    if (first.startsWith("- "))
+                    {
+                        tv.setText(first.substring(2).trim());
+                    }
                 }
-                holder.details.addView(t);
+                holder.details.addView(tv);
             }
         }
 

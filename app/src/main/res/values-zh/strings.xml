@@ -861,4 +861,6 @@
     <string name="i_already_have_a_wallet">I already have a Wallet</string>
     <string name="title_select_theme">Select Mode</string>
     <string name="title_network_info">Network Info</string>
+    <string name="testnet">Testnet</string>
+    <string name="website_text">Website</string>
 </resources>

@@ -84,6 +84,11 @@
     <declare-styleable name="TokenIcon">
         <attr name="square" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="DialogInfoItem">
+        <attr name="title"/>
+        <attr name="text"/>
+        <attr name="showActionText" format="boolean"/>
+    </declare-styleable>
     <attr name="seedWordStyle" format="reference" />
     <attr name="whatsNewEntryStyle" format="reference" />
     <attr name="colorSurfaceSecondary" format="reference" />

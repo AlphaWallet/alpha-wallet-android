@@ -490,7 +490,7 @@ public class WalletConnectViewModel extends BaseViewModel {
         return sessions;
     }
 
-    public void getPendingRequest(WalletConnectActivity activity, String sessionId)
+    public void removePendingRequest(Activity activity, long id)
     {
         ServiceConnection connection = new ServiceConnection()
         {
@@ -498,7 +498,7 @@ public class WalletConnectViewModel extends BaseViewModel {
             public void onServiceConnected(ComponentName name, IBinder service)
             {
                 WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
-                ((WalletConnectCallback)activity).receiveRequest(walletConnectService.getPendingRequest(sessionId));
+                walletConnectService.removePendingRequest(id);
             }
 
             @Override
@@ -512,11 +512,6 @@ public class WalletConnectViewModel extends BaseViewModel {
         Intent i = new Intent(activity, WalletConnectService.class);
         i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
         startServiceLocal(i, activity, connection);
-    }
-
-    public void getCurrentRequest(WalletConnectActivity activity)
-    {
-        getPendingRequest(activity, "");
     }
 
     public void getClient(Activity activity, String sessionId, GetClientCallback clientCb)

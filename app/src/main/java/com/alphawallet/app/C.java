@@ -179,6 +179,8 @@ public abstract class C {
     public static final String FROM_HOME_ROUTER = "HomeRouter";
     public static final String TOKEN_CLICK = "com.stormbird.wallet.TOKEN_CLICK";
     public static final String SETTINGS_INSTANTIATED = "com.stormbird.wallet.SETTINGS_INSTANTIATED";
+    public static final String APP_FOREGROUND_STATE = "com.alphawallet.APP_FOREGROUND_STATE";
+    public static final String EXTRA_APP_FOREGROUND = "com.alphawallet.IS_FOREGORUND";
 
     public static final String DEFAULT_GAS_PRICE =     "10000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";

@@ -1,12 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Misc Palette -->
-    <color name="positive">@color/green</color>
-    <color name="negative">@color/danger</color>
-    <color name="transparent">#00000000</color>
-    <color name="translucent_light">#B3FFFFFF</color>
-    <color name="translucent_dark">#80000000</color>
-    <color name="translucent_red">#19ff3b30</color>
-    <color name="translucent_green">#1975b943</color>
+    <!--
 
+    These colors define the values referenced in the base application theme.
+
+    ** ATTENTION **
+    1. DO NOT CHANGE values in this file, unless you want to customize
+    or rebrand the app.
+
+    2. DO NOT USE these colors directly onto a component or view. Use
+    corresponding color references in `themes.xml` (or in the comments below).
+    This is to allow flexibility for when theme overlays are used.
+
+    Please refer to `theming.md` for a detailed overview on app theming.
+
+    Example:
+    DO NOT USE `@color/brand`
+    INSTEAD USE `?colorPrimary`
+
+    DO NOT USE `@color/text_primary`
+    INSTEAD USE ?android:textColorPrimary`
+
+    -->
+    <!-- ?colorPrimary -->
+    <color name="brand">@color/azure</color>
+    <!-- ?colorOnPrimary -->
+    <color name="brand_inverse">@color/white</color>
+    <!-- ?colorAccent -->
+    <color name="accent">@color/brand</color>
+    <!-- ?colorError -->
+    <color name="error">@color/danger</color>
+    <!-- ?colorOnError -->
+    <color name="error_inverse">@color/white</color>
+    <!-- ?android:colorBackground -->
+    <color name="background">@color/white</color>
+    <!-- ?colorOnBackground -->
+    <color name="background_inverse">@color/black</color>
+    <!-- ?colorSurface -->
+    <color name="surface">@color/white</color>
+    <!-- ?colorSurfaceSecondary -->
+    <color name="surface_secondary">@color/alabaster</color>
+    <!-- ?colorSurfaceTertiary -->
+    <color name="surface_tertiary">@color/concrete</color>
+    <!-- ?colorSurfaceQuaternary -->
+    <color name="surface_quaternary">@color/mercury</color>
+    <!-- ?colorOnSurface -->
+    <color name="surface_inverse">@color/black</color>
+    <!-- ?colorSurfaceDark -->
+    <color name="surface_dark">@color/mine</color>
+    <!-- ?colorBackgroundFloating -->
+    <color name="background_floating">@color/white</color>
+    <!-- ?colorControlNormal -->
+    <color name="control">@color/black</color>
+    <!-- ?colorControlActivated -->
+    <color name="control_activated">@color/accent</color>
+    <!-- ?colorControlHighlight -->
+    <color name="control_highlight">@color/accent</color>
+    <!-- ?android:textColorPrimary -->
+    <color name="text_primary">@color/black</color>
+    <!-- ?android:textColorPrimaryInverse -->
+    <color name="text_primary_inverse">@color/white</color>
+    <!-- ?android:textColorScondaryInverse -->
+    <color name="text_secondary">@color/dove</color>
+    <!-- ?android:textColorSecondary -->
+    <color name="text_secondary_inverse">@color/white</color>
 </resources>

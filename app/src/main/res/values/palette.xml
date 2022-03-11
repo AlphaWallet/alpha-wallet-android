@@ -1,67 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--
+	<!--
 
-    These colors define the values referenced in the base application theme.
+	These colors represent the branding palette of AlphaWallet.
 
-    ** ATTENTION **
-    1. DO NOT CHANGE values in this file, unless you want to customize
-    or rebrand the app.
+	** ATTENTION **
+	If you want to customize or rebrand the app, define your new colors here.
 
-    2. DO NOT USE these colors directly onto a component or view. Use
-    corresponding color references in `themes.xml` (or in the comments below)
-    or `colors.xml`. This is to allow flexibility for when theme overlays are used.
+	AVOID referencing these colors directly onto the view, as these do not provide
+	flexibility for light/dark modes. Prioritize using the color references defined
+	in `themes.xml` (ex. ?colorPrimary, ?colorSurface, etc).
 
-    Please refer to `theming.md` for a detailed overview.
-
-    Example:
-    DO NOT USE `@color/brand`
-    INSTEAD USE `?colorPrimary`
-
-    DO NOT USE `@color/text_primary`
-    INSTEAD USE ?android:textColorPrimary`
-
-    -->
-    <!-- ?colorPrimary -->
-    <color name="brand">@color/azure</color>
-    <!-- ?colorOnPrimary -->
-    <color name="brand_inverse">@color/white</color>
-    <!-- ?colorAccent -->
-    <color name="accent">@color/brand</color>
-    <!-- ?colorError -->
-    <color name="error">@color/danger</color>
-    <!-- ?colorOnError -->
-    <color name="error_inverse">@color/white</color>
-    <!-- ?android:colorBackground -->
-    <color name="background">@color/white</color>
-    <!-- ?colorOnBackground -->
-    <color name="background_inverse">@color/black</color>
-    <!-- ?colorSurface -->
-    <color name="surface">@color/white</color>
-    <!-- ?colorSurfaceSecondary -->
-    <color name="surface_secondary">@color/alabaster</color>
-    <!-- ?colorSurfaceTertiary -->
-    <color name="surface_tertiary">@color/concrete</color>
-    <!-- ?colorSurfaceQuaternary -->
-    <color name="surface_quaternary">@color/mercury</color>
-    <!-- ?colorOnSurface -->
-    <color name="surface_inverse">@color/black</color>
-    <!-- ?colorSurfaceDark -->
-    <color name="surface_dark">@color/mine</color>
-    <!-- ?colorBackgroundFloating -->
-    <color name="background_floating">@color/white</color>
-    <!-- ?colorControlNormal -->
-    <color name="control">@color/black</color>
-    <!-- ?colorControlActivated -->
-    <color name="control_activated">@color/accent</color>
-    <!-- ?colorControlHighlight -->
-    <color name="control_highlight">@color/accent</color>
-    <!-- ?android:textColorPrimary -->
-    <color name="text_primary">@color/black</color>
-    <!-- ?android:textColorPrimaryInverse -->
-    <color name="text_primary_inverse">@color/white</color>
-    <!-- ?android:textColorScondaryInverse -->
-    <color name="text_secondary">@color/dove</color>
-    <!-- ?android:textColorSecondary -->
-    <color name="text_secondary_inverse">@color/white</color>
+	-->
+	<color name="pinkish_grey">#bdbdbd</color>
+	<color name="pale_salmon">#fcbbb7</color>
+	<color name="very_light_pink">#ffebea</color>
+	<color name="black">#000000</color>
+	<color name="mine">#2f2f2f</color>
+	<color name="dove">#727272</color>
+	<color name="dusty">#999999</color>
+	<color name="silver">#c2c2c2</color>
+	<color name="mike">#dddddd</color>
+	<color name="alto">#e0e0e0</color>
+	<color name="mercury">#e9e9e9</color>
+	<color name="concrete">#f2f2f2</color>
+	<color name="alabaster">#fbfbfb</color>
+	<color name="white">#ffffff</color>
+	<color name="solitude">#e6f3ff</color>
+	<color name="azure">#007fed</color>
+	<color name="azure_hover">#1993fd</color>
+	<color name="cerulean">#00bfff</color>
+	<color name="green">#75b943</color>
+	<color name="emerald">#53d76b</color>
+	<color name="danger">#ff3b30</color>
+	<color name="radical">#fc3159</color>
+	<color name="pumpkin">#fd9426</color>
+	<color name="indigo">#595ad5</color>
+	<color name="elm">#197a84</color>
+	<color name="polar">#f3f9fd</color>
+	<color name="mystic">#b2c6d8</color>
+	<color name="bali">#8aa3b8</color>
+	<color name="science">#006bc8</color>
+	<color name="picton">#4bbcec</color>
+	<color name="cod">#141414</color>
+	<color name="aurora">#bbdda2</color>
+	<color name="vida">#4da322</color>
+	<color name="porcelain">#f0f3f4</color>
+	<color name="botticelli">#ccd9e3</color>
+	<color name="international">#ff5a00</color>
+	<color name="dodge">#0c84ff</color>
+	<color name="venus">#232323</color>
+	<color name="shark">#232325</color>
+	<color name="atlantis">#7cca42</color>
 </resources>

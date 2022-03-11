@@ -37,7 +37,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -46,8 +45,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentOnAttachListener;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
@@ -87,7 +84,6 @@ import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 
-import net.yslibrary.android.keyboardvisibilityevent.AutoActivityLifecycleCallback;
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import java.io.File;
@@ -96,7 +92,6 @@ import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.util.List;
 
-import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 import timber.log.Timber;
@@ -148,7 +143,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private void onMoveToForeground()
     {
         Timber.tag("LIFE").d("AlphaWallet into foreground");
-        if (viewModel != null) viewModel.checkTransactionEngine();
+        if (viewModel != null)
+        {
+            viewModel.checkTransactionEngine();
+            viewModel.sendMsgPumpToWC(this);
+        }
         isForeground = true;
     }
 

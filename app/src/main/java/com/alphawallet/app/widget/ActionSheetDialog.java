@@ -8,12 +8,14 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.ComponentActivity;
 import androidx.annotation.NonNull;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.GlideApp;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
@@ -26,8 +28,10 @@ import com.alphawallet.app.ui.TransactionSuccessActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
@@ -57,6 +61,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private final AssetDetailView assetDetailView;
     private final FunctionButtonBar functionBar;
     private final TransactionDetailWidget detailWidget;
+    private final WalletConnectRequestWidget walletConnectRequestWidget; // TODO final
     private final Activity activity;
 
     private final Token token;
@@ -108,6 +113,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         }
 
         signCallback = null;
+        walletConnectRequestWidget = null;
 
         actionSheetCallback = aCallBack;
         actionCompleted = false;
@@ -178,6 +184,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         tokensService = null;
         candidateTransaction = null;
         actionCompleted = false;
+        walletConnectRequestWidget = null;
 
         addressDetail.setupRequester(message.getOrigin());
         SignDataWidget signWidget = findViewById(R.id.sign_widget);
@@ -222,11 +229,61 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         token = baseToken;
         tokensService = null;
         candidateTransaction = null;
+        walletConnectRequestWidget = null;
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(buttonTextId)));
         functionBar.revealButtons();
         setupCancelListeners();
         isAttached = true;
+    }
+
+    // wallet connect request
+    public ActionSheetDialog(Activity activity, WCPeerMeta wcPeerMeta, long chainIdOverride, String iconUrl, ActionSheetCallback actionSheetCallback) {
+        super(activity);
+        setContentView(R.layout.dialog_wallet_connect_sheet);
+        mode = ActionSheetMode.WALLET_CONNECT_REQUEST;
+
+        ImageView logo = findViewById(R.id.image_logo);
+        cancelButton = findViewById(R.id.image_close);
+        functionBar = findViewById(R.id.layoutButtons);
+
+
+        this.activity = activity;
+        this.actionSheetCallback = actionSheetCallback;
+
+        walletConnectRequestWidget = findViewById(R.id.wallet_connect_widget);
+        gasWidget = null;
+        balanceDisplay = null;
+        confirmationWidget = null;
+        addressDetail = null;
+        amountDisplay = null;
+        assetDetailView = null;
+        detailWidget = null;
+        token = null;
+        tokensService = null;
+        candidateTransaction = null;
+        callbackId = 0;
+        isAttached = true;
+
+        Glide.with(activity)
+                .load(iconUrl)
+                .circleCrop()
+                .into(logo);
+
+        TextView title = findViewById(R.id.text_title);
+        title.setText(wcPeerMeta.getName());
+
+        cancelButton.setOnClickListener( v -> {
+            actionSheetCallback.denyWalletConnect();
+        });
+
+        walletConnectRequestWidget.setupWidget(wcPeerMeta, chainIdOverride, actionSheetCallback::openChainSelection);
+
+        ArrayList<Integer> functionList = new ArrayList<>();
+        functionList.add(R.string.approve);
+        functionList.add(R.string.dialog_reject);
+        functionBar.setupFunctions(this, functionList);
+        functionBar.revealButtons();
     }
 
     public void setSignOnly()
@@ -325,6 +382,17 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 break;
             case MESSAGE:
                 actionSheetCallback.buttonClick(callbackId, token);
+                break;
+            case WALLET_CONNECT_REQUEST:
+                if (id == R.string.approve)
+                {
+                    actionSheetCallback.notifyWalletConnectApproval(walletConnectRequestWidget.getChainIdOverride());
+                    tryDismiss();
+                }
+                else
+                {
+                    actionSheetCallback.denyWalletConnect();
+                }
                 break;
         }
 
@@ -649,5 +717,9 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     public void waitForEstimate()
     {
         functionBar.setPrimaryButtonWaiting();
+    }
+
+    public void updateChain(long chainId) {
+        walletConnectRequestWidget.updateChain(chainId);
     }
 }

@@ -38,7 +38,7 @@
         <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="bottomSheetStyle">@style/Aw.Component.BottomSheet</item>
         <item name="colorSecondary">@color/brand</item>
-        <item name="colorBackgroundFloating">@color/surface_secondary</item>
+        <item name="colorBackgroundFloating">@color/background_floating</item>
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
@@ -60,12 +60,12 @@
     </style>
 
     <style name="Aw.Component.TabLayout" parent="Widget.Design.TabLayout">
-        <item name="tabIndicatorColor">?colorControlActivated</item>
+        <item name="tabIndicatorColor">?colorAccent</item>
         <item name="tabIndicatorHeight">3dp</item>
         <item name="tabPaddingStart">25dp</item>
         <item name="tabPaddingEnd">25dp</item>
         <item name="tabTextAppearance">@style/Aw.Typography.Tab</item>
-        <item name="tabSelectedTextColor">?colorControlActivated</item>
+        <item name="tabSelectedTextColor">?colorAccent</item>
         <item name="tabTextColor">?android:textColorSecondary</item>
         <item name="tabIndicatorFullWidth">true</item>
     </style>
@@ -131,17 +131,16 @@
 
     <style name="Aw.Component.Button.Primary">
         <item name="android:lines">1</item>
-<!--        <item name="android:backgroundTint">@color/button_primary</item>-->
-        <item name="android:backgroundTint">?android:textColorPrimary</item>
-        <item name="android:textColor">?android:textColorPrimaryInverse</item>
+        <item name="android:backgroundTint">?colorOnSurface</item>
+        <item name="android:textColor">?colorSurface</item>
     </style>
 
     <style name="Aw.Component.Button.Secondary">
         <item name="android:lines">1</item>
-        <item name="android:backgroundTint">@color/button_secondary</item>
-        <item name="strokeColor">?android:textColorPrimary</item>
+        <item name="android:backgroundTint">@color/transparent</item>
+        <item name="android:textColor">?colorOnSurface</item>
+        <item name="strokeColor">?colorOnSurface</item>
         <item name="strokeWidth">1dp</item>
-        <item name="android:textColor">?android:textColorPrimary</item>
     </style>
 
     <style name="Aw.Component.Button.Icon" parent="Aw.Component.Button.Secondary">
@@ -157,7 +156,7 @@
         <item name="android:textSize">@dimen/sp17</item>
         <item name="iconPadding">@dimen/cozy_20</item>
         <item name="iconGravity">textEnd</item>
-        <item name="iconTint">?colorControlActivated</item>
+        <item name="iconTint">?colorAccent</item>
         <item name="android:layout_margin">@dimen/cozy_20</item>
         <item name="cornerRadius">5dp</item>
         <item name="android:textColor">?android:textColorPrimary</item>

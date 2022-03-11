@@ -115,7 +115,7 @@
         android:layout_centerVertical="true"
         android:src="@drawable/ic_copy"
         android:visibility="visible"
-        app:tint="?colorControlActivated" />
+        app:tint="?colorAccent" />
 
     <LinearLayout
         android:id="@+id/wallet_click_layer"

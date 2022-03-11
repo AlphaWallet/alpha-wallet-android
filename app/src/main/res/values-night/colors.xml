@@ -1,36 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <color name="brand">@color/dodge</color>
-    <color name="brand_inverse">@color/white</color>
-    <color name="accent">@color/brand</color>
-    <color name="accent_inverse">@color/white</color>
-
-    <color name="error">@color/danger</color>
-    <color name="error_inverse">@color/white</color>
-
-    <color name="background">@color/cod</color>
-    <color name="background_inverse">@color/white</color>
-
-    <color name="surface">@color/cod</color>
-    <color name="surface_inverse">@color/white</color>
-    <color name="surface_secondary">@color/mine</color>
-    <color name="surface_secondary_inverse">@color/white</color>
-
-    <color name="control">@color/white</color>
-    <color name="control_activated">@color/brand</color>
-    <color name="control_highlight">@color/brand</color>
-
-    <color name="text_primary">@color/white</color>
-    <color name="text_primary_inverse">@color/cod</color>
-    <color name="text_secondary">@color/dusty</color>
-    <color name="text_secondary_inverse">@color/cod</color>
-
-
+    <!-- ========== -->
     <!-- Components -->
+    <!-- ========== -->
+
     <!-- Buttons -->
-    <color name="button_primary">@color/white</color>
-    <color name="button_secondary">@color/transparent</color>
     <color name="button_texticon">@color/mine</color>
     <color name="button_suggestion">@color/venus</color>
 
@@ -43,7 +17,7 @@
     <!-- Separator -->
     <color name="separator">@color/venus</color>
 
-    <!-- Address Bar -->
+    <!-- Address/Search Bar Background -->
     <color name="search_bar">@color/mine</color>
 
     <!-- History Chart -->
@@ -56,7 +30,7 @@
     <color name="seed_word">@color/mine</color>
     <color name="seed_word_selected">@color/venus</color>
     <color name="seed_word_stroke">@color/mike</color>
-    <color name="seed_word_text">?android:textColorPrimary</color>
+    <color name="seed_word_text">@color/text_primary</color>
     <color name="seed_word_text_selected">@color/venus</color>
 
 </resources>

@@ -71,7 +71,7 @@
     </style>
 
     <style name="Aw.Typography.Control">
-        <item name="android:textColor">?colorControlActivated</item>
+        <item name="android:textColor">?colorAccent</item>
         <item name="android:fontFamily">@font/font_semibold</item>
     </style>
 

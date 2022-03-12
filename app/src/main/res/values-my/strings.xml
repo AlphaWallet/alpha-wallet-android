@@ -905,4 +905,7 @@
     <string name="current_price">Current Price:</string>
     <string name="add_new_price_alert">Add New Price Alert</string>
     <string name="website_text">Website</string>
+    <string name="setting_theme_light">Light</string>
+    <string name="setting_theme_dark">Dark</string>
+    <string name="setting_theme_auto">Auto</string>
 </resources>

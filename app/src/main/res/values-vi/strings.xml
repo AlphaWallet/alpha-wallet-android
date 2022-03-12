@@ -882,4 +882,7 @@
     <string name="title_select_theme">Select Mode</string>
     <string name="title_network_info">Network Info</string>
     <string name="website_text">Website</string>
+    <string name="setting_theme_light">Light</string>
+    <string name="setting_theme_dark">Dark</string>
+    <string name="setting_theme_auto">Auto</string>
 </resources>

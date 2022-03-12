@@ -40,7 +40,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/standard_16"
                     android:layout_marginBottom="@dimen/tiny_8"
-                    android:text="Light" />
+                    android:text="@string/setting_theme_light" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/radio_theme_light"
@@ -67,7 +67,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/standard_16"
                     android:layout_marginBottom="@dimen/tiny_8"
-                    android:text="Dark" />
+                    android:text="@string/setting_theme_dark" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/radio_theme_dark"
@@ -94,7 +94,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/standard_16"
                     android:layout_marginBottom="@dimen/tiny_8"
-                    android:text="Auto" />
+                    android:text="@string/setting_theme_auto" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/radio_theme_auto"
@@ -104,6 +104,7 @@
             </LinearLayout>
 
         </RadioGroup>
+        
     </LinearLayout>
 
 </LinearLayout>

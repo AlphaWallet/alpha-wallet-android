@@ -1,7 +1,6 @@
 package com.alphawallet.app.service;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -14,12 +13,8 @@ import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
-import com.alphawallet.app.walletconnect.TransactionDialogBuilder;
-import com.alphawallet.app.walletconnect.entity.BaseRequest;
-import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
-import com.alphawallet.app.walletconnect.entity.SignTypedDataRequest;
+import com.alphawallet.app.walletconnect.WalletConnectV2SessionRequestHandler;
 import com.alphawallet.app.walletconnect.util.WCMethodChecker;
-import com.alphawallet.app.widget.SignMethodDialog;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
@@ -88,31 +83,8 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
         WalletConnect.Model.SettledSession settledSession = getSession(sessionRequest.getTopic());
 
         Activity topActivity = App.getInstance().getTopActivity();
-        topActivity.runOnUiThread(() -> {
-            Dialog dialog = createDialog(method, sessionRequest, settledSession, topActivity);
-            dialog.show();
-        });
-    }
-
-    private Dialog createDialog(String method, @NonNull WalletConnect.Model.SessionRequest sessionRequest, WalletConnect.Model.SettledSession settledSession, Activity topActivity)
-    {
-        boolean sendTransaction = "eth_sendTransaction".equals(method);
-        boolean signTransaction = "eth_signTransaction".equals(method);
-        if (sendTransaction || signTransaction)
-        {
-            return new TransactionDialogBuilder(topActivity, sessionRequest, settledSession).build(this, signTransaction);
-        }
-
-        BaseRequest request = null;
-        if ("personal_sign".equals(method))
-        {
-            request = new SignPersonalMessageRequest(sessionRequest.getRequest().getParams());
-        } else if ("eth_signTypedData".equals(method))
-        {
-            request = new SignTypedDataRequest(sessionRequest.getRequest().getParams());
-        }
-
-        return new SignMethodDialog(topActivity, settledSession, sessionRequest, request);
+        WalletConnectV2SessionRequestHandler handler = new WalletConnectV2SessionRequestHandler(sessionRequest, settledSession, topActivity, this);
+        handler.handle(method);
     }
 
     private WalletConnect.Model.SettledSession getSession(String topic)

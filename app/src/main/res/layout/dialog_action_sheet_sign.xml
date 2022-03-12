@@ -9,7 +9,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="60dp">
+        android:minHeight="@dimen/action_sheet_header">
 
         <ImageView
             android:id="@+id/image_close"

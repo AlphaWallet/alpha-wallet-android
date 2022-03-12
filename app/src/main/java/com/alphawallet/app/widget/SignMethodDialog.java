@@ -120,7 +120,8 @@ public class SignMethodDialog extends BottomSheetDialog
             }
         });
 
-        if (signable.getMessageType() == SignMessageType.SIGN_PERSONAL_MESSAGE)
+        if (signable.getMessageType() == SignMessageType.SIGN_PERSONAL_MESSAGE
+                || signable.getMessageType() == SignMessageType.SIGN_MESSAGE)
         {
             message.setText(Hex.hexToUtf8(signable.getMessage()));
         } else

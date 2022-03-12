@@ -48,11 +48,19 @@ public class WalletConnectV2SessionRequestHandler
                 return ethSignTransaction();
             case "personal_sign":
                 return personalSign();
+            case "eth_sign":
+                return ethSign();
             case "eth_signTypedData":
                 return ethSignTypedData();
             default:
                 return null;
         }
+    }
+
+    private Dialog ethSign()
+    {
+        BaseRequest request = new SignRequest(sessionRequest.getRequest().getParams());
+        return new SignMethodDialog(activity, settledSession, sessionRequest, request);
     }
 
     @NonNull

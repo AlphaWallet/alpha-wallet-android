@@ -78,10 +78,10 @@
         <item name="switchStyle">@style/Aw.Component.Switch</item>
         <item name="checkboxStyle">@style/Aw.Component.CheckBox</item>
         <item name="radioButtonStyle">@style/Aw.Component.RadioButton</item>
-        <item name="bottomSheetDialogTheme">@style/Aw.Component.BottomSheetDialog</item>
+        <item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog</item>
         <item name="seedWordStyle">@style/Aw.Component.SeedWord</item>
         <item name="whatsNewEntryStyle">@style/Aw.Component.WhatsNewEntry</item>
-        <item name="materialAlertDialogTheme">@style/Aw.Component.AlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/AppTheme.AlertDialog</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -104,6 +104,23 @@
         <item name="android:textColorPrimaryInverse">@color/cod</item>
         <item name="android:textColorSecondary">@color/dusty</item>
         <item name="android:textColorSecondaryInverse">@color/cod</item>
+    </style>
+
+    <style name="AppTheme.AlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="colorSurface">?colorBackgroundFloating</item>
+    </style>
+
+    <style name="AppTheme.BottomSheetDialog" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="bottomSheetStyle">@style/Aw.Component.BottomSheet</item>
+        <item name="colorSecondary">@color/brand</item>
+        <item name="colorControlNormal">@color/surface_inverse</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textColorSecondaryInverse">@color/text_secondary_inverse</item>
     </style>
 
 </resources>

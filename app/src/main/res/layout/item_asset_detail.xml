@@ -45,7 +45,9 @@
             android:background="@color/transparent"
             android:padding="@dimen/mini_4"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_expand_more" />
+            android:src="@drawable/ic_expand_more"
+            custom:tint="?colorControlNormal" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -89,4 +91,5 @@
             android:layout_height="wrap_content"
             tools:text="A narcissist drew herself." />
     </LinearLayout>
+
 </LinearLayout>

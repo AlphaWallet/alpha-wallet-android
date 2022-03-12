@@ -28,23 +28,6 @@
         <item name="android:textSize">@dimen/sp17</item>
     </style>
 
-    <style name="Aw.Component.AlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
-        <item name="colorSurface">?colorBackgroundFloating</item>
-    </style>
-
-    <style name="Aw.Component.BottomSheetDialog" parent="Theme.MaterialComponents.BottomSheetDialog">
-        <item name="android:windowIsFloating">false</item>
-        <item name="android:statusBarColor">@color/transparent</item>
-        <item name="android:windowSoftInputMode">adjustResize</item>
-        <item name="bottomSheetStyle">@style/Aw.Component.BottomSheet</item>
-        <item name="colorSecondary">@color/brand</item>
-        <item name="colorBackgroundFloating">@color/background_floating</item>
-        <item name="android:textColorPrimary">@color/text_primary</item>
-        <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
-        <item name="android:textColorSecondary">@color/text_secondary</item>
-        <item name="android:textColorSecondaryInverse">@color/text_secondary_inverse</item>
-    </style>
-
     <style name="Aw.Component.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
         <item name="backgroundTint">?colorBackgroundFloating</item>
     </style>

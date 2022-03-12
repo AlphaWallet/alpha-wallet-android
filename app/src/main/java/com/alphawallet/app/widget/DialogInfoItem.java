@@ -39,7 +39,7 @@ public class DialogInfoItem extends LinearLayout {
         boolean showAction = a.getBoolean(R.styleable.DialogInfoItem_showActionText, false);
         setLabel(a.getString(R.styleable.DialogInfoItem_title));
         setMessage(a.getString(R.styleable.DialogInfoItem_text));
-        actionText.setVisibility( showAction ? VISIBLE : GONE);
+        actionText.setVisibility( showAction ? VISIBLE : INVISIBLE);
     }
 
     public void setLabel(String label) {

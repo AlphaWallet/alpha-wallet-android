@@ -70,6 +70,9 @@
     <dimen name="double_massive_88">88dp</dimen>
     <dimen name="hundred_100">100dp</dimen>
     <dimen name="horizontal_toolbar_progress_height">3dp</dimen>
+
+    <!-- Component Dimens -->
     <dimen name="dialog_corner_radius">4dp</dimen>
+    <dimen name="action_sheet_header">60dp</dimen>
 
 </resources>

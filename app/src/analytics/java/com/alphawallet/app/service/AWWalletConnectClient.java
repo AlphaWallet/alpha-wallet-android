@@ -18,6 +18,7 @@ import com.alphawallet.app.walletconnect.TransactionDialogBuilder;
 import com.alphawallet.app.walletconnect.entity.BaseRequest;
 import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
 import com.alphawallet.app.walletconnect.entity.SignTypedDataRequest;
+import com.alphawallet.app.walletconnect.util.WCMethodChecker;
 import com.alphawallet.app.widget.SignMethodDialog;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
@@ -76,6 +77,12 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
     {
         String method = sessionRequest.getRequest().getMethod();
 
+        if (!WCMethodChecker.includes(method))
+        {
+            reject(sessionRequest);
+            return;
+        }
+
         Timber.tag("seaborn").d("onSessionRequest - method: " + sessionRequest.getRequest().getMethod() + ", params:" + sessionRequest.getRequest().getParams());
 
         WalletConnect.Model.SettledSession settledSession = getSession(sessionRequest.getTopic());
@@ -104,6 +111,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
         {
             request = new SignTypedDataRequest(sessionRequest.getRequest().getParams());
         }
+
         return new SignMethodDialog(topActivity, settledSession, sessionRequest, request);
     }
 

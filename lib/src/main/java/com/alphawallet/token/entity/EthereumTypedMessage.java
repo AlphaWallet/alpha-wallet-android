@@ -50,13 +50,6 @@ public class EthereumTypedMessage implements Signable
         this.leafPosition = callbackId;
     }
 
-    private void parseV4(String messageData, CryptoFunctionsInterface cryptoFunctions)
-    {
-        this.structuredData = cryptoFunctions.getStructuredData(messageData);
-        this.userMessage = cryptoFunctions.formatEIP721Message(messageData);
-        messageType = SignMessageType.SIGN_TYPED_DATA_V4;
-    }
-
     private void parseV3(String messageData, CryptoFunctionsInterface cryptoFunctions)
     {
         this.structuredData = cryptoFunctions.getStructuredData(messageData);

@@ -17,7 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -39,10 +39,10 @@ import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.ImportWalletViewModel;
-import com.alphawallet.app.viewmodel.ImportWalletViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,13 +58,15 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 import static com.alphawallet.app.C.ErrorCode.ALREADY_ADDED;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
+@AndroidEntryPoint
 public class ImportWalletActivity extends BaseActivity implements OnImportSeedListener, ImportWalletCallback, OnImportKeystoreListener, OnImportPrivateKeyListener
 {
     private enum ImportType
@@ -74,15 +76,12 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
 
     private final List<Pair<String, Fragment>> pages = new ArrayList<>();
 
-    @Inject
-    ImportWalletViewModelFactory importWalletViewModelFactory;
     ImportWalletViewModel importWalletViewModel;
     private AWalletAlertDialog dialog;
     private ImportType currentPage;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_import_wallet);
@@ -99,48 +98,56 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         pages.add(ImportType.PRIVATE_KEY_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.tab_private_key), ImportPrivateKeyFragment.create()));
         if (isWatch) pages.add(ImportType.WATCH_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.watch_wallet), SetWatchWalletFragment.create()));
 
-        ViewPager viewPager = findViewById(R.id.viewPager);
-        viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
-        viewPager.setOffscreenPageLimit(4);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        ViewPager2 viewPager = findViewById(R.id.viewPager);
+        viewPager.setAdapter(new TabPagerAdapter(this, pages));
+        viewPager.setOffscreenPageLimit(pages.size());
+
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
+            }
 
             @Override
             public void onPageSelected(int position) {
+                super.onPageSelected(position);
                 int oldPos = currentPage.ordinal();
                 currentPage = ImportType.values()[position];
                 handlePageChange(oldPos, position);
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) { }
+            public void onPageScrollStateChanged(int state) {
+                super.onPageScrollStateChanged(state);
+            }
         });
 
         TabLayout tabLayout = findViewById(R.id.tabLayout);
-        tabLayout.setupWithViewPager(viewPager);
-
+        new TabLayoutMediator(tabLayout, viewPager,
+                ((tab, position) -> tab.setText(pages.get(position).first))
+        ).attach();
         TabUtils.decorateTabLayout(this, tabLayout);
 
         if (isWatch)
         {
             tabLayout.setVisibility(View.GONE);
-            viewPager.setCurrentItem(ImportType.WATCH_FORM_INDEX.ordinal());
+            viewPager.setCurrentItem(ImportType.WATCH_FORM_INDEX.ordinal(), false);
+            viewPager.setUserInputEnabled(false);
             setTitle(getString(R.string.watch_wallet));
         }
         else
         {
+            viewPager.setUserInputEnabled(true);
             setTitle(getString(R.string.title_import));
         }
 
-        importWalletViewModel = new ViewModelProvider(this, importWalletViewModelFactory)
+        importWalletViewModel = new ViewModelProvider(this)
                 .get(ImportWalletViewModel.class);
         importWalletViewModel.progress().observe(this, this::onProgress);
         importWalletViewModel.error().observe(this, this::onError);
         importWalletViewModel.wallet().observe(this, this::onWallet);
         importWalletViewModel.badSeed().observe(this, this::onBadSeed);
         importWalletViewModel.watchExists().observe(this, this::onWatchExists);
-
 
     }
 
@@ -457,7 +464,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
                 showCameraDenied();
                 break;
             default:
-                Log.e("SEND", String.format(getString(R.string.barcode_error_format),
+                Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
                                             "Code: " + resultCode
                 ));
                 break;

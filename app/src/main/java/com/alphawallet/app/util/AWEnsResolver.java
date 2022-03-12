@@ -32,6 +32,7 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import timber.log.Timber;
 
 /**
  * Created by James on 29/05/2019.
@@ -46,6 +47,12 @@ public class AWEnsResolver extends EnsResolver
     private static final String OPENSEA_IMAGE_PREVIEW = "image_preview_url";
     private final Context context;
     private final OkHttpClient client;
+
+    static {
+        System.loadLibrary("keys");
+    }
+
+    public static native String getOpenSeaKey();
 
     public AWEnsResolver(Web3j web3j, Context context) {
         super(web3j, DEFAULT_SYNC_THRESHOLD);
@@ -82,7 +89,7 @@ public class AWEnsResolver extends EnsResolver
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
                 // no action
             }
             return ensName;
@@ -177,13 +184,19 @@ public class AWEnsResolver extends EnsResolver
     {
         String apiBase = OpenSeaService.apiMap.get(chainId);
         if (apiBase == null) return null;
+        apiBase = apiBase.substring(0, apiBase.lastIndexOf("asset") + 5);
 
-        Request request = new Request.Builder()
-                    .url(apiBase + "/api/v1/asset/" + tokenAddress + "/" + tokenId)
-                    .get()
-                    .build();
+        Request.Builder requestB = new Request.Builder()
+                    .url(apiBase + "/" + tokenAddress + "/" + tokenId)
+                    .get();
 
-        try (okhttp3.Response response = client.newCall(request).execute())
+        String apiKey = getOpenSeaKey();
+        if (!TextUtils.isEmpty(apiKey) && !apiKey.equals("..."))
+        {
+            requestB.addHeader("X-API-KEY", apiKey);
+        }
+
+        try (okhttp3.Response response = client.newCall(requestB.build()).execute())
         {
             String jsonResult = response.body().string();
             return new JSONObject(jsonResult);
@@ -196,7 +209,7 @@ public class AWEnsResolver extends EnsResolver
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return null;
@@ -290,7 +303,7 @@ public class AWEnsResolver extends EnsResolver
     public Single<String> resolveENSAddress(String ensName)
     {
         return Single.fromCallable(() -> {
-            if (BuildConfig.DEBUG) System.out.println("Verify: " + ensName);
+            Timber.d("Verify: " + ensName);
             String address = "";
             if (!isValidEnsName(ensName)) return "";
             try
@@ -299,25 +312,11 @@ public class AWEnsResolver extends EnsResolver
             }
             catch (Exception e)
             {
-                System.out.println("Verify: error: " + e.getMessage());
+                Timber.d("Verify: error: " + e.getMessage());
                 // no action
             }
             return address;
         }).onErrorReturnItem("");
-    }
-
-    public static boolean couldBeENS(String address)
-    {
-        if (address == null || address.length() == 0) return false;
-
-        String[] split = address.split("[.]");
-        if (split.length > 1)
-        {
-            String extension = split[split.length - 1];
-            return extension.length() > 0 && Utils.isAlNum(extension);
-        }
-
-        return false;
     }
 
     @Override
@@ -364,7 +363,7 @@ public class AWEnsResolver extends EnsResolver
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) Log.d("ENS", e.getMessage());
+            Timber.tag("ENS").d(e.getMessage());
         }
 
         return "";

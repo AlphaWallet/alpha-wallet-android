@@ -19,6 +19,9 @@ import com.alphawallet.app.widget.PasswordInputView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ImportPrivateKeyFragment extends ImportFragment
 {
     private static final OnImportPrivateKeyListener dummyOnImportPrivateKeyListener = key -> { };
@@ -50,9 +53,9 @@ public class ImportPrivateKeyFragment extends ImportFragment
 
     private void setupView()
     {
-        privateKey = getActivity().findViewById(R.id.input_private_key);
-        importButton = getActivity().findViewById(R.id.import_action_pk);
-        buttonHolder = getActivity().findViewById(R.id.button_holder_pk);
+        privateKey = getView().findViewById(R.id.input_private_key);
+        importButton = getView().findViewById(R.id.import_action_pk);
+        buttonHolder = getView().findViewById(R.id.button_holder_pk);
         importButton.setOnClickListener(this);
         privateKey.getEditText().addTextChangedListener(this);
         updateButtonState(false);
@@ -105,10 +108,7 @@ public class ImportPrivateKeyFragment extends ImportFragment
 
     private void updateButtonState(boolean enabled)
     {
-        importButton.setActivated(enabled);
-        importButton.setClickable(enabled);
-        int colorId = enabled ? R.color.nasty_green : R.color.inactive_green;
-        if (getContext() != null) importButton.setBackgroundColor(getContext().getColor(colorId));
+        importButton.setEnabled(enabled);
     }
 
     public void setOnImportPrivateKeyListener(OnImportPrivateKeyListener onImportPrivateKeyListener) {

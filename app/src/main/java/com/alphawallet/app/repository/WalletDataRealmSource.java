@@ -19,6 +19,7 @@ import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import timber.log.Timber;
 
 /**
  * Created by James on 8/11/2018.
@@ -72,7 +73,7 @@ public class WalletDataRealmSource {
                         {
                             //remove from realm
                             Wallet gone = deleteWallet(o).subscribeOn(Schedulers.io()).blockingGet();
-                            System.out.println("DELETED WALLET: " + gone.address);
+                            Timber.d("DELETED WALLET: " + gone.address);
                         }
                     }
                 }
@@ -101,7 +102,7 @@ public class WalletDataRealmSource {
                 });
             }
 
-            if (BuildConfig.DEBUG) Log.d("RealmDebug", "populate " + walletList.size());
+            Timber.tag("RealmDebug").d("populate %s", walletList.size());
             return walletList.toArray(new Wallet[0]);
         });
     }
@@ -151,7 +152,7 @@ public class WalletDataRealmSource {
             }
         }
 
-        if (BuildConfig.DEBUG) Log.d("RealmDebug", "loadorcreate " + walletList.size());
+        Timber.tag("RealmDebug").d("loadorcreate " + walletList.size());
         return walletList;
     }
 
@@ -216,7 +217,7 @@ public class WalletDataRealmSource {
                     }
                 });
             } catch (Exception e) {
-                Log.e(TAG, "storeWallets: " + e.getMessage(), e);
+                Timber.e(e, "storeWallets: %s", e.getMessage());
             }
             return wallets;
         });
@@ -244,12 +245,12 @@ public class WalletDataRealmSource {
                 item.setENSName(wallet.ENSname);
                 item.setBalance(wallet.balance);
                 item.setENSAvatar(wallet.ENSAvatar);
-                if (BuildConfig.DEBUG) Log.d("RealmDebug", "storedwalletdata " + wallet.address);
+                Timber.tag("RealmDebug").d("storedwalletdata " + wallet.address);
             }, onSuccess);
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
             onSuccess.onSuccess();
         }
     }
@@ -263,7 +264,7 @@ public class WalletDataRealmSource {
                         .findFirst();
                 if (realmWallet != null) name = realmWallet.getName();
             } catch (Exception e) {
-                Log.e(TAG, "getName: " + e.getMessage(), e);
+                Timber.e(e, "getName: %s", e.getMessage());
             }
             return name;
         });
@@ -337,7 +338,7 @@ public class WalletDataRealmSource {
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
             try (Realm realm = realmManager.getWalletTypeRealmInstance())
             {
@@ -348,7 +349,7 @@ public class WalletDataRealmSource {
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             try (Realm instance = realmManager.getRealmInstance(wallet))
@@ -358,7 +359,7 @@ public class WalletDataRealmSource {
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             return wallet;
@@ -385,7 +386,7 @@ public class WalletDataRealmSource {
     {
         try (Realm realm = realmManager.getWalletTypeRealmInstance())
         {
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 RealmKeyType realmKey = r.where(RealmKeyType.class)
                         .equalTo("address", wallet.address, Case.INSENSITIVE)
                         .findFirst();
@@ -401,7 +402,7 @@ public class WalletDataRealmSource {
                 realmKey.setLastBackup(wallet.lastBackupTime);
                 realmKey.setAuthLevel(wallet.authLevel);
                 realmKey.setKeyModulus("");
-                if (BuildConfig.DEBUG) Log.d("RealmDebug", "storedKeyData " + wallet.address);
+                Timber.tag("RealmDebug").d("storedKeyData " + wallet.address);
             });
         }
     }
@@ -410,7 +411,7 @@ public class WalletDataRealmSource {
     {
         try (Realm realm = realmManager.getWalletDataRealmInstance())
         {
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 RealmWalletData item = r.where(RealmWalletData.class)
                         .equalTo("address", wallet.address, Case.INSENSITIVE)
                         .findFirst();
@@ -419,12 +420,12 @@ public class WalletDataRealmSource {
                 item.setENSName(wallet.ENSname);
                 item.setBalance(wallet.balance);
                 item.setENSAvatar(wallet.ENSAvatar);
-                if (BuildConfig.DEBUG) Log.d("RealmDebug", "storedwalletdata " + wallet.address);
+                Timber.tag("RealmDebug").d("storedwalletdata " + wallet.address);
             });
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 

@@ -57,7 +57,7 @@
     <dimen name="grid_icon_height">70dp</dimen>
 
     <!-- Standard Token Icon size -->
-    <dimen name="token_icon">43dp</dimen>
+    <dimen name="token_icon">40dp</dimen>
     <dimen name="token_icon_large">86dp</dimen>
 
     <!-- Dashboard -->
@@ -65,5 +65,9 @@
     <dimen name="divider_margin_top">27dp</dimen>
     <dimen name="already_label_margin_top">20dp</dimen>
     <dimen name="bottom_buttons_holder_margin_bottom">25dp</dimen>
+
+    <!-- Item Offset Decoration -->
+    <dimen name="grid_divider_offset">16dp</dimen>
+    <dimen name="list_divider_offset">0dp</dimen>
 
 </resources>

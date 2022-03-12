@@ -14,6 +14,7 @@ import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.CryptoFunctionsInterface;
 import com.alphawallet.token.entity.ProviderTypedData;
 
+import timber.log.Timber;
 import wallet.core.jni.Hash;
 
 public class CryptoFunctions implements CryptoFunctionsInterface
@@ -67,7 +68,7 @@ public class CryptoFunctions implements CryptoFunctionsInterface
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return msgData;
@@ -83,7 +84,7 @@ public class CryptoFunctions implements CryptoFunctionsInterface
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return new byte[0];

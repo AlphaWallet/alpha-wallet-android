@@ -18,7 +18,9 @@ import com.alphawallet.app.widget.PasswordInputView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class ImportKeystoreFragment extends ImportFragment
 {
     private static final OnImportKeystoreListener dummyOnImportKeystoreListener = (k, p) -> {};
@@ -53,13 +55,13 @@ public class ImportKeystoreFragment extends ImportFragment
 
     private void setupView()
     {
-        keystore = getActivity().findViewById(R.id.input_keystore);
-        password = getActivity().findViewById(R.id.input_password);
-        passwordText = getActivity().findViewById(R.id.text_password_notice);
-        importText = getActivity().findViewById(R.id.import_text);
+        keystore = getView().findViewById(R.id.input_keystore);
+        password = getView().findViewById(R.id.input_password);
+        passwordText = getView().findViewById(R.id.text_password_notice);
+        importText = getView().findViewById(R.id.import_text);
         passwordText.setVisibility(View.GONE);
         password.setVisibility(View.GONE);
-        importButton = getActivity().findViewById(R.id.import_action_ks);
+        importButton = getView().findViewById(R.id.import_action_ks);
         importButton.setOnClickListener(this);
         updateButtonState(false);
         keystore.getEditText().addTextChangedListener(this);
@@ -84,10 +86,7 @@ public class ImportKeystoreFragment extends ImportFragment
 
     private void updateButtonState(boolean enabled)
     {
-        importButton.setActivated(enabled);
-        importButton.setClickable(enabled);
-        int colorId = enabled ? R.color.nasty_green : R.color.inactive_green;
-        if (getContext() != null) importButton.setBackgroundColor(getContext().getColor(colorId));
+        importButton.setEnabled(enabled);
     }
 
     private void handleKeypress(View view)

@@ -1,11 +1,13 @@
 package com.alphawallet.app.entity.tokens;
 
 import static com.alphawallet.app.ui.widget.entity.ChainItem.CHAIN_ITEM_WEIGHT;
+import static com.alphawallet.app.ui.widget.holder.TokenHolder.CHECK_MARK;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
@@ -17,6 +19,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.widget.holder.TokenHolder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -46,8 +49,8 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress);
         this.lastUpdate = timeStamp;
         this.type = type;
-        this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum());
         this.balance = balance;
+        this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum());
         this.filterText = symbol + "'" + name;
         this.group = group;
     }
@@ -58,23 +61,23 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.lastUpdate = timeStamp;
         this.lastTxUpdate = lastTxUpdate;
         this.type = type;
-        this.nameWeight = 1000;
         this.balance = balance;
+        this.nameWeight = 1000;
         this.filterText = null;
         this.group = group;
     }
 
-    public TokenCardMeta(Token token)
+    public TokenCardMeta(Token token, String filterText)
     {
         this.tokenId = TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress());
         this.lastUpdate = token.updateBlancaTime;
         this.lastTxUpdate = token.lastTxCheck;
         this.type = token.getInterfaceSpec();
-        this.nameWeight = 1000;
         this.balance = token.balance.toString();
-        this.filterText = token.getShortSymbol() + "'" + token.getName(); //TODO: will not find AssetDefinition names
+        this.nameWeight = calculateTokenNameWeight(token.tokenInfo.chainId, token.tokenInfo.address, null, token.getName(), token.getSymbol(), isEthereum());
+        this.filterText = filterText;
         this.group = token.group;
-        this.isEnabled = true;
+        this.isEnabled = TextUtils.isEmpty(filterText) || !filterText.equals(CHECK_MARK);
     }
 
     protected TokenCardMeta(Parcel in)
@@ -82,7 +85,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         tokenId = in.readString();
         lastUpdate = in.readLong();
         lastTxUpdate = in.readLong();
-        nameWeight = in.readInt();
+        nameWeight = in.readLong();
         type = ContractType.values()[in.readInt()];
         balance = in.readString();
         filterText = in.readString();
@@ -137,7 +140,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     public boolean hasPositiveBalance()
     {
-        return !balance.equals("0");
+        return balance != null && !balance.equals("0");
     }
 
     public boolean hasValidName()
@@ -181,7 +184,10 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
             return CHAIN_ITEM_WEIGHT + 1 + EthereumNetworkBase.getChainOrdinal(chainId);
         }
 
-        if (TextUtils.isEmpty(name)) return Long.MAX_VALUE;
+        if (TextUtils.isEmpty(name))
+        {
+            return hasPositiveBalance() ? Long.MAX_VALUE - tokenAddress.hashCode() : Long.MAX_VALUE;
+        }
 
         int i = 4;
         int pos = 0;
@@ -260,7 +266,19 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     {
         float updateWeight = 0;
         //calculate balance update time
-        if (hasValidName())
+        if (isEthereum())
+        {
+            long currentTime = System.currentTimeMillis();
+            if (lastUpdate < currentTime - 30 * DateUtils.SECOND_IN_MILLIS)
+            {
+                updateWeight = 2.0f;
+            }
+            else
+            {
+                updateWeight = 1.0f;
+            }
+        }
+        else if (hasValidName())
         {
             if (isNFT())
             {

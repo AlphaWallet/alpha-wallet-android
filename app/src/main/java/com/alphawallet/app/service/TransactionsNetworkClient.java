@@ -47,6 +47,7 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import timber.log.Timber;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
@@ -54,6 +55,8 @@ import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
 
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
@@ -66,10 +69,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 23; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 25; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY;
     private final String BSC_EXPLORER_API_KEY;
+    private final String POLYGONSCAN_API_KEY;
 
     private final OkHttpClient httpClient;
     private final Gson gson;
@@ -82,6 +86,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     public static native String getEtherscanKey();
     public static native String getBSCExplorerKey();
     public static native String getCovalentKey();
+    public static native String getPolygonScanKey();
 
     public TransactionsNetworkClient(
             OkHttpClient httpClient,
@@ -94,6 +99,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
         BSC_EXPLORER_API_KEY = getBSCExplorerKey().length() > 0 ? "&apikey=" + getBSCExplorerKey() : "";
         ETHERSCAN_API_KEY = "&apikey=" + getEtherscanKey();
+        POLYGONSCAN_API_KEY = getPolygonScanKey().length() > 3 ? "&apikey=" + getPolygonScanKey() : "";
     }
 
     @Override
@@ -179,7 +185,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
             finally
             {
@@ -385,14 +391,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 sb.append(pageSize);
             }
 
-            if (networkInfo.etherscanAPI.contains("etherscan"))
-            {
-                sb.append(ETHERSCAN_API_KEY);
-            }
-            else if (networkInfo.chainId == BINANCE_TEST_ID || networkInfo.chainId == BINANCE_MAIN_ID)
-            {
-                sb.append(BSC_EXPLORER_API_KEY);
-            }
+            sb.append(getNetworkAPIToken(networkInfo));
 
             fullUrl = sb.toString();
 
@@ -423,7 +422,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
         }
 
@@ -452,7 +451,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 {
                     long oldestBlockRead = getOldestBlockRead(instance, network.chainId, oldestTxTime);
                     long oldestPossibleBlock = getFirstTransactionBlock(instance, network.chainId, walletAddress);
-                    if (BuildConfig.DEBUG) System.out.println("DIAGNOSE: " + oldestBlockRead + " : " + oldestPossibleBlock);
+                    Timber.d("DIAGNOSE: " + oldestBlockRead + " : " + oldestPossibleBlock);
                     if (oldestBlockRead > 0 && oldestBlockRead != oldestPossibleBlock)
                     {
                         syncDownwards(null, instance, walletAddress, network, walletAddress, oldestBlockRead);
@@ -514,7 +513,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
             return eventCount;
         }).observeOn(Schedulers.io());
@@ -540,7 +539,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 token = createNewERC721Token(eventMap.get(contract).get(0), networkInfo, walletAddress, false);
                 newToken = true;
-                if (BuildConfig.DEBUG) Log.d(TAG, "Discover NFT: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
+                Timber.tag(TAG).d("Discover NFT: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
             }
             else if (tokenDecimal >= 0 && token == null)
             {
@@ -549,12 +548,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                         tokenDecimal > 0 ? ContractType.ERC20 : ContractType.MAYBE_ERC20);
                 token.setTokenWallet(walletAddress);
                 newToken = true;
-                if (BuildConfig.DEBUG) Log.d(TAG, "Discover ERC20: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
+                Timber.tag(TAG).d("Discover ERC20: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
             }
             else if (token == null)
             {
                 svs.addUnknownTokenToCheck(new ContractAddress(networkInfo.chainId, ev0.contractAddress));
-                if (BuildConfig.DEBUG) Log.d(TAG, "Discover unknown: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
+                Timber.tag(TAG).d("Discover unknown: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
                 continue;
             }
 
@@ -631,12 +630,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         String result = "0";
         if (currentBlock == 0) currentBlock = 1;
 
-        String APIKEY_TOKEN = networkInfo.etherscanAPI.contains("etherscan") ? ETHERSCAN_API_KEY : "";
         String fullUrl = networkInfo.etherscanAPI + "module=account&action=" + queryType +
                 "&startblock=" + currentBlock + "&endblock=9999999999" +
                 "&address=" + walletAddress +
                 "&page=1&offset=" + TRANSFER_RESULT_MAX +
-                "&sort=asc" + APIKEY_TOKEN;
+                "&sort=asc" + getNetworkAPIToken(networkInfo);
 
         Request request = new Request.Builder()
                 .url(fullUrl)
@@ -665,6 +663,26 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
 
         return result;
+    }
+
+    private String getNetworkAPIToken(NetworkInfo networkInfo)
+    {
+        if (networkInfo.etherscanAPI.contains("etherscan"))
+        {
+            return ETHERSCAN_API_KEY;
+        }
+        else if (networkInfo.chainId == BINANCE_TEST_ID || networkInfo.chainId == BINANCE_MAIN_ID)
+        {
+            return BSC_EXPLORER_API_KEY;
+        }
+        else if (networkInfo.chainId == MATIC_ID || networkInfo.chainId == MATIC_TEST_ID)
+        {
+            return POLYGONSCAN_API_KEY;
+        }
+        else
+        {
+            return "";
+        }
     }
 
     //TODO: Instead of reading transfers we can read balances and track changes for ERC20 tokens
@@ -705,7 +723,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
             return new EtherscanTransaction[0];
         }
 
@@ -850,7 +868,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         try
         {
-            instance.executeTransactionAsync(r -> {
+            instance.executeTransaction(r -> {
                 RealmToken realmToken = r.where(RealmToken.class)
                         .equalTo("address", databaseKey(chainId, walletAddress))
                         .findFirst();
@@ -952,7 +970,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         else
         {
-            if (BuildConfig.DEBUG) System.out.println("Prevented collision: " + tokenAddress);
+            Timber.d("Prevented collision: %s", tokenAddress);
         }
     }
 

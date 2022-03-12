@@ -9,6 +9,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
+
 
 /**
  * Created by James on 22/02/2019.
@@ -112,7 +114,7 @@ public class EthereumProtocolParser
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
             return null;
         }
 

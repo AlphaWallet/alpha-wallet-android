@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static com.alphawallet.app.util.AWEnsResolver.couldBeENS;
+import timber.log.Timber;
 
 /**
  * Created by marat on 10/11/17.
@@ -65,7 +65,7 @@ public class QRParser {
             if (Utils.isAddressValid(address))
                 return address;
 
-            if (couldBeENS(address))
+            if (ENSHandler.couldBeENS(address))
             {
                 return address;
             }
@@ -167,7 +167,7 @@ public class QRParser {
         catch (Exception e)
         {
             // No action
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return false;

@@ -10,6 +10,11 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.TokenInfoFragment;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class TokenInfoViewModel extends BaseViewModel {
     private final MutableLiveData<String> marketPrice = new MutableLiveData<>();
     private final MutableLiveData<TokenPortfolio> portfolio = new MutableLiveData<>();
@@ -19,6 +24,7 @@ public class TokenInfoViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
 
+    @Inject
     public TokenInfoViewModel(AssetDefinitionService assetDefinitionService,
                               TokensService tokensService)
     {

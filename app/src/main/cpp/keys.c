@@ -21,6 +21,12 @@
 #   define HAS_OS 0
 #endif
 
+#ifdef PSKEY
+#   define HAS_PS 1
+#else
+#   define HAS_PS 0
+#endif
+
 JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_repository_EthereumNetworkBase_getAmberDataKey( JNIEnv* env, jobject thiz )
 {
@@ -159,10 +165,18 @@ JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_service_GasService_getPolygonScanKey(JNIEnv *env, jobject thiz) {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, polygonScanKey);
+#elif (HAS_PS == 1)
+    return (*env)->NewStringUTF(env, PSKEY);
 #else
     const jstring key = "";
     return (*env)->NewStringUTF(env, key);
 #endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_service_TransactionsNetworkClient_getPolygonScanKey( JNIEnv* env, jclass thiz )
+{
+    return Java_com_alphawallet_app_service_GasService_getPolygonScanKey(env, thiz);
 }
 
 JNIEXPORT jstring JNICALL
@@ -187,4 +201,10 @@ Java_com_alphawallet_app_service_OpenSeaService_getOpenSeaKey( JNIEnv* env, jcla
     const jstring key = "...";
     return (*env)->NewStringUTF(env, key);
 #endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_util_AWEnsResolver_getOpenSeaKey( JNIEnv* env, jclass thiz )
+{
+    return Java_com_alphawallet_app_service_OpenSeaService_getOpenSeaKey(env, thiz);
 }

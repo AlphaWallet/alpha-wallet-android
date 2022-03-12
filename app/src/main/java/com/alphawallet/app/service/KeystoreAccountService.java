@@ -45,6 +45,7 @@ import java.util.Map;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 
@@ -328,10 +329,10 @@ public class KeystoreAccountService implements AccountKeystoreService
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
-        if (BuildConfig.DEBUG) Log.d("RealmDebug", "gotcredentials + " + address);
+        Timber.tag("RealmDebug").d("gotcredentials + %s", address);
         return credentials;
     }
 
@@ -462,7 +463,7 @@ public class KeystoreAccountService implements AccountKeystoreService
         }
         catch (IndexOutOfBoundsException e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return sigBytes;

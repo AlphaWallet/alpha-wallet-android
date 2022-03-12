@@ -679,6 +679,7 @@
     <string name="invalid_walletconnect_session">无效的WalletConnect会话</string>
     <string name="restart_walletconnect_session">先前的WalletConnect会话未正确终止。请返回网页并断开连接，然后开始新的会话。</string>
     <string name="invalid_walletconnect_data">无效的WalletConnect二维码数据</string>
+    <string name="walletconnect_timeout">Connection attempt timed out. Please cancel the request from the Dapp and start a new session.</string>
     <string name="label_nonce">Nonce</string>
     <string name="payload">数据</string>
     <string name="signed_transactions">签署的交易</string>
@@ -804,13 +805,14 @@
     <string name="add_chain_dialog_message">This site is requesting you to enable and switch to the %1$s Chain with chain ID: %2$s. This will reload the page</string>
     <string name="switch_chain_request">Switch Chain Request</string>
     <string name="no_chart_data_available">No chart data available</string>
-    <string name="wallet_total_change">%1$s (%2$.2f%%) 今天</string>
+    <string name="wallet_total_change">%1$s (%2$s%%) 今天</string>
     <string name="title_wallets_summary">Wallets</string>
     <string name="summary">Summary</string>
     <string name="network_menu_item">Network: %1$s</string>
     <string name="action_set_as_homepage">Set as Home Page</string>
     <string name="action_networks">网络</string>
     <string name="exchange_with_oneinch">Exchange with 1inch</string>
+    <string name="swap">Swap</string>
     <string name="action_send_to_this_address">Send to this Address</string>
     <string name="stay_updated">Stay Updated</string>
     <string name="email_prompt_hint">We send an email announcing major features. Would you like to receive such emails? (max 1 email per week)</string>
@@ -843,5 +845,17 @@
     <string name="unknown_network_title">Unkown Network</string>
     <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
     <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
+    <string name="wc_no_active_sessions">No Active sessions</string>
+    <string name="wc_connect_wallet">Connect Wallet</string>
     <string name="error_seed_phrase_must_words">助记符只能包含单词</string>
+    <string name="label_token_id">Token #</string>
+    <string name="label_external_link">External Link</string>
+    <string name="label_description">Description</string>
+    <string name="label_details">Details</string>
+    <string name="send_multiple_tokens">Send Multiple Tokens</string>
+    <string name="switch_to_grid_view">Switch to Grid View</string>
+    <string name="switch_to_list_view">Switch to List View</string>
+    <string name="reload_metadata">Reload Metadata</string>
+    <string name="testnet">Testnet</string>
+    <string name="website_text">Website</string>
 </resources>

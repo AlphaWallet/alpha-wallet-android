@@ -41,6 +41,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by JB on 8/07/2020.
@@ -204,7 +205,7 @@ public class TransactionsService
         {
             tokensService.checkingChain(chainId);
         }
-        if (BuildConfig.DEBUG) Log.d(TAG,"Check transfers: " + chainId + " : NFT=" + isNFT);
+        Timber.tag(TAG).d("Check transfers: %s : NFT=%s", chainId, isNFT);
         eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -214,7 +215,7 @@ public class TransactionsService
     private void gotReadErr(Throwable e)
     {
         eventFetch = null;
-        if (BuildConfig.DEBUG) e.printStackTrace();
+        Timber.e(e);
     }
 
     private void handleMoveCheck(long chainId, boolean isNFT)
@@ -235,7 +236,7 @@ public class TransactionsService
             {
                 String tick = (t.isEthereum() && getPendingChains().contains(t.tokenInfo.chainId)) ? "*" : "";
                 if (BuildConfig.DEBUG)
-                    Log.d(TAG,"Transaction check for: " + t.tokenInfo.chainId + " (" + t.getNetworkName() + ") " + tick);
+                    Timber.tag(TAG).d("Transaction check for: %s (%s) %s", t.tokenInfo.chainId, t.getNetworkName(), tick);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId);
                 fetchTransactionDisposable =
                         transactionsClient.storeNewTransactions(tokensService.getCurrentAddress(), network, t.getAddress(), t.lastBlockCheck)
@@ -321,7 +322,7 @@ public class TransactionsService
         fetchTransactionDisposable = null;
         if (transactions.length == 0) return;
 
-        if (BuildConfig.DEBUG) Log.d(TAG, "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
+        Timber.tag(TAG).d("Queried for %s : %s Network transactions", token.tokenInfo.name, transactions.length);
 
         //should we only check here for chain moves?
 
@@ -397,7 +398,7 @@ public class TransactionsService
 
     public void markPending(Transaction tx)
     {
-        if (BuildConfig.DEBUG) Log.d(TAG,"Marked Pending Tx Chain: " + tx.chainId);
+        Timber.tag(TAG).d("Marked Pending Tx Chain: %s", tx.chainId);
         tokensService.markChainPending(tx.chainId);
     }
 
@@ -424,7 +425,7 @@ public class TransactionsService
     {
         final String currentWallet = tokensService.getCurrentAddress();
         Transaction[] pendingTxs = fetchPendingTransactions();
-        if (BuildConfig.DEBUG) Log.d(TAG, "Checking " + pendingTxs.length + " Transactions");
+        Timber.tag(TAG).d("Checking %s Transactions", pendingTxs.length);
         for (final Transaction tx : pendingTxs)
         {
             Web3j web3j = TokenRepository.getWeb3jService(tx.chainId);
@@ -497,7 +498,7 @@ public class TransactionsService
                 case TRANSFER_FROM:
                 case RECEIVED:
                 case SEND:
-                    if (BuildConfig.DEBUG) Log.d(TAG, "Trigger check for " + t.getFullName());
+                    Timber.tag(TAG).d("Trigger check for %s", t.getFullName());
                     //setup next check to be for this chain
                     setNextTransferCheck(transaction.chainId, t.isNonFungible());
                 default:

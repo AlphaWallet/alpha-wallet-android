@@ -14,6 +14,8 @@ import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SC
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import timber.log.Timber;
+
 public class TokenscriptFunctionTest implements ParseResult {
     //have to put file as a string because app cannot read files
     private final String entryTokenTestFile = "<ts:token xmlns:ethereum=\"urn:ethereum:constantinople\" xmlns:ts=\"http://tokenscript.org/2020/06/tokenscript\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" custodian=\"false\" xsi:schemaLocation=\"http://tokenscript.org/2020/06/tokenscript http://tokenscript.org/2020/06/tokenscript.xsd\">\n" +
@@ -555,17 +557,17 @@ public class TokenscriptFunctionTest implements ParseResult {
         switch (parseResult)
         {
             case OK:
-                System.out.println("Schema date is correct.");
+                Timber.d("Schema date is correct.");
                 break;
             case XML_OUT_OF_DATE:
-                System.out.println("Parsing outdated schema. It's an older schema but it checks out.");
+                Timber.d("Parsing outdated schema. It's an older schema but it checks out.");
                 break;
             case PARSER_OUT_OF_DATE:
-                System.out.println("Parser attempting to parse future schema. Code base needs to be updated.");
+                Timber.d("Parser attempting to parse future schema. Code base needs to be updated.");
                 fail();
                 break;
             case PARSE_FAILED:
-                System.out.println("Parser Error.");
+                Timber.d("Parser Error.");
                 fail();
                 break;
         }

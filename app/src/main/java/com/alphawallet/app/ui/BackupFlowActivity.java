@@ -30,6 +30,9 @@ import static com.alphawallet.app.entity.BackupState.ENTER_BACKUP_STATE_HD;
 import static com.alphawallet.app.entity.BackupState.ENTER_JSON_BACKUP;
 import static com.alphawallet.app.entity.BackupState.UPGRADE_KEY_SECURITY;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class BackupFlowActivity extends BaseActivity implements
         View.OnClickListener,
         StandardFunctionInterface {

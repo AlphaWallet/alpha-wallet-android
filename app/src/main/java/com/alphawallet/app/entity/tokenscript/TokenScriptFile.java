@@ -1,7 +1,13 @@
 package com.alphawallet.app.entity.tokenscript;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
+
+import com.alphawallet.app.R;
+import com.alphawallet.token.entity.SigReturnType;
+import com.alphawallet.token.entity.XMLDsigDescriptor;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,10 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
-import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.R;
-import com.alphawallet.token.entity.SigReturnType;
-import com.alphawallet.token.entity.XMLDsigDescriptor;
+import timber.log.Timber;
 
 public class TokenScriptFile extends File
 {
@@ -56,14 +59,18 @@ public class TokenScriptFile extends File
             try
             {
                 if (!pathname.isEmpty() && pathname.startsWith("/")) pathname = pathname.substring(1); //.getAbsolute() adds a '/' to the filename
-                InputStream is = context.getResources().getAssets().open(pathname);
-                if (is.available() > 0) resourceFile = true;
-                is.close();
-                fileName = pathname; // correct the filename if required
+                File fPathName = new File(pathname);
+                if (fPathName.exists() && fPathName.isFile())
+                {
+                    InputStream is = context.getResources().getAssets().open(pathname);
+                    if (is.available() > 0) resourceFile = true;
+                    is.close();
+                    fileName = pathname; // correct the filename if required
+                }
             }
-            catch (IOException e)
+            catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);;
             }
         }
     }
@@ -77,7 +84,7 @@ public class TokenScriptFile extends File
         }
         catch (IOException e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return null;

@@ -8,6 +8,7 @@ import android.os.IBinder;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepository;
@@ -26,12 +27,14 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import androidx.annotation.Nullable;
-import dagger.android.AndroidInjection;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+@AndroidEntryPoint
 public class PriceAlertsService extends Service
 {
 
@@ -79,7 +82,6 @@ public class PriceAlertsService extends Service
     public void onCreate()
     {
         super.onCreate();
-        AndroidInjection.inject(this);
 
         genericWalletInteract
                 .find()
@@ -131,7 +133,12 @@ public class PriceAlertsService extends Service
                         {
                             return;
                         }
-                        double currentTokenPrice = Double.parseDouble(tokensService.getTokenTicker(token).price);
+                        TokenTicker tokenTicker = tokensService.getTokenTicker(token);
+                        if (tokenTicker == null)
+                        {
+                            return;
+                        }
+                        double currentTokenPrice = Double.parseDouble(tokenTicker.price);
 
                         if (priceAlert.match(rate, currentTokenPrice))
                         {

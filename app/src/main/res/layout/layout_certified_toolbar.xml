@@ -6,15 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
     android:background="@color/colorPrimary"
-    android:contentInsetEnd="0dp"
-    android:contentInsetLeft="0dp"
-    android:contentInsetRight="0dp"
     android:contentInsetStart="0dp"
+    android:contentInsetLeft="0dp"
+    android:contentInsetEnd="0dp"
+    android:contentInsetRight="0dp"
     android:theme="@style/AppTheme.Toolbar"
     app:contentInsetEnd="0dp"
     app:contentInsetLeft="0dp"
     app:contentInsetRight="0dp"
     app:contentInsetStart="0dp"
+    app:contentInsetStartWithNavigation="0dp"
     app:popupTheme="@style/AppTheme.PopupOverlay"
     app:titleTextAppearance="@style/AppTheme.Toolbar.Title">
 
@@ -22,15 +23,14 @@
         android:id="@+id/image_lock"
         android:layout_width="30dp"
         android:layout_height="30dp"
+        android:src="@mipmap/ic_locked"
         android:visibility="gone"
-        tools:visibility="visible"
-        android:src="@mipmap/ic_locked"/>
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/toolbar_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
         android:layout_gravity="center"
         android:ellipsize="end"
         android:fontFamily="@font/font_semibold"
@@ -38,7 +38,7 @@
         android:paddingHorizontal="15dp"
         android:singleLine="true"
         android:textColor="@color/toolbar_text_color"
-        tools:text="Wrapped Ether (WETH)"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        tools:text="Wrapped Ether (WETH)" />
 
 </androidx.appcompat.widget.Toolbar>

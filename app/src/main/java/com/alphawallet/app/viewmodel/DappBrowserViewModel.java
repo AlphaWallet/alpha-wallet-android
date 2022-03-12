@@ -48,6 +48,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -57,6 +58,9 @@ import io.realm.Realm;
 
 import static com.alphawallet.app.C.Key.WALLET;
 
+import javax.inject.Inject;
+
+@HiltViewModel
 public class DappBrowserViewModel extends BaseViewModel  {
     private static final int BALANCE_CHECK_INTERVAL_SECONDS = 20;
 
@@ -73,6 +77,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     @Nullable
     private Disposable balanceTimerDisposable;
 
+    @Inject
     DappBrowserViewModel(
             GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,

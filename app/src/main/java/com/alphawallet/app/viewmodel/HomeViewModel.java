@@ -32,6 +32,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -49,6 +50,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
+import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportWalletActivity;
@@ -75,12 +77,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import timber.log.Timber;
 
+@HiltViewModel
 public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
     public static final String ALPHAWALLET_DIR = "AlphaWallet";
@@ -114,6 +121,7 @@ public class HomeViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> splashActivity = new MutableLiveData<>();
     private BottomSheetDialog dialog;
 
+    @Inject
     HomeViewModel(
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
@@ -210,7 +218,7 @@ public class HomeViewModel extends BaseViewModel {
                 filterPass = !wallet.address.equals(linkAddress);
             }
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.tag(TAG).e(e);
         }
 
         return filterPass;
@@ -343,7 +351,7 @@ public class HomeViewModel extends BaseViewModel {
 
     private void onENSError(Throwable throwable)
     {
-        if (BuildConfig.DEBUG) throwable.printStackTrace();
+        Timber.tag(TAG).e(throwable);
     }
 
     public void setErrorCallback(FragmentMessenger callback)
@@ -602,7 +610,7 @@ public class HomeViewModel extends BaseViewModel {
                         return new Gson().<List<GitHubRelease>>fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>() {
                         }.getType());
                     } catch (Exception e) {
-                        if (BuildConfig.DEBUG) e.printStackTrace();
+                        Timber.tag(TAG).e(e);
                     }
                     return null;
                 }).subscribeOn(Schedulers.io())
@@ -703,5 +711,12 @@ public class HomeViewModel extends BaseViewModel {
             localeRepository.setLocale(context, localeRepository.getActiveLocale());
         }
         currencyRepository.setDefaultCurrency(preferenceRepository.getDefaultCurrency());
+    }
+
+    public void sendMsgPumpToWC(Context context) {
+        Timber.d("Start WC service");
+        Intent si = new Intent(context, WalletConnectService.class);
+        si.setAction(String.valueOf(WalletConnectActions.MSG_PUMP.ordinal()));
+        context.startService(si);
     }
 }

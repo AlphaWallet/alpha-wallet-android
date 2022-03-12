@@ -1,65 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
-    android:orientation="vertical">
+    android:background="@color/colorPrimary">
 
     <include layout="@layout/layout_white_toolbar" />
 
-    <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/layoutButtons"
+        android:layout_below="@id/toolbar">
 
-        <TextView
-            android:id="@+id/text_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center_horizontal"
-            android:lineSpacingMultiplier="1.2"
-            android:paddingStart="50dp"
-            android:paddingEnd="50dp"
-            android:text="@string/backup_seed_phrase"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="28sp" />
-
-        <ImageView
-            android:id="@+id/backup_seed_image"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/text_title"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="16dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/seed"
-            android:visibility="visible" />
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/text_detail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/backup_seed_image"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="16dp"
-            android:fontFamily="@font/font_regular"
-            android:lineSpacingMultiplier="1.3"
-            android:paddingStart="50dp"
-            android:paddingEnd="50dp"
-            android:text="@string/backup_seed_phrase_detail"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="17sp" />
+            <TextView
+                android:id="@+id/text_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_regular"
+                android:gravity="center_horizontal"
+                android:lineSpacingMultiplier="1.2"
+                android:paddingStart="50dp"
+                android:paddingEnd="50dp"
+                android:text="@string/backup_seed_phrase"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp28" />
 
-        <com.alphawallet.app.widget.FunctionButtonBar
-            android:id="@+id/layoutButtons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" />
+            <ImageView
+                android:id="@+id/backup_seed_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/sp16"
+                android:scaleType="fitCenter"
+                android:src="@drawable/seed"
+                android:visibility="visible" />
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/text_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp16"
+                android:fontFamily="@font/font_regular"
+                android:lineSpacingMultiplier="1.3"
+                android:paddingStart="50dp"
+                android:paddingEnd="50dp"
+                android:text="@string/backup_seed_phrase_detail"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp17" />
+        </LinearLayout>
+    </ScrollView>
+
+    <com.alphawallet.app.widget.FunctionButtonBar
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" />
+
     <LinearLayout
         android:id="@+id/layout_success_overlay"
         android:layout_width="match_parent"
@@ -77,5 +79,4 @@
             android:src="@drawable/big_green_tick" />
 
     </LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>

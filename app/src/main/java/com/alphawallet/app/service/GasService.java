@@ -15,7 +15,6 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.EIP1559FeeOracleResult;
 import com.alphawallet.app.entity.FeeHistory;
@@ -31,7 +30,6 @@ import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -42,7 +40,6 @@ import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.ContractGasProvider;
 
-import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +54,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import timber.log.Timber;
 
 /**
  * Created by JB on 18/11/2020.
@@ -129,7 +127,7 @@ public class GasService implements ContractGasProvider
     {
         if (networkRepository.getNetworkByChain(chainId) == null)
         {
-            if (BuildConfig.DEBUG) System.out.println("Network error, no chain, trying to pick: " + chainId);
+            Timber.d("Network error, no chain, trying to pick: %s", chainId);
         }
         else if (EthereumNetworkRepository.hasGasOverride(chainId))
         {
@@ -151,7 +149,7 @@ public class GasService implements ContractGasProvider
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(updated -> {
-                    if (BuildConfig.DEBUG) System.out.println("Updated gas prices: " + updated);
+                    Timber.d("Updated gas prices: %s", updated);
                     }, Throwable::printStackTrace)
                 .isDisposed();
 
@@ -289,7 +287,7 @@ public class GasService implements ContractGasProvider
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             return update;
@@ -348,15 +346,11 @@ public class GasService implements ContractGasProvider
         updateChainId(chainId);
         String finalTxData = txData;
 
-        if (transactionBytes == null || transactionBytes.length == 0)
-        {
-            return Single.fromCallable(() -> BigInteger.valueOf(GAS_LIMIT_MIN));
-        }
-        else if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
+        if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
                     .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), finalTxData))
-                    .map(estimate -> convertToGasLimit(estimate, defaultLimit));
+                    .map(estimate -> convertToGasLimit(estimate, BigInteger.valueOf(GAS_LIMIT_CONTRACT)));
         }
         else
         {
@@ -371,7 +365,14 @@ public class GasService implements ContractGasProvider
     {
         if (estimate.hasError())
         {
-            return BigInteger.ZERO;
+            if (estimate.getError().getCode() == -32000) //out of gas
+            {
+                return defaultLimit;
+            }
+            else
+            {
+                return BigInteger.ZERO;
+            }
         }
         else if (estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0)
         {
@@ -488,7 +489,7 @@ public class GasService implements ContractGasProvider
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             return new FeeHistory();

@@ -20,9 +20,12 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
 /**
  * Created by JB on 9/09/2020.
  */
+@AndroidEntryPoint
 public class SignDetailActivity extends BaseActivity
 {
     private RecyclerView recyclerView;

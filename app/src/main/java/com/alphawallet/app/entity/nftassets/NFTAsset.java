@@ -4,6 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
+
 import com.alphawallet.app.entity.tokens.ERC1155Token;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.util.Utils;
@@ -22,6 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.disposables.Disposable;
+
 /**
  * Created by JB on 1/07/2021.
  */
@@ -34,13 +38,30 @@ public class NFTAsset implements Parcelable
     private static final String IMAGE_PREVIEW = "image_preview_url";
     private static final String DESCRIPTION = "description";
     private static final String IMAGE_ORIGINAL_URL = "image_original_url";
-    private static final String[] IMAGE_DESIGNATORS = { IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW };
-    private static final String[] SVG_OVERRIDE = { IMAGE_ORIGINAL_URL, IMAGE, IMAGE_URL };
-    private static final String[] IMAGE_THUMBNAIL_DESIGNATORS = { IMAGE_PREVIEW, IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL };
+    private static final String IMAGE_ANIMATION = "animation_url";
+    private static final String[] IMAGE_DESIGNATORS = { IMAGE, IMAGE_URL, IMAGE_ANIMATION, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW };
+    private static final String[] SVG_OVERRIDE = { IMAGE_ORIGINAL_URL, IMAGE_ANIMATION, IMAGE, IMAGE_URL };
+    private static final String[] IMAGE_THUMBNAIL_DESIGNATORS = { IMAGE_PREVIEW, IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_ANIMATION };
     private static final String BACKGROUND_COLOUR = "background_color";
     private static final String EXTERNAL_LINK = "external_link";
-    private static final List<String> DESIRED_PARAMS = Arrays.asList(NAME, BACKGROUND_COLOUR, IMAGE_URL, IMAGE, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW, DESCRIPTION, EXTERNAL_LINK);
+    private static final List<String> DESIRED_PARAMS = Arrays.asList(NAME, BACKGROUND_COLOUR, IMAGE_URL, IMAGE, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW, DESCRIPTION, EXTERNAL_LINK, IMAGE_ANIMATION);
     private static final List<String> ATTRIBUTE_DESCRIPTOR = Arrays.asList("attributes", "traits");
+
+    public enum Category {
+        NFT("NFT"), FT("Fungible Token"), COLLECTION("Collection"), SEMI_FT("Semi-Fungible");
+
+        private final String category;
+
+        Category(String category)
+        {
+            this.category = category;
+        }
+
+        public String getValue()
+        {
+            return this.category;
+        }
+    }
 
     private final Map<String, String> assetMap = new HashMap<>();
     private final Map<String, String> attributeMap = new HashMap<>();
@@ -49,6 +70,9 @@ public class NFTAsset implements Parcelable
     private BigDecimal selected; //for ERC1155 transfer
 
     private List<BigInteger> tokenIdList; // for ERC1155 collections
+
+    @Nullable
+    public Disposable metaDataLoader;
 
     public boolean isChecked = false;
     public boolean exposeRadio = false;
@@ -86,6 +110,18 @@ public class NFTAsset implements Parcelable
         assetMap.putAll(asset.assetMap);
         attributeMap.putAll(asset.attributeMap);
         balance = asset.balance;
+
+        if (asset.tokenIdList != null)
+        {
+            tokenIdList = new ArrayList<>(tokenIdList);
+        }
+        else
+        {
+            tokenIdList = null;
+        }
+
+        isChecked = asset.isChecked;
+        exposeRadio = asset.exposeRadio;
     }
 
     public String getAssetValue(String key)
@@ -103,6 +139,12 @@ public class NFTAsset implements Parcelable
     public String getName()
     {
         return assetMap.get(NAME);
+    }
+
+    public boolean isAnimation()
+    {
+        String anim = assetMap.get(IMAGE_ANIMATION);
+        return anim != null;
     }
 
     public String getImage()
@@ -149,14 +191,6 @@ public class NFTAsset implements Parcelable
     public String getExternalLink()
     {
         return assetMap.get(EXTERNAL_LINK);
-    }
-
-    public void setDecimals(BigDecimal rawBalance)
-    {
-        if (assetMap.containsKey("decimals"))
-        {
-            BigDecimal decimals = new BigDecimal(assetMap.get("decimals"));
-        }
     }
 
     public boolean setBalance(BigDecimal value)
@@ -210,6 +244,7 @@ public class NFTAsset implements Parcelable
         {
             JSONObject jsonData = new JSONObject(metaData);
             Iterator<String> keys = jsonData.keys();
+
             while (keys.hasNext())
             {
                 String key = keys.next();
@@ -435,33 +470,30 @@ public class NFTAsset implements Parcelable
     public List<BigInteger> getCollectionIds()
     {
         //return sorted list
-        Collections.sort(tokenIdList);/*, (e1, e2) -> {
-            BigInteger tokenId1 = e1.first;
-            BigInteger tokenId2 = e2.first;
-            return tokenId1.compareTo(tokenId2);
-        });*/
-
+        Collections.sort(tokenIdList);
         return tokenIdList;
     }
 
-    public String getAssetCategory()
+    public Category getAssetCategory(BigInteger tokenId)
     {
-        if (tokenIdList != null && tokenIdList.size() > 1)
+        if (tokenIdList != null && isCollection())
         {
-            return "Collection";
+            return Category.COLLECTION;
         }
-        else if (balance.compareTo(BigDecimal.ONE) > 0)
+        else if (ERC1155Token.isNFT(tokenId))
         {
-            return "Fungible Token";
-        }
-        else if (tokenIdList != null && tokenIdList.size() == 1
-                && ERC1155Token.getNFTTokenId(tokenIdList.get(0)).compareTo(BigInteger.ZERO) > 0)
-        {
-            return "NFT";
+            if (balance.equals(BigDecimal.ONE))
+            {
+                return Category.NFT;
+            }
+            else
+            {
+                return Category.SEMI_FT; //Should not see this, but there could have been a mis-labelling
+            }
         }
         else
         {
-            return "Fungible Token"; //?
+            return Category.FT;
         }
     }
 }

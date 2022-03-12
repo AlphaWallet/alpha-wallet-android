@@ -43,7 +43,6 @@ import com.alphawallet.app.ui.widget.entity.GasWarningLayout;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
-import com.alphawallet.app.viewmodel.GasSettingsViewModelFactory;
 import com.alphawallet.app.widget.GasSliderView;
 
 import java.math.BigDecimal;
@@ -55,16 +54,15 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
 import io.realm.RealmQuery;
 
+@AndroidEntryPoint
 public class GasSettingsActivity extends BaseActivity implements GasSettingsCallback
 {
     private static final int GAS_PRECISION = 5; //5 dp for gas
 
-    @Inject
-    GasSettingsViewModelFactory viewModelFactory;
     GasSettingsViewModel viewModel;
 
     private GasSliderView gasSliderView;
@@ -99,7 +97,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_gas_settings);
@@ -112,7 +109,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         insufficientWarning = findViewById(R.id.insufficient_bubble);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(GasSettingsViewModel.class);
 
         minGasPrice = getIntent().getLongExtra(C.EXTRA_MIN_GAS_PRICE, -1);

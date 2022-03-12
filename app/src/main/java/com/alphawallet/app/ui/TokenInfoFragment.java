@@ -25,7 +25,6 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.entity.HistoryChart;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.TokenInfoViewModel;
-import com.alphawallet.app.viewmodel.TokenInfoViewModelFactory;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoHeaderView;
 import com.alphawallet.app.widget.TokenInfoView;
@@ -46,13 +45,15 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import dagger.android.support.AndroidSupportInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import timber.log.Timber;
 
+@AndroidEntryPoint
 public class TokenInfoFragment extends BaseFragment {
     public static final int CHART_1D = 0;
     public static final int CHART_1W = 1;
@@ -60,8 +61,6 @@ public class TokenInfoFragment extends BaseFragment {
     public static final int CHART_3M = 3;
     public static final int CHART_1Y = 4;
 
-    @Inject
-    TokenInfoViewModelFactory viewModelFactory;
     private TokenInfoViewModel viewModel;
 
     private Token token;
@@ -90,7 +89,6 @@ public class TokenInfoFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        AndroidSupportInjection.inject(this);
         return inflater.inflate(R.layout.fragment_token_info, container, false);
     }
 
@@ -100,7 +98,7 @@ public class TokenInfoFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null)
         {
-            viewModel = new ViewModelProvider(this, viewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(TokenInfoViewModel.class);
 
             long chainId = getArguments().getLong(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
@@ -301,7 +299,7 @@ public class TokenInfoFragment extends BaseFragment {
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             return values;
@@ -324,7 +322,7 @@ public class TokenInfoFragment extends BaseFragment {
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         if (min == Double.MAX_VALUE) min = 0.0;
@@ -352,7 +350,7 @@ public class TokenInfoFragment extends BaseFragment {
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return 0.0;
@@ -367,7 +365,7 @@ public class TokenInfoFragment extends BaseFragment {
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return 0.0;

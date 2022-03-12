@@ -98,6 +98,8 @@ public class Token
         walletUIUpdateRequired = false;
         hasTokenScript = false;
         resultMap.clear();
+
+        if (group == null) group = TokenGroup.ASSET; //default to Asset
     }
 
     public String getStringBalance()
@@ -413,10 +415,6 @@ public class Token
     public Function getTransferFunction(String to, List<BigInteger> transferData) throws NumberFormatException
     {
         return null;
-    }
-    public byte[] getTransferBytes(String to, List<BigInteger> transferData)
-    {
-        return Numeric.hexStringToByteArray("0x");
     }
     public byte[] getTransferBytes(String to, ArrayList<Pair<BigInteger, NFTAsset>> transferData)
     {
@@ -997,5 +995,10 @@ public class Token
         if (TextUtils.isEmpty(realmToken.getSymbol()) || (!TextUtils.isEmpty(tokenInfo.symbol) && !tokenInfo.symbol.equals(realmToken.getSymbol()))) { return true; }
         if (realmToken.getContractType() != contractType) { return true; }
         return realmToken.getDecimals() != tokenInfo.decimals;
+    }
+
+    public boolean isBatchTransferAvailable()
+    {
+        return false;
     }
 }

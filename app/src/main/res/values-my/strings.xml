@@ -693,7 +693,6 @@
     <string name="from_op">မှ</string>
     <string name="valueSymbol">%1$s %2$s</string>
     <string name="sent_to">to: %1$s</string>
-    <string name="operation_definition" translatable="false">%1$s: %2$s</string>
     <string name="approval_granted_to">တိုကင်များကိုပြောင်းရွှေ့ရန်ခွင့်ပြုသည်: %1$s</string>
     <string name="approval_obtained_from">%1$sကိုယ်စားသုံးစွဲရန်</string>
     <string name="unknown_event">အမည်မသိဖြစ်ရပ်</string>
@@ -711,6 +710,7 @@
     <string name="invalid_walletconnect_session">WalletCoonnect လုပ်ငန်းစဥ်မှားယွင်းနေပါသည်။</string>
     <string name="restart_walletconnect_session">WalletConnect နှင့်ချိတ်ဆက်ထားသောလုပ်ငန်းစဥ်ကို မှန်ကန်စွာမပိတ်ရသေးပါ။ ကျေးဇူးပြု၍ အင်တာနက်စာမျက်နှာကိုပြန်သွား၍ ချိတ်ဆက်ထားမှုကိုဖြုတ်ပါ။ ထို့နောက် ချိတ်ထားမှုလုပ်ငန်းစဥ်အသစ်ကိုပြန်စပါ။</string>
     <string name="invalid_walletconnect_data">WalletConnectမှပြထားသောQRကုတ်သည်အသုံးပြု၍မရပါ</string>
+    <string name="walletconnect_timeout">Connection attempt timed out. Please cancel the request from the Dapp and start a new session.</string>
     <string name="label_nonce">Nonce</string>
     <string name="payload">ဝန်ချိန်</string>
     <string name="signed_transactions">လုပ်ငန်းစဥ်ကိုလက်မှတ်ထိုးပြီးပါပြီ</string>
@@ -723,13 +723,6 @@
     <string name="all_funds">ရံပုံငွေအားလုံး</string>
     <string name="recipient_address">လက်ခံမည့်သူ၏လိပ်စာ</string>
 
-    <string name="address_separator" translatable="false">%1$s | %2$s</string>
-    <string name="bracketed" translatable="false">(%1$s)</string>
-    <string name="ens_resolved" translatable="false">ENS: %1$s</string>
-    <string name="fiat_format" translatable="false">%1$s %2$s ≈ %3$s %4$s</string>
-    <string name="gas_amount" translatable="false">&lt; %1$s %2$s</string>
-    <string name="gas_fiat_suffix" translatable="false">(%1$s %2$s)</string>
-    <string name="gas_time_suffix" translatable="false"> ≈ %1$s</string>
     <string name="confirm_transaction">လုပ်ငန်းစဥ်ကိုအတည်ပြုသည်၊</string>
     <string name="balance">လက်ကျန်ငွေ</string>
     <string name="speed_average">ပျမ်းမျှ</string>
@@ -830,9 +823,6 @@
     <string name="unsupported_walletconnect">WalletConnect: ကွန်ရက်အားမထောက်ပံ့ထားပါ။ ဆက်သွယ်မှုအားပိတ်သိမ်း၍ DappBrowser ကွန်ရက်အား ပြောင်းလဲပါ။</string>
     <string name="asset_description_text">%1$s Asset | %2$s</string>
     <string name="asset_description_text_plural">%1$s Assets | %2$s</string>
-    <string name="erc1155_idname" translatable="false">%1$s #%2$s</string>
-    <string name="asset_count_val" translatable="false">x%1$s</string>
-    <string name="input_amount_max" translatable="false">(max. %1$s)</string>
     <string name="this_is_testnet">စမ်းသပ်ကွန်ရက်သို့ရောက်ရှိနေပါသည်</string>
     <string name="swap_with_quickswap">Quickswapဖြင့် ပြောင်းလဲမည်</string>
     <string name="email">Email</string>
@@ -842,8 +832,6 @@
     <string name="action_save_name">အမည်ကိုသိမ်းဆည်းမည်</string>
     <string name="select_amount">ပမာဏကိုရွေးချယ်ပါ</string>
     <string name="safe_transfer" translatable="false">လုံခြုံစွာပြောင်းရွှေ့မည်</string>
-    <string name="safe_batch_transfer" translatable="false">Safe Batch Transfer</string>
-    <string name="hash_tokenid" translatable="false">#%1$s</string>
     <string name="selected_tokens">ရွေးချယ်ထားသောတိုကင်များ</string>
     <string name="send_tokens">တိုကင်များကိုပို့မည်</string>
     <string name="rate_prompt">အသုံးပြုသည်ကိုကျေနပ်မှုရှိလျှင် ကျေးဇူးပြု၍ ကျွန်တော်တို့အားအဆင့်သတ်မှတ်ပေး၍ကူညီပါ။</string>
@@ -859,13 +847,14 @@
     <string name="add_chain_dialog_message">ယခုဝက်ဘ်ဆိုဒ်သည် the %1$s Chain၊ chain ID: %2$s သို့ပြောင်းဖွင့်ရန်တောင်းဆိုနေပါသည်။</string>
     <string name="switch_chain_request">Chain တောင်းဆိုမှုကိုပြောင်းလဲမည်</string>
     <string name="no_chart_data_available">ဇယားအချက်အလက်မရရှိနိုင်ပါ</string>
-    <string name="wallet_total_change">%1$s (%2$.2f%%) ယနေ့</string>
+    <string name="wallet_total_change">%1$s (%2$s%%) ယနေ့</string>
     <string name="title_wallets_summary">ဝေါလက်များ</string>
     <string name="summary">အနှစ်ချုပ်</string>
     <string name="network_menu_item">ကွန်ရက်: %1$s</string>
     <string name="action_set_as_homepage">Set as Home Page</string>
     <string name="action_networks">Networks</string>
     <string name="exchange_with_oneinch">Exchange with 1inch</string>
+    <string name="swap">Swap</string>
     <string name="action_send_to_this_address">ဤလိပ်စာကိုပို့ပါ</string>
     <string name="stay_updated">Stay Updated</string>
     <string name="email_prompt_hint">ကျွန်ုပ်တို့မှအဓိကပြုပြင်ပြောင်းလဲမှုများပြုလုပ်ခဲ့လျှင်အီးမေးလ်ပို့ပါမည်။ ၄င်းအီးမေးလ်များကို(အများဆုံးတပတ်တခါ)လက်ခံရရှိလိုပါသလား။</string>
@@ -885,4 +874,30 @@
     <string name="token_name_hint">တိုကင်နာမည်</string>
     <string name="version">ဗားရှင်း</string>
     <string name="error_seed_phrase_must_words">မျိုးစေ့ထားသောစကားစုများတွင်စကားလုံးများသာပါ 0 င်နိုင်သည်</string>
+    <string name="label_token_id">Token #</string>
+    <string name="label_external_link">External Link</string>
+    <string name="label_description">Description</string>
+    <string name="label_details">Details</string>
+    <string name="switch_to_grid_view">Switch to Grid View</string>
+    <string name="switch_to_list_view">Switch to List View</string>
+    <string name="reload_metadata">Reload Metadata</string>
+    <string name="assets">Assets</string>
+    <string name="defi_header">DeFi</string>
+    <string name="governance_header">Governance</string>
+    <string name="collectibles_header">Collectibles</string>
+    <string name="wc_connect_wallet">Connect Wallet</string>
+    <string name="wc_no_active_sessions">No Active sessions</string>
+    <string name="send_multiple_tokens">Send Multiple Tokens</string>
+    <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
+    <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
+    <string name="unknown_network_title">Unkown Network</string>
+    <string name="whats_new">ဘာထူးသလဲ?</string>
+    <string name="price_alert_indicator_below">အောက်မှာ</string>
+    <string name="price_alert_indicator_above">အပေါ်က</string>
+    <string name="tab_info">အချက်အလက်</string>
+    <string name="tab_activity">လှုပ်ရှားမှု</string>
+    <string name="tab_alert">သတိပေးချက်များ</string>
+    <string name="current_price">Current Price:</string>
+    <string name="add_new_price_alert">Add New Price Alert</string>
+    <string name="website_text">Website</string>
 </resources>

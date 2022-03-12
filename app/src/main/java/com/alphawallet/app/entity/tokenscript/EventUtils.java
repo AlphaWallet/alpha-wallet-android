@@ -132,6 +132,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Single;
+import timber.log.Timber;
 
 import static org.web3j.tx.Contract.staticExtractEventParameters;
 
@@ -253,11 +254,11 @@ public abstract class EventUtils
             try
             {
                 txResult = web3j.ethGetBlockByHash(blockHash.trim(), false).send();
-                //if (BuildConfig.DEBUG) System.out.println("TS EVENT: " + txResult.getResult().getHash());
+                //if (BuildConfig.DEBUG) Timber.d("TS EVENT: " + txResult.getResult().getHash());
             }
             catch (IOException | NullPointerException e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
                 txResult = new EthBlock();
             }
 
@@ -272,11 +273,11 @@ public abstract class EventUtils
             try
             {
                 txResult = web3j.ethGetTransactionByHash(blockHash.trim()).send();
-                //if (BuildConfig.DEBUG) System.out.println("TS EVENT: " + txResult.getResult().getHash());
+                //if (BuildConfig.DEBUG) Timber.d("TS EVENT: " + txResult.getResult().getHash());
             }
             catch (IOException | NullPointerException e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
                 txResult = new EthTransaction();
             }
 
@@ -639,7 +640,7 @@ public abstract class EventUtils
                     paramList.add(new TypeReference<Bytes32>(element.indexed) { });
                     break;
                 default:
-                    System.out.println("NOT IMPLEMENTED: " + element.type);
+                    Timber.d("NOT IMPLEMENTED: " + element.type);
                     break;
             }
         }

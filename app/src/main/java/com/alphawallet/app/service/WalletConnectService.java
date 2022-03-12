@@ -12,12 +12,12 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.WalletConnectActions;
+import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.walletconnect.WCClient;
 
@@ -31,6 +31,7 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
+import timber.log.Timber;
 
 /**
  * The purpose of this service is to manage the currently active WalletConnect sessions. Keep the connections alive and terminate where required.
@@ -39,10 +40,10 @@ import kotlin.Unit;
 public class WalletConnectService extends Service
 {
     private final long CONNECTION_TIMEOUT = 10*DateUtils.MINUTE_IN_MILLIS;
-    private final ConcurrentHashMap<String, WCClient> clientMap = new ConcurrentHashMap<>();
-    private final ConcurrentLinkedQueue<WCRequest> signRequests = new ConcurrentLinkedQueue<>();
+    private final static ConcurrentHashMap<String, WCClient> clientMap = new ConcurrentHashMap<>();
+    private final static ConcurrentLinkedQueue<WCRequest> signRequests = new ConcurrentLinkedQueue<>();
 
-    private final ConcurrentHashMap<String, Long> clientTimes = new ConcurrentHashMap<>();
+    private final static ConcurrentHashMap<String, Long> clientTimes = new ConcurrentHashMap<>();
     private WCRequest currentRequest = null;
 
     private static final String TAG = "WCClientSvs";
@@ -53,7 +54,8 @@ public class WalletConnectService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        Log.d(TAG, "SERVICE STARTING");
+        Timber.tag(TAG).d("SERVICE STARTING");
+
         try
         {
             int actionVal = Integer.parseInt(intent.getAction());
@@ -62,7 +64,7 @@ public class WalletConnectService extends Service
             switch (action)
             {
                 case CONNECT:
-                    Log.d(TAG, "SERVICE CONNECT");
+                    Timber.tag(TAG).d("SERVICE CONNECT");
                     break;
                 case APPROVE:
                     approveRequest(intent);
@@ -71,29 +73,27 @@ public class WalletConnectService extends Service
                     rejectRequest(intent);
                     break;
                 case DISCONNECT:
-                    Log.d(TAG, "SERVICE DISCONNECT");
+                    Timber.tag(TAG).d("SERVICE DISCONNECT");
                     //kill any active connection
                     disconnectCurrentSessions();
                     break;
                 case CLOSE:
-                    Log.d(TAG, "SERVICE CLOSE");
+                    Timber.tag(TAG).d("SERVICE CLOSE");
                     //result.getData().getIntExtra(C.EXTRA_CHAIN_ID, -1);
                     String sessionId = intent.getStringExtra("session");
                     disconnectSession(sessionId);
+                    break;
+                case MSG_PUMP:
+                    Timber.tag(TAG).d("SERVICE MSG PUMP");
+                    checkMessages();
                     break;
             }
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
         return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
     }
 
     private final IBinder mBinder = new LocalBinder();
@@ -148,6 +148,19 @@ public class WalletConnectService extends Service
         }
     }
 
+    //executed a pending request, remove from the queue
+    public void removePendingRequest(long id)
+    {
+        for (WCRequest rq : signRequests)
+        {
+            if (rq.id == id)
+            {
+                signRequests.remove(rq);
+                break;
+            }
+        }
+    }
+
     public class LocalBinder extends Binder
     {
         public WalletConnectService getService()
@@ -174,7 +187,7 @@ public class WalletConnectService extends Service
 
     public void putClient(String sessionId, WCClient client)
     {
-        Log.d(TAG, "Add session: " + sessionId);
+        Timber.tag(TAG).d("Add session: " + sessionId);
         clientMap.put(sessionId, client);
         broadcastConnectionCount(clientMap.size());
         clientTimes.put(sessionId, System.currentTimeMillis());
@@ -216,21 +229,26 @@ public class WalletConnectService extends Service
             setLastUsed(client);
             signRequests.add(new WCRequest(client.sessionId(), id, peer, client.chainIdVal()));
             broadcastSessionEvent(WALLET_CONNECT_NEW_SESSION, client.sessionId());
-            Log.d(TAG, "On Request: " + peer.getName());
+            Timber.tag(TAG).d("On Request: %s", peer.getName());
             return Unit.INSTANCE;
         });
 
         client.setOnFailure(throwable -> {
             //alert UI
             if (client.sessionId() == null) return Unit.INSTANCE;
-            Log.d(TAG, "On Fail: " + throwable.getMessage());
-            signRequests.add(new WCRequest(client.sessionId(), throwable, client.chainIdVal()));
-            broadcastSessionEvent(WALLET_CONNECT_FAIL, client.sessionId());
+            Timber.tag(TAG).d("On Fail: %s", throwable.getMessage());
+            //only add if no errors already in queue
+            if (queueHasNoErrors())
+            {
+                signRequests.add(new WCRequest(client.sessionId(), throwable, client.chainIdVal()));
+                broadcastSessionEvent(WALLET_CONNECT_FAIL, client.sessionId());
+            }
+            startMessagePump();
             return Unit.INSTANCE;
         });
 
         client.setOnDisconnect((code, reason) -> {
-            Log.d(TAG, "Terminate session?");
+            Timber.tag(TAG).d("Terminate session?");
             terminateClient(client.sessionId());
             client.resetState();
             return Unit.INSTANCE;
@@ -239,37 +257,46 @@ public class WalletConnectService extends Service
         client.setOnEthSign((id, message) -> {
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
-            signRequests.add(new WCRequest(client.sessionId(), id, message));
-            //see if this connection is live, if so then bring WC request to foreground
-            switchToWalletConnectApprove(client.sessionId());
-            Log.d(TAG, "Sign Request: " + message.toString());
-            startMessagePump();
+            WCRequest rq = new WCRequest(client.sessionId(), id, message);
+            Timber.tag(TAG).d("Sign Request: %s", message.toString());
+            sendRequest(client, rq);
             return Unit.INSTANCE;
         });
 
         client.setOnEthSignTransaction((id, transaction) -> {
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
-            signRequests.add(new WCRequest(client.sessionId(), id, transaction, true, client.chainIdVal()));
-            switchToWalletConnectApprove(client.sessionId());
-            startMessagePump();
+            WCRequest rq = new WCRequest(client.sessionId(), id, transaction, true, client.chainIdVal());
+            sendRequest(client, rq);
             return Unit.INSTANCE;
         });
 
         client.setOnEthSendTransaction((id, transaction) -> {
             if (client.sessionId() == null) return Unit.INSTANCE;
             setLastUsed(client);
-            signRequests.add(new WCRequest(client.sessionId(), id, transaction, false, client.chainIdVal()));
-            switchToWalletConnectApprove(client.sessionId());
-            startMessagePump();
+            WCRequest rq = new WCRequest(client.sessionId(), id, transaction, false, client.chainIdVal());
+            sendRequest(client, rq);
             return Unit.INSTANCE;
         });
     }
 
+    //TODO: Can we determine if AlphaWallet is running? If it is, no need to add this to the queue,
+    //TODO: as user will get the intent in walletConnectActionReceiver (repeat for below)
+    private void sendRequest(WCClient client, WCRequest rq)
+    {
+        Timber.d("sendRequest: sessionId: %s", client.sessionId());
+        signRequests.add(rq);
+        //see if this connection is live, if so then bring WC request to foreground
+        switchToWalletConnectApprove(client.sessionId(), rq);
+        startMessagePump();
+    }
+
     private void broadcastSessionEvent(String command, String sessionId)
     {
+        Timber.d("broadcastSessionEvent: sessionId: %s, command: %s", sessionId, command);
         Intent intent = new Intent(command);
         intent.putExtra("sessionid", sessionId);
+        intent.putExtra("wcrequest", getPendingRequest(sessionId));     // pass WCRequest as parcelable in the intent
         sendBroadcast(intent);
     }
 
@@ -280,7 +307,7 @@ public class WalletConnectService extends Service
         sendBroadcast(intent);
     }
 
-    private void switchToWalletConnectApprove(String sessionId)
+    private void switchToWalletConnectApprove(String sessionId, WCRequest rq)
     {
         WCClient cc = clientMap.get(sessionId);
 
@@ -288,9 +315,10 @@ public class WalletConnectService extends Service
         {
             Intent intent = new Intent(WALLET_CONNECT_REQUEST);
             intent.putExtra("sessionid", sessionId);
+            intent.putExtra("wcrequest", rq);
             sendBroadcast(intent);
 
-            Log.d(TAG, "Connected clients: " + clientMap.size());
+            Timber.tag(TAG).d("Connected clients: %s", clientMap.size());
         }
     }
 
@@ -312,23 +340,23 @@ public class WalletConnectService extends Service
             if (c == null) return;
             if (c.isConnected() && c.chainIdVal() != 0 && c.getAccounts() != null)
             {
-                Log.d(TAG, "Ping Key: " + sessionKey);
-                c.approveSession(c.getAccounts(), c.chainIdVal());
+                Timber.tag(TAG).d("Ping Key: %s", sessionKey);
+                c.updateSession(c.getAccounts(), c.chainIdVal(), true);
             }
 
             long lastUsed = getLastUsed(c);
             long timeUntilTerminate = CONNECTION_TIMEOUT - (System.currentTimeMillis() - lastUsed);
-            Log.d(TAG, "Time until terminate: " + timeUntilTerminate/DateUtils.SECOND_IN_MILLIS + " (" + sessionKey + ")");
+            Timber.tag(TAG).d("Time until terminate: %s (%s)", (timeUntilTerminate/DateUtils.SECOND_IN_MILLIS), sessionKey);
             if ((System.currentTimeMillis() - lastUsed) > CONNECTION_TIMEOUT)
             {
                 if (c.getSession() != null)
                 {
-                    Log.d(TAG, "Terminate session: " + sessionKey);
+                    Timber.tag(TAG).d("Terminate session: %s", sessionKey);
                     c.killSession();
                 }
                 else
                 {
-                    Log.d(TAG, "Disconnect session: " + sessionKey);
+                    Timber.tag(TAG).d("Disconnect session: %s", sessionKey);
                     c.disconnect();
                 }
                 removeKeyList.add(sessionKey);
@@ -337,7 +365,7 @@ public class WalletConnectService extends Service
 
         for (String removeKey : removeKeyList)
         {
-            Log.d(TAG, "Removing Key: " + removeKey);
+            Timber.tag(TAG).d("Removing Key: %s", removeKey);
             terminateClient(removeKey);
         }
     }
@@ -349,7 +377,7 @@ public class WalletConnectService extends Service
         broadcastConnectionCount(clientMap.size());
         if (clientMap.size() == 0 && pingTimer != null && !pingTimer.isDisposed())
         {
-            Log.d(TAG, "Stop timer & service");
+            Timber.tag(TAG).d("Stop timer & service");
             pingTimer.dispose();
             pingTimer = null;
             stopSelf();
@@ -383,11 +411,25 @@ public class WalletConnectService extends Service
         WCRequest rq = signRequests.peek();
         if (rq != null)
         {
-            switchToWalletConnectApprove(rq.sessionId);
+            WCClient cc = clientMap.get(rq.sessionId);
+            if (cc != null)
+            {
+                switchToWalletConnectApprove(rq.sessionId, rq);
+            }
         }
         else if (messagePump != null && !messagePump.isDisposed())
         {
             messagePump.dispose();
         }
+    }
+
+    private boolean queueHasNoErrors()
+    {
+        for (WCRequest rq : signRequests.toArray(new WCRequest[0]))
+        {
+            if (rq.type == SignType.FAILURE) return false;
+        }
+
+        return true;
     }
 }

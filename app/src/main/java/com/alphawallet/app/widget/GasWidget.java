@@ -36,6 +36,7 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.Sort;
+import timber.log.Timber;
 
 import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 import static com.alphawallet.app.C.DEFAULT_GAS_PRICE;
@@ -366,7 +367,7 @@ public class GasWidget extends LinearLayout implements Runnable
         catch (Exception e)
         {
             currentGasSpeedIndex = 0;
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
     }
 
@@ -564,7 +565,7 @@ public class GasWidget extends LinearLayout implements Runnable
 
     private boolean isSendingAll(Web3Transaction tx)
     {
-        if (token.isEthereum())
+        if (token.isEthereum() && token.balance.compareTo(BigDecimal.ZERO) > 0)
         {
             //gas fee:
             BigDecimal networkFee = new BigDecimal(tx.gasPrice.multiply(BigInteger.valueOf(GAS_LIMIT_MIN)));

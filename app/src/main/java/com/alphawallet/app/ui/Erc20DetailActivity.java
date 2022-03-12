@@ -10,14 +10,13 @@ import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -35,15 +34,13 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
-import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.TabUtils;
-import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
-import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -51,11 +48,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
 
 import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.C.Key.WALLET;
@@ -63,10 +59,11 @@ import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_MODE;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+import javax.inject.Inject;
+
+@AndroidEntryPoint
 public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface, BuyCryptoInterface
 {
-    @Inject
-    Erc20DetailViewModelFactory erc20DetailViewModelFactory;
     Erc20DetailViewModel viewModel;
 
     public static final int HISTORY_LENGTH = 5;
@@ -76,25 +73,19 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private Token token;
     private TokenCardMeta tokenMeta;
     private RecyclerView tokenView;
-    private CertifiedToolbarView certificateToolbar;
 
     private TokensAdapter tokenViewAdapter;
     private ActivityHistoryList activityHistoryList = null;
     private Realm realm = null;
     private RealmResults<RealmToken> realmTokenUpdates;
 
-    private ScrollControlViewPager viewPager;
+    private ViewPager2 viewPager;
 
-    private enum DetailPages
-    {
-        INFO(R.string.tab_info, new TokenInfoFragment()),
-        ACTIVITY(R.string.tab_activity, new TokenActivityFragment()),
-        ALERTS(R.string.tab_alert, new TokenAlertsFragment());
-
+    private class DetailPage {
         private final int tabNameResourceId;
         private final Fragment fragment;
 
-        DetailPages(int tabNameResourceId, Fragment fragment)
+        DetailPage(int tabNameResourceId, Fragment fragment)
         {
             this.tabNameResourceId = tabNameResourceId;
             this.fragment = fragment;
@@ -107,10 +98,15 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
     }
 
+    private final DetailPage[] detailPages = new DetailPage[] {
+            new DetailPage(R.string.tab_info, new TokenInfoFragment()),
+            new DetailPage(R.string.tab_activity, new TokenActivityFragment()),
+            new DetailPage(R.string.tab_alert, new TokenAlertsFragment())
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc20_token_detail);
         symbol = null;
@@ -148,27 +144,31 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         List<Pair<String, Fragment>> pages = getPages(bundle);
 
         viewPager = findViewById(R.id.viewPager);
-        viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        viewPager.setAdapter(new TabPagerAdapter(this, pages));
+        viewPager.setOffscreenPageLimit(detailPages.length);  // to retain fragments in memory
+        viewPager.setUserInputEnabled(false);
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
-            {
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
             }
 
             @Override
-            public void onPageSelected(int position)
-            {
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
             }
 
             @Override
-            public void onPageScrollStateChanged(int state)
-            {
+            public void onPageScrollStateChanged(int state) {
+                super.onPageScrollStateChanged(state);
             }
         });
 
         TabLayout tabLayout = findViewById(R.id.tab_layout);
-
-        tabLayout.setupWithViewPager(viewPager);
+        // connect viewPager and TabLayout
+        new TabLayoutMediator(tabLayout, viewPager,
+                (tab, position) -> tab.setText(pages.get(position).first)
+        ).attach();
 
         // TODO: addOnTabSelectedListener if you need to refresh values when switching tabs
 
@@ -178,10 +178,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private List<Pair<String, Fragment>> getPages(Bundle bundle)
     {
         List<Pair<String, Fragment>> pages = new ArrayList<>();
-        for (DetailPages detailPages : DetailPages.values())
-        {
-            pages.add(detailPages.ordinal(), detailPages.init(this, bundle));
-
+        for (int i = 0; i< detailPages.length; i++) {
+            pages.add(i, detailPages[i].init(this, bundle));
         }
         return pages;
     }
@@ -202,7 +200,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     {
         if (viewModel == null)
         {
-            viewModel = new ViewModelProvider(this, erc20DetailViewModelFactory)
+            viewModel = new ViewModelProvider(this)
                     .get(Erc20DetailViewModel.class);
             viewModel.newScriptFound().observe(this, this::onNewScript);
             viewModel.sig().observe(this, this::onSignature);
@@ -222,7 +220,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private void onSignature(XMLDsigDescriptor descriptor)
     {
-        certificateToolbar = findViewById(R.id.certified_toolbar);
+        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
         certificateToolbar.onSigData(descriptor, this);
     }
 
@@ -270,7 +268,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         token = viewModel.getTokensService().getTokenOrBase(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         token.group = viewModel.getTokensService().getTokenGroup(token);
-        tokenMeta = new TokenCardMeta(token);
+        tokenMeta = new TokenCardMeta(token, token.getName());
         viewModel.checkForNewScript(token);
     }
 
@@ -431,7 +429,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 if (transactionHash != null)
                 {
                     //switch to activity view
-                    viewPager.setCurrentItem(DetailPages.ACTIVITY.ordinal());
+                    viewPager.setCurrentItem(1);        // 0-INFO, 1-ACTIVITY, 2-ALERTS
                 }
                 break;
         }
@@ -449,7 +447,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             String queryPath = "?use=v2&inputCurrency=" + (token.isEthereum() ? ETH_SYMBOL : token.getAddress());
             openDapp(C.QUICKSWAP_EXCHANGE_DAPP + queryPath);
         }
-        else if (actionId == R.string.exchange_with_oneinch)
+        else if (actionId == R.string.swap)
         {
             openDapp(formatOneInchCall(token));
         }

@@ -19,6 +19,7 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
@@ -31,11 +32,13 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.AssetDisplayActivity;
+import com.alphawallet.app.ui.Erc1155AssetSelectActivity;
 import com.alphawallet.app.ui.Erc20DetailActivity;
 import com.alphawallet.app.ui.FunctionActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
+import com.alphawallet.app.ui.TransferNFTActivity;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.app.util.BalanceUtils;
@@ -65,6 +68,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -72,10 +77,13 @@ import io.realm.Realm;
 
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
 
+import javax.inject.Inject;
+
 /**
  * Created by James on 2/04/2019.
  * Stormbird in Singapore
  */
+@HiltViewModel
 public class TokenFunctionViewModel extends BaseViewModel
 {
     private final AssetDefinitionService assetDefinitionService;
@@ -102,6 +110,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
     private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
 
+    @Inject
     TokenFunctionViewModel(
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
@@ -619,5 +628,40 @@ public class TokenFunctionViewModel extends BaseViewModel
         analyticsProperties.setData(mode);
 
         analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+    }
+
+    public Single<Intent> showTransferSelectCount(Context ctx, Token token, BigInteger tokenId)
+    {
+        return genericWalletInteract.find()
+                .map(wallet -> completeTransferSelect(ctx, token, tokenId, wallet));
+    }
+
+    private Intent completeTransferSelect(Context ctx, Token token, BigInteger tokenId, Wallet wallet)
+    {
+        Intent intent = new Intent(ctx, Erc1155AssetSelectActivity.class);
+        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
+        intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString(16));
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        return intent;
+    }
+
+    public Single<Intent> getTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)
+    {
+        return genericWalletInteract.find()
+                .map(wallet -> completeTransferIntent(ctx, token, tokenIds, selection, wallet));
+    }
+
+    private Intent completeTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection, Wallet wallet)
+    {
+        Intent intent = new Intent(ctx, TransferNFTActivity.class);
+        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
+        intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(tokenIds, false));
+        intent.putParcelableArrayListExtra(C.EXTRA_NFTASSET_LIST, selection);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        return intent;
     }
 }

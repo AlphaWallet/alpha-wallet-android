@@ -28,8 +28,9 @@ public class Web3Transaction implements Parcelable {
     public final BigInteger gasPrice;
     public final BigInteger gasLimit;
 
-    //public final BigDecimal baseFee;
-    //public final
+    // EIP1559
+    public final BigInteger maxFeePerGas;
+    public final BigInteger maxPriorityFeePerGas;
 
     public final long nonce;
     public final String payload;
@@ -65,6 +66,8 @@ public class Web3Transaction implements Parcelable {
         this.payload = payload;
         this.leafPosition = 0;
         this.description = description;
+        this.maxFeePerGas = BigInteger.ZERO;
+        this.maxPriorityFeePerGas = BigInteger.ZERO;
     }
 
     public Web3Transaction(
@@ -85,6 +88,8 @@ public class Web3Transaction implements Parcelable {
         this.payload = payload;
         this.leafPosition = leafPosition;
         this.description = null;
+        this.maxFeePerGas = BigInteger.ZERO;
+        this.maxPriorityFeePerGas = BigInteger.ZERO;
     }
 
     /**
@@ -103,6 +108,8 @@ public class Web3Transaction implements Parcelable {
         this.value = wcTx.getValue() == null ? BigInteger.ZERO : Hex.hexToBigInteger(wcTx.getValue(), BigInteger.ZERO);
         this.gasPrice = Hex.hexToBigInteger(gasPrice, BigInteger.ZERO);
         this.gasLimit = Hex.hexToBigInteger(gasLimit, BigInteger.ZERO);
+        this.maxFeePerGas = Hex.hexToBigInteger(wcTx.getMaxFeePerGas(), BigInteger.ZERO);
+        this.maxPriorityFeePerGas = Hex.hexToBigInteger(wcTx.getMaxPriorityFeePerGas(), BigInteger.ZERO);
         this.nonce = Hex.hexToLong(nonce, -1);
         this.payload = wcTx.getData();
         this.leafPosition = callbackId;
@@ -126,6 +133,8 @@ public class Web3Transaction implements Parcelable {
         payload = (mode == ActionSheetMode.CANCEL_TRANSACTION) ? "0x": tx.input;
         leafPosition = -1;
         description = null;
+        maxFeePerGas = BigInteger.ZERO;
+        maxPriorityFeePerGas = BigInteger.ZERO;
     }
 
     Web3Transaction(Parcel in) {
@@ -134,6 +143,8 @@ public class Web3Transaction implements Parcelable {
         value = new BigInteger(in.readString());
         gasPrice = new BigInteger(in.readString());
         gasLimit = new BigInteger(in.readString());
+        maxFeePerGas = new BigInteger(in.readString());
+        maxPriorityFeePerGas = new BigInteger(in.readString());
         nonce = in.readLong();
         payload = in.readString();
         leafPosition = in.readLong();
@@ -164,7 +175,8 @@ public class Web3Transaction implements Parcelable {
         dest.writeString((value == null ? BigInteger.ZERO : value).toString());
         dest.writeString((gasPrice == null ? BigInteger.ZERO : gasPrice).toString());
         dest.writeString((gasLimit == null ? BigInteger.ZERO : gasLimit).toString());
-        //dest.writeLong(gasLimit);
+        dest.writeString((maxFeePerGas == null ? BigInteger.ZERO : maxFeePerGas).toString());
+        dest.writeString((maxPriorityFeePerGas == null ? BigInteger.ZERO : maxPriorityFeePerGas).toString());
         dest.writeLong(nonce);
         dest.writeString(payload);
         dest.writeLong(leafPosition);

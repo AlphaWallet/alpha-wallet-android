@@ -23,6 +23,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 import okio.BufferedSource;
+import timber.log.Timber;
 
 public class LogInterceptor implements Interceptor {
 	private static final String TAG = "HTTP_TRACE";
@@ -76,7 +77,7 @@ public class LogInterceptor implements Interceptor {
 		}
 		catch (InterruptedIOException e)
 		{
-			if (BuildConfig.DEBUG) e.printStackTrace();
+			Timber.e(e);
 		}
 
 		try
@@ -133,7 +134,7 @@ public class LogInterceptor implements Interceptor {
 			logBuilder.append("\n");
 			logBuilder.append("<-----------------------------END REQUEST--------------------------------->");
 			logBuilder.append("\n\n\n");
-			Log.d(TAG, logBuilder.toString());
+			Timber.tag(TAG).d(logBuilder.toString());
 		}
 		catch (Exception e)
 		{

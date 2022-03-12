@@ -18,21 +18,20 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.LongSparseArray;
-import android.util.SparseLongArray;
 
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CoinGeckoTicker;
+import com.alphawallet.app.entity.DexGuruTicker;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.entity.DexGuruTicker;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.token.entity.EthereumReadBuffer;
 import com.alphawallet.token.tools.Numeric;
 
@@ -53,7 +52,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,7 +59,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -72,6 +69,7 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import timber.log.Timber;
 
 public class TickerService
 {
@@ -85,7 +83,6 @@ public class TickerService
     private static final String COINGECKO_API = "https://api.coingecko.com/api/v3/simple/token_price/" + CHAIN_IDS + "?contract_addresses=" + CONTRACT_ADDR + "&vs_currencies=" + CURRENCY_TOKEN + "&include_24hr_change=true";
     private static final String DEXGURU_API = "https://api.dex.guru/v1/tokens/" + CONTRACT_ADDR + "-" + CHAIN_IDS;
     private static final String CURRENCY_CONV = "currency";
-    private static final double ONE_BILLION = 1000000000.0;
     private static final boolean ALLOW_UNVERIFIED_TICKERS = false; //allows verified:false tickers from DEX.GURU. Not recommended
     public static final long TICKER_TIMEOUT = DateUtils.WEEK_IN_MILLIS; //remove ticker if not seen in one week
     public static final long TICKER_STALE_TIMEOUT = 15 * DateUtils.MINUTE_IN_MILLIS; //try to use market API if AlphaWallet market oracle not updating
@@ -97,7 +94,7 @@ public class TickerService
     private double currentConversionRate = 0.0;
     private static String currentCurrencySymbolTxt;
     private static String currentCurrencySymbol;
-    private static final Map<Long, Boolean> canUpdate = new ConcurrentHashMap<>();
+    private static final Map<Long, Long> canUpdate = new ConcurrentHashMap<>();
     private static final Map<String, TokenCardMeta> dexGuruQuery = new ConcurrentHashMap<>();
 
     @Nullable
@@ -147,7 +144,7 @@ public class TickerService
 
     private void tickersUpdated(int tickerCount)
     {
-        if (BuildConfig.DEBUG) System.out.println("Tickers Updated: " + tickerCount);
+        Timber.d("Tickers Updated: " + tickerCount);
         mainTickerUpdate = null;
     }
 
@@ -211,7 +208,7 @@ public class TickerService
             }
             catch (IOException e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
 
             return tickers;
@@ -252,19 +249,30 @@ public class TickerService
         });
     }
 
+    private static final int GREATEST_MAPSIZE = 75;
+
     public Single<Integer> syncERC20Tickers(long chainId, List<TokenCardMeta> erc20Tokens)
     {
-        if (canUpdate.containsKey(chainId) || erc20Tokens.size() == 0)
+        if (!canUpdate(chainId) || erc20Tokens.size() == 0)
             return Single.fromCallable(() -> 0);
         //this function called after sync is complete, only update tickers that need updating
         //first fetch the tickers for these
         long staleTime = System.currentTimeMillis() - 5 * DateUtils.MINUTE_IN_MILLIS;
         Map<String, Long> currentTickerMap = localSource.getTickerTimeMap(chainId, erc20Tokens);
         final Map<String, TokenCardMeta> lookupMap = new HashMap<>();
+
+        canUpdate.put(chainId, System.currentTimeMillis() + 15 * DateUtils.SECOND_IN_MILLIS);
+        nextUpdate = System.currentTimeMillis() + 5 * DateUtils.SECOND_IN_MILLIS;
+
         for (TokenCardMeta tcm : erc20Tokens)
         {
-            if (!currentTickerMap.containsKey(tcm.getAddress())
-                    || currentTickerMap.get(tcm.getAddress()) < staleTime) lookupMap.put(tcm.getAddress().toLowerCase(), tcm);
+            if (!dexGuruQuery.containsKey(tcm.tokenId) // don't include any token in the dexguru queue
+                && (!currentTickerMap.containsKey(tcm.getAddress())
+                    || currentTickerMap.get(tcm.getAddress()) < staleTime)) //include tokens who's tickers have gone stale
+            {
+                lookupMap.put(tcm.getAddress().toLowerCase(), tcm);
+                if (lookupMap.size() > GREATEST_MAPSIZE) break;
+            }
         }
 
         if (lookupMap.size() == 0) return Single.fromCallable(() -> 0);
@@ -276,19 +284,20 @@ public class TickerService
         });
     }
 
-    public Single<Integer> getERC20Tickers(long chainId, List<TokenCardMeta> erc20Tokens)
+    private long nextUpdate = 0;
+
+    private boolean canUpdate(long chainId)
     {
-        if (canUpdate.containsKey(chainId) || erc20Tokens.size() == 0)
-            return Single.fromCallable(() -> 0);
+        if (System.currentTimeMillis() < nextUpdate) return false;
 
-        final Map<String, TokenCardMeta> lookupMap = new HashMap<>();
-        for (TokenCardMeta tcm : erc20Tokens) { lookupMap.put(tcm.getAddress().toLowerCase(), tcm); }
-
-        return Single.fromCallable(() -> {
-            Map<String, TokenTicker> tickerMap = fetchERC20TokenTickers(chainId, lookupMap.values());
-            localSource.updateERC20Tickers(chainId, tickerMap);
-            return tickerMap.size();
-        });
+        if (canUpdate.containsKey(chainId))
+        {
+            return System.currentTimeMillis() > canUpdate.get(chainId);
+        }
+        else
+        {
+            return true;
+        }
     }
 
     private Map<String, TokenTicker> fetchERC20TokenTickers(long chainId, Collection<TokenCardMeta> erc20Tokens)
@@ -319,7 +328,8 @@ public class TickerService
         try (okhttp3.Response response = httpClient.newCall(request)
                 .execute())
         {
-            List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(response.body().string(), currentCurrencySymbolTxt, currentConversionRate);
+            String responseStr = response.body().string();
+            List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(responseStr, currentCurrencySymbolTxt, currentConversionRate);
             for (CoinGeckoTicker t : tickers)
             {
                 //store ticker
@@ -327,12 +337,23 @@ public class TickerService
                 lookupMap.remove(t.address.toLowerCase());
             }
 
-            canUpdate.put(chainId, true);
-            if (dexGuruName != null) addDexGuruTickers(lookupMap.values());
+            if (dexGuruName != null)
+            {
+                addDexGuruTickers(lookupMap.values());
+            }
+            else
+            {
+                final Map<String, TokenTicker> blankTickers = new HashMap<>(); //These tokens have no ticker, don't check them again today
+                for (String address : lookupMap.keySet())
+                {
+                    blankTickers.put(address, new TokenTicker(System.currentTimeMillis() + DateUtils.DAY_IN_MILLIS));
+                }
+                localSource.updateERC20Tickers(chainId, blankTickers);
+            }
         }
         catch (Exception e)
         {
-            if (BuildConfig.DEBUG) e.printStackTrace();
+            Timber.e(e);
         }
 
         return erc20Tickers;
@@ -383,12 +404,14 @@ public class TickerService
                         {{
                             put(tcm.getAddress(), tTicker);
                         }});
+                        return;
                     }
                 }
+                localSource.updateTicker(tcm.getChain(), tcm.getAddress(), new TokenTicker(System.currentTimeMillis() + DateUtils.DAY_IN_MILLIS));
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
+                Timber.e(e);
             }
         }
         else
@@ -438,7 +461,7 @@ public class TickerService
 
     private int checkTickers(int tickerSize)
     {
-        if (BuildConfig.DEBUG) System.out.println("Tickers received: " + tickerSize);
+        Timber.d("Tickers received: %s", tickerSize);
         //store ticker values. If values have changed then update the token's update time so the wallet view will update
         localSource.updateEthTickers(ethTickers);
         //localSource.removeOutdatedTickers();
@@ -617,35 +640,19 @@ public class TickerService
         return getCurrencyString(price) + " " + currentCurrencySymbolTxt;
     }
 
-    //TODO: Refactor this as required
     public static String getCurrencyString(double price)
     {
-        if (price > ONE_BILLION)
-        {
-            return getBillionsString(price);
-        }
-        DecimalFormat df = new DecimalFormat("#,##0.00");
-        df.setRoundingMode(RoundingMode.CEILING);
-        if (price >= 0) {
-            return currentCurrencySymbol + df.format(price);
-        } else {
-            return "-" + currentCurrencySymbol + df.format(Math.abs(price));
-        }
-    }
-
-    private static String getBillionsString(double price)
-    {
-        price /= ONE_BILLION;
-        DecimalFormat df = new DecimalFormat("#,##0.000");
-        df.setRoundingMode(RoundingMode.CEILING);
-        return currentCurrencySymbol + df.format(price) + "B";
+        return BalanceUtils.genCurrencyString(price, currentCurrencySymbol);
     }
 
     public static String getCurrencyWithoutSymbol(double price)
     {
-        DecimalFormat df = new DecimalFormat("#,##0.00");
-        df.setRoundingMode(RoundingMode.DOWN);
-        return df.format(price);
+        return BalanceUtils.genCurrencyString(price, "");
+    }
+
+    public static String getPercentageConversion(double d)
+    {
+        return BalanceUtils.getScaledValue(BigDecimal.valueOf(d), 2, 2);
     }
 
     private void initCurrency()

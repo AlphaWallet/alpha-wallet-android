@@ -75,4 +75,6 @@ public interface TokenLocalSource {
 
     ContractAddress getBaseToken(long chainId, String address);
     TokenGroup getTokenGroup(long chainId, String address, ContractType type);
+
+    void updateTicker(long chainId, String address, TokenTicker ticker);
 }

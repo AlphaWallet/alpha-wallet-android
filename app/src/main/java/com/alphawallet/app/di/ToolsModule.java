@@ -12,14 +12,13 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import dagger.hilt.InstallIn;
+import dagger.hilt.components.SingletonComponent;
 import okhttp3.OkHttpClient;
 
 @Module
-class ToolsModule {
-	@Provides
-	Context provideContext(App application) {
-		return application.getApplicationContext();
-	}
+@InstallIn(SingletonComponent.class)
+public class ToolsModule {
 
 	@Singleton
 	@Provides

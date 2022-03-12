@@ -28,25 +28,15 @@
             android:id="@+id/large_title_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|snap"
-            />
-
+            app:layout_scrollFlags="scroll|snap" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
-            style="@style/WalletTabLayoutStyle"
+            style="@style/AwTabLayout.Scrollable"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            app:layout_scrollFlags="enterAlways"
-            app:tabGravity="center"
-            app:tabIndicatorColor="@color/colorHighlight"
-            app:tabIndicatorFullWidth="true"
-            app:tabMode="scrollable"
-            app:tabSelectedTextColor="@color/colorHighlight"
-            app:tabTextAppearance="@style/WalletTabTextAppearance"
-            app:tabTextColor="@color/dove"
-            android:background="@color/white"/>
+            app:layout_scrollFlags="enterAlways" />
 
         <View
             android:layout_width="match_parent"

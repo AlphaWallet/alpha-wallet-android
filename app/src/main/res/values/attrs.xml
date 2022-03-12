@@ -48,6 +48,7 @@
         <attr name="ens" format="boolean" />
         <attr name="nocam" format="boolean" />
         <attr name="show_header" format="boolean" />
+        <attr name="can_change_currency" format="boolean" />
         <attr name="show_allFunds" format="boolean" />
         <attr name="show_paste" format="boolean" />
         <attr name="font_size" format="integer" />
@@ -80,5 +81,10 @@
     </declare-styleable>
     <declare-styleable name="TokenIcon">
         <attr name="square" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="DialogInfoItem">
+        <attr name="title"/>
+        <attr name="text"/>
+        <attr name="showActionText" format="boolean"/>
     </declare-styleable>
 </resources>

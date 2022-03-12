@@ -43,7 +43,6 @@ import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SendViewModel;
-import com.alphawallet.app.viewmodel.SendViewModelFactory;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -63,19 +62,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
+@AndroidEntryPoint
 public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {
     private static final BigDecimal NEGATIVE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
 
-    @Inject
-    SendViewModelFactory sendViewModelFactory;
     SendViewModel viewModel;
 
     private Wallet wallet;
@@ -98,12 +95,11 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
         toolbar();
 
-        viewModel = new ViewModelProvider(this, sendViewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(SendViewModel.class);
 
         String contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
@@ -286,7 +282,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                     showCameraDenied();
                     break;
                 default:
-                    Log.e("SEND", String.format(getString(R.string.barcode_error_format),
+                    Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
                                                 "Code: " + resultCode
                     ));
                     break;
@@ -501,8 +497,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         Token base = viewModel.getToken(token.tokenInfo.chainId, wallet.address);
         //validate that we have sufficient balance
         if ((token.isEthereum() && token.balance.subtract(value).compareTo(BigDecimal.ZERO) > 0) // if sending base ethereum then check we have more than just the value
-             || (hasGasOverride(token.tokenInfo.chainId) && token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0) //allow for chains with no gas requirement
-             || (base.balance.compareTo(BigDecimal.ZERO) > 0 && token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0)) // contract token, check gas and sufficient token balance
+             || (token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0)) // contract token, check sufficient token balance (gas widget will check sufficient gas)
         {
             sendAmount = value;
             sendGasPrice = gasPrice;
@@ -572,7 +567,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
-        Log.w(this.getLocalClassName(), throwable.getMessage());
+        Timber.w(throwable.getMessage());
         checkConfirm(BigInteger.ZERO, transactionBytes, txSendAddress, resolvedAddress);
     }
 

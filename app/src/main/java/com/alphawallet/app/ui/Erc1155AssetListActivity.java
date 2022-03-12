@@ -24,18 +24,16 @@ import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.alphawallet.app.ui.widget.adapter.Erc1155AssetListAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.Erc1155AssetListViewModel;
-import com.alphawallet.app.viewmodel.Erc1155AssetListViewModelFactory;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.math.BigInteger;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class Erc1155AssetListActivity extends BaseActivity implements StandardFunctionInterface, OnAssetClickListener {
-    @Inject
-    Erc1155AssetListViewModelFactory viewModelFactory;
     Erc1155AssetListViewModel viewModel;
 
     private Token token;
@@ -48,7 +46,6 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc1155_asset_list);
 
@@ -83,7 +80,7 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
 
     private void initViewModel()
     {
-        viewModel = new ViewModelProvider(this, viewModelFactory)
+        viewModel = new ViewModelProvider(this)
                 .get(Erc1155AssetListViewModel.class);
     }
 
@@ -110,14 +107,14 @@ public class Erc1155AssetListActivity extends BaseActivity implements StandardFu
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.menu_select, menu);
+        getMenuInflater().inflate(R.menu.menu_nft_display, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        if (item.getItemId() == R.id.action_select)
+        if (item.getItemId() == R.id.action_send_multiple_tokens)
         {
             handleTransactionSuccess.launch(viewModel.openSelectionModeIntent(this, token, wallet, asset));
             return true;

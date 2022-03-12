@@ -18,22 +18,21 @@
             android:id="@+id/layout_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/toolbar"
             android:orientation="vertical"
             android:visibility="visible">
 
             <ImageView
                 android:id="@+id/icon"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="@dimen/token_icon"
+                android:layout_height="@dimen/token_icon"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/dp30"
-                android:layout_marginBottom="@dimen/dp30"
+                android:layout_marginTop="@dimen/optimal_30"
+                android:layout_marginBottom="@dimen/small_12"
                 android:src="@mipmap/ic_launcher" />
 
             <TextView
-                style="@style/Aw.Typography.Title.Large.Bold"
                 android:id="@+id/peer_name"
+                style="@style/Aw.Typography.Title.XLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -59,11 +58,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.3"
-                    android:text="@string/status"/>
+                    android:text="@string/status" />
 
                 <TextView
-                    style="@style/Aw.Typography.SemiBold"
                     android:id="@+id/connection_status"
+                    style="@style/Aw.Typography.SemiBold"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/tiny_8"
@@ -93,7 +92,6 @@
                     android:text="@string/hint_contract_name" />
 
                 <TextView
-                    style="@style/Aw.Typography.SemiBold"
                     android:id="@+id/text_name"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -124,7 +122,6 @@
                     android:text="@string/connected_to" />
 
                 <TextView
-                    style="@style/Aw.Typography.SemiBold"
                     android:id="@+id/peer_url"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -175,8 +172,8 @@
 
                     <com.alphawallet.app.widget.TokenIcon
                         android:id="@+id/chain_icon"
-                        android:layout_width="@dimen/token_icon"
-                        android:layout_height="@dimen/token_icon"
+                        android:layout_width="@dimen/token_icon_small"
+                        android:layout_height="@dimen/token_icon_small"
                         android:visibility="gone"
                         custom:layout_constrainedHeight="true"
                         custom:layout_constrainedWidth="true"
@@ -190,6 +187,8 @@
                 </LinearLayout>
 
             </LinearLayout>
+
+            <View style="@style/Aw.Component.Separator" />
 
         </LinearLayout>
 

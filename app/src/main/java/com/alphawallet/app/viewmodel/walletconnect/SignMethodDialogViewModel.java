@@ -58,7 +58,7 @@ public class SignMethodDialogViewModel extends BaseViewModel
                         long chainId = Long.parseLong(sessionRequest.getChainId().split(":")[1]);
                         Single<SignatureFromKey> signature = transactionRepositoryType.getSignature(wallet, signable, chainId);
                         signature
-                                .delay(3, TimeUnit.SECONDS) // The WC connection shutdown when show biometric, when back to foreground, it will open new connection, so need delay to wait the connection opened
+                                .delay(5, TimeUnit.SECONDS) // The WC connection shutdown when show biometric, when back to foreground, it will open new connection, so need delay to wait the connection opened
                                 .subscribe(signatureFromKey -> onSuccess(signatureFromKey, sessionRequest), SignMethodDialogViewModel.this::onError);
                     }
                 }

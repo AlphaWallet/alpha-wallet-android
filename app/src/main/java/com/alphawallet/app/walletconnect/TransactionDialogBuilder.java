@@ -81,15 +81,16 @@ public class TransactionDialogBuilder
             }
 
             @Override
+            public void signTransaction(Web3Transaction tx)
+            {
+                signMessage(fromWallet, tx, awWalletConnectClient);
+            }
+
+            @Override
             public void sendTransaction(Web3Transaction tx)
             {
                 Log.d("seaborn", "sendTransaction: ");
-                if (signOnly)
-                {
-                    signMessage(fromWallet, tx, awWalletConnectClient);
-                } else {
-                    TransactionDialogBuilder.this.sendTransaction(fromWallet, tx, awWalletConnectClient);
-                }
+                TransactionDialogBuilder.this.sendTransaction(fromWallet, tx, awWalletConnectClient);
             }
 
             @Override
@@ -104,6 +105,10 @@ public class TransactionDialogBuilder
                 Log.d("seaborn", "notifyConfirm: " + mode);
             }
         });
+        if (signOnly)
+        {
+            actionSheetDialog.setSignOnly();
+        }
         actionSheetDialog.setURL(settledSession.getPeerAppMetaData().getUrl());
         actionSheetDialog.setCanceledOnTouchOutside(false);
         actionSheetDialog.waitForEstimate();
@@ -131,8 +136,8 @@ public class TransactionDialogBuilder
             @Override
             public void DAppReturn(byte[] data, Signable message)
             {
-                Log.d("seaborn", "DAppReturn: " + Numeric.toHexString(data));
                 approve(Numeric.toHexString(data), awWalletConnectClient);
+                actionSheetDialog.transactionWritten(".");
             }
         }, Objects.requireNonNull(settledSession.getPeerAppMetaData()).getUrl(), getChainId(), fromWallet);
     }
@@ -144,8 +149,8 @@ public class TransactionDialogBuilder
             @Override
             public void transactionSuccess(Web3Transaction web3Tx, String hashData)
             {
-                Log.d("seaborn", "transactionSuccess: " + hashData);
                 approve(hashData, awWalletConnectClient);
+                actionSheetDialog.transactionWritten(hashData);
             }
 
             @Override
@@ -169,7 +174,6 @@ public class TransactionDialogBuilder
         {
             awWalletConnectClient.approve(sessionRequest, hashData);
         }, 5000);
-        actionSheetDialog.dismiss();
     }
 
     private long getChainId()

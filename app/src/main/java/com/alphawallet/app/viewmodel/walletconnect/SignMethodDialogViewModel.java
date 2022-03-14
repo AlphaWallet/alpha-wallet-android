@@ -1,7 +1,10 @@
 package com.alphawallet.app.viewmodel.walletconnect;
 
 import android.app.Activity;
+import android.util.Log;
+import android.widget.Toast;
 
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
@@ -25,6 +28,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import timber.log.Timber;
 
+import static com.alphawallet.app.entity.cryptokeys.SignatureReturnType.SIGNATURE_GENERATED;
+
 @HiltViewModel
 public class SignMethodDialogViewModel extends BaseViewModel
 {
@@ -43,50 +48,52 @@ public class SignMethodDialogViewModel extends BaseViewModel
         this.keyService = keyService;
     }
 
-    public void sign(Activity activity, String walletAddress, WalletConnect.Model.SessionRequest sessionRequest, final Signable signable)
+    public void sign(Activity activity, Wallet wallet, WalletConnect.Model.SessionRequest sessionRequest, final Signable signable)
     {
-        Single<Wallet> signer = fetchWalletsInteract.getWallet(walletAddress);
-        signer.subscribe(wallet ->
+        keyService.getAuthenticationForSignature(wallet, activity, new SignAuthenticationCallback()
         {
-            keyService.getAuthenticationForSignature(wallet, activity, new SignAuthenticationCallback()
+            @Override
+            public void gotAuthorisation(boolean gotAuth)
             {
-                @Override
-                public void gotAuthorisation(boolean gotAuth)
+                Log.d("seaborn", "gotAuthorisation: " + gotAuth);
+                if (gotAuth)
                 {
-                    if (gotAuth)
-                    {
-                        long chainId = Long.parseLong(sessionRequest.getChainId().split(":")[1]);
-                        Single<SignatureFromKey> signature = transactionRepositoryType.getSignature(wallet, signable, chainId);
-                        signature
-                                .delay(5, TimeUnit.SECONDS) // The WC connection shutdown when show biometric, when back to foreground, it will open new connection, so need delay to wait the connection opened
-                                .subscribe(signatureFromKey -> onSuccess(signatureFromKey, sessionRequest), SignMethodDialogViewModel.this::onError);
-                    }
+                    long chainId = Long.parseLong(sessionRequest.getChainId().split(":")[1]);
+                    Single<SignatureFromKey> signature = transactionRepositoryType.getSignature(wallet, signable, chainId);
+                    signature
+                            .delay(5, TimeUnit.SECONDS) // The WC connection shutdown when show biometric, when back to foreground, it will open new connection, so need delay to wait the connection opened
+                            .subscribe(signatureFromKey -> onSuccess(signatureFromKey, sessionRequest), SignMethodDialogViewModel.this::onError);
                 }
-
-                @Override
-                public void cancelAuthentication()
-                {
-                    Timber.d("cancelAuthentication");
+                else {
+                    Toast.makeText(activity, activity.getString(R.string.error_while_signing_transaction), Toast.LENGTH_SHORT).show();
                 }
-            });
-        }, this::onWalletFetchError);
-    }
+            }
 
-    private void onWalletFetchError(Throwable throwable)
-    {
-        Timber.e(throwable);
+            @Override
+            public void cancelAuthentication()
+            {
+                Timber.d("cancelAuthentication");
+            }
+        });
     }
 
     public void onError(Throwable throwable)
     {
-        Timber.e(throwable);
+        Timber.tag("seaborn").e(throwable);
     }
 
     private void onSuccess(SignatureFromKey signatureFromKey, WalletConnect.Model.SessionRequest sessionRequest)
     {
-
-        String result = Numeric.toHexString(signatureFromKey.signature);
-        awWalletConnectClient.approve(sessionRequest, result);
+        Log.d("seaborn", "signed:" + signatureFromKey.sigType);
+        if (signatureFromKey.sigType == SIGNATURE_GENERATED)
+        {
+            String result = Numeric.toHexString(signatureFromKey.signature);
+            awWalletConnectClient.approve(sessionRequest, result);
+        } else
+        {
+            Log.d("seaborn", "sign fail: " + signatureFromKey.failMessage);
+            awWalletConnectClient.reject(sessionRequest, signatureFromKey.failMessage);
+        }
         completed.postValue(true);
     }
 

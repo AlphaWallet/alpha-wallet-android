@@ -178,7 +178,7 @@ public class SignMethodDialog extends BottomSheetDialog
         } else
         {
             functionBar.setPrimaryButtonWaiting();
-            viewModel.sign(activity, walletAddress, sessionRequest, signable);
+            viewModel.sign(activity, wallet, sessionRequest, signable);
         }
     }
 

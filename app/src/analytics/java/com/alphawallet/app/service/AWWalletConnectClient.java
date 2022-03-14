@@ -140,21 +140,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
 
     public void reject(WalletConnect.Model.SessionRequest sessionRequest)
     {
-        WalletConnect.Model.JsonRpcResponse jsonRpcResponse = new WalletConnect.Model.JsonRpcResponse.JsonRpcError(sessionRequest.getRequest().getId(), new WalletConnect.Model.JsonRpcResponse.Error(0, "User rejected."));
-        WalletConnect.Params.Response response = new WalletConnect.Params.Response(sessionRequest.getTopic(), jsonRpcResponse);
-        try
-        {
-            Log.d("seaborn", "reject: " + sessionRequest.getTopic());
-            WalletConnectClient.INSTANCE.respond(response, t ->
-            {
-                Log.d("seaborn", "respond: " + t);
-                Timber.e(t);
-            });
-        } catch (WalletConnectException e)
-        {
-            Timber.e(e);
-            Log.d("seaborn", "reject: " + e);
-        }
+        reject(sessionRequest, "User rejected.");
     }
 
     public void approve(WalletConnect.Model.SessionProposal sessionProposal, List<String> accounts, WalletConnectV2Callback callback)
@@ -234,6 +220,25 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
         } catch (WalletConnectException e)
         {
             Timber.e(e);
+        }
+    }
+
+    public void reject(WalletConnect.Model.SessionRequest sessionRequest, String failMessage)
+    {
+        WalletConnect.Model.JsonRpcResponse jsonRpcResponse = new WalletConnect.Model.JsonRpcResponse.JsonRpcError(sessionRequest.getRequest().getId(), new WalletConnect.Model.JsonRpcResponse.Error(0, failMessage));
+        WalletConnect.Params.Response response = new WalletConnect.Params.Response(sessionRequest.getTopic(), jsonRpcResponse);
+        try
+        {
+            Log.d("seaborn", "reject: " + sessionRequest.getTopic());
+            WalletConnectClient.INSTANCE.respond(response, t ->
+            {
+                Log.d("seaborn", "respond: " + t);
+                Timber.e(t);
+            });
+        } catch (WalletConnectException e)
+        {
+            Timber.e(e);
+            Log.d("seaborn", "reject: " + e);
         }
     }
 

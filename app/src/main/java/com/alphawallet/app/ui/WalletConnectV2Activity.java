@@ -297,7 +297,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     @Override
     public void onSessionProposalApproved()
     {
-        showSessionsActivity();
         finish();
     }
 

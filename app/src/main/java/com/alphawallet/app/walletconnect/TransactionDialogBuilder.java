@@ -16,6 +16,7 @@ import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
+import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.token.entity.Signable;
@@ -43,7 +44,6 @@ public class TransactionDialogBuilder
     private WalletConnect.Model.SettledSession settledSession;
     private WalletConnectViewModel viewModel;
     private ActionSheetDialog actionSheetDialog;
-    private boolean send;
 
     public TransactionDialogBuilder(Activity activity, WalletConnect.Model.SessionRequest sessionRequest, WalletConnect.Model.SettledSession settledSession)
     {
@@ -97,6 +97,10 @@ public class TransactionDialogBuilder
             public void dismissed(String txHash, long callbackId, boolean actionCompleted)
             {
                 Log.d("seaborn", "dismissed: ");
+                if (!actionCompleted)
+                {
+                    awWalletConnectClient.reject(sessionRequest);
+                }
             }
 
             @Override
@@ -120,6 +124,7 @@ public class TransactionDialogBuilder
                 .subscribe(actionSheetDialog::setGasEstimate,
                         Throwable::printStackTrace)
                 .isDisposed();
+
         return actionSheetDialog;
     }
 

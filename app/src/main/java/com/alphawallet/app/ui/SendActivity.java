@@ -206,14 +206,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                             //Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
                             displayScanError();
                             return;
-                        }
-                        else if (qrCode.startsWith("wc:"))
-                        {
-                            startWalletConnect(qrCode);
-                        }
-                        else
-                        {
-
+                        } else {
                             QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
                             QRResult result = parser.parse(qrCode);
                             String extracted_address = null;
@@ -271,16 +264,6 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
-    }
-
-    private void startWalletConnect(String qrCode)
-    {
-        Intent intent = new Intent(this, WalletConnectActivity.class);
-        intent.putExtra("qrCode", qrCode);
-        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
-        startActivity(intent);
-        setResult(RESULT_OK);
-        finish();
     }
 
     private void showCameraDenied()

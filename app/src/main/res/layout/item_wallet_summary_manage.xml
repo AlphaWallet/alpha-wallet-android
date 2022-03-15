@@ -24,11 +24,19 @@
         android:paddingBottom="5dp">
 
         <ImageView
+            android:id="@+id/image_default_indicator"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:src="@drawable/ic_dot"
+            android:layout_marginStart="3dp"
+            android:visibility="invisible"/>
+
+        <ImageView
             android:id="@+id/manage_wallet_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/transparent"
-            android:paddingStart="11dp"
+            android:paddingStart="0dp"
             android:src="@drawable/ic_menu"
             android:visibility="gone" />
 

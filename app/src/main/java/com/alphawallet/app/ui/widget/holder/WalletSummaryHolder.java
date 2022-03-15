@@ -39,6 +39,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 	public static final String IS_LAST_ITEM = "is_last";
 
 	private final LinearLayout manageWalletLayout;
+	private final ImageView defaultWalletIndicator;
 	private final ImageView manageWalletBtn;
 	private final UserAvatar walletIcon;
 	private final LinearLayout walletClickLayout;
@@ -59,6 +60,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 
 	public WalletSummaryHolder(int resId, ViewGroup parent, WalletClickCallback callback, Realm realm) {
 		super(resId, parent);
+		defaultWalletIndicator = findViewById(R.id.image_default_indicator);
 		manageWalletBtn = findViewById(R.id.manage_wallet_btn);
 		walletIcon = findViewById(R.id.wallet_icon);
 		walletBalanceText = findViewById(R.id.wallet_balance);
@@ -117,6 +119,12 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 			walletBalanceCurrency.setText(wallet.balanceSymbol);
 
 			walletAddressText.setText(Utils.formatAddress(wallet.address));
+
+			if (addition.getBoolean(IS_DEFAULT_ADDITION, false)) {
+				defaultWalletIndicator.setVisibility(View.VISIBLE);
+			} else {
+				defaultWalletIndicator.setVisibility(View.INVISIBLE);
+			}
 
 			walletSelectedIcon.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 

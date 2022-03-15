@@ -17,7 +17,7 @@ public class WalletConnectV2SessionRequestHandler
     private final WalletConnect.Model.SessionRequest sessionRequest;
     private final WalletConnect.Model.SettledSession settledSession;
     private final Activity activity;
-    private AWWalletConnectClient client;
+    private final AWWalletConnectClient client;
 
     public WalletConnectV2SessionRequestHandler(WalletConnect.Model.SessionRequest sessionRequest, WalletConnect.Model.SettledSession settledSession, Activity activity, AWWalletConnectClient client)
     {

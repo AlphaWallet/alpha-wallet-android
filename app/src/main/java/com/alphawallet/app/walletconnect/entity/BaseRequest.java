@@ -9,7 +9,7 @@ import static java.util.Arrays.asList;
 public abstract class BaseRequest
 {
     protected String rawParams;
-    private WCEthereumSignMessage.WCSignType type;
+    private final WCEthereumSignMessage.WCSignType type;
     protected List<String> params;
 
     public BaseRequest(String rawParams, WCEthereumSignMessage.WCSignType type)

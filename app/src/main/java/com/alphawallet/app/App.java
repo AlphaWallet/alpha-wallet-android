@@ -34,7 +34,7 @@ public class App extends Application
     AWWalletConnectClient awWalletConnectClient;
 
     private static App mInstance;
-    private Stack<Activity> activityStack = new Stack<>();
+    private final Stack<Activity> activityStack = new Stack<>();
 
     public static App getInstance()
     {
@@ -114,7 +114,7 @@ public class App extends Application
             @Override
             public void onActivityPaused(Activity activity)
             {
-                pop(activity);
+                pop();
             }
 
             @Override
@@ -132,11 +132,9 @@ public class App extends Application
     @NonNull
     private WalletConnect.Model.AppMetaData getAppMetaData()
     {
-
         String name = getString(R.string.app_name);
-        String url = "https://alphawallet.com";
-        String[] icons = {"https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media"};
-
+        String url = C.ALPHAWALLET_WEBSITE;
+        String[] icons = {C.ALPHA_WALLET_LOGO_URL};
         String description = "The ultimate Web3 Wallet to power your tokens.";
         return new WalletConnect.Model.AppMetaData(name, description, url, Arrays.asList(icons));
     }
@@ -145,13 +143,13 @@ public class App extends Application
     {
         WalletConnect.Model.AppMetaData appMetaData = getAppMetaData();
         WalletConnect.Params.Init init = new WalletConnect.Params.Init(this,
-                "wss://relay.walletconnect.com/?projectId=40c6071febfd93f4fe485c232a8a4cd9",
+                String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, C.WALLET_CONNECT_PROJECT_ID),
                 true,
                 appMetaData);
 
         WalletConnectClient.INSTANCE.initialize(init, e ->
         {
-            Timber.tag("AlphaWallet").d("Init failed: %s", e.getMessage());
+            Timber.i("Init failed: %s", e.getMessage());
             return null;
         });
 
@@ -173,7 +171,7 @@ public class App extends Application
         WalletConnectClient.INSTANCE.shutdown();
     }
 
-    private void pop(Activity activity)
+    private void pop()
     {
         activityStack.pop();
     }

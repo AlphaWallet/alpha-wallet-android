@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.alphawallet.app.entity.DAppFunction;
@@ -16,7 +15,6 @@ import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
-import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.token.entity.Signable;
@@ -39,9 +37,9 @@ import io.reactivex.schedulers.Schedulers;
 
 public class TransactionDialogBuilder
 {
-    private Activity activity;
-    private WalletConnect.Model.SessionRequest sessionRequest;
-    private WalletConnect.Model.SettledSession settledSession;
+    private final Activity activity;
+    private final WalletConnect.Model.SessionRequest sessionRequest;
+    private final WalletConnect.Model.SettledSession settledSession;
     private WalletConnectViewModel viewModel;
     private ActionSheetDialog actionSheetDialog;
 
@@ -62,9 +60,7 @@ public class TransactionDialogBuilder
 
     public Dialog build(AWWalletConnectClient awWalletConnectClient, boolean signOnly)
     {
-        Type listType = new TypeToken<ArrayList<WCEthereumTransaction>>()
-        {
-        }.getType();
+        Type listType = new TypeToken<ArrayList<WCEthereumTransaction>>() {}.getType();
         List<WCEthereumTransaction> list = new Gson().fromJson(sessionRequest.getRequest().getParams(), listType);
         WCEthereumTransaction wcTx = list.get(0);
         final Web3Transaction w3Tx = new Web3Transaction(wcTx, 0);
@@ -76,7 +72,6 @@ public class TransactionDialogBuilder
             @Override
             public void getAuthorisation(SignAuthenticationCallback callback)
             {
-                Log.d("seaborn", "getAuthorisation: " + callback);
                 viewModel.getAuthenticationForSignature(fromWallet, activity, callback);
             }
 
@@ -89,14 +84,12 @@ public class TransactionDialogBuilder
             @Override
             public void sendTransaction(Web3Transaction tx)
             {
-                Log.d("seaborn", "sendTransaction: ");
                 TransactionDialogBuilder.this.sendTransaction(fromWallet, tx, awWalletConnectClient);
             }
 
             @Override
             public void dismissed(String txHash, long callbackId, boolean actionCompleted)
             {
-                Log.d("seaborn", "dismissed: ");
                 if (!actionCompleted)
                 {
                     awWalletConnectClient.reject(sessionRequest);
@@ -106,14 +99,14 @@ public class TransactionDialogBuilder
             @Override
             public void notifyConfirm(String mode)
             {
-                Log.d("seaborn", "notifyConfirm: " + mode);
             }
         });
         if (signOnly)
         {
             actionSheetDialog.setSignOnly();
         }
-        actionSheetDialog.setURL(settledSession.getPeerAppMetaData().getUrl());
+        String url = Objects.requireNonNull(settledSession.getPeerAppMetaData()).getUrl();
+        actionSheetDialog.setURL(url);
         actionSheetDialog.setCanceledOnTouchOutside(false);
         actionSheetDialog.waitForEstimate();
 
@@ -176,9 +169,7 @@ public class TransactionDialogBuilder
     private void approve(String hashData, AWWalletConnectClient awWalletConnectClient)
     {
         new Handler(Looper.getMainLooper()).postDelayed(() ->
-        {
-            awWalletConnectClient.approve(sessionRequest, hashData);
-        }, 5000);
+                awWalletConnectClient.approve(sessionRequest, hashData), 5000);
     }
 
     private long getChainId()
@@ -186,6 +177,3 @@ public class TransactionDialogBuilder
         return Long.parseLong(sessionRequest.getChainId().split(":")[1]);
     }
 }
-
-
-

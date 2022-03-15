@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -68,7 +67,6 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
 
     private TXSpeed currentGasSpeedIndex = TXSpeed.STANDARD;
     private long customNonce = -1;
-    private OnGasSelectedCallback onGasSelectedCallback;
     private boolean isSendingAll;
     private BigInteger resendGasPrice = BigInteger.ZERO;
 
@@ -87,10 +85,9 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
     protected void onWindowVisibilityChanged(int visibility)
     {
         super.onWindowVisibilityChanged(visibility);
-        Log.d("seaborn", "visible: " + visibility);
-        if (visibility == VISIBLE && AWWalletConnectClient.data != null)
+        if (visibility == VISIBLE && AWWalletConnectClient.gasData != null)
         {
-            Intent data = AWWalletConnectClient.data;
+            Intent data = AWWalletConnectClient.gasData;
 
             int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
             long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
@@ -103,12 +100,11 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
 
             setCurrentGasIndex(gasSelectionIndex, customGasPrice, maxPriorityFee, customGasLimit, expectedTxTime, customNonce);
         }
-        AWWalletConnectClient.data = null;
+        AWWalletConnectClient.gasData = null;
     }
     //For legacy transaction, either we are sending all or the chain doesn't support EIP1559
     //Since these chains are not so well used, we will compromise and send at the standard gas rate
     //That is - not allow selection of gas price
-
     public void setupWidget(TokensService svs, Token t, Web3Transaction tx, StandardFunctionInterface sfi, ActivityResultLauncher<Intent> gasSelectLauncher)
     {
         tokensService = svs;
@@ -120,7 +116,6 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
         isSendingAll = isSendingAll(tx);
         initialGasPrice = tx.gasPrice;
         customNonce = tx.nonce;
-        this.onGasSelectedCallback = onGasSelectedCallback;
 
         if (tx.gasLimit.equals(BigInteger.ZERO)) //dapp didn't specify a limit, use default limits until node returns an estimate (see setGasEstimate())
         {

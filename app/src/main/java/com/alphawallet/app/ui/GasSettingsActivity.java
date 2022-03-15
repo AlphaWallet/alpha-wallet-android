@@ -244,7 +244,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         result.putExtra(C.EXTRA_GAS_PRICE, custom.gasPrice.maxFeePerGas.toString());
         result.putExtra(C.EXTRA_MIN_GAS_PRICE, custom.gasPrice.maxPriorityFeePerGas.toString());
 
-        AWWalletConnectClient.data = result;
+        AWWalletConnectClient.gasData = result;
         finish();
     }
 

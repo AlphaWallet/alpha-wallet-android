@@ -1,7 +1,7 @@
 package com.alphawallet.app.viewmodel.walletconnect;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.alphawallet.app.R;
@@ -33,11 +33,11 @@ import static com.alphawallet.app.entity.cryptokeys.SignatureReturnType.SIGNATUR
 @HiltViewModel
 public class SignMethodDialogViewModel extends BaseViewModel
 {
-    private AWWalletConnectClient awWalletConnectClient;
-    private FetchWalletsInteract fetchWalletsInteract;
-    private TransactionRepositoryType transactionRepositoryType;
-    private KeyService keyService;
-    private MutableLiveData<Boolean> completed = new MutableLiveData<>(false);
+    private final AWWalletConnectClient awWalletConnectClient;
+    private final FetchWalletsInteract fetchWalletsInteract;
+    private final TransactionRepositoryType transactionRepositoryType;
+    private final KeyService keyService;
+    private final MutableLiveData<Boolean> completed = new MutableLiveData<>(false);
 
     @Inject
     public SignMethodDialogViewModel(AWWalletConnectClient awWalletConnectClient, FetchWalletsInteract fetchWalletsInteract, TransactionRepositoryType transactionRepositoryType, KeyService keyService)
@@ -52,10 +52,10 @@ public class SignMethodDialogViewModel extends BaseViewModel
     {
         keyService.getAuthenticationForSignature(wallet, activity, new SignAuthenticationCallback()
         {
+            @SuppressLint("CheckResult")
             @Override
             public void gotAuthorisation(boolean gotAuth)
             {
-                Log.d("seaborn", "gotAuthorisation: " + gotAuth);
                 if (gotAuth)
                 {
                     long chainId = Long.parseLong(sessionRequest.getChainId().split(":")[1]);
@@ -72,26 +72,25 @@ public class SignMethodDialogViewModel extends BaseViewModel
             @Override
             public void cancelAuthentication()
             {
-                Timber.d("cancelAuthentication");
+                Timber.i("cancelAuthentication");
             }
         });
     }
 
     public void onError(Throwable throwable)
     {
-        Timber.tag("seaborn").e(throwable);
+        Timber.e(throwable);
     }
 
     private void onSuccess(SignatureFromKey signatureFromKey, WalletConnect.Model.SessionRequest sessionRequest)
     {
-        Log.d("seaborn", "signed:" + signatureFromKey.sigType);
         if (signatureFromKey.sigType == SIGNATURE_GENERATED)
         {
             String result = Numeric.toHexString(signatureFromKey.signature);
             awWalletConnectClient.approve(sessionRequest, result);
         } else
         {
-            Log.d("seaborn", "sign fail: " + signatureFromKey.failMessage);
+            Timber.i("sign fail: %s", signatureFromKey.failMessage);
             awWalletConnectClient.reject(sessionRequest, signatureFromKey.failMessage);
         }
         completed.postValue(true);
@@ -114,7 +113,6 @@ public class SignMethodDialogViewModel extends BaseViewModel
 
     public void reject(WalletConnect.Model.SessionRequest sessionRequest)
     {
-
         awWalletConnectClient.reject(sessionRequest);
     }
 

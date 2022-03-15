@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.util.Log;
 
 import com.alphawallet.app.App;
 import com.alphawallet.app.R;
@@ -29,13 +28,13 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
 {
-    public static Intent data;
+    public static Intent gasData;
     public static AuthenticationCallback authCallback;
     private final WalletConnectInteract walletConnectInteract;
     public static WalletConnect.Model.SessionProposal sessionProposal;
 
     public static SignMethodDialogViewModel viewModel;
-    private Context context;
+    private final Context context;
 
     public AWWalletConnectClient(Context context, WalletConnectInteract walletConnectInteract)
     {
@@ -58,7 +57,6 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
     @Override
     public void onSessionProposal(@NonNull WalletConnect.Model.SessionProposal sessionProposal)
     {
-        Log.d("seaborn", "onSessionProposal: ");
         AWWalletConnectClient.sessionProposal = sessionProposal;
         Intent intent = new Intent(context, WalletConnectV2Activity.class);
         intent.putExtra("session", WalletConnectV2SessionItem.from(sessionProposal));
@@ -77,8 +75,6 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
             reject(sessionRequest);
             return;
         }
-
-        Timber.tag("seaborn").d("onSessionRequest - method: " + sessionRequest.getRequest().getMethod() + ", params:" + sessionRequest.getRequest().getParams());
 
         WalletConnect.Model.SettledSession settledSession = getSession(sessionRequest.getTopic());
 
@@ -140,7 +136,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
 
     public void reject(WalletConnect.Model.SessionRequest sessionRequest)
     {
-        reject(sessionRequest, "User rejected.");
+        reject(sessionRequest, context.getString(R.string.message_reject_request));
     }
 
     public void approve(WalletConnect.Model.SessionProposal sessionProposal, List<String> accounts, WalletConnectV2Callback callback)
@@ -158,7 +154,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
             @Override
             public void onError(@NonNull Throwable throwable)
             {
-
+                Timber.e(throwable);
             }
         });
     }
@@ -194,6 +190,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
             @Override
             public void onError(@NonNull Throwable throwable)
             {
+                Timber.e(throwable);
             }
         });
     }
@@ -229,16 +226,10 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
         WalletConnect.Params.Response response = new WalletConnect.Params.Response(sessionRequest.getTopic(), jsonRpcResponse);
         try
         {
-            Log.d("seaborn", "reject: " + sessionRequest.getTopic());
-            WalletConnectClient.INSTANCE.respond(response, t ->
-            {
-                Log.d("seaborn", "respond: " + t);
-                Timber.e(t);
-            });
+            WalletConnectClient.INSTANCE.respond(response, Timber::e);
         } catch (WalletConnectException e)
         {
             Timber.e(e);
-            Log.d("seaborn", "reject: " + e);
         }
     }
 

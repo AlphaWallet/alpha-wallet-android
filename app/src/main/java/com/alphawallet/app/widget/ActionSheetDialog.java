@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -688,11 +687,9 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             @Override
             public void gotAuthorisation(boolean gotAuth)
             {
-                Log.d("seaborn", "gotAuthorisation: " + gotAuth);
                 actionCompleted = true;
                 if (!gotAuth) { cancelAuthentication(); return; }
                 confirmationWidget.startProgressCycle(4);
-                //send the transaction
                 actionSheetCallback.sendTransaction(formTransaction());
             }
 

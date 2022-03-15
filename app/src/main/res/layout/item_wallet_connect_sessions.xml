@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_item_wallet_connect"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -16,12 +17,13 @@
         android:layout_marginStart="@dimen/dp20"
         android:layout_marginVertical="@dimen/dp20"
         android:src="@drawable/ic_wallet_connect_card"
-        android:contentDescription="Wallet connect logo" />
+        android:contentDescription="Wallet connect logo"
+        tools:ignore="HardcodedText" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="@dimen/dp15"
+        android:paddingHorizontal="@dimen/dp15"
         android:layout_marginVertical="@dimen/dp17"
         android:orientation="vertical">
 

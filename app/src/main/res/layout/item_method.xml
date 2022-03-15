@@ -12,7 +12,5 @@
         android:fontFamily="@font/font_regular"
         android:textSize="@dimen/sp16"
         android:textColor="@color/blur"
-        android:layout_marginStart="@dimen/dp16"
-        android:text="personal_sign"
-        />
+        android:layout_marginStart="@dimen/dp16" />
 </LinearLayout>

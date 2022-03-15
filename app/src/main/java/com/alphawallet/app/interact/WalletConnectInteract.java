@@ -4,6 +4,7 @@ import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.service.RealmManager;
+import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 
@@ -18,8 +19,6 @@ import io.realm.Sort;
 
 public class WalletConnectInteract
 {
-    public static final String WC_SESSION_DB = "wc_data-db.realm";
-
     private final RealmManager realmManager;
 
     @Inject
@@ -44,7 +43,7 @@ public class WalletConnectInteract
     private List<WalletConnectSessionItem> getWalletConnectV1SessionItems()
     {
         List<WalletConnectSessionItem> sessions = new ArrayList<>();
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (Realm realm = realmManager.getRealmInstance(WalletConnectViewModel.WC_SESSION_DB))
         {
             RealmResults<RealmWCSession> items = realm.where(RealmWCSession.class)
                     .sort("lastUsageTime", Sort.DESCENDING)

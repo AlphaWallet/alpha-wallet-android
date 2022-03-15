@@ -224,13 +224,14 @@ public abstract class C {
     public static final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
 
     public interface ErrorCode {
+
         int UNKNOWN = 1;
         int CANT_GET_STORE_PASSWORD = 2;
         int ALREADY_ADDED = 3;
         int EMPTY_COLLECTION = 4;
     }
-
     public interface Key {
+
         String WALLET = "wallet";
         String TRANSACTION = "transaction";
         String TICKET_RANGE = "ticket_range";
@@ -281,8 +282,11 @@ public abstract class C {
     public static final String AN_USE_ONRAMP = "Use OnRamp";
     public static final String APP_NAME = "PACKAGE_NAME";
 
+    public static final String ALPHAWALLET_WEBSITE = "https://alphawallet.com";
     public static final String ALPHAWALLET_LOGO_URI = "https://alphawallet.com/wp-content/themes/alphawallet/img/alphawallet-logo.svg";
-    public static final String WALLET_CONNECT_LOGO_URI = "https://walletconnect.com/favicon.ico";
+    public static final String WALLET_CONNECT_REACT_APP_RELAY_URL = "wss://relay.walletconnect.com";
+    public static final String WALLET_CONNECT_PROJECT_ID = "40c6071febfd93f4fe485c232a8a4cd9";
+    public static final String ALPHA_WALLET_LOGO_URL = "https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media";
 
     // Theme/Dark Mode
     public static final int THEME_LIGHT = 0;

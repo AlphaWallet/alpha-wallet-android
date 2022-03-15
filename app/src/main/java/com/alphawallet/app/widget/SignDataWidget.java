@@ -40,7 +40,7 @@ public class SignDataWidget extends LinearLayout
         scrollView = findViewById(R.id.scroll_view);
         messageTitle = findViewById(R.id.text_message_title);
 
-        boolean noTitle = noTitle(context, attrs);
+        boolean noTitle = getAttribute(context, attrs);
         if (noTitle)
         {
             messageTitle.setText("");
@@ -48,7 +48,7 @@ public class SignDataWidget extends LinearLayout
         }
     }
 
-    private boolean noTitle(Context context, AttributeSet attrs)
+    private boolean getAttribute(Context context, AttributeSet attrs)
     {
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,

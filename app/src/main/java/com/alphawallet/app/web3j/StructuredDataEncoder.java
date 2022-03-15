@@ -114,7 +114,6 @@ public class StructuredDataEncoder {
         HashMap<String, List<StructuredData.Entry>> types = jsonMessageObject.getTypes();
         if (!types.containsKey("EIP712Domain"))
         {
-            //{ name: "name", type: "string" }, { name: "version", type: "string" }, { name: "verifyingContract", type: "address" },
             types.put("EIP712Domain", Arrays.asList(
                     new StructuredData.Entry("name", "string"),
                     new StructuredData.Entry("version", "string"),

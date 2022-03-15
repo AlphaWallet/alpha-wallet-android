@@ -3,11 +3,6 @@ package com.alphawallet.app.ui.widget.adapter;
 import android.content.Intent;
 import android.view.ViewGroup;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SortedList;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
@@ -20,7 +15,6 @@ import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
-import com.alphawallet.app.ui.widget.entity.WalletConnectSessionSortedItem;
 import com.alphawallet.app.ui.widget.entity.ChainItem;
 import com.alphawallet.app.ui.widget.entity.HeaderItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensData;
@@ -29,6 +23,7 @@ import com.alphawallet.app.ui.widget.entity.ManageTokensSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
 import com.alphawallet.app.ui.widget.entity.TotalBalanceSortedItem;
+import com.alphawallet.app.ui.widget.entity.WalletConnectSessionSortedItem;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.entity.WarningSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
@@ -46,6 +41,11 @@ import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final String TAG = "TKNADAPTER";
@@ -542,11 +542,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void showActiveWalletConnectSessions(List<WalletConnectSessionItem> sessions)
     {
-        if (sessions.size() > 0)
+        if (sessions.isEmpty())
+        {
+            removeItem(WalletConnectSessionHolder.VIEW_TYPE);
+        } else
         {
             items.add(new WalletConnectSessionSortedItem(sessions, 2));
-        } else {
-            removeItem(WalletConnectSessionHolder.VIEW_TYPE);
         }
     }
 

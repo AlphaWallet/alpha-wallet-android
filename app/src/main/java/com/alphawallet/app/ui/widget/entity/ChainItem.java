@@ -22,6 +22,6 @@ public class ChainItem extends SortedItem<Long> {
 
     @Override
     public boolean areItemsTheSame(SortedItem other) {
-        return other.weight.weighting == weight.weighting && ((ChainItem)other).weight.group == weight.group;
+        return other.weight.weighting == weight.weighting && other.weight.group == weight.group;
     }
 }

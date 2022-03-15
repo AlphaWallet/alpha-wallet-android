@@ -56,12 +56,13 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
 
         Wallet wallet = getItem(position);
 
-        if (!TextUtils.isEmpty(wallet.ENSname))
+        if (TextUtils.isEmpty(wallet.ENSname))
         {
-            holder.walletName.setText(wallet.ENSname);
-        } else {
             holder.walletName.setVisibility(View.GONE);
             holder.walletAddressSeparator.setVisibility(View.GONE);
+        } else
+        {
+            holder.walletName.setText(wallet.ENSname);
         }
         holder.walletAddress.setText(wallet.address);
         if (wallet.type == WalletType.NOT_DEFINED)

@@ -19,7 +19,6 @@ public class WalletConnectV2ViewModel extends BaseViewModel
     private final FetchWalletsInteract fetchWalletsInteract;
     private final GenericWalletInteract genericWalletInteract;
 
-
     public LiveData<Wallet[]> wallets()
     {
         return wallets;

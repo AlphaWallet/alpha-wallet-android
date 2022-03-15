@@ -1,5 +1,6 @@
 package com.alphawallet.app.widget;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +16,6 @@ import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
 import com.alphawallet.app.walletconnect.entity.BaseRequest;
-import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
 import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
@@ -23,8 +23,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
@@ -49,10 +50,10 @@ public class SignMethodDialog extends BottomSheetDialog
     private ImageView closeButton;
     private final WalletConnect.Model.SettledSession settledSession;
     private final WalletConnect.Model.SessionRequest sessionRequest;
-    private BaseRequest request;
+    private final BaseRequest request;
     private String walletAddress;
     private SignMethodDialogViewModel viewModel;
-    private Signable signable;
+    private final Signable signable;
     private SignDataWidget signDataWidget;
 
     public SignMethodDialog(@NonNull Activity activity, WalletConnect.Model.SettledSession settledSession, WalletConnect.Model.SessionRequest sessionRequest, BaseRequest request)
@@ -78,7 +79,7 @@ public class SignMethodDialog extends BottomSheetDialog
 
     private void bindData()
     {
-        List<String> icons = settledSession.getPeerAppMetaData().getIcons();
+        List<String> icons = Objects.requireNonNull(settledSession.getPeerAppMetaData()).getIcons();
 
         if (icons.isEmpty())
         {
@@ -108,16 +109,12 @@ public class SignMethodDialog extends BottomSheetDialog
                     approve();
                 }
             }
-        }, Arrays.asList(R.string.action_confirm));
+        }, Collections.singletonList(R.string.action_confirm));
 
-        closeButton.setOnClickListener(new View.OnClickListener()
+        closeButton.setOnClickListener(v ->
         {
-            @Override
-            public void onClick(View v)
-            {
-                viewModel.reject(sessionRequest);
-                dismiss();
-            }
+            viewModel.reject(sessionRequest);
+            dismiss();
         });
 
         if (signable.getMessageType() == SignMessageType.SIGN_PERSONAL_MESSAGE
@@ -151,6 +148,7 @@ public class SignMethodDialog extends BottomSheetDialog
         viewModel = new ViewModelProvider((ViewModelStoreOwner) activity).get(SignMethodDialogViewModel.class);
     }
 
+    @SuppressLint("CheckResult")
     private void approve()
     {
         AWWalletConnectClient.viewModel = viewModel;
@@ -171,7 +169,7 @@ public class SignMethodDialog extends BottomSheetDialog
 
     private void onWalletFound(Wallet wallet)
     {
-        // The find may return the first wallet if the specified wallet not found
+        // The method find may return the first wallet if the specified wallet not found
         if (!wallet.address.equals(walletAddress) || wallet.watchOnly())
         {
             Toast.makeText(getContext(), activity.getString(R.string.wc_wallet_not_match), Toast.LENGTH_SHORT).show();
@@ -181,5 +179,4 @@ public class SignMethodDialog extends BottomSheetDialog
             viewModel.sign(activity, wallet, sessionRequest, signable);
         }
     }
-
 }

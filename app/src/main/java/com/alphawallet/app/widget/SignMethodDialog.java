@@ -174,7 +174,7 @@ public class SignMethodDialog extends BottomSheetDialog
         // The find may return the first wallet if the specified wallet not found
         if (!wallet.address.equals(walletAddress) || wallet.watchOnly())
         {
-            Toast.makeText(getContext(), "You don't have permission with this wallet.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), activity.getString(R.string.wc_wallet_not_match), Toast.LENGTH_SHORT).show();
         } else
         {
             functionBar.setPrimaryButtonWaiting();

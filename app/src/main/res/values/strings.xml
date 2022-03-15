@@ -917,4 +917,8 @@
     <string name="wc_methods">Methods</string>
     <string name="wc_card_title" translatable="false">WalletConnect</string>
     <string name="wc_card_subtitle">Active connection to browser-based Dapp</string>
+    <string name="wc_disconnect">User disconnect the session.</string>
+    <string name="wc_sign_dapp_name">Name</string>
+    <string name="wc_wallet">Wallet</string>
+    <string name="wc_wallet_not_match">Wallet not exist or it\'s watch only</string>
 </resources>

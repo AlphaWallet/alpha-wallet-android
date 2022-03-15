@@ -898,4 +898,8 @@
     <string name="action_reset_network" >Cài lại</string>
     <string name="wc_methods">Phương pháp</string>
     <string name="wc_card_subtitle">Kết nối đang hoạt động với Dapp dựa trên trình duyệt</string>
+    <string name="wc_disconnect">Người dùng ngắt kết nối phiên.</string>
+    <string name="wc_sign_dapp_name">Tên</string>
+    <string name="wc_wallet">Ví tiền</string>
+    <string name="wc_wallet_not_match">Ví không tồn tại hoặc đó chỉ là đồng hồ</string>
 </resources>

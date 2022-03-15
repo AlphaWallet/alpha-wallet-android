@@ -879,4 +879,8 @@
     <string name="action_reset_network" >Reiniciar</string>
     <string name="wc_methods">Métodos</string>
     <string name="wc_card_subtitle">Conexiones activas a Dapp basado en navegador</string>
+    <string name="wc_disconnect">El usuario desconecta la sesión.</string>
+    <string name="wc_sign_dapp_name">Nombre</string>
+    <string name="wc_wallet">Billetera</string>
+    <string name="wc_wallet_not_match">La billetera no existe o es solo reloj</string>
 </resources>

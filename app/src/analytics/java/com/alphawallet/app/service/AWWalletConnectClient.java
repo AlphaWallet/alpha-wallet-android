@@ -202,7 +202,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
     {
         try
         {
-            WalletConnectClient.INSTANCE.disconnect(new WalletConnect.Params.Disconnect(sessionId, "User disconnect the session."), new WalletConnect.Listeners.SessionDelete()
+            WalletConnectClient.INSTANCE.disconnect(new WalletConnect.Params.Disconnect(sessionId, context.getString(R.string.wc_disconnect)), new WalletConnect.Listeners.SessionDelete()
             {
                 @Override
                 public void onSuccess(@NonNull WalletConnect.Model.DeletedSession deletedSession)

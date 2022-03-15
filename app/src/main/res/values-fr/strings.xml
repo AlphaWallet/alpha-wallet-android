@@ -896,4 +896,8 @@
     <string name="action_reset_network" >Réinitialiser</string>
     <string name="wc_methods">Méthodes</string>
     <string name="wc_card_subtitle">Connexions actives à Dapp basé sur un navigateur</string>
+    <string name="wc_disconnect">L\'utilisateur déconnecte la session.</string>
+    <string name="wc_sign_dapp_name">Nom</string>
+    <string name="wc_wallet">Portefeuille</string>
+    <string name="wc_wallet_not_match">Le portefeuille n\'existe pas ou il ne s\'agit que d\'une montre</string>
 </resources>

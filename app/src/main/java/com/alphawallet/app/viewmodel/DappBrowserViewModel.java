@@ -34,7 +34,7 @@ import com.alphawallet.app.ui.AddEditDappActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
-import com.alphawallet.app.ui.QRScanning.QRCodeHelper;
+import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
@@ -58,7 +58,6 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.ui.QRScanning.QRScanner.WALLET_CONNECT;
 
 import javax.inject.Inject;
 
@@ -310,7 +309,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     public void handleWalletConnect(Context context, String url, NetworkInfo activeNetwork)
     {
         Intent intent;
-        if (QRCodeHelper.isWalletConnectV1(url))
+        if (WalletConnectHelper.isWalletConnectV1(url))
         {
             intent = getIntentOfWalletConnectV1(context, url, activeNetwork);
         } else

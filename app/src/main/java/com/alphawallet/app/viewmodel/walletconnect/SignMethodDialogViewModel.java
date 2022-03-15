@@ -14,10 +14,12 @@ import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -58,7 +60,7 @@ public class SignMethodDialogViewModel extends BaseViewModel
             {
                 if (gotAuth)
                 {
-                    long chainId = Long.parseLong(sessionRequest.getChainId().split(":")[1]);
+                    long chainId = WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId()));
                     Single<SignatureFromKey> signature = transactionRepositoryType.getSignature(wallet, signable, chainId);
                     signature
                             .delay(5, TimeUnit.SECONDS) // The WC connection shutdown when show biometric, when back to foreground, it will open new connection, so need delay to wait the connection opened

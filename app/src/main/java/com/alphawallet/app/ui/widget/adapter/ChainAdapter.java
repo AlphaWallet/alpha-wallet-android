@@ -9,8 +9,8 @@ import android.widget.ImageView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.widget.ChainName;
-import com.alphawallet.app.widget.TokenIcon;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class ChainAdapter extends ArrayAdapter<String>
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent)
     {
-        long chainId = Long.parseLong(getItem(position).split(":")[1]);
+        long chainId = WalletConnectHelper.getChainId(getItem(position));
         if (convertView == null)
         {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_chain, parent, false);

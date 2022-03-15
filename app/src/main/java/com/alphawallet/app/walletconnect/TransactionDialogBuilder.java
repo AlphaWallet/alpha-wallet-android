@@ -15,6 +15,7 @@ import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
+import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.token.entity.Signable;
@@ -65,7 +66,7 @@ public class TransactionDialogBuilder
         WCEthereumTransaction wcTx = list.get(0);
         final Web3Transaction w3Tx = new Web3Transaction(wcTx, 0);
         Wallet fromWallet = viewModel.findWallet(wcTx.getFrom());
-        Token token = viewModel.getTokensService().getTokenOrBase(getChainId(), w3Tx.recipient.toString());
+        Token token = viewModel.getTokensService().getTokenOrBase(WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), w3Tx.recipient.toString());
         actionSheetDialog = new ActionSheetDialog(activity, w3Tx, token, "",
                 w3Tx.recipient.toString(), viewModel.getTokensService(), new ActionSheetCallback()
         {
@@ -111,7 +112,7 @@ public class TransactionDialogBuilder
         actionSheetDialog.waitForEstimate();
 
         viewModel.calculateGasEstimate(fromWallet, Numeric.hexStringToByteArray(w3Tx.payload),
-                getChainId(), w3Tx.recipient.toString(), new BigDecimal(w3Tx.value), w3Tx.gasLimit)
+                WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), w3Tx.recipient.toString(), new BigDecimal(w3Tx.value), w3Tx.gasLimit)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(actionSheetDialog::setGasEstimate,
@@ -137,12 +138,12 @@ public class TransactionDialogBuilder
                 approve(Numeric.toHexString(data), awWalletConnectClient);
                 actionSheetDialog.transactionWritten(".");
             }
-        }, Objects.requireNonNull(settledSession.getPeerAppMetaData()).getUrl(), getChainId(), fromWallet);
+        }, Objects.requireNonNull(settledSession.getPeerAppMetaData()).getUrl(), WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), fromWallet);
     }
 
     private void sendTransaction(Wallet wallet, Web3Transaction tx, AWWalletConnectClient awWalletConnectClient)
     {
-        viewModel.sendTransaction(tx, wallet, getChainId(), new SendTransactionInterface()
+        viewModel.sendTransaction(tx, wallet, WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), new SendTransactionInterface()
         {
             @Override
             public void transactionSuccess(Web3Transaction web3Tx, String hashData)
@@ -172,8 +173,4 @@ public class TransactionDialogBuilder
                 awWalletConnectClient.approve(sessionRequest, hashData), 5000);
     }
 
-    private long getChainId()
-    {
-        return Long.parseLong(sessionRequest.getChainId().split(":")[1]);
-    }
 }

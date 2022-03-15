@@ -16,6 +16,7 @@ import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
 import com.alphawallet.app.walletconnect.entity.BaseRequest;
+import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
@@ -96,7 +97,7 @@ public class SignMethodDialog extends BottomSheetDialog
         walletAddress = request.getWalletAddress();
         walletTv.setText(walletAddress);
 
-        long chainID = Long.parseLong(sessionRequest.getChainId().split(":")[1]);
+        long chainID = WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId()));
         networkIcon.setImageResource(EthereumNetworkRepository.getChainLogo(chainID));
         networkName.setChainID(chainID);
         functionBar.setupFunctions(new StandardFunctionInterface()

@@ -9,16 +9,12 @@ import android.app.UiModeManager;
 import android.content.Context;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.util.ReleaseTree;
-import com.walletconnect.walletconnectv2.client.WalletConnect;
-import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 
-import java.util.Arrays;
 import java.util.Stack;
 
 import javax.inject.Inject;
@@ -86,7 +82,7 @@ public class App extends Application
             }
         }
 
-        initWalletConnectV2Client();
+        awWalletConnectClient.init(this);
 
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks()
         {
@@ -129,38 +125,11 @@ public class App extends Application
         });
     }
 
-    @NonNull
-    private WalletConnect.Model.AppMetaData getAppMetaData()
-    {
-        String name = getString(R.string.app_name);
-        String url = C.ALPHAWALLET_WEBSITE;
-        String[] icons = {C.ALPHA_WALLET_LOGO_URL};
-        String description = "The ultimate Web3 Wallet to power your tokens.";
-        return new WalletConnect.Model.AppMetaData(name, description, url, Arrays.asList(icons));
-    }
-
-    private void initWalletConnectV2Client()
-    {
-        WalletConnect.Model.AppMetaData appMetaData = getAppMetaData();
-        WalletConnect.Params.Init init = new WalletConnect.Params.Init(this,
-                String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, C.WALLET_CONNECT_PROJECT_ID),
-                true,
-                appMetaData);
-
-        WalletConnectClient.INSTANCE.initialize(init, e ->
-        {
-            Timber.i("Init failed: %s", e.getMessage());
-            return null;
-        });
-
-        WalletConnectClient.INSTANCE.setWalletDelegate(awWalletConnectClient);
-    }
-
     @Override
     public void onTrimMemory(int level)
     {
         super.onTrimMemory(level);
-        WalletConnectClient.INSTANCE.shutdown();
+        awWalletConnectClient.shutdown();
     }
 
     @Override
@@ -168,7 +137,7 @@ public class App extends Application
     {
         super.onTerminate();
         activityStack.clear();
-        WalletConnectClient.INSTANCE.shutdown();
+        awWalletConnectClient.shutdown();
     }
 
     private void pop()

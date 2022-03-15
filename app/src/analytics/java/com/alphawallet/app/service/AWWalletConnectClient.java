@@ -1,11 +1,13 @@
 package com.alphawallet.app.service;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
 import com.alphawallet.app.App;
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
@@ -18,6 +20,7 @@ import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 
+import java.util.Arrays;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -231,6 +234,38 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
         {
             Timber.e(e);
         }
+    }
+
+    public void init(Application application)
+    {
+        WalletConnect.Model.AppMetaData appMetaData = getAppMetaData(application);
+        WalletConnect.Params.Init init = new WalletConnect.Params.Init(application,
+                String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, C.WALLET_CONNECT_PROJECT_ID),
+                true,
+                appMetaData);
+
+        WalletConnectClient.INSTANCE.initialize(init, e ->
+        {
+            Timber.i("Init failed: %s", e.getMessage());
+            return null;
+        });
+
+        WalletConnectClient.INSTANCE.setWalletDelegate(this);
+    }
+
+    @NonNull
+    private WalletConnect.Model.AppMetaData getAppMetaData(Application application)
+    {
+        String name = application.getString(R.string.app_name);
+        String url = C.ALPHAWALLET_WEBSITE;
+        String[] icons = {C.ALPHA_WALLET_LOGO_URL};
+        String description = "The ultimate Web3 Wallet to power your tokens.";
+        return new WalletConnect.Model.AppMetaData(name, description, url, Arrays.asList(icons));
+    }
+
+    public void shutdown()
+    {
+        WalletConnectClient.INSTANCE.shutdown();
     }
 
     public interface WalletConnectV2Callback {

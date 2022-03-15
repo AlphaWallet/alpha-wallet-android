@@ -1,10 +1,5 @@
 package com.alphawallet.app.ui;
 
-import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,7 +20,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -62,11 +56,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
+
+import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 @AndroidEntryPoint
 public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
@@ -188,12 +189,6 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Operation taskCode = null;
-        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10) {
-            taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
-            requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
-        }
-
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
             if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.completeSignRequest(resultCode == RESULT_OK);

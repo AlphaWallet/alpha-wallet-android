@@ -11,6 +11,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
@@ -20,6 +21,7 @@ import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
@@ -360,6 +362,20 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId, tokensService.getCurrentAddress(),
                 tokensService.getNetworkSymbol(token.tokenInfo.chainId), this);
         detailWidget.setVisibility(View.VISIBLE);
+    }
+
+    public void setCurrentGasIndex(ActivityResult result)
+    {
+        if (result == null || result.getData() == null) return;
+        int gasSelectionIndex = result.getData().getIntExtra(C.EXTRA_SINGLE_ITEM, TXSpeed.STANDARD.ordinal());
+        long customNonce = result.getData().getLongExtra(C.EXTRA_NONCE, -1);
+        BigInteger maxFeePerGas = result.getData().hasExtra(C.EXTRA_GAS_PRICE) ?
+                new BigInteger(result.getData().getStringExtra(C.EXTRA_GAS_PRICE)) : BigInteger.ZERO;
+        BigInteger maxPriorityFee = result.getData().hasExtra(C.EXTRA_MIN_GAS_PRICE) ?
+                new BigInteger(result.getData().getStringExtra(C.EXTRA_MIN_GAS_PRICE)) : BigInteger.ZERO;
+        BigDecimal customGasLimit = new BigDecimal(result.getData().getStringExtra(C.EXTRA_GAS_LIMIT));
+        long expectedTxTime = result.getData().getLongExtra(C.EXTRA_AMOUNT, 0);
+        gasWidgetInterface.setCurrentGasIndex(gasSelectionIndex, maxFeePerGas, maxPriorityFee, customGasLimit, expectedTxTime, customNonce);
     }
 
     private boolean isSendingTransaction()

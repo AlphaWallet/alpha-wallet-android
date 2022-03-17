@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -266,7 +268,7 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                 }
                 break;
 
-            case C.SET_GAS_SETTINGS:
+            /*case C.SET_GAS_SETTINGS:
                 if (data != null && actionDialog != null)
                 {
                     int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
@@ -277,7 +279,7 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                     long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
                     actionDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
                 }
-                break;
+                break;*/
             case C.COMPLETED_TRANSACTION:
                 Intent i = new Intent();
                 i.putExtra(C.EXTRA_TXHASH, data.getStringExtra(C.EXTRA_TXHASH));
@@ -431,6 +433,15 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
 
     @Override
     public void notifyConfirm(String mode) { viewModel.actionSheetConfirm(mode); }
+
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> actionDialog.setCurrentGasIndex(result));
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
+    }
 
     private void txWritten(TransactionData transactionData)
     {

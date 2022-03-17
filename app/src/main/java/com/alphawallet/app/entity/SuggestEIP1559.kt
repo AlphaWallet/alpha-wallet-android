@@ -64,7 +64,7 @@ private fun calculateResult(priorityFee: BigInteger, feeHistory: FeeHistory): Si
                 t += BigDecimal(maxBaseFee - bf) * BigDecimal.valueOf(extraPriorityFeeRatio)
                 bf = maxBaseFee
             }
-            result[timeFactor] = EIP1559FeeOracleResult(bf + t.toBigInteger(), t.toBigInteger())
+            result[timeFactor] = EIP1559FeeOracleResult(bf + t.toBigInteger(), t.toBigInteger(), bf)
         }
 
         return@fromCallable result

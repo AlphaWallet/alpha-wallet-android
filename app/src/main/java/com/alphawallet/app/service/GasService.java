@@ -155,12 +155,10 @@ public class GasService implements ContractGasProvider
 
         //also update EIP1559
         getEIP1559FeeStructure()
+                .map(result -> updateEIP1559Realm(result, currentChainId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result -> {
-                    //store
-                    updateEIP1559Realm(result, currentChainId);
-                }, this::handleError).isDisposed();
+                .subscribe(r -> Timber.d(r ? "Updated Fees" : "Fail to update fees"), this::handleError).isDisposed();
     }
 
     private Single<Boolean> useNodeFallback(Boolean updated)
@@ -318,8 +316,9 @@ public class GasService implements ContractGasProvider
         }
     }
 
-    private void updateEIP1559Realm(final Map<Integer, EIP1559FeeOracleResult> result, final long chainId)
+    private boolean updateEIP1559Realm(final Map<Integer, EIP1559FeeOracleResult> result, final long chainId)
     {
+        boolean hasError = false;
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {
             realm.executeTransaction(r -> {
@@ -327,12 +326,20 @@ public class GasService implements ContractGasProvider
                         .equalTo("chainId", chainId)
                         .findFirst();
                 if (rgs == null)
+                {
                     rgs = r.createObject(Realm1559Gas.class, chainId);
+                }
 
                 rgs.setResultData(result, System.currentTimeMillis());
                 r.insertOrUpdate(rgs);
             });
         }
+        catch (Exception e)
+        {
+            hasError = true;
+        }
+
+        return hasError;
     }
 
     public Single<BigInteger> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress, BigInteger amount, Wallet wallet, final BigInteger defaultLimit)

@@ -1,5 +1,7 @@
 package com.alphawallet.app.widget;
 
+import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.text.TextUtils;
@@ -9,13 +11,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.ComponentActivity;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.GlideApp;
+import com.alphawallet.app.entity.GasPriceSpread2;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
@@ -43,17 +48,13 @@ import java.util.List;
 
 import io.realm.Realm;
 
-import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
-
-import org.w3c.dom.Text;
-
 /**
  * Created by JB on 17/11/2020.
  */
 public class ActionSheetDialog extends BottomSheetDialog implements StandardFunctionInterface, ActionSheetInterface
 {
     private final ImageView cancelButton;
-    private final GasWidget gasWidget;
+    private final GasWidget2 gasWidget;
     private final BalanceDisplayWidget balanceDisplay;
     private final ConfirmationWidget confirmationWidget;
     private final AddressDetailView addressDetail;
@@ -131,7 +132,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
         functionBar.revealButtons();
 
-        gasWidget.setupWidget(ts, token, candidateTransaction, this, activity);
+        gasWidget.setupWidget(ts, token, candidateTransaction, this, aCallBack.gasSelectLauncher());
         updateAmount();
 
         addressDetail.setupAddress(destAddress, destName, tokensService.getToken(token.tokenInfo.chainId, destAddress));
@@ -327,9 +328,31 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         detailWidget.setVisibility(View.VISIBLE);
     }
 
-    public void setCurrentGasIndex(int gasSelectionIndex, BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime, long nonce)
+    //Legacy
+    /*public void setCurrentGasIndex(int gasSelectionIndex, BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime, long nonce)
     {
         gasWidget.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, nonce);
+        updateAmount();
+    }*/
+
+    public void setCurrentGasIndex(ActivityResult result)
+    {
+        if (result == null || result.getData() == null) return;
+        int gasSelectionIndex = result.getData().getIntExtra(C.EXTRA_SINGLE_ITEM, GasPriceSpread2.TXSpeed.STANDARD.ordinal());
+        long customNonce = result.getData().getLongExtra(C.EXTRA_NONCE, -1);
+        BigInteger maxFeePerGas = result.getData().hasExtra(C.EXTRA_GAS_PRICE) ?
+                new BigInteger(result.getData().getStringExtra(C.EXTRA_GAS_PRICE)) : BigInteger.ZERO;
+        BigInteger maxPriorityFee = result.getData().hasExtra(C.EXTRA_MIN_GAS_PRICE) ?
+                new BigInteger(result.getData().getStringExtra(C.EXTRA_MIN_GAS_PRICE)) : BigInteger.ZERO;
+        BigDecimal customGasLimit = new BigDecimal(result.getData().getStringExtra(C.EXTRA_GAS_LIMIT));
+        long expectedTxTime = result.getData().getLongExtra(C.EXTRA_AMOUNT, 0);
+        gasWidget.setCurrentGasIndex(gasSelectionIndex, maxFeePerGas, maxPriorityFee, customGasLimit, expectedTxTime, customNonce);
+    }
+
+    public void setCurrentGasIndex(int gasSelectionIndex, BigInteger maxFeePerGas, BigInteger maxPriorityFee, BigDecimal customGasLimit, long expectedTxTime, long nonce)
+    {
+        //setCurrentGasIndex(int gasSelectionIndex, BigInteger maxFeePerGas, BigInteger maxPriorityFee, BigDecimal custGasLimit, long expectedTxTime, long nonce)
+        gasWidget.setCurrentGasIndex(gasSelectionIndex, maxFeePerGas, maxPriorityFee, customGasLimit, expectedTxTime, nonce);
         updateAmount();
     }
 

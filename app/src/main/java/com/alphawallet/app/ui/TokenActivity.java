@@ -794,7 +794,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     {
         switch (requestCode)
         {
-            case C.SET_GAS_SETTINGS:
+            /*case C.SET_GAS_SETTINGS:
                 if (data != null && confirmationDialog != null)
                 {
                     int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
@@ -805,9 +805,18 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
                     long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
                     confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
                 }
-                break;
+                break;*/
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> confirmationDialog.setCurrentGasIndex(result));
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
     }
 }

@@ -1046,7 +1046,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             else if (requestCode == C.SET_GAS_SETTINGS)
             {
                 //will either be an index, or if using custom then it will contain a price and limit
-                if (data != null && confirmationDialog != null)
+                /*if (data != null && confirmationDialog != null)
                 {
                     int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
                     long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
@@ -1054,7 +1054,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
                     long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
                     confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
-                }
+                }*/
             }
             else if (signCallback != null) signCallback.gotAuthorisation(true);
         }
@@ -1154,6 +1154,15 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     public void notifyConfirm(String mode)
     {
         viewModel.actionSheetConfirm(mode);
+    }
+
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> confirmationDialog.setCurrentGasIndex(result));
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
     }
 
     @Override

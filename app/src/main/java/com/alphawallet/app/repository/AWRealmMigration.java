@@ -403,7 +403,7 @@ public class AWRealmMigration implements RealmMigration
             oldVersion = 43;
         }
 
-        if (oldVersion == 40)
+        if (oldVersion == 43 || oldVersion == 44)
         {
             RealmObjectSchema realmData = schema.get("Realm1559Gas");
             if (realmData != null) schema.remove("Realm1559Gas");
@@ -412,7 +412,7 @@ public class AWRealmMigration implements RealmMigration
                         .addField("timeStamp", long.class)
                         .addField("resultData", String.class);
 
-            oldVersion++;
+            oldVersion = 45;
         }
     }
 

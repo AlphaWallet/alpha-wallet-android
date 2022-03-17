@@ -17,6 +17,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -24,6 +26,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
+import com.alphawallet.app.entity.GasPriceSpread2;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
@@ -194,7 +197,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
         }
 
-        if (requestCode == C.SET_GAS_SETTINGS)
+        /*if (requestCode == C.SET_GAS_SETTINGS)
         {
             //will either be an index, or if using custom then it will contain a price and limit
             if (data != null && confirmationDialog != null)
@@ -208,7 +211,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                 confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
             }
         }
-        else if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        else*/ if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
             if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
         }
@@ -567,7 +570,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
-        Timber.w(throwable.getMessage());
+        Timber.w(throwable);
         checkConfirm(BigInteger.ZERO, transactionBytes, txSendAddress, resolvedAddress);
     }
 
@@ -632,6 +635,15 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
             finish();
         }
+    }
+
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> confirmationDialog.setCurrentGasIndex(result));
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
     }
 
     @Override

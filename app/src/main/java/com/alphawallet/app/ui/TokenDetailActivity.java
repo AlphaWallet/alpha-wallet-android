@@ -322,4 +322,13 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     {
         viewModel.actionSheetConfirm(mode);
     }
+
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> confirmationDialog.setCurrentGasIndex(result));
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
+    }
 }

@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.lifecycle.ViewModelProvider;
@@ -346,7 +348,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (requestCode == C.SET_GAS_SETTINGS)
+        /*if (requestCode == C.SET_GAS_SETTINGS)
         {
             //will either be an index, or if using custom then it will contain a price and limit
             if (data != null && confirmationDialog != null)
@@ -360,7 +362,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
                 confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
             }
         }
-        else if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        else*/ if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
             if (confirmationDialog != null && confirmationDialog.isShowing())
             {
@@ -401,6 +403,15 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
             setResult(RESULT_OK, intent);
             finish();
         }
+    }
+
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> confirmationDialog.setCurrentGasIndex(result));
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
     }
 
     @Override

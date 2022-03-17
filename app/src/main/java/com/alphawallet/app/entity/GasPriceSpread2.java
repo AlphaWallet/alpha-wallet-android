@@ -31,6 +31,11 @@ public class GasPriceSpread2 implements Parcelable
         return fees.get(currentGasSpeedIndex);
     }
 
+    public int getEntrySize()
+    {
+        return fees.size();
+    }
+
     public enum TXSpeed
     {
         RAPID,
@@ -49,27 +54,48 @@ public class GasPriceSpread2 implements Parcelable
     {
         timeStamp = System.currentTimeMillis();
         if (result == null || result.size() == 0) return;
-        int third = result.size()/3;
+        setComponents(ctx, result);
 
-        fees.put(TXSpeed.RAPID, new GasSpeed2(ctx.getString(R.string.speed_rapid), RAPID_SECONDS, new EIP1559FeeOracleResult(result.get(result.size()-1))));
-        fees.put(TXSpeed.FAST, new GasSpeed2(ctx.getString(R.string.speed_fast), FAST_SECONDS, new EIP1559FeeOracleResult(result.get(result.get(third*2)))));
-        fees.put(TXSpeed.STANDARD, new GasSpeed2(ctx.getString(R.string.speed_average), STANDARD_SECONDS, new EIP1559FeeOracleResult(result.get(result.get(third)))));
-        fees.put(TXSpeed.SLOW, new GasSpeed2(ctx.getString(R.string.speed_slow), SLOW_SECONDS, new EIP1559FeeOracleResult(result.get(0))));
-        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, new EIP1559FeeOracleResult(result.get(result.get(third)))));
+        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, fees.get(TXSpeed.STANDARD).gasPrice));
     }
 
+    public GasPriceSpread2(Context ctx, GasPriceSpread2 gs, Map<Integer, EIP1559FeeOracleResult> result)
+    {
+        timeStamp = System.currentTimeMillis();
+        if (result == null || result.size() == 0) return;
+        setComponents(ctx, result);
+
+        GasSpeed2 custom = gs.getSelectedGasFee(TXSpeed.CUSTOM);
+
+        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), custom.seconds, custom.gasPrice));
+    }
+
+    //This is a fallback method, it should never be used
     public GasPriceSpread2(Context ctx, BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas)
     {
         timeStamp = System.currentTimeMillis();
 
-        fees.put(TXSpeed.STANDARD, new GasSpeed2(ctx.getString(R.string.speed_average), STANDARD_SECONDS, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas)));
-        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas)));
+        BigInteger baseFeeApprox = maxFeePerGas.subtract(maxPriorityFeePerGas.divide(BigInteger.valueOf(2)));
+
+        fees.put(TXSpeed.STANDARD, new GasSpeed2(ctx.getString(R.string.speed_average), STANDARD_SECONDS, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFeeApprox)));
+        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFeeApprox)));
+    }
+
+    private void setComponents(Context ctx, Map<Integer, EIP1559FeeOracleResult> result)
+    {
+        int third = result.size()/3;
+
+        fees.put(TXSpeed.RAPID, new GasSpeed2(ctx.getString(R.string.speed_rapid), RAPID_SECONDS, new EIP1559FeeOracleResult(result.get(0))));
+        fees.put(TXSpeed.FAST, new GasSpeed2(ctx.getString(R.string.speed_fast), FAST_SECONDS, new EIP1559FeeOracleResult(result.get(third))));
+        fees.put(TXSpeed.STANDARD, new GasSpeed2(ctx.getString(R.string.speed_average), STANDARD_SECONDS, new EIP1559FeeOracleResult(result.get(third*2))));
+        fees.put(TXSpeed.SLOW, new GasSpeed2(ctx.getString(R.string.speed_slow), SLOW_SECONDS, new EIP1559FeeOracleResult(result.get(result.size()-1))));
     }
 
     public void setCustom(BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas, long fastSeconds)
     {
         GasSpeed2 gsCustom = fees.get(TXSpeed.CUSTOM);
-        fees.put(TXSpeed.CUSTOM, new GasSpeed2(gsCustom.speed, fastSeconds, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas)));
+        BigInteger baseFee = gsCustom.gasPrice.baseFee;
+        fees.put(TXSpeed.CUSTOM, new GasSpeed2(gsCustom.speed, fastSeconds, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFee)));
     }
 
     protected GasPriceSpread2(Parcel in)

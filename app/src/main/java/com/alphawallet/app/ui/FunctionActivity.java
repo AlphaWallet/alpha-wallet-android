@@ -12,6 +12,8 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -893,6 +895,15 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     public void notifyConfirm(String mode)
     {
         viewModel.actionSheetConfirm(mode);
+    }
+
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> confirmationDialog.setCurrentGasIndex(result));
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
     }
 
     /**

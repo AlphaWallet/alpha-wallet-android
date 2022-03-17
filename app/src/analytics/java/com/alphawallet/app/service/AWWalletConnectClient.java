@@ -10,6 +10,7 @@ import com.alphawallet.app.App;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AuthenticationCallback;
+import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
@@ -21,10 +22,12 @@ import com.walletconnect.walletconnectv2.client.WalletConnectClient;
 import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.lifecycle.MutableLiveData;
 import timber.log.Timber;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -38,6 +41,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
 
     public static SignMethodDialogViewModel viewModel;
     private final Context context;
+    private final MutableLiveData<List<WalletConnectSessionItem>> sessionItemMutableLiveData = new MutableLiveData<>(Collections.emptyList());
 
     public AWWalletConnectClient(Context context, WalletConnectInteract walletConnectInteract)
     {
@@ -163,21 +167,14 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
         });
     }
 
+    public MutableLiveData<List<WalletConnectSessionItem>> sessionItemMutableLiveData()
+    {
+        return sessionItemMutableLiveData;
+    }
+
     public void updateNotification()
     {
-        if (walletConnectInteract.getSessionsCount() > 0)
-        {
-            Intent service = new Intent(context, WalletConnectV2Service.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            {
-                context.startForegroundService(service);
-            } else {
-                context.startService(service);
-            }
-        } else
-        {
-            context.stopService(new Intent(context, WalletConnectV2Service.class));
-        }
+        sessionItemMutableLiveData.postValue(walletConnectInteract.getSessions());
     }
 
     public void reject(WalletConnect.Model.SessionProposal sessionProposal, WalletConnectV2Callback callback)

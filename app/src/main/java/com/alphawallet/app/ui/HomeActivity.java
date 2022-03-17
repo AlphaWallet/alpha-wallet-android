@@ -32,11 +32,13 @@ import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
+import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.PriceAlertsService;
+import com.alphawallet.app.service.WalletConnectV2Service;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
@@ -55,7 +57,6 @@ import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.util.List;
 
@@ -311,6 +312,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         startService(i);
 
         awWalletConnectClient.updateNotification();
+        awWalletConnectClient.sessionItemMutableLiveData().observe(this, this::updateService);
     }
 
     private void setupFragmentListeners()
@@ -515,6 +517,24 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 viewModel.showImportLink(this, magicLink);
             }
         });
+    }
+
+    private void updateService(List<WalletConnectSessionItem> walletConnectSessionItems)
+    {
+        Context context = getApplicationContext();
+        if (walletConnectSessionItems.isEmpty())
+        {
+            stopService(new Intent(context, WalletConnectV2Service.class));
+        } else
+        {
+            Intent service = new Intent(context, WalletConnectV2Service.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                context.startForegroundService(service);
+            } else {
+                context.startService(service);
+            }
+        }
     }
 
     @Override

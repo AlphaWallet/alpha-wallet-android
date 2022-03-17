@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -51,7 +50,6 @@ import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -201,6 +199,7 @@ public class WalletFragment extends BaseFragment implements
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
         viewModel.getTokensService().startWalletSync(this);
+        viewModel.activeWalletConnectSessions().observe(getViewLifecycleOwner(), walletConnectSessionItems -> adapter.showActiveWalletConnectSessions(walletConnectSessionItems));
     }
 
     private void initViews(@NonNull View view)

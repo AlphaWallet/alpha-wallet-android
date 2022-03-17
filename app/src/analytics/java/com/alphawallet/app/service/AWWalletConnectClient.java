@@ -48,6 +48,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
     @Override
     public void onSessionDelete(@NonNull WalletConnect.Model.DeletedSession deletedSession)
     {
+        updateNotification();
     }
 
     @Override

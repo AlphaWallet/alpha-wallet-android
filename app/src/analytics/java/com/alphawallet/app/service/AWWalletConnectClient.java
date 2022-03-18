@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Build;
 
 import com.alphawallet.app.App;
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AuthenticationCallback;
@@ -238,7 +239,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
     {
         WalletConnect.Model.AppMetaData appMetaData = getAppMetaData(application);
         WalletConnect.Params.Init init = new WalletConnect.Params.Init(application,
-                String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, C.WALLET_CONNECT_PROJECT_ID),
+                String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, BuildConfig.WALLETCONNECT_PROJECT_ID),
                 true,
                 appMetaData);
 

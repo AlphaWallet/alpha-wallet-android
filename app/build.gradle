@@ -68,9 +68,12 @@ android {
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\""
         def DEFAULT_OPENSEA_API_KEY = "\"...\""; //Put your OpenSea developer API key in here, otherwise you are reliant on the backup NFT fetch method
         def DEFAULT_POLYGONSCAN_API_KEY = "\"\""; //Put your Polygonscan developer API key in here to get access to Polygon/Mumbai token discovery and transactions
+        def WALLETCONNECT_PROJECT_ID = "\"40c6071febfd93f4fe485c232a8a4cd9\""
 
         buildConfigField 'int', 'DB_VERSION', '45'
+
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
+        buildConfigField "String", "WALLETCONNECT_PROJECT_ID", WALLETCONNECT_PROJECT_ID
 
         ndk {
             abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"

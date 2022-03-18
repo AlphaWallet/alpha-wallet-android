@@ -34,15 +34,9 @@ jdk:
 
 before_install:
 
-env:
-  - JAVA_OPTS='-XX:+IgnoreUnrecognizedVMOptions --add-modules java.se.ee'
-
-jdk:
-  - openjdk11
-
 install:
   - true
 
 script:
-# go and test other modules before going on to app, can only have one travis file per repo.
-- java -version
+  # go and test other modules before going on to app, can only have one travis file per repo.
+  - java -version

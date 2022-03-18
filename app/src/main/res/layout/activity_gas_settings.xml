@@ -2,7 +2,8 @@
 <ScrollView android:id="@+id/setting_scroll"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,6 +19,7 @@
 
         <com.alphawallet.app.widget.GasSliderView
             android:visibility="gone"
+            tools:visibility="visible"
             android:id="@+id/gasSliderView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -62,6 +64,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dp18"
+            tools:visibliity="visible"
             android:visibility="gone">
             <LinearLayout
                 android:background="@drawable/background_warning_salmon"
@@ -115,6 +118,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dp18"
+            tools:visibility="visible"
             android:visibility="gone">
             <LinearLayout
                 android:background="@drawable/background_warning_salmon"

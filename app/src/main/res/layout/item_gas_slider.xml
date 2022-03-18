@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/background_dove_bar"
         android:fontFamily="@font/font_semibold"
-        android:text="@string/label_gas_price_gwei"
+        android:text="@string/label_gas_price_max"
         android:paddingStart="@dimen/dp14"
         android:paddingTop="@dimen/dp10"
         android:paddingBottom="@dimen/dp10"
@@ -52,6 +52,56 @@
             android:paddingEnd="10dp"
             android:inputType="numberDecimal"
             tools:text="20"/>
+
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_dove_bar"
+        android:fontFamily="@font/font_semibold"
+        android:text="@string/priority_fee"
+        android:paddingStart="@dimen/dp14"
+        android:paddingTop="@dimen/dp10"
+        android:paddingBottom="@dimen/dp10"
+        android:layout_marginBottom="@dimen/dp14"
+        android:gravity="center_vertical"
+        android:textAllCaps="true"
+        android:textColor="@color/dove"
+        android:textSize="@dimen/sp16" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp8"
+        android:layout_marginEnd="@dimen/dp8"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/priority_fee_slider"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_weight="4"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:max="90"
+            android:paddingTop="@dimen/dp8"
+            android:paddingBottom="@dimen/dp8"
+            android:progress="10"
+            android:progressTint="@color/azure"
+            android:thumbTint="@color/azure" />
+
+        <EditText
+            android:id="@+id/priority_fee_entry"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/background_password_entry"
+            android:gravity="end|center_vertical"
+            android:textSize="@dimen/sp14"
+            android:paddingEnd="10dp"
+            android:inputType="numberDecimal"
+            tools:text="1.5"/>
 
 
     </LinearLayout>

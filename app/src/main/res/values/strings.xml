@@ -52,6 +52,7 @@
     <string name="label_gas_limit">Gas Limit</string>
     <string name="label_gas_price">Gas Price</string>
     <string name="label_gas_price_gwei">Gas Price (GWEI)</string>
+    <string name="label_gas_price_max">Max Fee (GWEI)</string>
     <string name="label_old_gas_price">Old Gas Price</string>
     <string name="label_network_fee">Network Fee (Maximum)</string>
     <string name="button_ok">OK</string>
@@ -734,7 +735,8 @@
     <string name="new_balance">(New: %1$s %2$s)</string>
     <string name="set_speed_title">Set Speed</string>
     <string name="gas_price_widget">Gas Price: %1$s</string>
-    <string name="priority_fee">Priority Fee: %1$s</string>
+    <string name="gas_max">Max Fee: %1$s</string>
+    <string name="priority_fee">Priority Fee</string>
     <string name="base_fee">Base Fee: %1$s</string>
     <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the %1$s live oracle and updates the gas prices every 15 seconds.</string>
     <string name="set_your_speed">Set Your Own</string>

@@ -124,6 +124,7 @@ public class GasWidget2 extends LinearLayout implements Runnable
         setOnClickListener(v -> {
             Token baseEth = tokensService.getToken(token.tokenInfo.chainId, token.getWallet());
             Intent intent = new Intent(context, GasSettingsActivity.class);
+            intent.putExtra(C.EXTRA_SINGLE_ITEM, currentGasSpeedIndex.ordinal());
             intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
             intent.putExtra(C.EXTRA_CUSTOM_GAS_LIMIT, customGasLimit.toString());
             intent.putExtra(C.EXTRA_GAS_LIMIT_PRESET, presetGasLimit.toString());
@@ -397,9 +398,6 @@ public class GasWidget2 extends LinearLayout implements Runnable
         GasSpeed2 ug = gasSpread.getSelectedGasFee(GasPriceSpread2.TXSpeed.RAPID); //rapid
         GasSpeed2 lg = gasSpread.getSelectedGasFee(GasPriceSpread2.TXSpeed.SLOW); //slow
 
-        double lowerBound = SLOW_SECONDS;
-        double upperBound = RAPID_SECONDS;
-
         if (resendGasPrice.compareTo(BigInteger.ZERO) > 0)
         {
             if (dGasPrice > (3.0 * resendGasPrice.doubleValue()))
@@ -411,11 +409,11 @@ public class GasWidget2 extends LinearLayout implements Runnable
                 speedWarning.setVisibility(View.GONE);
             }
         }
-        else if (dGasPrice < lowerBound)
+        else if (dGasPrice < lg.gasPrice.maxFeePerGas.doubleValue())
         {
             showCustomSpeedWarning(false);
         }
-        else if (dGasPrice > 2.0 * upperBound)
+        else if (dGasPrice > 2.0 * ug.gasPrice.maxFeePerGas.doubleValue())
         {
             showCustomSpeedWarning(true);
         }

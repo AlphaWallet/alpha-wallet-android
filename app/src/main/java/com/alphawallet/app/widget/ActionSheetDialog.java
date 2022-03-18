@@ -328,13 +328,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         detailWidget.setVisibility(View.VISIBLE);
     }
 
-    //Legacy
-    /*public void setCurrentGasIndex(int gasSelectionIndex, BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime, long nonce)
-    {
-        gasWidget.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, nonce);
-        updateAmount();
-    }*/
-
     public void setCurrentGasIndex(ActivityResult result)
     {
         if (result == null || result.getData() == null) return;

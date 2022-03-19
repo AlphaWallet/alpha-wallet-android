@@ -497,7 +497,6 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     @Override
     public void amountReady(BigDecimal value, BigDecimal gasPrice)
     {
-        Token base = viewModel.getToken(token.tokenInfo.chainId, wallet.address);
         //validate that we have sufficient balance
         if ((token.isEthereum() && token.balance.subtract(value).compareTo(BigDecimal.ZERO) > 0) // if sending base ethereum then check we have more than just the value
              || (token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0)) // contract token, check sufficient token balance (gas widget will check sufficient gas)

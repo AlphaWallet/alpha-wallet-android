@@ -230,7 +230,6 @@ public class KeystoreAccountService implements AccountKeystoreService
     @Override
     public Single<SignatureFromKey> signTransaction(Wallet signer, String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
         return Single.fromCallable(() -> {
-            SignatureFromKey returnSig = new SignatureFromKey();
             Sign.SignatureData sigData;
             String dataStr = data != null ? Numeric.toHexString(data) : "";
 
@@ -244,7 +243,7 @@ public class KeystoreAccountService implements AccountKeystoreService
             );
 
             byte[] signData = TransactionEncoder.encode(rtx, chainId);
-            returnSig = keyService.signData(signer, signData);
+            SignatureFromKey returnSig = keyService.signData(signer, signData);
             sigData = sigFromByteArray(returnSig.signature);
             if (sigData == null) {
                 returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
@@ -259,10 +258,9 @@ public class KeystoreAccountService implements AccountKeystoreService
 
     @Override
     public Single<SignatureFromKey> signTransactionEIP1559(Wallet signer, String toAddress, BigInteger amount, BigInteger gasLimit,
-                                                           BigInteger gasPremium, BigInteger gasMax, long nonce, byte[] data, long chainId)
+                                                           BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas, long nonce, byte[] data, long chainId)
     {
         return Single.fromCallable(() -> {
-            SignatureFromKey returnSig = new SignatureFromKey();
             Sign.SignatureData sigData;
             String dataStr = data != null ? Numeric.toHexString(data) : "";
 
@@ -273,13 +271,13 @@ public class KeystoreAccountService implements AccountKeystoreService
                     toAddress,
                     amount,
                     dataStr,
-                    gasPremium, //max priority
-                    gasMax  //max gas
+                    maxPriorityFeePerGas,
+                    maxFeePerGas
             );
 
             byte[] signData = TransactionEncoder.encode(rtx);
 
-            returnSig = keyService.signData(signer, signData);
+            SignatureFromKey returnSig = keyService.signData(signer, signData);
             sigData = sigFromByteArray(returnSig.signature);
             if (sigData == null) {
                 returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;

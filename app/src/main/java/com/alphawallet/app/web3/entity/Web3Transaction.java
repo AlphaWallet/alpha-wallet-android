@@ -74,6 +74,29 @@ public class Web3Transaction implements Parcelable {
             Address recipient,
             Address contract,
             BigInteger value,
+            BigInteger maxFee,
+            BigInteger maxPriorityFee,
+            BigInteger gasLimit,
+            long nonce,
+            String payload,
+            String description) {
+        this.recipient = recipient;
+        this.contract = contract;
+        this.value = value;
+        this.gasPrice = BigInteger.ZERO;
+        this.gasLimit = gasLimit;
+        this.nonce = nonce;
+        this.payload = payload;
+        this.leafPosition = 0;
+        this.description = description;
+        this.maxFeePerGas = maxFee;
+        this.maxPriorityFeePerGas = maxPriorityFee;
+    }
+
+    public Web3Transaction(
+            Address recipient,
+            Address contract,
+            BigInteger value,
             BigInteger gasPrice,
             BigInteger gasLimit,
             long nonce,
@@ -90,6 +113,29 @@ public class Web3Transaction implements Parcelable {
         this.description = null;
         this.maxFeePerGas = BigInteger.ZERO;
         this.maxPriorityFeePerGas = BigInteger.ZERO;
+    }
+
+    public Web3Transaction(
+            Address recipient,
+            Address contract,
+            BigInteger value,
+            BigInteger maxFee,
+            BigInteger maxPriorityFee,
+            BigInteger gasLimit,
+            long nonce,
+            String payload,
+            long leafPosition) {
+        this.recipient = recipient;
+        this.contract = contract;
+        this.value = value;
+        this.gasPrice = BigInteger.ZERO;
+        this.gasLimit = gasLimit;
+        this.nonce = nonce;
+        this.payload = payload;
+        this.leafPosition = leafPosition;
+        this.description = null;
+        this.maxFeePerGas = maxFee;
+        this.maxPriorityFeePerGas = maxPriorityFee;
     }
 
     /**
@@ -194,6 +240,8 @@ public class Web3Transaction implements Parcelable {
      * @param chainId
      * @return
      */
+
+    //TODO: Show legacy/EIP1559
     public CharSequence getFormattedTransaction(Context ctx, long chainId, String symbol)
     {
         StyledStringBuilder sb = new StyledStringBuilder();
@@ -244,5 +292,10 @@ public class Web3Transaction implements Parcelable {
                 recipient.toString(),
                 value,
                 payload);
+    }
+
+    public boolean isLegacyTransaction()
+    {
+        return !gasPrice.equals(BigInteger.ZERO) || maxFeePerGas.compareTo(BigInteger.ZERO) <= 0;
     }
 }

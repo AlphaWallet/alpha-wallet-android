@@ -375,8 +375,20 @@ public class GasWidget2 extends LinearLayout implements Runnable
 
     public BigInteger getGasPrice(BigInteger defaultPrice)
     {
-        GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);// gasSpeeds.get(currentGasSpeedIndex);
+        GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
         return gs.gasPrice.maxFeePerGas;
+    }
+
+    public BigInteger getGasMax()
+    {
+        GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
+        return gs.gasPrice.maxFeePerGas;
+    }
+
+    public BigInteger getPriorityFee()
+    {
+        GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
+        return gs.gasPrice.maxPriorityFeePerGas;
     }
 
     public BigInteger getValue()

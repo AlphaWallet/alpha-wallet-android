@@ -21,7 +21,7 @@ public interface TransactionRepositoryType {
 	Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId);
 	Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId);
 	Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, long chainId);
-	Single<TransactionData> create1559TransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasLimit, BigInteger gasPremium, BigInteger gasMax, long nonce, byte[] data, long chainId);
+	Single<TransactionData> create1559TransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasLimit, BigInteger maxFeePerGas, BigInteger maxPriorityFee, long nonce, byte[] data, long chainId);
 
 	Single<TransactionData> getSignatureForTransaction(Wallet wallet, Web3Transaction w3tx, long chainId);
 	Single<SignatureFromKey> getSignature(Wallet wallet, Signable message, long chainId);

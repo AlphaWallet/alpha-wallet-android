@@ -209,6 +209,38 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
     private void setupVisibilities()
     {
+        BigDecimal gasPrice = !TextUtils.isEmpty(transaction.gasPrice) ? new BigDecimal(transaction.gasPrice) : BigDecimal.ZERO;
+        BigDecimal gasFee = !TextUtils.isEmpty(transaction.gasUsed) ? new BigDecimal(transaction.gasUsed).multiply(gasPrice) : BigDecimal.ZERO;
+
+        //any gas fee?
+        if (gasFee.equals(BigDecimal.ZERO))
+        {
+            findViewById(R.id.layout_gas_fee).setVisibility(View.GONE);
+            findViewById(R.id.layout_network_fee).setVisibility(View.GONE);
+        }
+        else
+        {
+            findViewById(R.id.layout_gas_fee).setVisibility(View.VISIBLE);
+            findViewById(R.id.layout_network_fee).setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.gas_used)).setText(BalanceUtils.getScaledValue(new BigDecimal(transaction.gasUsed), 0, 0));
+            ((TextView) findViewById(R.id.network_fee)).setText(BalanceUtils.getScaledValue(BalanceUtils.weiToEth(gasFee), 0, 6));
+            ((TextView) findViewById(R.id.text_fee_unit)).setText(viewModel.getNetworkSymbol(transaction.chainId));
+        }
+
+        if (gasPrice.equals(BigDecimal.ZERO))
+        {
+            findViewById(R.id.layout_gas_price).setVisibility(View.GONE);
+        }
+        else
+        {
+            findViewById(R.id.layout_gas_price).setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.gas_price)).setText(BalanceUtils.weiToGwei(gasPrice, 2));
+        }
+    }
+
+    private void setup1559Visibilities()
+    {
+        //transaction fee
         BigDecimal gasFee = new BigDecimal(transaction.gasUsed).multiply(new BigDecimal(transaction.gasPrice));
         BigDecimal gasPrice = new BigDecimal(transaction.gasPrice);
         //any gas fee?

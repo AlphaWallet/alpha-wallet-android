@@ -631,11 +631,24 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     {
         //form Web3Transaction
         //get user gas settings
-        return new Web3Transaction(
+        /*return new Web3Transaction(
                 candidateTransaction.recipient,
                 candidateTransaction.contract,
                 gasWidget.getValue(),
                 gasWidget.getGasPrice(candidateTransaction.gasPrice),
+                gasWidget.getGasLimit(),
+                gasWidget.getNonce(),
+                candidateTransaction.payload,
+                candidateTransaction.leafPosition
+        );*/
+
+        return new Web3Transaction(
+                candidateTransaction.recipient,
+                candidateTransaction.contract,
+                gasWidget.getValue(),
+                gasWidget.getGasMax(),
+                gasWidget.getPriorityFee(),
+                //gasWidget.getGasPrice(candidateTransaction.gasPrice),
                 gasWidget.getGasLimit(),
                 gasWidget.getNonce(),
                 candidateTransaction.payload,

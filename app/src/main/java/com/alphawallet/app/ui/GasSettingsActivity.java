@@ -359,7 +359,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                     Utils.shortConvertTimePeriodInSeconds(gs.seconds, context));
             String fiatStr = getGasCost(gasAmountInBase);
 
-            holder.speedGwei.setText(context.getString(R.string.gas_max, speedGwei));
+            String buildGasMax = context.getString(R.string.gas_max) + ": " + context.getString(R.string.delete_session, speedGwei);
+            holder.speedGwei.setText(buildGasMax);
             holder.speedCostEth.setText(context.getString(R.string.gas_fiat_suffix, gasAmountInBase, baseCurrency.getSymbol()));
             holder.speedTime.setText(displayTime);
             String buildPriorityFee = context.getString(R.string.priority_fee) + ": " + context.getString(R.string.delete_session, priorityFee);

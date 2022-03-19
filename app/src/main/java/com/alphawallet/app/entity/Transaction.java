@@ -27,6 +27,7 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpString;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -56,6 +57,8 @@ public class Transaction implements Parcelable
     public final String gas;
     public final String gasPrice;
     public final String gasUsed;
+    public final String maxFeePerGas;
+    public final String maxPriorityFee;
     public final String input;
     public final String error;
     public final long chainId;
@@ -84,6 +87,8 @@ public class Transaction implements Parcelable
 		input = "";
 		error = "";
 		chainId = 0;
+		maxFeePerGas = "";
+		maxPriorityFee = "";
 	}
 
 	public boolean isPending()
@@ -130,6 +135,8 @@ public class Transaction implements Parcelable
 		this.gasUsed = gasUsed;
 		this.chainId = chainId;
 		this.isConstructor = isConstructor;
+		this.maxFeePerGas = "";
+		this.maxPriorityFee = "";
 	}
 
 	public Transaction(Web3Transaction tx, long chainId, String wallet)
@@ -148,6 +155,8 @@ public class Transaction implements Parcelable
 		this.gasUsed = tx.gasLimit.toString();
 		this.chainId = chainId;
 		this.isConstructor = tx.isConstructor();
+		this.maxFeePerGas = tx.maxFeePerGas.toString();
+		this.maxPriorityFee = tx.maxPriorityFeePerGas.toString();
 	}
 
 	public Transaction(org.web3j.protocol.core.methods.response.Transaction ethTx, long chainId, boolean isSuccess, long timeStamp)
@@ -186,6 +195,8 @@ public class Transaction implements Parcelable
 		this.gasPrice = ethTx.getGasPrice().toString();
 		this.gasUsed = ethTx.getGas().toString();
 		this.chainId = chainId;
+		this.maxFeePerGas = ethTx.getMaxFeePerGas();
+		this.maxPriorityFee = ethTx.getMaxPriorityFeePerGas();
 	}
 
 	public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
@@ -211,6 +222,35 @@ public class Transaction implements Parcelable
 		this.input = input;
 		this.gasUsed = gasUsed;
 		this.chainId = chainId;
+		this.maxFeePerGas = "";
+		this.maxPriorityFee = "";
+	}
+
+	public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
+					   String value, String gas, String maxFeePerGas, String maxPriorityFee, String input, String gasUsed, long chainId, String contractAddress)
+	{
+		if (!TextUtils.isEmpty(contractAddress)) //must be a constructor
+		{
+			to = contractAddress;
+			isConstructor = true;
+			input = CONSTRUCTOR;
+		}
+
+		this.to = to;
+		this.hash = hash;
+		this.error = isError;
+		this.blockNumber = blockNumber;
+		this.timeStamp = timeStamp;
+		this.nonce = nonce;
+		this.from = from;
+		this.value = value;
+		this.gas = gas;
+		this.maxFeePerGas = maxFeePerGas;
+		this.maxPriorityFee = maxPriorityFee;
+		this.gasPrice = "";
+		this.input = input;
+		this.gasUsed = gasUsed;
+		this.chainId = chainId;
 	}
 
 	protected Transaction(Parcel in)
@@ -228,6 +268,8 @@ public class Transaction implements Parcelable
 		input = in.readString();
 		gasUsed = in.readString();
 		chainId = in.readLong();
+		maxFeePerGas = in.readString();
+		maxPriorityFee = in.readString();
 	}
 
 	public static final Creator<Transaction> CREATOR = new Creator<Transaction>() {
@@ -262,6 +304,8 @@ public class Transaction implements Parcelable
 		dest.writeString(input);
 		dest.writeString(gasUsed);
 		dest.writeLong(chainId);
+		dest.writeString(maxFeePerGas);
+		dest.writeString(maxPriorityFee);
 	}
 
 	public boolean isRelated(String contractAddress, String walletAddress)
@@ -335,6 +379,18 @@ public class Transaction implements Parcelable
 		else
 		{
 			return "";
+		}
+	}
+
+	public boolean isLegacyTransaction()
+	{
+		try
+		{
+			return !TextUtils.isEmpty(gasPrice) && new BigInteger(gasPrice).compareTo(BigInteger.ZERO) > 0;
+		}
+		catch (Exception e)
+		{
+			return true;
 		}
 	}
 

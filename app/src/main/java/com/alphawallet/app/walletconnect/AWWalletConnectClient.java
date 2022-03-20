@@ -1,4 +1,4 @@
-package com.alphawallet.app.service;
+package com.alphawallet.app.walletconnect;
 
 import android.app.Activity;
 import android.app.Application;
@@ -16,7 +16,6 @@ import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
-import com.alphawallet.app.walletconnect.WalletConnectV2SessionRequestHandler;
 import com.alphawallet.app.walletconnect.util.WCMethodChecker;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 import com.walletconnect.walletconnectv2.client.WalletConnectClient;

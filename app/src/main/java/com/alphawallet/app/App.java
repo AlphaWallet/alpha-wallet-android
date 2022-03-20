@@ -12,8 +12,8 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 
-import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.util.ReleaseTree;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 
 import java.util.Stack;
 

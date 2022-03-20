@@ -3,7 +3,6 @@ package com.alphawallet.app.walletconnect;
 import android.app.Activity;
 import android.app.Dialog;
 
-import com.alphawallet.app.service.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.entity.BaseRequest;
 import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
 import com.alphawallet.app.walletconnect.entity.SignTypedDataRequest;

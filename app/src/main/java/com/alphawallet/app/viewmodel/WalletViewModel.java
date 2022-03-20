@@ -35,7 +35,7 @@ import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
-import com.alphawallet.app.service.AWWalletConnectClient;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;

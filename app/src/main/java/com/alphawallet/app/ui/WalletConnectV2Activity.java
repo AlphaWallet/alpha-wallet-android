@@ -15,7 +15,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
-import com.alphawallet.app.service.AWWalletConnectClient;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
 import com.alphawallet.app.ui.widget.adapter.MethodAdapter;
 import com.alphawallet.app.ui.widget.adapter.WalletAdapter;

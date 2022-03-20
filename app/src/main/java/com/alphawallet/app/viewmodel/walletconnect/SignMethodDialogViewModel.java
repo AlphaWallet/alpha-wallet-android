@@ -11,7 +11,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.repository.TransactionRepositoryType;
-import com.alphawallet.app.service.AWWalletConnectClient;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;

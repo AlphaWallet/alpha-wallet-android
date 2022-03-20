@@ -35,7 +35,7 @@ import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
-import com.alphawallet.app.service.AWWalletConnectClient;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.service.WalletConnectV2Service;

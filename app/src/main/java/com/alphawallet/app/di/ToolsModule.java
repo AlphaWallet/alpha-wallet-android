@@ -3,7 +3,7 @@ package com.alphawallet.app.di;
 import android.content.Context;
 
 import com.alphawallet.app.interact.WalletConnectInteract;
-import com.alphawallet.app.service.AWWalletConnectClient;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.google.gson.Gson;
 import com.alphawallet.app.service.RealmManager;
 

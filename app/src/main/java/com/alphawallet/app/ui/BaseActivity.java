@@ -8,7 +8,7 @@ import android.widget.Toast;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AuthenticationFailType;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.service.AWWalletConnectClient;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.app.widget.SignTransactionDialog;
 

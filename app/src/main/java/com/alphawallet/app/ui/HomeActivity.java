@@ -35,7 +35,6 @@ import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
-import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.service.WalletConnectV2Service;
@@ -45,6 +44,7 @@ import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
@@ -311,8 +311,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         Intent i = new Intent(this, PriceAlertsService.class);
         startService(i);
 
-        awWalletConnectClient.updateNotification();
         awWalletConnectClient.sessionItemMutableLiveData().observe(this, this::updateService);
+        awWalletConnectClient.updateNotification();
     }
 
     private void setupFragmentListeners()
@@ -525,15 +525,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (walletConnectSessionItems.isEmpty())
         {
             stopService(new Intent(context, WalletConnectV2Service.class));
-        } else
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
             Intent service = new Intent(context, WalletConnectV2Service.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            {
-                context.startForegroundService(service);
-            } else {
-                context.startService(service);
-            }
+            context.startForegroundService(service);
         }
     }
 

@@ -30,6 +30,7 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.opensea.AssetTrait;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -148,6 +149,44 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         rotation.setRepeatCount(Animation.INFINITE);
     }
 
+    private void getIntentData()
+    {
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        wallet = getIntent().getParcelableExtra(C.Key.WALLET);
+        tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
+        sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
+    }
+
+    private void initViewModel()
+    {
+        viewModel = new ViewModelProvider(this)
+                .get(TokenFunctionViewModel.class);
+        viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
+        viewModel.traits().observe(this, this::onTraits);
+    }
+
+    private void setupFunctionBar()
+    {
+        if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
+        {
+            FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
+            functionBar.revealButtons();
+            functionBar.setWalletType(wallet.type);
+        }
+    }
+
+    private void addInfoView(String elementName, String name)
+    {
+        if (!TextUtils.isEmpty(name))
+        {
+            TokenInfoView v = new TokenInfoView(this, elementName);
+            v.setValue(name);
+            tokenInfoLayout.addView(v);
+        }
+    }
+
     private void reloadMetadata()
     {
         refreshMenu = findViewById(R.id.action_reload_metadata);
@@ -215,8 +254,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
         addInfoView(getString(R.string.label_external_link), asset.getExternalLink());
 
-        nftAttributeLayout.bind(token, asset);
-
         String description = asset.getDescription();
         if (description != null)
         {
@@ -226,47 +263,17 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         tokenInfoLayout.forceLayout();
 
+        viewModel.getAsset(token, tokenId);
+
         if (refreshMenu != null)
         {
             refreshMenu.clearAnimation();
         }
     }
 
-    private void getIntentData()
+    private void onTraits(List<AssetTrait> assetTraits)
     {
-        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
-        token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
-        wallet = getIntent().getParcelableExtra(C.Key.WALLET);
-        tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
-        sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
-    }
-
-    private void initViewModel()
-    {
-        viewModel = new ViewModelProvider(this)
-                .get(TokenFunctionViewModel.class);
-        viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
-    }
-
-    private void setupFunctionBar()
-    {
-        if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
-        {
-            FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
-            functionBar.revealButtons();
-            functionBar.setWalletType(wallet.type);
-        }
-    }
-
-    private void addInfoView(String elementName, String name)
-    {
-        if (!TextUtils.isEmpty(name))
-        {
-            TokenInfoView v = new TokenInfoView(this, elementName);
-            v.setValue(name);
-            tokenInfoLayout.addView(v);
-        }
+        nftAttributeLayout.bind(token, assetTraits);
     }
 
     @Override

@@ -2,17 +2,14 @@ package com.alphawallet.app.service;
 
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.util.LongSparseArray;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.gson.Gson;
 
@@ -21,7 +18,6 @@ import org.json.JSONObject;
 
 import java.io.InterruptedIOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -262,21 +258,22 @@ public class OpenSeaService
         sb.append("&offset=");
         sb.append(offset);
 
-        Request.Builder requestB = new Request.Builder()
-                .url(sb.toString())
-                .header("User-Agent", "Chrome/74.0.3729.169")
-                .method("GET", null)
-                .addHeader("Content-Type", "application/json");
+//        Request.Builder requestB = new Request.Builder()
+//                .url(sb.toString())
+//                .header("User-Agent", "Chrome/74.0.3729.169")
+//                .method("GET", null)
+//                .addHeader("Content-Type", "application/json");
+//
+//        String apiKey = getOpenSeaKey();
+//        Timber.d("apiKey : " + apiKey);
+//        if (!TextUtils.isEmpty(apiKey) && !apiKey.equals("..."))
+//        {
+//            requestB.addHeader("X-API-KEY", apiKey);
+//        }
 
-        String apiKey = getOpenSeaKey();
-        if (!TextUtils.isEmpty(apiKey) && !apiKey.equals("..."))
-        {
-            requestB.addHeader("X-API-KEY", apiKey);
-        }
+//        Request request = getRequest(sb.toString());
 
-        Request request = requestB.build();
-
-        try (okhttp3.Response response = httpClient.newCall(request).execute())
+        try (okhttp3.Response response = httpClient.newCall(buildRequest(sb.toString())).execute())
         {
             jsonResult = response.body().string();
         }
@@ -312,5 +309,65 @@ public class OpenSeaService
     {
         long lastCheckTime = networkCheckTimes.get(networkId, 0L);
         return System.currentTimeMillis() > (lastCheckTime + DateUtils.MINUTE_IN_MILLIS);
+    }
+
+    public Request buildRequest(String api)
+    {
+        Request.Builder requestB = new Request.Builder()
+                .url(api)
+                .header("User-Agent", "Chrome/74.0.3729.169")
+                .method("GET", null)
+                .addHeader("Content-Type", "application/json");
+
+        String apiKey = getOpenSeaKey();
+        if (!TextUtils.isEmpty(apiKey) && !apiKey.equals("..."))
+        {
+            requestB.addHeader("X-API-KEY", apiKey);
+        }
+
+        return requestB.build();
+    }
+
+    public Single<String> getAsset(Token token, BigInteger tokenId)
+    {
+        return Single.fromCallable(() -> {
+            String contractAddress = token.tokenInfo.address;
+            long networkId = token.tokenInfo.chainId;
+
+            String jsonResult = "{\"noresult\":[]}";
+            String apiBase = "";
+
+            if (networkId == EthereumNetworkBase.MAINNET_ID)
+            {
+                apiBase = "https://api.opensea.io/api/v1/asset/" + contractAddress + "/" + tokenId;
+            }
+            else if (networkId == EthereumNetworkBase.RINKEBY_ID)
+            {
+                apiBase = "https://rinkeby-api.opensea.io/api/v1/asset/" + contractAddress + "/" + tokenId;
+            }
+            else if (networkId == EthereumNetworkBase.MATIC_ID)
+            {
+                apiBase = "https://api.opensea.io/api/v2/metadata/matic/" + contractAddress + "/" + tokenId;
+            }
+
+            Timber.d("api: " + apiBase);
+
+            try (okhttp3.Response response = httpClient.newCall(buildRequest(apiBase)).execute())
+            {
+                jsonResult = response.body().string();
+            }
+            catch (InterruptedIOException e)
+            {
+                //If user switches account or network during a fetch
+                //this exception is going to be thrown because we're terminating the API call
+                //Don't display error
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return jsonResult;
+        });
     }
 }

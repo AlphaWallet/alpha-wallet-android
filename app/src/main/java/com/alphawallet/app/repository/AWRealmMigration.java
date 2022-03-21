@@ -414,6 +414,17 @@ public class AWRealmMigration implements RealmMigration
 
             oldVersion = 45;
         }
+
+        if (oldVersion == 45)
+        {
+            RealmObjectSchema realmData = schema.get("RealmTransaction");
+            if (realmData != null)
+            {
+                if (!realmData.hasField("maxFeePerGas")) realmData.addField("maxFeePerGas", String.class);
+                if (!realmData.hasField("maxPriorityFee")) realmData.addField("maxPriorityFee", String.class);
+            }
+            oldVersion++;
+        }
     }
 
     @Override

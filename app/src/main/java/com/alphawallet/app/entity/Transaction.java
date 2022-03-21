@@ -227,7 +227,7 @@ public class Transaction implements Parcelable
 	}
 
 	public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
-					   String value, String gas, String maxFeePerGas, String maxPriorityFee, String input, String gasUsed, long chainId, String contractAddress)
+					   String value, String gas, String gasPrice, String maxFeePerGas, String maxPriorityFee, String input, String gasUsed, long chainId, String contractAddress)
 	{
 		if (!TextUtils.isEmpty(contractAddress)) //must be a constructor
 		{
@@ -247,7 +247,7 @@ public class Transaction implements Parcelable
 		this.gas = gas;
 		this.maxFeePerGas = maxFeePerGas;
 		this.maxPriorityFee = maxPriorityFee;
-		this.gasPrice = "";
+		this.gasPrice = gasPrice;
 		this.input = input;
 		this.gasUsed = gasUsed;
 		this.chainId = chainId;

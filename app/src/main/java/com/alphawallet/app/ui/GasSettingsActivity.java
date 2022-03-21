@@ -270,7 +270,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 speedTime = view.findViewById(R.id.text_speed_time);
                 itemLayout = view.findViewById(R.id.layout_list_item);
                 speedGwei = view.findViewById(R.id.text_gwei);
-                priorityFee = view.findViewById(R.id.text_priorityfee);
+                priorityFee = view.findViewById(R.id.text_priority_fee);
 
                 warning = view.findViewById(R.id.layout_speed_warning);
                 warningText = view.findViewById(R.id.text_speed_warning);

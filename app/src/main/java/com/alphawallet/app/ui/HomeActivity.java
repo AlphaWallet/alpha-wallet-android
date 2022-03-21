@@ -1079,17 +1079,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         switch (requestCode)
         {
-            /*case C.SET_GAS_SETTINGS:
-                if (data != null)
-                {
-                    int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
-                    long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
-                    BigDecimal customGasPrice = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE));
-                    BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
-                    long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
-                    ((DappBrowserFragment) getFragment(DAPP_BROWSER)).setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
-                }
-                break;*/
             case DAPP_BARCODE_READER_REQUEST_CODE:
                 ((DappBrowserFragment) getFragment(DAPP_BROWSER)).handleQRCode(resultCode, data, this);
                 break;

@@ -5,7 +5,10 @@ import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 
 import static java.lang.Thread.sleep;
 
+import android.os.Build;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ActivityMeta;
@@ -285,6 +288,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Transaction storeRawTx(Wallet wallet, long chainId, EthTransaction rawTx, long timeStamp, boolean isSuccessful)
     {
@@ -293,10 +297,9 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
         final Transaction tx = new Transaction(ethTx, chainId, isSuccessful, timeStamp);
 
-        deleteTransaction(wallet, ethTx.getHash());
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
-            instance.executeTransactionAsync(r -> {
+            instance.executeTransaction(r -> {
                 RealmTransaction item = r.createObject(RealmTransaction.class, ethTx.getHash());
                 fill(item, tx);
                 r.insertOrUpdate(item);
@@ -322,7 +325,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
                 if (realmTx != null)
                 {
-                    //deleteOperations(realmTx);
                     realmTx.deleteFromRealm();
                 }
             });
@@ -421,13 +423,23 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         item.setValue(transaction.value);
         item.setGas(transaction.gas);
         item.setGasPrice(transaction.gasPrice);
+        item.setMaxFeePerGas(transaction.maxFeePerGas);
+        item.setMaxPriorityFee(transaction.maxPriorityFee);
         item.setInput(transaction.input);
         item.setGasUsed(transaction.gasUsed);
         item.setChainId(transaction.chainId);
     }
 
+    /*
+    	public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
+					   String value, String gas, String maxFeePerGas, String maxPriorityFee, String input, String gasUsed, long chainId, String contractAddress).
+
+					   	public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
+					   String value, String gas, String gasPrice, String maxFeePerGas, String maxPriorityFee, String input, String gasUsed, long chainId, String contractAddress)
+
+     */
     public static Transaction convert(RealmTransaction rawItem) {
-        boolean isConstructor = rawItem.getInput() != null && rawItem.getInput().equals(Transaction.CONSTRUCTOR);
+        //boolean isConstructor = rawItem.getInput() != null && rawItem.getInput().equals(Transaction.CONSTRUCTOR);
 
 	    return new Transaction(
 	            rawItem.getHash(),
@@ -440,10 +452,12 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 rawItem.getValue(),
                 rawItem.getGas(),
                 rawItem.getGasPrice(),
+                rawItem.getMaxFeePerGas(),
+                rawItem.getPriorityFee(),
                 rawItem.getInput(),
                 rawItem.getGasUsed(),
                 rawItem.getChainId(),
-                isConstructor
+                rawItem.getContractAddress()
                 );
     }
 

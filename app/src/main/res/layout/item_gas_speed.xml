@@ -93,7 +93,7 @@
                 tools:text="Gas Price: 45" />
 
             <TextView
-                android:id="@+id/text_priorityfee"
+                android:id="@+id/text_priority_fee"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"

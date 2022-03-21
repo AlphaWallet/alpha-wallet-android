@@ -1043,19 +1043,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             {
                 handleTransactionCallback(resultCode, data);
             }
-            else if (requestCode == C.SET_GAS_SETTINGS)
-            {
-                //will either be an index, or if using custom then it will contain a price and limit
-                /*if (data != null && confirmationDialog != null)
-                {
-                    int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
-                    long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
-                    BigDecimal customGasPrice = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE));
-                    BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
-                    long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
-                    confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
-                }*/
-            }
             else if (signCallback != null) signCallback.gotAuthorisation(true);
         }
         else

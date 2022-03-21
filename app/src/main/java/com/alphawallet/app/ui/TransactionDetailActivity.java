@@ -236,37 +236,26 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
             findViewById(R.id.layout_gas_price).setVisibility(View.VISIBLE);
             ((TextView) findViewById(R.id.gas_price)).setText(BalanceUtils.weiToGwei(gasPrice, 2));
         }
+
+        if (!TextUtils.isEmpty(transaction.maxFeePerGas))
+        {
+            setup1559Visibilities();
+        }
     }
 
     private void setup1559Visibilities()
     {
-        //transaction fee
-        BigDecimal gasFee = new BigDecimal(transaction.gasUsed).multiply(new BigDecimal(transaction.gasPrice));
-        BigDecimal gasPrice = new BigDecimal(transaction.gasPrice);
-        //any gas fee?
-        if (gasFee.equals(BigDecimal.ZERO))
-        {
-            findViewById(R.id.layout_gas_fee).setVisibility(View.GONE);
-            findViewById(R.id.layout_network_fee).setVisibility(View.GONE);
-        }
-        else
-        {
-            findViewById(R.id.layout_gas_fee).setVisibility(View.VISIBLE);
-            findViewById(R.id.layout_network_fee).setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.gas_used)).setText(BalanceUtils.getScaledValue(new BigDecimal(transaction.gasUsed), 0, 0));
-            ((TextView) findViewById(R.id.network_fee)).setText(BalanceUtils.getScaledValue(BalanceUtils.weiToEth(gasFee), 0, 6));
-            ((TextView) findViewById(R.id.text_fee_unit)).setText(viewModel.getNetworkSymbol(transaction.chainId));
-        }
+        LinearLayout extendedGas = findViewById(R.id.layout_1559);
+        extendedGas.setVisibility(View.VISIBLE);
 
-        if (gasPrice.equals(BigDecimal.ZERO))
-        {
-            findViewById(R.id.layout_gas_price).setVisibility(View.GONE);
-        }
-        else
-        {
-            findViewById(R.id.layout_gas_price).setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.gas_price)).setText(BalanceUtils.weiToGwei(gasPrice, 2));
-        }
+        TextView textGasMax = findViewById(R.id.text_gas_max);
+        TextView textGasPriority = findViewById(R.id.text_priority_fee);
+
+        BigDecimal gasMax = new BigDecimal(transaction.maxFeePerGas);
+        BigDecimal gasPriorityFee = new BigDecimal(transaction.maxPriorityFee);
+
+        textGasMax.setText(BalanceUtils.weiToGwei(gasMax, 4));
+        textGasPriority.setText(BalanceUtils.weiToGwei(gasPriorityFee, 4));
     }
 
     private void setupWalletDetails()
@@ -380,21 +369,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        /*if (requestCode == C.SET_GAS_SETTINGS)
-        {
-            //will either be an index, or if using custom then it will contain a price and limit
-            if (data != null && confirmationDialog != null)
-            {
-                int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
-                long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
-                BigDecimal customGasPrice = data.hasExtra(C.EXTRA_GAS_PRICE) ?
-                        new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE)) : BigDecimal.ZERO; //may not have set a custom gas price
-                BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
-                long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
-                confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
-            }
-        }
-        else*/ if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
             if (confirmationDialog != null && confirmationDialog.isShowing())
             {

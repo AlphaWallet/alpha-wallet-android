@@ -250,7 +250,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	private Single<TransactionData> storeUnconfirmedTransaction(Wallet from, TransactionData txData, String toAddress, BigInteger value, BigInteger nonce, BigInteger maxFeePerGas, BigInteger maxPriorityFee, BigInteger gasLimit, long chainId, String data, String contractAddr)
 	{
 		return Single.fromCallable(() -> {
-			Transaction newTx = new Transaction(txData.txHash, "0", "0", System.currentTimeMillis()/1000, nonce.intValue(), from.address, toAddress, value.toString(10), "0", maxFeePerGas.toString(10),
+			Transaction newTx = new Transaction(txData.txHash, "0", "0", System.currentTimeMillis()/1000, nonce.intValue(), from.address, toAddress, value.toString(10), "0", "0", maxFeePerGas.toString(10),
 					maxPriorityFee.toString(10), data,
 					gasLimit.toString(10), chainId, contractAddr);
 			inDiskCache.putTransaction(from, newTx);

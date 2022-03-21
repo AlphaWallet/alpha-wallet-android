@@ -100,7 +100,8 @@
             android:lines="1"
             android:textSize="@dimen/sp17"
             android:text="@string/edit"
-            android:visibility="visible" />
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
     </LinearLayout>
 

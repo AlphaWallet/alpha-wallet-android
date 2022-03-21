@@ -197,21 +197,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
         }
 
-        /*if (requestCode == C.SET_GAS_SETTINGS)
-        {
-            //will either be an index, or if using custom then it will contain a price and limit
-            if (data != null && confirmationDialog != null)
-            {
-                int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
-                long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
-                BigDecimal customGasPrice = data.hasExtra(C.EXTRA_GAS_PRICE) ?
-                        new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE)) : BigDecimal.ZERO; //may not have set a custom gas price
-                BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
-                long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
-                confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
-            }
-        }
-        else*/ if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
             if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
         }
@@ -580,6 +566,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
         BigInteger ethValue = token.isEthereum() ? sendAmount.toBigInteger() : BigInteger.ZERO;
+        long leafCode = amountInput.isSendAll() ? -2: -1;
         Web3Transaction w3tx = new Web3Transaction(
                 new Address(txSendAddress),
                 new Address(token.getAddress()),
@@ -588,7 +575,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                 sendGasLimit,
                 -1,
                 Numeric.toHexString(transactionBytes),
-                -1);
+                leafCode);
 
         if (sendGasLimit.equals(BigInteger.ZERO))
         {

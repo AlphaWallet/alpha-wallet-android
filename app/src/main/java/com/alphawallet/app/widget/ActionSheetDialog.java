@@ -62,7 +62,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private final AssetDetailView assetDetailView;
     private final FunctionButtonBar functionBar;
     private final TransactionDetailWidget detailWidget;
-    private final WalletConnectRequestWidget walletConnectRequestWidget; // TODO final
+    private final WalletConnectRequestWidget walletConnectRequestWidget;
     private final Activity activity;
 
     private final Token token;
@@ -569,6 +569,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         setOnDismissListener(v -> {
             actionSheetCallback.dismissed(txHash, callbackId, actionCompleted);
+            gasWidget.onDestroy();
         });
     }
 
@@ -630,30 +631,35 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private Web3Transaction formTransaction()
     {
         //form Web3Transaction
-        //get user gas settings
-        /*return new Web3Transaction(
-                candidateTransaction.recipient,
-                candidateTransaction.contract,
-                gasWidget.getValue(),
-                gasWidget.getGasPrice(candidateTransaction.gasPrice),
-                gasWidget.getGasLimit(),
-                gasWidget.getNonce(),
-                candidateTransaction.payload,
-                candidateTransaction.leafPosition
-        );*/
+        if (gasWidget.sendingAll()) // If sweeping account, use legacy transaction
+        {
+            BigInteger currentGasPrice = gasWidget.getGasPrice(); // also recalculates the transaction value
 
-        return new Web3Transaction(
-                candidateTransaction.recipient,
-                candidateTransaction.contract,
-                gasWidget.getValue(),
-                gasWidget.getGasMax(),
-                gasWidget.getPriorityFee(),
-                //gasWidget.getGasPrice(candidateTransaction.gasPrice),
-                gasWidget.getGasLimit(),
-                gasWidget.getNonce(),
-                candidateTransaction.payload,
-                candidateTransaction.leafPosition
-        );
+            return new Web3Transaction(
+                    candidateTransaction.recipient,
+                    candidateTransaction.contract,
+                    gasWidget.getValue(),
+                    currentGasPrice,
+                    gasWidget.getGasLimit(),
+                    gasWidget.getNonce(),
+                    candidateTransaction.payload,
+                    candidateTransaction.leafPosition
+            );
+        }
+        else
+        {
+            return new Web3Transaction(
+                    candidateTransaction.recipient,
+                    candidateTransaction.contract,
+                    gasWidget.getValue(),
+                    gasWidget.getGasMax(),
+                    gasWidget.getPriorityFee(),
+                    gasWidget.getGasLimit(),
+                    gasWidget.getNonce(),
+                    candidateTransaction.payload,
+                    candidateTransaction.leafPosition
+            );
+        }
     }
 
     private void sendTransaction()

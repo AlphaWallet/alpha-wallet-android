@@ -94,22 +94,13 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             blockExplorerUrlInputView.setText(network.etherscanUrl);
             blockExplorerApiUrl.setText(network.etherscanAPI);
             testNetCheckBox.setChecked(viewModel.isTestNetwork(network));
-            // disable editing for hardcoded networks
+            
             if (!network.isCustom)
             {
                 setTitle(getString(R.string.title_network_info));
-                nameInputView.getEditText().setEnabled(false);
-                rpcUrlInputView.getEditText().setEnabled(false);
                 chainIdInputView.getEditText().setEnabled(false);
-                symbolInputView.getEditText().setEnabled(false);
-                blockExplorerUrlInputView.getEditText().setEnabled(false);
-                blockExplorerApiUrl.getEditText().setEnabled(false);
-                testNetCheckBox.setEnabled(false);
             }
-            else
-            {
-                addFunctionBar(true);
-            }
+            addFunctionBar(true);
         }
         else
         {

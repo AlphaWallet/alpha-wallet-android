@@ -40,7 +40,7 @@ android {
         versionName "3.52.0"
 
         applicationId "io.stormbird.wallet"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 30
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         def XInfuraAPI = "XInfuraAPI"

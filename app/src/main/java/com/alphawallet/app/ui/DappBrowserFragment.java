@@ -1218,7 +1218,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         //and additionally add a window.ethereum.setAddress function in init.js to set up addresses
         //together with this update, also need to track which websites have been given permission, and if they already have it (can probably get away with using SharedPrefs)
         //then automatically perform with step without a dialog (ie same as it does currently)
-        web3.onWalletActionSuccessful(callbackId, "[" + wallet.address + "]");
+        web3.onWalletActionSuccessful(callbackId, "[\"" + wallet.address + "\"]");
     }
 
     //EIP-3326

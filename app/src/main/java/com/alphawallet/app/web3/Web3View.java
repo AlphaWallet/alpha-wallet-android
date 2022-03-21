@@ -44,6 +44,7 @@ import timber.log.Timber;
 public class Web3View extends WebView {
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
     private static final String JS_PROTOCOL_ON_SUCCESSFUL = "AlphaWallet.executeCallback(%1$s, null, \"%2$s\")";
+    private static final String JS_PROTOCOL_EXPR_ON_SUCCESSFUL = "AlphaWallet.executeCallback(%1$s, null, %2$s)";
     private static final String JS_PROTOCOL_ON_FAILURE = "AlphaWallet.executeCallback(%1$s, \"%2$s\", null)";
 
     @Nullable
@@ -255,8 +256,8 @@ public class Web3View extends WebView {
         post(() -> evaluateJavascript(callback, value ->Timber.tag("WEB_VIEW").d(value)));
     }
 
-    public void onWalletActionSuccessful(long callbackId, String message) {
-        String callback = String.format(JS_PROTOCOL_ON_SUCCESSFUL, callbackId, message);
+    public void onWalletActionSuccessful(long callbackId, String expression) {
+        String callback = String.format(JS_PROTOCOL_EXPR_ON_SUCCESSFUL, callbackId, expression);
         post(() -> {
             evaluateJavascript(callback, Timber::d);
         });

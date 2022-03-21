@@ -114,7 +114,7 @@ public class TransferTest {
         if (isDeviceRooted()) {
             click(withText(R.string.ok));
         }
-        click(withText("CREATE A NEW WALLET"));
+        click(withId(R.id.button_create));
         Helper.wait(10);
         click(withText(R.string.action_close)); // works well locally but NOT work with GitHub actions
 //        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).click(300, 300);
@@ -147,6 +147,7 @@ public class TransferTest {
         onView(withHint("0")).perform(replaceText(String.valueOf(amount)));
         onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));
         click(withId(R.string.action_next));
+        Helper.wait(5);
         click(withId(R.string.action_confirm));
     }
 

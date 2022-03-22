@@ -50,7 +50,7 @@ public class ContactRepository implements ContactRepositoryType {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            Timber.e(e);
             return Completable.error(new RuntimeException("Failed to add Contact"));
         }
 
@@ -66,7 +66,6 @@ public class ContactRepository implements ContactRepositoryType {
                     .equalTo("walletAddress", oldContact.getWalletAddress())
                     .findFirst();
             if (realmContact != null) {
-//                realmContact.setName(newContact.getName());
                 realmContact.setName(newContact.getName());
             }
             realm.commitTransaction();
@@ -78,7 +77,7 @@ public class ContactRepository implements ContactRepositoryType {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            Timber.e(e);
             return Completable.error(new RuntimeException("Failed to update Contact"));
         }
     }
@@ -100,7 +99,7 @@ public class ContactRepository implements ContactRepositoryType {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            Timber.e(e);
             return Completable.error(new RuntimeException("Failed to remove Contact"));
         }
     }

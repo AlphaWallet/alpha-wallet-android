@@ -87,9 +87,10 @@ public class AddressBookViewModel extends BaseViewModel {
     }
 
     public void filterByName(String nameText) {
+        String nameToSearch = nameText.toLowerCase();
         ArrayList<AddressBookContact> filtered = new ArrayList<>();
         for (AddressBookContact u : contactsList) {
-            if (u.getName().toLowerCase().startsWith(nameText.toLowerCase())) {
+            if (u.getName().toLowerCase().startsWith(nameToSearch)) {
                 filtered.add(u);
             }
         }

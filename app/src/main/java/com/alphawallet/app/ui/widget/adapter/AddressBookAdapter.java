@@ -15,6 +15,8 @@ import com.alphawallet.app.ui.widget.OnAddressBookItemCLickListener;
 
 import java.util.List;
 
+import timber.log.Timber;
+
 public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.ViewHolder> {
     private List<AddressBookContact> data;
     private OnAddressBookItemCLickListener listener;
@@ -43,6 +45,7 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
             data.add(position, item);
             notifyItemInserted(position);
         } catch(Exception e) {
+            Timber.e(e);
         }
     }
 
@@ -91,6 +94,7 @@ public class AddressBookAdapter extends RecyclerView.Adapter<AddressBookAdapter.
         }
         catch(Exception e)
         {
+            Timber.e(e);
         }
         return item;
     }

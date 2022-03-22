@@ -86,8 +86,6 @@ public class AddEditAddressViewModel extends BaseViewModel {
         }
     }
 
-    
-
     /**
      * @param walletAddress wallet address to match with existing contacts.
      * Finds address and posts result to addressError Live Data
@@ -113,6 +111,7 @@ public class AddEditAddressViewModel extends BaseViewModel {
         for (AddressBookContact addressBookContact : contactsList) {
             if (addressBookContact.getWalletAddress().equalsIgnoreCase(walletAddress)) {
                 matchedContact = addressBookContact;
+                break;
             }
         }
         if (matchedContact == null) {
@@ -127,6 +126,7 @@ public class AddEditAddressViewModel extends BaseViewModel {
         for (AddressBookContact addressBookContact : contactsList) {
             if (addressBookContact.getName().equalsIgnoreCase(name)) {
                 matchedContact = addressBookContact;
+                break;
             }
         }
         if (matchedContact == null) {

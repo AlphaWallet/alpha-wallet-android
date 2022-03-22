@@ -888,6 +888,7 @@
     <string name="msg_contacts_will_appear_here">Contacts will appear here</string>
     <string name="title_select_recipient">Select Recipient</string>
     <string name="msg_address_update_succes">Address updated successfully</string>
+    <string name="error_address_empty">Address should not be empty</string>
 
     <string name="label_token_id">Token #</string>
     <string name="label_external_link">External Link</string>

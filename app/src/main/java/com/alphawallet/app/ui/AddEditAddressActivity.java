@@ -55,7 +55,6 @@ public class AddEditAddressActivity extends BaseActivity implements AddressReady
         } else {
             mode = ADDRESS_OPERATION_MODE.EDIT;
             setTitle(getString(R.string.title_edit_address));
-            contactToEdit = getIntent().getParcelableExtra(C.EXTRA_CONTACT);
         }
         initViews();
 
@@ -87,10 +86,10 @@ public class AddEditAddressActivity extends BaseActivity implements AddressReady
             String name = inputViewName.getText().toString().trim();
             boolean isDataValid = true;
             if (address.isEmpty()) {
-                inputViewAddress.setError("Address should not be empty");
+                inputViewAddress.setError(getString(R.string.error_address_empty));
                 isDataValid = false;
             } else if (!Utils.isAddressValid(address)) {
-                inputViewAddress.setError("Invalid Address");
+                inputViewAddress.setError(getString(R.string.error_invalid_address));
                 isDataValid = false;
             }
             if (name.isEmpty()) {
@@ -160,18 +159,20 @@ public class AddEditAddressActivity extends BaseActivity implements AddressReady
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        String title = getIntent().getStringExtra(C.EXTRA_PAGE_TITLE);
-        if (title != null) {
-            if (title.equals(getString(R.string.title_edit_address))) {
-                getMenuInflater().inflate(R.menu.menu_close, menu);
-            }
+        if (mode == ADDRESS_OPERATION_MODE.EDIT) {
+            getMenuInflater().inflate(R.menu.menu_close, menu);
         }
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_cancel) {
+            super.onBackPressed();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

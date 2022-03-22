@@ -293,10 +293,10 @@ public class WalletConnectService extends Service
             Timber.tag(TAG).d("onSwitchEthereumChain: request.id: %s, sessionId: %s, chainId: %s", requestId, client.sessionId(), chainId);
             // send broadcast to show dialog for switching chain
             Intent i = new Intent(WALLET_CONNECT_SWITCH_CHAIN);
-            i.putExtra("requestId", requestId);
-            i.putExtra("sessionId", client.sessionId());
-            i.putExtra("chainId", chainId);
-            i.putExtra("name", client.getPeerMeta().getName());
+            i.putExtra(C.EXTRA_WC_REQUEST_ID, requestId);
+            i.putExtra(C.EXTRA_SESSION_ID, client.sessionId());
+            i.putExtra(C.EXTRA_CHAIN_ID, chainId);
+            i.putExtra(C.EXTRA_NAME, client.getPeerMeta().getName());
             WalletConnectService.this.sendBroadcast(i);
             return Unit.INSTANCE;
         });
@@ -456,15 +456,16 @@ public class WalletConnectService extends Service
     }
 
     private void switchChain(Intent intent) {
-        long requestId = intent.getLongExtra("requestId", -1);
-        String id = intent.getStringExtra("sessionId");
-        long chainId = intent.getLongExtra("chainId", -1);
-        boolean approved = intent.getBooleanExtra("approved", false);
+        long requestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
+        String id = intent.getStringExtra(C.EXTRA_SESSION_ID);
+        long chainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
+        boolean approved = intent.getBooleanExtra(C.EXTRA_APPROVED, false);
+        boolean chainAvailable = intent.getBooleanExtra(C.EXTRA_CHAIN_AVAILABLE, true);
         Timber.tag(TAG).d("sessionId: %s, chainId: %s, approved: %s", id, chainId, approved);
         if (requestId != -1 && id != null && chainId != -1) {
             WCClient c = clientMap.get(id);
             if (c != null) {
-                c.switchChain(requestId, chainId, approved);
+                c.switchChain(requestId, chainId, approved, chainAvailable);
             } else {
                 Timber.tag(TAG).d("WCClient not found");
             }

@@ -31,5 +31,6 @@ data class JsonRpcError(
         fun invalidRequest(message: String) = JsonRpcError(-32600, message)
         fun parseError(message: String) = JsonRpcError(-32700, message)
         fun methodNotFound(message: String) = JsonRpcError(-32601, message)
+        fun unrecognisedChain(message: String) = JsonRpcError(4902, message)
     }
 }

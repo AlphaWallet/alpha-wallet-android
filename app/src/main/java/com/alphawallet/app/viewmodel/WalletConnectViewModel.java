@@ -603,13 +603,14 @@ public class WalletConnectViewModel extends BaseViewModel {
         }
     }
 
-    public void approveSwitchEthChain(Context context, long requestId, String sessionId, long chainId, boolean approve) {
+    public void approveSwitchEthChain(Context context, long requestId, String sessionId, long chainId, boolean approve, boolean chainAvailable) {
         Intent i = new Intent(context, WalletConnectService.class);
         i.setAction(String.valueOf(WalletConnectActions.SWITCH_CHAIN.ordinal()));
-        i.putExtra("requestId", requestId);
-        i.putExtra("sessionId", sessionId);
-        i.putExtra("chainId", chainId);
-        i.putExtra("approved", approve);
+        i.putExtra(C.EXTRA_WC_REQUEST_ID, requestId);
+        i.putExtra(C.EXTRA_SESSION_ID, sessionId);
+        i.putExtra(C.EXTRA_CHAIN_ID, chainId);
+        i.putExtra(C.EXTRA_APPROVED, approve);
+        i.putExtra(C.EXTRA_CHAIN_AVAILABLE, chainAvailable);
         context.startService(i);
     }
 }

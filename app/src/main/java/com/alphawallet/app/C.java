@@ -138,6 +138,11 @@ public abstract class C {
     public static final String DAPP_URL_LOAD = "DAPP_URL";
     public static final String EXTRA_LOCAL_NETWORK_SELECT_FLAG = "EXTRA_LOCAL_NETWORK_SELECT";
     public static final String EXTRA_PRICE_ALERT = "EXTRA_PRICE_ALERT";
+    public static final String EXTRA_SESSION_ID = "SESSION_ID";
+    public static final String EXTRA_WC_REQUEST_ID = "REQUEST_ID";
+    public static final String EXTRA_APPROVED = "APPROVED";
+    public static final String EXTRA_CHAIN_AVAILABLE = "CHAIN_AVAILABLE";
+    public static final String EXTRA_NAME = "NAME";
     public static final String EXTRA_1559_TX = "1559_TX";
 
     public static final String PRUNE_ACTIVITY =

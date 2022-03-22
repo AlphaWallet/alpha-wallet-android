@@ -12,7 +12,9 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonSyntaxException
 import okhttp3.*
+import okhttp3.internal.toHexString
 import okio.ByteString
+import org.web3j.abi.datatypes.Bool
 import timber.log.Timber
 import java.util.*
 
@@ -229,8 +231,17 @@ open class WCClient(
         return encryptAndSend(gson.toJson(response))
     }
 
-    fun switchChain(requestId: Long, chainId: Long, success: Boolean): Boolean {
-        Timber.tag(TAG).d("switchChain: id: %s, chainId: %s, success: %s", requestId, chainId, success);
+    fun switchChain(requestId: Long, chainId: Long, success: Boolean, chainAvailable: Boolean = true): Boolean {
+        Timber.tag(TAG).d("switchChain: id: %s, chainId: %s, success: %s, chainAvailable: %s", requestId, chainId, success, chainAvailable);
+        if (!chainAvailable) {
+            val errorResponse = JsonRpcErrorResponse(
+                id = requestId,
+                error = JsonRpcError.unrecognisedChain(
+                    message = "Unrecognized chain ID"
+                )
+            )
+            return encryptAndSend(gson.toJson(errorResponse))
+        }
         if (success) {
             this.chainId = chainId.toString();
             updateSession()     // will use updated chainId

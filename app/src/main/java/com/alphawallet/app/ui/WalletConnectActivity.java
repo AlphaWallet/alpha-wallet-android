@@ -404,10 +404,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     break;
                 case C.WALLET_CONNECT_SWITCH_CHAIN:
                     Timber.tag(TAG).d("MSG: SWITCH CHAIN: ");
-                    String name = intent.getStringExtra("name");
-                    long requestId = intent.getLongExtra("requestId", -1);
-                    long chainId = intent.getLongExtra("chainId", -1);
-                    String currentSessionId = intent.getStringExtra("sessionId");
+                    String name = intent.getStringExtra(C.EXTRA_NAME);
+                    long requestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
+                    long chainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
+                    String currentSessionId = intent.getStringExtra(C.EXTRA_SESSION_ID);
                     Timber.tag(TAG).d("MSG: SWITCH CHAIN: name: %s, chainId: %s", name, chainId);
 
                     if (!session.getTopic().equals(currentSessionId)) {
@@ -417,21 +417,26 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     if (chainId == -1 || currentSessionId == null || requestId == -1) {
                         Timber.tag(TAG).d("Cant find data");
                     } else {
-                        AlertDialog alertDialog = new AlertDialog.Builder(WalletConnectActivity.this)
-                                .setTitle(getString(R.string.switch_chain_request))
-                                .setMessage(String.format("%s is requesting to switch to the %s chain with chain id: %s",
-                                        remotePeerMeta.getName(), EthereumNetworkBase.getShortChainName(chainId),  chainId))
-                                .setPositiveButton("Approve", (dialog, which) -> {
-                                    viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, true);
-                                    // TODO update db and ui
-                                    displaySessionStatus(session.getTopic());
-                                })
-                                .setNegativeButton("Reject", (dialog, which) ->
-                                        viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, false)
+                        boolean chainAvailable = EthereumNetworkBase.getNetworkInfo(chainId) != null;
+                        if (!chainAvailable) {
+                            viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, false, false);
+                        } else {
+                            AlertDialog alertDialog = new AlertDialog.Builder(WalletConnectActivity.this)
+                                    .setTitle(getString(R.string.switch_chain_request))
+                                    .setMessage(String.format("%s is requesting to switch to the %s chain with chain id: %s",
+                                            remotePeerMeta.getName(), EthereumNetworkBase.getShortChainName(chainId),  chainId))
+                                    .setPositiveButton("Approve", (dialog, which) -> {
+                                        viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, true, chainAvailable);
+                                        // TODO update db and ui
+                                        displaySessionStatus(session.getTopic());
+                                    })
+                                    .setNegativeButton("Reject", (dialog, which) ->
+                                            viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, false, chainAvailable)
 
-                                )
-                                .create();
-                        alertDialog.show();
+                                    )
+                                    .create();
+                            alertDialog.show();
+                        }
                     }
                     break;
             }

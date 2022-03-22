@@ -40,6 +40,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.router.AddressBookRouter;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
@@ -72,6 +73,7 @@ public class NewSettingsFragment extends BaseFragment {
     private SettingsItemView walletConnectSetting;
     private SettingsItemView showSeedPhrase;
     private SettingsItemView nameThisWallet;
+    private SettingsItemView addressBook;
 
     private LinearLayout layoutBackup;
     private View warningSeparator;
@@ -186,6 +188,13 @@ public class NewSettingsFragment extends BaseFragment {
                 .withListener(this::onNameThisWallet)
                 .build();
 
+        addressBook =
+                new SettingsItemView.Builder(getContext())
+                        .withIcon(R.drawable.ic_address_book)
+                        .withTitle(R.string.title_address_book)
+                        .withListener(this::onAddressBookSettingClicked)
+                        .build();
+
         walletConnectSetting =
                 new SettingsItemView.Builder(getContext())
                         .withIcon(R.drawable.ic_wallet_connect)
@@ -247,6 +256,8 @@ public class NewSettingsFragment extends BaseFragment {
         showSeedPhrase.setVisibility(View.GONE);
 
         walletSettingsLayout.addView(nameThisWallet, walletIndex++);
+
+        walletSettingsLayout.addView(addressBook, walletIndex++);
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
@@ -484,6 +495,15 @@ public class NewSettingsFragment extends BaseFragment {
     {
         Intent intent = new Intent(getActivity(), NameThisWalletActivity.class);
         requireActivity().startActivity(intent);
+    }
+
+    private void onAddressBookSettingClicked() {
+        new AddressBookRouter().open(getContext());
+    }
+
+    private void openAddressBookActivity() {
+        Intent intent = new Intent(getActivity(), AddressBookActivity.class);
+        getActivity().startActivity(intent);
     }
 
     private void onNotificationsSettingClicked() {

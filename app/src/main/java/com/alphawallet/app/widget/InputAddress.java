@@ -14,20 +14,20 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ENSCallback;
+import com.alphawallet.app.entity.AddressBookContact;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.router.AddressBookRouter;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
@@ -47,6 +47,7 @@ import timber.log.Timber;
  */
 public class InputAddress extends RelativeLayout implements ItemClickListener, ENSCallback, TextWatcher
 {
+    private final View layout;
     private final AutoCompleteTextView editText;
     private final TextView labelText;
     private final TextView pasteItem;
@@ -69,11 +70,13 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private long chainOverride;
     private final Pattern findAddress = Pattern.compile("^(\\s?)+(0x)([0-9a-fA-F]{40})(\\s?)+\\z");
     private final float standardTextSize;
+    private boolean showAddressBook = false;
+    private TextView addressBook;
 
     public InputAddress(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        inflate(context, R.layout.item_input_address, this);
+        layout = inflate(context, R.layout.item_input_address, this);
         getAttrs(context, attrs);
         this.context = context;
 
@@ -140,6 +143,12 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
             findViewById(R.id.layout_header).setVisibility(showHeader ? View.VISIBLE : View.GONE);
             TextView headerText = findViewById(R.id.text_header);
             headerText.setText(headerTextId);
+            showAddressBook = a.getBoolean(R.styleable.InputView_showAddressBook, false);
+            addressBook = findViewById(R.id.text_address_book);
+            addressBook.setVisibility(showAddressBook ? View.VISIBLE : View.GONE);
+            addressBook.setOnClickListener(v -> {
+                new AddressBookRouter().openForContactSelection(getContext(), C.ADDRESS_BOOK_CONTACT_REQUEST_CODE);
+            });
         }
         finally
         {
@@ -518,7 +527,32 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         setStatus(null);
         if (ensHandler != null && !TextUtils.isEmpty(getInputText()))
         {
+            Timber.d("ensHandler.checkAddress:  ");
             ensHandler.checkAddress();
         }
+    }
+
+    public void onContactSelected(AddressBookContact addressBookContact) {
+        if (!addressBookContact.getWalletAddress().isEmpty()) {
+            fullAddress = addressBookContact.getWalletAddress();
+            if (!addressBookContact.getEthName().isEmpty()) {
+                setAddress(addressBookContact.getEthName() + " | " + addressBookContact.getWalletAddress());
+            } else {
+                setAddress(addressBookContact.getWalletAddress());
+            }
+        }
+    }
+
+    /** Use to enable/disable ens resolver*/
+    public void setHandleENS(boolean handleENS) {
+        this.handleENS = handleENS;
+    }
+
+    public void setEditable(boolean enabled) {
+        layout.setClickable(enabled);
+        editText.setEnabled(enabled);
+        scanQrIcon.setVisibility(enabled ? VISIBLE : GONE);
+        pasteItem.setVisibility(enabled ? VISIBLE : GONE);
+        addressBook.setVisibility( (enabled && showAddressBook) ? VISIBLE : GONE);
     }
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.interact.AddressBookInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
@@ -20,15 +21,18 @@ public class TokenActivityViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final AddressBookInteract addressBookInteract;
 
     @Inject
     public TokenActivityViewModel(AssetDefinitionService assetDefinitionService,
                                   FetchTransactionsInteract fetchTransactionsInteract,
-                                  TokensService tokensService)
+                                  TokensService tokensService,
+                                  AddressBookInteract addressBookInteract)
     {
         this.assetDefinitionService = assetDefinitionService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.tokensService = tokensService;
+        this.addressBookInteract = addressBookInteract;
     }
 
     public TokensService getTokensService()
@@ -44,6 +48,10 @@ public class TokenActivityViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return this.assetDefinitionService;
+    }
+
+    public AddressBookInteract getAddressBookInteract() {
+        return this.addressBookInteract;
     }
 
     public Realm getRealmInstance(Wallet wallet)

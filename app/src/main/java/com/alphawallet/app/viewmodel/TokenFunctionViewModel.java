@@ -21,6 +21,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.interact.AddressBookInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -95,6 +96,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final GenericWalletInteract genericWalletInteract;
     private final OpenSeaService openseaService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final AddressBookInteract addressBookInteract;
     private final AnalyticsServiceType analyticsService;
     private Wallet wallet;
 
@@ -121,6 +123,7 @@ public class TokenFunctionViewModel extends BaseViewModel
             GenericWalletInteract genericWalletInteract,
             OpenSeaService openseaService,
             FetchTransactionsInteract fetchTransactionsInteract,
+            AddressBookInteract addressBookInteract,
             AnalyticsServiceType analyticsService)
     {
         this.assetDefinitionService = assetDefinitionService;
@@ -132,6 +135,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        this.addressBookInteract = addressBookInteract;
         this.analyticsService = analyticsService;
     }
 
@@ -139,6 +143,10 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         return assetDefinitionService;
     }
+    public AddressBookInteract getAddressBookInteract() {
+        return addressBookInteract;
+    }
+
     public LiveData<Token> insufficientFunds() { return insufficientFunds; }
     public LiveData<String> invalidAddress() { return invalidAddress; }
     public LiveData<XMLDsigDescriptor> sig() { return sig; }

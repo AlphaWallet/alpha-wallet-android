@@ -24,6 +24,7 @@ import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.ActivityDataInteract;
+import com.alphawallet.app.interact.AddressBookInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
@@ -92,6 +93,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final ActivityDataInteract dataInteract;
     private final AssetDefinitionService assetService;
+    private final AddressBookInteract addressBookInteract;
     private long fetchData = 0;
     private final Handler handler = new Handler();
     private int itemLimit = 0;
@@ -99,19 +101,21 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
     private boolean pendingReset = false;
 
     public ActivityAdapter(TokensService service, FetchTransactionsInteract fetchTransactionsInteract,
-                           AssetDefinitionService svs, ActivityDataInteract dataInteract) {
+                           AssetDefinitionService svs, ActivityDataInteract dataInteract, AddressBookInteract addressBookInteract) {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.dataInteract = dataInteract;
         this.assetService = svs;
         tokensService = service;
+        this.addressBookInteract = addressBookInteract;
     }
 
-    public ActivityAdapter(TokensService service, FetchTransactionsInteract fetchTransactionsInteract, AssetDefinitionService svs)
+    public ActivityAdapter(TokensService service, FetchTransactionsInteract fetchTransactionsInteract, AssetDefinitionService svs, AddressBookInteract addressBookInteract)
     {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         tokensService = service;
         this.dataInteract = null;
         this.assetService = svs;
+        this.addressBookInteract = addressBookInteract;
     }
 
     @Override
@@ -119,7 +123,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         switch (viewType) {
             case TransactionHolder.VIEW_TYPE:
                 return new TransactionHolder(parent, tokensService, fetchTransactionsInteract,
-                        assetService);
+                        assetService, addressBookInteract);
             case EventHolder.VIEW_TYPE:
                 return new EventHolder(parent, tokensService, fetchTransactionsInteract,
                         assetService, this);

@@ -184,6 +184,7 @@ public class InputView extends LinearLayout {
             errorText.setText(resId);
             errorText.setVisibility(View.VISIBLE);
         }
+        setBoxColour(BoxStatus.ERROR);
     }
 
     public void setError(CharSequence message) {
@@ -196,6 +197,7 @@ public class InputView extends LinearLayout {
             errorText.setText(message);
             errorText.setVisibility(View.VISIBLE);
         }
+        setBoxColour(BoxStatus.ERROR);
     }
 
     public void setStatus(CharSequence statusTxt)
@@ -235,5 +237,18 @@ public class InputView extends LinearLayout {
                 errorText.setVisibility(View.GONE);
                 break;
         }
+    }
+
+    /**
+     * Enables highlighting input box on selection & error.
+     */
+    public void enableFocusListener() {
+        editText.setOnFocusChangeListener( (v, hasFocus) -> {
+            if (hasFocus) {
+                setBoxColour(BoxStatus.SELECTED);
+            } else {
+                setBoxColour(BoxStatus.UNSELECTED);
+            }
+        });
     }
 }

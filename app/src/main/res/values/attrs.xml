@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <attr name="showAddressBook" format="boolean"/>
+
     <attr name="gravity">
         <flag name="bottom" value="80" />
         <flag name="center" value="17" />
@@ -55,6 +58,7 @@
         <attr name="showChainName" format="boolean" />
         <attr name="currencyMode" format="boolean" />
         <attr name="invert" format="boolean" />
+        <attr name="showAddressBook"/>
     </declare-styleable>
     <declare-styleable name="CopyTextView">
         <attr name="text" format="string" />
@@ -64,6 +68,7 @@
         <attr name="marginRight" format="dimension" />
         <attr name="textColour" format="color"/>
         <attr name="android:gravity" />
+        <attr name="showAddressBook"/>
     </declare-styleable>
     <declare-styleable name="BarcodeScannerView">
         <attr name="shouldScaleToFill" format="boolean" />

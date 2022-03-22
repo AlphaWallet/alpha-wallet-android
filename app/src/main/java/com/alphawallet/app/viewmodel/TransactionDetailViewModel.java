@@ -8,6 +8,7 @@ import android.net.Uri;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -17,9 +18,11 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.AddressBookContact;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
+import com.alphawallet.app.interact.AddressBookInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
@@ -41,6 +44,7 @@ import org.web3j.protocol.core.methods.response.EthTransaction;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -49,6 +53,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import timber.log.Timber;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
@@ -62,6 +67,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private final TokenRepositoryType tokenRepository;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final CreateTransactionInteract createTransactionInteract;
+    private final AddressBookInteract addressBookInteract;
 
     private final KeyService keyService;
     private final TokensService tokenService;
@@ -73,13 +79,20 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private final MutableLiveData<Transaction> transaction = new MutableLiveData<>();
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<AddressBookContact> senderAddressContact = new MutableLiveData<>();
+    private final MutableLiveData<AddressBookContact> receiverAddressContact = new MutableLiveData<>();
+    private final MutableLiveData<List<AddressBookContact>> addressBook = new MutableLiveData<>();
 
     public LiveData<BigInteger> latestBlock() {
         return latestBlock;
     }
     public LiveData<Transaction> latestTx() { return latestTx; }
     public LiveData<Transaction> onTransaction() { return transaction; }
+    public LiveData<AddressBookContact> senderAddressContact() { return senderAddressContact; }
+    public LiveData<AddressBookContact> receiverAddressContact() { return receiverAddressContact; }
     private String walletAddress;
+    private Observer<List<AddressBookContact>> senderAddressContactObserver;
+    private Observer<List<AddressBookContact>> receiverAddressContactObserver;
 
     @Nullable
     private Disposable pendingUpdateDisposable;
@@ -97,6 +110,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
             KeyService keyService,
             GasService gasService,
             CreateTransactionInteract createTransactionInteract,
+            AddressBookInteract addressBookInteract,
             AnalyticsServiceType analyticsService)
     {
         this.networkInteract = findDefaultNetworkInteract;
@@ -107,7 +121,10 @@ public class TransactionDetailViewModel extends BaseViewModel {
         this.keyService = keyService;
         this.gasService = gasService;
         this.createTransactionInteract = createTransactionInteract;
+        this.addressBookInteract = addressBookInteract;
         this.analyticsService = analyticsService;
+
+        loadAddressBook();
     }
 
     public MutableLiveData<TransactionData> transactionFinalised()
@@ -318,5 +335,59 @@ public class TransactionDetailViewModel extends BaseViewModel {
         analyticsProperties.setData(mode);
 
         analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+    }
+
+    public void loadAddressBook() {
+        Timber.d("loadAddressBook: ");
+        addressBookInteract.getAllContacts()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onLoadAddressBook, (throwable -> Timber.e(throwable, "Failed to load address book")))
+                .isDisposed();
+    }
+
+    private void onLoadAddressBook(List<AddressBookContact> addressBook) {
+        Timber.d("onLoadAddressBook: ");
+        this.addressBook.postValue(addressBook);
+    }
+
+    public void resolveSenderAddress(String walletAddress) {
+        // observer to react on loading address book
+        senderAddressContactObserver = new Observer<List<AddressBookContact>>() {
+            @Override
+            public void onChanged(List<AddressBookContact> addressBookContacts) {
+                for (AddressBookContact addressBookContact : addressBookContacts) {
+                    if (addressBookContact.getWalletAddress().equalsIgnoreCase(walletAddress)) {
+                        senderAddressContact.postValue(addressBookContact);
+                        break;
+                    }
+                }
+            }
+        };
+        this.addressBook.observeForever(senderAddressContactObserver);
+
+    }
+
+    public void resolveReceiverAddress(String walletAddress) {
+        // observer to react on loading address book
+        receiverAddressContactObserver = new Observer<List<AddressBookContact>>() {
+            @Override
+            public void onChanged(List<AddressBookContact> addressBookContacts) {
+                for (AddressBookContact addressBookContact : addressBookContacts) {
+                    if (addressBookContact.getWalletAddress().equalsIgnoreCase(walletAddress)) {
+                        receiverAddressContact.postValue(addressBookContact);
+                        break;
+                    }
+                }
+            }
+        };
+        this.addressBook.observeForever(receiverAddressContactObserver);
+    }
+
+    @Override
+    protected void onCleared() {
+        addressBook.removeObserver(senderAddressContactObserver);
+        addressBook.removeObserver(receiverAddressContactObserver);
+        super.onCleared();
     }
 }

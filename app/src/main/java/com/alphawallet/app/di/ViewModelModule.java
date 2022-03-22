@@ -1,5 +1,6 @@
 package com.alphawallet.app.di;
 
+import com.alphawallet.app.interact.AddressBookInteract;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.DeleteWalletInteract;
@@ -13,6 +14,7 @@ import com.alphawallet.app.interact.ImportWalletInteract;
 import com.alphawallet.app.interact.MemPoolInteract;
 import com.alphawallet.app.interact.SetDefaultWalletInteract;
 import com.alphawallet.app.interact.SignatureGenerateInteract;
+import com.alphawallet.app.repository.ContactRepositoryType;
 import com.alphawallet.app.repository.CurrencyRepository;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
@@ -173,5 +175,10 @@ public class ViewModelModule {
     @Provides
     RedeemSignatureDisplayRouter provideRedeemSignatureDisplayRouter() {
         return new RedeemSignatureDisplayRouter();
+    }
+
+    @Provides
+    AddressBookInteract provideAddressBookInteract(ContactRepositoryType contactRepository) {
+        return new AddressBookInteract(contactRepository);
     }
 }

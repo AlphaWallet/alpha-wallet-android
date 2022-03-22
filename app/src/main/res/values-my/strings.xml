@@ -874,6 +874,20 @@
     <string name="token_name_hint">တိုကင်နာမည်</string>
     <string name="version">ဗားရှင်း</string>
     <string name="error_seed_phrase_must_words">မျိုးစေ့ထားသောစကားစုများတွင်စကားလုံးများသာပါ 0 င်နိုင်သည်</string>
+
+    <string name="title_address_book">Address Book</string>
+    <string name="title_add_address">Add Address</string>
+    <string name="title_edit_address">Edit Address</string>
+    <string name="error_contact_address_exists">That address already exists as: %s</string>
+    <string name="error_contact_name_taken">The name is already taken. Try another one.</string>
+    <string name="msg_address_added_succes">Address added successfully</string>
+    <string name="action_save_address">Save Address</string>
+    <string name="action_add_contact">Add Contact</string>
+    <string name="msg_contacts_will_appear_here">Contacts will appear here</string>
+    <string name="title_select_recipient">Select Recipient</string>
+    <string name="msg_address_update_succes">Address updated successfully</string>
+    <string name="error_address_empty">Address should not be empty</string>
+
     <string name="label_token_id">Token #</string>
     <string name="label_external_link">External Link</string>
     <string name="label_description">Description</string>

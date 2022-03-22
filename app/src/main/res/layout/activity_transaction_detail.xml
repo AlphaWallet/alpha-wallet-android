@@ -210,7 +210,8 @@
                 custom:gravity="start"
                 custom:bold="false"
                 custom:textColor="@color/mine"
-                custom:marginRight="@dimen/dp18" />
+                custom:marginRight="@dimen/dp18"
+                custom:showAddressBook="true"/>
 
             <TextView
                 style="@style/TransactionDetailsSubTitleStyle"
@@ -226,7 +227,8 @@
                 custom:gravity="start"
                 custom:bold="false"
                 custom:textColor="@color/mine"
-                custom:marginRight="@dimen/dp18" />
+                custom:marginRight="@dimen/dp18"
+                custom:showAddressBook="true"/>
 
             <LinearLayout
                 android:layout_width="match_parent"

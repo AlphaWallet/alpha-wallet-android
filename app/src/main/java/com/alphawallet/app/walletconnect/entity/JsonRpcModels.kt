@@ -12,7 +12,7 @@ data class JsonRpcRequest<T>(
 data class JsonRpcResponse<T>(
         val jsonrpc: String = JSONRPC_VERSION,
         val id: Long,
-        val result: T
+        val result: T?
 )
 
 data class JsonRpcErrorResponse(

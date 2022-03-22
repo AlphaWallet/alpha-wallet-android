@@ -1,10 +1,10 @@
 package com.alphawallet.app.walletconnect
 
-import android.util.Log
 import com.alphawallet.app.walletconnect.entity.*
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
 import com.alphawallet.app.walletconnect.entity.ethTransactionSerializer;
+import com.alphawallet.token.tools.Numeric
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.registerTypeAdapter
 import com.github.salomonbrys.kotson.typeToken
@@ -75,6 +75,7 @@ open class WCClient(
     var onGetAccounts: (id: Long) -> Unit = { _ -> Unit }
     var onWCOpen: (peerId: String) -> Unit = { _ -> Unit }
     var onPong: (peerId: String)-> Unit = { _ -> Unit }
+    var onSwitchEthereumChain: (requestId: Long, chainId: Long) -> Unit = { _, _ -> Unit }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         Timber.d("<< websocket opened >>")
@@ -228,6 +229,27 @@ open class WCClient(
         return encryptAndSend(gson.toJson(response))
     }
 
+    fun switchChain(requestId: Long, chainId: Long, success: Boolean): Boolean {
+        Timber.tag(TAG).d("switchChain: id: %s, chainId: %s, success: %s", requestId, chainId, success);
+        if (success) {
+            this.chainId = chainId.toString();
+            updateSession()     // will use updated chainId
+            val response = JsonRpcResponse<Any>(
+                id = requestId,     // json rpc request id
+                result = null
+            )
+            return encryptAndSend(gson.toJson(response))
+        } else {
+            val response = JsonRpcErrorResponse(
+                id = requestId,
+                error = JsonRpcError.serverError(
+                    message = "Rejected by user"
+                )
+            )
+            return encryptAndSend(gson.toJson(response))
+        }
+    }
+
     private fun decryptMessage(text: String): String {
         val message = gson.fromJson<WCSocketMessage>(text)
         val encrypted = gson.fromJson<WCEncryptionPayload>(message.payload)
@@ -256,11 +278,13 @@ open class WCClient(
                 onCustomRequest(request.id, payload)
             }
         } catch (e: InvalidJsonRpcParamsException) {
+            Timber.d("handleMessage: InvalidJsonRpcParamsException")
             invalidParams(e.requestId)
         }
     }
 
     private fun handleRequest(request: JsonRpcRequest<JsonArray>) {
+        Timber.tag(TAG).d("handleRequest: %s", request.toString())
         when (request.method) {
             WCMethod.SESSION_REQUEST -> {
                 val param = gson.fromJson<List<WCSessionRequest>>(request.params)
@@ -308,8 +332,16 @@ open class WCClient(
             WCMethod.GET_ACCOUNTS -> {
                 onGetAccounts(request.id)
             }
-            null -> { //Shouldn't need this
-
+            WCMethod.SWITCH_ETHEREUM_CHAIN -> {
+                Timber.d("WCMethod: switchEthereumChain")
+                val param = gson.fromJson<List<WCSwitchEthChain>>(request.params)
+                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+                val newChainId: Long = Numeric.cleanHexPrefix(param.chainId).toLong(16)
+                if (newChainId != chainIdVal()) {
+                    onSwitchEthereumChain(request.id, newChainId)
+                } else {
+                    switchChain(request.id, chainIdVal(), true);
+                }
             }
         }
     }

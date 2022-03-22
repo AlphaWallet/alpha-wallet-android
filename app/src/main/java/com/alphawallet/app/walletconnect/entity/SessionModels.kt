@@ -38,3 +38,7 @@ data class WCPeerMeta (
         val description: String? = null,
         val icons: List<String> = listOf("")
 )
+
+data class WCSwitchEthChain(
+        val chainId: String
+)

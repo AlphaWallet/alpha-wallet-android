@@ -5,6 +5,7 @@ import static com.alphawallet.app.C.WALLET_CONNECT_COUNT_CHANGE;
 import static com.alphawallet.app.C.WALLET_CONNECT_FAIL;
 import static com.alphawallet.app.C.WALLET_CONNECT_NEW_SESSION;
 import static com.alphawallet.app.C.WALLET_CONNECT_REQUEST;
+import static com.alphawallet.app.C.WALLET_CONNECT_SWITCH_CHAIN;
 
 import android.app.Service;
 import android.content.Intent;
@@ -20,6 +21,9 @@ import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.walletconnect.WCClient;
+import com.alphawallet.app.walletconnect.WCSession;
+import com.alphawallet.app.walletconnect.entity.WCSessionRequest;
+import com.alphawallet.app.walletconnect.entity.WCSessionUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +46,7 @@ public class WalletConnectService extends Service
     private final long CONNECTION_TIMEOUT = 10*DateUtils.MINUTE_IN_MILLIS;
     private final static ConcurrentHashMap<String, WCClient> clientMap = new ConcurrentHashMap<>();
     private final static ConcurrentLinkedQueue<WCRequest> signRequests = new ConcurrentLinkedQueue<>();
+    private final static ConcurrentHashMap<String, WCClient> clientMapByRequestId = new ConcurrentHashMap<>();
 
     private final static ConcurrentHashMap<String, Long> clientTimes = new ConcurrentHashMap<>();
     private WCRequest currentRequest = null;
@@ -86,6 +91,11 @@ public class WalletConnectService extends Service
                 case MSG_PUMP:
                     Timber.tag(TAG).d("SERVICE MSG PUMP");
                     checkMessages();
+                    break;
+
+                case SWITCH_CHAIN:
+                    Timber.tag(TAG).d("SERVICE SWITCH CHAIN");
+                    switchChain(intent);
                     break;
             }
         }
@@ -278,6 +288,18 @@ public class WalletConnectService extends Service
             sendRequest(client, rq);
             return Unit.INSTANCE;
         });
+
+        client.setOnSwitchEthereumChain((requestId, chainId) -> {
+            Timber.tag(TAG).d("onSwitchEthereumChain: request.id: %s, sessionId: %s, chainId: %s", requestId, client.sessionId(), chainId);
+            // send broadcast to show dialog for switching chain
+            Intent i = new Intent(WALLET_CONNECT_SWITCH_CHAIN);
+            i.putExtra("requestId", requestId);
+            i.putExtra("sessionId", client.sessionId());
+            i.putExtra("chainId", chainId);
+            i.putExtra("name", client.getPeerMeta().getName());
+            WalletConnectService.this.sendBroadcast(i);
+            return Unit.INSTANCE;
+        });
     }
 
     //TODO: Can we determine if AlphaWallet is running? If it is, no need to add this to the queue,
@@ -431,5 +453,21 @@ public class WalletConnectService extends Service
         }
 
         return true;
+    }
+
+    private void switchChain(Intent intent) {
+        long requestId = intent.getLongExtra("requestId", -1);
+        String id = intent.getStringExtra("sessionId");
+        long chainId = intent.getLongExtra("chainId", -1);
+        boolean approved = intent.getBooleanExtra("approved", false);
+        Timber.tag(TAG).d("sessionId: %s, chainId: %s, approved: %s", id, chainId, approved);
+        if (requestId != -1 && id != null && chainId != -1) {
+            WCClient c = clientMap.get(id);
+            if (c != null) {
+                c.switchChain(requestId, chainId, approved);
+            } else {
+                Timber.tag(TAG).d("WCClient not found");
+            }
+        }
     }
 }

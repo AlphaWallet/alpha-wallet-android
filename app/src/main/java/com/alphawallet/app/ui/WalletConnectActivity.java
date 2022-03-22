@@ -5,6 +5,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -53,6 +54,7 @@ import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.walletconnect.entity.WalletConnectCallback;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -400,6 +402,38 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         finish();
                     }
                     break;
+                case C.WALLET_CONNECT_SWITCH_CHAIN:
+                    Timber.tag(TAG).d("MSG: SWITCH CHAIN: ");
+                    String name = intent.getStringExtra("name");
+                    long requestId = intent.getLongExtra("requestId", -1);
+                    long chainId = intent.getLongExtra("chainId", -1);
+                    String currentSessionId = intent.getStringExtra("sessionId");
+                    Timber.tag(TAG).d("MSG: SWITCH CHAIN: name: %s, chainId: %s", name, chainId);
+
+                    if (!session.getTopic().equals(currentSessionId)) {
+                        Timber.tag(TAG).d("Wrong session");
+                        break;
+                    }
+                    if (chainId == -1 || currentSessionId == null || requestId == -1) {
+                        Timber.tag(TAG).d("Cant find data");
+                    } else {
+                        AlertDialog alertDialog = new AlertDialog.Builder(WalletConnectActivity.this)
+                                .setTitle(getString(R.string.switch_chain_request))
+                                .setMessage(String.format("%s is requesting to switch to the %s chain with chain id: %s",
+                                        remotePeerMeta.getName(), EthereumNetworkBase.getShortChainName(chainId),  chainId))
+                                .setPositiveButton("Approve", (dialog, which) -> {
+                                    viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, true);
+                                    // TODO update db and ui
+                                    displaySessionStatus(session.getTopic());
+                                })
+                                .setNegativeButton("Reject", (dialog, which) ->
+                                        viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, false)
+
+                                )
+                                .create();
+                        alertDialog.show();
+                    }
+                    break;
             }
         }
     };
@@ -492,6 +526,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         filter.addAction(C.WALLET_CONNECT_NEW_SESSION);
         filter.addAction(C.WALLET_CONNECT_FAIL);
         filter.addAction(C.WALLET_CONNECT_CLIENT_TERMINATE);
+        filter.addAction(C.WALLET_CONNECT_SWITCH_CHAIN);
         registerReceiver(walletConnectActionReceiver, filter);
     }
 
@@ -632,7 +667,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         functionBar.setVisibility(View.VISIBLE);
         infoLayout.setVisibility(View.VISIBLE);
         WCPeerMeta remotePeerData = viewModel.getRemotePeer(sessionId);
-
+        this.remotePeerMeta = remotePeerData;   // init meta to access in other places
         if (remotePeerData != null)
         {
             if (remotePeerData.getIcons().isEmpty())

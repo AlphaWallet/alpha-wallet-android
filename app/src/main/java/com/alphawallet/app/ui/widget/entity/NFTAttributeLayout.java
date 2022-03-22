@@ -14,14 +14,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.opensea.AssetTrait;
+import com.alphawallet.app.entity.opensea.Trait;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.adapter.TraitsAdapter;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 
-import java.text.DecimalFormat;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -68,7 +66,7 @@ public class NFTAttributeLayout extends LinearLayout {
         }
     }
 
-    public void bind(Token token, List<AssetTrait> traits)
+    public void bind(Token token, List<Trait> traits)
     {
         TraitsAdapter adapter = new TraitsAdapter(traits);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));

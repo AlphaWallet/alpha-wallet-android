@@ -22,7 +22,8 @@ import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.opensea.AssetTrait;
+import com.alphawallet.app.entity.opensea.Stats;
+import com.alphawallet.app.entity.opensea.Trait;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
@@ -61,9 +62,9 @@ import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -89,7 +90,8 @@ import timber.log.Timber;
  * Stormbird in Singapore
  */
 @HiltViewModel
-public class TokenFunctionViewModel extends BaseViewModel {
+public class TokenFunctionViewModel extends BaseViewModel
+{
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
@@ -108,7 +110,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
     private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
-    private final MutableLiveData<List<AssetTrait>> traits = new MutableLiveData<>();
+    private final MutableLiveData<List<Trait>> traits = new MutableLiveData<>();
 
     private Wallet wallet;
 
@@ -188,7 +190,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
         return gasEstimateComplete;
     }
 
-    public MutableLiveData<List<AssetTrait>> traits()
+    public MutableLiveData<List<Trait>> traits()
     {
         return traits;
     }
@@ -735,62 +737,49 @@ public class TokenFunctionViewModel extends BaseViewModel {
 
     private void onAsset(String asset)
     {
-
-        JSONObject statsJson = new JSONObject();
-        JSONObject lastSaleJson = new JSONObject();
-        JSONArray traitsJson = new JSONArray();
-
         try
         {
             JSONObject result = new JSONObject(asset);
-            if (result.has("collection"))
+            if (result.has("collection") && result.has("traits"))
             {
-                JSONObject collection = result.getJSONObject("collection");
-                if (collection.has("stats"))
-                {
-                    statsJson = collection.getJSONObject("stats");
-                    Timber.d(statsJson.toString());
-                }
+                computeRarity(getCountFromJson(result), getTraitsFromJson(result));
             }
-
-            if (result.has("traits"))
-            {
-                traitsJson = result.getJSONArray("traits");
-                Timber.d(traitsJson.toString());
-            }
-
-            computeRarity(statsJson, traitsJson);
         }
         catch (JSONException e)
         {
-            e.printStackTrace();
+            Timber.e(e);
         }
     }
 
-    private void computeRarity(JSONObject statsJson, JSONArray traitsJson) throws JSONException
+    private ArrayList<Trait> getTraitsFromJson(JSONObject result) throws JSONException
     {
-        List<AssetTrait> traitList = new ArrayList<>();
+        return new Gson().fromJson(result.getString("traits"),
+                new TypeToken<ArrayList<Trait>>()
+                {
+                }.getType());
+    }
 
-        int count = statsJson.getInt("count");
-        Timber.d("count: " + count);
-        if (traitsJson != null)
+    private long getCountFromJson(JSONObject result) throws JSONException
+    {
+        JSONObject collectionJson = result.getJSONObject("collection");
+        Stats stats = new Gson().fromJson(collectionJson.getString("stats"), Stats.class);
+        return stats.getCount();
+    }
+
+    private void computeRarity(long count, List<Trait> traitList) throws JSONException
+    {
+        for (Trait trait : traitList)
         {
-            for (int i = 0; i < traitsJson.length(); i++)
+            if (trait.getTraitCount() == 1)
             {
-                AssetTrait trait = new Gson().fromJson(traitsJson.get(i).toString(), AssetTrait.class);
-                if (trait.getTraitCount() == 1)
-                {
-                    trait.setTraitRarity(0); // Unique
-                }
-                else
-                {
-                    trait.setTraitRarity(((float) trait.getTraitCount() * 100) / count);
-                }
-
-                traitList.add(trait);
+                trait.setTraitRarity(0); // Unique
             }
-
-            traits.postValue(traitList);
+            else
+            {
+                trait.setTraitRarity(((float) trait.getTraitCount() * 100) / count);
+            }
         }
+
+        traits.postValue(traitList);
     }
 }

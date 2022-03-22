@@ -1,12 +1,22 @@
-Trust - is an extremely fast and secure Ethereum wallet built with ease of use in mind. We provide a fully security audited system that makes it simple to buy and store Ethereum and ERC20 tokens on your device. Trust is designed specifically for mobile to provide the best possible experience:
+AlphaWallet is an easy to use and secure Ethereum wallet with native ERC20, ERC721 and ERC875 support. AlphaWallet supports all Ethereum based networks, Ethereum, xDai, Ethereum Classic, Artis, POA, Ropsten, Goerli, Kovan, Rinkeby and Sokol.
 
-- Securely store private keys on your device
-- Send and request ether (ETH)
-- Store and track ERC20 tokens
-- Check balance, transaction history, and other details
-- Keep your private key secure with bank level security
-- Gain peace of mind knowing all web interactions are protected by military grade encryptions
-- Keep your data personal - we will never access any of your information 
-- Enjoy intuitive interfaces
+Focus on Defi:
+- Shows comprehensive breakdown on Token transactions & swaps.
+- Automatic discovery of tokens.
+- Tickers for all main tokens.
 
-If you’re having issues with the app, or wish to provide feedback, please send us an email at support@trustwalletapp.com or contact our community from within the app itself.
+Coming soon:
+- Improved Defi interaction; full performance history on per-token and per-account basis.
+- Easy interaction with tokens using TokenScript.
+
+AlphaWallet has comprehensive Ethereum crypto management for most chains, however our main focus is managing and using tokens. The real power of Ethereum is in being able to interact with tokens in an intuitive and simple way. AlphaWallet and TokenScript together are working on the next generation of token usability; unlocking the real power and convenience of tokens. This is what sets us aside from other wallets - we are the wallet for token control and interaction.
+
+Version 3.24 sees our new UX for any blockchain interactions.
+
+We are still open source. Thank you for supporting us and open source projects. We welcome you to check our source code and fork our repo to produce your own wallet and encourage you to create exciting utility tokens powered by TokenScript, in your new wallet or using base AlphaWallet. Check out our exiting new TokenScript creation tools on the main website. Check the progress and adoption of TokenScript in the media by following our Medium account here: https://medium.com/alphawallet
+
+GitHub: https://github.com/alphawallet
+Twitter: https://twitter.com/Alpha_wallet
+Reddit: https://www.reddit.com/r/AlphaWallet
+Forum: https://www.tokenscript.org/
+Telegram: https://t.me/AlphaWalletGroup

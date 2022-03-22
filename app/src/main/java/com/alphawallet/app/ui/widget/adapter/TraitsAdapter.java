@@ -9,15 +9,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.opensea.AssetTrait;
+import com.alphawallet.app.entity.opensea.Trait;
 
 import java.text.DecimalFormat;
 import java.util.List;
 
 public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder> {
-    private List<AssetTrait> traitList;
+    private List<Trait> traitList;
 
-    public TraitsAdapter(List<AssetTrait> data)
+    public TraitsAdapter(List<Trait> data)
     {
         this.traitList = data;
     }
@@ -34,7 +34,7 @@ public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull TraitsAdapter.ViewHolder viewHolder, int i)
     {
-        AssetTrait trait = traitList.get(i);
+        Trait trait = traitList.get(i);
         viewHolder.trait.setText(trait.getTraitType());
         viewHolder.value.setText(trait.getValue());
 

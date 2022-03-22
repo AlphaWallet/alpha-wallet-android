@@ -3,7 +3,8 @@ package com.alphawallet.app.entity.opensea;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class AssetTrait {
+public class Trait
+{
     @SerializedName("trait_type")
     @Expose
     private String traitType;

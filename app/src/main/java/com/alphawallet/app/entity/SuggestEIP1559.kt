@@ -103,6 +103,7 @@ internal fun suggestPriorityFee(firstBlock: Long, gasUsedRatio: DoubleArray, gas
                 val feeHistory = gasService.getChainFeeHistory(blockCount, "0x" + (firstBlock + ptr).toString(16), rewardPercentile.toString()).blockingGet();
 
                 (feeHistory!!.reward.indices).forEach {
+                    println("YOLESS: " + feeHistory.reward[it][0]);
                     rewards.add(BigInteger(Numeric.cleanHexPrefix(feeHistory.reward[it][0].removePrefix("0x")), 16))
                 }
                 if (feeHistory.reward.size < blockCount) break

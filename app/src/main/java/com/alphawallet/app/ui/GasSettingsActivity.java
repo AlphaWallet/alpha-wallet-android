@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,21 +26,17 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.GasPriceSpread2;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
-import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.GasSettingsCallback;
-import com.alphawallet.app.ui.widget.entity.GasSpeed;
 import com.alphawallet.app.ui.widget.entity.GasSpeed2;
 import com.alphawallet.app.ui.widget.entity.GasWarningLayout;
 import com.alphawallet.app.util.BalanceUtils;
@@ -51,12 +46,8 @@ import com.alphawallet.app.widget.GasSliderView;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
@@ -121,8 +112,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             resendNote.setVisibility(View.VISIBLE);
         }
 
-        int testa = getIntent().getIntExtra(C.EXTRA_SINGLE_ITEM, 2);
-
         currentGasSpeedIndex = GasPriceSpread2.TXSpeed.values()[getIntent().getIntExtra(C.EXTRA_SINGLE_ITEM, GasPriceSpread2.TXSpeed.STANDARD.ordinal())];
         chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         customGasLimit = new BigDecimal(getIntent().getStringExtra(C.EXTRA_CUSTOM_GAS_LIMIT));
@@ -132,7 +121,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         gasSliderView.setNonce(getIntent().getLongExtra(C.EXTRA_NONCE, -1));
         gasSliderView.initGasLimit(customGasLimit.toBigInteger());
         gasSpread = getIntent().getParcelableExtra(C.EXTRA_GAS_PRICE);
-        //customGasPriceFromWidget = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
 
         gasSliderView.initGasPrice(gasSpread.getSelectedGasFee(GasPriceSpread2.TXSpeed.CUSTOM));
         adapter = new CustomAdapter(this);
@@ -167,7 +155,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private void initGasSpeeds(Realm1559Gas gs)
     {
         gasSpread = new GasPriceSpread2(this, gasSpread, gs.getResult());
-        gasSliderView.initGasPriceMax(gasSpread.getSelectedGasFee(GasPriceSpread2.TXSpeed.RAPID).gasPrice);
+        gasSliderView.initGasPriceMax(gasSpread.getQuickestGasSpeed().gasPrice);
         GasSpeed2 custom = gasSpread.getSelectedGasFee(GasPriceSpread2.TXSpeed.CUSTOM);
         updateCustomElement(custom.gasPrice.maxFeePerGas, custom.gasPrice.maxPriorityFeePerGas, customGasLimit.toBigInteger());
         gasSliderView.initGasPrice(custom);
@@ -220,7 +208,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     public void onDestroy()
     {
         super.onDestroy();
-        if (realmGasSpread != null)
+        if (realmGasSpread != null && realmGasSpread.isValid())
         {
             realmGasSpread.removeAllChangeListeners();
             if (!realmGasSpread.getRealm().isClosed()) realmGasSpread.getRealm().close();
@@ -287,7 +275,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         public void onBindViewHolder(CustomAdapter.CustomViewHolder holder, int p)
         {
             BigDecimal useGasLimit = presetGasLimit;
-            GasPriceSpread2.TXSpeed position = GasPriceSpread2.TXSpeed.values()[holder.getAbsoluteAdapterPosition()];
+            GasPriceSpread2.TXSpeed position = gasSpread.getSelectedPosition(holder.getAbsoluteAdapterPosition());//  GasPriceSpread2.TXSpeed.values()[holder.getAbsoluteAdapterPosition()];
             GasSpeed2 gs = gasSpread.getSelectedGasFee(position);
             holder.speedName.setText(gs.speed);
 
@@ -310,7 +298,18 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 notifyItemChanged(position.ordinal());
             });
 
-            String speedGwei = BalanceUtils.weiToGweiBI(gs.gasPrice.maxFeePerGas).toBigInteger().toString();
+            BigDecimal maxGas = BalanceUtils.weiToGweiBI(gs.gasPrice.maxFeePerGas);
+            String speedGwei;
+
+            if (maxGas.compareTo(BigDecimal.valueOf(2)) < 0)
+            {
+                speedGwei = BalanceUtils.weiToGwei(new BigDecimal(gs.gasPrice.maxFeePerGas), 2);
+            }
+            else
+            {
+                speedGwei = BalanceUtils.weiToGweiBI(gs.gasPrice.maxFeePerGas).toBigInteger().toString();
+            }
+
             String priorityFee = BalanceUtils.weiToGwei(new BigDecimal(gs.gasPrice.maxPriorityFeePerGas), 2);
 
             if (position == GasPriceSpread2.TXSpeed.CUSTOM)
@@ -485,7 +484,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             //Extrapolate between adjacent price readings
             for (GasPriceSpread2.TXSpeed speed : GasPriceSpread2.TXSpeed.values())
             {
-                GasPriceSpread2.TXSpeed nextSpeed = GasPriceSpread2.TXSpeed.values()[speed.ordinal() + 1];
+                GasPriceSpread2.TXSpeed nextSpeed = gasSpread.getNextSpeed(speed);
                 if (nextSpeed == GasPriceSpread2.TXSpeed.CUSTOM) break;
 
                 GasSpeed2 ug = gasSpread.getSelectedGasFee(speed);

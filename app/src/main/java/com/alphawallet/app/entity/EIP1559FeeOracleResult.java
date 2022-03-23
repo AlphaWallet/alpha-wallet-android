@@ -3,6 +3,9 @@ package com.alphawallet.app.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alphawallet.app.util.BalanceUtils;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
@@ -16,8 +19,8 @@ public class EIP1559FeeOracleResult implements Parcelable
 
     public EIP1559FeeOracleResult(BigInteger maxFee, BigInteger maxPriority, BigInteger base)
     {
-        maxFeePerGas = maxFee;
-        maxPriorityFeePerGas = maxPriority;
+        maxFeePerGas = minOneGwei(maxFee);
+        maxPriorityFeePerGas = minOneGwei(maxPriority);
         baseFee = base;
     }
 
@@ -59,5 +62,11 @@ public class EIP1559FeeOracleResult implements Parcelable
         dest.writeString(maxFeePerGas.toString(16));
         dest.writeString(maxPriorityFeePerGas.toString(16));
         dest.writeString(baseFee.toString(16));
+    }
+
+    // Returns minimum 1 Gwei
+    private BigInteger minOneGwei(BigInteger input)
+    {
+        return input.max(BalanceUtils.gweiToWei(BigDecimal.ONE));
     }
 }

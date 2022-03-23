@@ -64,6 +64,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <com.alphawallet.app.widget.GasWidget
+        android:id="@+id/gas_widget_legacy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
     <com.alphawallet.app.widget.TransactionDetailWidget
         android:id="@+id/detail_widget"
         android:layout_width="match_parent"

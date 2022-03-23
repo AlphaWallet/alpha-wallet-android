@@ -36,6 +36,54 @@ public class GasPriceSpread2 implements Parcelable
         return fees.size();
     }
 
+    public GasSpeed2 getQuickestGasSpeed()
+    {
+        for (TXSpeed txs : TXSpeed.values())
+        {
+            GasSpeed2 gs = fees.get(txs);
+            if (gs != null) return gs;
+        }
+
+        //Should not reach this
+        return null;
+    }
+
+    public TXSpeed getNextSpeed(TXSpeed speed)
+    {
+        boolean begin = false;
+        for (TXSpeed txs : TXSpeed.values())
+        {
+            GasSpeed2 gs = fees.get(txs);
+            if (gs != null)
+            {
+                if (txs == speed)
+                {
+                    begin = true;
+                }
+                else if (begin)
+                {
+                    return txs;
+                }
+            }
+        }
+
+        return TXSpeed.CUSTOM;
+    }
+
+    public TXSpeed getSelectedPosition(int absoluteAdapterPosition)
+    {
+        int index = 0;
+        for (TXSpeed txs : TXSpeed.values())
+        {
+            GasSpeed2 gs = fees.get(txs);
+            if (gs == null) continue;
+            else if (absoluteAdapterPosition == index) return txs;
+            index++;
+        }
+
+        return TXSpeed.CUSTOM;
+    }
+
     public enum TXSpeed
     {
         RAPID,
@@ -89,6 +137,18 @@ public class GasPriceSpread2 implements Parcelable
         fees.put(TXSpeed.FAST, new GasSpeed2(ctx.getString(R.string.speed_fast), FAST_SECONDS, new EIP1559FeeOracleResult(result.get(third))));
         fees.put(TXSpeed.STANDARD, new GasSpeed2(ctx.getString(R.string.speed_average), STANDARD_SECONDS, new EIP1559FeeOracleResult(result.get(third*2))));
         fees.put(TXSpeed.SLOW, new GasSpeed2(ctx.getString(R.string.speed_slow), SLOW_SECONDS, new EIP1559FeeOracleResult(result.get(result.size()-1))));
+
+        //now de-duplicate
+        for (TXSpeed txs : TXSpeed.values())
+        {
+            GasSpeed2 gs = fees.get(txs);
+            if (txs == TXSpeed.STANDARD || gs == null) continue;
+            if (gs.gasPrice.maxPriorityFeePerGas.equals(fees.get(TXSpeed.STANDARD).gasPrice.maxPriorityFeePerGas)
+                && gs.gasPrice.maxFeePerGas.equals(fees.get(TXSpeed.STANDARD).gasPrice.maxFeePerGas))
+            {
+                fees.remove(txs);
+            }
+        }
     }
 
     public void setCustom(BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas, long fastSeconds)

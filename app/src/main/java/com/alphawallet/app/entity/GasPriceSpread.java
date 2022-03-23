@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity;
 
+import static com.alphawallet.app.util.BalanceUtils.gweiToWei;
+
 import android.content.Context;
 
 import com.alphawallet.app.R;
@@ -11,8 +13,6 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
-
-import static com.alphawallet.app.util.BalanceUtils.gweiToWei;
 
 /**
  * Created by JB on 18/11/2020.

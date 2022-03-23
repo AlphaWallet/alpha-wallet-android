@@ -533,7 +533,7 @@
     <string name="tokenscript_error_detail">Error en el elemento de TokenScript: %1$s</string>
     <string name="tokenscript_element_not_present">entrada de la función \"%1$s\" no encontrada en los elementos HTML.</string>
     <string name="complete_tokenscript_value">Valor de entrada no válido: %1$s</string>
-    <string name="value">VALOR</string>
+    <string name="value">Valor</string>
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">No ha sido posible crear la clave. Prueba a activar la seguridad en tu teléfono.</string>
     <string name="what_is_seed_phrase">Una frase semilla, frase semilla de recuperación o frase semilla de respaldo es una lista de palabras que almacena toda la información necesaria para recuperar un monedero criptográfico. Normalmente, el software del monedero genera una frase semilla e indica al usuario que la escriba en un papel.</string>
@@ -852,10 +852,18 @@
     <string name="label_external_link">External Link</string>
     <string name="label_description">Description</string>
     <string name="label_details">Details</string>
+    <string name="title_dark_mode">Dark Mode</string>
     <string name="send_multiple_tokens">Send Multiple Tokens</string>
     <string name="switch_to_grid_view">Switch to Grid View</string>
     <string name="switch_to_list_view">Switch to List View</string>
     <string name="reload_metadata">Reload Metadata</string>
+    <string name="label_market_price">Market Price:</string>
+    <string name="i_already_have_a_wallet">I already have a Wallet</string>
+    <string name="title_select_theme">Select Mode</string>
+    <string name="title_network_info">Network Info</string>
     <string name="testnet">Testnet</string>
     <string name="website_text">Website</string>
+    <string name="setting_theme_light">Light</string>
+    <string name="setting_theme_dark">Dark</string>
+    <string name="setting_theme_auto">Auto</string>
 </resources>

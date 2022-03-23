@@ -109,7 +109,6 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
                 LayoutInflater inflater = LayoutInflater.from(SelectNetworkFilterActivity.this);
                 View popupView = inflater.inflate(R.layout.popup_view_delete_network, null);
 
-
                 int width = LinearLayout.LayoutParams.WRAP_CONTENT;
                 int height = LinearLayout.LayoutParams.WRAP_CONTENT;
                 final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
@@ -136,7 +135,6 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
                 popupView.measure(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                 popupWindow.setHeight(popupView.getMeasuredHeight());
 
-                popupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
                 popupWindow.setElevation(5);
 
                 popupWindow.showAsDropDown(view);

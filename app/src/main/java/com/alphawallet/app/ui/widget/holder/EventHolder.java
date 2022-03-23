@@ -53,8 +53,6 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     private final TextView type;
     private final TextView address;
     private final TextView value;
-    private final TextView supplemental;
-    private final LinearLayout transactionBackground;
 
     private final AssetDefinitionService assetDefinition;
     private final AdapterCallback refreshSignaller;
@@ -75,15 +73,11 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         address = findViewById(R.id.address);
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
-        supplemental = findViewById(R.id.supplimental);
-        transactionBackground = findViewById(R.id.layout_background);
         tokensService = service;
         itemView.setOnClickListener(this);
         assetDefinition = svs;
-
         fetchTransactionsInteract = interact;
         refreshSignaller = signaller;
-        transactionBackground.setBackgroundResource(R.color.white);
     }
 
     @Override

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
+import com.google.android.material.checkbox.MaterialCheckBox;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -72,14 +73,14 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
             holder.manageView.setVisibility(View.VISIBLE);
             holder.manageView.setOnClickListener(v ->  editListener.onEditNetwork(networkList.get(position).getChainId(), holder.manageView));
-            holder.checkbox.setSelected(item.isSelected());
+            holder.checkbox.setChecked(item.isSelected());
         }
     }
 
     private void clickListener(final MultiSelectNetworkAdapter.ViewHolder holder, final int position)
     {
         networkList.get(position).setSelected(!networkList.get(position).isSelected());
-        holder.checkbox.setSelected(networkList.get(position).isSelected());
+        holder.checkbox.setChecked(networkList.get(position).isSelected());
         hasClicked = true;
     }
 
@@ -90,7 +91,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView checkbox;
+        MaterialCheckBox checkbox;
         TextView name;
         View itemLayout;
         View manageView;

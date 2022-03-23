@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,38 +13,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="25dp"
             android:layout_marginTop="40dp"
-            android:src="@drawable/ic_logo" />
+            android:layout_marginBottom="25dp"
+            android:src="@drawable/ic_launcher_foreground" />
 
         <TextView
+            style="@style/Aw.Typography.Title.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:fontFamily="@font/font_light"
-            android:text="@string/browser_history"
-            android:textSize="20sp" />
+            android:text="@string/browser_history" />
 
         <TextView
             android:id="@+id/clear"
+            style="@style/Aw.Typography.Control"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:fontFamily="@font/font_bold"
             android:paddingStart="20dp"
             android:text="@string/action_clear"
-            android:textColor="@color/colorPrimaryDark"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <TextView
-            android:layout_marginTop="40dp"
             android:id="@+id/no_history"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:fontFamily="@font/font_light"
-            android:text="@string/your_browser_history_appears_here"
-            android:textSize="18sp" />
+            android:layout_marginTop="40dp"
+            android:text="@string/your_browser_history_appears_here" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -57,5 +54,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp" />
         </RelativeLayout>
+
     </LinearLayout>
+
 </ScrollView>

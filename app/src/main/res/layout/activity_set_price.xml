@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_card">
+        android:layout_height="match_parent">
 
         <ScrollView
             android:layout_width="match_parent"
@@ -26,44 +25,39 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:paddingBottom="15dp"
                     android:paddingLeft="15dp"
-                    android:paddingRight="15dp">
+                    android:paddingRight="15dp"
+                    android:paddingBottom="15dp">
 
                     <TextView
                         android:id="@+id/title_set_price"
+                        style="@style/Aw.Typography.Title.SemiBold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:layout_marginBottom="20dp"
-                        android:layout_marginTop="20dp"
-                        android:fontFamily="@font/font_light"
+                        android:layout_marginTop="@dimen/cozy_20"
+                        android:layout_marginBottom="@dimen/cozy_20"
                         android:gravity="center"
-                        android:text="@string/set_a_price"
-                        android:textColor="@color/text_black"
-                        android:textSize="25sp" />
+                        android:text="@string/set_a_price" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_light"
                         android:gravity="center"
                         android:text="@string/set_price_subtext_abr"
-                        android:textColor="@color/text_black"
-                        android:textSize="16sp"
-                        android:visibility="gone" />
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
                     <TextView
+                        style="@style/Aw.Typography.Control"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="20dp"
                         android:layout_marginTop="20dp"
-                        android:fontFamily="@font/font_semibold"
+                        android:layout_marginBottom="20dp"
                         android:gravity="center"
                         android:text="@string/learn_more_about_ethereum"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18sp"
-                        android:visibility="gone" />
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/listTickets"
@@ -90,15 +84,12 @@
                                 android:orientation="vertical">
 
                                 <TextView
+                                    style="@style/Aw.Typography.Label"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="center_horizontal"
-                                    android:layout_marginBottom="5dp"
-                                    android:fontFamily="@font/font_regular"
-                                    android:text="@string/price_per_ticket"
-                                    android:textAllCaps="true"
-                                    android:textColor="@color/light_gray"
-                                    android:textSize="10sp" />
+                                    android:layout_marginBottom="@dimen/mini_4"
+                                    android:text="@string/price_per_ticket" />
 
                                 <RelativeLayout
                                     android:layout_width="match_parent"
@@ -106,50 +97,44 @@
 
                                     <EditText
                                         android:id="@+id/asking_price"
+                                        style="@style/Aw.Typography.Title.SemiBold"
                                         android:layout_width="match_parent"
                                         android:layout_height="47dp"
                                         android:layout_alignParentLeft="true"
                                         android:layout_centerVertical="true"
                                         android:background="@drawable/background_quantity"
-                                        android:fontFamily="@font/font_semibold"
                                         android:hint="0.00"
                                         android:imeOptions="actionDone"
                                         android:inputType="numberDecimal"
-                                        android:paddingStart="15dp"
-                                        android:textColor="@color/colorPrimaryDark"
-                                        android:textColorHint="@color/light_gray"
-                                        android:textSize="21sp" />
+                                        android:paddingStart="@dimen/standard_16" />
 
                                     <TextView
                                         android:id="@+id/text_currency"
+                                        style="@style/Aw.Typography.Title"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_alignParentRight="true"
                                         android:layout_centerVertical="true"
                                         android:layout_marginRight="15dp"
-                                        android:fontFamily="@font/font_regular"
-                                        android:text="@string/eth"
-                                        android:textColor="@color/semi_dark_grey" />
+                                        android:text="@string/eth" />
                                 </RelativeLayout>
 
                                 <TextView
+                                    style="@style/Aw.Typography.Small"
                                     android:id="@+id/error_price"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="5dp"
-                                    android:fontFamily="@font/font_regular"
                                     android:gravity="center"
                                     android:text="@string/error_invalid_amount"
-                                    android:textColor="@color/cancel_red"
-                                    android:textSize="12sp"
+                                    android:textColor="?colorError"
                                     android:visibility="gone" />
 
                             </LinearLayout>
 
                             <View
                                 android:layout_width="15dp"
-                                android:layout_height="match_parent"
-                                android:background="@color/white" />
+                                android:layout_height="match_parent" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -158,15 +143,12 @@
                                 android:orientation="vertical">
 
                                 <TextView
+                                    style="@style/Aw.Typography.Label"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="center_horizontal"
-                                    android:layout_marginBottom="5dp"
-                                    android:fontFamily="@font/font_regular"
-                                    android:text="@string/quantity_of_tickets"
-                                    android:textAllCaps="true"
-                                    android:textColor="@color/light_gray"
-                                    android:textSize="10sp" />
+                                    android:layout_marginBottom="@dimen/mini_4"
+                                    android:text="@string/quantity_of_tickets" />
 
                                 <LinearLayout
                                     android:id="@+id/layout_ticket_quantity"
@@ -180,8 +162,6 @@
                                         android:id="@+id/layout_quantity_add"
                                         android:layout_width="wrap_content"
                                         android:layout_height="match_parent"
-                                        android:layout_alignParentLeft="true"
-                                        android:layout_centerVertical="true"
                                         android:layout_weight="1">
 
                                         <ImageView
@@ -194,16 +174,14 @@
 
                                     <TextView
                                         android:id="@+id/text_quantity"
+                                        style="@style/Aw.Typography.Title.SemiBold"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_gravity="center"
                                         android:layout_weight="1"
-                                        android:fontFamily="@font/font_semibold"
                                         android:gravity="center"
-                                        android:padding="10dp"
-                                        android:text="1"
-                                        android:textColor="@color/colorPrimaryDark"
-                                        android:textSize="21sp" />
+                                        android:padding="@dimen/small_12"
+                                        android:text="1" />
 
                                     <RelativeLayout
                                         android:id="@+id/layout_quantity_minus"
@@ -222,15 +200,14 @@
                                 </LinearLayout>
 
                                 <TextView
+                                    style="@style/Aw.Typography.Small"
                                     android:id="@+id/error_quantity"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="5dp"
-                                    android:fontFamily="@font/font_regular"
                                     android:gravity="center"
                                     android:text="@string/error_invalid_quantity"
-                                    android:textColor="@color/cancel_red"
-                                    android:textSize="12sp"
+                                    android:textColor="?colorError"
                                     android:visibility="gone" />
                             </LinearLayout>
                         </LinearLayout>
@@ -240,70 +217,42 @@
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
                             android:layout_marginTop="20dp"
-                            android:background="@color/white"
                             android:orientation="vertical"
                             android:paddingLeft="10dp"
                             android:paddingRight="10dp">
 
                             <TextView
+                                style="@style/Aw.Typography.Label"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="@font/font_light"
                                 android:gravity="center"
-                                android:text="@string/total_cost_label"
-                                android:textColor="@color/text_black"
-                                android:textSize="21sp" />
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_marginBottom="10dp"
-                                android:layout_marginTop="10dp"
-                                android:background="@color/grey" />
+                                android:text="@string/total_cost_label" />
 
                             <TextView
                                 android:id="@+id/eth_price"
+                                style="@style/Aw.Typography.Title.SemiBold"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="@font/font_bold"
                                 android:gravity="center"
-                                android:text="@string/eth_00"
-                                android:textColor="@color/colorPrimaryDark"
-                                android:textSize="21sp" />
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_marginBottom="10dp"
-                                android:layout_marginTop="10dp"
-                                android:background="@color/grey" />
+                                android:text="@string/eth_00" />
 
                             <TextView
                                 android:id="@+id/fiat_price_txt"
+                                style="@style/Aw.Typography.Label"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="@font/font_regular"
+                                android:layout_marginTop="@dimen/standard_16"
                                 android:gravity="center"
-                                android:text="@string/equivalent_in_usd"
-                                android:textAllCaps="true"
-                                android:textColor="@color/light_gray"
-                                android:textSize="10sp" />
+                                android:text="@string/equivalent_in_usd" />
 
 
                             <TextView
                                 android:id="@+id/fiat_price"
+                                style="@style/Aw.Typography.Title.SemiBold"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
-                                android:layout_marginTop="5dp"
-                                android:background="@drawable/background_round_grey"
-                                android:paddingBottom="10dp"
-                                android:paddingLeft="20dp"
-                                android:paddingRight="20dp"
-                                android:paddingTop="10dp"
-                                android:text="$0"
-                                android:textColor="@color/light_gray"
-                                android:textSize="21sp" />
+                                android:text="$0" />
 
                         </LinearLayout>
                     </LinearLayout>
@@ -312,45 +261,42 @@
                         android:id="@+id/layout_universal_link_details"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/standard_16"
                         android:orientation="vertical"
-                        android:visibility="gone">
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <TextView
                             android:id="@+id/text_confirm_quantity"
+                            style="@style/Aw.Typography.Label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:fontFamily="@font/font_bold"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="20sp" />
+                            tools:text="Confirm Quantity" />
 
                         <TextView
                             android:id="@+id/text_confirm_price_per_ticket"
+                            style="@style/Aw.Typography.Title.SemiBold"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:fontFamily="@font/font_bold"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="20sp" />
+                            tools:text="1000" />
 
                         <TextView
                             android:id="@+id/text_confirm_total_cost"
+                            style="@style/Aw.Typography.Title.SemiBold"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:layout_marginBottom="10dp"
-                            android:fontFamily="@font/font_bold"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="20sp" />
+                            android:layout_marginBottom="@dimen/standard_16"
+                            tools:text="1000" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:fontFamily="@font/font_light"
                             android:gravity="center"
-                            android:text="@string/universal_link_info"
-                            android:textSize="16sp" />
+                            android:text="@string/universal_link_info" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -365,15 +311,12 @@
                                 android:orientation="vertical">
 
                                 <TextView
+                                    style="@style/Aw.Typography.Label"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="center_horizontal"
-                                    android:layout_marginBottom="5dp"
-                                    android:fontFamily="@font/font_regular"
-                                    android:text="@string/link_expiry_date"
-                                    android:textAllCaps="true"
-                                    android:textColor="@color/light_gray"
-                                    android:textSize="10sp" />
+                                    android:layout_marginBottom="@dimen/mini_4"
+                                    android:text="@string/link_expiry_date" />
 
                                 <RelativeLayout
                                     android:layout_width="match_parent"
@@ -381,21 +324,18 @@
 
                                     <EditText
                                         android:id="@+id/edit_expiry_date"
+                                        style="@style/Aw.Typography.Title.SemiBold"
                                         android:layout_width="match_parent"
                                         android:layout_height="47dp"
-                                        android:layout_alignParentLeft="true"
+                                        android:layout_alignParentStart="true"
                                         android:layout_centerVertical="true"
                                         android:background="@drawable/background_quantity"
                                         android:digits="1234567890a"
                                         android:focusable="false"
-                                        android:fontFamily="@font/font_semibold"
                                         android:hint="@string/date_hint"
                                         android:imeOptions="actionDone"
                                         android:inputType="datetime"
-                                        android:paddingStart="15dp"
-                                        android:textColor="@color/colorPrimaryDark"
-                                        android:textColorHint="@color/light_gray"
-                                        android:textSize="18sp" />
+                                        android:paddingStart="@dimen/standard_16" />
 
                                     <ImageView
                                         android:layout_width="wrap_content"
@@ -407,22 +347,20 @@
                                 </RelativeLayout>
 
                                 <TextView
+                                    style="@style/Aw.Typography.Small"
                                     android:id="@+id/error_date"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="5dp"
-                                    android:fontFamily="@font/font_regular"
                                     android:gravity="center"
                                     android:text="@string/error_date"
-                                    android:textColor="@color/cancel_red"
-                                    android:textSize="12sp"
+                                    android:textColor="?colorError"
                                     android:visibility="gone" />
                             </LinearLayout>
 
                             <View
                                 android:layout_width="15dp"
-                                android:layout_height="match_parent"
-                                android:background="@color/white" />
+                                android:layout_height="match_parent" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -431,15 +369,12 @@
                                 android:orientation="vertical">
 
                                 <TextView
+                                    style="@style/Aw.Typography.Label"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="center_horizontal"
-                                    android:layout_marginBottom="5dp"
-                                    android:fontFamily="@font/font_regular"
-                                    android:text="@string/link_expiry_time"
-                                    android:textAllCaps="true"
-                                    android:textColor="@color/light_gray"
-                                    android:textSize="10sp" />
+                                    android:layout_marginBottom="@dimen/mini_4"
+                                    android:text="@string/link_expiry_time" />
 
                                 <RelativeLayout
                                     android:layout_width="match_parent"
@@ -447,21 +382,17 @@
 
                                     <EditText
                                         android:id="@+id/edit_expiry_time"
+                                        style="@style/Aw.Typography.Title.SemiBold"
                                         android:layout_width="match_parent"
                                         android:layout_height="47dp"
-                                        android:layout_alignParentLeft="true"
-                                        android:layout_centerHorizontal="true"
-                                        android:layout_centerVertical="true"
+                                        android:layout_alignParentStart="true"
+                                        android:layout_centerInParent="true"
                                         android:background="@drawable/background_quantity"
                                         android:focusable="false"
-                                        android:fontFamily="@font/font_semibold"
                                         android:hint="@string/hint_time"
                                         android:imeOptions="actionDone"
                                         android:inputType="time"
-                                        android:paddingStart="15dp"
-                                        android:textColor="@color/colorPrimaryDark"
-                                        android:textColorHint="@color/light_gray"
-                                        android:textSize="18sp" />
+                                        android:paddingStart="@dimen/standard_16" />
 
                                     <ImageView
                                         android:layout_width="wrap_content"
@@ -474,52 +405,49 @@
 
                                 <TextView
                                     android:id="@+id/error_time"
+                                    style="@style/Aw.Typography.Small"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="5dp"
-                                    android:fontFamily="@font/font_regular"
+                                    android:layout_marginTop="@dimen/mini_4"
                                     android:gravity="center"
                                     android:text="@string/error_time"
-                                    android:textColor="@color/cancel_red"
-                                    android:textSize="12sp"
-                                    android:visibility="gone" />
+                                    android:textColor="?colorError"
+                                    android:visibility="gone"
+                                    tools:visibility="visible" />
+
                             </LinearLayout>
+
                         </LinearLayout>
 
                         <include layout="@layout/item_universal_link_warning" />
 
                     </LinearLayout>
+
                 </LinearLayout>
+
             </LinearLayout>
+
         </ScrollView>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_next"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:text="@string/action_next"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
+            android:layout_margin="@dimen/dp16"
+            android:text="@string/action_next" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_sell"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
+            android:layout_margin="@dimen/dp16"
             android:text="@string/action_next"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp"
             android:visibility="gone" />
+
     </RelativeLayout>
+
 </LinearLayout>

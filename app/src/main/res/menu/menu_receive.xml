@@ -1,23 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
         android:id="@+id/action_networks"
         android:icon="@drawable/ic_network_2"
         android:orderInCategory="1"
         android:title="@string/action_networks"
-        app:showAsAction="always"
-        />
+        app:iconTint="?colorControlNormal"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/action_show_contract"
         android:icon="@drawable/ic_ethereum"
         android:orderInCategory="1"
         android:title="@string/show_token_contract"
+        app:iconTint="?colorControlNormal"
         app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/action_my_address"
         android:icon="@drawable/ic_action_qrx"
         android:orderInCategory="20"
         android:title="@string/my_wallet_address"
+        app:iconTint="?colorControlNormal"
         app:showAsAction="ifRoom" />
 </menu>

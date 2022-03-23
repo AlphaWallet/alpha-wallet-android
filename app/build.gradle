@@ -183,6 +183,9 @@ dependencies {
     implementation "com.google.dagger:hilt-android:2.40.5"
     annotationProcessor "com.google.dagger:hilt-compiler:2.40.5"
 
+    // WebKit - for WebView Dark Mode
+    implementation 'androidx.webkit:webkit:1.4.0'
+
     //Use Leak Canary for debug builds only
     //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 

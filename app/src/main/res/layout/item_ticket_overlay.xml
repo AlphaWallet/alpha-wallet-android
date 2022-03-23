@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:background="@drawable/selector_radio_check"
+        android:background="@drawable/selector_checkbox_round"
         android:checked="false"
         android:text=""
         android:layout_marginRight="15dp"
@@ -23,7 +23,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="110dp"
-        android:background="@drawable/background_card_shadow"
         android:orientation="vertical"
         android:gravity="center"
         android:paddingBottom="20dp"
@@ -33,10 +32,8 @@
 
         <ProgressBar
             android:layout_gravity="center"
-            android:indeterminateTint="@color/colorPrimaryDark"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 

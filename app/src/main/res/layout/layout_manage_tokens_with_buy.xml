@@ -1,32 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:id="@+id/layout_manage_tokens"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_manage_tokens"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/background_divider_top_bottom"
     android:gravity="center"
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:orientation="vertical">
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/primary_button"
+        style="@style/Aw.Component.Button.Primary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp24"
-        android:layout_marginStart="@dimen/dp16"
-        android:layout_marginEnd="@dimen/dp16"
-        android:layout_marginBottom="@dimen/dp22"
-
-        android:background="@drawable/selector_round_button"
-        android:ellipsize="end"
-        android:fontFamily="@font/font_semibold"
-        android:lines="1"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:text="@string/buy_eth"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        />
+        android:layout_margin="@dimen/standard_16"
+        android:text="@string/buy_eth" />
 
     <ImageView
         android:id="@+id/img_add_token"

@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.text.format.DateUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -16,11 +18,12 @@ public class TransactionDateHolder extends BinderViewHolder<Date> {
 
     public static final int VIEW_TYPE = 1004;
     private final TextView title;
+    private final View separator;
 
     public TransactionDateHolder(int resId, ViewGroup parent) {
         super(resId, parent);
-
-        title = findViewById(R.id.title);
+        title = findViewById(R.id.text_header);
+        separator = findViewById(R.id.separator);
     }
 
     @Override
@@ -30,6 +33,7 @@ public class TransactionDateHolder extends BinderViewHolder<Date> {
         } else {
             title.setText(getDate(data));
         }
+        separator.setVisibility(View.GONE);
     }
 
     private String getDate(Date date)

@@ -45,8 +45,6 @@ import io.realm.Realm;
 
 import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
 
-import org.w3c.dom.Text;
-
 /**
  * Created by JB on 17/11/2020.
  */
@@ -81,7 +79,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                              String destName, String destAddress, TokensService ts,
                              ActionSheetCallback aCallBack)
     {
-        super(activity, R.style.FullscreenBottomSheetDialogStyle);
+        super(activity);
         View view = View.inflate(getContext(), R.layout.dialog_action_sheet, null);
         setContentView(view);
 

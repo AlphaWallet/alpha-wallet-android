@@ -3,102 +3,97 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@drawable/background_card">
+    android:orientation="vertical">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+    <View style="@style/Aw.Component.Separator" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp20"
+        android:layout_marginHorizontal="@dimen/standard_16"
+        android:layout_marginTop="@dimen/standard_16"
         android:orientation="horizontal">
 
         <TextView
+            style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1.1"
-            android:layout_marginStart="@dimen/dp16"
-            android:text="@string/speed_gas"
-            android:textColor="@color/dove"
-            android:fontFamily="@font/font_regular"
-            android:lines="1"
+            android:layout_weight="1"
             android:gravity="start"
-            android:textSize="@dimen/sp13"/>
+            android:lines="1"
+            android:text="@string/speed_gas" />
 
         <LinearLayout
             android:id="@+id/layout_gas_warning"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.1"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_weight="3"
             android:orientation="horizontal"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="gone">
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
-                android:src="@drawable/ic_red_warning"/>
+                android:layout_marginEnd="@dimen/tiny_8"
+                android:src="@drawable/ic_red_warning" />
 
             <TextView
                 android:id="@+id/text_warning"
+                style="@style/Aw.Typography.SemiBold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/danger"
-                android:fontFamily="@font/font_semibold"
                 android:text="@string/insufficient_gas"
-                android:textSize="@dimen/sp17"/>
+                android:textColor="?colorError" />
 
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/layout_speed_warning"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.1"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_weight="3"
             android:orientation="horizontal"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="gone">
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
-                android:src="@drawable/ic_red_warning"/>
+                android:layout_marginEnd="@dimen/tiny_8"
+                android:src="@drawable/ic_red_warning" />
 
             <TextView
                 android:id="@+id/text_speed_warning"
+                style="@style/Aw.Typography.SemiBold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/danger"
-                android:fontFamily="@font/font_semibold"
                 android:text="@string/speed_too_low"
-                android:textSize="@dimen/sp17"/>
+                android:textColor="?colorError" />
 
         </LinearLayout>
+
         <TextView
             android:id="@+id/text_speed"
+            style="@style/Aw.Typography.SemiBold"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.1"
-            android:textColor="@color/black"
-            android:fontFamily="@font/font_semibold"
-            android:text="@string/speed_average"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_weight="3"
             android:gravity="start"
-            android:textSize="@dimen/sp17"/>
+            android:text="@string/speed_average" />
 
         <TextView
             android:id="@+id/edit_text"
+            style="@style/Aw.Typography.Control"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_weight="0.6"
-            android:fontFamily="@font/font_semibold"
             android:gravity="center_horizontal"
-            android:textColor="@color/azure"
             android:lines="1"
-            android:textSize="@dimen/sp17"
+            android:orientation="horizontal"
             android:text="@string/edit"
             android:visibility="visible" />
 
@@ -107,26 +102,30 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="@dimen/dp16">
+        android:layout_marginHorizontal="@dimen/standard_16"
+        android:layout_marginBottom="@dimen/standard_16"
+        android:orientation="horizontal">
 
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/text_time_estimate"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.4"
-            android:layout_marginStart="@dimen/dp16"
-            android:layout_marginTop="3dp"
-            android:textColor="@color/dove"
-            android:fontFamily="@font/font_regular"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_marginTop="@dimen/mini_4"
+            android:layout_weight="3"
             android:gravity="start"
-            tools:text="&lt; 0.003 ETH ($0.55 USD)≈2 minutes"
-            android:textSize="@dimen/sp15"/>
+            tools:text="&lt; 0.003 ETH ($0.55 USD)≈2 minutes" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="0.6" />
 
     </LinearLayout>
 
@@ -134,13 +133,9 @@
         android:id="@+id/text_speedup_note"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="24dp"
         android:textAlignment="center"
-        android:fontFamily="@font/font_regular"
-        android:textSize="@dimen/sp17"
-        android:textColor="@color/mine"
-        android:lineHeight="29sp"
+        android:visibility="gone"
         tools:text="@string/text_speedup_note"
-        android:visibility="gone"/>
+        tools:visibility="visible" />
 
 </LinearLayout>

@@ -5,16 +5,25 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
 
+import com.alphawallet.app.entity.CurrencyItem;
+import com.alphawallet.app.entity.LocaleItem;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.CurrencyRepositoryType;
+import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.TransactionsService;
+import com.alphawallet.app.util.LocaleUtils;
+
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import io.reactivex.Single;
 
 @HiltViewModel
 public class NewSettingsViewModel extends BaseViewModel {
@@ -26,17 +35,59 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final MyAddressRouter myAddressRouter;
     private final ManageWalletsRouter manageWalletsRouter;
     private final PreferenceRepositoryType preferenceRepository;
+    private final LocaleRepositoryType localeRepository;
+    private final CurrencyRepositoryType currencyRepository;
+    private final TransactionsService transactionsService;
 
     @Inject
     NewSettingsViewModel(
             GenericWalletInteract genericWalletInteract,
             MyAddressRouter myAddressRouter,
             ManageWalletsRouter manageWalletsRouter,
-            PreferenceRepositoryType preferenceRepository) {
+            PreferenceRepositoryType preferenceRepository,
+            LocaleRepositoryType localeRepository,
+            CurrencyRepositoryType currencyRepository,
+            TransactionsService transactionsService) {
         this.genericWalletInteract = genericWalletInteract;
         this.myAddressRouter = myAddressRouter;
         this.manageWalletsRouter = manageWalletsRouter;
         this.preferenceRepository = preferenceRepository;
+        this.localeRepository = localeRepository;
+        this.currencyRepository = currencyRepository;
+        this.transactionsService = transactionsService;
+    }
+
+    public ArrayList<LocaleItem> getLocaleList(Context context) {
+        return localeRepository.getLocaleList(context);
+    }
+
+    public void setLocale(Context activity) {
+        String currentLocale = localeRepository.getActiveLocale();
+        LocaleUtils.setLocale(activity, currentLocale);
+    }
+
+    public void updateLocale(String newLocale, Context context) {
+        localeRepository.setUserPreferenceLocale(newLocale);
+        localeRepository.setLocale(context, newLocale);
+    }
+
+    public String getDefaultCurrency(){
+        return currencyRepository.getDefaultCurrency();
+    }
+
+    public ArrayList<CurrencyItem> getCurrencyList() {
+        return currencyRepository.getCurrencyList();
+    }
+
+    public Single<Boolean> updateCurrency(String currencyCode){
+        currencyRepository.setDefaultCurrency(currencyCode);
+        //delete tickers from realm
+        return transactionsService.wipeTickerData();
+    }
+
+    public String getActiveLocale()
+    {
+        return localeRepository.getActiveLocale();
     }
 
     public void showManageWallets(Context context, boolean clearStack) {

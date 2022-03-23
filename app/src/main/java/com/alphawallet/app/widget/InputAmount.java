@@ -56,7 +56,7 @@ public class InputAmount extends LinearLayout
     private final NumericInput editText;
     private final TextView symbolText;
     private final TokenIcon icon;
-    private final ChainName chainName;
+    private final StandardHeader header;
     private final TextView availableSymbol;
     private final TextView availableAmount;
     private final TextView allFunds;
@@ -87,7 +87,7 @@ public class InputAmount extends LinearLayout
         editText = findViewById(R.id.amount_entry);
         symbolText = findViewById(R.id.text_token_symbol);
         icon = findViewById(R.id.token_icon);
-        chainName = findViewById(R.id.chain_name);
+        header = findViewById(R.id.header);
         availableSymbol = findViewById(R.id.text_symbol);
         availableAmount = findViewById(R.id.text_available);
         allFunds = findViewById(R.id.text_all_funds);
@@ -116,7 +116,7 @@ public class InputAmount extends LinearLayout
         this.assetService = assetDefinitionService;
         this.amountReadyCallback = amountCallback;
         icon.bindData(token, assetService);
-        chainName.setChainID(token.tokenInfo.chainId);
+        header.getChainName().setChainID(token.tokenInfo.chainId);
         updateAvailableBalance();
 
         this.realm = tokensService.getWalletRealmInstance();
@@ -186,12 +186,12 @@ public class InputAmount extends LinearLayout
         if (showError)
         {
             errorText.setVisibility(View.VISIBLE);
-            editText.setTextColor(context.getColor(R.color.danger));
+            editText.setTextColor(context.getColor(R.color.error));
         }
         else
         {
             errorText.setVisibility(View.GONE);
-            editText.setTextColor(context.getColor(R.color.text_dark_gray));
+            editText.setTextColor(context.getColor(R.color.text_secondary));
         }
 
     }
@@ -462,11 +462,10 @@ public class InputAmount extends LinearLayout
             boolean showChainName = a.getBoolean(R.styleable.InputView_showChainName, true);
             boolean currencyMode = a.getBoolean(R.styleable.InputView_currencyMode, false);
             int headerTextId = a.getResourceId(R.styleable.InputView_label, R.string.amount);
-            findViewById(R.id.layout_header_amount).setVisibility(showHeader ? View.VISIBLE : View.GONE);
+            header.setVisibility(showHeader ? View.VISIBLE : View.GONE);
             allFunds.setVisibility(showAllFunds ? View.VISIBLE : View.GONE);
-            TextView headerText = findViewById(R.id.text_header);
-            headerText.setText(headerTextId);
-            chainName.setVisibility(showChainName ? View.VISIBLE : View.GONE);
+            header.setText(headerTextId);
+            header.getChainName().setVisibility(showChainName ? View.VISIBLE : View.GONE);
             if (currencyMode)
             {
                 symbolText.setText(TickerService.getCurrencySymbolTxt());

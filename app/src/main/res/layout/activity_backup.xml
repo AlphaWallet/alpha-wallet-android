@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
+    android:layout_height="match_parent">
 
-    <include layout="@layout/layout_white_toolbar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -19,17 +18,15 @@
 
             <TextView
                 android:id="@+id/text_title"
+                style="@style/Aw.Typography.Headline"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
                 android:gravity="center_horizontal"
                 android:lineSpacingMultiplier="1.2"
-                android:paddingStart="50dp"
-                android:paddingEnd="50dp"
+                android:paddingStart="@dimen/double_base_48"
+                android:paddingEnd="@dimen/double_base_48"
                 android:text="@string/backup_seed_phrase"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:textSize="@dimen/sp28" />
+                android:textAlignment="center" />
 
             <ImageView
                 android:id="@+id/backup_seed_image"
@@ -44,15 +41,12 @@
                 android:id="@+id/text_detail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp16"
-                android:fontFamily="@font/font_regular"
+                android:layout_marginTop="@dimen/standard_16"
                 android:lineSpacingMultiplier="1.3"
-                android:paddingStart="50dp"
-                android:paddingEnd="50dp"
+                android:paddingStart="@dimen/double_base_48"
+                android:paddingEnd="@dimen/double_base_48"
                 android:text="@string/backup_seed_phrase_detail"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:textSize="@dimen/sp17" />
+                android:textAlignment="center" />
         </LinearLayout>
     </ScrollView>
 
@@ -66,7 +60,7 @@
         android:id="@+id/layout_success_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blur"
+        android:background="@color/translucent_dark"
         android:gravity="center"
         android:visibility="gone">
 

@@ -41,8 +41,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -299,7 +297,8 @@ public class WalletsActivity extends BaseActivity implements
         addWalletView.setOnImportWalletClickListener(this);
         addWalletView.setOnWatchWalletClickListener(this);
         addWalletView.setOnCloseActionListener(this);
-        dialog = new BottomSheetDialog(this, R.style.FullscreenBottomSheetDialogStyle);
+        dialog = new BottomSheetDialog(this);
+//        dialog = new BottomSheetDialog(this, R.style.Aw_Component_BottomSheetDialog);
         dialog.setContentView(addWalletView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);

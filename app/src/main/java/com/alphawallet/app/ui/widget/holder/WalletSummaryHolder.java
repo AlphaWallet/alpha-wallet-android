@@ -47,10 +47,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 	private final TextView walletNameText;
 	private final TextView walletAddressSeparator;
 	private final TextView walletAddressText;
-	private final ImageView walletSelectedIcon;
 	private final TextView wallet24hChange;
-	private final int greyColor;
-	private final int blackColor;
 	private final Realm realm;
 	private RealmResults<RealmWalletData> realmUpdate;
 
@@ -66,13 +63,10 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 		walletNameText = findViewById(R.id.wallet_name);
 		walletAddressSeparator = findViewById(R.id.wallet_address_separator);
 		walletAddressText = findViewById(R.id.wallet_address);
-		walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
 		walletClickLayout = findViewById(R.id.wallet_click_layer);
 		wallet24hChange = findViewById(R.id.wallet_24h_change);
 		clickCallback = callback;
 		manageWalletLayout = findViewById(R.id.layout_manage_wallet);
-		greyColor = parent.getContext().getColor(R.color.greyffive);
-		blackColor = parent.getContext().getColor(R.color.text_black);
 		this.realm = realm;
 	}
 
@@ -107,18 +101,11 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 			if (!TextUtils.isEmpty(walletBalance) && walletBalance.startsWith("*"))
 			{
 				walletBalance = walletBalance.substring(1);
-				walletBalanceText.setTextColor(greyColor);
-			}
-			else
-			{
-				walletBalanceText.setTextColor(blackColor);
 			}
 			walletBalanceText.setText(walletBalance);
 			walletBalanceCurrency.setText(wallet.balanceSymbol);
 
 			walletAddressText.setText(Utils.formatAddress(wallet.address));
-
-			walletSelectedIcon.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 
 			if (addition.getBoolean(IS_SYNCED, false))
 			{
@@ -154,7 +141,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 		//This sets the 24hr percentage change (rightmost value)
 		try {
 			wallet24hChange.setVisibility(View.VISIBLE);
-			int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.red : R.color.green);
+			int color = ContextCompat.getColor(getContext(), percentChange24h < 0 ? R.color.negative : R.color.positive);
 			BigDecimal percentChangeBI = BigDecimal.valueOf(percentChange24h).setScale(3, RoundingMode.DOWN);
 			String formattedPercents = (percentChange24h < 0 ? "" : "+") + percentChangeBI + "%";
 			//wallet24hChange.setBackgroundResource(percentage < 0 ? R.drawable.background_24h_change_red : R.drawable.background_24h_change_green);

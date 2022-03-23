@@ -243,7 +243,7 @@ public class WalletViewModel extends BaseViewModel
             context.startActivity(intent);
         });
 
-        dialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);
+        dialog = new BottomSheetDialog(context);
         dialog.setContentView(actionsView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);

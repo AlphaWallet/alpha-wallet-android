@@ -36,6 +36,8 @@
     </declare-styleable>
     <declare-styleable name="StandardHeader">
         <attr name="headerText" format="string"/>
+        <attr name="showSwitch" format="boolean"/>
+        <attr name="showChain" format="boolean"/>
     </declare-styleable>
     <declare-styleable name="InputView">
         <attr name="label" format="integer" />
@@ -87,4 +89,10 @@
         <attr name="text"/>
         <attr name="showActionText" format="boolean"/>
     </declare-styleable>
+    <attr name="seedWordStyle" format="reference" />
+    <attr name="whatsNewEntryStyle" format="reference" />
+    <attr name="colorSurfaceSecondary" format="reference" />
+    <attr name="colorSurfaceTertiary" format="reference" />
+    <attr name="colorSurfaceQuaternary" format="reference" />
+    <attr name="colorSurfaceDark" format="reference" />
 </resources>

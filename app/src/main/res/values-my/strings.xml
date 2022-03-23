@@ -555,7 +555,7 @@
     <string name="tokenscript_error_detail">Error in TokenScript element: %1$s</string>
     <string name="tokenscript_element_not_present">function input \'%1$s\' not found in HTML elements.</string>
     <string name="complete_tokenscript_value">Invalid input value: %1$s</string>
-    <string name="value">VALUE</string>
+    <string name="value">Value</string>
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">သော့ကိုဖန်တီး၍မရပါ။ သင်၏ဖုန်းတွင်လုံခြုုံရေးခွင့်ပြုချက်ပြုလုပ်ပေးပါ။</string>
     <string name="what_is_seed_phrase">Recovery Phrase(သို့) backup Seed Phrase သိမ်းဆည်းခြင်းဆိုသည်မှာ ခရစ်ပ်တိုဝေါလက်တစ်ခုကိုပြန်လည်ရယူရန်အတွက် လိုအပ်သောစကားလုံးများကိုသိမ်းဆည်းသော လုပ်ငန်းစဥ်ဖြစ်ပါသည်။ အသုံးပြုသူများသည်ပုံမှန်အားဖြင့်ဝေါလက်အသုံးပြုရန် seed phrase ကိုထည့်သွင်းရမည်ဖြစ်ပြီး ထို Seed Phrase ကို စာရွက်ပေါ်တွင် မှတ်သားထားရန်ညွှန်ကြားထားလေ့ရှိသည်။</string>
@@ -878,9 +878,14 @@
     <string name="label_external_link">External Link</string>
     <string name="label_description">Description</string>
     <string name="label_details">Details</string>
+    <string name="title_dark_mode">Dark Mode</string>
     <string name="switch_to_grid_view">Switch to Grid View</string>
     <string name="switch_to_list_view">Switch to List View</string>
     <string name="reload_metadata">Reload Metadata</string>
+    <string name="label_market_price">Market Price:</string>
+    <string name="i_already_have_a_wallet">I already have a Wallet</string>
+    <string name="title_select_theme">Select Mode</string>
+    <string name="title_network_info">Network Info</string>
     <string name="assets">Assets</string>
     <string name="defi_header">DeFi</string>
     <string name="governance_header">Governance</string>
@@ -900,4 +905,7 @@
     <string name="current_price">Current Price:</string>
     <string name="add_new_price_alert">Add New Price Alert</string>
     <string name="website_text">Website</string>
+    <string name="setting_theme_light">Light</string>
+    <string name="setting_theme_dark">Dark</string>
+    <string name="setting_theme_auto">Auto</string>
 </resources>

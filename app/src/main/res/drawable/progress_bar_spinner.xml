@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rotate xmlns:android="http://schemas.android.com/apk/res/android"
-    android:fromDegrees="0"
     android:duration="4000"
+    android:fromDegrees="0"
     android:pivotX="50%"
     android:pivotY="50%"
     android:toDegrees="720">
@@ -13,10 +13,10 @@
         android:useLevel="false">
 
         <gradient
-            android:centerColor="@color/colorAccent"
-            android:endColor="@color/azure"
-            android:startColor="@color/colorTheme"
-            android:useLevel="false"
-            android:type="sweep" />
+            android:centerColor="?colorPrimary"
+            android:endColor="?colorPrimary"
+            android:startColor="?colorSurface"
+            android:type="sweep"
+            android:useLevel="false" />
     </shape>
 </rotate>

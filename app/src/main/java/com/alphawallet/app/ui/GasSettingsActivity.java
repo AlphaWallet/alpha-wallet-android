@@ -8,21 +8,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,6 +44,7 @@ import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
 import com.alphawallet.app.widget.GasSliderView;
+import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -51,8 +52,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
@@ -96,12 +95,13 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private Warning warningType = Warning.OFF;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_gas_settings);
         toolbar();
-        setTitle(R.string.set_speed_title);
+        setTitle(getString(R.string.set_speed_title));
 
         gasSliderView = findViewById(R.id.gasSliderView);
         recyclerView = findViewById(R.id.list);
@@ -152,7 +152,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     {
         if (realmGasSpread != null) realmGasSpread.removeAllChangeListeners();
         realmGasSpread = getGasQuery().findFirstAsync();
-        realmGasSpread.addChangeListener(realmToken -> {
+        realmGasSpread.addChangeListener(realmToken ->
+        {
             if (realmGasSpread.isValid())
             {
                 GasPriceSpread gs = ((RealmGasSpread) realmToken).getGasPrice();
@@ -224,7 +225,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -247,21 +249,23 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         adapter.notifyItemChanged(customIndex);
     }
 
-    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>
+    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.GasSpeedHolder>
     {
         private final Token baseCurrency;
         private final Context context;
 
         @Override
-        public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public GasSpeedHolder onCreateViewHolder(ViewGroup parent, int viewType)
+        {
             View itemView = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_gas_speed, parent, false);
 
-            return new CustomViewHolder(itemView);
+            return new GasSpeedHolder(itemView);
         }
 
-        class CustomViewHolder extends RecyclerView.ViewHolder {
-            final ImageView checkbox;
+        class GasSpeedHolder extends RecyclerView.ViewHolder
+        {
+            final MaterialRadioButton radio;
             final TextView speedName;
             final TextView speedGwei;
             final TextView speedCostEth;
@@ -272,10 +276,10 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             final LinearLayout warning;
             final TextView warningText;
 
-            CustomViewHolder(View view)
+            GasSpeedHolder(View view)
             {
                 super(view);
-                checkbox = view.findViewById(R.id.checkbox);
+                radio = view.findViewById(R.id.radio);
                 speedName = view.findViewById(R.id.text_speed);
                 speedCostFiat = view.findViewById(R.id.text_speed_cost);
                 speedCostEth = view.findViewById(R.id.text_speed_cost_eth);
@@ -295,7 +299,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         }
 
         @Override
-        public void onBindViewHolder(CustomAdapter.CustomViewHolder holder, int p)
+        public void onBindViewHolder(GasSpeedHolder holder, int p)
         {
             BigDecimal useGasLimit = presetGasLimit;
             int position = holder.getAbsoluteAdapterPosition();
@@ -305,8 +309,22 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             holder.speedName.setVisibility(View.VISIBLE);
             holder.warning.setVisibility(View.GONE);
 
-            holder.checkbox.setSelected(position == currentGasSpeedIndex);
-            holder.itemLayout.setOnClickListener(v -> {
+            holder.radio.setOnCheckedChangeListener((compoundButton, checked) ->
+            {
+                if (checked)
+                {
+                    holder.speedName.setTypeface(ResourcesCompat.getFont(getApplicationContext(), R.font.font_bold));
+                }
+                else
+                {
+                    holder.speedName.setTypeface(ResourcesCompat.getFont(getApplicationContext(), R.font.font_regular));
+                }
+            });
+
+            holder.radio.setChecked(position == currentGasSpeedIndex);
+
+            holder.itemLayout.setOnClickListener(v ->
+            {
                 if (position == customIndex && currentGasSpeedIndex != customIndex)
                 {
                     gasSliderView.initGasLimit(customGasLimit.toBigInteger());
@@ -363,7 +381,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             BigDecimal gasFee = new BigDecimal(gs.gasPrice).multiply(useGasLimit);
 
             String gasAmountInBase = BalanceUtils.getScaledValueScientific(gasFee, baseCurrency.tokenInfo.decimals, GAS_PRECISION);
-            if (gasAmountInBase.equals("0")) gasAmountInBase = "0.00001"; //NB no need to allow for zero gas chains; this activity wouldn't appear
+            if (gasAmountInBase.equals("0"))
+                gasAmountInBase = "0.00001"; //NB no need to allow for zero gas chains; this activity wouldn't appear
             String displayStr = context.getString(R.string.gas_amount, gasAmountInBase, baseCurrency.getSymbol());
             String displayTime = context.getString(R.string.gas_time_suffix,
                     Utils.shortConvertTimePeriodInSeconds(gs.seconds, context));
@@ -387,9 +406,9 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
             //This collapses the view if it's not required, eg for re-send transaction
             //This hides the views that aren't selectable due to gas too low
-            if(minGasPrice > 0)
+            if (minGasPrice > 0)
             {
-                if(!gs.isCustom && gs.gasPrice.longValue() < minGasPrice)
+                if (!gs.isCustom && gs.gasPrice.longValue() < minGasPrice)
                 {
                     ViewGroup.LayoutParams params = holder.itemLayout.getLayoutParams();
                     params.height = 0;
@@ -403,7 +422,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             checkInsufficientGas(txCost);
         }
 
-        private void blankCustomHolder(CustomViewHolder holder)
+        private void blankCustomHolder(GasSpeedHolder holder)
         {
             holder.speedGwei.setText(context.getString(R.string.bracketed, context.getString(R.string.set_your_speed)));
             holder.speedCostEth.setText("");
@@ -503,19 +522,23 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                     expectedTime = (long) ((double) lg.seconds - extrapolateFactor * timeDiff);
                     break;
                 }
-                else if (lg.speed.equals(getString(R.string.speed_slow))) { //final entry
+                else if (lg.speed.equals(getString(R.string.speed_slow)))
+                { //final entry
                     //danger zone - transaction may not complete
                     double dangerAmount = lowerBound / 2.0;
                     long dangerTime = 12 * DateUtils.HOUR_IN_MILLIS / 1000;
 
-                    if (dGasPrice < (lowerBound*0.95)) //only show gas warning if less than 95% of slow
+                    if (dGasPrice < (lowerBound * 0.95)) //only show gas warning if less than 95% of slow
                     {
                         showGasWarning(false);
                     }
 
-                    if (dGasPrice < dangerAmount) {
+                    if (dGasPrice < dangerAmount)
+                    {
                         expectedTime = -1; //never
-                    } else {
+                    }
+                    else
+                    {
                         expectedTime = extrapolateTime(dangerTime, lg.seconds, dGasPrice, dangerAmount, lowerBound);
                     }
 
@@ -595,7 +618,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             gasWarning.setVisibility(View.VISIBLE);
 
             EditText gas_price_entry = findViewById(R.id.gas_price_entry);
-            gas_price_entry.setTextColor(getColor(R.color.danger));
+            gas_price_entry.setTextColor(getColor(R.color.error));
             gas_price_entry.setBackground(ContextCompat.getDrawable(this, R.drawable.background_text_edit_error));
         }
     }
@@ -614,7 +637,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         warningType = Warning.OFF;
 
         EditText gas_price_entry = findViewById(R.id.gas_price_entry);
-        gas_price_entry.setTextColor(getColor(R.color.dove));
+        gas_price_entry.setTextColor(getColor(R.color.text_secondary));
         gas_price_entry.setBackground(AppCompatResources.getDrawable(this, R.drawable.background_password_entry));
     }
 

@@ -2,12 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_white_toolbar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -15,40 +12,31 @@
 
         <TextView
             android:id="@+id/text_title"
+            style="@style/Aw.Typography.Headline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:fontFamily="@font/font_regular"
             android:gravity="center_horizontal"
             android:text="@string/transaction_in_progress"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="28sp" />
+            android:textAlignment="center" />
 
         <ImageView
             android:id="@+id/backup_seed_image"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:layout_margin="@dimen/dp14"
             android:layout_below="@id/text_title"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="16dp"
+            android:layout_margin="@dimen/standard_16"
             android:scaleType="fitCenter"
             android:src="@drawable/tx_in_progress"
             android:visibility="visible" />
 
         <com.alphawallet.app.widget.CopyTextView
             android:id="@+id/tx_hash"
-            style="@style/MyAddressCopyTextStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp10"
-            android:layout_marginHorizontal="@dimen/dp22"
             android:layout_below="@id/backup_seed_image"
-            android:layout_centerHorizontal="true"
-            custom:gravity="center"
-            custom:bold="true"
-            custom:textColor="@color/black" />
+            android:layout_centerHorizontal="true" />
 
         <TextView
             android:id="@+id/text_detail"
@@ -56,15 +44,12 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/tx_hash"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="16dp"
-            android:fontFamily="@font/font_regular"
+            android:layout_marginTop="@dimen/standard_16"
             android:lineSpacingMultiplier="1.3"
-            android:paddingStart="50dp"
-            android:paddingEnd="50dp"
+            android:paddingStart="@dimen/double_base_48"
+            android:paddingEnd="@dimen/double_base_48"
             android:text="@string/transaction_progress_detail"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="17sp" />
+            android:textAlignment="center" />
 
         <com.alphawallet.app.widget.FunctionButtonBar
             android:id="@+id/layoutButtons"

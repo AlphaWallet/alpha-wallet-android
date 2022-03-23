@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+
+    The base application theme specifies the default attributes applied
+    to native components before any custom styling.
+
+    ** ATTENTION **
+    1. DO NOT CHANGE any values in this file. If you want to modify, customize,
+    or rebrand the app, please refer to `theming.md` for a detailed overview.
+
+    -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
+        <!-- The primary branding color -->
+        <item name="colorPrimary">@color/brand</item>
+        <!-- The variation of the primary branding color -->
+        <item name="colorPrimaryVariant">@color/brand</item>
+        <!-- The color applied to the status bar -->
+        <item name="colorPrimaryDark">@color/surface</item>
+        <!-- The color applied on top of brand color -->
+        <item name="colorOnPrimary">@color/brand_inverse</item>
+        <!-- The complementary branding color often used for controls -->
+        <item name="colorAccent">@color/accent</item>
+        <!-- Similar to secondary color for Material Design components -->
+        <item name="colorSecondary">@color/accent</item>
+        <!-- The variation of the secondary branding color -->
+        <item name="colorSecondaryVariant">@color/accent</item>
+        <!-- The color applied on top of secondary branding color -->
+        <item name="colorOnSecondary">@color/brand_inverse</item>
+        <!-- The color used for errors, warnings or notifications -->
+        <item name="colorError">@color/error</item>
+        <!-- The color applied over error color -->
+        <item name="colorOnError">@color/error_inverse</item>
+        <!-- The color applied to the window background -->
+        <item name="android:colorBackground">@color/background</item>
+        <!-- The color applied on top of background color -->
+        <item name="colorOnBackground">@color/background_inverse</item>
+        <!-- The color applied to floating surfaces (ex. dialogs, popups, bottom sheets) -->
+        <item name="colorBackgroundFloating">@color/background_floating</item>
+        <!-- The color applied to most component backgrounds -->
+        <item name="colorSurface">@color/surface</item>
+        <!-- The color applied to over surface color -->
+        <item name="colorOnSurface">@color/surface_inverse</item>
+        <!-- The default color of controls (ex. toolbar icons, checkboxes, radio buttons) -->
+        <item name="colorControlNormal">@color/control</item>
+        <!-- The color applied to controls in their activated state (ex. checked state) -->
+        <item name="colorControlActivated">@color/control_activated</item>
+        <!-- The color applied to controls in their highlighted state (ex. ripples) -->
+        <item name="colorControlHighlight">@color/control_highlight</item>
+        <!-- The most prominent text color -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <!-- The color applied to primary text for inverted backgrounds -->
+        <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
+        <!-- The color used for subtitles, labels and other supplemental text -->
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <!-- The color applied to secondary text for inverted backgrounds -->
+        <item name="android:textColorSecondaryInverse">@color/text_secondary_inverse</item>
+
+        <!-- Custom color references -->
+        <!-- The color applied to headers -->
+        <item name="colorSurfaceSecondary">@color/surface_secondary</item>
+        <!-- The color applied to search bars, text icon button -->
+        <item name="colorSurfaceTertiary">@color/surface_tertiary</item>
+        <!-- The color applied to separators -->
+        <item name="colorSurfaceQuaternary">@color/surface_quaternary</item>
+        <!-- The color applied to chart tabs -->
+        <item name="colorSurfaceDark">@color/surface_dark</item>
+
+        <!-- Default Component Styles -->
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_secondary</item>
+        <item name="android:textColorHintInverse">@color/text_secondary_inverse</item>
+        <item name="android:textViewStyle">@style/Aw.Typography</item>
+        <item name="toolbarStyle">@style/Aw.Component.Toolbar</item>
+        <item name="appBarLayoutStyle">@style/Aw.Component.AppBarLayout</item>
+        <item name="recyclerViewStyle">@style/Aw.Component.RecyclerView</item>
+        <item name="materialButtonStyle">@style/Aw.Component.Button.Primary</item>
+        <item name="switchStyle">@style/Aw.Component.Switch</item>
+        <item name="checkboxStyle">@style/Aw.Component.CheckBox</item>
+        <item name="radioButtonStyle">@style/Aw.Component.RadioButton</item>
+        <item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog</item>
+        <item name="seedWordStyle">@style/Aw.Component.SeedWord</item>
+        <item name="whatsNewEntryStyle">@style/Aw.Component.WhatsNewEntry</item>
+        <item name="materialAlertDialogTheme">@style/AppTheme.AlertDialog</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar.Splash">
+        <item name="android:windowBackground">@drawable/background_splash</item>
+    </style>
+
+    <style name="AppTheme.DarkOverlay">
+        <item name="android:colorBackground">@color/cod</item>
+        <item name="colorBackgroundFloating">@color/mine</item>
+        <item name="colorSurface">@color/cod</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorControlNormal">@color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorPrimaryInverse">@color/cod</item>
+        <item name="android:textColorSecondary">@color/dusty</item>
+        <item name="android:textColorSecondaryInverse">@color/cod</item>
+    </style>
+
+    <style name="AppTheme.AlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="colorSurface">?colorBackgroundFloating</item>
+    </style>
+
+    <style name="AppTheme.BottomSheetDialog" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="bottomSheetStyle">@style/Aw.Component.BottomSheet</item>
+        <item name="colorSecondary">@color/brand</item>
+        <item name="colorControlNormal">@color/surface_inverse</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textColorSecondaryInverse">@color/text_secondary_inverse</item>
+    </style>
+
+</resources>

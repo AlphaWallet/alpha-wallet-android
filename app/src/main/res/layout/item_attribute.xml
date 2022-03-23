@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="@dimen/dp16"
-    android:paddingTop="@dimen/dp8"
-    android:paddingEnd="@dimen/dp16"
-    android:paddingBottom="@dimen/dp8">
+    android:paddingStart="@dimen/standard_16"
+    android:paddingTop="@dimen/tiny_8"
+    android:paddingEnd="@dimen/standard_16"
+    android:paddingBottom="@dimen/tiny_8">
 
     <ImageView
         android:id="@+id/icon_trait"
@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="@dimen/dp8"
+        android:layout_marginEnd="@dimen/tiny_8"
         android:src="@drawable/ic_trait_icon" />
 
     <LinearLayout
@@ -25,21 +25,17 @@
         android:orientation="vertical">
 
         <TextView
+            style="@style/Aw.Typography.SemiBold"
             android:id="@+id/value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp14"
             tools:text="Value" />
 
         <TextView
+            style="@style/Aw.Typography.Sub"
             android:id="@+id/trait"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/dove"
-            android:textSize="@dimen/sp14"
             tools:text="Attribute" />
 
     </LinearLayout>

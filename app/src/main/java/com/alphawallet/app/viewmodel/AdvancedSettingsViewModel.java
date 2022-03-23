@@ -26,52 +26,18 @@ import io.realm.Realm;
 
 @HiltViewModel
 public class AdvancedSettingsViewModel extends BaseViewModel {
-    private final LocaleRepositoryType localeRepository;
-    private final CurrencyRepositoryType currencyRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final PreferenceRepositoryType preferenceRepository;
     private final TransactionsService transactionsService;
 
     @Inject
     AdvancedSettingsViewModel(
-            LocaleRepositoryType localeRepository,
-            CurrencyRepositoryType currencyRepository,
             AssetDefinitionService assetDefinitionService,
             PreferenceRepositoryType preferenceRepository,
             TransactionsService transactionsService) {
-        this.localeRepository = localeRepository;
-        this.currencyRepository = currencyRepository;
         this.assetDefinitionService = assetDefinitionService;
         this.preferenceRepository = preferenceRepository;
         this.transactionsService = transactionsService;
-    }
-
-    public ArrayList<LocaleItem> getLocaleList(Context context) {
-        return localeRepository.getLocaleList(context);
-    }
-
-    public void setLocale(Context activity) {
-        String currentLocale = localeRepository.getActiveLocale();
-        LocaleUtils.setLocale(activity, currentLocale);
-    }
-
-    public void updateLocale(String newLocale, Context context) {
-        localeRepository.setUserPreferenceLocale(newLocale);
-        localeRepository.setLocale(context, newLocale);
-    }
-
-    public String getDefaultCurrency(){
-        return currencyRepository.getDefaultCurrency();
-    }
-
-    public ArrayList<CurrencyItem> getCurrencyList() {
-        return currencyRepository.getCurrencyList();
-    }
-
-    public Single<Boolean> updateCurrency(String currencyCode){
-        currencyRepository.setDefaultCurrency(currencyCode);
-        //delete tickers from realm
-        return transactionsService.wipeTickerData();
     }
 
     public boolean createDirectory() {
@@ -92,11 +58,6 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     public void startFileListeners()
     {
         assetDefinitionService.startAlphaWalletListener();
-    }
-
-    public String getActiveLocale()
-    {
-        return localeRepository.getActiveLocale();
     }
 
     public void setFullScreenState(boolean state)

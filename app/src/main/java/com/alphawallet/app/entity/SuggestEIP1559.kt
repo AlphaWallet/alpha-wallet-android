@@ -102,11 +102,11 @@ internal fun suggestPriorityFee(firstBlock: Long, gasUsedRatio: DoubleArray, gas
                 // feeHistory API call with reward percentile specified is expensive and therefore is only requested for a few non-full recent blocks.
                 val feeHistory = gasService.getChainFeeHistory(blockCount, "0x" + (firstBlock + ptr).toString(16), rewardPercentile.toString()).blockingGet();
 
-                (feeHistory!!.reward.indices).forEach {
-                    println("YOLESS: " + feeHistory.reward[it][0]);
+                val rewardSize = feeHistory?.reward?.size ?: 0
+                (0 until rewardSize).forEach {
                     rewards.add(BigInteger(Numeric.cleanHexPrefix(feeHistory.reward[it][0].removePrefix("0x")), 16))
                 }
-                if (feeHistory.reward.size < blockCount) break
+                if (rewardSize < blockCount) break
                 needBlocks -= blockCount
             }
             ptr -= blockCount + 1

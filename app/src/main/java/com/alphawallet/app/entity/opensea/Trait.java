@@ -19,14 +19,16 @@ public class Trait
 
     private float traitRarity;
 
+    private boolean isUnique;
+
     public float getTraitRarity()
     {
         return traitRarity;
     }
 
-    public void setTraitRarity(float traitRarity)
+    public void updateTraitRarity(long totalSupply)
     {
-        this.traitRarity = traitRarity;
+        traitRarity =  ((float) traitCount * 100) / totalSupply;
     }
 
     public long getTraitCount()
@@ -57,5 +59,15 @@ public class Trait
     public void setTraitType(String traitType)
     {
         this.traitType = traitType;
+    }
+
+    public void setUnique(boolean isUnique)
+    {
+        this.isUnique = isUnique;
+    }
+
+    public boolean isUnique()
+    {
+        return this.isUnique;
     }
 }

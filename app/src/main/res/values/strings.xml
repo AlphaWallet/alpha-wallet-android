@@ -903,4 +903,6 @@
     <string name="setting_theme_light">Light</string>
     <string name="setting_theme_dark">Dark</string>
     <string name="setting_theme_auto">Auto</string>
+    <string name="trait_rarity_unique">Unique</string>
+    <string name="trait_rarity_suppl_text">%1$s%% have this trait</string>
 </resources>

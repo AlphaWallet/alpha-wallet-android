@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.LongSparseArray;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
@@ -338,15 +339,15 @@ public class OpenSeaService
         String api = "";
         if (networkId == EthereumNetworkBase.MAINNET_ID)
         {
-            api = "https://api.opensea.io/api/v1/assets/?owner=" + address;
+            api = C.OPENSEA_ASSETS_API_MAINNET + address;
         }
         else if (networkId == EthereumNetworkBase.RINKEBY_ID)
         {
-            api = "https://rinkeby-api.opensea.io/api/v1/assets/?owner=" + address;
+            api = C.OPENSEA_ASSETS_API_RINKEBY + address;
         }
         else if (networkId == EthereumNetworkBase.MATIC_ID)
         {
-            api = "https://api.opensea.io/api/v2/assets/matic?owner_address=" + address;
+            api = C.OPENSEA_ASSETS_API_MATIC + address;
         }
 
         Uri.Builder builder = new Uri.Builder();
@@ -362,15 +363,15 @@ public class OpenSeaService
         String api = "";
         if (networkId == EthereumNetworkBase.MAINNET_ID)
         {
-            api = "https://api.opensea.io/api/v1/asset/" + contractAddress + "/" + tokenId;
+            api = C.OPENSEA_SINGLE_ASSET_API_MAINNET + contractAddress + "/" + tokenId;
         }
         else if (networkId == EthereumNetworkBase.RINKEBY_ID)
         {
-            api = "https://rinkeby-api.opensea.io/api/v1/asset/" + contractAddress + "/" + tokenId;
+            api = C.OPENSEA_SINGLE_ASSET_API_RINKEBY + contractAddress + "/" + tokenId;
         }
         else if (networkId == EthereumNetworkBase.MATIC_ID)
         {
-            api = "https://api.opensea.io/api/v2/metadata/matic/" + contractAddress + "/" + tokenId;
+            api = C.OPENSEA_SINGLE_ASSET_API_MATIC + contractAddress + "/" + tokenId;
         }
 
         return executeRequest(api);

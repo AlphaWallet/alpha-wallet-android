@@ -53,6 +53,7 @@ import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.walletconnect.entity.WalletConnectCallback;
 import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
@@ -404,41 +405,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     break;
                 case C.WALLET_CONNECT_SWITCH_CHAIN:
                     Timber.tag(TAG).d("MSG: SWITCH CHAIN: ");
-                    String name = intent.getStringExtra(C.EXTRA_NAME);
-                    long requestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
-                    long chainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
-                    String currentSessionId = intent.getStringExtra(C.EXTRA_SESSION_ID);
-                    Timber.tag(TAG).d("MSG: SWITCH CHAIN: name: %s, chainId: %s", name, chainId);
-
-                    if (!session.getTopic().equals(currentSessionId)) {
-                        Timber.tag(TAG).d("Wrong session");
-                        break;
-                    }
-                    if (chainId == -1 || currentSessionId == null || requestId == -1) {
-                        Timber.tag(TAG).d("Cant find data");
-                    } else {
-                        boolean chainAvailable = EthereumNetworkBase.getNetworkInfo(chainId) != null;
-                        if (!chainAvailable) {
-                            viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, false, false);
-                        } else {
-                            AlertDialog alertDialog = new AlertDialog.Builder(WalletConnectActivity.this)
-                                    .setTitle(getString(R.string.switch_chain_request))
-                                    .setMessage(String.format("%s is requesting to switch to the %s chain with chain id: %s",
-                                            remotePeerMeta.getName(), EthereumNetworkBase.getShortChainName(chainId),  chainId))
-                                    .setPositiveButton("Approve", (dialog, which) -> {
-                                        viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, true, chainAvailable);
-                                        // TODO update db and ui
-                                        displaySessionStatus(session.getTopic());
-                                    })
-                                    .setNegativeButton("Reject", (dialog, which) ->
-                                            viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, false, chainAvailable)
-
-                                    )
-                                    .create();
-                            alertDialog.show();
-                        }
-                    }
+                    onSwitchChainRequest(intent);
                     break;
+                case C.WALLET_CONNECT_ADD_CHAIN:
+                    Timber.tag(TAG).d("MSG: SWITCH CHAIN");
+                    onAddChainRequest(intent);
+                    break;
+
             }
         }
     };
@@ -1258,5 +1231,96 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
         getNetwork.launch(intent);
+    }
+
+    private void onSwitchChainRequest(Intent intent) {
+        String name = intent.getStringExtra(C.EXTRA_NAME);
+        long requestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
+        long chainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
+        String currentSessionId = intent.getStringExtra(C.EXTRA_SESSION_ID);
+        Timber.tag(TAG).d("MSG: SWITCH CHAIN: name: %s, chainId: %s", name, chainId);
+
+        if (!session.getTopic().equals(currentSessionId)) {
+            Timber.tag(TAG).d("Wrong session");
+            return;
+        }
+        if (chainId == -1 || currentSessionId == null || requestId == -1) {
+            Timber.tag(TAG).d("Cant find data");
+        } else {
+            boolean chainAvailable = EthereumNetworkBase.getNetworkInfo(chainId) != null;
+            if (!chainAvailable) {
+                viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, false, false);
+            } else {
+                AlertDialog alertDialog = new AlertDialog.Builder(WalletConnectActivity.this)
+                        .setTitle(getString(R.string.switch_chain_request))
+                        .setMessage(String.format("%s is requesting to switch to the %s chain with chain id: %s",
+                                remotePeerMeta.getName(), EthereumNetworkBase.getShortChainName(chainId),  chainId))
+                        .setPositiveButton("Approve", (dialog, which) -> {
+                            viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, true, chainAvailable);
+                            // TODO update db and ui
+                            displaySessionStatus(session.getTopic());
+                        })
+                        .setNegativeButton("Reject", (dialog, which) ->
+                                viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, false, chainAvailable)
+
+                        )
+                        .create();
+                alertDialog.show();
+            }
+        }
+    }
+
+    private void onAddChainRequest(Intent intent) {
+        long requestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
+        String currentSessionId = intent.getStringExtra(C.EXTRA_SESSION_ID);
+        WalletAddEthereumChainObject chainObject = intent.getParcelableExtra(C.EXTRA_CHAIN_OBJ);
+        if (chainObject != null) {
+            if (viewModel.isChainAdded(chainObject.getChainId())) {
+                // if chain is already added, approve the request
+                viewModel.approveAddEthereumChain(
+                        WalletConnectActivity.this,
+                        requestId,
+                        currentSessionId,
+                        chainObject,
+                        true
+                );
+            } else {
+                // showing dialog because chain is not added
+                AddEthereumChainPrompt addEthereumChainPrompt = new AddEthereumChainPrompt(
+                        this,
+                        chainObject,
+                        chainObject1 -> {
+                            viewModel.approveAddEthereumChain(
+                                    WalletConnectActivity.this,
+                                    requestId,
+                                    currentSessionId,
+                                    chainObject,
+                                    true
+
+                            );
+                        }
+                );
+
+                addEthereumChainPrompt.setOnDismissListener( dialog -> {
+                    viewModel.approveAddEthereumChain(
+                            WalletConnectActivity.this,
+                            requestId,
+                            currentSessionId,
+                            chainObject,
+                            false
+
+                    );
+                });
+                addEthereumChainPrompt.show();
+            }
+        } else {
+            viewModel.approveAddEthereumChain(
+                    WalletConnectActivity.this,
+                    requestId,
+                    currentSessionId,
+                    chainObject,
+                    false
+            );
+        }
     }
 }

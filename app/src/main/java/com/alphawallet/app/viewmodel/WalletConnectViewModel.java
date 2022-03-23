@@ -28,6 +28,7 @@ import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.repository.entity.RealmWCSignElement;
@@ -43,6 +44,7 @@ import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.GetClientCallback;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.walletconnect.entity.WalletConnectCallback;
+import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
@@ -86,6 +88,7 @@ public class WalletConnectViewModel extends BaseViewModel {
     private final GasService gasService;
     private final TokensService tokensService;
     private final AnalyticsServiceType analyticsService;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     private final HashMap<String, WCClient> clientBuffer = new HashMap<>();
 
@@ -104,7 +107,8 @@ public class WalletConnectViewModel extends BaseViewModel {
                            RealmManager realmManager,
                            GasService gasService,
                            TokensService tokensService,
-                           AnalyticsServiceType analyticsService) {
+                           AnalyticsServiceType analyticsService,
+                           EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.keyService = keyService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.createTransactionInteract = createTransactionInteract;
@@ -113,6 +117,7 @@ public class WalletConnectViewModel extends BaseViewModel {
         this.gasService = gasService;
         this.tokensService = tokensService;
         this.analyticsService = analyticsService;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
         prepareDisposable = null;
         disposable = genericWalletInteract
                 .find()
@@ -612,5 +617,41 @@ public class WalletConnectViewModel extends BaseViewModel {
         i.putExtra(C.EXTRA_APPROVED, approve);
         i.putExtra(C.EXTRA_CHAIN_AVAILABLE, chainAvailable);
         context.startService(i);
+    }
+
+    public void approveAddEthereumChain(Context context,
+                                        long requestId,
+                                        String sessionId,
+                                        WalletAddEthereumChainObject chainObject,
+                                        boolean approved) {
+        Intent i = new Intent(context, WalletConnectService.class);
+        i.setAction(String.valueOf(WalletConnectActions.ADD_CHAIN.ordinal()));
+        i.putExtra(C.EXTRA_WC_REQUEST_ID, requestId);
+        i.putExtra(C.EXTRA_SESSION_ID, sessionId);
+        i.putExtra(C.EXTRA_CHAIN_OBJ, chainObject);
+        i.putExtra(C.EXTRA_APPROVED, approved);
+
+        if (approved) {
+            // add only if not present
+            if (!isChainAdded(chainObject.getChainId())) {
+                ethereumNetworkRepository.addCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
+                        chainObject.nativeCurrency.symbol, "", "", false, -1L);
+            }
+        }
+        context.startService(i);
+    }
+
+    private String extractRpc(WalletAddEthereumChainObject chainObject)
+    {
+        for (String thisRpc : chainObject.rpcUrls)
+        {
+            if (thisRpc.toLowerCase().startsWith("http")) { return thisRpc; }
+        }
+
+        return "";
+    }
+
+    public boolean isChainAdded(long chainId) {
+        return ethereumNetworkRepository.getNetworkByChain(chainId) != null;
     }
 }

@@ -4,6 +4,7 @@ import com.alphawallet.app.walletconnect.entity.*
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
 import com.alphawallet.app.walletconnect.entity.ethTransactionSerializer;
+import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject
 import com.alphawallet.token.tools.Numeric
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.registerTypeAdapter
@@ -78,6 +79,7 @@ open class WCClient(
     var onWCOpen: (peerId: String) -> Unit = { _ -> Unit }
     var onPong: (peerId: String)-> Unit = { _ -> Unit }
     var onSwitchEthereumChain: (requestId: Long, chainId: Long) -> Unit = { _, _ -> Unit }
+    var onAddEthereumChain: (requestId: Long, chainObj: WalletAddEthereumChainObject) -> Unit = { _, _ -> }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         Timber.d("<< websocket opened >>")
@@ -261,6 +263,24 @@ open class WCClient(
         }
     }
 
+    fun addChain(requestId: Long, chainObj: WalletAddEthereumChainObject, success: Boolean): Boolean {
+        Timber.tag(TAG).d("switchChain: id: %s, chainId: %s, success: %s", requestId, chainId, success);
+        return if (success) {
+            updateSession(chainId = chainObj.getChainId())  // updated session with new chain Id
+            encryptAndSend(
+                gson.toJson(
+                    JsonRpcResponse<Any>(id = requestId, result = null)
+                )
+            )
+        } else {
+            val errorResponse = JsonRpcErrorResponse(
+                id = requestId,
+                error = JsonRpcError.serverError("Rejected by user")
+            )
+            encryptAndSend(gson.toJson(errorResponse))
+        }
+    }
+
     private fun decryptMessage(text: String): String {
         val message = gson.fromJson<WCSocketMessage>(text)
         val encrypted = gson.fromJson<WCEncryptionPayload>(message.payload)
@@ -351,8 +371,15 @@ open class WCClient(
                 if (newChainId != chainIdVal()) {
                     onSwitchEthereumChain(request.id, newChainId)
                 } else {
+                    // auto accept if same chain
                     switchChain(request.id, chainIdVal(), true);
                 }
+            }
+            WCMethod.ADD_ETHEREUM_CHAIN -> {
+                Timber.d("WCMethod: addEthereumChain")
+                val param: WCAddEthChain = gson.fromJson<List<WCAddEthChain>>(request.params)
+                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+                onAddEthereumChain(request.id, param.toWalletAddEthereumObject())
             }
         }
     }

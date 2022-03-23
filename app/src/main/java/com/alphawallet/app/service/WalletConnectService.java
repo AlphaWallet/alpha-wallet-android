@@ -1,5 +1,6 @@
 package com.alphawallet.app.service;
 
+import static com.alphawallet.app.C.WALLET_CONNECT_ADD_CHAIN;
 import static com.alphawallet.app.C.WALLET_CONNECT_CLIENT_TERMINATE;
 import static com.alphawallet.app.C.WALLET_CONNECT_COUNT_CHANGE;
 import static com.alphawallet.app.C.WALLET_CONNECT_FAIL;
@@ -24,6 +25,7 @@ import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.WCSessionRequest;
 import com.alphawallet.app.walletconnect.entity.WCSessionUpdate;
+import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,6 +98,10 @@ public class WalletConnectService extends Service
                 case SWITCH_CHAIN:
                     Timber.tag(TAG).d("SERVICE SWITCH CHAIN");
                     switchChain(intent);
+                    break;
+                case ADD_CHAIN:
+                    Timber.tag(TAG).d("SERVICE ADD CHAIN");
+                    addChain(intent);
                     break;
             }
         }
@@ -300,6 +306,16 @@ public class WalletConnectService extends Service
             WalletConnectService.this.sendBroadcast(i);
             return Unit.INSTANCE;
         });
+
+        client.setOnAddEthereumChain((requestId, chainObj) -> {
+            Timber.tag(TAG).d("onAddEthereumChain: requestId: %s, chainObj: %s", requestId, chainObj);
+            Intent i = new Intent(WALLET_CONNECT_ADD_CHAIN);
+            i.putExtra(C.EXTRA_WC_REQUEST_ID, requestId);
+            i.putExtra(C.EXTRA_SESSION_ID, client.sessionId());
+            i.putExtra(C.EXTRA_CHAIN_OBJ, chainObj);
+            WalletConnectService.this.sendBroadcast(i);
+            return Unit.INSTANCE;
+        });
     }
 
     //TODO: Can we determine if AlphaWallet is running? If it is, no need to add this to the queue,
@@ -466,6 +482,28 @@ public class WalletConnectService extends Service
             WCClient c = clientMap.get(id);
             if (c != null) {
                 c.switchChain(requestId, chainId, approved, chainAvailable);
+            } else {
+                Timber.tag(TAG).d("WCClient not found");
+            }
+        }
+    }
+
+    public void addChain(Intent intent) {
+        long requestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
+        String id = intent.getStringExtra(C.EXTRA_SESSION_ID);
+        WalletAddEthereumChainObject chainObject = intent.getParcelableExtra(C.EXTRA_CHAIN_OBJ);
+        boolean chainAdded = intent.getBooleanExtra(C.EXTRA_APPROVED, false);
+        Timber.tag(TAG).d("sessionId: %s, chainObj: %s, chainAdded: %s", id, chainObject, chainAdded);
+
+        if (requestId != -1) {
+            WCClient c = clientMap.get(id);
+            if (c != null) {
+                if (chainObject != null) {
+                    c.addChain(requestId, chainObject, chainAdded);
+                } else {
+                    // reject with serverError
+                    c.addChain(requestId, chainObject, false);
+                }
             } else {
                 Timber.tag(TAG).d("WCClient not found");
             }

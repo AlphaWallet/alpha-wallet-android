@@ -143,6 +143,7 @@ public abstract class C {
     public static final String EXTRA_APPROVED = "APPROVED";
     public static final String EXTRA_CHAIN_AVAILABLE = "CHAIN_AVAILABLE";
     public static final String EXTRA_NAME = "NAME";
+    public static final String EXTRA_CHAIN_OBJ = "CHAIN_OBJ";
     public static final String EXTRA_1559_TX = "1559_TX";
 
     public static final String PRUNE_ACTIVITY =
@@ -182,6 +183,8 @@ public abstract class C {
             "com.stormbird.wallet.WC_CLIENT_TERMINATE";
     public static final String WALLET_CONNECT_SWITCH_CHAIN =
             "com.stormbird.wallet.WC_SWITCH_CHAIN";
+    public static final String WALLET_CONNECT_ADD_CHAIN =
+            "com.stormbird.wallet.WC_ADD_CHAIN";
     public static final String SHOW_BACKUP = "com.stormbird.wallet.CHECK_BACKUP";
     public static final String HANDLE_BACKUP = "com.stormbird.wallet.HANDLE_BACKUP";
     public static final String FROM_HOME_ROUTER = "HomeRouter";

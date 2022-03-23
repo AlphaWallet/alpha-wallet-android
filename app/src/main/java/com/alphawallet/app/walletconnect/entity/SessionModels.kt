@@ -1,5 +1,7 @@
 package com.alphawallet.app.walletconnect.entity
 
+import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject
+
 data class WCSessionRequest(
         val peerId: String,
         val peerMeta: WCPeerMeta,
@@ -41,4 +43,31 @@ data class WCPeerMeta (
 
 data class WCSwitchEthChain(
         val chainId: String
+)
+
+data class WCAddEthChain(
+        val chainId: String,
+        val chainName: String,
+        val nativeCurrency: NativeCurrency,
+        val rpcUrls: List<String>,
+        val blockExplorerUrls: List<String>? = null,
+        val iconUrls: List<String>? = null
+) {
+        fun toWalletAddEthereumObject(): WalletAddEthereumChainObject {
+                val chainObject: WalletAddEthereumChainObject = WalletAddEthereumChainObject()
+                chainObject.nativeCurrency.name = this.nativeCurrency.name
+                chainObject.nativeCurrency.symbol = this.nativeCurrency.symbol
+                chainObject.nativeCurrency.decimals = this.nativeCurrency.decimals
+                chainObject.chainName = this.chainName
+                chainObject.chainId = this.chainId
+                chainObject.blockExplorerUrls = this.blockExplorerUrls?.toTypedArray()
+                chainObject.rpcUrls = this.rpcUrls.toTypedArray()
+                return chainObject
+        }
+}
+
+data class NativeCurrency(
+        val name: String,
+        val symbol: String,
+        val decimals: Int
 )

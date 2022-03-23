@@ -135,7 +135,6 @@ public class SelectCurrencyActivity extends BaseActivity {
                 notifyDataSetChanged();
             });
 
-//            holder.checkbox.setSelected(currencyItem.isSelected());
             holder.radioButton.setChecked(currencyItem.isSelected());
         }
 

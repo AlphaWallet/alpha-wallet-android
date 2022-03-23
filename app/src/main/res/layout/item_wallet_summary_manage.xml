@@ -29,7 +29,7 @@
             android:layout_height="@dimen/tiny_8"
             android:layout_marginStart="@dimen/mini_4"
             android:src="@drawable/ic_wallet_indicator"
-            android:visibility="invisible"/>
+            android:visibility="invisible" />
 
         <ImageView
             android:id="@+id/manage_wallet_btn"

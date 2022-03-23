@@ -8,9 +8,9 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
         android:gravity="center_vertical"
         android:orientation="vertical"
-        android:layout_margin="8dp"
         app:cardElevation="0dp"
         app:contentPadding="@dimen/tiny_8"
         app:strokeColor="?colorPrimary"

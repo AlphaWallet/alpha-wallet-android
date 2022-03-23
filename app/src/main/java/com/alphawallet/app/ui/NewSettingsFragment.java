@@ -4,6 +4,9 @@ package com.alphawallet.app.ui;
 import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.CHANGED_LOCALE;
 import static com.alphawallet.app.C.CHANGE_CURRENCY;
+import static com.alphawallet.app.C.EXTRA_CURRENCY;
+import static com.alphawallet.app.C.EXTRA_LOCALE;
+import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.C.SETTINGS_INSTANTIATED;
@@ -15,6 +18,7 @@ import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SC
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,9 +53,12 @@ import com.google.android.material.card.MaterialCardView;
 import java.util.Locale;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 @AndroidEntryPoint
-public class NewSettingsFragment extends BaseFragment {
+public class NewSettingsFragment extends BaseFragment
+{
 
     private NewSettingsViewModel viewModel;
 
@@ -63,6 +70,8 @@ public class NewSettingsFragment extends BaseFragment {
     private SettingsItemView changeWalletSetting;
     private SettingsItemView backUpWalletSetting;
     private SettingsItemView notificationsSetting;
+    private SettingsItemView changeLanguage;
+    private SettingsItemView changeCurrency;
     private SettingsItemView biometricsSetting;
     private SettingsItemView selectNetworksSetting;
     private SettingsItemView advancedSetting;
@@ -85,9 +94,22 @@ public class NewSettingsFragment extends BaseFragment {
 
     private Wallet wallet;
 
+    ActivityResultLauncher<Intent> updateLocale = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result ->
+            {
+                updateLocale(result.getData());
+            });
+
+    ActivityResultLauncher<Intent> updateCurrency = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result ->
+            {
+                updateCurrency(result.getData());
+            });
+
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    {
         viewModel = new ViewModelProvider(this)
                 .get(NewSettingsViewModel.class);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
@@ -117,13 +139,17 @@ public class NewSettingsFragment extends BaseFragment {
         return view;
     }
 
-    private void initNotificationView(View view) {
+    private void initNotificationView(View view)
+    {
         notificationView = view.findViewById(R.id.notification);
-        if (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+        if (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M)
+        {
             notificationView.setNotificationBackgroundColor(R.color.indigo);
             notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
             notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
-        } else {
+        }
+        else
+        {
             notificationView.setVisibility(View.GONE);
         }
     }
@@ -135,7 +161,8 @@ public class NewSettingsFragment extends BaseFragment {
         checkPendingUpdate(getView());
     }
 
-    private void initBackupWarningViews(View view) {
+    private void initBackupWarningViews(View view)
+    {
         layoutBackup = view.findViewById(R.id.layout_item_warning);
         backupTitle = view.findViewById(R.id.text_title);
         backupDetail = view.findViewById(R.id.text_detail);
@@ -146,7 +173,8 @@ public class NewSettingsFragment extends BaseFragment {
         warningSeparator = view.findViewById(R.id.warning_separator);
     }
 
-    private void initializeSettings(View view) {
+    private void initializeSettings(View view)
+    {
         walletSettingsLayout = view.findViewById(R.id.layout_settings_wallet);
         systemSettingsLayout = view.findViewById(R.id.layout_settings_system);
         supportSettingsLayout = view.findViewById(R.id.layout_settings_support);
@@ -200,6 +228,18 @@ public class NewSettingsFragment extends BaseFragment {
                         .withListener(this::onNotificationsSettingClicked)
                         .build();
 
+        changeLanguage = new SettingsItemView.Builder(getContext())
+                .withIcon(R.drawable.ic_settings_language)
+                .withTitle(R.string.title_change_language)
+                .withListener(this::onChangeLanguageClicked)
+                .build();
+
+        changeCurrency = new SettingsItemView.Builder(getContext())
+                .withIcon(R.drawable.ic_currency)
+                .withTitle(R.string.settings_locale_currency)
+                .withListener(this::onChangeCurrencyClicked)
+                .build();
+
 //        biometricsSetting =
 //                new SettingsItemView.Builder(getContext())
 //                        .withType(SettingsItemView.Type.TOGGLE)
@@ -237,7 +277,8 @@ public class NewSettingsFragment extends BaseFragment {
                         .build();
     }
 
-    private void addSettingsToLayout() {
+    private void addSettingsToLayout()
+    {
         int walletIndex = 0;
         int systemIndex = 0;
         int supportIndex = 0;
@@ -256,21 +297,27 @@ public class NewSettingsFragment extends BaseFragment {
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
-        systemSettingsLayout.addView(notificationsSetting, systemIndex++);
-
-        if (biometricsSetting != null) systemSettingsLayout.addView(biometricsSetting, systemIndex++);
-
         if (CustomViewSettings.getLockedChains().size() == 0)
             systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
 
-        systemSettingsLayout.addView(advancedSetting, systemIndex++);
+        if (biometricsSetting != null)
+            systemSettingsLayout.addView(biometricsSetting, systemIndex++);
+
+        systemSettingsLayout.addView(notificationsSetting, systemIndex++);
+
+        systemSettingsLayout.addView(changeLanguage, systemIndex++);
+
+        systemSettingsLayout.addView(changeCurrency, systemIndex++);
 
         systemSettingsLayout.addView(darkModeSetting, systemIndex++);
 
+        systemSettingsLayout.addView(advancedSetting, systemIndex++);
+        
         supportSettingsLayout.addView(supportSetting, supportIndex++);
     }
 
-    private void setInitialSettingsData(View view) {
+    private void setInitialSettingsData(View view)
+    {
         TextView appVersionText = view.findViewById(R.id.text_version);
         appVersionText.setText(String.format(Locale.getDefault(), "%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
         TextView tokenScriptVersionText = view.findViewById(R.id.text_tokenscript_compatibility);
@@ -289,7 +336,8 @@ public class NewSettingsFragment extends BaseFragment {
     }
 
     ActivityResultLauncher<Intent> handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
+            result ->
+            {
                 String keyBackup = "";
                 boolean noLockScreen = false;
                 Intent data = result.getData();
@@ -303,7 +351,8 @@ public class NewSettingsFragment extends BaseFragment {
                 getParentFragmentManager().setFragmentResult(C.HANDLE_BACKUP, b);
             });
 
-    private void openBackupActivity(Wallet wallet) {
+    private void openBackupActivity(Wallet wallet)
+    {
         Intent intent = new Intent(getContext(), BackupFlowActivity.class);
         intent.putExtra(WALLET, wallet);
 
@@ -337,7 +386,8 @@ public class NewSettingsFragment extends BaseFragment {
         handleBackupClick.launch(intent);
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(Wallet wallet)
+    {
         this.wallet = wallet;
         if (wallet.address != null)
         {
@@ -351,14 +401,18 @@ public class NewSettingsFragment extends BaseFragment {
             }
         }
 
-        switch (wallet.authLevel) {
+        switch (wallet.authLevel)
+        {
             case NOT_SET:
             case STRONGBOX_NO_AUTHENTICATION:
             case TEE_NO_AUTHENTICATION:
-                if (wallet.lastBackupTime > 0) {
+                if (wallet.lastBackupTime > 0)
+                {
                     backUpWalletSetting.setTitle(getString(R.string.action_upgrade_key));
                     backUpWalletSetting.setSubtitle(getString(R.string.not_locked));
-                } else {
+                }
+                else
+                {
                     backUpWalletSetting.setTitle(getString(R.string.back_up_this_wallet));
                     backUpWalletSetting.setSubtitle(getString(R.string.back_up_now));
                 }
@@ -387,14 +441,21 @@ public class NewSettingsFragment extends BaseFragment {
             case KEYSTORE_LEGACY:
                 break;
         }
+
+        viewModel.setLocale(getContext());
+
+        changeLanguage.setSubtitle(LocaleUtils.getDisplayLanguage(viewModel.getActiveLocale(), viewModel.getActiveLocale()));
+
+        changeCurrency.setSubtitle(viewModel.getDefaultCurrency());
     }
 
     @Override
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
         if (viewModel == null)
         {
-            ((HomeActivity)getActivity()).resetFragment(WalletPage.SETTINGS);
+            ((HomeActivity) getActivity()).resetFragment(WalletPage.SETTINGS);
         }
         else
         {
@@ -402,7 +463,8 @@ public class NewSettingsFragment extends BaseFragment {
         }
     }
 
-    public void backupSeedSuccess(boolean hasNoLock) {
+    public void backupSeedSuccess(boolean hasNoLock)
+    {
         if (viewModel != null) viewModel.TestWalletBackup();
         if (layoutBackup != null) layoutBackup.setVisibility(View.GONE);
         if (hasNoLock)
@@ -411,11 +473,16 @@ public class NewSettingsFragment extends BaseFragment {
         }
     }
 
-    private void backupWarning(String s) {
-        if (s.equals(viewModel.defaultWallet().getValue().address)) {
+    private void backupWarning(String s)
+    {
+        if (s.equals(viewModel.defaultWallet().getValue().address))
+        {
             addBackupNotice(GenericWalletInteract.BackupLevel.WALLET_HAS_HIGH_VALUE);
-        } else {
-            if (layoutBackup != null) {
+        }
+        else
+        {
+            if (layoutBackup != null)
+            {
                 layoutBackup.setVisibility(View.GONE);
             }
             //remove the number prompt
@@ -425,31 +492,37 @@ public class NewSettingsFragment extends BaseFragment {
         }
     }
 
-    void addBackupNotice(GenericWalletInteract.BackupLevel walletValue) {
+    void addBackupNotice(GenericWalletInteract.BackupLevel walletValue)
+    {
         layoutBackup.setVisibility(View.VISIBLE);
         warningSeparator.setVisibility(View.VISIBLE);
-        if (wallet != null) {
+        if (wallet != null)
+        {
             backupButton.setText(getString(R.string.back_up_wallet_action, wallet.address.substring(0, 5)));
             backupButton.setOnClickListener(v -> openBackupActivity(wallet));
             backupTitle.setText(getString(R.string.wallet_not_backed_up));
             backupDetail.setText(getString(R.string.backup_wallet_detail));
-            backupMenuButton.setOnClickListener(v -> {
+            backupMenuButton.setOnClickListener(v ->
+            {
                 showPopup(backupPopupAnchor, wallet.address);
             });
 
-            if (getActivity() != null) {
+            if (getActivity() != null)
+            {
                 ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
             }
         }
     }
 
-    private void showPopup(View view, String walletAddress) {
+    private void showPopup(View view, String walletAddress)
+    {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View popupView = inflater.inflate(R.layout.popup_remind_later, null);
         int width = LinearLayout.LayoutParams.WRAP_CONTENT;
         int height = LinearLayout.LayoutParams.WRAP_CONTENT;
         final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
-        popupView.setOnClickListener(v -> {
+        popupView.setOnClickListener(v ->
+        {
             viewModel.setIsDismissed(walletAddress, true);
             backedUp(walletAddress);
             popupWindow.dismiss();
@@ -457,24 +530,29 @@ public class NewSettingsFragment extends BaseFragment {
         popupWindow.showAsDropDown(view, 0, 0);
     }
 
-    private void backedUp(String walletAddress) {
+    private void backedUp(String walletAddress)
+    {
         layoutBackup.setVisibility(View.GONE);
         warningSeparator.setVisibility(View.GONE);
         if (getActivity() != null)
             ((HomeActivity) getActivity()).postponeWalletBackupWarning(walletAddress);
     }
 
-    private void onShowWalletAddressSettingClicked() {
+    private void onShowWalletAddressSettingClicked()
+    {
         viewModel.showMyAddress(getContext());
     }
 
-    private void onChangeWalletSettingClicked() {
+    private void onChangeWalletSettingClicked()
+    {
         viewModel.showManageWallets(getContext(), false);
     }
 
-    private void onBackUpWalletSettingClicked() {
+    private void onBackUpWalletSettingClicked()
+    {
         Wallet wallet = viewModel.defaultWallet().getValue();
-        if (wallet != null) {
+        if (wallet != null)
+        {
             openBackupActivity(wallet);
         }
     }
@@ -482,7 +560,8 @@ public class NewSettingsFragment extends BaseFragment {
     private void onShowSeedPhrase()
     {
         Wallet wallet = viewModel.defaultWallet().getValue();
-        if (wallet != null) {
+        if (wallet != null)
+        {
             openShowSeedPhrase(wallet);
         }
     }
@@ -493,28 +572,33 @@ public class NewSettingsFragment extends BaseFragment {
         requireActivity().startActivity(intent);
     }
 
-    private void onNotificationsSettingClicked() {
+    private void onNotificationsSettingClicked()
+    {
         viewModel.setNotificationState(notificationsSetting.getToggleState());
     }
 
-    private void onBiometricsSettingClicked() {
+    private void onBiometricsSettingClicked()
+    {
         // TODO: Implementation
     }
 
     ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
+            result ->
+            {
                 //send instruction to restart tokenService
                 getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
             });
 
-    private void onSelectNetworksSettingClicked() {
+    private void onSelectNetworksSettingClicked()
+    {
         Intent intent = new Intent(getActivity(), SelectNetworkFilterActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
         networkSettingsHandler.launch(intent);
     }
 
     ActivityResultLauncher<Intent> advancedSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
+            result ->
+            {
                 Intent data = result.getData();
                 if (data == null) return;
                 if (data.getBooleanExtra(RESET_WALLET, false))
@@ -531,22 +615,26 @@ public class NewSettingsFragment extends BaseFragment {
                 }
             });
 
-    private void onAdvancedSettingClicked() {
+    private void onAdvancedSettingClicked()
+    {
         Intent intent = new Intent(getActivity(), AdvancedSettingsActivity.class);
         advancedSettingsHandler.launch(intent);
     }
 
-    private void onDarkModeSettingClicked() {
+    private void onDarkModeSettingClicked()
+    {
         Intent intent = new Intent(getActivity(), SelectThemeActivity.class);
         startActivity(intent);
     }
 
-    private void onSupportSettingClicked() {
+    private void onSupportSettingClicked()
+    {
         Intent intent = new Intent(getActivity(), SupportSettingsActivity.class);
         startActivity(intent);
     }
 
-    private void onWalletConnectSettingClicked() {
+    private void onWalletConnectSettingClicked()
+    {
         Intent intent = new Intent(getActivity(), WalletConnectSessionActivity.class);
         intent.putExtra("wallet", wallet);
         startActivity(intent);
@@ -563,15 +651,18 @@ public class NewSettingsFragment extends BaseFragment {
             TextView available = view.findViewById(R.id.text_detail_available);
             current.setText(getString(R.string.installed_version, String.valueOf(BuildConfig.VERSION_CODE)));
             available.setText(getString(R.string.available_version, String.valueOf(pendingUpdate)));
-            if (getActivity() != null) {
+            if (getActivity() != null)
+            {
                 ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
             }
 
-            updateLayout.setOnClickListener(v -> {
+            updateLayout.setOnClickListener(v ->
+            {
                 UpdateUtils.pushUpdateDialog(getActivity());
                 updateLayout.setVisibility(View.GONE);
                 pendingUpdate = 0;
-                if (getActivity() != null) {
+                if (getActivity() != null)
+                {
                     ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
                 }
             });
@@ -579,6 +670,54 @@ public class NewSettingsFragment extends BaseFragment {
         else
         {
             updateLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private void onChangeLanguageClicked()
+    {
+        Intent intent = new Intent(getActivity(), SelectLocaleActivity.class);
+        String selectedLocale = viewModel.getActiveLocale();
+        intent.putExtra(EXTRA_LOCALE, selectedLocale);
+        intent.putParcelableArrayListExtra(EXTRA_STATE, viewModel.getLocaleList(getContext()));
+        updateLocale.launch(intent);
+    }
+
+    private void onChangeCurrencyClicked()
+    {
+        Intent intent = new Intent(getActivity(), SelectCurrencyActivity.class);
+        String currentLocale = viewModel.getDefaultCurrency();
+        intent.putExtra(EXTRA_CURRENCY, currentLocale);
+        intent.putParcelableArrayListExtra(EXTRA_STATE, viewModel.getCurrencyList());
+        updateCurrency.launch(intent);
+    }
+
+    public void updateLocale(Intent data)
+    {
+        if (data != null)
+        {
+            String newLocale = data.getStringExtra(C.EXTRA_LOCALE);
+            String oldLocale = viewModel.getActiveLocale();
+            if (!TextUtils.isEmpty(newLocale) && !newLocale.equals(oldLocale))
+            {
+                viewModel.updateLocale(newLocale, getContext());
+                getActivity().recreate();
+            }
+        }
+    }
+
+    public void updateCurrency(Intent data)
+    {
+        if (data != null)
+        {
+            String currencyCode = data.getStringExtra(C.EXTRA_CURRENCY);
+            if (!viewModel.getDefaultCurrency().equals(currencyCode))
+            {
+                viewModel.updateCurrency(currencyCode)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(res -> getActivity().recreate())
+                        .isDisposed();
+            }
         }
     }
 }

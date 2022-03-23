@@ -135,7 +135,7 @@
     </style>
 
     <style name="Aw.Component.Button.TextIcon">
-        <item name="android:backgroundTint">?colorSurfaceDark</item>
+        <item name="android:backgroundTint">?colorSurfaceTertiary</item>
         <item name="android:maxLines">2</item>
         <item name="android:padding">@dimen/standard_16</item>
         <item name="android:textSize">@dimen/sp17</item>

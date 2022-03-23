@@ -2,11 +2,9 @@ package com.alphawallet.app.util;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.service.OpenSeaService;
@@ -45,6 +43,7 @@ public class AWEnsResolver extends EnsResolver
     private static final String DAS_NAME = "[DAS_NAME]";
     private static final String DAS_PAYLOAD = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"das_searchAccount\",\"params\":[\"" + DAS_NAME + "\"]}";
     private static final String OPENSEA_IMAGE_PREVIEW = "image_preview_url";
+    private static final String OPENSEA_IMAGE_ORIGINAL = "image_original_url"; //in case of SVG; Opensea breaks SVG compression
     private final Context context;
     private final OkHttpClient client;
 
@@ -161,9 +160,16 @@ public class AWEnsResolver extends EnsResolver
 
                 JSONObject asset = fetchOpenseaAsset(chainId, tokenAddress, tokenId);
 
-                if (asset != null && asset.has(OPENSEA_IMAGE_PREVIEW))
+                if (asset != null)
                 {
-                    return asset.getString(OPENSEA_IMAGE_PREVIEW);
+                    String url = asset.getString(OPENSEA_IMAGE_PREVIEW);
+                    if (!TextUtils.isEmpty(url) && url.endsWith(".svg"))
+                    {
+                        String original = asset.getString(OPENSEA_IMAGE_ORIGINAL);
+                        if (!TextUtils.isEmpty(original)) url = original;
+                    }
+
+                    return url;
                 }
                 else
                 {

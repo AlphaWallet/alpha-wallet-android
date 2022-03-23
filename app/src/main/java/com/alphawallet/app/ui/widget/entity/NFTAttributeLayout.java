@@ -68,7 +68,7 @@ public class NFTAttributeLayout extends LinearLayout {
 
     public void bind(Token token, List<Trait> traits)
     {
-        TraitsAdapter adapter = new TraitsAdapter(traits);
+        TraitsAdapter adapter = new TraitsAdapter(getContext(), traits);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         recyclerView.setAdapter(adapter);
         setAttributeLabel(token.tokenInfo.name, adapter.getItemCount());
@@ -76,7 +76,7 @@ public class NFTAttributeLayout extends LinearLayout {
 
     private void setAttributeLabel(String tokenName, int size)
     {
-        if (size > 0 && tokenName.toLowerCase().contains("cryptokitties"))
+        if (size > 0 && tokenName.equalsIgnoreCase("cryptokitties"))
         {
             labelAttributes.setTitle(getContext().getString(R.string.label_cattributes));
             labelAttributes.setVisibility(View.VISIBLE);

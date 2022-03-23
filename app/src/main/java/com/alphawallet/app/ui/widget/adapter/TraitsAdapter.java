@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui.widget.adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +17,11 @@ import java.util.List;
 
 public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder> {
     private List<Trait> traitList;
+    private Context context;
 
-    public TraitsAdapter(List<Trait> data)
+    public TraitsAdapter(Context context, List<Trait> data)
     {
+        this.context = context;
         this.traitList = data;
     }
 
@@ -39,14 +42,15 @@ public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder
         viewHolder.value.setText(trait.getValue());
 
         float rarity = trait.getTraitRarity();
-        if (rarity == 0)
+        if (trait.isUnique())
         {
-            viewHolder.rarity.setText("Unique");
+            viewHolder.rarity.setText(R.string.trait_rarity_unique);
         }
         else
         {
             DecimalFormat df = new DecimalFormat("#0");
-            viewHolder.rarity.setText(df.format(rarity) + "% have this trait");
+            String s = context.getString(R.string.trait_rarity_suppl_text, df.format(rarity));
+            viewHolder.rarity.setText(s);
         }
     }
 

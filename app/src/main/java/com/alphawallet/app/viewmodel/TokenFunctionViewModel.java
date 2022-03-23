@@ -772,12 +772,10 @@ public class TokenFunctionViewModel extends BaseViewModel
         {
             if (trait.getTraitCount() == 1)
             {
-                trait.setTraitRarity(0); // Unique
+                trait.setUnique(true);
             }
-            else
-            {
-                trait.setTraitRarity(((float) trait.getTraitCount() * 100) / count);
-            }
+
+            trait.updateTraitRarity(count);
         }
 
         traits.postValue(traitList);

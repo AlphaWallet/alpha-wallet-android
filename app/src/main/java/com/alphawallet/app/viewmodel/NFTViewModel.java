@@ -88,10 +88,13 @@ public class NFTViewModel extends BaseViewModel {
 
     public void checkTokenScriptValidity(Token token)
     {
-        disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig::postValue, this::onSigCheckError);
+        if (token != null)
+        {
+            disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(sig::postValue, this::onSigCheckError);
+        }
     }
 
     private void onSigCheckError(Throwable throwable)

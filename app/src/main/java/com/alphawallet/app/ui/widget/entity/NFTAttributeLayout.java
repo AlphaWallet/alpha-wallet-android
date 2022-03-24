@@ -9,12 +9,17 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.gridlayout.widget.GridLayout;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.opensea.Trait;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.adapter.TraitsAdapter;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,6 +28,7 @@ import java.util.Map;
 public class NFTAttributeLayout extends LinearLayout {
     private final FrameLayout layout;
     private final GridLayout grid;
+    private final RecyclerView recyclerView;
     private TokenInfoCategoryView labelAttributes;
 
     public NFTAttributeLayout(Context context, @Nullable AttributeSet attrs)
@@ -32,6 +38,7 @@ public class NFTAttributeLayout extends LinearLayout {
 
         layout = view.findViewById(R.id.layout);
         grid = view.findViewById(R.id.grid);
+        recyclerView = view.findViewById(R.id.recycler_view);
 
         labelAttributes = new TokenInfoCategoryView(context, context.getString(R.string.label_attributes));
         layout.addView(labelAttributes);
@@ -43,7 +50,7 @@ public class NFTAttributeLayout extends LinearLayout {
     public void bind(Token token, NFTAsset asset)
     {
         Map<String, String> attributes = asset.getAttributes();
-        setAttributeLabel(token, attributes.size());
+        setAttributeLabel(token.tokenInfo.name, attributes.size());
         for (String key : attributes.keySet())
         {
             View attributeView = View.inflate(getContext(), R.layout.item_attribute, null);
@@ -59,9 +66,17 @@ public class NFTAttributeLayout extends LinearLayout {
         }
     }
 
-    private void setAttributeLabel(Token token, int size)
+    public void bind(Token token, List<Trait> traits)
     {
-        if (size > 0 && token.tokenInfo.name.toLowerCase().contains("cryptokitties"))
+        TraitsAdapter adapter = new TraitsAdapter(getContext(), traits);
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        recyclerView.setAdapter(adapter);
+        setAttributeLabel(token.tokenInfo.name, adapter.getItemCount());
+    }
+
+    private void setAttributeLabel(String tokenName, int size)
+    {
+        if (size > 0 && tokenName.equalsIgnoreCase("cryptokitties"))
         {
             labelAttributes.setTitle(getContext().getString(R.string.label_cattributes));
             labelAttributes.setVisibility(View.VISIBLE);

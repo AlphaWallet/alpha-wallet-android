@@ -5,6 +5,12 @@
 buildscript {
     repositories {
         google()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.worker8.android_lint_reporter:android_lint_reporter:2.1.0"
     }
 }
 
@@ -15,6 +21,15 @@ apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 apply plugin: 'kotlin-android'
 apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'com.worker8.android_lint_reporter'
+
+android_lint_reporter {
+    lintFilePath = "./app/build/reports/lint-results.xml"
+    detektFilePath = ".app/build/reports/detekt_reports.xml"
+    githubOwner = "AlphaWallet"
+    githubRepositoryName = "alpha-wallet-android"
+    showLog = true // optional - default to false, show extra information, will slow things down
+}
 
 repositories {
     maven {
@@ -97,6 +112,9 @@ android {
     }
     lintOptions {
         abortOnError false
+        ignoreWarnings true
+        baseline file("lint-baseline.xml")
+        abortOnError true
     }
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8

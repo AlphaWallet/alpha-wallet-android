@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="5" by="lint 4.2.2" client="gradle" variant="all" version="4.2.2">
+
+    <issue
+        id="NamespaceTypo"
+        message="Suspicious namespace and prefix combination"
+        errorLine1="    xmlns:app=&quot;http://schemas.android.com/tools&quot;"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/dialog_action_sheet_sign.xml"
+            line="3"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 24 (current min is 23): `java.util.Collection#stream`"
+        errorLine1="                depthsAndDimensions.stream().collect(Collectors.groupingBy(Pair::getFirst));"
+        errorLine2="                                    ~~~~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/web3j/StructuredDataEncoder.java"
+            line="187"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 24 (current min is 23): `java.util.stream.Collectors#groupingBy`"
+        errorLine1="                depthsAndDimensions.stream().collect(Collectors.groupingBy(Pair::getFirst));"
+        errorLine2="                                                                ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/web3j/StructuredDataEncoder.java"
+            line="187"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 24 (current min is 23): `java.util.stream.Stream#collect`"
+        errorLine1="                depthsAndDimensions.stream().collect(Collectors.groupingBy(Pair::getFirst));"
+        errorLine2="                                             ~~~~~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/web3j/StructuredDataEncoder.java"
+            line="187"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast to `Collector` requires API level 24 (current min is 23)"
+        errorLine1="                depthsAndDimensions.stream().collect(Collectors.groupingBy(Pair::getFirst));"
+        errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/web3j/StructuredDataEncoder.java"
+            line="187"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 24 (current min is 23): `java.util.Collection#stream`"
+        errorLine1="            dimensions.add(setOfDimensionsInParticularDepth.stream().findFirst().get());"
+        errorLine2="                                                            ~~~~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/web3j/StructuredDataEncoder.java"
+            line="208"
+            column="61"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 24 (current min is 23): `java.util.Optional#get`"
+        errorLine1="            dimensions.add(setOfDimensionsInParticularDepth.stream().findFirst().get());"
+        errorLine2="                                                                                 ~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/web3j/StructuredDataEncoder.java"
+            line="208"
+            column="82"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 24 (current min is 23): `java.util.stream.Stream#findFirst`"
+        errorLine1="            dimensions.add(setOfDimensionsInParticularDepth.stream().findFirst().get());"
+        errorLine2="                                                                     ~~~~~~~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/web3j/StructuredDataEncoder.java"
+            line="208"
+            column="70"/>
+    </issue>
+
+    <issue
+        id="WrongConstant"
+        message="Must be one of: AudioManager.STREAM_VOICE_CALL, AudioManager.STREAM_SYSTEM, AudioManager.STREAM_RING, AudioManager.STREAM_MUSIC, AudioManager.STREAM_ALARM, AudioManager.STREAM_NOTIFICATION, AudioManager.STREAM_DTMF, AudioManager.STREAM_ACCESSIBILITY"
+        errorLine1="                .setSound(notification, 1)"
+        errorLine2="                                        ~">
+        <location
+            file="src/main/java/com/alphawallet/app/service/NotificationService.java"
+            line="79"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="WrongConstant"
+        message="Must be one of: AudioManager.STREAM_VOICE_CALL, AudioManager.STREAM_SYSTEM, AudioManager.STREAM_RING, AudioManager.STREAM_MUSIC, AudioManager.STREAM_ALARM, AudioManager.STREAM_NOTIFICATION, AudioManager.STREAM_DTMF, AudioManager.STREAM_ACCESSIBILITY"
+        errorLine1="                .setSound(notification, 1)"
+        errorLine2="                                        ~">
+        <location
+            file="src/main/java/com/alphawallet/app/service/NotificationService.java"
+            line="108"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="StringFormatInvalid"
+        message="Format string &apos;`explain_not_whitelisted`&apos; is not a valid format string so it should not be passed to `String.format`"
+        errorLine1="        alertDialog.setMessage(getString(R.string.explain_not_whitelisted, url));"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/ui/FunctionActivity.java"
+            line="699"
+            column="32"/>
+        <location
+            file="src/main/res/values-my/strings.xml"
+            line="640"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="StringFormatInvalid"
+        message="Format string &apos;`gas_message`&apos; is not a valid format string so it should not be passed to `String.format`"
+        errorLine1="                notice.setText(getString(R.string.gas_message, matcher.group(4)));"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/ui/GasSettingsActivity.java"
+            line="500"
+            column="32"/>
+        <location
+            file="src/main/res/values-my/strings.xml"
+            line="739"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="StringFormatInvalid"
+        message="Format string &apos;`rate_prompt`&apos; is not a valid format string so it should not be passed to `String.format`"
+        errorLine1="                    .setMessage(context.getString(R.string.rate_prompt, context.getString(R.string.app_name)))"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        includedVariants="analyticsDebug,analyticsRelease"
+        excludedVariants="noAnalyticsDebug,noAnalyticsRelease">
+        <location
+            file="src/analytics/java/com/alphawallet/app/util/RateApp.java"
+            line="29"
+            column="33"/>
+        <location
+            file="src/main/res/values-my/strings.xml"
+            line="837"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="StringFormatInvalid"
+        message="Incorrect formatting string `text_resend_gas_note`; missing conversion character in &apos;`% h`&apos; ?"
+        errorLine1="    &lt;string name=&quot;text_resend_gas_note&quot;>In order to speed up this transaction, the gas price must be at least 10% higher than the original gas price.&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/strings.xml"
+            line="766"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="StringFormatInvalid"
+        message="Incorrect formatting string `text_resend_gas_note`; missing conversion character in &apos;`% h`&apos; ?"
+        errorLine1="    &lt;string name=&quot;text_resend_gas_note&quot;>In order to speed up this transaction, the gas price must be at least 10% higher than the original gas price.&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-zh/strings.xml"
+            line="766"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="StringFormatInvalid"
+        message="Incorrect formatting string `text_resend_gas_note`; missing conversion character in &apos;`% h`&apos; ?"
+        errorLine1="    &lt;string name=&quot;text_resend_gas_note&quot;>In order to speed up this transaction, the gas price must be at least 10% higher than the original gas price.&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-fr/strings.xml"
+            line="783"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="StringFormatInvalid"
+        message="Incorrect formatting string `text_resend_gas_note`; missing conversion character in &apos;`% h`&apos; ?"
+        errorLine1="    &lt;string name=&quot;text_resend_gas_note&quot;>For this transaction to succeed, the gas price must be at least 10% higher than the original gas price.&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-vi/strings.xml"
+            line="795"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="StringFormatInvalid"
+        message="Incorrect formatting string `text_resend_gas_note`; missing conversion character in &apos;`% h`&apos; ?"
+        errorLine1="    &lt;string name=&quot;text_resend_gas_note&quot;>For this transaction to succeed, the gas price must be at least 10% higher than the original gas price.&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="806"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="StringFormatMatches"
+        message="Wrong argument count, format string `default_from` requires `2` but format call supplies `3`"
+        errorLine1="            detail.setText(getContext().getString(R.string.default_from, supplimentalInfo.substring(2), &quot;&quot;, token.getFullName()));"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/widget/EventDetailWidget.java"
+            line="88"
+            column="28"/>
+        <location
+            file="src/main/res/values-my/strings.xml"
+            line="748"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="StringFormatMatches"
+        message="Wrong argument count, format string `default_from` requires `2` but format call supplies `3`"
+        errorLine1="                detail.setText(getContext().getString(R.string.default_from, value, &quot;&quot;, addressDetail));"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/widget/EventDetailWidget.java"
+            line="116"
+            column="32"/>
+        <location
+            file="src/main/res/values-my/strings.xml"
+            line="748"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;rename_this_wallet_action&quot; is not translated in &quot;my&quot; (Burmese)"
+        errorLine1="    &lt;string name=&quot;rename_this_wallet_action&quot;>Rename this Wallet&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="113"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;token_count&quot; is not translated in &quot;my&quot; (Burmese)"
+        errorLine1="    &lt;string name=&quot;token_count&quot;>%1$s Tokens&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="458"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;0.00 ETH&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;0.00 ETH&quot; />"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_import_token.xml"
+            line="77"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;$0&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;$0&quot; />"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_import_token.xml"
+            line="93"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;0.00&quot;, should use `@string` resource"
+        errorLine1="                                        android:hint=&quot;0.00&quot;"
+        errorLine2="                                        ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_set_price.xml"
+            line="106"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;1&quot;, should use `@string` resource"
+        errorLine1="                                        android:text=&quot;1&quot; />"
+        errorLine2="                                        ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_set_price.xml"
+            line="184"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;$0&quot;, should use `@string` resource"
+        errorLine1="                                android:text=&quot;$0&quot; />"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_set_price.xml"
+            line="255"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;☹&quot;, should use `@string` resource"
+        errorLine1="                        android:text=&quot;☹&quot;"
+        errorLine2="                        ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_transaction_detail.xml"
+            line="83"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Gwei&quot;, should use `@string` resource"
+        errorLine1="                            android:text=&quot;Gwei&quot; />"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_transaction_detail.xml"
+            line="270"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;Gwei&quot;, should use `@string` resource"
+        errorLine1="                            android:text=&quot;Gwei&quot; />"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_transaction_detail.xml"
+            line="351"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;1&quot;, should use `@string` resource"
+        errorLine1="                            android:text=&quot;1&quot; />"
+        errorLine2="                            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_transfer_detail.xml"
+            line="93"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;DD/MM/YYYY&quot;, should use `@string` resource"
+        errorLine1="                                    android:hint=&quot;DD/MM/YYYY&quot;"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_transfer_detail.xml"
+            line="239"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;0.0&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;0.0&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/fragment_webview.xml"
+            line="70"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;0&quot;, should use `@string` resource"
+        errorLine1="                android:hint=&quot;0&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_input_amount.xml"
+            line="83"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;:&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;:&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_input_amount.xml"
+            line="111"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;0&quot;, should use `@string` resource"
+        errorLine1="                android:hint=&quot;0&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_input_fiat.xml"
+            line="71"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;1&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;1&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_quantity_selector.xml"
+            line="62"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;|&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;|&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/item_wallet_summary_manage.xml"
+            line="119"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;0.0&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;0.0&quot; />"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/layout_url_bar_compact.xml"
+            line="80"
+            column="13"/>
+    </issue>
+
+</issues>

@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    xmlns:custom="http://schemas.android.com/apk/res-auto">
+    android:orientation="vertical">
+
+    <View style="@style/Aw.Component.Separator" />
 
     <com.alphawallet.app.widget.DialogInfoItem
         android:id="@+id/info_website"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp16"/>
+        android:layout_height="wrap_content" />
+
+    <View style="@style/Aw.Component.Separator" />
 
     <com.alphawallet.app.widget.DialogInfoItem
         android:id="@+id/info_network"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        custom:showActionText="true"/>
+        custom:showActionText="true" />
+
+    <View style="@style/Aw.Component.Separator" />
 
 </LinearLayout>

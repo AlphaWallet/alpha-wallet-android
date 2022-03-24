@@ -1,47 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingStart="@dimen/dp16"
-    android:paddingTop="@dimen/dp8"
-    android:paddingEnd="@dimen/dp16"
-    android:paddingBottom="@dimen/dp8">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/icon_trait"
-        android:layout_width="wrap_content"
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="@dimen/dp8"
-        android:src="@drawable/ic_trait_icon" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/icon_trait"
         android:gravity="center_vertical"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_margin="8dp"
+        app:cardElevation="0dp"
+        app:contentPadding="@dimen/tiny_8"
+        app:strokeColor="?colorPrimary"
+        app:strokeWidth="1dp">
 
-        <TextView
-            android:id="@+id/value"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp14"
-            tools:text="Value" />
+            android:gravity="center"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/trait"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/dove"
-            android:textSize="@dimen/sp14"
-            tools:text="Attribute" />
+            <TextView
+                android:id="@+id/trait"
+                style="@style/Aw.Typography.Label.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?colorPrimary"
+                tools:text="Attribute" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/value"
+                style="@style/Aw.Typography.SemiBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:lines="1"
+                tools:text="Value" />
+
+            <TextView
+                android:id="@+id/rarity"
+                style="@style/Aw.Typography.Sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Attribute" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
 </RelativeLayout>

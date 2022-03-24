@@ -58,7 +58,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
                 binderViewHolder = new WalletSummaryHolder(R.layout.item_wallet_summary_manage, parent, this, realm);
             break;
             case TextHolder.VIEW_TYPE:
-                binderViewHolder = new TextHolder(R.layout.item_text_view, parent);
+                binderViewHolder = new TextHolder(R.layout.item_standard_header, parent);
                 break;
             case WalletSummaryHeaderHolder.VIEW_TYPE:
                 binderViewHolder = new WalletSummaryHeaderHolder(R.layout.item_wallet_summary_large_title, parent,this, realm);

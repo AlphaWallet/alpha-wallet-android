@@ -4,7 +4,6 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
@@ -21,18 +20,11 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
             android:orientation="vertical">
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/mercury" />
+            <View style="@style/Aw.Component.Separator" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@color/alabaster" />
+            <View style="@style/Aw.Component.Separator.Large" />
 
             <LinearLayout
                 android:id="@+id/layout_backup_method"
@@ -40,10 +32,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/mercury" />
+                <View style="@style/Aw.Component.Separator" />
 
                 <com.alphawallet.app.widget.SettingsItemView
                     android:id="@+id/setting_backup"
@@ -55,23 +44,15 @@
 
                 <TextView
                     android:id="@+id/backup_text"
+                    style="@style/Aw.Typography.Sub"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="19dp"
-                    android:layout_marginTop="13dp"
-                    android:layout_marginEnd="51dp"
-                    android:layout_marginBottom="16dp"
-                    android:fontFamily="@font/font_regular"
-                    android:text="@string/seed_phrase_loss_warning"
-                    android:textColor="@color/dove"
-                    android:textSize="13sp" />
+                    android:layout_margin="@dimen/standard_16"
+                    android:text="@string/seed_phrase_loss_warning" />
 
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/mercury" />
+            <View style="@style/Aw.Component.Separator" />
 
             <com.alphawallet.app.widget.SettingsItemView
                 android:id="@+id/delete"
@@ -82,32 +63,27 @@
                 app:settingType="default" />
 
             <TextView
+                style="@style/Aw.Typography.Sub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="19dp"
-                android:layout_marginTop="13dp"
-                android:layout_marginEnd="51dp"
-                android:layout_marginBottom="16dp"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/delete_lose_funds_warning"
-                android:textColor="@color/dove"
-                android:textSize="13sp" />
+                android:layout_margin="@dimen/standard_16"
+                android:text="@string/delete_lose_funds_warning" />
+
+            <View
+                style="@style/Aw.Component.Separator"
+                android:layout_marginTop="@dimen/dp20" />
 
             <com.alphawallet.app.widget.InputAddress
                 android:id="@+id/input_ens"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="15dp"
+                android:layout_marginBottom="@dimen/standard_16"
+                custom:ens="true"
                 custom:hint="@string/enter_ens"
                 custom:label="@string/ens_name"
-                custom:ens="true"
-                custom:nocam="true"/>
+                custom:nocam="true" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/mercury" />
+            <View style="@style/Aw.Component.Separator" />
 
         </LinearLayout>
 
@@ -117,7 +93,7 @@
         android:id="@+id/layout_success_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/blur"
+        android:background="@color/translucent_dark"
         android:gravity="center"
         android:visibility="gone">
 

@@ -2,36 +2,35 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
+    android:layout_marginTop="@dimen/standard_16"
+    android:layout_marginBottom="@dimen/standard_16"
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:background="@drawable/background_round_red"
+        android:background="?colorError"
         android:orientation="vertical"
-        android:padding="15dp">
+        android:padding="@dimen/standard_16">
 
         <TextView
+            style="@style/Aw.Typography.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:fontFamily="@font/font_bold"
             android:text="@string/label_important"
             android:textAllCaps="true"
-            android:textColor="@color/cancel_red"
-            android:textSize="16sp" />
+            android:textColor="?colorOnError" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:fontFamily="@font/font_regular"
             android:gravity="center"
             android:text="@string/universal_link_notice"
-            android:textColor="@color/cancel_red" />
+            android:textColor="?colorOnError" />
 
     </LinearLayout>
+
 </LinearLayout>

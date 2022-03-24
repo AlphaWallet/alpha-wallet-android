@@ -3,24 +3,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorTheme"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
+
+    <View
+        android:id="@+id/separator"
+        style="@style/Aw.Component.Separator"
+        android:layout_below="@id/toolbar" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar"
-        android:layout_marginBottom="?actionBarSize"
-        android:background="@color/alabaster">
+        android:layout_below="@id/separator">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
     <com.alphawallet.app.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"

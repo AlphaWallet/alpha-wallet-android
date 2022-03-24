@@ -1,5 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +22,8 @@ import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.opensea.Stats;
+import com.alphawallet.app.entity.opensea.Trait;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
@@ -57,9 +61,12 @@ import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.jetbrains.annotations.NotNull;
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -68,16 +75,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-
-import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
-
-import javax.inject.Inject;
+import timber.log.Timber;
 
 /**
  * Created by James on 2/04/2019.
@@ -96,11 +102,6 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final OpenSeaService openseaService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AnalyticsServiceType analyticsService;
-    private Wallet wallet;
-
-    @Nullable
-    private Disposable calcGasCost;
-
     private final MutableLiveData<Token> insufficientFunds = new MutableLiveData<>();
     private final MutableLiveData<String> invalidAddress = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
@@ -109,6 +110,15 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
     private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
+    private final MutableLiveData<List<Trait>> traits = new MutableLiveData<>();
+
+    private Wallet wallet;
+
+    @Nullable
+    private Disposable openseaDisposable;
+
+    @Nullable
+    private Disposable calcGasCost;
 
     @Inject
     TokenFunctionViewModel(
@@ -139,21 +149,59 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         return assetDefinitionService;
     }
-    public LiveData<Token> insufficientFunds() { return insufficientFunds; }
-    public LiveData<String> invalidAddress() { return invalidAddress; }
-    public LiveData<XMLDsigDescriptor> sig() { return sig; }
-    public LiveData<Wallet> walletUpdate() { return walletUpdate; }
-    public LiveData<Boolean> newScriptFound() { return newScriptFound; }
-    public MutableLiveData<TransactionData> transactionFinalised() { return transactionFinalised; }
-    public MutableLiveData<Throwable> transactionError() { return transactionError; }
-    public MutableLiveData<Web3Transaction> gasEstimateComplete() { return gasEstimateComplete; }
+
+    public LiveData<Token> insufficientFunds()
+    {
+        return insufficientFunds;
+    }
+
+    public LiveData<String> invalidAddress()
+    {
+        return invalidAddress;
+    }
+
+    public LiveData<XMLDsigDescriptor> sig()
+    {
+        return sig;
+    }
+
+    public LiveData<Wallet> walletUpdate()
+    {
+        return walletUpdate;
+    }
+
+    public LiveData<Boolean> newScriptFound()
+    {
+        return newScriptFound;
+    }
+
+    public MutableLiveData<TransactionData> transactionFinalised()
+    {
+        return transactionFinalised;
+    }
+
+    public MutableLiveData<Throwable> transactionError()
+    {
+        return transactionError;
+    }
+
+    public MutableLiveData<Web3Transaction> gasEstimateComplete()
+    {
+        return gasEstimateComplete;
+    }
+
+    public MutableLiveData<List<Trait>> traits()
+    {
+        return traits;
+    }
 
     public void prepare()
     {
         getCurrentWallet();
     }
 
-    public void openUniversalLink(Context context, Token token, List<BigInteger> selection) {
+    public void openUniversalLink(Context context, Token token, List<BigInteger> selection)
+    {
         Intent intent = new Intent(context, SellDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
@@ -166,7 +214,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     }
 
     @Override
-    protected void onCleared() {
+    protected void onCleared()
+    {
         super.onCleared();
     }
 
@@ -200,7 +249,8 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_STATE, method);
-        if (tokenIds == null) tokenIds = new ArrayList<>(Collections.singletonList(BigInteger.ZERO));
+        if (tokenIds == null)
+            tokenIds = new ArrayList<>(Collections.singletonList(BigInteger.ZERO));
         intent.putExtra(C.EXTRA_TOKEN_ID, Utils.bigIntListToString(tokenIds, true));
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
@@ -223,7 +273,8 @@ public class TokenFunctionViewModel extends BaseViewModel
         sig.postValue(failSig);
     }
 
-    public void signMessage(Signable message, DAppFunction dAppFunction, long chainId) {
+    public void signMessage(Signable message, DAppFunction dAppFunction, long chainId)
+    {
         disposable = createTransactionInteract.sign(wallet, message, chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -287,7 +338,8 @@ public class TokenFunctionViewModel extends BaseViewModel
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    private void onDefaultWallet(Wallet w) {
+    private void onDefaultWallet(Wallet w)
+    {
         progress.postValue(false);
         wallet = w;
         walletUpdate.postValue(w);
@@ -329,7 +381,8 @@ public class TokenFunctionViewModel extends BaseViewModel
         ctx.startActivity(intent);
     }
 
-    public void sellTicketRouter(Context context, Token token, List<BigInteger> idList) {
+    public void sellTicketRouter(Context context, Token token, List<BigInteger> idList)
+    {
         Intent intent = new Intent(context, SellDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
@@ -457,7 +510,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     }
 
     private Web3Transaction buildWeb3Transaction(String functionData,
-                                    String contractAddress, String additionalDetails, String value)
+                                                 String contractAddress, String additionalDetails, String value)
     {
         return new Web3Transaction(
                 new Address(contractAddress),
@@ -473,7 +526,10 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     public void onDestroy()
     {
-        if (calcGasCost != null && !calcGasCost.isDisposed()) { calcGasCost.dispose(); }
+        if (calcGasCost != null && !calcGasCost.isDisposed())
+        {
+            calcGasCost.dispose();
+        }
     }
 
     public OpenSeaService getOpenseaService()
@@ -550,7 +606,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         gasEstimateComplete.postValue(new Web3Transaction(
                 w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, estimate, w3tx.nonce, w3tx.payload, w3tx.description));
     }
-    
+
     @Override
     public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token)
     {
@@ -617,7 +673,8 @@ public class TokenFunctionViewModel extends BaseViewModel
     private void processTransaction(TransactionData txData, Wallet wallet, String overridenTxHash)
     {
         //remove old tx from database
-        if (!TextUtils.isEmpty(overridenTxHash)) fetchTransactionsInteract.removeOverridenTransaction(wallet, overridenTxHash);
+        if (!TextUtils.isEmpty(overridenTxHash))
+            fetchTransactionsInteract.removeOverridenTransaction(wallet, overridenTxHash);
         //update Activity
         transactionFinalised.postValue(txData);
     }
@@ -663,5 +720,64 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putParcelableArrayListExtra(C.EXTRA_NFTASSET_LIST, selection);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
+    }
+
+    public void getAsset(Token token, BigInteger tokenId)
+    {
+        openseaDisposable = openseaService.getAsset(token, tokenId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(asset -> onAsset(asset), this::onAssetError);
+    }
+
+    private void onAssetError(Throwable throwable)
+    {
+        Timber.d(throwable);
+    }
+
+    private void onAsset(String asset)
+    {
+        try
+        {
+            JSONObject result = new JSONObject(asset);
+            if (result.has("collection") && result.has("traits"))
+            {
+                computeRarity(getCountFromJson(result), getTraitsFromJson(result));
+            }
+        }
+        catch (JSONException e)
+        {
+            Timber.e(e);
+        }
+    }
+
+    private ArrayList<Trait> getTraitsFromJson(JSONObject result) throws JSONException
+    {
+        return new Gson().fromJson(result.getString("traits"),
+                new TypeToken<ArrayList<Trait>>()
+                {
+                }.getType());
+    }
+
+    private long getCountFromJson(JSONObject result) throws JSONException
+    {
+        JSONObject collectionJson = result.getJSONObject("collection");
+        Stats stats = new Gson().fromJson(collectionJson.getString("stats"), Stats.class);
+        return stats.getCount();
+    }
+
+    private void computeRarity(long count, List<Trait> traitList) throws JSONException
+    {
+        for (Trait trait : traitList)
+        {
+            if (trait.getTraitCount() == 1)
+            {
+                trait.setUnique(true);
+            }
+
+            trait.updateTraitRarity(count);
+        }
+
+        traits.postValue(traitList);
     }
 }

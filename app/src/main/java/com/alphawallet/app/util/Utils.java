@@ -23,6 +23,7 @@ import android.util.Patterns;
 import android.util.TypedValue;
 import android.webkit.URLUtil;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.RawRes;
 
 import com.alphawallet.app.BuildConfig;
@@ -879,5 +880,13 @@ public class Utils {
         }
 
         return cleanInput.length() == 64;
+    }
+
+    public static @ColorInt int getColorFromAttr(Context context, int resId)
+    {
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        theme.resolveAttribute(resId, typedValue, true);
+        return typedValue.data;
     }
 }

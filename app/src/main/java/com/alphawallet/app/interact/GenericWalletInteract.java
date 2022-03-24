@@ -80,6 +80,12 @@ public class GenericWalletInteract
 		walletRepository.updateWalletData(wallet, onSuccess);
 	}
 
+	public void updateWalletENS(Wallet wallet, String newENSName, Realm.Transaction.OnSuccess onSuccess)
+	{
+		wallet.ENSname = newENSName;
+		walletRepository.updateWalletData(wallet, onSuccess);
+	}
+
 	public void updateBalanceIfRequired(Wallet wallet, BigDecimal newBalance)
 	{
 		String newBalanceStr = BalanceUtils.getScaledValueFixed(newBalance, ETHER_DECIMALS, TOKEN_BALANCE_PRECISION);

@@ -3,50 +3,48 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_list_item"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/white">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:id="@+id/layout_details"
-        android:paddingStart="15dp"
-        android:paddingTop="15dp"
-        android:paddingBottom="15dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingStart="15dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp">
+
         <LinearLayout
             android:id="@+id/layout_speed_warning"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="3.1"
             android:orientation="horizontal"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"
-                android:src="@drawable/ic_red_warning"/>
+                android:src="@drawable/ic_red_warning" />
 
             <TextView
                 android:id="@+id/text_speed_warning"
+                style="@style/Aw.Typography.Title.SemiBold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/danger"
-                android:fontFamily="@font/font_bold"
                 android:text="@string/speed_too_low"
-                android:textSize="@dimen/sp20"/>
+                android:textColor="?colorError" />
 
         </LinearLayout>
 
         <TextView
             android:id="@+id/text_speed"
+            style="@style/Aw.Typography.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_bold"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp20"
             tools:text="Average" />
 
         <LinearLayout
@@ -57,22 +55,18 @@
 
             <TextView
                 android:id="@+id/text_speed_cost"
+                style="@style/Aw.Typography.Caption.SemiBold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
                 android:layout_marginEnd="3dp"
-                android:textColor="@color/mine"
-                android:textSize="@dimen/sp15"
                 android:lineSpacingExtra="7sp"
                 tools:text="$0.55" />
 
             <TextView
                 android:id="@+id/text_speed_cost_eth"
+                style="@style/Aw.Typography.Sub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
-                android:textColor="@color/dove"
-                android:textSize="@dimen/sp15"
                 tools:text="(0.00362 ETH)" />
 
         </LinearLayout>
@@ -84,63 +78,49 @@
 
             <TextView
                 android:id="@+id/text_gwei"
+                style="@style/Aw.Typography.Sub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
                 android:layout_marginTop="3dp"
-                android:textColor="@color/dove"
-                android:textSize="@dimen/sp13"
-                tools:text="Gas Price: 45" />
+                tools:text="Gas Price/Max Fee: 45" />
 
             <TextView
                 android:id="@+id/text_priority_fee"
+                style="@style/Aw.Typography.Sub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:fontFamily="@font/font_regular"
                 android:layout_marginTop="3dp"
-                android:textColor="@color/dove"
-                android:textSize="@dimen/sp13"
                 tools:text="Priority Fee: 2.00" />
 
-<!--            <TextView-->
-<!--                android:id="@+id/text_gwei"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:fontFamily="@font/font_regular"-->
-<!--                android:layout_marginTop="3dp"-->
-<!--                android:textColor="@color/dove"-->
-<!--                android:textSize="@dimen/sp13"-->
-<!--                tools:text="Gas Price: 45" />-->
-
         </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:paddingEnd="12dp">
+        android:orientation="horizontal"
+        android:paddingEnd="@dimen/tiny_8">
 
         <TextView
             android:id="@+id/text_speed_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/mine"
-            android:textSize="@dimen/sp17"
             android:layout_gravity="center_vertical"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="@dimen/tiny_8"
             tools:text=" ≈ 2 minutes" />
 
-        <ImageView
-            android:id="@+id/checkbox"
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/selector_radio" />
+            android:clickable="false"
+            android:focusable="false" />
 
     </LinearLayout>
+
 </RelativeLayout>

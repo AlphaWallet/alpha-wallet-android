@@ -546,7 +546,7 @@
     <string name="tokenscript_error_detail">Erreur dans l\'élément TokenScript: %1$s</string>
     <string name="tokenscript_element_not_present">entrée de fonction \'%1$s\' introuvable dans les éléments HTML.</string>
     <string name="complete_tokenscript_value">Valeur d\'Entrée Invalide: %1$s</string>
-    <string name="value">VALEUR</string>
+    <string name="value">Valeur</string>
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">Impossible de créer la clé. Essayer d\'activer la sécurité de votre téléphone.</string>
     <string name="what_is_seed_phrase">Une phrase seed, une phrase de récupération seed ou une phrase seed de sauvegarde est une liste de mots qui stockent toutes les informations nécessaires pour récupérer un portefeuille cryptographique. Le logiciel de portefeuille génère généralement une phrase seed et demande à l\'utilisateur de l\'écrire sur papier.</string>
@@ -873,9 +873,19 @@
     <string name="label_external_link">External Link</string>
     <string name="label_description">Description</string>
     <string name="label_details">Details</string>
+    <string name="title_dark_mode">Dark Mode</string>
     <string name="send_multiple_tokens">Send Multiple Tokens</string>
     <string name="switch_to_grid_view">Switch to Grid View</string>
     <string name="switch_to_list_view">Switch to List View</string>
     <string name="reload_metadata">Reload Metadata</string>
+    <string name="label_market_price">Market Price:</string>
+    <string name="i_already_have_a_wallet">I already have a Wallet</string>
+    <string name="title_select_theme">Select Mode</string>
+    <string name="title_network_info">Network Info</string>
     <string name="website_text">Website</string>
+    <string name="setting_theme_light">Light</string>
+    <string name="setting_theme_dark">Dark</string>
+    <string name="setting_theme_auto">Auto</string>
+    <string name="trait_rarity_unique">Unique</string>
+    <string name="trait_rarity_suppl_text">%1$s%% have this trait</string>
 </resources>

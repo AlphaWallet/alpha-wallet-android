@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/colorPrimary">
+    android:layout_height="wrap_content">
 
     <com.alphawallet.app.widget.StandardHeader
         android:id="@+id/layout_header"
@@ -18,9 +18,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/layout_header"
-        android:layout_marginStart="@dimen/dp12"
-        android:layout_marginTop="@dimen/dp22"
-        android:layout_marginEnd="@dimen/dp12"
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginTop="@dimen/standard_16"
+        android:layout_marginEnd="@dimen/standard_16"
         android:background="@drawable/background_password_entry">
 
         <AutoCompleteTextView
@@ -30,18 +30,14 @@
             android:layout_alignParentStart="true"
             android:layout_toStartOf="@id/img_scan_qr"
             android:background="@color/transparent"
-            android:fontFamily="@font/font_regular"
             android:inputType="textNoSuggestions"
             android:lines="1"
             android:maxLines="1"
-            android:paddingStart="@dimen/dp8"
-            android:paddingTop="@dimen/dp12"
-            android:paddingEnd="@dimen/dp8"
-            android:paddingBottom="@dimen/dp12"
-            android:textColor="@color/black"
-            android:textColorHint="@color/dove"
-            android:textSize="@dimen/sp17"
-            tools:text="0x12345678...abcd1234" />
+            android:paddingStart="@dimen/standard_16"
+            android:paddingTop="@dimen/small_12"
+            android:paddingEnd="@dimen/tiny_8"
+            android:paddingBottom="@dimen/small_12"
+            tools:hint="0x12345678...abcd1234" />
 
         <ImageButton
             android:id="@+id/img_scan_qr"
@@ -49,41 +45,38 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="@dimen/dp8"
-            android:background="?android:selectableItemBackground"
+            android:background="@color/transparent"
             android:contentDescription="@string/scan_qr"
-            android:src="@drawable/ic_camera_scan" />
+            android:padding="@dimen/small_12"
+            android:src="@drawable/ic_camera_scan"
+            app:tint="?colorControlNormal" />
 
     </RelativeLayout>
 
     <TextView
+        style="@style/Aw.Typography.Label.Small"
         android:id="@+id/label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/box_layout"
-        android:layout_marginStart="31dp"
+        android:layout_marginStart="@dimen/comfy_28"
         android:layout_marginTop="-9dp"
-        android:layout_marginBottom="5dp"
-        android:background="@color/colorPrimary"
-        android:fontFamily="@font/font_semibold"
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"
-        android:textColor="@color/dove"
-        android:textSize="@dimen/sp13"
+        android:background="?colorSurface"
+        android:paddingLeft="@dimen/mini_4"
+        android:paddingRight="@dimen/mini_4"
         android:visibility="visible"
         tools:text="ENS Name" />
 
     <TextView
+        style="@style/Aw.Typography.Control"
         android:id="@+id/text_paste"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/box_layout"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="16dp"
-        android:fontFamily="@font/font_semibold"
+        android:layout_marginEnd="@dimen/small_12"
+        android:padding="@dimen/mini_4"
         android:text="@string/paste"
-        android:textColor="@color/azure"
-        android:textSize="@dimen/sp17"
         android:visibility="visible" />
 
     <LinearLayout
@@ -91,8 +84,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/box_layout"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="@dimen/dp10"
-        android:layout_marginTop="4dp"
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginTop="@dimen/mini_4"
         android:layout_toStartOf="@id/text_paste"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -101,34 +94,34 @@
             android:id="@+id/avatar"
             android:layout_width="@dimen/dp25"
             android:layout_height="@dimen/dp25"
-            android:layout_marginEnd="@dimen/dp6"
+            android:layout_marginEnd="@dimen/tiny_8"
             android:visibility="visible" />
 
         <TextView
             android:id="@+id/status_text"
+            style="@style/Aw.Typography.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/green"
-            android:textSize="@dimen/sp12"
+            android:textColor="@color/positive"
             android:visibility="gone"
-            tools:text="0x123456789abcdef12345" />
+            tools:text="0x123456789abcdef12345"
+            tools:visibility="visible" />
 
     </LinearLayout>
 
     <TextView
         android:id="@+id/error_text"
+        style="@style/Aw.Typography.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/box_layout"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="@dimen/dp10"
-        android:layout_marginTop="2dp"
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginTop="@dimen/mini_4"
         android:layout_toStartOf="@id/text_paste"
-        android:fontFamily="@font/font_regular"
-        android:textColor="@color/danger"
-        android:textSize="@dimen/sp12"
+        android:textColor="?colorError"
         android:visibility="gone"
-        tools:text="That address already exists" />
+        tools:text="That address already exists"
+        tools:visibility="visible" />
 
 </RelativeLayout>

@@ -52,7 +52,7 @@ public class GasSliderView extends RelativeLayout
 
     public GasSliderView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        inflate(context, R.layout.item_gas_slider, this);
+        inflate(context, R.layout.item_1559_gas_slider, this);
 
         calculateStaticScaleFactor();
 

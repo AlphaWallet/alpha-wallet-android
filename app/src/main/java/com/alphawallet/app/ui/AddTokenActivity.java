@@ -94,9 +94,9 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         setContentView(R.layout.activity_add_token);
 
-        setTitle(getString(R.string.title_add_token));
-
         toolbar();
+
+        setTitle(getString(R.string.title_add_token));
 
         counterLayout = findViewById(R.id.layout_progress_counter);
         counterText = findViewById(R.id.text_check_counter);

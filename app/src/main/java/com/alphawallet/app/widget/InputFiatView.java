@@ -8,7 +8,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
@@ -21,14 +20,13 @@ import com.alphawallet.app.ui.widget.entity.NumericInput;
 public class InputFiatView extends LinearLayout {
     private final Context context;
     private final NumericInput amountInput;
-    private final RelativeLayout headerLayout;
-    private final TextView headerText;
     private final LinearLayout moreLayout;
     private final ImageView icon;
     private final ImageView expandMore;
     private final TextView symbolText;
     private final TextView subTextLabel;
     private final TextView subTextValue;
+    private final StandardHeader header;
     private InputFiatCallback callback;
 
     public InputFiatView(Context context, AttributeSet attrs)
@@ -37,8 +35,7 @@ public class InputFiatView extends LinearLayout {
         this.context = context;
         inflate(context, R.layout.item_input_fiat, this);
 
-        headerLayout = findViewById(R.id.layout_header_amount);
-        headerText = findViewById(R.id.text_header);
+        header = findViewById(R.id.header);
         moreLayout = findViewById(R.id.layout_more_click);
         expandMore = findViewById(R.id.expand_more);
         icon = findViewById(R.id.icon);
@@ -74,8 +71,8 @@ public class InputFiatView extends LinearLayout {
         {
             boolean showHeader = a.getBoolean(R.styleable.InputView_show_header, true);
             int headerTextId = a.getResourceId(R.styleable.InputView_label, R.string.enter_target_price);
-            headerText.setText(headerTextId);
-            headerLayout.setVisibility(showHeader ? View.VISIBLE : View.GONE);
+            header.setText(headerTextId);
+            header.setVisibility(showHeader ? View.VISIBLE : View.GONE);
 
             boolean canChangeCurrency = a.getBoolean(R.styleable.InputView_can_change_currency, true);
             expandMore.setVisibility(canChangeCurrency ? VISIBLE : GONE);
@@ -123,11 +120,13 @@ public class InputFiatView extends LinearLayout {
         symbolText.setText(symbol);
     }
 
-    public void showKeyboard() {
+    public void showKeyboard()
+    {
         amountInput.requestFocus();
     }
 
-    public void setSubTextValue(String text) {
+    public void setSubTextValue(String text)
+    {
         subTextValue.setText(text);
     }
 }

@@ -1,48 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_white_toolbar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
-    <RelativeLayout
+    <TextView
+        android:id="@+id/text_title"
+        style="@style/Aw.Typography.Headline"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        android:gravity="center_horizontal"
+        android:paddingStart="@dimen/cozy_20"
+        android:paddingEnd="@dimen/cozy_20"
+        android:text="@string/write_down_seed_phrase"
+        android:textAlignment="center" />
 
-        <TextView
-            android:id="@+id/text_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center_horizontal"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:text="@string/write_down_seed_phrase"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="28sp" />
+    <com.google.android.flexbox.FlexboxLayout
+        android:id="@+id/layout_word_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_title"
+        android:layout_marginLeft="@dimen/standard_16"
+        android:layout_marginTop="@dimen/double_base_48"
+        android:layout_marginRight="@dimen/standard_16"
+        app:flexDirection="row"
+        app:flexWrap="wrap" />
 
-        <com.google.android.flexbox.FlexboxLayout
-            android:id="@+id/layout_word_holder"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/text_title"
-            android:layout_marginLeft="12dp"
-            android:layout_marginTop="49dp"
-            android:layout_marginRight="12dp"
-            app:flexDirection="row"
-            app:flexWrap="wrap" />
+    <com.alphawallet.app.widget.FunctionButtonBar
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" />
 
-        <com.alphawallet.app.widget.FunctionButtonBar
-            android:id="@+id/layoutButtons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" />
-
-    </RelativeLayout>
-
-</LinearLayout>
+</RelativeLayout>

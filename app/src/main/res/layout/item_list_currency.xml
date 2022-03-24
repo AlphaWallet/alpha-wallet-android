@@ -4,20 +4,19 @@
     android:id="@+id/layout_list_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
-    android:paddingStart="15dp"
-    android:paddingTop="15dp"
-    android:paddingEnd="12dp"
-    android:paddingBottom="15dp">
+    android:paddingStart="@dimen/standard_16"
+    android:paddingTop="@dimen/standard_16"
+    android:paddingEnd="@dimen/small_12"
+    android:paddingBottom="@dimen/standard_16">
 
     <ImageView
         android:id="@+id/flag"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/token_icon"
+        android:layout_height="@dimen/token_icon"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_flags_australia" />
+        android:layout_marginEnd="@dimen/standard_16"
+        tools:src="@drawable/ic_flags_australia" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -28,32 +27,27 @@
 
         <TextView
             android:id="@+id/code"
+            style="@style/Aw.Typography.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/black"
-            android:textSize="17sp"
+            android:layout_marginEnd="@dimen/standard_16"
             tools:text="AUD" />
 
         <TextView
             android:id="@+id/name"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/dove"
-            android:textSize="15sp"
             tools:text="AUD" />
     </LinearLayout>
 
-
-    <ImageView
-        android:id="@+id/checkbox"
+    <com.google.android.material.radiobutton.MaterialRadioButton
+        android:id="@+id/radio_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/selector_radio" />
+        android:clickable="false"
+        android:focusable="false" />
 
 </RelativeLayout>

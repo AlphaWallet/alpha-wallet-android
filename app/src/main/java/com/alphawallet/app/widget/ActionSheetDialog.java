@@ -10,10 +10,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 
 import com.alphawallet.app.C;
@@ -27,7 +24,6 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
-import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.HomeActivity;
@@ -88,7 +84,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                              String destName, String destAddress, TokensService ts,
                              ActionSheetCallback aCallBack)
     {
-        super(activity, R.style.FullscreenBottomSheetDialogStyle);
+        super(activity);
         View view = View.inflate(getContext(), R.layout.dialog_action_sheet, null);
         setContentView(view);
 

@@ -176,7 +176,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         {
             onBack();
         }
-        else if (item.getItemId() == R.id.action_qr)
+        else if (item.getItemId() == R.id.action_show_contract)
         {
             viewModel.showContractInfo(this, wallet, token);
         }

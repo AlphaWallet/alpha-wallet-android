@@ -10,6 +10,7 @@
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_above="@id/layoutButtons"
         android:layout_below="@id/toolbar"
         android:background="@drawable/background_bottom_border" />
 
@@ -24,6 +25,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
 </RelativeLayout>

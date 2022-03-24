@@ -21,6 +21,7 @@ import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
+import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 
 import java.math.BigInteger;
@@ -59,6 +60,7 @@ public class ActivityHistoryList extends LinearLayout
 
         recentTransactionsView = findViewById(R.id.list);
         recentTransactionsView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recentTransactionsView.addItemDecoration(new ListDivider(getContext()));
         loadingTransactions = findViewById(R.id.loading_transactions);
         noTxNotice = findViewById(R.id.layout_no_recent_transactions);
         this.context = context;

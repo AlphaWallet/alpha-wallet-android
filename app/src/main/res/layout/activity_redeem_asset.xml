@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_card">
+        android:layout_height="match_parent">
 
         <com.alphawallet.app.widget.ProgressView
             android:id="@+id/progress_view"
@@ -34,33 +31,23 @@
 
         </RelativeLayout>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_next"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:padding="15dp"
-            android:text="@string/action_next"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
+            android:layout_margin="@dimen/standard_16"
+            android:text="@string/action_next" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_redeem"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:padding="15dp"
+            android:layout_margin="@dimen/standard_16"
             android:text="@string/action_redeem"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp"
             android:visibility="gone" />
 
     </RelativeLayout>
@@ -70,7 +57,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?actionBarSize"
-        android:background="@color/white"
         tools:visibility="gone" />
 
 </LinearLayout>

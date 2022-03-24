@@ -18,6 +18,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String NETWORK_FILTER_KEY = "network_filters";
     private static final String CUSTOM_NETWORKS_KEY = "custom_networks";
     private static final String NOTIFICATIONS_KEY = "notifications";
+    private static final String THEME_KEY = "theme";
     private static final String DEFAULT_SET_KEY = "default_net_set";
     private static final String LOCALE_KEY = "locale";
     private static final String BACKUP_WALLET_SHOWN = "backup_wallet_shown";
@@ -348,5 +349,17 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setLastVersionCode(int code) {
         pref.edit().putInt(LAST_VERSION_CODE, code).apply();
+    }
+
+    @Override
+    public int getTheme()
+    {
+        return pref.getInt(THEME_KEY, C.THEME_AUTO);
+    }
+
+    @Override
+    public void setTheme(int state)
+    {
+        pref.edit().putInt(THEME_KEY, state).apply();
     }
 }

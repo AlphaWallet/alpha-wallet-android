@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/greyffive"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -12,51 +10,42 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:animateLayoutChanges="false"
-        android:background="@color/white"
         android:minHeight="100dp"
-        android:paddingStart="6dp"
-        android:paddingEnd="6dp">
+        android:paddingHorizontal="@dimen/tiny_8">
 
         <ProgressBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@id/total_wrapper"
-            android:layout_alignBottom="@id/total_wrapper"
             android:layout_centerInParent="true"
-            android:indeterminateTint="@color/tealish"
             android:visibility="visible" />
 
         <LinearLayout
             android:id="@+id/total_wrapper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="100dp"
             android:layout_centerHorizontal="true"
+            android:minHeight="100dp"
             android:orientation="horizontal">
 
-            <androidx.appcompat.widget.AppCompatRadioButton
+            <com.google.android.material.radiobutton.MaterialRadioButton
                 android:id="@+id/radioBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="1dp"
-                android:layout_marginEnd="10dp"
-                android:background="@drawable/selector_radio_check"
                 android:checked="false"
                 android:visibility="gone"
-                app:buttonTint="@color/transparent" />
+                tools:visibility="visible" />
 
             <LinearLayout
                 android:id="@+id/layout_webwrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="100dp"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="6dp"
-                android:background="@color/white"
                 android:gravity="top"
+                android:minHeight="100dp"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <com.alphawallet.app.web3.Web3TokenView
                     android:id="@+id/web3_tokenview"

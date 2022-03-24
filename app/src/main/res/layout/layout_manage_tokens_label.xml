@@ -1,38 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:id="@+id/layout_manage_tokens"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_manage_tokens"
     android:layout_width="match_parent"
-    android:layout_height="65dp"
-    android:background="@drawable/background_divider_top_bottom"
+    android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingEnd="16dp"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:paddingStart="@dimen/standard_16"
+    android:paddingTop="@dimen/standard_16"
+    android:paddingEnd="@dimen/standard_16"
+    android:paddingBottom="@dimen/tiny_8">
 
     <TextView
+        style="@style/Aw.Typography.Title.Large.Bold"
         android:id="@+id/text_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_alignParentBottom="true"
-        android:fontFamily="@font/font_semibold"
-        tools:text="@string/add_hide_tokens"
-        android:textColor="@color/black"
-        android:textSize="24sp" />
+        android:layout_alignParentStart="true"
+        android:ellipsize="end"
+        android:singleLine="true"
+        tools:text="@string/add_hide_tokens" />
 
     <TextView
+        style="@style/Aw.Typography.Control"
         android:id="@+id/text_ignore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="end"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="8dp"
-        android:fontFamily="@font/font_regular"
+        android:layout_marginBottom="@dimen/tiny_8"
+        android:gravity="end"
         android:text="@string/ignore"
-        android:textColor="@color/azure"
-        android:textSize="17sp"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <View
+        style="@style/Aw.Component.Separator"
+        android:layout_alignParentBottom="true" />
 
 </RelativeLayout>

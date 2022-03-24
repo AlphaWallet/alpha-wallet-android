@@ -96,7 +96,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         pages.add(ImportType.SEED_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.tab_seed), ImportSeedFragment.create()));
         pages.add(ImportType.KEYSTORE_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.tab_keystore), ImportKeystoreFragment.create()));
         pages.add(ImportType.PRIVATE_KEY_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.tab_private_key), ImportPrivateKeyFragment.create()));
-        if (isWatch) pages.add(ImportType.WATCH_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.watch_wallet), SetWatchWalletFragment.create()));
+        pages.add(ImportType.WATCH_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.watch_wallet), SetWatchWalletFragment.create()));
 
         ViewPager2 viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(new TabPagerAdapter(this, pages));

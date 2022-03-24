@@ -3,7 +3,6 @@
     android:id="@+id/layout_add_new_price_alert"
     android:layout_width="match_parent"
     android:layout_height="60dp"
-    android:background="@color/alabaster"
     android:gravity="end"
     android:orientation="horizontal"
     android:paddingStart="@dimen/dp16"
@@ -11,14 +10,12 @@
 
     <TextView
         android:id="@+id/text_add_new_price_alert"
+        style="@style/Aw.Typography.Control"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|center_vertical"
         android:layout_marginEnd="@dimen/dp8"
-        android:fontFamily="@font/font_semibold"
-        android:text="@string/add_new_price_alert"
-        android:textColor="@color/azure"
-        android:textSize="@dimen/sp17" />
+        android:text="@string/add_new_price_alert" />
 
     <ImageView
         android:id="@+id/img_add_token"

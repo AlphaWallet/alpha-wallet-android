@@ -4,7 +4,6 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
@@ -14,8 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
-        android:paddingLeft="@dimen/dp22"
-        android:paddingRight="@dimen/dp22">
+        android:paddingLeft="@dimen/cozy_20"
+        android:paddingRight="@dimen/cozy_20">
 
         <LinearLayout
             android:id="@+id/contract_info"
@@ -23,8 +22,8 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
+            android:layout_marginTop="@dimen/cozy_20"
             android:gravity="center_horizontal"
-            android:layout_marginTop="@dimen/dp20"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -36,11 +35,11 @@
                 android:src="@drawable/ic_ethereum" />
 
             <TextView
+                style="@style/Aw.Typography.Caption"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/contract_address"
-                android:textSize="@dimen/sp15" />
+                android:text="@string/contract_address" />
 
         </LinearLayout>
 
@@ -49,12 +48,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp25"
-            android:fontFamily="@font/font_regular"
             android:gravity="center"
-            android:paddingTop="@dimen/dp20"
+            android:paddingTop="@dimen/cozy_20"
             android:text="@string/scan_qr_label"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp17"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -64,34 +60,22 @@
             android:layout_height="wrap_content"
             android:scaleType="center"
             android:src="@drawable/ic_ethereum"
-            app:layout_constraintBottom_toTopOf="@id/copy_address_layout"
+            app:layout_constraintBottom_toTopOf="@id/copy_address"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/contract_info" />
 
-        <LinearLayout
-            android:id="@+id/copy_address_layout"
-            android:layout_width="match_parent"
+        <com.alphawallet.app.widget.CopyTextView
+            android:id="@+id/copy_address"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/dp24"
-            android:animateLayoutChanges="true"
             android:gravity="center_horizontal"
-            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/qr_image">
-
-            <com.alphawallet.app.widget.CopyTextView
-                android:id="@+id/copy_address"
-                style="@style/MyAddressCopyTextStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                custom:gravity="center"
-                custom:bold="true"
-                custom:textColor="@color/black" />
-
-        </LinearLayout>
+            app:layout_constraintTop_toBottomOf="@id/qr_image"
+            custom:bold="true"
+            custom:gravity="center" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

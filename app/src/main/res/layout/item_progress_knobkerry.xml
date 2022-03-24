@@ -1,8 +1,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:layout_constraintDimensionRatio="1:1"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    app:layout_constraintDimensionRatio="1:1">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guidelineBottom"
@@ -15,20 +16,19 @@
         android:id="@+id/_progress_bar_waiting"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="1:1"
         android:layout_gravity="center_horizontal"
         android:gravity="center_horizontal"
         android:indeterminateDrawable="@drawable/indeterminate_gradient_ring"
         android:rotation="270"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/guidelineBottom"
-        android:visibility="gone" />
+        app:layout_constraintDimensionRatio="1:1" />
 
     <ProgressBar
         android:id="@+id/_progress_bar_main"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="1:1"
         android:layout_gravity="center_horizontal"
         android:gravity="center_horizontal"
         android:max="500"
@@ -37,31 +37,31 @@
         android:rotation="270"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/guidelineBottom"
-        />
+        app:layout_constraintDimensionRatio="1:1" />
 
     <ProgressBar
         android:id="@+id/_progress_bar_knob"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="1:1"
         android:layout_gravity="center"
         android:gravity="center"
         android:max="500"
         android:progress="20"
         android:progressDrawable="@drawable/rotate_knobkerry"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/guidelineBottom"
-        android:visibility="visible" />
+        app:layout_constraintDimensionRatio="1:1" />
 
     <ImageView
         android:id="@+id/_progress_complete"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/ic_correct"
-        android:gravity="center_horizontal"
         android:layout_gravity="center_horizontal"
-        android:background="@color/white"
+        android:gravity="center_horizontal"
+        android:src="@drawable/ic_correct"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/guidelineBottom"
-        android:visibility="gone"/>
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

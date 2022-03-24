@@ -1,10 +1,11 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,12 +13,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
+import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-
-public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelectNetworkAdapter.ViewHolder> {
+public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelectNetworkAdapter.ViewHolder>
+{
     private final ArrayList<NetworkItem> networkList;
     private boolean hasSelection;
 
@@ -69,7 +70,7 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
         {
             holder.name.setText(item.getName());
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
-            holder.checkbox.setSelected(item.isSelected());
+            holder.radio.setChecked(item.isSelected());
         }
     }
 
@@ -81,7 +82,7 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
         }
         networkList.get(position).setSelected(true);
         notifyDataSetChanged();
-        holder.checkbox.setSelected(networkList.get(position).isSelected());
+        holder.radio.setChecked(networkList.get(position).isSelected());
     }
 
     @Override
@@ -99,15 +100,16 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
         }
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView checkbox;
+    class ViewHolder extends RecyclerView.ViewHolder
+    {
+        MaterialRadioButton radio;
         TextView name;
         View itemLayout;
 
         ViewHolder(View view)
         {
             super(view);
-            checkbox = view.findViewById(R.id.checkbox);
+            radio = view.findViewById(R.id.radio);
             name = view.findViewById(R.id.name);
             itemLayout = view.findViewById(R.id.layout_list_item);
         }

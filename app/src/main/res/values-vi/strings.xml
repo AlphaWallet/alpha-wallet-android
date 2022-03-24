@@ -549,7 +549,7 @@
     <string name="tokenscript_error_detail">Error in TokenScript element: %1$s</string>
     <string name="tokenscript_element_not_present">function input \'%1$s\' not found in HTML elements.</string>
     <string name="complete_tokenscript_value">Giá trị đầu vào không hợp lệ: %1$s</string>
-    <string name="value">VALUE</string>
+    <string name="value">Value</string>
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">Không thể tạo khóa. Thử bật bảo mật trên điện thoại của bạn.</string>
     <string name="what_is_seed_phrase">Cụm từ bí mật, cụm từ khôi phục bí mật hoặc cụm từ bí mật dự phòng là danh sách các từ lưu trữ tất cả thông tin cần thiết để khôi phục ví tiền điện tử. Phần mềm Wallet thường sẽ tạo ra một cụm từ bí mật và hướng dẫn người dùng viết nó ra giấy.</string>
@@ -875,9 +875,19 @@
     <string name="label_external_link">External Link</string>
     <string name="label_description">Description</string>
     <string name="label_details">Details</string>
+    <string name="title_dark_mode">Dark Mode</string>
     <string name="send_multiple_tokens">Send Multiple Tokens</string>
     <string name="switch_to_grid_view">Switch to Grid View</string>
     <string name="switch_to_list_view">Switch to List View</string>
     <string name="reload_metadata">Reload Metadata</string>
+    <string name="label_market_price">Market Price:</string>
+    <string name="i_already_have_a_wallet">I already have a Wallet</string>
+    <string name="title_select_theme">Select Mode</string>
+    <string name="title_network_info">Network Info</string>
     <string name="website_text">Website</string>
+    <string name="setting_theme_light">Light</string>
+    <string name="setting_theme_dark">Dark</string>
+    <string name="setting_theme_auto">Auto</string>
+    <string name="trait_rarity_unique">Unique</string>
+    <string name="trait_rarity_suppl_text">%1$s%% have this trait</string>
 </resources>

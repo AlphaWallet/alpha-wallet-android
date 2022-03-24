@@ -17,14 +17,14 @@
 
     <TextView
         android:id="@+id/text_message"
+        style="@style/Aw.Typography.Title"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:fontFamily="@font/font_light"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/cozy_20"
         android:gravity="center"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
+        android:paddingLeft="@dimen/base_24"
+        android:paddingRight="@dimen/base_24"
         android:text="@string/show_qr_code_to_redemption_booth"
-        android:textColor="@color/colorPrimaryDark"
         android:visibility="visible"
         app:autoSizeMaxTextSize="20sp"
         app:autoSizeMinTextSize="9sp"
@@ -36,10 +36,10 @@
 
     <TextView
         android:id="@+id/textAddIDs"
+        style="@style/Aw.Typography.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/add_ids_to_redeem"
-        android:textColor="@color/black"
         android:visibility="gone"
         app:autoSizeMaxTextSize="20sp"
         app:autoSizeMinTextSize="12sp"
@@ -48,26 +48,27 @@
         app:layout_constraintBottom_toTopOf="@+id/advanced_options"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include" />
+        app:layout_constraintTop_toBottomOf="@+id/include"
+        tools:visibility="visible" />
 
     <ImageView
         android:id="@+id/qr_image"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:adjustViewBounds="true"
-        android:background="@drawable/background_marketplace_event"
-        android:padding="10dp"
+        android:padding="@dimen/small_12"
         app:layout_constraintBottom_toTopOf="@+id/include2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_message"
         app:srcCompat="@drawable/ic_autorenew_black_24dp" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/advanced_options"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="0dp"
+        style="@style/Aw.Component.Button.Primary"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="@dimen/standard_16"
         android:text="@string/advanced"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"

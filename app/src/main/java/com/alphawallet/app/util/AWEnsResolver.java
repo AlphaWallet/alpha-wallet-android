@@ -2,11 +2,9 @@ package com.alphawallet.app.util;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.service.OpenSeaService;
@@ -20,7 +18,6 @@ import org.json.JSONObject;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 
-import java.io.InterruptedIOException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -45,16 +42,19 @@ public class AWEnsResolver extends EnsResolver
     private static final String DAS_NAME = "[DAS_NAME]";
     private static final String DAS_PAYLOAD = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"das_searchAccount\",\"params\":[\"" + DAS_NAME + "\"]}";
     private static final String OPENSEA_IMAGE_PREVIEW = "image_preview_url";
+    private static final String OPENSEA_IMAGE_ORIGINAL = "image_original_url"; //in case of SVG; Opensea breaks SVG compression
     private final Context context;
     private final OkHttpClient client;
 
-    static {
+    static
+    {
         System.loadLibrary("keys");
     }
 
     public static native String getOpenSeaKey();
 
-    public AWEnsResolver(Web3j web3j, Context context) {
+    public AWEnsResolver(Web3j web3j, Context context)
+    {
         super(web3j, DEFAULT_SYNC_THRESHOLD);
         this.context = context;
         this.client = setupClient();
@@ -62,12 +62,14 @@ public class AWEnsResolver extends EnsResolver
 
     /**
      * Given an address, find any corresponding ENS name (eg fredblogs.eth)
+     *
      * @param address Ethereum address
      * @return ENS name or empty string
      */
     public Single<String> reverseResolveEns(String address)
     {
-        return Single.fromCallable(() -> {
+        return Single.fromCallable(() ->
+        {
             String ensName = "";
 
             try
@@ -98,7 +100,8 @@ public class AWEnsResolver extends EnsResolver
 
     public Single<String> getENSUrl(String ensName)
     {
-        return Single.fromCallable(() -> {
+        return Single.fromCallable(() ->
+        {
             try
             {
                 if (TextUtils.isEmpty(ensName))
@@ -124,7 +127,8 @@ public class AWEnsResolver extends EnsResolver
     public Single<String> convertLocator(String locator)
     {
         if (TextUtils.isEmpty(locator)) return Single.fromCallable(() -> "");
-        return Single.fromCallable(() -> {
+        return Single.fromCallable(() ->
+        {
             String url = "";
             switch (getLocatorType(locator))
             {
@@ -159,60 +163,23 @@ public class AWEnsResolver extends EnsResolver
                 String tokenAddress = Numeric.prependHexPrefix(matcher.group(6));
                 String tokenId = matcher.group(8);
 
-                JSONObject asset = fetchOpenseaAsset(chainId, tokenAddress, tokenId);
-
-                if (asset != null && asset.has(OPENSEA_IMAGE_PREVIEW))
+                String asset = OpenSeaService.fetchAsset(chainId, tokenAddress, tokenId);
+                JSONObject assetObj = new JSONObject(asset);
+                String url = assetObj.getString(OPENSEA_IMAGE_PREVIEW);
+                if (!TextUtils.isEmpty(url) && url.endsWith(".svg"))
                 {
-                    return asset.getString(OPENSEA_IMAGE_PREVIEW);
+                    String original = assetObj.getString(OPENSEA_IMAGE_ORIGINAL);
+                    if (!TextUtils.isEmpty(original)) url = original;
                 }
-                else
-                {
-                    //TODO: fetch metadata directly
-                    return "";
-                }
+                return url;
             }
-        }
-        catch (Exception e)
-        {
-            //
-        }
-
-        return "";
-    }
-
-    private JSONObject fetchOpenseaAsset(long chainId, String tokenAddress, String tokenId)
-    {
-        String apiBase = OpenSeaService.apiMap.get(chainId);
-        if (apiBase == null) return null;
-        apiBase = apiBase.substring(0, apiBase.lastIndexOf("asset") + 5);
-
-        Request.Builder requestB = new Request.Builder()
-                    .url(apiBase + "/" + tokenAddress + "/" + tokenId)
-                    .get();
-
-        String apiKey = getOpenSeaKey();
-        if (!TextUtils.isEmpty(apiKey) && !apiKey.equals("..."))
-        {
-            requestB.addHeader("X-API-KEY", apiKey);
-        }
-
-        try (okhttp3.Response response = client.newCall(requestB.build()).execute())
-        {
-            String jsonResult = response.body().string();
-            return new JSONObject(jsonResult);
-        }
-        catch (InterruptedIOException e)
-        {
-            //If user switches account or network during a fetch
-            //this exception is going to be thrown because we're terminating the API call
-            //Don't display error
         }
         catch (Exception e)
         {
             Timber.e(e);
         }
 
-        return null;
+        return "";
     }
 
     private LocatorType getLocatorType(String locator)
@@ -250,7 +217,9 @@ public class AWEnsResolver extends EnsResolver
         String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.ENS_HISTORY_PAIR, "");
         if (historyJson.length() > 0)
         {
-            HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>() {}.getType());
+            HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>()
+            {
+            }.getType());
             if (history.containsKey(address.toLowerCase()))
             {
                 ensName = history.get(address.toLowerCase());
@@ -267,7 +236,9 @@ public class AWEnsResolver extends EnsResolver
         String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.ENS_HISTORY_PAIR, "");
         if (historyJson.length() > 0)
         {
-            HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>() {}.getType());
+            HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>()
+            {
+            }.getType());
             if (history.containsKey(address.toLowerCase()))
             {
                 String previouslyUsedDomain = history.get(address.toLowerCase());
@@ -297,12 +268,14 @@ public class AWEnsResolver extends EnsResolver
 
     /**
      * Given an ENS Name (eg fredblogs.eth), find corresponding Ethereum address
+     *
      * @param ensName ensName to be resolved to address
      * @return Ethereum address or empty string
      */
     public Single<String> resolveENSAddress(String ensName)
     {
-        return Single.fromCallable(() -> {
+        return Single.fromCallable(() ->
+        {
             Timber.d("Verify: " + ensName);
             String address = "";
             if (!isValidEnsName(ensName)) return "";
@@ -338,9 +311,9 @@ public class AWEnsResolver extends EnsResolver
 
         RequestBody requestBody = RequestBody.create(payload, HttpService.JSON_MEDIA_TYPE);
         Request request = new Request.Builder()
-                    .url(DAS_LOOKUP)
-                    .post(requestBody)
-                    .build();
+                .url(DAS_LOOKUP)
+                .post(requestBody)
+                .build();
 
         try (okhttp3.Response response = client.newCall(request).execute())
         {

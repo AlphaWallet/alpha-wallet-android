@@ -1,60 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <RelativeLayout
-        android:id="@+id/layout_header_amount"
+    <View style="@style/Aw.Component.Separator" />
+
+    <com.alphawallet.app.widget.StandardHeader
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/alabaster">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_alignParentTop="true"
-            android:background="@color/mercury" />
-
-        <TextView
-            android:id="@+id/text_header"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:fontFamily="@font/font_semibold"
-            android:gravity="center_vertical|end"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="@string/amount"
-            android:textAllCaps="true"
-            android:textColor="@color/dove"
-            android:textSize="15sp" />
-
-
-        <com.alphawallet.app.widget.ChainName
-            android:id="@+id/chain_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/dp10" />
-
-    </RelativeLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+        app:headerText="@string/amount" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="@dimen/dp16"
-        android:paddingEnd="@dimen/dp16"
-        android:paddingTop="@dimen/dp30"
-        android:paddingBottom="@dimen/dp20"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingTop="@dimen/comfy_28"
+        android:paddingEnd="@dimen/standard_16"
+        android:paddingBottom="@dimen/cozy_20">
 
         <LinearLayout
             android:id="@+id/layout_container"
@@ -71,20 +38,18 @@
                 <com.alphawallet.app.widget.TokenIcon
                     android:id="@+id/token_icon"
                     android:layout_width="@dimen/token_icon"
-                    android:foregroundGravity="center_vertical"
                     android:layout_height="@dimen/token_icon"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="@dimen/dp8" />
+                    android:layout_marginEnd="@dimen/tiny_8"
+                    android:foregroundGravity="center_vertical" />
 
                 <TextView
                     android:id="@+id/text_token_symbol"
+                    style="@style/Aw.Typography.Title.XLarge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:fontFamily="@font/font_regular"
                     android:textAllCaps="true"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/sp36"
                     tools:text="ETH" />
 
                 <ImageView
@@ -92,8 +57,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="@dimen/dp8"
-                    android:src="@drawable/ic_expand_more" />
+                    android:layout_marginStart="@dimen/tiny_8"
+                    android:src="@drawable/ic_expand_more"
+                    app:tint="?colorControlNormal" />
 
             </LinearLayout>
 
@@ -102,18 +68,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="end"
-                android:indeterminateTint="@color/azure"
-                android:paddingTop="@dimen/dp8"
-                android:paddingBottom="@dimen/dp8"
+                android:paddingTop="@dimen/tiny_8"
+                android:paddingBottom="@dimen/tiny_8"
                 android:visibility="gone" />
 
             <com.alphawallet.app.ui.widget.entity.NumericInput
                 android:id="@+id/amount_entry"
+                style="@style/Aw.Typography.Title.XLarge"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/transparent"
                 android:completionThreshold="1"
-                android:fontFamily="@font/font_semibold"
                 android:gravity="end"
                 android:hint="0"
                 android:imeOptions="actionDone"
@@ -121,74 +86,65 @@
                 android:lines="1"
                 android:maxLines="1"
                 android:paddingStart="@dimen/dp5"
-                android:paddingEnd="@dimen/dp5"
-                android:textColor="@color/text_dark_gray"
-                android:textColorHint="@color/light_gray"
-                android:textSize="36sp" />
+                android:paddingEnd="@dimen/dp5" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/small_12"
             android:gravity="center_vertical"
-            android:layout_marginTop="@dimen/dp12"
             android:orientation="horizontal">
 
             <TextView
+                style="@style/Aw.Typography.Sub.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/available"
                 android:paddingStart="2dp"
-                android:textColor="@color/dove"
-                android:textSize="@dimen/sp13" />
+                android:text="@string/available" />
 
             <TextView
+                style="@style/Aw.Typography.Sub.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=":"
-                android:textColor="@color/dove"
-                android:textSize="@dimen/sp13" />
+                android:text=":" />
 
             <TextView
                 android:id="@+id/text_available"
+                style="@style/Aw.Typography.Sub.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="3dp"
-                android:textColor="@color/dove"
-                android:textSize="@dimen/sp13"
+                android:layout_marginStart="@dimen/mini_4"
                 tools:text="4.4328" />
 
             <TextView
                 android:id="@+id/text_symbol"
+                style="@style/Aw.Typography.Sub.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="3dp"
-                android:textColor="@color/dove"
-                android:textSize="@dimen/sp13"
+                android:layout_marginStart="@dimen/mini_4"
                 tools:text="ETH" />
 
             <TextView
                 android:id="@+id/text_error"
+                style="@style/Aw.Typography.SemiBold"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
                 android:gravity="end"
                 android:text="@string/error_insufficient_funds"
-                android:textColor="@color/danger"
-                android:textSize="@dimen/sp17"
-                android:visibility="gone" />
+                android:textColor="?colorError"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/text_all_funds"
+                style="@style/Aw.Typography.Control"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
                 android:gravity="end"
                 android:lines="1"
                 android:text="@string/all_funds"
-                android:textColor="@color/azure"
-                android:textSize="@dimen/sp17"
                 android:visibility="visible" />
 
         </LinearLayout>

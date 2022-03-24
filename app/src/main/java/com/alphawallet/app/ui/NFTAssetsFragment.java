@@ -41,6 +41,7 @@ import com.alphawallet.app.ui.widget.divider.ItemOffsetDecoration;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.NFTAssetsViewModel;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.google.android.material.color.MaterialColors;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -145,7 +146,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         recyclerView.removeItemDecoration(listItemDecoration);
         recyclerView.addItemDecoration(gridItemDecoration);
-        recyclerView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+        recyclerView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.surface));
         initAndAttachAdapter(true);
     }
 

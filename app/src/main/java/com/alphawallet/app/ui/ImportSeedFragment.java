@@ -196,17 +196,17 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
         }
 
         if (passwordPhraseCounter.match()) {
-            wordCount.setTextColor(ContextCompat.getColor(requireActivity(), R.color.nasty_green));
+            wordCount.setTextColor(ContextCompat.getColor(requireActivity(), R.color.positive));
             wordCount.setTypeface(boldTypeface);
             updateButtonState(true);
         } else if (passwordPhraseCounter.notEnough())
         {
-            wordCount.setTextColor(ContextCompat.getColor(requireActivity(), R.color.colorPrimaryDark));
+            wordCount.setTextColor(ContextCompat.getColor(requireActivity(), R.color.text_secondary));
             wordCount.setTypeface(normalTypeface);
             updateButtonState(false);
         } else if (passwordPhraseCounter.exceed())
         {
-            wordCount.setTextColor(ContextCompat.getColor(requireActivity(), R.color.dark_seed_danger));
+            wordCount.setTextColor(ContextCompat.getColor(requireActivity(), R.color.error));
             updateButtonState(false);
         }
 

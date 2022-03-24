@@ -199,9 +199,12 @@ public class TokenIcon extends ConstraintLayout
 
         if (iconItem.usePrimary())
         {
+            final RequestOptions optionalCircleCrop = squareToken || iconItem.getUrl().startsWith(Utils.ALPHAWALLET_REPO_NAME) ? new RequestOptions() : new RequestOptions().circleCrop();
+
             currentRq = Glide.with(getContext())
                     .load(iconItem.getUrl())
                     .placeholder(R.drawable.ic_token_eth)
+                    .apply(optionalCircleCrop)
                     .listener(requestListener)
                     .into(new DrawableImageViewTarget(icon)).getRequest();
         }

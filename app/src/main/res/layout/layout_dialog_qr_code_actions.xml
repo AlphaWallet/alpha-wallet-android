@@ -1,93 +1,40 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
     android:orientation="vertical">
-    
+
     <TextView
         android:id="@+id/send_to_this_address_action"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_gravity="center_vertical"
-        android:fontFamily="@font/font_regular"
-        android:gravity="center_vertical"
-        android:paddingStart="20dp"
-        android:paddingEnd="15dp"
-        android:text="@string/action_send_to_this_address"
-        android:textColor="@color/black"
-        android:textSize="17sp" />
+        style="@style/Aw.Component.ActionItem"
+        android:text="@string/action_send_to_this_address" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury"/>
+    <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/add_custom_token_action"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_gravity="center_vertical"
-        android:fontFamily="@font/font_regular"
-        android:gravity="center_vertical"
-        android:paddingStart="20dp"
-        android:paddingEnd="15dp"
-        android:text="@string/title_add_token"
-        android:textColor="@color/black"
-        android:textSize="17sp" />
+        style="@style/Aw.Component.ActionItem"
+        android:text="@string/title_add_token" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury"/>
+    <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/watch_account_action"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_gravity="center_vertical"
-        android:fontFamily="@font/font_regular"
-        android:gravity="center_vertical"
-        android:paddingStart="20dp"
-        android:paddingEnd="15dp"
-        android:text="@string/action_watch_account"
-        android:textColor="@color/black"
-        android:textSize="17sp" />
+        style="@style/Aw.Component.ActionItem"
+        android:text="@string/action_watch_account" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury"/>
+    <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/open_in_etherscan_action"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_gravity="center_vertical"
-        android:fontFamily="@font/font_regular"
-        android:gravity="center_vertical"
-        android:paddingStart="20dp"
-        android:paddingEnd="15dp"
-        android:text="@string/action_open_etherscan"
-        android:textColor="@color/black"
-        android:textSize="17sp" />
+        style="@style/Aw.Component.ActionItem"
+        android:text="@string/action_open_etherscan" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury"/>
-    
+    <View style="@style/Aw.Component.Separator" />
+
     <TextView
         android:id="@+id/close_action"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_gravity="center_vertical"
-        android:fontFamily="@font/font_bold"
-        android:gravity="center_vertical"
-        android:paddingStart="20dp"
-        android:paddingEnd="15dp"
-        android:text="@string/action_cancel"
-        android:textColor="@color/black"
-        android:textSize="17sp" />
+        style="@style/Aw.Component.ActionItem"
+        android:text="@string/action_cancel" />
 
 </LinearLayout>
 

@@ -265,4 +265,17 @@ public abstract class C {
     public static final String APP_NAME = "PACKAGE_NAME";
 
     public static final String ALPHAWALLET_LOGO_URI = "https://alphawallet.com/wp-content/themes/alphawallet/img/alphawallet-logo.svg";
+
+    // Theme/Dark Mode
+    public static final int THEME_LIGHT = 0;
+    public static final int THEME_DARK = 1;
+    public static final int THEME_AUTO = 2;
+
+    // OpenSea APIs
+    public static final String OPENSEA_ASSETS_API_MAINNET = "https://api.opensea.io/api/v1/assets/?owner=";
+    public static final String OPENSEA_ASSETS_API_RINKEBY = "https://rinkeby-api.opensea.io/api/v1/assets/?owner=";
+    public static final String OPENSEA_ASSETS_API_MATIC = "https://api.opensea.io/api/v2/assets/matic?owner_address=";
+    public static final String OPENSEA_SINGLE_ASSET_API_MAINNET = "https://api.opensea.io/api/v1/asset/";
+    public static final String OPENSEA_SINGLE_ASSET_API_RINKEBY = "https://rinkeby-api.opensea.io/api/v1/asset/";
+    public static final String OPENSEA_SINGLE_ASSET_API_MATIC = "https://api.opensea.io/api/v2/metadata/matic/";
 }

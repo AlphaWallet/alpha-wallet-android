@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>ComplexCondition:WCSession.kt$WCSession.Companion$bridge == null || key == null || topic == null || version == null</ID>
+    <ID>ComplexMethod:WCClient.kt$WCClient$private fun handleRequest(request: JsonRpcRequest&lt;JsonArray&gt;)</ID>
+    <ID>FunctionParameterNaming:WCClient.kt$WCClient$_chainId: Long</ID>
+    <ID>MagicNumber:JsonRpcModels.kt$JsonRpcError.Companion$32000</ID>
+    <ID>MagicNumber:JsonRpcModels.kt$JsonRpcError.Companion$32600</ID>
+    <ID>MagicNumber:JsonRpcModels.kt$JsonRpcError.Companion$32601</ID>
+    <ID>MagicNumber:JsonRpcModels.kt$JsonRpcError.Companion$32602</ID>
+    <ID>MagicNumber:JsonRpcModels.kt$JsonRpcError.Companion$32700</ID>
+    <ID>MagicNumber:WCCipher.kt$WCCipher$16</ID>
+    <ID>MagicNumber:WCClient.kt$WCClient$1000</ID>
+    <ID>MaxLineLength:WCClient.kt$WCClient$fun</ID>
+    <ID>NewLineAtEndOfFile:Enums.kt$com.alphawallet.app.walletconnect.entity.Enums.kt</ID>
+    <ID>NewLineAtEndOfFile:EthereumModels.kt$com.alphawallet.app.walletconnect.entity.EthereumModels.kt</ID>
+    <ID>NewLineAtEndOfFile:Exceptions.kt$com.alphawallet.app.walletconnect.entity.Exceptions.kt</ID>
+    <ID>NewLineAtEndOfFile:Extensions.kt$com.alphawallet.app.walletconnect.util.Extensions.kt</ID>
+    <ID>NewLineAtEndOfFile:JsonRpcModels.kt$com.alphawallet.app.walletconnect.entity.JsonRpcModels.kt</ID>
+    <ID>NewLineAtEndOfFile:ReleaseTree.kt$com.alphawallet.app.util.ReleaseTree.kt</ID>
+    <ID>NewLineAtEndOfFile:SessionModels.kt$com.alphawallet.app.walletconnect.entity.SessionModels.kt</ID>
+    <ID>NewLineAtEndOfFile:WCSession.kt$com.alphawallet.app.walletconnect.WCSession.kt</ID>
+    <ID>ReturnCount:WCSession.kt$WCSession.Companion$fun from(from: String): WCSession?</ID>
+    <ID>SwallowedException:WCClient.kt$WCClient$e: JsonSyntaxException</ID>
+    <ID>ThrowsCount:WCClient.kt$WCClient$private fun handleRequest(request: JsonRpcRequest&lt;JsonArray&gt;)</ID>
+    <ID>TooGenericExceptionCaught:WCClient.kt$WCClient$e: Exception</ID>
+    <ID>TooManyFunctions:WCClient.kt$WCClient : WebSocketListener</ID>
+    <ID>UnusedPrivateMember:WCClient.kt$WCClient$private val TAG = WCClient::class.java.simpleName</ID>
+    <ID>VariableNaming:WCClient.kt$WCClient$private val TAG = WCClient::class.java.simpleName</ID>
+    <ID>WildcardImport:WCClient.kt$import com.alphawallet.app.walletconnect.entity.*</ID>
+    <ID>WildcardImport:WCClient.kt$import okhttp3.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

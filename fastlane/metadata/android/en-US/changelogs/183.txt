@@ -1,0 +1,9 @@
+- Improve ERC721 and ERC1155 consistency.
+- Improve Polygon NFT discovery.
+- Fix magiclink urlencoding issue.
+- Fix Arbitrum chain sending.
+- Move gas check to widget to ensure user can make sending decision.
+- Fix Burmese font clipping.
+- UI consistency improvements.
+- Internal structure improvements.
+- Various minor stability and performance improvements.

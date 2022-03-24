@@ -1,4 +1,4 @@
-name: Android Pull Request & Master CI
+name: Android lint
 
 on: [push, pull_request]
 

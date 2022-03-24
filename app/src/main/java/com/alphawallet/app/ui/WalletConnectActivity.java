@@ -258,11 +258,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void parseSessionCode(String wcCode)
     {
-        if (wcCode != null && wcCode.startsWith(WC_LOCAL_PREFIX)) {
+        if (wcCode != null && wcCode.startsWith(WC_LOCAL_PREFIX))
+        {
             wcCode = wcCode.replace(WC_LOCAL_PREFIX, "");
             fromDappBrowser = true;
         }
-        else if (wcCode != null && wcCode.startsWith(WC_INTENT)) {
+        else if (wcCode != null && wcCode.startsWith(WC_INTENT))
+        {
             wcCode = wcCode.replace(WC_INTENT, "");
             fromPhoneBrowser = true; //don't use this yet, but could use it for switching between apps
         }
@@ -375,9 +377,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-    private final BroadcastReceiver walletConnectActionReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver walletConnectActionReceiver = new BroadcastReceiver()
+    {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, Intent intent)
+        {
             Timber.tag(TAG).d("Received message");
             String action = intent.getAction();
             switch (action)
@@ -388,10 +392,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     Timber.tag(TAG).d("MSG: %s", action);
 //                    getPendingRequest();
                     WCRequest wcRequest = (WCRequest) intent.getParcelableExtra("wcrequest");
-                    if (wcRequest != null) {
+                    if (wcRequest != null)
+                    {
                         executedPendingRequest(wcRequest.id);
                         receiveRequest(wcRequest);
-                    } else {
+                    }
+                    else
+                    {
                         // something went wrong
                     }
                     break;
@@ -681,12 +688,17 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void onSessionRequest(Long id, WCPeerMeta peer, long chainId)
     {
-        if (peer == null) { finish(); }
+        if (peer == null)
+        {
+            finish();
+        }
 
         closeErrorDialog();
 
-        if (walletConnectDialog != null) {
-            if (walletConnectDialog.isShowing()) {      // if already opened
+        if (walletConnectDialog != null)
+        {
+            if (walletConnectDialog.isShowing())
+            {      // if already opened
                 walletConnectDialog.forceDismiss();
             }
         }
@@ -1050,7 +1062,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
+            if (confirmationDialog != null && confirmationDialog.isShowing())
+                confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
         }
         if (resultCode == RESULT_OK)
         {
@@ -1227,7 +1240,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     }
 
     @Override
-    public void openChainSelection() {
+    public void openChainSelection()
+    {
         ActionSheetCallback.super.openChainSelection();
         Intent intent = new Intent(WalletConnectActivity.this, SelectNetworkActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
@@ -1235,28 +1249,36 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         getNetwork.launch(intent);
     }
 
-    private void onSwitchChainRequest(Intent intent) {
+    private void onSwitchChainRequest(Intent intent)
+    {
         String name = intent.getStringExtra(C.EXTRA_NAME);
         long requestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
         long chainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
         String currentSessionId = intent.getStringExtra(C.EXTRA_SESSION_ID);
         Timber.tag(TAG).d("MSG: SWITCH CHAIN: name: %s, chainId: %s", name, chainId);
 
-        if (!session.getTopic().equals(currentSessionId)) {
+        if (!session.getTopic().equals(currentSessionId))
+        {
             Timber.tag(TAG).d("Wrong session");
             return;
         }
-        if (chainId == -1 || currentSessionId == null || requestId == -1) {
+        if (chainId == -1 || currentSessionId == null || requestId == -1)
+        {
             Timber.tag(TAG).d("Cant find data");
-        } else {
+        }
+        else
+        {
             boolean chainAvailable = EthereumNetworkBase.getNetworkInfo(chainId) != null;
-            if (!chainAvailable) {
+            if (!chainAvailable)
+            {
                 viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, false, false);
-            } else {
+            }
+            else
+            {
                 AlertDialog alertDialog = new AlertDialog.Builder(WalletConnectActivity.this)
                         .setTitle(getString(R.string.switch_chain_request))
                         .setMessage(String.format("%s is requesting to switch to the %s chain with chain id: %s",
-                                remotePeerMeta.getName(), EthereumNetworkBase.getShortChainName(chainId),  chainId))
+                                remotePeerMeta.getName(), EthereumNetworkBase.getShortChainName(chainId), chainId))
                         .setPositiveButton("Approve", (dialog, which) -> {
                             viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, true, chainAvailable);
                             // TODO update db and ui
@@ -1272,12 +1294,15 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-    private void onAddChainRequest(Intent intent) {
+    private void onAddChainRequest(Intent intent)
+    {
         long requestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
         String currentSessionId = intent.getStringExtra(C.EXTRA_SESSION_ID);
         WalletAddEthereumChainObject chainObject = intent.getParcelableExtra(C.EXTRA_CHAIN_OBJ);
-        if (chainObject != null) {
-            if (viewModel.isChainAdded(chainObject.getChainId())) {
+        if (chainObject != null)
+        {
+            if (viewModel.isChainAdded(chainObject.getChainId()))
+            {
                 // if chain is already added, approve the request
                 Timber.tag(TAG).d("Chain is already added. Skipping dialog and responding");
                 viewModel.approveAddEthereumChain(
@@ -1287,7 +1312,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         chainObject,
                         true
                 );
-            } else {
+            }
+            else
+            {
                 // showing dialog because chain is not added
                 addEthereumChainPrompt = new AddEthereumChainPrompt(
                         this,
@@ -1305,7 +1332,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         }
                 );
 
-                addEthereumChainPrompt.setOnDismissListener( dialog -> {
+                addEthereumChainPrompt.setOnDismissListener(dialog -> {
                     viewModel.approveAddEthereumChain(
                             WalletConnectActivity.this,
                             requestId,
@@ -1317,7 +1344,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 });
                 addEthereumChainPrompt.show();
             }
-        } else {
+        }
+        else
+        {
             viewModel.approveAddEthereumChain(
                     WalletConnectActivity.this,
                     requestId,

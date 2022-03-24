@@ -45,7 +45,7 @@ import timber.log.Timber;
  */
 public class WalletConnectService extends Service
 {
-    private final long CONNECTION_TIMEOUT = 10*DateUtils.MINUTE_IN_MILLIS;
+    private final long CONNECTION_TIMEOUT = 10 * DateUtils.MINUTE_IN_MILLIS;
     private final static ConcurrentHashMap<String, WCClient> clientMap = new ConcurrentHashMap<>();
     private final static ConcurrentLinkedQueue<WCRequest> signRequests = new ConcurrentLinkedQueue<>();
     private final static ConcurrentHashMap<String, WCClient> clientMapByRequestId = new ConcurrentHashMap<>();
@@ -197,8 +197,14 @@ public class WalletConnectService extends Service
 
     public WCClient getClient(String sessionId)
     {
-        if (sessionId == null) { return null; }
-        else { return clientMap.get(sessionId); }
+        if (sessionId == null)
+        {
+            return null;
+        }
+        else
+        {
+            return clientMap.get(sessionId);
+        }
     }
 
     public void putClient(String sessionId, WCClient client)
@@ -384,7 +390,7 @@ public class WalletConnectService extends Service
 
             long lastUsed = getLastUsed(c);
             long timeUntilTerminate = CONNECTION_TIMEOUT - (System.currentTimeMillis() - lastUsed);
-            Timber.tag(TAG).d("Time until terminate: %s (%s)", (timeUntilTerminate/DateUtils.SECOND_IN_MILLIS), sessionKey);
+            Timber.tag(TAG).d("Time until terminate: %s (%s)", (timeUntilTerminate / DateUtils.SECOND_IN_MILLIS), sessionKey);
             if ((System.currentTimeMillis() - lastUsed) > CONNECTION_TIMEOUT)
             {
                 if (c.getSession() != null)
@@ -425,7 +431,8 @@ public class WalletConnectService extends Service
     private long getLastUsed(WCClient c)
     {
         String sessionId = c.sessionId();
-        if (sessionId != null && clientTimes.containsKey(sessionId)) return clientTimes.get(sessionId);
+        if (sessionId != null && clientTimes.containsKey(sessionId))
+            return clientTimes.get(sessionId);
         else return 0;
     }
 
@@ -471,40 +478,53 @@ public class WalletConnectService extends Service
         return true;
     }
 
-    private void switchChain(Intent intent) {
+    private void switchChain(Intent intent)
+    {
         long requestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
         String id = intent.getStringExtra(C.EXTRA_SESSION_ID);
         long chainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
         boolean approved = intent.getBooleanExtra(C.EXTRA_APPROVED, false);
         boolean chainAvailable = intent.getBooleanExtra(C.EXTRA_CHAIN_AVAILABLE, true);
         Timber.tag(TAG).d("sessionId: %s, chainId: %s, approved: %s", id, chainId, approved);
-        if (requestId != -1 && id != null && chainId != -1) {
+        if (requestId != -1 && id != null && chainId != -1)
+        {
             WCClient c = clientMap.get(id);
-            if (c != null) {
+            if (c != null)
+            {
                 c.switchChain(requestId, chainId, approved, chainAvailable);
-            } else {
+            }
+            else
+            {
                 Timber.tag(TAG).d("WCClient not found");
             }
         }
     }
 
-    public void addChain(Intent intent) {
+    public void addChain(Intent intent)
+    {
         long requestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
         String id = intent.getStringExtra(C.EXTRA_SESSION_ID);
         WalletAddEthereumChainObject chainObject = intent.getParcelableExtra(C.EXTRA_CHAIN_OBJ);
         boolean chainAdded = intent.getBooleanExtra(C.EXTRA_APPROVED, false);
         Timber.tag(TAG).d("sessionId: %s, chainObj: %s, chainAdded: %s", id, chainObject, chainAdded);
 
-        if (requestId != -1) {
+        if (requestId != -1)
+        {
             WCClient c = clientMap.get(id);
-            if (c != null) {
-                if (chainObject != null) {
+            if (c != null)
+            {
+                if (chainObject != null)
+                {
                     c.addChain(requestId, chainObject, chainAdded);
-                } else {
+                }
+                else
+                {
                     // reject with serverError
                     c.addChain(requestId, chainObject, false);
                 }
-            } else {
+            }
+            else
+            {
                 Timber.tag(TAG).d("WCClient not found");
             }
         }

@@ -75,7 +75,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import javax.inject.Inject;
 
 @HiltViewModel
-public class WalletConnectViewModel extends BaseViewModel {
+public class WalletConnectViewModel extends BaseViewModel
+{
     public static final String WC_SESSION_DB = "wc_data-db.realm";
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> serviceReady = new MutableLiveData<>();
@@ -108,7 +109,8 @@ public class WalletConnectViewModel extends BaseViewModel {
                            GasService gasService,
                            TokensService tokensService,
                            AnalyticsServiceType analyticsService,
-                           EthereumNetworkRepositoryType ethereumNetworkRepository) {
+                           EthereumNetworkRepositoryType ethereumNetworkRepository)
+    {
         this.keyService = keyService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.createTransactionInteract = createTransactionInteract;
@@ -131,7 +133,7 @@ public class WalletConnectViewModel extends BaseViewModel {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service)
             {
-                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
+                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
                 Timber.tag(TAG).d("Service connected");
                 for (String sessionId : clientBuffer.keySet())
                 {
@@ -208,12 +210,14 @@ public class WalletConnectViewModel extends BaseViewModel {
         gasService.stopGasPriceCycle();
     }
 
-    private void onDefaultWallet(Wallet w) {
+    private void onDefaultWallet(Wallet w)
+    {
         this.wallet = w;
         defaultWallet.postValue(w);
     }
 
-    public LiveData<Wallet> defaultWallet() {
+    public LiveData<Wallet> defaultWallet()
+    {
         return defaultWallet;
     }
 
@@ -222,15 +226,18 @@ public class WalletConnectViewModel extends BaseViewModel {
         return wallet;
     }
 
-    public LiveData<Boolean> serviceReady() {
+    public LiveData<Boolean> serviceReady()
+    {
         return serviceReady;
     }
 
-    public void getAuthenticationForSignature(Wallet wallet, Activity activity, SignAuthenticationCallback callback) {
+    public void getAuthenticationForSignature(Wallet wallet, Activity activity, SignAuthenticationCallback callback)
+    {
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void signMessage(Signable message, DAppFunction dAppFunction) {
+    public void signMessage(Signable message, DAppFunction dAppFunction)
+    {
         resetSignDialog();
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), message, MAINNET_ID)
                 .subscribeOn(Schedulers.computation())
@@ -315,8 +322,8 @@ public class WalletConnectViewModel extends BaseViewModel {
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
             RealmWCSession sessionData = realm.where(RealmWCSession.class)
-                .equalTo("sessionId", sessionId)
-                .findFirst();
+                    .equalTo("sessionId", sessionId)
+                    .findFirst();
 
             if (sessionData != null)
             {
@@ -502,7 +509,7 @@ public class WalletConnectViewModel extends BaseViewModel {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service)
             {
-                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
+                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
                 walletConnectService.removePendingRequest(id);
             }
 
@@ -526,7 +533,7 @@ public class WalletConnectViewModel extends BaseViewModel {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service)
             {
-                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
+                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
                 clientCb.getClient(walletConnectService.getClient(sessionId));
             }
 
@@ -549,7 +556,7 @@ public class WalletConnectViewModel extends BaseViewModel {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service)
             {
-                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder)service).getService();
+                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
                 walletConnectService.putClient(sessionId, client);
             }
 
@@ -588,7 +595,10 @@ public class WalletConnectViewModel extends BaseViewModel {
     public String getNetworkSymbol(long chainId)
     {
         NetworkInfo info = findDefaultNetworkInteract.getNetworkInfo(chainId);
-        if (info == null) { info = findDefaultNetworkInteract.getNetworkInfo(MAINNET_ID); }
+        if (info == null)
+        {
+            info = findDefaultNetworkInteract.getNetworkInfo(MAINNET_ID);
+        }
         return info.symbol;
     }
 
@@ -608,7 +618,8 @@ public class WalletConnectViewModel extends BaseViewModel {
         }
     }
 
-    public void approveSwitchEthChain(Context context, long requestId, String sessionId, long chainId, boolean approve, boolean chainAvailable) {
+    public void approveSwitchEthChain(Context context, long requestId, String sessionId, long chainId, boolean approve, boolean chainAvailable)
+    {
         Intent i = new Intent(context, WalletConnectService.class);
         i.setAction(String.valueOf(WalletConnectActions.SWITCH_CHAIN.ordinal()));
         i.putExtra(C.EXTRA_WC_REQUEST_ID, requestId);
@@ -623,7 +634,8 @@ public class WalletConnectViewModel extends BaseViewModel {
                                         long requestId,
                                         String sessionId,
                                         WalletAddEthereumChainObject chainObject,
-                                        boolean approved) {
+                                        boolean approved)
+    {
         Intent i = new Intent(context, WalletConnectService.class);
         i.setAction(String.valueOf(WalletConnectActions.ADD_CHAIN.ordinal()));
         i.putExtra(C.EXTRA_WC_REQUEST_ID, requestId);
@@ -631,9 +643,11 @@ public class WalletConnectViewModel extends BaseViewModel {
         i.putExtra(C.EXTRA_CHAIN_OBJ, chainObject);
         i.putExtra(C.EXTRA_APPROVED, approved);
 
-        if (approved) {
+        if (approved)
+        {
             // add only if not present
-            if (!isChainAdded(chainObject.getChainId())) {
+            if (!isChainAdded(chainObject.getChainId()))
+            {
                 ethereumNetworkRepository.addCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
                         chainObject.nativeCurrency.symbol, "", "", false, -1L);
             }
@@ -645,13 +659,17 @@ public class WalletConnectViewModel extends BaseViewModel {
     {
         for (String thisRpc : chainObject.rpcUrls)
         {
-            if (thisRpc.toLowerCase().startsWith("http")) { return thisRpc; }
+            if (thisRpc.toLowerCase().startsWith("http"))
+            {
+                return thisRpc;
+            }
         }
 
         return "";
     }
 
-    public boolean isChainAdded(long chainId) {
+    public boolean isChainAdded(long chainId)
+    {
         return ethereumNetworkRepository.getNetworkByChain(chainId) != null;
     }
 }

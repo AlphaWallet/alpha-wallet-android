@@ -898,8 +898,11 @@ public class BackupKeyActivity extends BaseActivity implements
                 break;
             case SET_JSON_PASSWORD:
                 String txt = inputView.getText().toString();
-                //password length minimum 6
-                functionButtonBar.setPrimaryButtonEnabled(txt.length() >= 6);
+                if (txt.length() >= 6)
+                {
+                    inputView.setError("");
+                    functionButtonBar.setPrimaryButtonEnabled(true);
+                }
                 break;
             case SHOW_SEED_PHRASE:
                 break;

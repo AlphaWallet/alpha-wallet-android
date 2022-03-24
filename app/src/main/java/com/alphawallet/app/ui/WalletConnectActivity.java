@@ -119,7 +119,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private FunctionButtonBar functionBar;
     private boolean fromDappBrowser = false;  //if using this from dappBrowser (which is a bit strange but could happen) then return back to browser once signed
     private boolean fromPhoneBrowser = false; //if from phone browser, clicking 'back' should take user back to dapp running on the phone's browser,
-                                              // -- according to WalletConnect's expected UX docs.
+    // -- according to WalletConnect's expected UX docs.
     private boolean fromSessionActivity = false;
 
     private String qrCode;
@@ -635,17 +635,17 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         viewModel.getClient(this, sessionId, client ->
                 runOnUiThread(() -> {
-            if (client == null || !client.isConnected())
-            {
-                statusText.setText(R.string.not_connected);
-                statusText.setTextColor(getColor(R.color.error));
-            }
-            else
-            {
-                statusText.setText(R.string.online);
-                statusText.setTextColor(getColor(R.color.positive));
-            }
-        }));
+                    if (client == null || !client.isConnected())
+                    {
+                        statusText.setText(R.string.not_connected);
+                        statusText.setTextColor(getColor(R.color.error));
+                    }
+                    else
+                    {
+                        statusText.setText(R.string.online);
+                        statusText.setTextColor(getColor(R.color.positive));
+                    }
+                }));
     }
 
     private void displaySessionStatus(String sessionId)
@@ -1301,55 +1301,35 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         WalletAddEthereumChainObject chainObject = intent.getParcelableExtra(C.EXTRA_CHAIN_OBJ);
         if (chainObject != null)
         {
-            if (viewModel.isChainAdded(chainObject.getChainId()))
-            {
-                // if chain is already added, approve the request
-                Timber.tag(TAG).d("Chain is already added. Skipping dialog and responding");
+            // showing dialog because chain is not added
+            addEthereumChainPrompt = new AddEthereumChainPrompt(
+                    this,
+                    chainObject,
+                    chainObject1 -> {
+                        this.addEthereumChainPrompt.setOnDismissListener(null);
+                        this.addEthereumChainPrompt.dismiss();
+                        viewModel.approveAddEthereumChain(
+                                WalletConnectActivity.this,
+                                requestId,
+                                currentSessionId,
+                                chainObject,
+                                true
+                        );
+                        viewModel.updateSession(currentSessionId, chainObject.getChainId());
+                        displaySessionStatus(currentSessionId);
+                    }
+            );
+
+            addEthereumChainPrompt.setOnDismissListener(dialog -> {
                 viewModel.approveAddEthereumChain(
                         WalletConnectActivity.this,
                         requestId,
                         currentSessionId,
                         chainObject,
-                        true
+                        false
                 );
-
-                viewModel.updateSession(currentSessionId, chainObject.getChainId());
-                displaySessionStatus(currentSessionId);
-            }
-            else
-            {
-                // showing dialog because chain is not added
-                addEthereumChainPrompt = new AddEthereumChainPrompt(
-                        this,
-                        chainObject,
-                        chainObject1 -> {
-                            this.addEthereumChainPrompt.setOnDismissListener(null);
-                            this.addEthereumChainPrompt.dismiss();
-                            viewModel.approveAddEthereumChain(
-                                    WalletConnectActivity.this,
-                                    requestId,
-                                    currentSessionId,
-                                    chainObject,
-                                    true
-                            );
-
-                            viewModel.updateSession(currentSessionId, chainObject.getChainId());
-                            displaySessionStatus(currentSessionId);
-                        }
-                );
-
-                addEthereumChainPrompt.setOnDismissListener(dialog -> {
-                    viewModel.approveAddEthereumChain(
-                            WalletConnectActivity.this,
-                            requestId,
-                            currentSessionId,
-                            chainObject,
-                            false
-
-                    );
-                });
-                addEthereumChainPrompt.show();
-            }
+            });
+            addEthereumChainPrompt.show();
         }
         else
         {

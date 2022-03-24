@@ -1257,12 +1257,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         String currentSessionId = intent.getStringExtra(C.EXTRA_SESSION_ID);
         Timber.tag(TAG).d("MSG: SWITCH CHAIN: name: %s, chainId: %s", name, chainId);
 
-        if (!session.getTopic().equals(currentSessionId))
+        if (currentSessionId == null || !session.getTopic().equals(currentSessionId))
         {
             Timber.tag(TAG).d("Wrong session");
             return;
         }
-        if (chainId == -1 || currentSessionId == null || requestId == -1)
+        if (chainId == -1 || requestId == -1)
         {
             Timber.tag(TAG).d("Cant find data");
         }
@@ -1281,7 +1281,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                                 remotePeerMeta.getName(), EthereumNetworkBase.getShortChainName(chainId), chainId))
                         .setPositiveButton("Approve", (dialog, which) -> {
                             viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, true, chainAvailable);
-                            // TODO update db and ui
+                            viewModel.updateSession(currentSessionId, chainId);
                             displaySessionStatus(session.getTopic());
                         })
                         .setNegativeButton("Reject", (dialog, which) ->
@@ -1312,6 +1312,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         chainObject,
                         true
                 );
+
+                viewModel.updateSession(currentSessionId, chainObject.getChainId());
+                displaySessionStatus(currentSessionId);
             }
             else
             {
@@ -1329,6 +1332,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                                     chainObject,
                                     true
                             );
+
+                            viewModel.updateSession(currentSessionId, chainObject.getChainId());
+                            displaySessionStatus(currentSessionId);
                         }
                 );
 

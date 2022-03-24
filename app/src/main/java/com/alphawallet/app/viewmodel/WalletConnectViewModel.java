@@ -415,6 +415,31 @@ public class WalletConnectViewModel extends BaseViewModel
         gasService.startGasPriceCycle(sessionChainId);
     }
 
+    public void updateSession(String sessionId, long sessionChainId)
+    {
+        Timber.tag(TAG).d("updateSession: sessionId: %s, updated chainId: %s", sessionId, sessionChainId);
+        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        {
+            RealmWCSession sessionData = realm.where(RealmWCSession.class)
+                    .equalTo("sessionId", sessionId)
+                    .findFirst();
+            realm.beginTransaction();
+            if (sessionData != null)
+            {
+                sessionData.setChainId(sessionChainId);
+            }
+            else
+            {
+                Timber.tag("TAG").d("updateSession: could not fin session!");
+            }
+            realm.commitTransaction();
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
+    }
+
     public void deleteSession(String sessionId)
     {
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))

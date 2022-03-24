@@ -12,11 +12,11 @@ jobs:
         with:
           fetch-depth: 1
       - name: set up JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: zulu
-        java-version: 11
-        cache: gradle
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+          cache: gradle
       - name: Run detekt
         run: ./gradlew detekt
         continue-on-error: true

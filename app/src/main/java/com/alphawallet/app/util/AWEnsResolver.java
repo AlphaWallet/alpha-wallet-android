@@ -42,6 +42,7 @@ public class AWEnsResolver extends EnsResolver
     private static final String DAS_NAME = "[DAS_NAME]";
     private static final String DAS_PAYLOAD = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"das_searchAccount\",\"params\":[\"" + DAS_NAME + "\"]}";
     private static final String OPENSEA_IMAGE_PREVIEW = "image_preview_url";
+    private static final String OPENSEA_IMAGE_ORIGINAL = "image_original_url"; //in case of SVG; Opensea breaks SVG compression
     private final Context context;
     private final OkHttpClient client;
 
@@ -162,13 +163,15 @@ public class AWEnsResolver extends EnsResolver
                 String tokenAddress = Numeric.prependHexPrefix(matcher.group(6));
                 String tokenId = matcher.group(8);
 
-                OpenSeaService oss = new OpenSeaService();
-                String asset = oss.fetchAsset(tokenAddress, tokenId, chainId);
+                String asset = OpenSeaService.fetchAsset(chainId, tokenAddress, tokenId);
                 JSONObject assetObj = new JSONObject(asset);
-                if (assetObj.has(OPENSEA_IMAGE_PREVIEW))
+                String url = assetObj.getString(OPENSEA_IMAGE_PREVIEW);
+                if (!TextUtils.isEmpty(url) && url.endsWith(".svg"))
                 {
-                    return assetObj.getString(OPENSEA_IMAGE_PREVIEW);
+                    String original = assetObj.getString(OPENSEA_IMAGE_ORIGINAL);
+                    if (!TextUtils.isEmpty(original)) url = original;
                 }
+                return url;
             }
         }
         catch (Exception e)

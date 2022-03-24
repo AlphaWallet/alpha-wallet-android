@@ -63,7 +63,7 @@ public class OpenSeaService
                 .build();
     }
 
-    private Request buildRequest(String api)
+    private static Request buildRequest(String api)
     {
         Request.Builder requestB = new Request.Builder()
                 .url(api)
@@ -80,7 +80,7 @@ public class OpenSeaService
         return requestB.build();
     }
 
-    private String executeRequest(String api)
+    private static String executeRequest(String api)
     {
         try (okhttp3.Response response = httpClient.newCall(buildRequest(api)).execute())
         {
@@ -119,7 +119,7 @@ public class OpenSeaService
 
             do
             {
-                String jsonData = fetchAssets(address, networkId, pageOffset);
+                String jsonData = fetchAssets(networkId, address, pageOffset);
                 if (!hasAssets(jsonData))
                 {
                     return foundTokens.values().toArray(new Token[0]); //on error return results found so far
@@ -331,10 +331,10 @@ public class OpenSeaService
     public Single<String> getAsset(Token token, BigInteger tokenId)
     {
         return Single.fromCallable(() ->
-                fetchAsset(token.tokenInfo.address, tokenId.toString(), token.tokenInfo.chainId));
+                fetchAsset(token.tokenInfo.chainId, token.tokenInfo.address, tokenId.toString()));
     }
 
-    public String fetchAssets(String address, long networkId, int offset)
+    public static String fetchAssets(long networkId, String address, int offset)
     {
         String api = "";
         if (networkId == EthereumNetworkBase.MAINNET_ID)
@@ -358,7 +358,7 @@ public class OpenSeaService
         return executeRequest(builder.build().toString());
     }
 
-    public String fetchAsset(String contractAddress, String tokenId, long networkId)
+    public static String fetchAsset(long networkId, String contractAddress, String tokenId)
     {
         String api = "";
         if (networkId == EthereumNetworkBase.MAINNET_ID)

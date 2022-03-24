@@ -105,6 +105,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private ActionSheetDialog confirmationDialog;
     private ActionSheetDialog walletConnectDialog;
+    private AddEthereumChainPrompt addEthereumChainPrompt;
 
     private ImageView icon;
     private TextView peerName;
@@ -408,7 +409,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     onSwitchChainRequest(intent);
                     break;
                 case C.WALLET_CONNECT_ADD_CHAIN:
-                    Timber.tag(TAG).d("MSG: SWITCH CHAIN");
+                    Timber.tag(TAG).d("MSG: ADD CHAIN");
                     onAddChainRequest(intent);
                     break;
 
@@ -505,6 +506,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         filter.addAction(C.WALLET_CONNECT_FAIL);
         filter.addAction(C.WALLET_CONNECT_CLIENT_TERMINATE);
         filter.addAction(C.WALLET_CONNECT_SWITCH_CHAIN);
+        filter.addAction(C.WALLET_CONNECT_ADD_CHAIN);
         registerReceiver(walletConnectActionReceiver, filter);
     }
 
@@ -1277,6 +1279,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         if (chainObject != null) {
             if (viewModel.isChainAdded(chainObject.getChainId())) {
                 // if chain is already added, approve the request
+                Timber.tag(TAG).d("Chain is already added. Skipping dialog and responding");
                 viewModel.approveAddEthereumChain(
                         WalletConnectActivity.this,
                         requestId,
@@ -1286,17 +1289,18 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 );
             } else {
                 // showing dialog because chain is not added
-                AddEthereumChainPrompt addEthereumChainPrompt = new AddEthereumChainPrompt(
+                addEthereumChainPrompt = new AddEthereumChainPrompt(
                         this,
                         chainObject,
                         chainObject1 -> {
+                            this.addEthereumChainPrompt.setOnDismissListener(null);
+                            this.addEthereumChainPrompt.dismiss();
                             viewModel.approveAddEthereumChain(
                                     WalletConnectActivity.this,
                                     requestId,
                                     currentSessionId,
                                     chainObject,
                                     true
-
                             );
                         }
                 );
@@ -1323,4 +1327,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             );
         }
     }
+
+
 }

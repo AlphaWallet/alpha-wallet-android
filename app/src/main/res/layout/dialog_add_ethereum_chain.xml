@@ -23,7 +23,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/standard_16"
             android:layout_marginBottom="@dimen/standard_16"
-            android:text="@string/switch_chain_request" />
+            android:text="@string/add_chain_request" />
 
     </RelativeLayout>
 

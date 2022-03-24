@@ -17,12 +17,6 @@ import timber.log.Timber;
 
 public class WalletAddEthereumChainObject implements Parcelable
 {
-    public static class NativeCurrency {
-        public String name;
-        public String symbol;
-        public int decimals;
-    }
-
     public NativeCurrency nativeCurrency;
     public String[] blockExplorerUrls;
     public String chainName;
@@ -53,9 +47,10 @@ public class WalletAddEthereumChainObject implements Parcelable
     }
 
     protected WalletAddEthereumChainObject(Parcel in) {
-        nativeCurrency.name = in.readString();
-        nativeCurrency.symbol = in.readString();
-        nativeCurrency.decimals = in.readInt();
+//        nativeCurrency.name = in.readString();
+//        nativeCurrency.symbol = in.readString();
+//        nativeCurrency.decimals = in.readInt();
+        nativeCurrency = NativeCurrency.CREATOR.createFromParcel(in);
         blockExplorerUrls = in.readInt() == 1 ? in.createStringArray() : null;
         chainName = in.readString();
         chainId = in.readString();
@@ -82,9 +77,10 @@ public class WalletAddEthereumChainObject implements Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         // native currency
-        dest.writeString(nativeCurrency.name);
-        dest.writeString(nativeCurrency.symbol);
-        dest.writeInt(nativeCurrency.decimals);
+//        dest.writeString(nativeCurrency.name);
+//        dest.writeString(nativeCurrency.symbol);
+//        dest.writeInt(nativeCurrency.decimals);
+        nativeCurrency.writeToParcel(dest, PARCELABLE_WRITE_RETURN_VALUE);
 
         dest.writeInt(blockExplorerUrls == null ? 0 : 1);
         if (blockExplorerUrls != null) {

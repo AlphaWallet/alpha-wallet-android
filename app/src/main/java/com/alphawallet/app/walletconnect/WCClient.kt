@@ -264,9 +264,10 @@ open class WCClient(
     }
 
     fun addChain(requestId: Long, chainObj: WalletAddEthereumChainObject, success: Boolean): Boolean {
-        Timber.tag(TAG).d("switchChain: id: %s, chainId: %s, success: %s", requestId, chainId, success);
+        Timber.tag(TAG).d("addChain: id: %s, chainId: %s, success: %s", requestId, chainObj.getChainId(), success);
         return if (success) {
-            updateSession(chainId = chainObj.getChainId())  // updated session with new chain Id
+            this.chainId = chainObj.getChainId().toString()
+            updateSession()  // updated session with new chain Id
             encryptAndSend(
                 gson.toJson(
                     JsonRpcResponse<Any>(id = requestId, result = null)
@@ -379,6 +380,7 @@ open class WCClient(
                 Timber.d("WCMethod: addEthereumChain")
                 val param: WCAddEthChain = gson.fromJson<List<WCAddEthChain>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+                Timber.tag(TAG).d("addChainRequest: $param")
                 onAddEthereumChain(request.id, param.toWalletAddEthereumObject())
             }
         }

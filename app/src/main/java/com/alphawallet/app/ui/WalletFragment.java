@@ -879,13 +879,7 @@ public class WalletFragment extends BaseFragment implements
     @Override
     public void onSearchClicked()
     {
-        if (getView() != null && getHost() != null && getChildFragmentManager().findFragmentByTag(SEARCH_FRAGMENT) == null)
-        {
-            getView().clearFocus();
-            Fragment f = new TokenSearchFragment();
-            getChildFragmentManager().beginTransaction()
-                    .add(R.id.coordinator, f, SEARCH_FRAGMENT)
-                    .commit();
-        }
+        Intent intent = new Intent(getActivity(), SearchActivity.class);
+        startActivity(intent);
     }
 }

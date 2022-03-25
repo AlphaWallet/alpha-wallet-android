@@ -30,11 +30,11 @@ detekt {
     toolVersion = "1.20.0-RC1"
     buildUponDefaultConfig = true // preconfigure defaults
     allRules = false // activate all available (even unstable) rules.
-    baseline = file("$projectDir/baseline/detekt.xml")
+    baseline = file("$projectDir/check/detekt-baseline.xml")
 }
 
 android_lint_reporter {
-    lintFilePath = "./build/reports/lint-results.xml"
+    lintFilePath = "./build/reports/check-results.xml"
     detektFilePath = "./build/reports/detekt/detekt.xml"
     githubOwner = "AlphaWallet"
     githubRepositoryName = "alpha-wallet-android"
@@ -123,7 +123,8 @@ android {
     lintOptions {
         abortOnError false
         ignoreWarnings true
-        baseline file("./baseline/lint.xml")
+        baseline file("./check/lint-baseline.xml")
+        lintConfig file('./check/lint-rules.xml')
         abortOnError true
     }
     compileOptions {

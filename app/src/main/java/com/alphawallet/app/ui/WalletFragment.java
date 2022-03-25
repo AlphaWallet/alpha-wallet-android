@@ -860,7 +860,6 @@ public class WalletFragment extends BaseFragment implements
 
         if (!hasShownWarning && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M)
         {
-            notificationView.setNotificationBackgroundColor(R.color.indigo);
             notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
             notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
             notificationView.setPrimaryButtonText(getContext().getString(R.string.hide_notification));

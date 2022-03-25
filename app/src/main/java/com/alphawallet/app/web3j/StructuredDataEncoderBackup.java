@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -232,7 +233,7 @@ public class StructuredDataEncoderBackup
     private byte[] convertToEncodedItem(String baseType, Object data) {
         byte[] hashBytes;
         try {
-            if (baseType.toLowerCase().startsWith("uint")
+            if (baseType.toLowerCase(Locale.getDefault()).startsWith("uint")
                     || baseType.toLowerCase().startsWith("int")) {
                 hashBytes = convertToBigInt(data).toByteArray();
             } else if (baseType.equals("string")) {

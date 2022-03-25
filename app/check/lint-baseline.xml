@@ -440,16 +440,4 @@
             line="119"
             column="17"/>
     </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;0.0&quot;, should use `@string` resource"
-        errorLine1="            android:text=&quot;0.0&quot; />"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/layout_url_bar_compact.xml"
-            line="80"
-            column="13"/>
-    </issue>
-
 </issues>

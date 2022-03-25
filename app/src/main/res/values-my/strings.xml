@@ -910,4 +910,5 @@
     <string name="setting_theme_auto">Auto</string>
     <string name="trait_rarity_unique">Unique</string>
     <string name="trait_rarity_suppl_text">%1$s%% have this trait</string>
+    <string name="toast_qr_scanning_requires_api_24">QR စကင်န်ဖတ်ခြင်းတွင် Android 7.0 (API အဆင့် 24) နှင့်အထက် လိုအပ်သည်။</string>
 </resources>

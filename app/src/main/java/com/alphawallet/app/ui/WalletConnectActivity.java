@@ -36,6 +36,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DAppFunction;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -1284,19 +1285,40 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
             else
             {
-                String message = getString(R.string.request_change_chain, EthereumNetworkBase.getShortChainName(switchChainId), String.valueOf(switchChainId));
-                Token baseToken = viewModel.getTokenService().getTokenOrBase(switchChainId, viewModel.defaultWallet().getValue().address);
+                try
+                {
+                    String message = getString(R.string.request_change_chain, EthereumNetworkBase.getShortChainName(switchChainId), String.valueOf(switchChainId));
+                    Token baseToken = viewModel.getTokenService().getTokenOrBase(switchChainId, viewModel.defaultWallet().getValue().address);
+                    NetworkInfo newNetwork = EthereumNetworkBase.getNetworkInfo(switchChainId);
+                    NetworkInfo activeNetwork = EthereumNetworkBase.getNetworkInfo(client.chainIdVal());
 
-                // show action sheet
-                switchChainDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, message, R.string.switch_and_reload,
-                        switchChainDialogCallbackId, baseToken);
+                    if (newNetwork != null && activeNetwork != null)
+                    {
+                        if (newNetwork.hasRealValue() && !activeNetwork.hasRealValue())
+                        {
+                            message += "\n" + getString(R.string.warning_switch_to_main);
+                        }
+                        else if (!newNetwork.hasRealValue() && activeNetwork.hasRealValue())
+                        {
+                            message += "\n" + getString(R.string.warning_switching_to_test);
+                        }
+                    }
 
-                switchChainDialog.setOnDismissListener(dialog -> {
-                    viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, false, chainAvailable);
-                });
-                switchChainDialog.setCanceledOnTouchOutside(false);
-                switchChainDialog.show();
-                switchChainDialog.fullExpand();
+                    // show action sheet
+                    switchChainDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, message, R.string.switch_and_reload,
+                            switchChainDialogCallbackId, baseToken);
+
+                    switchChainDialog.setOnDismissListener(dialog -> {
+                        viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, false, chainAvailable);
+                    });
+                    switchChainDialog.setCanceledOnTouchOutside(false);
+                    switchChainDialog.show();
+                    switchChainDialog.fullExpand();
+                }
+                catch (Exception e)
+                {
+                    Timber.e(e);
+                }
             }
         }
     }

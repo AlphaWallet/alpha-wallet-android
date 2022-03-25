@@ -34,7 +34,7 @@ detekt {
 }
 
 android_lint_reporter {
-    lintFilePath = "./build/reports/check-results.xml"
+    lintFilePath = "./build/reports/lint-results.xml"
     detektFilePath = "./build/reports/detekt/detekt.xml"
     githubOwner = "AlphaWallet"
     githubRepositoryName = "alpha-wallet-android"
@@ -121,11 +121,9 @@ android {
         exclude 'META-INF/LICENSE' // will not include LICENSE file
     }
     lintOptions {
-        abortOnError false
-        ignoreWarnings true
         baseline file("./check/lint-baseline.xml")
         lintConfig file('./check/lint-rules.xml')
-        abortOnError true
+        abortOnError false
     }
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8

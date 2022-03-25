@@ -697,4 +697,8 @@ public class WalletConnectViewModel extends BaseViewModel
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId) != null;
     }
+
+    public TokensService getTokenService() {
+        return tokensService;
+    }
 }

@@ -105,7 +105,16 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private ActionSheetDialog confirmationDialog;
     private ActionSheetDialog walletConnectDialog;
+    private ActionSheetDialog switchChainDialog;
     private AddEthereumChainPrompt addEthereumChainPrompt;
+    private long switchChainDialogCallbackId = 1;
+
+    // data for switch chain request
+    private long switchChainRequestId;  // rpc request id
+    private long switchChainId;         // new chain to switch to
+    private String name;                // remote peer name
+    private String currentSessionId;    // sessionId for which chain is switched
+    private boolean chainAvailable;     // flag denoting chain available in AW or not
 
     private ImageView icon;
     private TextView peerName;
@@ -1251,45 +1260,43 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void onSwitchChainRequest(Intent intent)
     {
-        String name = intent.getStringExtra(C.EXTRA_NAME);
-        long requestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
-        long chainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
-        String currentSessionId = intent.getStringExtra(C.EXTRA_SESSION_ID);
-        Timber.tag(TAG).d("MSG: SWITCH CHAIN: name: %s, chainId: %s", name, chainId);
+        name = intent.getStringExtra(C.EXTRA_NAME);
+        switchChainRequestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
+        switchChainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
+        currentSessionId = intent.getStringExtra(C.EXTRA_SESSION_ID);
+        Timber.tag(TAG).d("MSG: SWITCH CHAIN: name: %s, chainId: %s", name, switchChainId);
 
         if (currentSessionId == null || !session.getTopic().equals(currentSessionId))
         {
             Timber.tag(TAG).d("Wrong session");
             return;
         }
-        if (chainId == -1 || requestId == -1)
+        if (switchChainId == -1 || requestId == -1)
         {
             Timber.tag(TAG).d("Cant find data");
         }
         else
         {
-            boolean chainAvailable = EthereumNetworkBase.getNetworkInfo(chainId) != null;
+            chainAvailable = EthereumNetworkBase.getNetworkInfo(switchChainId) != null;
             if (!chainAvailable)
             {
-                viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, false, false);
+                viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, switchChainId, false, false);
             }
             else
             {
-                AlertDialog alertDialog = new AlertDialog.Builder(WalletConnectActivity.this)
-                        .setTitle(getString(R.string.switch_chain_request))
-                        .setMessage(String.format("%s is requesting to switch to the %s chain with chain id: %s",
-                                remotePeerMeta.getName(), EthereumNetworkBase.getShortChainName(chainId), chainId))
-                        .setPositiveButton("Approve", (dialog, which) -> {
-                            viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, true, chainAvailable);
-                            viewModel.updateSession(currentSessionId, chainId);
-                            displaySessionStatus(session.getTopic());
-                        })
-                        .setNegativeButton("Reject", (dialog, which) ->
-                                viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, chainId, false, chainAvailable)
+                String message = getString(R.string.request_change_chain, EthereumNetworkBase.getShortChainName(switchChainId), String.valueOf(switchChainId));
+                Token baseToken = viewModel.getTokenService().getTokenOrBase(switchChainId, viewModel.defaultWallet().getValue().address);
 
-                        )
-                        .create();
-                alertDialog.show();
+                // show action sheet
+                switchChainDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, message, R.string.switch_and_reload,
+                        switchChainDialogCallbackId, baseToken);
+
+                switchChainDialog.setOnDismissListener(dialog -> {
+                    viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, false, chainAvailable);
+                });
+                switchChainDialog.setCanceledOnTouchOutside(false);
+                switchChainDialog.show();
+                switchChainDialog.fullExpand();
             }
         }
     }
@@ -1343,5 +1350,16 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-
+    @Override
+    public void buttonClick(long callbackId, Token baseToken)
+    {
+        if (callbackId == switchChainDialogCallbackId)
+        {
+            switchChainDialog.setOnDismissListener(null);
+            switchChainDialog.dismiss();
+            viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, true, chainAvailable);
+            viewModel.updateSession(currentSessionId, switchChainId);
+            displaySessionStatus(session.getTopic());
+        }
+    }
 }

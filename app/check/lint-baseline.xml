@@ -14,6 +14,28 @@
 
     <issue
         id="NewApi"
+        message="Call requires API level 24 (current min is 23): `java.util.Collection#stream`"
+        errorLine1="                depthsAndDimensions.stream().collect(Collectors.groupingBy(Pair::getFirst));"
+        errorLine2="                                    ~~~~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/web3j/StructuredDataEncoder.java"
+            line="187"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 24 (current min is 23): `java.util.stream.Collectors#groupingBy`"
+        errorLine1="                depthsAndDimensions.stream().collect(Collectors.groupingBy(Pair::getFirst));"
+        errorLine2="                                                                ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/alphawallet/app/web3j/StructuredDataEncoder.java"
+            line="187"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="NewApi"
         message="Call requires API level 24 (current min is 23): `java.util.stream.Stream#collect`"
         errorLine1="                depthsAndDimensions.stream().collect(Collectors.groupingBy(Pair::getFirst));"
         errorLine2="                                             ~~~~~~~">

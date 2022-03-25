@@ -10,19 +10,19 @@
     android:clickable="true"
     android:focusable="true"
     android:orientation="vertical"
+    android:theme="@style/AppTheme.DarkOverlay"
+    app:cardBackgroundColor="@color/indigo"
     app:cardCornerRadius="@dimen/dialog_corner_radius"
     app:cardElevation="0dp"
-    app:strokeColor="?android:textColorPrimary"
-    app:strokeWidth="1dp">
+    app:contentPadding="@dimen/standard_16">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/standard_16">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/title"
-            style="@style/Aw.Typography.Title"
+            style="@style/Aw.Typography.Title.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -51,8 +51,9 @@
                 android:layout_marginTop="@dimen/base_24"
                 android:layout_marginEnd="@dimen/standard_16"
                 android:paddingHorizontal="@dimen/standard_16"
-                android:visibility="visible"
-                tools:text="Primary" />
+                android:visibility="gone"
+                tools:text="Primary"
+                tools:visibility="visible" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_secondary"
@@ -61,8 +62,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/base_24"
                 android:paddingHorizontal="@dimen/standard_16"
-                android:visibility="visible"
-                tools:text="Secondary" />
+                android:visibility="gone"
+                tools:text="Secondary"
+                tools:visibility="visible" />
         </LinearLayout>
 
     </RelativeLayout>

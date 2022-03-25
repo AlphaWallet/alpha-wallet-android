@@ -35,7 +35,7 @@ detekt {
 
 android_lint_reporter {
     lintFilePath = "./build/reports/lint-results.xml"
-    detektFilePath = "./build/reports/detekt_reports.xml"
+    detektFilePath = "./build/reports/detekt/detekt.xml"
     githubOwner = "AlphaWallet"
     githubRepositoryName = "alpha-wallet-android"
     showLog = true // optional - default to false, show extra information, will slow things down

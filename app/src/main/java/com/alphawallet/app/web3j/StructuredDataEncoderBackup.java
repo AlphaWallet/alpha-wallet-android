@@ -259,6 +259,7 @@ public class StructuredDataEncoderBackup
         return hashBytes;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private List<Object> getArrayItems(StructuredData.Entry field, Object value) {
         List<Integer> expectedDimensions = getArrayDimensionsFromDeclaration(field.getType());
         // This function will itself give out errors in case
@@ -286,6 +287,7 @@ public class StructuredDataEncoderBackup
         return flattenMultidimensionalArray(value);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressWarnings("unchecked")
     public byte[] encodeData(String primaryType, HashMap<String, Object> data)
             throws RuntimeException {

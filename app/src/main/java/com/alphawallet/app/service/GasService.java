@@ -18,9 +18,10 @@ import androidx.annotation.NonNull;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.EIP1559FeeOracleResult;
 import com.alphawallet.app.entity.FeeHistory;
-import com.alphawallet.app.entity.GasPriceSpread;
+import com.alphawallet.app.entity.GasPriceSpread2;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SuggestEIP1559Kt;
+import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -214,7 +215,7 @@ public class GasService implements ContractGasProvider
     {
         if (EthereumNetworkRepository.hasGasOverride(currentChainId))
         {
-            updateRealm(new GasPriceSpread(EthereumNetworkRepository.gasOverrideValue(currentChainId),
+            updateRealm(new GasPriceSpread2(EthereumNetworkRepository.gasOverrideValue(currentChainId),
                     networkRepository.hasLockedGas(currentChainId)), currentChainId);
             currentGasPrice = EthereumNetworkRepository.gasOverrideValue(currentChainId);
             return Single.fromCallable(() -> true);
@@ -230,7 +231,7 @@ public class GasService implements ContractGasProvider
     private Boolean updateGasPrice(EthGasPrice ethGasPrice, long chainId)
     {
         currentGasPrice = fixGasPrice(ethGasPrice.getGasPrice(), chainId);
-        updateRealm(new GasPriceSpread(currentGasPrice, networkRepository.hasLockedGas(chainId)), chainId);
+        updateRealm(new GasPriceSpread2(currentGasPrice, networkRepository.hasLockedGas(chainId)), chainId);
         return true;
     }
 
@@ -269,13 +270,14 @@ public class GasService implements ContractGasProvider
                 {
                     String result = response.body()
                             .string();
-                    GasPriceSpread gps = new GasPriceSpread(result);
+                    GasPriceSpread2 gps = new GasPriceSpread2(result);
+                    updateRealm(gps, chainId);
+
                     if (gps.isResultValid())
                     {
-                        updateRealm(gps, chainId);
                         update = true;
-                        currentGasPrice = gps.standard;
-                        currentLowGasPrice = gps.baseFee;
+                        currentGasPrice = gps.getSelectedGasFee(TXSpeed.STANDARD).gasPrice.maxFeePerGas;
+                        currentLowGasPrice = gps.getBaseFee();
                     }
                     else
                     {
@@ -296,10 +298,10 @@ public class GasService implements ContractGasProvider
      * Store latest gas prices in the database.
      * This decouples gas service from any activity
      *
-     * @param gasPriceSpread
+     * @param oracleResult
      * @param chainId
      */
-    private void updateRealm(final GasPriceSpread gasPriceSpread, final long chainId)
+    private void updateRealm(final GasPriceSpread2 oracleResult, final long chainId)
     {
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {
@@ -310,7 +312,7 @@ public class GasService implements ContractGasProvider
                 if (rgs == null)
                     rgs = r.createObject(RealmGasSpread.class, chainId);
 
-                rgs.setGasSpread(gasPriceSpread, gasPriceSpread.timeStamp);
+                rgs.setGasSpread(oracleResult, System.currentTimeMillis());
                 r.insertOrUpdate(rgs);
             });
         }

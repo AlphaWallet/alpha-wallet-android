@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
@@ -35,6 +36,8 @@ public class GasSliderView extends RelativeLayout
     private final EditText gasLimitValue;
     private final EditText priorityFeeValue;
     private final EditText nonceValue;
+    private final StandardHeader gasPriceTitle;
+    private final LinearLayout priorityFeeSliderLayout;
 
     private final AppCompatSeekBar gasPriceSlider;
     private final AppCompatSeekBar gasLimitSlider;
@@ -52,7 +55,7 @@ public class GasSliderView extends RelativeLayout
 
     public GasSliderView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        inflate(context, R.layout.item_1559_gas_slider, this);
+        inflate(context, R.layout.item_gas_slider, this);
 
         calculateStaticScaleFactor();
 
@@ -62,6 +65,8 @@ public class GasSliderView extends RelativeLayout
         gasLimitValue = findViewById(R.id.gas_limit_entry);
         gasPriceValue = findViewById(R.id.gas_price_entry);
         priorityFeeValue = findViewById(R.id.priority_fee_entry);
+        gasPriceTitle = findViewById(R.id.title_gas_price);
+        priorityFeeSliderLayout = findViewById(R.id.layout_priority_fee);
         nonceValue = findViewById(R.id.nonce_entry);
         note = findViewById(R.id.layout_resend_note);
         minimumPrice = BalanceUtils.weiToGweiBI(BigInteger.valueOf(C.GAS_PRICE_MIN)).multiply(BigDecimal.TEN).floatValue();
@@ -351,5 +356,11 @@ public class GasSliderView extends RelativeLayout
     public void reportPosition()
     {
         updateGasControl();
+    }
+
+    public void usingLegacyGas()
+    {
+        gasPriceTitle.setText(R.string.label_gas_price_gwei);
+        priorityFeeSliderLayout.setVisibility(View.GONE);
     }
 }

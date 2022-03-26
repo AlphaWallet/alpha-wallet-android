@@ -235,7 +235,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 					}
 					txData.txHash = raw.getTransactionHash();
 					return txData;
-				}))
+				})) //TODO: Calculate new contract address and store here
 				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, "", BigInteger.ZERO, txData.nonce, useGasPrice, gasLimit, chainId, data, C.BURN_ADDRESS))
 				.subscribeOn(Schedulers.io());
 	}
@@ -340,12 +340,6 @@ public class TransactionRepository implements TransactionRepositoryType {
 		List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
 		RlpList rlpList = new RlpList(values);
 		return RlpEncoder.encode(rlpList);
-	}
-
-	@Override
-	public void removeOverridenTransaction(Wallet wallet, String oldTxHash)
-	{
-		inDiskCache.deleteTransaction(wallet, oldTxHash);
 	}
 
 	@Override

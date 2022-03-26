@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import com.alphawallet.app.entity.EIP1559FeeOracleResult;
 
+import java.math.BigInteger;
+
 /**
  * Created by JB on 20/01/2022.
  */
@@ -26,6 +28,13 @@ public class GasSpeed2 implements Parcelable
         speed = in.readString();
         seconds = in.readLong();
         gasPrice = in.readParcelable(EIP1559FeeOracleResult.class.getClassLoader());
+    }
+
+    public GasSpeed2(String speed, long seconds, BigInteger gasPrice)
+    {
+        this.speed = speed;
+        this.seconds = seconds;
+        this.gasPrice = new EIP1559FeeOracleResult(gasPrice, BigInteger.ZERO, BigInteger.ZERO);
     }
 
     @Override

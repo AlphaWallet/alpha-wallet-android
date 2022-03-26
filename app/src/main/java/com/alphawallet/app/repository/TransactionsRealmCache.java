@@ -267,7 +267,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     {
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
-            instance.executeTransactionAsync(r -> {
+            instance.executeTransaction(r -> {
                 RealmTransaction realmTx = r.where(RealmTransaction.class)
                         .equalTo("hash", tx.hash)
                         .findFirst();
@@ -284,7 +284,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         catch (Exception e)
         {
             //do not record
-            Timber.e(e);
+            Timber.w(e);
         }
     }
 
@@ -300,40 +300,21 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
             instance.executeTransaction(r -> {
-                RealmTransaction item = r.createObject(RealmTransaction.class, ethTx.getHash());
-                fill(item, tx);
-                r.insertOrUpdate(item);
+                RealmTransaction realmTx = r.where(RealmTransaction.class)
+                        .equalTo("hash", ethTx.getHash())
+                        .findFirst();
+
+                if (realmTx == null) realmTx = r.createObject(RealmTransaction.class, ethTx.getHash());
+                fill(realmTx, tx);
+                r.insertOrUpdate(realmTx);
             });
         }
         catch (Exception e)
         {
-            //
+            Timber.w(e);
         }
 
         return tx;
-    }
-
-    @Override
-    public void deleteTransaction(Wallet wallet, String oldTxHash)
-    {
-        try (Realm instance = realmManager.getRealmInstance(wallet))
-        {
-            instance.executeTransactionAsync(r -> {
-                RealmTransaction realmTx = r.where(RealmTransaction.class)
-                        .equalTo("hash", oldTxHash)
-                        .findFirst();
-
-                if (realmTx != null)
-                {
-                    realmTx.deleteFromRealm();
-                }
-            });
-        }
-        catch (Exception e)
-        {
-            //do not record
-            Timber.e(e);
-        }
     }
 
     @Override
@@ -430,14 +411,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         item.setChainId(transaction.chainId);
     }
 
-    /*
-    	public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
-					   String value, String gas, String maxFeePerGas, String maxPriorityFee, String input, String gasUsed, long chainId, String contractAddress).
-
-					   	public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
-					   String value, String gas, String gasPrice, String maxFeePerGas, String maxPriorityFee, String input, String gasUsed, long chainId, String contractAddress)
-
-     */
     public static Transaction convert(RealmTransaction rawItem) {
         //boolean isConstructor = rawItem.getInput() != null && rawItem.getInput().equals(Transaction.CONSTRUCTOR);
 

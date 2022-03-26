@@ -16,9 +16,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.GasPriceSpread2;
-import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
@@ -63,7 +62,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     private final LinearLayout speedWarning;
     private final Context context;
 
-    private GasPriceSpread2.TXSpeed currentGasSpeedIndex = GasPriceSpread2.TXSpeed.STANDARD;
+    private TXSpeed currentGasSpeedIndex = TXSpeed.STANDARD;
     private long customNonce = -1;
     private BigInteger resendGasPrice = BigInteger.ZERO;
 
@@ -122,6 +121,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
                 intent.putExtra(C.EXTRA_AMOUNT, transactionValue.toString());
                 intent.putExtra(C.EXTRA_GAS_PRICE, gasSpread);  //Parcelised
                 intent.putExtra(C.EXTRA_NONCE, customNonce);
+                intent.putExtra(C.EXTRA_1559_TX, true);
                 intent.putExtra(C.EXTRA_MIN_GAS_PRICE, resendGasPrice.longValue());
                 gasSelectLauncher.launch(intent);
             });
@@ -144,7 +144,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
 
         if (w3tx.maxFeePerGas.compareTo(BigInteger.ZERO) > 0 && w3tx.maxPriorityFeePerGas.compareTo(BigInteger.ZERO) > 0)
         {
-            gasSpread.setCustom(w3tx.maxFeePerGas, w3tx.maxPriorityFeePerGas, GasPriceSpread.FAST_SECONDS);
+            gasSpread.setCustom(w3tx.maxFeePerGas, w3tx.maxPriorityFeePerGas, GasPriceSpread2.FAST_SECONDS);
         }
     }
 
@@ -166,9 +166,9 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
      */
     public void setCurrentGasIndex(int gasSelectionIndex, BigInteger maxFeePerGas, BigInteger maxPriorityFee, BigDecimal custGasLimit, long expectedTxTime, long nonce)
     {
-        if (gasSelectionIndex < GasPriceSpread2.TXSpeed.values().length)
+        if (gasSelectionIndex < TXSpeed.values().length)
         {
-            currentGasSpeedIndex = GasPriceSpread2.TXSpeed.values()[gasSelectionIndex];
+            currentGasSpeedIndex = TXSpeed.values()[gasSelectionIndex];
         }
 
         customNonce = nonce;
@@ -224,7 +224,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
 
             if (rgs != null)
             {
-                legacyPrice = rgs.getGasPrice().standard;
+                legacyPrice = rgs.getGasFee(TXSpeed.STANDARD);
             }
         }
         catch (Exception e)
@@ -237,7 +237,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
 
     private BigInteger getUseGasLimit()
     {
-        if (currentGasSpeedIndex == GasPriceSpread2.TXSpeed.CUSTOM)
+        if (currentGasSpeedIndex == TXSpeed.CUSTOM)
         {
             return customGasLimit;
         }
@@ -276,7 +276,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
         }
         catch (Exception e)
         {
-            currentGasSpeedIndex = GasPriceSpread2.TXSpeed.STANDARD;
+            currentGasSpeedIndex = TXSpeed.STANDARD;
             if (BuildConfig.DEBUG) e.printStackTrace();
         }
     }
@@ -326,9 +326,9 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
         timeEstimate.setText(displayStr);
         speedText.setText(gs.speed);
 
-        if (currentGasSpeedIndex == GasPriceSpread2.TXSpeed.CUSTOM)
+        if (currentGasSpeedIndex == TXSpeed.CUSTOM)
         {
-            checkCustomGasPrice(gasSpread.getSelectedGasFee(GasPriceSpread2.TXSpeed.CUSTOM).gasPrice.maxFeePerGas);
+            checkCustomGasPrice(gasSpread.getSelectedGasFee(TXSpeed.CUSTOM).gasPrice.maxFeePerGas);
         }
         else
         {
@@ -389,8 +389,8 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     {
         double dGasPrice = customGasPrice.doubleValue();
 
-        GasSpeed2 ug = gasSpread.getSelectedGasFee(GasPriceSpread2.TXSpeed.RAPID); //rapid
-        GasSpeed2 lg = gasSpread.getSelectedGasFee(GasPriceSpread2.TXSpeed.SLOW); //slow
+        GasSpeed2 ug = gasSpread.getSelectedGasFee(TXSpeed.RAPID); //rapid
+        GasSpeed2 lg = gasSpread.getSelectedGasFee(TXSpeed.SLOW); //slow
 
         if (resendGasPrice.compareTo(BigInteger.ZERO) > 0)
         {
@@ -471,7 +471,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
 
     public long getNonce()
     {
-        if (currentGasSpeedIndex == GasPriceSpread2.TXSpeed.CUSTOM)
+        if (currentGasSpeedIndex == TXSpeed.CUSTOM)
         {
             return customNonce;
         }

@@ -390,10 +390,10 @@ public class InputAmount extends LinearLayout
                             .equalTo("chainId", token.tokenInfo.chainId)
                             .findFirst();
 
-                if (gasSpread != null && gasSpread.getGasPrice().standard.compareTo(BigInteger.ZERO) > 0)
+                if (gasSpread != null && gasSpread.getGasPrice().compareTo(BigInteger.ZERO) > 0)
                 {
                     //assume 'average' gas cost here
-                    onLatestGasPrice(gasSpread.getGasPrice().standard);
+                    onLatestGasPrice(gasSpread.getGasPrice());
                 }
                 else //fallback to node price
                 {

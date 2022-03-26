@@ -54,6 +54,7 @@
     <string name="label_gas_limit">ခွင့်ပြုလုပ်ငန်းဆောင်ရွက်ခ</string>
     <string name="label_gas_price">လုပ်ငန်းဆောင်ရွက်ခ</string>
     <string name="label_gas_price_gwei">လုပ်ငန်းဆောင်ရွက်ခ (GWEI)</string>
+    <string name="label_gas_price_max">Max Fee (GWEI)</string>
     <string name="label_old_gas_price">မူလလုပ်ငန်းဆောင်ရွက်ခ</string>
     <string name="label_network_fee">ကွန်ရက် အသုံးပြုခ (Maximum)</string>
     <string name="button_ok">OK</string>

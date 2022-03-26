@@ -20,6 +20,7 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.GasPriceSpread2;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
@@ -166,13 +167,14 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private GasWidgetInterface setupGasWidget()
     {
-        useLegacyGas = !has1559Gas() || (token.isEthereum() && candidateTransaction.leafPosition == -2);
+        //
+        useLegacyGas = !has1559Gas() || (token.isEthereum() && candidateTransaction.leafPosition == -2) || tokensService.hasLockedGas(token.tokenInfo.chainId);
 
         if (useLegacyGas)
         {
             gasWidget.setVisibility(View.GONE);
             gasWidgetLegacy.setVisibility(View.VISIBLE);
-            gasWidgetLegacy.setupWidget(tokensService, token, candidateTransaction, this);
+            gasWidgetLegacy.setupWidget(tokensService, token, candidateTransaction, this, actionSheetCallback.gasSelectLauncher());
             return gasWidgetLegacy;
         }
         else
@@ -359,7 +361,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     public void setCurrentGasIndex(ActivityResult result)
     {
         if (result == null || result.getData() == null) return;
-        int gasSelectionIndex = result.getData().getIntExtra(C.EXTRA_SINGLE_ITEM, GasPriceSpread2.TXSpeed.STANDARD.ordinal());
+        int gasSelectionIndex = result.getData().getIntExtra(C.EXTRA_SINGLE_ITEM, TXSpeed.STANDARD.ordinal());
         long customNonce = result.getData().getLongExtra(C.EXTRA_NONCE, -1);
         BigInteger maxFeePerGas = result.getData().hasExtra(C.EXTRA_GAS_PRICE) ?
                 new BigInteger(result.getData().getStringExtra(C.EXTRA_GAS_PRICE)) : BigInteger.ZERO;
@@ -573,6 +575,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 if (rt != null)
                 {
                     rt.setExpectedCompletion(expectedTime);
+                    r.insertOrUpdate(rt);
                 }
             });
         }

@@ -54,6 +54,7 @@
     <string name="label_gas_price_gwei">Prix du Gas (GWEI)</string>
     <string name="label_old_gas_price">Ancien Prix du Gas</string>
     <string name="label_network_fee">Frais de réseau (Maximum)</string>
+    <string name="label_gas_price_max">Max Fee (GWEI)</string>
     <string name="button_ok">OK</string>
 
     <!-- Subtitles -->

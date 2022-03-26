@@ -146,12 +146,6 @@ public class QRSelectionTest
             }
 
             @Override
-            public void removeOverridenTransaction(Wallet wallet, String oldTxHash)
-            {
-
-            }
-
-            @Override
             public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet,
                                                                       List<Long> networkFilters, long fetchTime, int fetchLimit)
             {

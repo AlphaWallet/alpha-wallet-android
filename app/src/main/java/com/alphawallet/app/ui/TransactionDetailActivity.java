@@ -209,8 +209,8 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
     private void setupVisibilities()
     {
-        BigDecimal gasPrice = !TextUtils.isEmpty(transaction.gasPrice) ? new BigDecimal(transaction.gasPrice) : BigDecimal.ZERO;
-        BigDecimal gasFee = !TextUtils.isEmpty(transaction.gasUsed) ? new BigDecimal(transaction.gasUsed).multiply(gasPrice) : BigDecimal.ZERO;
+        BigDecimal gasPrice = getValue(transaction.gasPrice);
+        BigDecimal gasFee = getValue(transaction.gasUsed);
 
         //any gas fee?
         if (gasFee.equals(BigDecimal.ZERO))
@@ -251,11 +251,35 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         TextView textGasMax = findViewById(R.id.text_gas_max);
         TextView textGasPriority = findViewById(R.id.text_priority_fee);
 
-        BigDecimal gasMax = new BigDecimal(transaction.maxFeePerGas);
-        BigDecimal gasPriorityFee = new BigDecimal(transaction.maxPriorityFee);
+        BigDecimal gasMax = getValue(transaction.maxFeePerGas);
+        BigDecimal gasPriorityFee = getValue(transaction.maxPriorityFee);
 
         textGasMax.setText(BalanceUtils.weiToGwei(gasMax, 4));
         textGasPriority.setText(BalanceUtils.weiToGwei(gasPriorityFee, 4));
+    }
+
+    private BigDecimal getValue(String input)
+    {
+        if (TextUtils.isEmpty(input)) return BigDecimal.ZERO;
+        BigDecimal value = BigDecimal.ZERO;
+
+        try
+        {
+            if (input.startsWith("0x"))
+            {
+                value = new BigDecimal(new BigInteger(input, 16));
+            }
+            else
+            {
+                value = new BigDecimal(input);
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            value = BigDecimal.ZERO;
+        }
+
+        return value;
     }
 
     private void setupWalletDetails()

@@ -92,11 +92,6 @@ public class CreateTransactionInteract
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public void removeOverridenTransaction(Wallet wallet, String oldTxHash)
-    {
-        transactionRepository.removeOverridenTransaction(wallet, oldTxHash);
-    }
-
     public Single<TransactionData> signTransaction(Wallet wallet, Web3Transaction w3tx, long chainId)
     {
         return transactionRepository.getSignatureForTransaction(wallet, w3tx, chainId);

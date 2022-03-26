@@ -52,6 +52,7 @@
     <string name="label_gas_limit">Giới hạn Gas</string>
     <string name="label_gas_price">Giá Gas</string>
     <string name="label_gas_price_gwei">Giá Gas (GWEI)</string>
+    <string name="label_gas_price_max">Max Fee (GWEI)</string>
     <string name="label_old_gas_price">Giá Gas cũ</string>
     <string name="label_network_fee">Phí mạng (Lớn nhất)</string>
     <string name="button_ok">Đồng ý</string>

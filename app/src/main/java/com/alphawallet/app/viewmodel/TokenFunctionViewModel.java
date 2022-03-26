@@ -530,6 +530,10 @@ public class TokenFunctionViewModel extends BaseViewModel
         {
             calcGasCost.dispose();
         }
+        if (openseaDisposable != null && !openseaDisposable.isDisposed())
+        {
+            openseaDisposable.dispose();
+        }
     }
 
     public OpenSeaService getOpenseaService()
@@ -585,11 +589,6 @@ public class TokenFunctionViewModel extends BaseViewModel
     public Transaction fetchTransaction(String txHash)
     {
         return fetchTransactionsInteract.fetchCached(wallet.address, txHash);
-    }
-
-    public long fetchExpectedTxTime(String txHash)
-    {
-        return fetchTransactionsInteract.fetchTxCompletionTime(wallet.address, txHash);
     }
 
     public void estimateGasLimit(Web3Transaction w3tx, long chainId)
@@ -666,17 +665,8 @@ public class TokenFunctionViewModel extends BaseViewModel
                 .createWithSig(wallet, finalTx, chainId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(txData -> processTransaction(txData, wallet, overridenTxHash),
+                .subscribe(transactionFinalised::postValue,
                         transactionError::postValue);
-    }
-
-    private void processTransaction(TransactionData txData, Wallet wallet, String overridenTxHash)
-    {
-        //remove old tx from database
-        if (!TextUtils.isEmpty(overridenTxHash))
-            fetchTransactionsInteract.removeOverridenTransaction(wallet, overridenTxHash);
-        //update Activity
-        transactionFinalised.postValue(txData);
     }
 
     public void actionSheetConfirm(String mode)

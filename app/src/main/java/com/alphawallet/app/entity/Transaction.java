@@ -5,8 +5,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import androidx.core.content.ContextCompat;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EventResult;
@@ -14,14 +12,12 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.annotations.SerializedName;
 
 import org.web3j.crypto.Hash;
-import org.web3j.crypto.Keys;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpString;
@@ -30,8 +26,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Map;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
 
 /**
  *
@@ -202,11 +196,16 @@ public class Transaction implements Parcelable
 	public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
 					   String value, String gas, String gasPrice, String input, String gasUsed, long chainId, String contractAddress)
 	{
-		if (!TextUtils.isEmpty(contractAddress)) //must be a constructor
+		//Is it a constructor?
+		if (!TextUtils.isEmpty(contractAddress))
 		{
-			to = contractAddress;
-			isConstructor = true;
-			input = CONSTRUCTOR;
+			String testContractDeploymentAddress = Utils.calculateContractAddress(from, nonce);
+			if (testContractDeploymentAddress.equalsIgnoreCase(contractAddress))
+			{
+				to = contractAddress;
+				isConstructor = true;
+				input = CONSTRUCTOR;
+			}
 		}
 
 		this.to = to;
@@ -229,11 +228,15 @@ public class Transaction implements Parcelable
 	public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
 					   String value, String gas, String gasPrice, String maxFeePerGas, String maxPriorityFee, String input, String gasUsed, long chainId, String contractAddress)
 	{
-		if (!TextUtils.isEmpty(contractAddress)) //must be a constructor
+		if (!TextUtils.isEmpty(contractAddress))
 		{
-			to = contractAddress;
-			isConstructor = true;
-			input = CONSTRUCTOR;
+			String testContractDeploymentAddress = Utils.calculateContractAddress(from, nonce);
+			if (testContractDeploymentAddress.equalsIgnoreCase(contractAddress))
+			{
+				to = contractAddress;
+				isConstructor = true;
+				input = CONSTRUCTOR;
+			}
 		}
 
 		this.to = to;

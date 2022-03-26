@@ -12,6 +12,8 @@
  */
 package com.alphawallet.app.web3j;
 
+import android.os.Build;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.web3j.abi.TypeEncoder;
@@ -37,6 +39,8 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import androidx.annotation.RequiresApi;
 
 import static org.web3j.crypto.Hash.sha3;
 import static org.web3j.crypto.Hash.sha3String;
@@ -182,6 +186,7 @@ public class StructuredDataEncoderBackup
         return list;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public List<Integer> getArrayDimensionsFromData(Object data) throws RuntimeException {
         List<Pair> depthsAndDimensions = getDepthsAndDimensions(data, 0);
         // groupedByDepth has key as depth and value as List(pair(Depth, Dimension))
@@ -233,8 +238,9 @@ public class StructuredDataEncoderBackup
     private byte[] convertToEncodedItem(String baseType, Object data) {
         byte[] hashBytes;
         try {
-            if (baseType.toLowerCase(Locale.getDefault()).startsWith("uint")
-                    || baseType.toLowerCase().startsWith("int")) {
+            String lowerCase = baseType.toLowerCase(Locale.getDefault());
+            if (lowerCase.startsWith("uint")
+                    || lowerCase.startsWith("int")) {
                 hashBytes = convertToBigInt(data).toByteArray();
             } else if (baseType.equals("string")) {
                 hashBytes = ((String) data).getBytes();

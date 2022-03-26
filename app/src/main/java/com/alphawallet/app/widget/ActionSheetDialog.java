@@ -4,6 +4,7 @@ import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -12,18 +13,19 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.GasPriceSpread2;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.SharedPreferenceRepository;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.service.TokensService;
@@ -78,7 +80,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private String txHash = null;
     private boolean actionCompleted;
-    private boolean useLegacyGas = false;
+    private boolean use1559Transactions = false;
     private Transaction transaction;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
@@ -167,20 +169,24 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private GasWidgetInterface setupGasWidget()
     {
-        //
-        useLegacyGas = !has1559Gas() || (token.isEthereum() && candidateTransaction.leafPosition == -2) || tokensService.hasLockedGas(token.tokenInfo.chainId);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        boolean canUse1559Transactions = prefs.getBoolean(SharedPreferenceRepository.EXPERIMENTAL_1559_TX,false);
 
-        if (useLegacyGas)
+        use1559Transactions = canUse1559Transactions && has1559Gas() //1559 Transactions toggled on in settings and this chain supports 1559
+                && !(token.isEthereum() && candidateTransaction.leafPosition == -2) //User not sweeping wallet (if so we need to use legacy tx)
+                && !tokensService.hasLockedGas(token.tokenInfo.chainId); //Service has locked gas, can only use legacy (eg Optimism).
+
+        if (use1559Transactions)
+        {
+            gasWidget.setupWidget(tokensService, token, candidateTransaction, actionSheetCallback.gasSelectLauncher());
+            return gasWidget;
+        }
+        else
         {
             gasWidget.setVisibility(View.GONE);
             gasWidgetLegacy.setVisibility(View.VISIBLE);
             gasWidgetLegacy.setupWidget(tokensService, token, candidateTransaction, this, actionSheetCallback.gasSelectLauncher());
             return gasWidgetLegacy;
-        }
-        else
-        {
-            gasWidget.setupWidget(tokensService, token, candidateTransaction, actionSheetCallback.gasSelectLauncher());
-            return gasWidget;
         }
     }
 
@@ -655,7 +661,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private Web3Transaction formTransaction()
     {
         //form Web3Transaction
-        if (useLegacyGas) // If sweeping account, use legacy transaction
+        if (!use1559Transactions)
         {
             BigInteger currentGasPrice = gasWidgetInterface.getGasPrice(candidateTransaction.gasPrice); // also recalculates the transaction value
 

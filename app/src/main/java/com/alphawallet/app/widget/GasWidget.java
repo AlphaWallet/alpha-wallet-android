@@ -16,7 +16,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.GasPriceSpread2;
+import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.tokens.Token;
@@ -44,7 +44,7 @@ import io.realm.RealmQuery;
  */
 public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterface
 {
-    private GasPriceSpread2 gasSpread;
+    private GasPriceSpread gasSpread;
     private RealmGasSpread realmGasSpread;
     private TokensService tokensService;
     private BigInteger customGasLimit;    //from slider
@@ -141,12 +141,12 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
         else
         {
             // Couldn't get current gas. Add a blank custom gas speed node
-            gasSpread = new GasPriceSpread2(getContext(), w3tx.gasPrice);
+            gasSpread = new GasPriceSpread(getContext(), w3tx.gasPrice);
         }
 
         if (w3tx.gasPrice.compareTo(BigInteger.ZERO) > 0)
         {
-            gasSpread.setCustom(w3tx.gasPrice, GasPriceSpread2.FAST_SECONDS);
+            gasSpread.setCustom(w3tx.gasPrice, GasPriceSpread.FAST_SECONDS);
         }
     }
 
@@ -290,7 +290,7 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
     {
         try
         {
-            gasSpread = new GasPriceSpread2(getContext(), gasSpread, rgs.getTimeStamp(), rgs.getGasFees(), rgs.isLocked());
+            gasSpread = new GasPriceSpread(getContext(), gasSpread, rgs.getTimeStamp(), rgs.getGasFees(), rgs.isLocked());
 
             TextView editTxt = findViewById(R.id.edit_text);
 

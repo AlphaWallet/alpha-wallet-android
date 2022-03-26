@@ -28,7 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.GasPriceSpread2;
+import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -66,7 +66,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private GasSliderView gasSliderView;
     private CustomAdapter adapter;
 
-    private GasPriceSpread2 gasSpread;
+    private GasPriceSpread gasSpread;
     private Realm1559Gas realmGasSpread;
     private RealmGasSpread realmLegacyGasSpread;
 
@@ -190,7 +190,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     //Periodic update. It should keep the custom data
     private void initGasSpeeds(Realm1559Gas gs)
     {
-        gasSpread = new GasPriceSpread2(this, gasSpread, gs.getResult());
+        gasSpread = new GasPriceSpread(this, gasSpread, gs.getResult());
         gasSliderView.initGasPriceMax(gasSpread.getQuickestGasSpeed().gasPrice);
         GasSpeed2 custom = gasSpread.getSelectedGasFee(TXSpeed.CUSTOM);
         updateCustomElement(custom.gasPrice.maxFeePerGas, custom.gasPrice.maxPriorityFeePerGas, customGasLimit.toBigInteger());
@@ -202,7 +202,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
     private void initLegacyGasSpeeds(RealmGasSpread gs)
     {
-        gasSpread = new GasPriceSpread2(this, gasSpread, gs.getTimeStamp(), gs.getGasFees(), gs.isLocked());
+        gasSpread = new GasPriceSpread(this, gasSpread, gs.getTimeStamp(), gs.getGasFees(), gs.isLocked());
         gasSliderView.initGasPriceMax(gasSpread.getQuickestGasSpeed().gasPrice);
         GasSpeed2 custom = gasSpread.getSelectedGasFee(TXSpeed.CUSTOM);
         updateCustomElement(custom.gasPrice.maxFeePerGas, custom.gasPrice.maxPriorityFeePerGas, customGasLimit.toBigInteger());
@@ -548,7 +548,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
     public long getExpectedTransactionTime(BigInteger customGasPriceBI)
     {
-        long expectedTime = GasPriceSpread2.RAPID_SECONDS;// gasSpeeds.get(0).seconds;
+        long expectedTime = GasPriceSpread.RAPID_SECONDS;// gasSpeeds.get(0).seconds;
         if (gasSpread.getEntrySize() > 2)
         {
             double dGasPrice = customGasPriceBI.doubleValue();

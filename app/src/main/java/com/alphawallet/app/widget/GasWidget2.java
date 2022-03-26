@@ -16,7 +16,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.GasPriceSpread2;
+import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -44,7 +44,7 @@ import io.realm.RealmQuery;
  */
 public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInterface
 {
-    private GasPriceSpread2 gasSpread;
+    private GasPriceSpread gasSpread;
     private Realm1559Gas realmGasSpread;
     private TokensService tokensService;
     private BigInteger customGasLimit;    //from slider
@@ -139,12 +139,12 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
         else
         {
             // Couldn't get current gas. Add a blank custom gas speed node
-            gasSpread = new GasPriceSpread2(getContext(), w3tx.maxFeePerGas, w3tx.maxPriorityFeePerGas);
+            gasSpread = new GasPriceSpread(getContext(), w3tx.maxFeePerGas, w3tx.maxPriorityFeePerGas);
         }
 
         if (w3tx.maxFeePerGas.compareTo(BigInteger.ZERO) > 0 && w3tx.maxPriorityFeePerGas.compareTo(BigInteger.ZERO) > 0)
         {
-            gasSpread.setCustom(w3tx.maxFeePerGas, w3tx.maxPriorityFeePerGas, GasPriceSpread2.FAST_SECONDS);
+            gasSpread.setCustom(w3tx.maxFeePerGas, w3tx.maxPriorityFeePerGas, GasPriceSpread.FAST_SECONDS);
         }
     }
 
@@ -269,7 +269,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     {
         try
         {
-            gasSpread = new GasPriceSpread2(getContext(), gs.getResult());
+            gasSpread = new GasPriceSpread(getContext(), gs.getResult());
 
             //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
             handler.post(this);

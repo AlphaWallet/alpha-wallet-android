@@ -1,7 +1,6 @@
 package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.repository.EthereumNetworkBase.hasGasOverride;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
@@ -11,7 +10,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +24,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
-import com.alphawallet.app.entity.GasPriceSpread2;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;

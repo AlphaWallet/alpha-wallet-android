@@ -39,6 +39,7 @@ import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.TokenIcon;
+import com.alphawallet.token.tools.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -210,7 +211,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     private void setupVisibilities()
     {
         BigDecimal gasPrice = getValue(transaction.gasPrice);
-        BigDecimal gasFee = getValue(transaction.gasUsed);
+        BigDecimal gasFee = getValue(transaction.gasUsed).multiply(gasPrice);
 
         //any gas fee?
         if (gasFee.equals(BigDecimal.ZERO))
@@ -267,7 +268,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         {
             if (input.startsWith("0x"))
             {
-                value = new BigDecimal(new BigInteger(input, 16));
+                value = new BigDecimal(Numeric.toBigInt(input));
             }
             else
             {

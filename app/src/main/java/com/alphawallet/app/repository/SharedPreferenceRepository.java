@@ -28,6 +28,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String USER_LOCALE_PREF = "user_locale_pref";
     public static final String HIDE_ZERO_BALANCE_TOKENS = "hide_zero_balance_tokens";
     public static final String FULL_SCREEN_STATE = "full_screen";
+    public static final String EXPERIMENTAL_1559_TX = "ex_1559_tx";
     public static final String ACTIVE_MAINNET = "active_mainnet";
     public static final String SHOWN_WARNING = "shown_warning";
     public static final String PRICE_ALERTS = "price_alerts";
@@ -173,10 +174,23 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         pref.edit().putBoolean(FULL_SCREEN_STATE, state).apply();
     }
 
+
     @Override
     public boolean getFullScreenState()
     {
         return pref.getBoolean(FULL_SCREEN_STATE, false);
+    }
+
+    @Override
+    public void setUse1559Transactions(boolean state)
+    {
+        pref.edit().putBoolean(EXPERIMENTAL_1559_TX, state).apply();
+    }
+
+    @Override
+    public boolean getUse1559Transactions()
+    {
+        return pref.getBoolean(EXPERIMENTAL_1559_TX, false);
     }
 
     @SuppressLint("ApplySharedPref")

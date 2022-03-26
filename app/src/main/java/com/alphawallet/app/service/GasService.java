@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.EIP1559FeeOracleResult;
 import com.alphawallet.app.entity.FeeHistory;
-import com.alphawallet.app.entity.GasPriceSpread2;
+import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SuggestEIP1559Kt;
 import com.alphawallet.app.entity.TXSpeed;
@@ -215,7 +215,7 @@ public class GasService implements ContractGasProvider
     {
         if (EthereumNetworkRepository.hasGasOverride(currentChainId))
         {
-            updateRealm(new GasPriceSpread2(EthereumNetworkRepository.gasOverrideValue(currentChainId),
+            updateRealm(new GasPriceSpread(EthereumNetworkRepository.gasOverrideValue(currentChainId),
                     networkRepository.hasLockedGas(currentChainId)), currentChainId);
             currentGasPrice = EthereumNetworkRepository.gasOverrideValue(currentChainId);
             return Single.fromCallable(() -> true);
@@ -231,7 +231,7 @@ public class GasService implements ContractGasProvider
     private Boolean updateGasPrice(EthGasPrice ethGasPrice, long chainId)
     {
         currentGasPrice = fixGasPrice(ethGasPrice.getGasPrice(), chainId);
-        updateRealm(new GasPriceSpread2(currentGasPrice, networkRepository.hasLockedGas(chainId)), chainId);
+        updateRealm(new GasPriceSpread(currentGasPrice, networkRepository.hasLockedGas(chainId)), chainId);
         return true;
     }
 
@@ -270,7 +270,7 @@ public class GasService implements ContractGasProvider
                 {
                     String result = response.body()
                             .string();
-                    GasPriceSpread2 gps = new GasPriceSpread2(result);
+                    GasPriceSpread gps = new GasPriceSpread(result);
                     updateRealm(gps, chainId);
 
                     if (gps.isResultValid())
@@ -301,7 +301,7 @@ public class GasService implements ContractGasProvider
      * @param oracleResult
      * @param chainId
      */
-    private void updateRealm(final GasPriceSpread2 oracleResult, final long chainId)
+    private void updateRealm(final GasPriceSpread oracleResult, final long chainId)
     {
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {

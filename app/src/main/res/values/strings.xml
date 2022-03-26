@@ -909,4 +909,6 @@
     <string name="setting_theme_auto">Auto</string>
     <string name="trait_rarity_unique">Unique</string>
     <string name="trait_rarity_suppl_text">%1$s%% have this trait</string>
+    <string name="experimental_1559">Use 1559 Transactions</string>
+    <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
 </resources>

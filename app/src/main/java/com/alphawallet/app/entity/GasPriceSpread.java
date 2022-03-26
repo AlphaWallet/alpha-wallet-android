@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * Created by JB on 20/01/2022.
  */
-public class GasPriceSpread2 implements Parcelable
+public class GasPriceSpread implements Parcelable
 {
     public static long RAPID_SECONDS = 15;
     public static long FAST_SECONDS = 60;
@@ -111,7 +111,7 @@ public class GasPriceSpread2 implements Parcelable
 
     private final Map<TXSpeed, GasSpeed2> fees = new HashMap<>();
 
-    public GasPriceSpread2(Context ctx, Map<Integer, EIP1559FeeOracleResult> result)
+    public GasPriceSpread(Context ctx, Map<Integer, EIP1559FeeOracleResult> result)
     {
         hasLockedGas = false;
         timeStamp = System.currentTimeMillis();
@@ -121,7 +121,7 @@ public class GasPriceSpread2 implements Parcelable
         fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, fees.get(TXSpeed.STANDARD).gasPrice));
     }
 
-    public GasPriceSpread2(Context ctx, GasPriceSpread2 gs, Map<Integer, EIP1559FeeOracleResult> result)
+    public GasPriceSpread(Context ctx, GasPriceSpread gs, Map<Integer, EIP1559FeeOracleResult> result)
     {
         hasLockedGas = false;
         timeStamp = System.currentTimeMillis();
@@ -134,7 +134,7 @@ public class GasPriceSpread2 implements Parcelable
     }
 
     //This is a fallback method, it should never be used
-    public GasPriceSpread2(Context ctx, BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas)
+    public GasPriceSpread(Context ctx, BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas)
     {
         timeStamp = System.currentTimeMillis();
 
@@ -145,7 +145,7 @@ public class GasPriceSpread2 implements Parcelable
         hasLockedGas = false;
     }
 
-    public GasPriceSpread2(BigInteger currentAvGasPrice, boolean lockedGas)
+    public GasPriceSpread(BigInteger currentAvGasPrice, boolean lockedGas)
     {
         timeStamp = System.currentTimeMillis();
 
@@ -154,7 +154,7 @@ public class GasPriceSpread2 implements Parcelable
         hasLockedGas = lockedGas;
     }
 
-    public GasPriceSpread2(Context ctx, BigInteger gasPrice)
+    public GasPriceSpread(Context ctx, BigInteger gasPrice)
     {
         timeStamp = System.currentTimeMillis();
 
@@ -163,7 +163,7 @@ public class GasPriceSpread2 implements Parcelable
         hasLockedGas = false;
     }
 
-    public GasPriceSpread2(String apiReturn)
+    public GasPriceSpread(String apiReturn)
     {
         this.timeStamp = System.currentTimeMillis();
 
@@ -202,7 +202,7 @@ public class GasPriceSpread2 implements Parcelable
         hasLockedGas = false;
     }
 
-    public GasPriceSpread2(Context ctx, GasPriceSpread2 gasSpread, long timestamp, Map<TXSpeed, BigInteger> feeMap, boolean locked)
+    public GasPriceSpread(Context ctx, GasPriceSpread gasSpread, long timestamp, Map<TXSpeed, BigInteger> feeMap, boolean locked)
     {
         this.timeStamp = timestamp;
 
@@ -271,7 +271,7 @@ public class GasPriceSpread2 implements Parcelable
         fees.put(TXSpeed.CUSTOM, new GasSpeed2(gsCustom.speed, fastSeconds, gasPrice));
     }
 
-    protected GasPriceSpread2(Parcel in)
+    protected GasPriceSpread(Parcel in)
     {
         timeStamp = in.readLong();
         int feeCount = in.readInt();
@@ -287,15 +287,15 @@ public class GasPriceSpread2 implements Parcelable
         }
     }
 
-    public static final Creator<GasPriceSpread2> CREATOR = new Creator<GasPriceSpread2>() {
+    public static final Creator<GasPriceSpread> CREATOR = new Creator<GasPriceSpread>() {
         @Override
-        public GasPriceSpread2 createFromParcel(Parcel in) {
-            return new GasPriceSpread2(in);
+        public GasPriceSpread createFromParcel(Parcel in) {
+            return new GasPriceSpread(in);
         }
 
         @Override
-        public GasPriceSpread2[] newArray(int size) {
-            return new GasPriceSpread2[size];
+        public GasPriceSpread[] newArray(int size) {
+            return new GasPriceSpread[size];
         }
     };
 

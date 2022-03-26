@@ -42,6 +42,7 @@ public class AdvancedSettingsActivity extends BaseActivity
     private SettingsItemView tokenScriptManagement;
     private SettingsItemView fullScreenSettings;
     private SettingsItemView refreshTokenDatabase;
+    private SettingsItemView eip1559Transactions;
     private AWalletAlertDialog waitDialog = null;
 
     @Nullable
@@ -114,12 +115,26 @@ public class AdvancedSettingsActivity extends BaseActivity
                 .withListener(this::onReloadTokenDataClicked)
                 .build();
 
+        eip1559Transactions = new SettingsItemView.Builder(this)
+                .withType(SettingsItemView.Type.TOGGLE)
+                .withIcon(R.drawable.ic_icons_settings_1559)
+                .withTitle(R.string.experimental_1559)
+                .withSubtitle(R.string.experimental_1559_tx_sub)
+                .withListener(this::on1559TransactionsClicked)
+                .build();
+
         fullScreenSettings.setToggleState(viewModel.getFullScreenState());
+        eip1559Transactions.setToggleState(viewModel.get1559TransactionsState());
     }
 
     private void onFullScreenClicked()
     {
         viewModel.setFullScreenState(fullScreenSettings.getToggleState());
+    }
+
+    private void on1559TransactionsClicked()
+    {
+        viewModel.toggle1559Transactions(eip1559Transactions.getToggleState());
     }
 
     private void addSettingsToLayout()
@@ -134,6 +149,7 @@ public class AdvancedSettingsActivity extends BaseActivity
         advancedSettingsLayout.addView(tokenScriptManagement);
         advancedSettingsLayout.addView(fullScreenSettings);
         advancedSettingsLayout.addView(refreshTokenDatabase);
+        advancedSettingsLayout.addView(eip1559Transactions);
     }
 
     private void onConsoleClicked()

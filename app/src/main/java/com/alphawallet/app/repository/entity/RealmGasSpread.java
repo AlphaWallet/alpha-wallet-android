@@ -1,12 +1,8 @@
 package com.alphawallet.app.repository.entity;
 
-import android.text.TextUtils;
-
-import com.alphawallet.app.entity.GasPriceSpread2;
+import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.TXSpeed;
-import com.alphawallet.app.util.BalanceUtils;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +30,7 @@ public class RealmGasSpread extends RealmObject
         return chainId;
     }
 
-    public void setGasSpread(GasPriceSpread2 spread, long time)
+    public void setGasSpread(GasPriceSpread spread, long time)
     {
         rapid = addGasPrice(TXSpeed.RAPID, spread);
         fast = addGasPrice(TXSpeed.FAST, spread);
@@ -43,7 +39,7 @@ public class RealmGasSpread extends RealmObject
         timeStamp = time;
     }
 
-    private String addGasPrice(TXSpeed speed, GasPriceSpread2 spread)
+    private String addGasPrice(TXSpeed speed, GasPriceSpread spread)
     {
         if (spread.getSelectedGasFee(speed) != null)
         {

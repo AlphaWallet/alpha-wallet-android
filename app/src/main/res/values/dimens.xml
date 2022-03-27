@@ -37,6 +37,9 @@
     <dimen name="dp25">23dp</dimen>
     <dimen name="dp30">28dp</dimen>
 
+    <!-- Notification Badge -->
+    <dimen name="notification_badge_small">18dp</dimen>
+
     <!-- Standard Token Icon size -->
     <dimen name="token_icon">40dp</dimen>
     <dimen name="token_icon_small">24dp</dimen>

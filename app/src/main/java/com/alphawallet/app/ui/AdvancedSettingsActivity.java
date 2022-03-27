@@ -183,24 +183,26 @@ public class AdvancedSettingsActivity extends BaseActivity
             Toast.makeText(this, getString(R.string.token_data_being_cleared), Toast.LENGTH_SHORT).show();
             return;
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(AdvancedSettingsActivity.this);
-        AlertDialog dialog = builder.setTitle(R.string.title_reload_token_data)
-                .setMessage(R.string.reload_token_data_desc)
-                .setPositiveButton(R.string.action_reload, (d, w) ->
-                {
-                    //delete all Token data for this wallet
-                    viewModel.stopChainActivity();
-                    showWaitDialog();
-                    clearTokenCache = viewModel.resetTokenData()
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(this::showResetResult);
 
-                    viewModel.blankFilterSettings();
-                })
-                .setNegativeButton(R.string.action_cancel, (d, w) -> d.dismiss())
-                .setCancelable(true)
-                .create();
+        AWalletAlertDialog dialog =  new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setTitle(R.string.title_reload_token_data);
+        dialog.setMessage(R.string.reload_token_data_desc);
+        dialog.setButtonText(R.string.action_reload);
+        dialog.setButtonListener(v -> {
+            viewModel.stopChainActivity();
+            showWaitDialog();
+            clearTokenCache = viewModel.resetTokenData()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::showResetResult);
+
+            viewModel.blankFilterSettings();
+        });
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
         dialog.show();
     }
 

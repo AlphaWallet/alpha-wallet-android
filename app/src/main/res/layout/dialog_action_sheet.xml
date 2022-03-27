@@ -17,9 +17,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginStart="@dimen/dp16"
+            android:layout_marginStart="@dimen/small_12"
             android:contentDescription="@string/action_close"
-            android:padding="5dp"
             android:src="@drawable/ic_close"
             app:tint="?colorControlNormal" />
 
@@ -37,11 +36,11 @@
 
         <ImageView
             android:id="@+id/logo"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/token_icon"
+            android:layout_height="@dimen/token_icon"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="@dimen/mini_4"
             android:contentDescription="@string/app_name"
             android:src="@drawable/ic_launcher_foreground" />
 
@@ -68,7 +67,7 @@
         android:id="@+id/gas_widget_legacy"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <com.alphawallet.app.widget.TransactionDetailWidget
         android:id="@+id/detail_widget"

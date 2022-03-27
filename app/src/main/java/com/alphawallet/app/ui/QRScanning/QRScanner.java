@@ -12,9 +12,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -44,7 +44,6 @@ import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.journeyapps.barcodescanner.DefaultDecoderFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,6 +56,7 @@ import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.os.Build.VERSION.SDK_INT;
 import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static com.alphawallet.app.repository.SharedPreferenceRepository.FULL_SCREEN_STATE;
 
@@ -84,6 +84,13 @@ public class QRScanner extends BaseActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N)
+        {
+            Toast.makeText(this, R.string.toast_qr_scanning_requires_api_24, Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
         hideSystemUI();
 
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -269,7 +276,7 @@ public class QRScanner extends BaseActivity
     {
         try
         {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            if (SDK_INT >= Build.VERSION_CODES.P)
             {
                 ImageDecoder.Source bitMapSrc = ImageDecoder.createSource(getContentResolver(), selectedPhotoUri);
                 return ImageDecoder.decodeBitmap(bitMapSrc).copy(Bitmap.Config.ARGB_8888, true);

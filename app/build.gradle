@@ -108,7 +108,10 @@ android {
         }
     }
     testOptions {
-        unitTests.returnDefaultValues = true
+        unitTests {
+            returnDefaultValues = true
+            includeAndroidResources = true
+        }
     }
 }
 
@@ -176,13 +179,18 @@ dependencies {
 
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-android'
 
-    // Tests
+    // Unit tests
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:3.4.6'
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '1.7.4'
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.2'
     testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.2'
 
+    // Component tests
+    testImplementation 'androidx.test:core:1.4.0'
+    testImplementation 'org.robolectric:robolectric:4.7.3'
+
+    // E2e tests
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {
         exclude group: "com.android.support", module: "support-annotations"
     })

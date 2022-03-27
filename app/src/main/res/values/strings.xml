@@ -45,6 +45,7 @@
     <string name="toast_message_wallet_imported">The wallet was imported</string>
     <string name="toast_message_wallet_exported">A backup was created</string>
     <string name="toast_qr_code_no_address">QR code doesn\'t contain valid address</string>
+    <string name="toast_qr_scanning_requires_api_24">QR scanning requires Android 7.0 (API level 24) or above.</string>
 
     <!-- Labels -->
     <string name="label_from">From</string>

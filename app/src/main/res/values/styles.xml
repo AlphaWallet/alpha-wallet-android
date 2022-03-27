@@ -28,8 +28,8 @@
         <item name="android:textSize">@dimen/sp17</item>
     </style>
 
-    <style name="Aw.Component.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
-        <item name="backgroundTint">?colorBackgroundFloating</item>
+    <style name="Aw.Component.BottomSheet" parent="">
+        <item name="android:background">?colorSurface</item>
     </style>
 
     <style name="Aw.Component.CheckBox" parent="Widget.AppCompat.CompoundButton.CheckBox">

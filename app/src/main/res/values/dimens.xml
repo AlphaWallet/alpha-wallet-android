@@ -50,6 +50,7 @@
     <dimen name="standard_header_height">50dp</dimen>
 
     <!-- Standard Spacing -->
+    <dimen name="micro_2">2dp</dimen>
     <dimen name="mini_4">4dp</dimen>
     <dimen name="tiny_8">8dp</dimen>
     <dimen name="small_12">12dp</dimen>

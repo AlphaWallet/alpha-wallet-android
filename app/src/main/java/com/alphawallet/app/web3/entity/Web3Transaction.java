@@ -27,6 +27,11 @@ public class Web3Transaction implements Parcelable {
     public final BigInteger value;
     public final BigInteger gasPrice;
     public final BigInteger gasLimit;
+
+    // EIP1559
+    public final BigInteger maxFeePerGas;
+    public final BigInteger maxPriorityFeePerGas;
+
     public final long nonce;
     public final String payload;
     public final long leafPosition;
@@ -61,6 +66,31 @@ public class Web3Transaction implements Parcelable {
         this.payload = payload;
         this.leafPosition = 0;
         this.description = description;
+        this.maxFeePerGas = BigInteger.ZERO;
+        this.maxPriorityFeePerGas = BigInteger.ZERO;
+    }
+
+    public Web3Transaction(
+            Address recipient,
+            Address contract,
+            BigInteger value,
+            BigInteger maxFee,
+            BigInteger maxPriorityFee,
+            BigInteger gasLimit,
+            long nonce,
+            String payload,
+            String description) {
+        this.recipient = recipient;
+        this.contract = contract;
+        this.value = value;
+        this.gasPrice = BigInteger.ZERO;
+        this.gasLimit = gasLimit;
+        this.nonce = nonce;
+        this.payload = payload;
+        this.leafPosition = 0;
+        this.description = description;
+        this.maxFeePerGas = maxFee;
+        this.maxPriorityFeePerGas = maxPriorityFee;
     }
 
     public Web3Transaction(
@@ -81,6 +111,31 @@ public class Web3Transaction implements Parcelable {
         this.payload = payload;
         this.leafPosition = leafPosition;
         this.description = null;
+        this.maxFeePerGas = BigInteger.ZERO;
+        this.maxPriorityFeePerGas = BigInteger.ZERO;
+    }
+
+    public Web3Transaction(
+            Address recipient,
+            Address contract,
+            BigInteger value,
+            BigInteger maxFee,
+            BigInteger maxPriorityFee,
+            BigInteger gasLimit,
+            long nonce,
+            String payload,
+            long leafPosition) {
+        this.recipient = recipient;
+        this.contract = contract;
+        this.value = value;
+        this.gasPrice = BigInteger.ZERO;
+        this.gasLimit = gasLimit;
+        this.nonce = nonce;
+        this.payload = payload;
+        this.leafPosition = leafPosition;
+        this.description = null;
+        this.maxFeePerGas = maxFee;
+        this.maxPriorityFeePerGas = maxPriorityFee;
     }
 
     /**
@@ -99,6 +154,8 @@ public class Web3Transaction implements Parcelable {
         this.value = wcTx.getValue() == null ? BigInteger.ZERO : Hex.hexToBigInteger(wcTx.getValue(), BigInteger.ZERO);
         this.gasPrice = Hex.hexToBigInteger(gasPrice, BigInteger.ZERO);
         this.gasLimit = Hex.hexToBigInteger(gasLimit, BigInteger.ZERO);
+        this.maxFeePerGas = Hex.hexToBigInteger(wcTx.getMaxFeePerGas(), BigInteger.ZERO);
+        this.maxPriorityFeePerGas = Hex.hexToBigInteger(wcTx.getMaxPriorityFeePerGas(), BigInteger.ZERO);
         this.nonce = Hex.hexToLong(nonce, -1);
         this.payload = wcTx.getData();
         this.leafPosition = callbackId;
@@ -122,6 +179,8 @@ public class Web3Transaction implements Parcelable {
         payload = (mode == ActionSheetMode.CANCEL_TRANSACTION) ? "0x": tx.input;
         leafPosition = -1;
         description = null;
+        maxFeePerGas = BigInteger.ZERO;
+        maxPriorityFeePerGas = BigInteger.ZERO;
     }
 
     Web3Transaction(Parcel in) {
@@ -130,6 +189,8 @@ public class Web3Transaction implements Parcelable {
         value = new BigInteger(in.readString());
         gasPrice = new BigInteger(in.readString());
         gasLimit = new BigInteger(in.readString());
+        maxFeePerGas = new BigInteger(in.readString());
+        maxPriorityFeePerGas = new BigInteger(in.readString());
         nonce = in.readLong();
         payload = in.readString();
         leafPosition = in.readLong();
@@ -160,7 +221,8 @@ public class Web3Transaction implements Parcelable {
         dest.writeString((value == null ? BigInteger.ZERO : value).toString());
         dest.writeString((gasPrice == null ? BigInteger.ZERO : gasPrice).toString());
         dest.writeString((gasLimit == null ? BigInteger.ZERO : gasLimit).toString());
-        //dest.writeLong(gasLimit);
+        dest.writeString((maxFeePerGas == null ? BigInteger.ZERO : maxFeePerGas).toString());
+        dest.writeString((maxPriorityFeePerGas == null ? BigInteger.ZERO : maxPriorityFeePerGas).toString());
         dest.writeLong(nonce);
         dest.writeString(payload);
         dest.writeLong(leafPosition);
@@ -178,6 +240,8 @@ public class Web3Transaction implements Parcelable {
      * @param chainId
      * @return
      */
+
+    //TODO: Show legacy/EIP1559
     public CharSequence getFormattedTransaction(Context ctx, long chainId, String symbol)
     {
         StyledStringBuilder sb = new StyledStringBuilder();
@@ -228,5 +292,10 @@ public class Web3Transaction implements Parcelable {
                 recipient.toString(),
                 value,
                 payload);
+    }
+
+    public boolean isLegacyTransaction()
+    {
+        return !gasPrice.equals(BigInteger.ZERO) || maxFeePerGas.compareTo(BigInteger.ZERO) <= 0;
     }
 }

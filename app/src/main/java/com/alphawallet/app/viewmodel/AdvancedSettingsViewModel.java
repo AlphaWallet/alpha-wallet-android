@@ -65,6 +65,16 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
         preferenceRepository.setFullScreenState(state);
     }
 
+    public void toggle1559Transactions(boolean toggleState)
+    {
+        preferenceRepository.setUse1559Transactions(toggleState);
+    }
+
+    public boolean get1559TransactionsState()
+    {
+        return preferenceRepository.getUse1559Transactions();
+    }
+
     public boolean getFullScreenState()
     {
         return preferenceRepository.getFullScreenState();

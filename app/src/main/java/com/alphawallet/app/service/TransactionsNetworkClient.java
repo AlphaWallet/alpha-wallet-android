@@ -336,6 +336,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         instance.executeTransaction(r -> {
             for (Transaction tx : txList)
             {
+                String oldGasFeeMax = "";
+                String oldPriorityFee = "";
                 RealmTransaction realmTx = r.where(RealmTransaction.class)
                         .equalTo("hash", tx.hash)
                         .findFirst();
@@ -344,8 +346,15 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 {
                     realmTx = r.createObject(RealmTransaction.class, tx.hash);
                 }
+                else
+                {
+                    oldGasFeeMax = !TextUtils.isEmpty(realmTx.getMaxFeePerGas()) ? realmTx.getMaxFeePerGas() : tx.maxFeePerGas;
+                    oldPriorityFee = !TextUtils.isEmpty(realmTx.getPriorityFee()) ? realmTx.getPriorityFee() : tx.maxPriorityFee;
+                }
 
                 TransactionsRealmCache.fill(realmTx, tx);
+                realmTx.setMaxFeePerGas(oldGasFeeMax);
+                realmTx.setMaxPriorityFee(oldPriorityFee);
                 r.insertOrUpdate(realmTx);
             }
         });

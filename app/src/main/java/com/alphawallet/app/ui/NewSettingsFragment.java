@@ -144,9 +144,14 @@ public class NewSettingsFragment extends BaseFragment
         notificationView = view.findViewById(R.id.notification);
         if (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M)
         {
-            notificationView.setNotificationBackgroundColor(R.color.indigo);
             notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
             notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
+            notificationView.setPrimaryButtonText(getContext().getString(R.string.hide_notification));
+            notificationView.setPrimaryButtonListener(() ->
+            {
+                notificationView.setVisibility(View.GONE);
+                viewModel.setMarshMallowWarning(true);
+            });
         }
         else
         {

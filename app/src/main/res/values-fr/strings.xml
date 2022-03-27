@@ -54,6 +54,7 @@
     <string name="label_gas_price_gwei">Prix du Gas (GWEI)</string>
     <string name="label_old_gas_price">Ancien Prix du Gas</string>
     <string name="label_network_fee">Frais de réseau (Maximum)</string>
+    <string name="label_gas_price_max">Max Fee (GWEI)</string>
     <string name="button_ok">OK</string>
 
     <!-- Subtitles -->
@@ -721,6 +722,9 @@
     <string name="new_balance">(Nouveau: %1$s %2$s)</string>
     <string name="set_speed_title">Régler la vitesse Speed</string>
     <string name="gas_price_widget">Prix du Gas: %1$s</string>
+    <string name="gas_max">Max Fee</string>
+    <string name="priority_fee">Priority Fee</string>
+    <string name="base_fee">Base Fee: %1$s</string>
     <string name="gas_message">Les frais sont basés sur la charge actuelle du réseau de la blockchain Ethereum. Ils ne dépendent pas d\'AlphaWallet. AlphaWallet utilise l\'oracle en direct de %1$s et met à jour les prix du gas toutes les 15 secondes.</string>
     <string name="set_your_speed">Définir Le Votre</string>
     <string name="nonce_optional">Nonce (optionnel)</string>
@@ -886,4 +890,6 @@
     <string name="trait_rarity_unique">Unique</string>
     <string name="trait_rarity_suppl_text">%1$s%% have this trait</string>
     <string name="toast_qr_scanning_requires_api_24">La numérisation QR nécessite Android 7.0 (API niveau 24) ou supérieur.</string>
+    <string name="experimental_1559">Use 1559 Transactions</string>
+    <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
 </resources>

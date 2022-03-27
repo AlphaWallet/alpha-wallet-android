@@ -95,7 +95,8 @@
             android:lines="1"
             android:orientation="horizontal"
             android:text="@string/edit"
-            android:visibility="visible" />
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
     </LinearLayout>
 

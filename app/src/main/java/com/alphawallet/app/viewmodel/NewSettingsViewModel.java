@@ -146,4 +146,8 @@ public class NewSettingsViewModel extends BaseViewModel {
     {
         genericWalletInteract.setIsDismissed(walletAddr, isDismissed);
     }
+
+    public void setMarshMallowWarning(boolean shown) {
+        preferenceRepository.setMarshMallowWarning(shown);
+    }
 }

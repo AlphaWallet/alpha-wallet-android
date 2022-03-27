@@ -44,7 +44,7 @@ android {
         def DEFAULT_OPENSEA_API_KEY = "\"...\""; //Put your OpenSea developer API key in here, otherwise you are reliant on the backup NFT fetch method
         def DEFAULT_POLYGONSCAN_API_KEY = "\"\""; //Put your Polygonscan developer API key in here to get access to Polygon/Mumbai token discovery and transactions
 
-        buildConfigField 'int', 'DB_VERSION', '43'
+        buildConfigField 'int', 'DB_VERSION', '45'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
 
         ndk {
@@ -119,14 +119,14 @@ dependencies {
     implementation project(":lib")
 
     // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
-    // WARNING!  Don't add depdency on Google Play Services without consulting
+    // WARNING!  Don't add dependency on Google Play Services without consulting
     // WARNING!  The China marketing team
     // WARNING!  Many Chinese Android phones execute (meaning terminate) any app that
     // WARNING!  users google gms summarily, like immune systems cleansing infections
     // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
 
     // Ethereum client
-    implementation "org.web3j:core:4.6.0-android"
+    implementation "org.web3j:core:4.8.7-android"
 
     // Http client
     implementation "com.squareup.okhttp3:okhttp:4.9.0"

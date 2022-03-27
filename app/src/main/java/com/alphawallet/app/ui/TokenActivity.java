@@ -788,25 +788,12 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         viewModel.actionSheetConfirm(mode);
     }
 
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> confirmationDialog.setCurrentGasIndex(result));
+
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
-        switch (requestCode)
-        {
-            case C.SET_GAS_SETTINGS:
-                if (data != null && confirmationDialog != null)
-                {
-                    int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
-                    long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
-                    BigDecimal customGasPrice = data.hasExtra(C.EXTRA_GAS_PRICE) ?
-                            new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE)) : BigDecimal.ZERO; //may not have set a custom gas price
-                    BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
-                    long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
-                    confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
-                }
-                break;
-            default:
-                super.onActivityResult(requestCode, resultCode, data);
-        }
+        return getGasSettings;
     }
 }

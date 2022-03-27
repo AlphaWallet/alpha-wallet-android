@@ -7,9 +7,10 @@
     android:orientation="vertical">
 
     <com.alphawallet.app.widget.StandardHeader
+        android:id="@+id/title_gas_price"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        custom:headerText="@string/label_gas_price_gwei" />
+        custom:headerText="@string/label_gas_price_max" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -39,6 +40,52 @@
             android:inputType="numberDecimal"
             android:paddingEnd="@dimen/tiny_8"
             tools:text="20" />
+
+    </LinearLayout>
+
+    <View style="@style/Aw.Component.Separator" />
+
+    <LinearLayout
+        android:id="@+id/layout_priority_fee"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <com.alphawallet.app.widget.StandardHeader
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        custom:headerText="@string/priority_fee" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/tiny_8">
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/priority_fee_slider"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="4"
+            android:max="90"
+            android:paddingTop="@dimen/tiny_8"
+            android:paddingBottom="@dimen/tiny_8"
+            android:progress="10" />
+
+        <EditText
+            android:id="@+id/priority_fee_entry"
+            style="@style/Aw.Typography.Caption"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/background_password_entry"
+            android:gravity="end|center_vertical"
+            android:inputType="numberDecimal"
+            android:paddingEnd="@dimen/tiny_8"
+            tools:text="20" />
+
+    </LinearLayout>
 
     </LinearLayout>
 
@@ -74,9 +121,9 @@
             android:layout_weight="1"
             android:background="@drawable/background_password_entry"
             android:gravity="end|center_vertical"
-            android:inputType="number"
+            android:inputType="numberDecimal"
             android:paddingEnd="@dimen/tiny_8"
-            tools:text="420000" />
+            tools:text="21000" />
 
     </LinearLayout>
 

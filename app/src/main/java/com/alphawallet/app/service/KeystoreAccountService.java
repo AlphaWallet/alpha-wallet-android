@@ -23,6 +23,7 @@ import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletFile;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.crypto.transaction.type.TransactionType;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
@@ -30,6 +31,7 @@ import org.web3j.utils.Numeric;
 
 import java.io.File;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -228,7 +230,6 @@ public class KeystoreAccountService implements AccountKeystoreService
     @Override
     public Single<SignatureFromKey> signTransaction(Wallet signer, String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
         return Single.fromCallable(() -> {
-            SignatureFromKey returnSig = new SignatureFromKey();
             Sign.SignatureData sigData;
             String dataStr = data != null ? Numeric.toHexString(data) : "";
 
@@ -239,10 +240,10 @@ public class KeystoreAccountService implements AccountKeystoreService
                     toAddress,
                     amount,
                     dataStr
-                    );
+            );
 
             byte[] signData = TransactionEncoder.encode(rtx, chainId);
-            returnSig = keyService.signData(signer, signData);
+            SignatureFromKey returnSig = keyService.signData(signer, signData);
             sigData = sigFromByteArray(returnSig.signature);
             if (sigData == null) {
                 returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
@@ -253,6 +254,51 @@ public class KeystoreAccountService implements AccountKeystoreService
             return returnSig;
         })
         .subscribeOn(Schedulers.io());
+    }
+
+    @Override
+    public Single<SignatureFromKey> signTransactionEIP1559(Wallet signer, String toAddress, BigInteger amount, BigInteger gasLimit,
+                                                           BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas, long nonce, byte[] data, long chainId)
+    {
+        return Single.fromCallable(() -> {
+            Sign.SignatureData sigData;
+            String dataStr = data != null ? Numeric.toHexString(data) : "";
+
+            RawTransaction rtx = RawTransaction.createTransaction(
+                    chainId,
+                    BigInteger.valueOf(nonce),
+                    gasLimit,
+                    toAddress,
+                    amount,
+                    dataStr,
+                    maxPriorityFeePerGas,
+                    maxFeePerGas
+            );
+
+            byte[] signData = TransactionEncoder.encode(rtx);
+
+            SignatureFromKey returnSig = keyService.signData(signer, signData);
+            sigData = sigFromByteArray(returnSig.signature);
+            if (sigData == null) {
+                returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
+                returnSig.failMessage = "Incorrect signature length"; //should never see this message
+            }
+            returnSig.signature = encode(rtx, sigData);
+            return returnSig;
+        }).subscribeOn(Schedulers.io());
+    }
+
+    private static byte[] encode(RawTransaction rawTransaction, Sign.SignatureData signatureData) {
+        List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
+        RlpList rlpList = new RlpList(values);
+        byte[] encoded = RlpEncoder.encode(rlpList);
+        if (!rawTransaction.getType().equals(TransactionType.LEGACY)) {
+            return ByteBuffer.allocate(encoded.length + 1)
+                    .put(rawTransaction.getType().getRlpType())
+                    .put(encoded)
+                    .array();
+        }
+        return encoded;
     }
 
     /**
@@ -286,12 +332,6 @@ public class KeystoreAccountService implements AccountKeystoreService
 
         Timber.tag("RealmDebug").d("gotcredentials + %s", address);
         return credentials;
-    }
-
-    private static byte[] encode(RawTransaction rawTransaction, Sign.SignatureData signatureData) {
-        List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
-        RlpList rlpList = new RlpList(values);
-        return RlpEncoder.encode(rlpList);
     }
 
     @Override

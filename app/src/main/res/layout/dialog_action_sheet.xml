@@ -59,10 +59,16 @@
         android:visibility="gone"
         custom:label="@string/requester_url" />
 
-    <com.alphawallet.app.widget.GasWidget
+    <com.alphawallet.app.widget.GasWidget2
         android:id="@+id/gas_widgetx"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <com.alphawallet.app.widget.GasWidget
+        android:id="@+id/gas_widget_legacy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
 
     <com.alphawallet.app.widget.TransactionDetailWidget
         android:id="@+id/detail_widget"

@@ -128,6 +128,36 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
+	public Single<TransactionData> create1559TransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasLimit, BigInteger maxFeePerGas, BigInteger maxPriorityFee, long nonce, byte[] data, long chainId) {
+		final Web3j web3j = getWeb3jService(chainId);
+
+		TransactionData txData = new TransactionData();
+
+		return getNonceForTransaction(web3j, from.address, nonce)
+				.flatMap(txNonce -> {
+					txData.nonce = txNonce;
+					return accountKeystoreService.signTransactionEIP1559(from, toAddress, subunitAmount, gasLimit, maxFeePerGas, maxPriorityFee, txNonce.longValue(), data, chainId);
+				})
+				.flatMap(signedMessage -> Single.fromCallable( () -> {
+					if (signedMessage.sigType != SignatureReturnType.SIGNATURE_GENERATED)
+					{
+						throw new Exception(signedMessage.failMessage);
+					}
+					txData.signature = Numeric.toHexString(signedMessage.signature);
+					EthSendTransaction raw = web3j
+							.ethSendRawTransaction(Numeric.toHexString(signedMessage.signature))
+							.send();
+					if (raw.hasError()) {
+						throw new Exception(raw.getError().getMessage());
+					}
+					txData.txHash = raw.getTransactionHash();
+					return txData;
+				}))
+				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, toAddress, subunitAmount, tx.nonce, maxFeePerGas, maxPriorityFee, gasLimit, chainId, data != null ? Numeric.toHexString(data) : "0x", ""))
+				.subscribeOn(Schedulers.io());
+	}
+
+	@Override
 	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
 		final Web3j web3j = getWeb3jService(chainId);
 		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
@@ -205,7 +235,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 					}
 					txData.txHash = raw.getTransactionHash();
 					return txData;
-				}))
+				})) //TODO: Calculate new contract address and store here
 				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, "", BigInteger.ZERO, txData.nonce, useGasPrice, gasLimit, chainId, data, C.BURN_ADDRESS))
 				.subscribeOn(Schedulers.io());
 	}
@@ -214,6 +244,20 @@ public class TransactionRepository implements TransactionRepositoryType {
 	{
 		if (EthereumNetworkRepository.hasGasOverride(chainId)) return EthereumNetworkRepository.gasOverrideValue(chainId);
 		else return gasPrice;
+	}
+
+	//EIP1559
+	private Single<TransactionData> storeUnconfirmedTransaction(Wallet from, TransactionData txData, String toAddress, BigInteger value, BigInteger nonce, BigInteger maxFeePerGas, BigInteger maxPriorityFee, BigInteger gasLimit, long chainId, String data, String contractAddr)
+	{
+		return Single.fromCallable(() -> {
+			Transaction newTx = new Transaction(txData.txHash, "0", "0", System.currentTimeMillis()/1000, nonce.intValue(), from.address, toAddress, value.toString(10), "0", "0", maxFeePerGas.toString(10),
+					maxPriorityFee.toString(10), data,
+					gasLimit.toString(10), chainId, contractAddr);
+			inDiskCache.putTransaction(from, newTx);
+			transactionsService.markPending(newTx);
+
+			return txData;
+		});
 	}
 
 	private Single<TransactionData> storeUnconfirmedTransaction(Wallet from, TransactionData txData, String toAddress, BigInteger value, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, long chainId, String data, String contractAddr)
@@ -299,12 +343,6 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public void removeOverridenTransaction(Wallet wallet, String oldTxHash)
-	{
-		inDiskCache.deleteTransaction(wallet, oldTxHash);
-	}
-
-	@Override
 	public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, List<Long> networkFilters, long fetchTime, int fetchLimit)
 	{
 		return inDiskCache.fetchActivityMetas(wallet, networkFilters, fetchTime, fetchLimit);
@@ -339,7 +377,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	{
 		//detect if transaction is success
 		return Single.fromCallable(() -> {
-			org.web3j.protocol.core.methods.response.Transaction fetchedTx = rawTx.getTransaction().orElseThrow();
+			org.web3j.protocol.core.methods.response.Transaction fetchedTx = rawTx.getResult();// .getTransaction();
 			Web3j web3j = getWeb3jService(fetchedTx.getChainId());
 			TransactionReceipt txr = web3j.ethGetTransactionReceipt(fetchedTx.getHash()).send().getResult();
 			return inDiskCache.storeRawTx(wallet, fetchedTx.getChainId(), rawTx, timeStamp, txr.isStatusOK());

@@ -43,7 +43,7 @@ object WCCipher {
                 key = key
         )
 
-        if (computedHmac != payload.hmac.toLowerCase()) {
+        if (computedHmac != payload.hmac.lowercase()) {
             throw InvalidHmacException()
         }
 

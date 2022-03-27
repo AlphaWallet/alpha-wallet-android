@@ -198,6 +198,8 @@ public class InputAmount extends LinearLayout
 
     private void updateAvailableBalance()
     {
+        if (exactAmount.compareTo(BigDecimal.ZERO) > 0) return;
+
         if (showingCrypto)
         {
             showCrypto();
@@ -224,7 +226,7 @@ public class InputAmount extends LinearLayout
 
         realmTokenUpdate.addChangeListener(realmToken -> {
             RealmToken rt = (RealmToken)realmToken;
-            if (rt.isValid())
+            if (rt.isValid() && exactAmount.compareTo(BigDecimal.ZERO) == 0)
             {
                 token = tokensService.getToken(rt.getChainId(), rt.getTokenAddress());
                 updateAvailableBalance();
@@ -388,10 +390,10 @@ public class InputAmount extends LinearLayout
                             .equalTo("chainId", token.tokenInfo.chainId)
                             .findFirst();
 
-                if (gasSpread != null && gasSpread.getGasPrice().standard.compareTo(BigInteger.ZERO) > 0)
+                if (gasSpread != null && gasSpread.getGasPrice().compareTo(BigInteger.ZERO) > 0)
                 {
                     //assume 'average' gas cost here
-                    onLatestGasPrice(gasSpread.getGasPrice().standard);
+                    onLatestGasPrice(gasSpread.getGasPrice());
                 }
                 else //fallback to node price
                 {
@@ -548,5 +550,10 @@ public class InputAmount extends LinearLayout
 
             editText.setText(showValue);
         }
+    }
+
+    public boolean isSendAll()
+    {
+        return exactAmount.compareTo(BigDecimal.ZERO) > 0;
     }
 }

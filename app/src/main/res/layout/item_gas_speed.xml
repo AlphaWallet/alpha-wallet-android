@@ -71,13 +71,30 @@
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/text_gwei"
-            style="@style/Aw.Typography.Sub"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            tools:text="Gas Price: 45" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/text_gwei"
+                style="@style/Aw.Typography.Sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                tools:text="Gas Price/Max Fee: 45" />
+
+            <TextView
+                android:id="@+id/text_priority_fee"
+                style="@style/Aw.Typography.Sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="3dp"
+                tools:text="Priority Fee: 2.00" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout

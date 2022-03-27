@@ -1226,4 +1226,8 @@ public class TokensService
         return tokenRepository.getTokenGroup(token.tokenInfo.chainId, token.tokenInfo.address, token.getInterfaceSpec());
     }
 
+    public boolean hasLockedGas(long chainId)
+    {
+        return ethereumNetworkRepository.hasLockedGas(chainId);
+    }
 }

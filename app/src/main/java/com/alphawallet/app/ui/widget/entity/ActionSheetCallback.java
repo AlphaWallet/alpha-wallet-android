@@ -1,6 +1,9 @@
 package com.alphawallet.app.ui.widget.entity;
 
 import android.app.Activity;
+import android.content.Intent;
+
+import androidx.activity.result.ActivityResultLauncher;
 
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.tokens.Token;
@@ -16,6 +19,7 @@ public interface ActionSheetCallback
     void sendTransaction(Web3Transaction tx);
     void dismissed(String txHash, long callbackId, boolean actionCompleted);
     void notifyConfirm(String mode);
+    ActivityResultLauncher<Intent> gasSelectLauncher();
     default void signTransaction(Web3Transaction tx) { } // only WalletConnect uses this so far
 
     default void buttonClick(long callbackId, Token baseToken) { }; //for message only actionsheet

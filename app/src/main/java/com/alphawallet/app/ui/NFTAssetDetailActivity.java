@@ -405,4 +405,13 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         viewModel.actionSheetConfirm(mode);
     }
+
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> confirmationDialog.setCurrentGasIndex(result));
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
+    }
 }

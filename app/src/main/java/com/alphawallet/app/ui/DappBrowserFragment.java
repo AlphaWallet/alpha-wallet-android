@@ -1105,10 +1105,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     public void setCurrentGasIndex(int gasSelectionIndex, BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime, long customNonce)
     {
-        if (confirmationDialog != null && confirmationDialog.isShowing())
+        /*if (confirmationDialog != null && confirmationDialog.isShowing())
         {
             confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
-        }
+        }*/
     }
 
     @Override
@@ -2127,6 +2127,15 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void notifyConfirm(String mode)
     {
         if (getActivity() != null) ((HomeActivity)getActivity()).useActionSheet(mode);
+    }
+
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> confirmationDialog.setCurrentGasIndex(result));
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
     }
 
     // Handle resizing the browser view when the soft keyboard pops up and goes.

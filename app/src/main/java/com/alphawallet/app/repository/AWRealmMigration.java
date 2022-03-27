@@ -402,6 +402,29 @@ public class AWRealmMigration implements RealmMigration
 
             oldVersion = 43;
         }
+
+        if (oldVersion == 43 || oldVersion == 44)
+        {
+            RealmObjectSchema realmData = schema.get("Realm1559Gas");
+            if (realmData != null) schema.remove("Realm1559Gas");
+            schema.create("Realm1559Gas")
+                        .addField("chainId", long.class, FieldAttribute.PRIMARY_KEY)
+                        .addField("timeStamp", long.class)
+                        .addField("resultData", String.class);
+
+            oldVersion = 45;
+        }
+
+        if (oldVersion == 45)
+        {
+            RealmObjectSchema realmData = schema.get("RealmTransaction");
+            if (realmData != null)
+            {
+                if (!realmData.hasField("maxFeePerGas")) realmData.addField("maxFeePerGas", String.class);
+                if (!realmData.hasField("maxPriorityFee")) realmData.addField("maxPriorityFee", String.class);
+            }
+            oldVersion++;
+        }
     }
 
     @Override

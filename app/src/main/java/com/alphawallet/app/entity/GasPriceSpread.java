@@ -1,42 +1,172 @@
 package com.alphawallet.app.entity;
 
+import static com.alphawallet.app.util.BalanceUtils.gweiToWei;
+
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.ui.widget.entity.GasSpeed;
+import com.alphawallet.app.ui.widget.entity.GasSpeed2;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.List;
-
-import static com.alphawallet.app.util.BalanceUtils.gweiToWei;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Created by JB on 18/11/2020.
+ * Created by JB on 20/01/2022.
  */
-public class GasPriceSpread
+public class GasPriceSpread implements Parcelable
 {
     public static long RAPID_SECONDS = 15;
     public static long FAST_SECONDS = 60;
     public static long STANDARD_SECONDS = 60 * 3;
     public static long SLOW_SECONDS = 60 * 10;
 
-    public final BigInteger rapid;
-    public final BigInteger fast;
-    public final BigInteger standard;
-    public final BigInteger slow;
-    public final BigInteger baseFee;
-    public final boolean lockedGas;
+    private final boolean hasLockedGas;
+    private BigInteger baseFee = BigInteger.ZERO;
+
+    public GasSpeed2 getSelectedGasFee(TXSpeed currentGasSpeedIndex)
+    {
+        return fees.get(currentGasSpeedIndex);
+    }
+
+    public int getEntrySize()
+    {
+        return fees.size();
+    }
+
+    public GasSpeed2 getQuickestGasSpeed()
+    {
+        for (TXSpeed txs : TXSpeed.values())
+        {
+            GasSpeed2 gs = fees.get(txs);
+            if (gs != null) return gs;
+        }
+
+        //Should not reach this
+        return null;
+    }
+
+    public GasSpeed2 getSlowestGasSpeed()
+    {
+        TXSpeed slowest = TXSpeed.STANDARD;
+        for (TXSpeed txs : TXSpeed.values())
+        {
+            GasSpeed2 gs = fees.get(txs);
+            if (gs != null)
+            {
+                if (gs.gasPrice.maxFeePerGas.compareTo(fees.get(slowest).gasPrice.maxFeePerGas) < 0)
+                {
+                    slowest = txs;
+                }
+            }
+        }
+
+        return fees.get(slowest);
+    }
+
+    public TXSpeed getNextSpeed(TXSpeed speed)
+    {
+        boolean begin = false;
+        for (TXSpeed txs : TXSpeed.values())
+        {
+            GasSpeed2 gs = fees.get(txs);
+            if (gs != null)
+            {
+                if (txs == speed)
+                {
+                    begin = true;
+                }
+                else if (begin)
+                {
+                    return txs;
+                }
+            }
+        }
+
+        return TXSpeed.CUSTOM;
+    }
+
+    public TXSpeed getSelectedPosition(int absoluteAdapterPosition)
+    {
+        int index = 0;
+        for (TXSpeed txs : TXSpeed.values())
+        {
+            GasSpeed2 gs = fees.get(txs);
+            if (gs == null) continue;
+            else if (absoluteAdapterPosition == index) return txs;
+            index++;
+        }
+
+        return TXSpeed.CUSTOM;
+    }
 
     public final long timeStamp;
+    public TXSpeed speedIndex = TXSpeed.STANDARD;
 
-    private int customIndex;
+    private final Map<TXSpeed, GasSpeed2> fees = new HashMap<>();
+
+    public GasPriceSpread(Context ctx, Map<Integer, EIP1559FeeOracleResult> result)
+    {
+        hasLockedGas = false;
+        timeStamp = System.currentTimeMillis();
+        if (result == null || result.size() == 0) return;
+        setComponents(ctx, result);
+
+        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, fees.get(TXSpeed.STANDARD).gasPrice));
+    }
+
+    public GasPriceSpread(Context ctx, GasPriceSpread gs, Map<Integer, EIP1559FeeOracleResult> result)
+    {
+        hasLockedGas = false;
+        timeStamp = System.currentTimeMillis();
+        if (result == null || result.size() == 0) return;
+        setComponents(ctx, result);
+
+        GasSpeed2 custom = gs.getSelectedGasFee(TXSpeed.CUSTOM);
+
+        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), custom.seconds, custom.gasPrice));
+    }
+
+    //This is a fallback method, it should never be used
+    public GasPriceSpread(Context ctx, BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas)
+    {
+        timeStamp = System.currentTimeMillis();
+
+        BigInteger baseFeeApprox = maxFeePerGas.subtract(maxPriorityFeePerGas.divide(BigInteger.valueOf(2)));
+
+        fees.put(TXSpeed.STANDARD, new GasSpeed2(ctx.getString(R.string.speed_average), STANDARD_SECONDS, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFeeApprox)));
+        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFeeApprox)));
+        hasLockedGas = false;
+    }
+
+    public GasPriceSpread(BigInteger currentAvGasPrice, boolean lockedGas)
+    {
+        timeStamp = System.currentTimeMillis();
+
+        fees.put(TXSpeed.FAST, new GasSpeed2("", FAST_SECONDS, new BigDecimal(currentAvGasPrice).multiply(BigDecimal.valueOf(1.2)).toBigInteger()));
+        fees.put(TXSpeed.STANDARD, new GasSpeed2("", STANDARD_SECONDS, currentAvGasPrice));
+        hasLockedGas = lockedGas;
+    }
+
+    public GasPriceSpread(Context ctx, BigInteger gasPrice)
+    {
+        timeStamp = System.currentTimeMillis();
+
+        fees.put(TXSpeed.STANDARD, new GasSpeed2(ctx.getString(R.string.speed_average), STANDARD_SECONDS, gasPrice));
+        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, gasPrice));
+        hasLockedGas = false;
+    }
 
     public GasPriceSpread(String apiReturn)
     {
+        this.timeStamp = System.currentTimeMillis();
+
         BigDecimal rRapid = BigDecimal.ZERO;
         BigDecimal rFast = BigDecimal.ZERO;
         BigDecimal rStandard = BigDecimal.ZERO;
@@ -63,96 +193,184 @@ public class GasPriceSpread
         }
 
         //convert to wei
-        rapid = gweiToWei(rRapid);
-        fast = gweiToWei(rFast);
-        standard = gweiToWei(rStandard);
-        slow = gweiToWei(rSlow);
+        fees.put(TXSpeed.RAPID, new GasSpeed2("", RAPID_SECONDS, gweiToWei(rRapid)));
+        fees.put(TXSpeed.FAST, new GasSpeed2("", FAST_SECONDS, gweiToWei(rFast)));
+        fees.put(TXSpeed.STANDARD, new GasSpeed2("", STANDARD_SECONDS, gweiToWei(rStandard)));
+        fees.put(TXSpeed.SLOW, new GasSpeed2("", SLOW_SECONDS, gweiToWei(rSlow)));
         baseFee = gweiToWei(rBaseFee);
-        lockedGas = false;
-        timeStamp = System.currentTimeMillis();
+
+        hasLockedGas = false;
     }
 
-    public GasPriceSpread(BigInteger currentAvGasPrice, boolean hasLockedGas)
+    public GasPriceSpread(Context ctx, GasPriceSpread gasSpread, long timestamp, Map<TXSpeed, BigInteger> feeMap, boolean locked)
     {
-        rapid = BigInteger.ZERO;
-        fast = new BigDecimal(currentAvGasPrice).multiply(BigDecimal.valueOf(1.2)).toBigInteger();
-        standard = currentAvGasPrice;
-        slow = BigInteger.ZERO;
-        baseFee = BigInteger.ZERO;
-        timeStamp = System.currentTimeMillis();
-        lockedGas = hasLockedGas;
-    }
+        this.timeStamp = timestamp;
 
-    public GasPriceSpread(String r, String f, String st, String sl, String bf, long timeSt, boolean locked)
-    {
-        rapid = new BigInteger(r);
-        fast = new BigInteger(f);
-        standard = new BigInteger(st);
-        slow = new BigInteger(sl);
-        baseFee = new BigInteger(bf);
-        timeStamp = timeSt;
-        lockedGas = locked;
-    }
+        addLegacyGasFee(TXSpeed.RAPID, RAPID_SECONDS, ctx.getString(R.string.speed_rapid), feeMap);
+        addLegacyGasFee(TXSpeed.FAST, FAST_SECONDS, ctx.getString(R.string.speed_fast), feeMap);
+        addLegacyGasFee(TXSpeed.STANDARD, STANDARD_SECONDS, ctx.getString(R.string.speed_average), feeMap);
+        addLegacyGasFee(TXSpeed.SLOW, SLOW_SECONDS, ctx.getString(R.string.speed_slow), feeMap);
 
-    public int setupGasSpeeds(Context ctx, List<GasSpeed> gasSpeeds, int currentGasSpeedIndex)
-    {
-        boolean hasRapid = false;
-        GasSpeed customGas = null;
-        if (gasSpeeds.size() > 0) customGas = gasSpeeds.get(gasSpeeds.size()-1);
-
-        gasSpeeds.clear();
-
-        if (rapid.compareTo(BigInteger.ZERO) > 0)
+        if (gasSpread != null)
         {
-            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_rapid), GasPriceSpread.RAPID_SECONDS, rapid));
-            hasRapid = true;
-        }
+            GasSpeed2 custom = gasSpread.getSelectedGasFee(TXSpeed.CUSTOM);
 
-        if (fast.compareTo(BigInteger.ZERO) > 0)
-        {
-            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_fast), GasPriceSpread.FAST_SECONDS, fast));
-            hasRapid = true;
-        }
-
-        if (standard.compareTo(BigInteger.ZERO) > 0)
-        {
-            long txTime = GasPriceSpread.STANDARD_SECONDS;
-            if (currentGasSpeedIndex == -1) currentGasSpeedIndex = gasSpeeds.size();
-            if (!hasRapid) txTime = GasPriceSpread.FAST_SECONDS; //for non mainnet chains, assume standard tx time is 1 minute
-            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_average), txTime, standard));
-        }
-
-        if (slow.compareTo(BigInteger.ZERO) > 0)
-        {
-            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_slow), GasPriceSpread.SLOW_SECONDS, slow));
-        }
-
-        customIndex = gasSpeeds.size();
-        if (customGas != null)
-        {
-            gasSpeeds.add(customGas);
+            if (custom != null)
+            {
+                fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), custom.seconds, custom.gasPrice.maxFeePerGas));
+            }
         }
         else
         {
-            gasSpeeds.add(new GasSpeed(ctx.getString(R.string.speed_custom), 0, BigInteger.ZERO, true));
+            fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, feeMap.get(TXSpeed.STANDARD)));
         }
-
-        if (currentGasSpeedIndex < 0 || currentGasSpeedIndex >= gasSpeeds.size())
-        {
-            currentGasSpeedIndex = 0;
-        }
-
-        return currentGasSpeedIndex;
+        hasLockedGas = locked;
     }
 
-    public int getCustomIndex()
+    private void addLegacyGasFee(TXSpeed speed, long seconds, String speedName, Map<TXSpeed, BigInteger> feeMap)
     {
-        return customIndex;
+        BigInteger gasPrice = feeMap.get(speed);
+        if (gasPrice != null && gasPrice.compareTo(BigInteger.ZERO) > 0)
+        {
+            fees.put(speed, new GasSpeed2(speedName, seconds, gasPrice));
+        }
     }
+
+    private void setComponents(Context ctx, Map<Integer, EIP1559FeeOracleResult> result)
+    {
+        int third = result.size()/3;
+
+        fees.put(TXSpeed.RAPID, new GasSpeed2(ctx.getString(R.string.speed_rapid), RAPID_SECONDS, new EIP1559FeeOracleResult(result.get(0))));
+        fees.put(TXSpeed.FAST, new GasSpeed2(ctx.getString(R.string.speed_fast), FAST_SECONDS, new EIP1559FeeOracleResult(result.get(third))));
+        fees.put(TXSpeed.STANDARD, new GasSpeed2(ctx.getString(R.string.speed_average), STANDARD_SECONDS, new EIP1559FeeOracleResult(result.get(third*2))));
+        fees.put(TXSpeed.SLOW, new GasSpeed2(ctx.getString(R.string.speed_slow), SLOW_SECONDS, new EIP1559FeeOracleResult(result.get(result.size()-1))));
+
+        //now de-duplicate
+        for (TXSpeed txs : TXSpeed.values())
+        {
+            GasSpeed2 gs = fees.get(txs);
+            if (txs == TXSpeed.STANDARD || gs == null) continue;
+            if (gs.gasPrice.maxPriorityFeePerGas.equals(fees.get(TXSpeed.STANDARD).gasPrice.maxPriorityFeePerGas)
+                && gs.gasPrice.maxFeePerGas.equals(fees.get(TXSpeed.STANDARD).gasPrice.maxFeePerGas))
+            {
+                fees.remove(txs);
+            }
+        }
+    }
+
+    public void setCustom(BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas, long fastSeconds)
+    {
+        GasSpeed2 gsCustom = fees.get(TXSpeed.CUSTOM);
+        BigInteger baseFee = gsCustom.gasPrice.baseFee;
+        fees.put(TXSpeed.CUSTOM, new GasSpeed2(gsCustom.speed, fastSeconds, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFee)));
+    }
+
+    public void setCustom(BigInteger gasPrice, long fastSeconds)
+    {
+        GasSpeed2 gsCustom = fees.get(TXSpeed.CUSTOM);
+        fees.put(TXSpeed.CUSTOM, new GasSpeed2(gsCustom.speed, fastSeconds, gasPrice));
+    }
+
+    protected GasPriceSpread(Parcel in)
+    {
+        timeStamp = in.readLong();
+        int feeCount = in.readInt();
+        int feeIndex = in.readInt();
+        speedIndex = TXSpeed.values()[feeIndex];
+        hasLockedGas = in.readByte() == 1;
+
+        for (int i = 0; i < feeCount; i++)
+        {
+            int entry = in.readInt();
+            GasSpeed2 r = in.readParcelable(GasSpeed2.class.getClassLoader());
+            fees.put(TXSpeed.values()[entry], r);
+        }
+    }
+
+    public static final Creator<GasPriceSpread> CREATOR = new Creator<GasPriceSpread>() {
+        @Override
+        public GasPriceSpread createFromParcel(Parcel in) {
+            return new GasPriceSpread(in);
+        }
+
+        @Override
+        public GasPriceSpread[] newArray(int size) {
+            return new GasPriceSpread[size];
+        }
+    };
+
+    @Override
+    public int describeContents()
+    {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags)
+    {
+        dest.writeLong(timeStamp);
+        dest.writeInt(fees.size());
+        dest.writeInt(speedIndex.ordinal());
+        dest.writeByte(hasLockedGas ? (byte) 1 : (byte) 0);
+
+        for (Map.Entry<TXSpeed, GasSpeed2> entry : fees.entrySet())
+        {
+            dest.writeInt(entry.getKey().ordinal());
+            dest.writeParcelable(entry.getValue(), flags);
+        }
+    }
+
+    public void addCustomGas(long seconds, EIP1559FeeOracleResult fee)
+    {
+        GasSpeed2 currentCustom = fees.get(TXSpeed.CUSTOM);
+        fees.put(TXSpeed.CUSTOM,
+                new GasSpeed2(currentCustom.speed, seconds, fee));
+    }
+
+    public EIP1559FeeOracleResult getCurrentGasFee()
+    {
+        return fees.get(this.speedIndex).gasPrice;
+    }
+
+    public long getCurrentTimeEstimate()
+    {
+        return fees.get(this.speedIndex).seconds;
+    }
+
+    public GasSpeed2 getGasSpeed()
+    {
+        return fees.get(this.speedIndex);
+    }
+
+    public boolean hasCustom()
+    {
+        return fees.get(TXSpeed.CUSTOM).seconds != 0;
+    }
+
+    public boolean hasLockedGas() { return hasLockedGas; }
+
+    public BigInteger getBaseFee() { return baseFee; }
 
     public boolean isResultValid()
     {
-        return !rapid.equals(BigInteger.ZERO) || !fast.equals(BigInteger.ZERO) || !standard.equals(BigInteger.ZERO)
-                || !slow.equals(BigInteger.ZERO);
+        for (TXSpeed txs : TXSpeed.values())
+        {
+            GasSpeed2 gs = fees.get(txs);
+            if (gs != null && gs.gasPrice.maxFeePerGas.compareTo(BigInteger.ZERO) > 0) return true;
+        }
+
+        return false;
+    }
+
+    public int findItem(TXSpeed currentGasSpeedIndex)
+    {
+        int index = 0;
+        for (TXSpeed txs : TXSpeed.values())
+        {
+            if (txs == currentGasSpeedIndex) return index;
+            if (fees.get(txs) != null) index++;
+        }
+
+        return 0;
     }
 }

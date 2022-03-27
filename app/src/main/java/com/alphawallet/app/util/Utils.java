@@ -35,8 +35,12 @@ import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
 
 import org.jetbrains.annotations.NotNull;
+import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.rlp.RlpEncoder;
+import org.web3j.rlp.RlpList;
+import org.web3j.rlp.RlpString;
 import org.web3j.utils.Numeric;
 
 import java.io.FileInputStream;
@@ -888,5 +892,19 @@ public class Utils {
         Resources.Theme theme = context.getTheme();
         theme.resolveAttribute(resId, typedValue, true);
         return typedValue.data;
+    }
+
+    public static String calculateContractAddress(String account, long nonce)
+    {
+        byte[] addressAsBytes = Numeric.hexStringToByteArray(account);
+        byte[] calculatedAddressAsBytes =
+                Hash.sha3(RlpEncoder.encode(
+                        new RlpList(
+                                RlpString.create(addressAsBytes),
+                                RlpString.create((nonce)))));
+
+        calculatedAddressAsBytes = Arrays.copyOfRange(calculatedAddressAsBytes,
+                12, calculatedAddressAsBytes.length);
+        return Keys.toChecksumAddress(Numeric.toHexString(calculatedAddressAsBytes));
     }
 }

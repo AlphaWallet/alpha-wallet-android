@@ -1223,7 +1223,14 @@ public class TokensService
     //   wallet specific data like balance, update time etc goes into the per-wallet database
     public TokenGroup getTokenGroup(Token token)
     {
-        return tokenRepository.getTokenGroup(token.tokenInfo.chainId, token.tokenInfo.address, token.getInterfaceSpec());
+        if (token != null)
+        {
+            return tokenRepository.getTokenGroup(token.tokenInfo.chainId, token.tokenInfo.address, token.getInterfaceSpec());
+        }
+        else
+        {
+            return TokenGroup.ASSET;
+        }
     }
 
     public boolean hasLockedGas(long chainId)

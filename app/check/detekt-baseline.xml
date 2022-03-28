@@ -4,14 +4,35 @@
   <CurrentIssues>
     <ID>ComplexCondition:WCSession.kt$WCSession.Companion$bridge == null || key == null || topic == null || version == null</ID>
     <ID>ComplexMethod:WCClient.kt$WCClient$private fun handleRequest(request: JsonRpcRequest&lt;JsonArray&gt;)</ID>
+    <ID>FunctionNaming:SuggestEIP1559.kt$fun SuggestEIP1559(gasService: GasService, feeHistory: FeeHistory): Single&lt;MutableMap&lt;Int, EIP1559FeeOracleResult&gt;&gt;</ID>
+    <ID>FunctionParameterNaming:SuggestEIP1559.kt$_needBlocks: Int</ID>
+    <ID>FunctionParameterNaming:SuggestEIP1559.kt$_ptr: Int</ID>
     <ID>FunctionParameterNaming:WCClient.kt$WCClient$_chainId: Long</ID>
     <ID>MagicNumber:JsonRpcModels.kt$JsonRpcError.Companion$32000</ID>
     <ID>MagicNumber:JsonRpcModels.kt$JsonRpcError.Companion$32600</ID>
     <ID>MagicNumber:JsonRpcModels.kt$JsonRpcError.Companion$32601</ID>
     <ID>MagicNumber:JsonRpcModels.kt$JsonRpcError.Companion$32602</ID>
     <ID>MagicNumber:JsonRpcModels.kt$JsonRpcError.Companion$32700</ID>
+    <ID>MagicNumber:SuggestEIP1559.kt$0.9</ID>
+    <ID>MagicNumber:SuggestEIP1559.kt$100.0</ID>
+    <ID>MagicNumber:SuggestEIP1559.kt$16</ID>
+    <ID>MagicNumber:SuggestEIP1559.kt$1e-6</ID>
+    <ID>MagicNumber:SuggestEIP1559.kt$5</ID>
+    <ID>MagicNumber:SuggestEIP1559.kt$8.0</ID>
+    <ID>MagicNumber:SuggestEIP1559.kt$9</ID>
     <ID>MagicNumber:WCCipher.kt$WCCipher$16</ID>
     <ID>MagicNumber:WCClient.kt$WCClient$1000</ID>
+    <ID>MaxLineLength:SuggestEIP1559.kt$// If a narrower time window yields a lower base fee suggestion than a wider window then we are probably in a price dip.</ID>
+    <ID>MaxLineLength:SuggestEIP1559.kt$// In this case getting included with a low priority fee is not guaranteed; instead we use the higher base fee suggestion</ID>
+    <ID>MaxLineLength:SuggestEIP1559.kt$// feeHistory API call with reward percentile specified is expensive and therefore is only requested for a few non-full recent blocks.</ID>
+    <ID>MaxLineLength:SuggestEIP1559.kt$else -&gt; (1 - cos((percentile - sampleMinPercentile) * 2 * Math.PI / (sampleMaxPercentile - sampleMinPercentile))) / 2</ID>
+    <ID>MaxLineLength:SuggestEIP1559.kt$internal</ID>
+    <ID>MaxLineLength:SuggestEIP1559.kt$private</ID>
+    <ID>MaxLineLength:SuggestEIP1559.kt$private const val rewardBlockPercentile = 40 // suggested priority fee to be selected from sorted individual block reward percentiles</ID>
+    <ID>MaxLineLength:SuggestEIP1559.kt$private const val sampleMinPercentile = 10 // sampled percentile range of exponentially weighted baseFee history</ID>
+    <ID>MaxLineLength:SuggestEIP1559.kt$result += ((samplingCurveValue - samplingCurveLast) * baseFee[order[i]].toDouble()).toBigDecimal().toBigInteger()</ID>
+    <ID>MaxLineLength:SuggestEIP1559.kt$return</ID>
+    <ID>MaxLineLength:SuggestEIP1559.kt$val feeHistory = gasService.getChainFeeHistory(blockCount, "0x" + (firstBlock + ptr).toString(16), rewardPercentile.toString()).blockingGet()</ID>
     <ID>MaxLineLength:WCClient.kt$WCClient$fun</ID>
     <ID>NewLineAtEndOfFile:Enums.kt$com.alphawallet.app.walletconnect.entity.Enums.kt</ID>
     <ID>NewLineAtEndOfFile:EthereumModels.kt$com.alphawallet.app.walletconnect.entity.EthereumModels.kt</ID>
@@ -20,12 +41,21 @@
     <ID>NewLineAtEndOfFile:JsonRpcModels.kt$com.alphawallet.app.walletconnect.entity.JsonRpcModels.kt</ID>
     <ID>NewLineAtEndOfFile:ReleaseTree.kt$com.alphawallet.app.util.ReleaseTree.kt</ID>
     <ID>NewLineAtEndOfFile:SessionModels.kt$com.alphawallet.app.walletconnect.entity.SessionModels.kt</ID>
+    <ID>NewLineAtEndOfFile:SuggestEIP1559.kt$com.alphawallet.app.entity.SuggestEIP1559.kt</ID>
     <ID>NewLineAtEndOfFile:WCSession.kt$com.alphawallet.app.walletconnect.WCSession.kt</ID>
+    <ID>ReturnCount:SuggestEIP1559.kt$internal fun predictMinBaseFee(baseFee: Array&lt;BigInteger&gt;, order: List&lt;Int&gt;, timeFactor: Double): BigInteger</ID>
     <ID>ReturnCount:WCSession.kt$WCSession.Companion$fun from(from: String): WCSession?</ID>
     <ID>SwallowedException:WCClient.kt$WCClient$e: JsonSyntaxException</ID>
     <ID>ThrowsCount:WCClient.kt$WCClient$private fun handleRequest(request: JsonRpcRequest&lt;JsonArray&gt;)</ID>
     <ID>TooGenericExceptionCaught:WCClient.kt$WCClient$e: Exception</ID>
     <ID>TooManyFunctions:WCClient.kt$WCClient : WebSocketListener</ID>
+    <ID>TopLevelPropertyNaming:SuggestEIP1559.kt$private const val extraPriorityFeeRatio = 0.25 // extra priority fee offered in case of expected baseFee rise</ID>
+    <ID>TopLevelPropertyNaming:SuggestEIP1559.kt$private const val fallbackPriorityFee = 2000000000L // priority fee offered when there are no recent transactions</ID>
+    <ID>TopLevelPropertyNaming:SuggestEIP1559.kt$private const val maxTimeFactor = 15 // highest timeFactor index in the returned list of suggestion</ID>
+    <ID>TopLevelPropertyNaming:SuggestEIP1559.kt$private const val rewardBlockPercentile = 40 // suggested priority fee to be selected from sorted individual block reward percentiles</ID>
+    <ID>TopLevelPropertyNaming:SuggestEIP1559.kt$private const val rewardPercentile = 10 // effective reward value to be selected from each individual block</ID>
+    <ID>TopLevelPropertyNaming:SuggestEIP1559.kt$private const val sampleMaxPercentile = 30</ID>
+    <ID>TopLevelPropertyNaming:SuggestEIP1559.kt$private const val sampleMinPercentile = 10 // sampled percentile range of exponentially weighted baseFee history</ID>
     <ID>UnusedPrivateMember:WCClient.kt$WCClient$private val TAG = WCClient::class.java.simpleName</ID>
     <ID>VariableNaming:WCClient.kt$WCClient$private val TAG = WCClient::class.java.simpleName</ID>
     <ID>WildcardImport:WCClient.kt$import com.alphawallet.app.walletconnect.entity.*</ID>

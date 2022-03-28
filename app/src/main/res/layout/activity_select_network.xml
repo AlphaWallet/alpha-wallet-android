@@ -10,13 +10,14 @@
     <include layout="@layout/layout_simple_toolbar" />
 
     <View
+        android:id="@+id/separator"
         style="@style/Aw.Component.Separator"
         android:layout_below="@id/toolbar" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar">
+        android:layout_below="@id/separator">
 
         <LinearLayout
             android:id="@+id/layout_list"
@@ -32,14 +33,11 @@
                 app:headerText="@string/mainnet"
                 app:showSwitch="true" />
 
-            <View style="@style/Aw.Component.Separator" />
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/main_list"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <View style="@style/Aw.Component.Separator" />
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_bottom_border" />
 
             <com.alphawallet.app.widget.StandardHeader
                 android:id="@+id/testnet_header"
@@ -48,12 +46,11 @@
                 app:headerText="@string/testnet"
                 app:showSwitch="true" />
 
-            <View style="@style/Aw.Component.Separator" />
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/test_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/background_bottom_border"
                 android:visibility="gone" />
 
         </LinearLayout>

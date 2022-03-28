@@ -63,6 +63,8 @@
         <item name="colorSurfaceTertiary">@color/surface_tertiary</item>
         <!-- The color applied to separators -->
         <item name="colorSurfaceQuaternary">@color/surface_quaternary</item>
+        <!-- The color applied to token icon mask -->
+        <item name="colorSurfaceQuinary">@color/surface_quinary</item>
         <!-- The color applied to chart tabs -->
         <item name="colorSurfaceDark">@color/surface_dark</item>
 

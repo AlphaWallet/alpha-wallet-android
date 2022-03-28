@@ -44,6 +44,8 @@
     <color name="surface_tertiary">@color/concrete</color>
     <!-- ?colorSurfaceQuaternary -->
     <color name="surface_quaternary">@color/mercury</color>
+    <!-- ?colorSurfaceQuinary -->
+    <color name="surface_quinary">@color/mercury</color>
     <!-- ?colorOnSurface -->
     <color name="surface_inverse">@color/black</color>
     <!-- ?colorSurfaceDark -->

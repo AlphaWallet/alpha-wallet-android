@@ -83,6 +83,14 @@
         <item name="android:textColor">?colorError</item>
     </style>
 
+    <style name="Aw.Typography.NotificationBadge">
+        <item name="fontFamily">@font/font_semibold</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">?colorOnError</item>
+        <item name="android:background">@drawable/background_settings_badge</item>
+        <item name="android:gravity">center</item>
+    </style>
+
     <style name="Aw.Typography.Toolbar">
         <item name="android:fontFamily">@font/font_semibold</item>
         <item name="android:textSize">@dimen/sp20</item>

@@ -75,16 +75,12 @@
 
             <TextView
                 android:id="@+id/settings_badge"
-                style="@style/Aw.Typography.Small"
-                android:layout_width="19dp"
-                android:layout_height="19dp"
+                style="@style/Aw.Typography.NotificationBadge"
+                android:layout_width="@dimen/notification_badge_small"
+                android:layout_height="@dimen/notification_badge_small"
                 android:layout_alignStart="@id/nav_settings_text"
                 android:layout_alignTop="@id/nav_settings_text"
-                android:background="@drawable/background_settings_badge"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:paddingBottom="2dp"
-                android:textColor="?colorOnError"
+                android:paddingBottom="1dp"
                 android:visibility="gone"
                 tools:text="1"
                 tools:visibility="visible" />

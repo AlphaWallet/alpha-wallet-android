@@ -115,6 +115,7 @@
         <item name="android:statusBarColor">@color/transparent</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="bottomSheetStyle">@style/Aw.Component.BottomSheet</item>
+        <item name="colorSurface">@color/background_floating</item>
         <item name="colorSecondary">@color/brand</item>
         <item name="colorControlNormal">@color/surface_inverse</item>
         <item name="android:textColorPrimary">@color/text_primary</item>

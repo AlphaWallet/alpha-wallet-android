@@ -37,6 +37,9 @@
     <dimen name="dp25">23dp</dimen>
     <dimen name="dp30">28dp</dimen>
 
+    <!-- Notification Badge -->
+    <dimen name="notification_badge_small">18dp</dimen>
+
     <!-- Standard Token Icon size -->
     <dimen name="token_icon">40dp</dimen>
     <dimen name="token_icon_small">24dp</dimen>
@@ -50,6 +53,7 @@
     <dimen name="standard_header_height">50dp</dimen>
 
     <!-- Standard Spacing -->
+    <dimen name="micro_2">2dp</dimen>
     <dimen name="mini_4">4dp</dimen>
     <dimen name="tiny_8">8dp</dimen>
     <dimen name="small_12">12dp</dimen>

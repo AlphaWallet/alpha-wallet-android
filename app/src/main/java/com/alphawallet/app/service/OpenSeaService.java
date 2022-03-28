@@ -63,7 +63,7 @@ public class OpenSeaService
                 .build();
     }
 
-    private static Request buildRequest(String api)
+    private static Request buildRequest(long networkId, String api)
     {
         Request.Builder requestB = new Request.Builder()
                 .url(api)
@@ -72,7 +72,7 @@ public class OpenSeaService
                 .addHeader("Content-Type", "application/json");
 
         String apiKey = getOpenSeaKey();
-        if (!TextUtils.isEmpty(apiKey) && !apiKey.equals("..."))
+        if (networkId != EthereumNetworkBase.RINKEBY_ID && !TextUtils.isEmpty(apiKey) && !apiKey.equals("..."))
         {
             requestB.addHeader("X-API-KEY", apiKey);
         }
@@ -80,9 +80,9 @@ public class OpenSeaService
         return requestB.build();
     }
 
-    private static String executeRequest(String api)
+    private static String executeRequest(long networkId, String api)
     {
-        try (okhttp3.Response response = httpClient.newCall(buildRequest(api)).execute())
+        try (okhttp3.Response response = httpClient.newCall(buildRequest(networkId, api)).execute())
         {
             ResponseBody responseBody = response.body();
             if (responseBody != null)
@@ -337,25 +337,28 @@ public class OpenSeaService
     public static String fetchAssets(long networkId, String address, int offset)
     {
         String api = "";
+        String ownerOption = "owner";
         if (networkId == EthereumNetworkBase.MAINNET_ID)
         {
-            api = C.OPENSEA_ASSETS_API_MAINNET + address;
+            api = C.OPENSEA_ASSETS_API_MAINNET;
         }
         else if (networkId == EthereumNetworkBase.RINKEBY_ID)
         {
-            api = C.OPENSEA_ASSETS_API_RINKEBY + address;
+            api = C.OPENSEA_ASSETS_API_RINKEBY;
         }
         else if (networkId == EthereumNetworkBase.MATIC_ID)
         {
-            api = C.OPENSEA_ASSETS_API_MATIC + address;
+            api = C.OPENSEA_ASSETS_API_MATIC;
+            ownerOption = "owner_address";
         }
 
         Uri.Builder builder = new Uri.Builder();
         builder.encodedPath(api)
+                .appendQueryParameter(ownerOption, address)
                 .appendQueryParameter("limit", String.valueOf(PAGE_SIZE))
                 .appendQueryParameter("offset", String.valueOf(offset));
 
-        return executeRequest(builder.build().toString());
+        return executeRequest(networkId, builder.build().toString());
     }
 
     public static String fetchAsset(long networkId, String contractAddress, String tokenId)
@@ -374,6 +377,6 @@ public class OpenSeaService
             api = C.OPENSEA_SINGLE_ASSET_API_MATIC + contractAddress + "/" + tokenId;
         }
 
-        return executeRequest(api);
+        return executeRequest(networkId, api);
     }
 }

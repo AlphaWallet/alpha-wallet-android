@@ -91,7 +91,7 @@
         android:layout_height="0dp"
         android:contentDescription="@string/empty"
         android:src="@drawable/grey_circle"
-        app:tint="?colorSurfaceQuaternary"
+        app:tint="?colorSurfaceQuinary"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"
         app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"

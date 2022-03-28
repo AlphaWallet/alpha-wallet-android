@@ -11,6 +11,7 @@
     <color name="surface_secondary">@color/venus</color>
     <color name="surface_tertiary">@color/mine</color>
     <color name="surface_quaternary">@color/venus</color>
+    <color name="surface_quinary">@color/mine</color>
     <color name="surface_inverse">@color/white</color>
     <color name="surface_dark">@color/white</color>
     <color name="background_floating">@color/mine</color>

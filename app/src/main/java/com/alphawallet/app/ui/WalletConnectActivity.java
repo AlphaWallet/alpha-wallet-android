@@ -5,14 +5,12 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.MenuItem;
@@ -27,11 +25,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
@@ -45,7 +41,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
-import com.alphawallet.app.util.StyledStringBuilder;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
@@ -56,7 +51,6 @@ import com.alphawallet.app.walletconnect.entity.WalletConnectCallback;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -106,7 +100,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private ActionSheetDialog confirmationDialog;
     private ActionSheetDialog walletConnectDialog;
-    private ActionSheetDialog switchChainDialog;
     private AddEthereumChainPrompt addEthereumChainPrompt;
     private long switchChainDialogCallbackId = 1;
 
@@ -1259,6 +1252,45 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         getNetwork.launch(intent);
     }
 
+    private void showSwitchChainDialog() {
+        try
+        {
+            String message = getString(R.string.request_change_chain, EthereumNetworkBase.getShortChainName(switchChainId), String.valueOf(switchChainId));
+            Token baseToken = viewModel.getTokenService().getTokenOrBase(switchChainId, viewModel.defaultWallet().getValue().address);
+            NetworkInfo newNetwork = EthereumNetworkBase.getNetworkInfo(switchChainId);
+            NetworkInfo activeNetwork = EthereumNetworkBase.getNetworkInfo(client.chainIdVal());
+
+            if (newNetwork != null && activeNetwork != null)
+            {
+                if (newNetwork.hasRealValue() && !activeNetwork.hasRealValue())
+                {
+                    message += "\n" + getString(R.string.warning_switch_to_main);
+                }
+                else if (!newNetwork.hasRealValue() && activeNetwork.hasRealValue())
+                {
+                    message += "\n" + getString(R.string.warning_switching_to_test);
+                }
+            }
+
+            if (walletConnectDialog.isShowing())
+                return;
+
+            // show action sheet
+            walletConnectDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, message, R.string.switch_and_reload,
+                    switchChainDialogCallbackId, baseToken);
+
+            walletConnectDialog.setOnDismissListener(dialog -> {
+                viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, false, chainAvailable);
+                walletConnectDialog.setOnDismissListener(null);         // remove from here as dialog is multi-purpose
+            });
+            walletConnectDialog.setCanceledOnTouchOutside(false);
+            walletConnectDialog.show();
+            walletConnectDialog.fullExpand();
+        } catch (Exception e) {
+            Timber.e(e);
+        }
+    }
+
     private void onSwitchChainRequest(Intent intent)
     {
         name = intent.getStringExtra(C.EXTRA_NAME);
@@ -1275,51 +1307,17 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         if (switchChainId == -1 || requestId == -1)
         {
             Timber.tag(TAG).d("Cant find data");
+            return;
+        }
+        chainAvailable = EthereumNetworkBase.getNetworkInfo(switchChainId) != null;
+        // reject with error message as the chain is not added
+        if (!chainAvailable)
+        {
+            viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, switchChainId, false, false);
         }
         else
         {
-            chainAvailable = EthereumNetworkBase.getNetworkInfo(switchChainId) != null;
-            if (!chainAvailable)
-            {
-                viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, switchChainId, false, false);
-            }
-            else
-            {
-                try
-                {
-                    String message = getString(R.string.request_change_chain, EthereumNetworkBase.getShortChainName(switchChainId), String.valueOf(switchChainId));
-                    Token baseToken = viewModel.getTokenService().getTokenOrBase(switchChainId, viewModel.defaultWallet().getValue().address);
-                    NetworkInfo newNetwork = EthereumNetworkBase.getNetworkInfo(switchChainId);
-                    NetworkInfo activeNetwork = EthereumNetworkBase.getNetworkInfo(client.chainIdVal());
-
-                    if (newNetwork != null && activeNetwork != null)
-                    {
-                        if (newNetwork.hasRealValue() && !activeNetwork.hasRealValue())
-                        {
-                            message += "\n" + getString(R.string.warning_switch_to_main);
-                        }
-                        else if (!newNetwork.hasRealValue() && activeNetwork.hasRealValue())
-                        {
-                            message += "\n" + getString(R.string.warning_switching_to_test);
-                        }
-                    }
-
-                    // show action sheet
-                    switchChainDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, message, R.string.switch_and_reload,
-                            switchChainDialogCallbackId, baseToken);
-
-                    switchChainDialog.setOnDismissListener(dialog -> {
-                        viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, false, chainAvailable);
-                    });
-                    switchChainDialog.setCanceledOnTouchOutside(false);
-                    switchChainDialog.show();
-                    switchChainDialog.fullExpand();
-                }
-                catch (Exception e)
-                {
-                    Timber.e(e);
-                }
-            }
+            showSwitchChainDialog();
         }
     }
 
@@ -1377,8 +1375,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         if (callbackId == switchChainDialogCallbackId)
         {
-            switchChainDialog.setOnDismissListener(null);
-            switchChainDialog.dismiss();
+            walletConnectDialog.setOnDismissListener(null);
+            walletConnectDialog.dismiss();
             viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, true, chainAvailable);
             viewModel.updateSession(currentSessionId, switchChainId);
             displaySessionStatus(session.getTopic());

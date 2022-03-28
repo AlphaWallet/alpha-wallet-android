@@ -336,6 +336,10 @@
             android:label="Select Mode" />
 
         <activity
+            android:name=".ui.SearchActivity"
+            android:label="Search Tokens" />
+
+        <activity
             android:name=".ui.QRScanning.QRScanner"
             android:label="@string/qr_scanner" />
 

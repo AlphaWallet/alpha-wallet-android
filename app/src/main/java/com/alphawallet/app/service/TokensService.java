@@ -1187,19 +1187,21 @@ public class TokensService
         completionCallback = cb;
         syncTimer = System.currentTimeMillis();
 
-        //Setup
-        baseTokenCheck.clear();
-        mainNetActive = true;
-        networkFilter.clear();
-
-        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
-
-        for (NetworkInfo info : networks)
+        if (sync > 0)
         {
-            if (info.hasRealValue())
+            mainNetActive = true;
+            baseTokenCheck.clear();
+            networkFilter.clear();
+
+            NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
+
+            for (NetworkInfo info : networks)
             {
-                networkFilter.add(info.chainId);
-                baseTokenCheck.add(info.chainId);
+                if (info.hasRealValue())
+                {
+                    networkFilter.add(info.chainId);
+                    baseTokenCheck.add(info.chainId);
+                }
             }
         }
     }

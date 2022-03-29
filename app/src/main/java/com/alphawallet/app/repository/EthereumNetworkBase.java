@@ -56,6 +56,10 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BAOBAB_RPC;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BOABAB_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
@@ -148,7 +152,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //Then xDai would appear as the first token at the top of the wallet
     private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
             MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
-            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID));
+            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID));
 
     //List of network details. Note, the advantage of using LongSparseArray is efficiency and also
     //the entries are automatically sorted into numerical order
@@ -265,6 +269,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     PALM_TEST_RPC_URL,
                     "https://explorer.palm-uat.xyz/tx/", PALM_TEST_ID, PALM_TEST_RPC_FALLBACK_URL,
                     "https://explorer.palm-uat.xyz/api?"));
+
+            put(KLAYTN_ID, new NetworkInfo(C.KLAYTN_NAME, C.KLAYTN_SYMBOL,
+                    KLAYTN_RPC,
+                    "https://scope.klaytn.com/tx/", KLAYTN_ID, "",
+                    "https://api.covalenthq.com/v1/" + COVALENT));
+            put(KLAYTN_BOABAB_ID, new NetworkInfo(C.KLAYTN_BAOBAB_NAME, C.KLAYTN_SYMBOL,
+                    KLAYTN_BAOBAB_RPC,
+                    "https://baobab.scope.klaytn.com/tx/", KLAYTN_BOABAB_ID, "",
+                    ""));
         }
     };
 
@@ -298,6 +311,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(ARBITRUM_TEST_ID, R.drawable.ic_icons_arbitrum_test);
             put(PALM_ID, R.drawable.ic_icons_network_palm);
             put(PALM_TEST_ID, R.drawable.palm_logo_test);
+            put(KLAYTN_ID, R.drawable.ic_klaytn_network_logo);
+            put(KLAYTN_BOABAB_ID, R.drawable.ic_klaytn_test);
         }
     };
 
@@ -331,6 +346,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(ARBITRUM_TEST_ID, R.drawable.ic_icons_arbitrum_test);
             put(PALM_ID, R.drawable.ic_icons_network_palm);
             put(PALM_TEST_ID, R.drawable.palm_logo_test);
+            put(KLAYTN_ID, R.drawable.ic_klaytn_network_logo);
+            put(KLAYTN_BOABAB_ID, R.drawable.ic_klaytn_test);
         }
     };
 
@@ -364,6 +381,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(ARBITRUM_TEST_ID, R.color.arbitrum_test);
             put(PALM_ID, R.color.palm_main);
             put(PALM_TEST_ID, R.color.palm_test);
+            put(KLAYTN_ID, R.color.klaytn_main);
+            put(KLAYTN_BOABAB_ID, R.color.klaytn_test);
         }
     };
 

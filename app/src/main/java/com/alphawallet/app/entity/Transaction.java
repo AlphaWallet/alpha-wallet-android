@@ -59,6 +59,7 @@ public class Transaction implements Parcelable
     public final String input;
     public final String error;
     public final long chainId;
+    public EthTxnNetwork txnNetwork = EthTxnNetwork.PUBLIC;
 
     public boolean isConstructor = false;
     public TransactionInput transactionInput = null;
@@ -84,6 +85,7 @@ public class Transaction implements Parcelable
 		input = "";
 		error = "";
 		chainId = 0;
+		txnNetwork = EthTxnNetwork.PUBLIC;
 	}
 
 	public boolean isPending()
@@ -115,6 +117,7 @@ public class Transaction implements Parcelable
 			String input,
 			String gasUsed,
             long chainId,
+            EthTxnNetwork txnNetwork,
             boolean isConstructor) {
         this.hash = hash;
         this.error = error;
@@ -129,6 +132,7 @@ public class Transaction implements Parcelable
 		this.input = input;
 		this.gasUsed = gasUsed;
 		this.chainId = chainId;
+		this.txnNetwork = txnNetwork;
 		this.isConstructor = isConstructor;
 	}
 
@@ -609,6 +613,8 @@ public class Transaction implements Parcelable
 			return true;
 		}
 	}
+
+
 
 	private String calculateContractAddress(String account, long nonce){
 		byte[] addressAsBytes = Numeric.hexStringToByteArray(account);

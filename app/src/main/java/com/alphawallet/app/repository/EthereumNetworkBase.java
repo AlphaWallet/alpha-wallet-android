@@ -11,6 +11,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.EthTxnNetwork;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
@@ -141,6 +142,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/" + getInfuraKey();
     public static final String PALM_RPC_FALLBACK_URL = "https://palm-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String PALM_TEST_RPC_FALLBACK_URL = "https://palm-testnet.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String EDEN_RPC_URL = "https://api.edennetwork.io/v1/rpc";
+    public static final String EDEN_ROPSTEN_RPC_URL = "https://dev-api.edennetwork.io/v1/rpc";
+    public static final String ETHERMINE_RPC_URL = "https://rpc.ethermine.org";
 
     //All chains that have fiat/real value (not testnet) must be put here
     //Note: This list also determines the order of display for main net chains in the wallet.
@@ -267,6 +271,36 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer.palm-uat.xyz/api?"));
         }
     };
+
+    // use this when private txn is enabled
+    // contains map of private networks based on network ids in network map
+    private static final LongSparseArray<Map<Integer, NetworkInfo>> privateEthNetworkMapArray = new LongSparseArray<>();
+    static {
+
+        // mainnet map - contains private networks for mainnet
+        // map of int(private network enum ordinal) and corresponding NetworkInfo
+        Map<Integer, NetworkInfo> mainNetMap = new HashMap<>();
+        mainNetMap.put(EthTxnNetwork.EDEN.ordinal(),
+                new NetworkInfo(C.EDEN_NAME, C.EDEN_SYMBOL, EDEN_RPC_URL,
+                        "https://explorer.edennetwork.io/tx/", MAINNET_ID,
+                        EDEN_RPC_URL, "https://explorer.edennetwork.io/api?"));
+        mainNetMap.put(EthTxnNetwork.ETHERMINE.ordinal(),
+                new NetworkInfo(C.ETHERMINE_NAME, C.ETHERMINE_SYMBOL, ETHERMINE_RPC_URL,
+                        "https://etherscan.io/tx", MAINNET_ID,
+                        ETHERMINE_RPC_URL, "https://etherscan.io/api?"));
+
+
+        // ropsten map - contains private network for ropsten
+        Map<Integer, NetworkInfo> ropstenMap = new HashMap<>();
+        ropstenMap.put(EthTxnNetwork.EDEN.ordinal(),
+                new NetworkInfo(C.EDEN_ROPSTEN_NAME, C.EDEN_ROPSTEN_SYMBOL, EDEN_ROPSTEN_RPC_URL,
+                        "https://ropsten.etherscan.io/tx", ROPSTEN_ID,
+                        EDEN_ROPSTEN_RPC_URL, "https://ropsten.etherscan.io/api?"));
+
+        privateEthNetworkMapArray.put(MAINNET_ID, mainNetMap);
+        privateEthNetworkMapArray.put(ROPSTEN_ID, ropstenMap);
+
+    }
 
     private static final LongSparseArray<Integer> chainLogos = new LongSparseArray<Integer>() {
         {
@@ -411,7 +445,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         return hasLockedGas.contains(chainId);
     }
-    
+
     static final Map<Long, String> addressOverride = new HashMap<Long, String>() {
         {
             put(OPTIMISTIC_MAIN_ID, "0x4200000000000000000000000000000000000006");
@@ -739,6 +773,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static String getNodeURLByNetworkId(long networkId)
     {
         NetworkInfo info = networkMap.get(networkId);
+        if (info != null) { return info.rpcServerUrl; }
+        else { return MAINNET_RPC_URL; }
+    }
+
+    // returns private network rpc if present else public
+    public static String getNodeURLByNetworkId(long networkId, EthTxnNetwork txnNetwork) {
+        NetworkInfo info = privateEthNetworkMapArray.get(networkId) != null ?
+                        privateEthNetworkMapArray.get(networkId).get(txnNetwork.ordinal()) : networkMap.get(networkId);
+
         if (info != null) { return info.rpcServerUrl; }
         else { return MAINNET_RPC_URL; }
     }

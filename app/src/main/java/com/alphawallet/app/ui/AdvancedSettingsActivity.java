@@ -27,7 +27,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.PrivateEthTxnNetwork;
+import com.alphawallet.app.entity.EthTxnNetwork;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.AdvancedSettingsViewModel;
@@ -35,8 +35,6 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SettingsItemView;
 import com.bumptech.glide.Glide;
-
-import java.sql.Time;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Single;
@@ -125,7 +123,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
                 .build();
 
         privateEthTxn = new SettingsItemView.Builder(this)
-                .withIcon(viewModel.getPrivateEthNetwork() == PrivateEthTxnNetwork.EDEN ? R.drawable.ic_settings_eden : R.drawable.ic_settings_ethermine)
+                .withIcon(viewModel.getPrivateEthNetwork() == EthTxnNetwork.EDEN ? R.drawable.ic_settings_eden : R.drawable.ic_settings_ethermine)
                 .withTitle(R.string.private_eth_txn)
                 .withListener(this::onPrivateEthTxnClicked)
                 .build();
@@ -375,14 +373,14 @@ public class AdvancedSettingsActivity extends BaseActivity {
 
     private void updatePrivateTxn(Intent data) {
         if (data != null) {
-            PrivateEthTxnNetwork network = (PrivateEthTxnNetwork) data.getSerializableExtra(EXTRA_PRIVATE_ETH_NETWORK);
+            EthTxnNetwork network = (EthTxnNetwork) data.getSerializableExtra(EXTRA_PRIVATE_ETH_NETWORK);
             if (network != null) {
                 viewModel.setPrivateEthNetwork(network);
                 try {
                     LinearLayout advancedSettingsLayout = findViewById(R.id.layout);
                     advancedSettingsLayout.removeViewAt(privateTxnItemPosition); // remove existing item
                     privateEthTxn = new SettingsItemView.Builder(this)
-                            .withIcon(viewModel.getPrivateEthNetwork() == PrivateEthTxnNetwork.EDEN ? R.drawable.ic_settings_eden : R.drawable.ic_settings_ethermine)
+                            .withIcon(viewModel.getPrivateEthNetwork() == EthTxnNetwork.EDEN ? R.drawable.ic_settings_eden : R.drawable.ic_settings_ethermine)
                             .withTitle(R.string.private_eth_txn)
                             .withListener(this::onPrivateEthTxnClicked)
                             .build();

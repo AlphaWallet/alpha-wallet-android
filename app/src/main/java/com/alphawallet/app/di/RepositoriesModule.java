@@ -98,12 +98,14 @@ public class RepositoriesModule {
 			EthereumNetworkRepositoryType networkRepository,
 			AccountKeystoreService accountKeystoreService,
             TransactionLocalSource inDiskCache,
-			TransactionsService transactionsService) {
+			TransactionsService transactionsService,
+			PreferenceRepositoryType preferenceRepository) {
 		return new TransactionRepository(
 				networkRepository,
 				accountKeystoreService,
 				inDiskCache,
-				transactionsService);
+				transactionsService,
+				preferenceRepository);
 	}
 
 	@Singleton

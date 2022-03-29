@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.PrivateEthTxnNetwork;
+import com.alphawallet.app.entity.EthTxnNetwork;
 import com.alphawallet.app.widget.SelectableItem;
 
 import timber.log.Timber;
@@ -22,7 +22,7 @@ public class SelectPrivateTxnActivity extends BaseActivity {
 
     private SelectableItem[] networks;
 
-    private PrivateEthTxnNetwork privateEthTxnNetwork = PrivateEthTxnNetwork.NONE;
+    private EthTxnNetwork ethTxnNetwork = EthTxnNetwork.PUBLIC;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -67,7 +67,7 @@ public class SelectPrivateTxnActivity extends BaseActivity {
             r.setOnClickListener(listener);
         }
 
-        PrivateEthTxnNetwork selectedNetwork = (PrivateEthTxnNetwork) getIntent().getSerializableExtra(C.EXTRA_PRIVATE_ETH_NETWORK);
+        EthTxnNetwork selectedNetwork = (EthTxnNetwork) getIntent().getSerializableExtra(C.EXTRA_PRIVATE_ETH_NETWORK);
         Timber.d("Selected Network: %s", selectedNetwork != null ? selectedNetwork.name() : "null");
         if (selectedNetwork != null && selectedNetwork.ordinal() > 0) {     // Not 'NONE'
             networks[selectedNetwork.ordinal()-1].performClick();        // in enum, networks start from 1, while in array of views it starts from 0
@@ -78,15 +78,15 @@ public class SelectPrivateTxnActivity extends BaseActivity {
         String text = currentlySelected != null ? currentlySelected.getText() : "";
 
         if (text.equals(getString(R.string.eden))) {
-            privateEthTxnNetwork = PrivateEthTxnNetwork.EDEN;
+            ethTxnNetwork = EthTxnNetwork.EDEN;
         } else if (text.equals(getString(R.string.ethermine))) {
-            privateEthTxnNetwork = PrivateEthTxnNetwork.ETHERMINE;
+            ethTxnNetwork = EthTxnNetwork.ETHERMINE;
         } else {
-            privateEthTxnNetwork = PrivateEthTxnNetwork.NONE;
+            ethTxnNetwork = EthTxnNetwork.PUBLIC;
         }
 
         Intent i = new Intent();
-        i.putExtra(C.EXTRA_PRIVATE_ETH_NETWORK, privateEthTxnNetwork);
+        i.putExtra(C.EXTRA_PRIVATE_ETH_NETWORK, ethTxnNetwork);
         setResult(RESULT_OK, i);
         finish();
     }

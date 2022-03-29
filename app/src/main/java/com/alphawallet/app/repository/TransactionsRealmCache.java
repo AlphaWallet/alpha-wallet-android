@@ -5,10 +5,8 @@ import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 
 import static java.lang.Thread.sleep;
 
-import android.util.Log;
-
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ActivityMeta;
+import com.alphawallet.app.entity.EthTxnNetwork;
 import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
@@ -27,7 +25,6 @@ import org.web3j.protocol.core.methods.response.EthTransaction;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Phaser;
 
 import io.reactivex.Single;
 import io.realm.Case;
@@ -260,7 +257,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-    public void putTransaction(Wallet wallet, final Transaction tx)
+    public void putTransaction(Wallet wallet, final Transaction tx, EthTxnNetwork txnNetwork)
     {
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
@@ -424,6 +421,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         item.setInput(transaction.input);
         item.setGasUsed(transaction.gasUsed);
         item.setChainId(transaction.chainId);
+        item.setTxnNetwork(transaction.txnNetwork);
     }
 
     public static Transaction convert(RealmTransaction rawItem) {
@@ -443,6 +441,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 rawItem.getInput(),
                 rawItem.getGasUsed(),
                 rawItem.getChainId(),
+                rawItem.getTxnNetwork(),
                 isConstructor
                 );
     }

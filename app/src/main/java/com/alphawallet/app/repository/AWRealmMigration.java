@@ -1,6 +1,9 @@
 package com.alphawallet.app.repository;
 
+import com.alphawallet.app.entity.EthTxnNetwork;
+
 import io.realm.DynamicRealm;
+import io.realm.DynamicRealmObject;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
 import io.realm.RealmObjectSchema;
@@ -401,6 +404,15 @@ public class AWRealmMigration implements RealmMigration
             if (realmData != null) schema.remove("RealmAToken");
 
             oldVersion = 43;
+        }
+
+        if (oldVersion == 43) {
+            RealmObjectSchema objectSchema = schema.get("RealmTransaction");
+            if (objectSchema != null) {
+                objectSchema.addField("txnNetwork", int.class, FieldAttribute.REQUIRED);
+                objectSchema.transform(obj -> obj.setInt("txnNetwork", EthTxnNetwork.PUBLIC.ordinal()));
+            }
+            oldVersion++;
         }
     }
 

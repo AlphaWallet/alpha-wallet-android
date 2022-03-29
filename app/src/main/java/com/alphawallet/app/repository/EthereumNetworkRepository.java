@@ -3,6 +3,7 @@ package com.alphawallet.app.repository;
 import android.content.Context;
 
 import com.alphawallet.app.entity.ContractLocator;
+import com.alphawallet.app.entity.EthTxnNetwork;
 import com.alphawallet.app.entity.KnownContract;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.UnknownToken;
@@ -33,6 +34,11 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
 
     public static String getNodeURLByNetworkId(long networkId) {
         return EthereumNetworkBase.getNodeURLByNetworkId(networkId);
+    }
+
+    // returns rpc url base on private/public network selection
+    public static String getNodeURLByNetworkId(long networkId, EthTxnNetwork txnNetwork) {
+        return EthereumNetworkBase.getNodeURLByNetworkId(networkId, txnNetwork);
     }
 
     public boolean getIsPopularToken(long chainId, String address)

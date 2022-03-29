@@ -1,7 +1,8 @@
 package com.alphawallet.app.entity;
 
-public enum PrivateEthTxnNetwork {
-    NONE,
+public enum EthTxnNetwork
+{
+    PUBLIC,
     EDEN,
     ETHERMINE;
 }

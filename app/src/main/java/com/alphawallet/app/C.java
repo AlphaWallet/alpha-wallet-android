@@ -76,6 +76,13 @@ public abstract class C {
     public static final String ARBITRUM_TEST_SYMBOL = "ARETH";
     public static final String PALM_SYMBOL = "PALM";
 
+    public static final String EDEN_NAME = "Eden Network";
+    public static final String EDEN_SYMBOL = ETH_SYMBOL;
+    public static final String EDEN_ROPSTEN_NAME = EDEN_NAME + " (Ropsten)";
+    public static final String EDEN_ROPSTEN_SYMBOL = EDEN_SYMBOL;
+    public static final String ETHERMINE_NAME = "Ethermine RPC";
+    public static final String ETHERMINE_SYMBOL = ETH_SYMBOL;
+
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
     //some important known contracts - NB must be all lower case for switch statement

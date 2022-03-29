@@ -1,6 +1,7 @@
 package com.alphawallet.app.repository;
 
 import com.alphawallet.app.entity.ActivityMeta;
+import com.alphawallet.app.entity.EthTxnNetwork;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
@@ -15,7 +16,7 @@ import io.realm.Realm;
 
 public interface TransactionLocalSource {
 	Transaction fetchTransaction(Wallet wallet, String hash);
-	void putTransaction(Wallet wallet, Transaction tx);
+	void putTransaction(Wallet wallet, Transaction tx, EthTxnNetwork txnNetwork);
     void deleteTransaction(Wallet wallet, String oldTxHash);
 
 	Realm getRealmInstance(Wallet wallet);

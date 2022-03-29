@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository.entity;
 
+import com.alphawallet.app.entity.EthTxnNetwork;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -24,6 +26,7 @@ public class RealmTransaction extends RealmObject {
                                     // NB: only transactions discovered by the Transfers API will have this field.
                                     // It allows us to lookup eg AirDrop tx's or Internal tx's that otherwise wouldn't
                                     // be indexable via RealmDB.
+    private int txnNetwork;
 
     public String getHash() {
         return hash;
@@ -150,5 +153,15 @@ public class RealmTransaction extends RealmObject {
     public void setContractAddress(String contractAddress)
     {
         this.contractAddress = contractAddress;
+    }
+
+    public EthTxnNetwork getTxnNetwork()
+    {
+        return EthTxnNetwork.values()[txnNetwork];
+    }
+
+    public void setTxnNetwork(EthTxnNetwork txnNetwork)
+    {
+        this.txnNetwork = txnNetwork.ordinal();
     }
 }

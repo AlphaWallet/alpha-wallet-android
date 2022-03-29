@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.EthTxnNetwork;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
@@ -1174,6 +1175,28 @@ public class TokenRepository implements TokenRepositoryType {
                 .retryOnConnectionFailure(false)
                 .build();
         AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId (chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);
+        EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
+        return Web3j.build(publicNodeService);
+    }
+
+    public static Web3j getWeb3jService(long chainId, EthTxnNetwork txnNetwork) {
+        OkHttpClient okClient = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(false)
+                .build();
+        AWHttpService publicNodeService;
+        if (txnNetwork == EthTxnNetwork.PUBLIC)
+        {
+            publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId (chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);
+        }
+        else
+        {
+            String nodeUrl = EthereumNetworkRepository.getNodeURLByNetworkId(chainId, txnNetwork);
+            String secondaryNodeUrl = EthereumNetworkRepository.getSecondaryNodeURL(chainId);
+            publicNodeService = new AWHttpService(nodeUrl, secondaryNodeUrl, okClient, false);
+        }
         EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
         return Web3j.build(publicNodeService);
     }

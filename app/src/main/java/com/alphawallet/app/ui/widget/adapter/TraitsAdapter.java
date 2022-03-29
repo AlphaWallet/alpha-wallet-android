@@ -16,8 +16,8 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder> {
-    private List<Trait> traitList;
-    private Context context;
+    private final List<Trait> traitList;
+    private final Context context;
 
     public TraitsAdapter(Context context, List<Trait> data)
     {
@@ -41,16 +41,24 @@ public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder
         viewHolder.trait.setText(trait.getTraitType());
         viewHolder.value.setText(trait.getValue());
 
-        float rarity = trait.getTraitRarity();
-        if (trait.isUnique())
+        if (trait.getTraitCount() > 0)
         {
-            viewHolder.rarity.setText(R.string.trait_rarity_unique);
+            viewHolder.rarity.setVisibility(View.VISIBLE);
+            float rarity = trait.getTraitRarity();
+            if (trait.isUnique())
+            {
+                viewHolder.rarity.setText(R.string.trait_rarity_unique);
+            }
+            else
+            {
+                DecimalFormat df = new DecimalFormat("#0");
+                String s = context.getString(R.string.trait_rarity_suppl_text, df.format(rarity));
+                viewHolder.rarity.setText(s);
+            }
         }
         else
         {
-            DecimalFormat df = new DecimalFormat("#0");
-            String s = context.getString(R.string.trait_rarity_suppl_text, df.format(rarity));
-            viewHolder.rarity.setText(s);
+            viewHolder.rarity.setVisibility(View.GONE);
         }
     }
 
@@ -60,7 +68,7 @@ public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder
         return traitList.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         TextView trait;
         TextView value;
         TextView rarity;

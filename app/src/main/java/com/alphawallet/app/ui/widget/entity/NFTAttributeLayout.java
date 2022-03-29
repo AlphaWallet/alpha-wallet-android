@@ -5,10 +5,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.gridlayout.widget.GridLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,6 +17,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.adapter.TraitsAdapter;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +26,6 @@ import java.util.Map;
  */
 public class NFTAttributeLayout extends LinearLayout {
     private final FrameLayout layout;
-    private final GridLayout grid;
     private final RecyclerView recyclerView;
     private TokenInfoCategoryView labelAttributes;
 
@@ -37,33 +35,25 @@ public class NFTAttributeLayout extends LinearLayout {
         View view = inflate(context, R.layout.item_nft_attributes, this);
 
         layout = view.findViewById(R.id.layout);
-        grid = view.findViewById(R.id.grid);
         recyclerView = view.findViewById(R.id.recycler_view);
 
         labelAttributes = new TokenInfoCategoryView(context, context.getString(R.string.label_attributes));
         layout.addView(labelAttributes);
-
-        grid.setAlignmentMode(GridLayout.ALIGN_BOUNDS);
-        grid.setUseDefaultMargins(false);
     }
 
     public void bind(Token token, NFTAsset asset)
     {
         Map<String, String> attributes = asset.getAttributes();
-        setAttributeLabel(token.tokenInfo.name, attributes.size());
-        for (String key : attributes.keySet())
+
+        List<Trait> traits = new ArrayList<>();
+
+        for (Map.Entry<String, String> entry : attributes.entrySet())
         {
-            View attributeView = View.inflate(getContext(), R.layout.item_attribute, null);
-            TextView traitType = attributeView.findViewById(R.id.trait);
-            TextView traitValue = attributeView.findViewById(R.id.value);
-            GridLayout.LayoutParams params = new GridLayout.LayoutParams(
-                    GridLayout.spec(GridLayout.UNDEFINED, 1f),
-                    GridLayout.spec(GridLayout.UNDEFINED, 1f));
-            attributeView.setLayoutParams(params);
-            traitType.setText(key);
-            traitValue.setText(attributes.get(key));
-            grid.addView(attributeView);
+            Trait trait = new Trait(entry.getKey(), entry.getValue());
+            traits.add(trait);
         }
+
+        bind(token, traits);
     }
 
     public void bind(Token token, List<Trait> traits)
@@ -97,6 +87,5 @@ public class NFTAttributeLayout extends LinearLayout {
     public void removeAllViews()
     {
         labelAttributes.setVisibility(View.GONE);
-        grid.removeAllViews();
     }
 }

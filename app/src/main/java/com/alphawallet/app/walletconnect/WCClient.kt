@@ -260,6 +260,7 @@ open class WCClient(
             success,
             chainAvailable
         );
+        var response:String;
         if (!chainAvailable) {
             val errorResponse = JsonRpcErrorResponse(
                 id = requestId,
@@ -272,20 +273,19 @@ open class WCClient(
         if (success) {
             this.chainId = chainId.toString();
             updateSession()     // will use updated chainId
-            val response = JsonRpcResponse<Any>(
+            response = gson.toJson(JsonRpcResponse<Any>(
                 id = requestId,     // json rpc request id
                 result = null
-            )
-            return encryptAndSend(gson.toJson(response))
+            ))
         } else {
-            val response = JsonRpcErrorResponse(
+            response = gson.toJson(JsonRpcErrorResponse(
                 id = requestId,
                 error = JsonRpcError.serverError(
                     message = "Rejected by user"
-                )
+                ))
             )
-            return encryptAndSend(gson.toJson(response))
         }
+        return encryptAndSend(response)
     }
 
     fun addChain(
@@ -371,31 +371,13 @@ open class WCClient(
                 }
             }
             WCMethod.ETH_SIGN -> {
-                val params = gson.fromJson<List<String>>(request.params)
-                if (params.size < 2)
-                    throw InvalidJsonRpcParamsException(request.id)
-                onEthSign(
-                    request.id,
-                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.MESSAGE)
-                )
+                signRequest(request, WCEthereumSignMessage.WCSignType.MESSAGE)
             }
             WCMethod.ETH_PERSONAL_SIGN -> {
-                val params = gson.fromJson<List<String>>(request.params)
-                if (params.size < 2)
-                    throw InvalidJsonRpcParamsException(request.id)
-                onEthSign(
-                    request.id,
-                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE)
-                )
+                signRequest(request, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE)
             }
             WCMethod.ETH_SIGN_TYPE_DATA -> {
-                val params = gson.fromJson<List<String>>(request.params)
-                if (params.size < 2)
-                    throw InvalidJsonRpcParamsException(request.id)
-                onEthSign(
-                    request.id,
-                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE)
-                )
+                signRequest(request, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE)
             }
             WCMethod.ETH_SIGN_TRANSACTION -> {
                 val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
@@ -411,25 +393,46 @@ open class WCClient(
                 onGetAccounts(request.id)
             }
             WCMethod.SWITCH_ETHEREUM_CHAIN -> {
-                Timber.d("WCMethod: switchEthereumChain")
-                val param = gson.fromJson<List<WCSwitchEthChain>>(request.params)
-                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                val newChainId: Long = Numeric.cleanHexPrefix(param.chainId).toLong(16)
-                if (newChainId != chainIdVal()) {
-                    onSwitchEthereumChain(request.id, newChainId)
-                } else {
-                    // auto accept if same chain
-                    switchChain(request.id, chainIdVal(), true);
-                }
+                handleSwitchChain(request)
             }
             WCMethod.ADD_ETHEREUM_CHAIN -> {
-                Timber.d("WCMethod: addEthereumChain")
-                val param: WCAddEthChain = gson.fromJson<List<WCAddEthChain>>(request.params)
-                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                Timber.tag(TAG).d("addChainRequest: $param")
-                onAddEthereumChain(request.id, param.toWalletAddEthereumObject())
+                handleAddChain(request)
             }
         }
+    }
+
+    private fun handleAddChain(request: JsonRpcRequest<JsonArray>)
+    {
+        Timber.d("WCMethod: addEthereumChain")
+        val param: WCAddEthChain = gson.fromJson<List<WCAddEthChain>>(request.params)
+                .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+        Timber.tag(TAG).d("addChainRequest: $param")
+        onAddEthereumChain(request.id, param.toWalletAddEthereumObject())
+    }
+
+    private fun handleSwitchChain(request: JsonRpcRequest<JsonArray>)
+    {
+        Timber.d("WCMethod: switchEthereumChain")
+        val param = gson.fromJson<List<WCSwitchEthChain>>(request.params)
+                .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+        val newChainId: Long = Numeric.toBigInt(param.chainId).toLong();
+        if (newChainId != chainIdVal()) {
+            onSwitchEthereumChain(request.id, newChainId)
+        } else {
+            // auto accept if same chain
+            switchChain(request.id, chainIdVal(), true);
+        }
+    }
+
+    private fun signRequest(request: JsonRpcRequest<JsonArray>, signType: WCEthereumSignMessage.WCSignType)
+    {
+        val params = gson.fromJson<List<String>>(request.params)
+        if (params.size < 2)
+            throw InvalidJsonRpcParamsException(request.id)
+        onEthSign(
+                request.id,
+                WCEthereumSignMessage(params, signType)
+        )
     }
 
     private fun subscribe(topic: String): Boolean {

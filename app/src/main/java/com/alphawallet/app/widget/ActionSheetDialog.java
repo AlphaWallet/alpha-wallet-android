@@ -599,7 +599,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         setOnDismissListener(v -> {
             actionSheetCallback.dismissed(txHash, callbackId, actionCompleted);
-            gasWidgetInterface.onDestroy();
+            if (gasWidgetInterface != null) gasWidgetInterface.onDestroy();
         });
     }
 

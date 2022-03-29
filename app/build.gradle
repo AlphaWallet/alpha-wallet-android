@@ -5,6 +5,14 @@
 buildscript {
     repositories {
         google()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.worker8.android_lint_reporter:android_lint_reporter:2.1.0"
+        classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.20.0-RC1"
     }
 }
 
@@ -15,6 +23,23 @@ apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 apply plugin: 'kotlin-android'
 apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'com.worker8.android_lint_reporter'
+apply plugin: 'io.gitlab.arturbosch.detekt'
+
+detekt {
+    toolVersion = "1.20.0-RC1"
+    buildUponDefaultConfig = true // preconfigure defaults
+    allRules = false // activate all available (even unstable) rules.
+    baseline = file("$projectDir/check/detekt-baseline.xml")
+}
+
+android_lint_reporter {
+    lintFilePath = "./build/reports/lint-results-analyticsDebug.xml"
+    detektFilePath = "./build/reports/detekt/detekt.xml"
+    githubOwner = "AlphaWallet"
+    githubRepositoryName = "alpha-wallet-android"
+    showLog = true // optional - default to false, show extra information, will slow things down
+}
 
 repositories {
     maven {
@@ -96,6 +121,8 @@ android {
         exclude 'META-INF/LICENSE' // will not include LICENSE file
     }
     lintOptions {
+        baseline file("./check/lint-baseline.xml")
+        lintConfig file('./check/lint-rules.xml')
         abortOnError false
     }
     compileOptions {

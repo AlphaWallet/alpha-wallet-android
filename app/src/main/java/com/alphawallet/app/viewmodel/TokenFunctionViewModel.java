@@ -111,6 +111,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
     private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
     private final MutableLiveData<List<Trait>> traits = new MutableLiveData<>();
+    private final MutableLiveData<NFTAsset> attrs = new MutableLiveData<>();
 
     private Wallet wallet;
 
@@ -193,6 +194,11 @@ public class TokenFunctionViewModel extends BaseViewModel
     public MutableLiveData<List<Trait>> traits()
     {
         return traits;
+    }
+
+    public MutableLiveData<NFTAsset> attrs()
+    {
+        return attrs;
     }
 
     public void prepare()
@@ -717,7 +723,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         openseaDisposable = openseaService.getAsset(token, tokenId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(asset -> onAsset(asset), this::onAssetError);
+                .subscribe(asset -> onAsset(asset, token, tokenId), this::onAssetError);
     }
 
     private void onAssetError(Throwable throwable)
@@ -725,7 +731,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         Timber.d(throwable);
     }
 
-    private void onAsset(String asset)
+    private void onAsset(String asset, Token token, BigInteger tokenId)
     {
         try
         {
@@ -734,10 +740,23 @@ public class TokenFunctionViewModel extends BaseViewModel
             {
                 computeRarity(getCountFromJson(result), getTraitsFromJson(result));
             }
+            else
+            {
+                useTraitsFromNFTAsset(token, tokenId);
+            }
         }
         catch (JSONException e)
         {
             Timber.e(e);
+        }
+    }
+
+    private void useTraitsFromNFTAsset(Token token, BigInteger tokenId)
+    {
+        NFTAsset nftAsset = token.getAssetForToken(tokenId);
+        if (nftAsset != null)
+        {
+            attrs.postValue(nftAsset);
         }
     }
 

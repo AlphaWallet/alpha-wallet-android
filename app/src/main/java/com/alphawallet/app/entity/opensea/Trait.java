@@ -70,4 +70,12 @@ public class Trait
     {
         return this.isUnique;
     }
+
+    public Trait(String key, String attrVal)
+    {
+        traitType = key;
+        value = attrVal;
+        traitCount = 0;
+        isUnique = false;
+    }
 }

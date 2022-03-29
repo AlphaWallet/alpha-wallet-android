@@ -161,6 +161,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
                 .get(TokenFunctionViewModel.class);
         viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
         viewModel.traits().observe(this, this::onTraits);
+        viewModel.attrs().observe(this, this::onAttributes);
     }
 
     private void setupFunctionBar()
@@ -272,6 +273,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private void onTraits(List<Trait> traits)
     {
         nftAttributeLayout.bind(token, traits);
+    }
+
+    private void onAttributes(NFTAsset asset)
+    {
+        nftAttributeLayout.bind(token, asset);
     }
 
     @Override

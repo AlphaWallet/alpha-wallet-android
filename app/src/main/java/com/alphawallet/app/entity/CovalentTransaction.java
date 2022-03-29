@@ -1,16 +1,24 @@
 package com.alphawallet.app.entity;
 
 import com.alphawallet.app.entity.tokenscript.EventUtils;
+import com.alphawallet.app.util.Utils;
+import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.protocol.Web3j;
 
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
+
+import android.text.TextUtils;
 
 /**
  * Created by JB on 17/05/2021.
@@ -34,8 +42,140 @@ public class CovalentTransaction
     public String input;
     public double gas_quote;
     public double gas_quote_rate;
+    public LogEvent[] log_events;
 
-    public static EtherscanTransaction[] toEtherscanTransactions(List<CovalentTransaction> transactions, NetworkInfo info)
+    public class LogEvent
+    {
+        public int sender_contract_decimals;
+        public String sender_name;
+        public String sender_address;
+        public String sender_contract_ticker_symbol;
+        public LogDecode decoded;
+        public String[] raw_log_topics;
+
+        public Map<String, Param> getParams() throws Exception
+        {
+            Map<String, Param> params = new HashMap<>();
+            if (decoded == null || decoded.params == null) return params;
+
+            for (int index = 0; index < decoded.params.length; index++)
+            {
+                String rawLogValue = (index + 1) < raw_log_topics.length ? raw_log_topics[index + 1] : "";
+                LogParam lp = decoded.params[index];
+                Param param = new Param();
+                param.type = lp.type;
+                String rawValue = TextUtils.isEmpty(lp.value) || lp.value.equals("null") ? rawLogValue : lp.value;
+                if (lp.type.startsWith("uint") || lp.type.startsWith("int"))
+                {
+                    param.valueBI = rawValue.startsWith("0x") ? Numeric.toBigInt(rawValue) : new BigInteger(rawValue);
+                    param.value = "";
+                }
+                else
+                {
+                    param.value = rawValue;
+                }
+
+                params.put(lp.name, param);
+            }
+
+            return params;
+        }
+    }
+
+    class Param
+    {
+        public String type;
+        public String value;
+        public BigInteger valueBI;
+    }
+
+    class LogDecode
+    {
+        public String name;
+        public String signature;
+        public LogParam[] params;
+
+    }
+
+    class LogParam
+    {
+        public String name;
+        public String type;
+        public String value;
+    }
+
+
+    /*
+    {
+                "block_signed_at": "2022-03-27T12:18:43Z",
+                "block_height": 86501114,
+                "tx_hash": "0x5d423336f1d99eb13592f815b8b2c56aaed582a640a46acaa2e2c027052fb32b",
+                "tx_offset": 23,
+                "successful": true,
+                "from_address": "0x1bccb088c28d4cba4559b4dff15dd9057ccd5568",
+                "from_address_label": null,
+                "to_address": "0x41f68ae333d53ff5e1766afd2d53bbe71e8a645c",
+                "to_address_label": null,
+                "value": "0",
+                "value_quote": 0.0,
+                "gas_offered": 130089,
+                "gas_spent": 100089,
+                "gas_price": 25000000000,
+                "gas_quote": 0.0029352196402698755,
+                "gas_quote_rate": 1.1730438470840454,
+                "log_events": [
+                    {
+                        "block_signed_at": "2022-03-27T12:18:43Z",
+                        "block_height": 86501114,
+                        "tx_offset": 23,
+                        "log_offset": 110,
+                        "tx_hash": "0x5d423336f1d99eb13592f815b8b2c56aaed582a640a46acaa2e2c027052fb32b",
+                        "raw_log_topics": [
+                            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+                            "0x0000000000000000000000001bccb088c28d4cba4559b4dff15dd9057ccd5568",
+                            "0x00000000000000000000000012ad0d742f3c340427c5dfceea5451e48d900755",
+                            "0x0000000000000000000000000000000000000000000000000000000000001cb2"
+                        ],
+                        "sender_contract_decimals": 0,
+                        "sender_name": "klaymfers",
+                        "sender_contract_ticker_symbol": "KMFERS",
+                        "sender_address": "0x41f68ae333d53ff5e1766afd2d53bbe71e8a645c",
+                        "sender_address_label": null,
+                        "sender_logo_url": "https://logos.covalenthq.com/tokens/8217/0x41f68ae333d53ff5e1766afd2d53bbe71e8a645c.png",
+                        "raw_log_data": null,
+                        "decoded": {
+                            "name": "Transfer",
+                            "signature": "Transfer(indexed address from, indexed address to, uint256 value)",
+                            "params": [
+                                {
+                                    "name": "from",
+                                    "type": "address",
+                                    "indexed": true,
+                                    "decoded": true,
+                                    "value": "0x1bccb088c28d4cba4559b4dff15dd9057ccd5568"
+                                },
+                                {
+                                    "name": "to",
+                                    "type": "address",
+                                    "indexed": true,
+                                    "decoded": true,
+                                    "value": "0x12ad0d742f3c340427c5dfceea5451e48d900755"
+                                },
+                                {
+                                    "name": "value",
+                                    "type": "uint256",
+                                    "indexed": false,
+                                    "decoded": false,
+                                    "value": null
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+     */
+
+    public static EtherscanTransaction[] toEtherscanTransactions(CovalentTransaction[] transactions, NetworkInfo info)
     {
         List<EtherscanTransaction> converted = new ArrayList<>();
         for (CovalentTransaction tx : transactions)
@@ -54,14 +194,132 @@ public class CovalentTransaction
         return converted.toArray(new EtherscanTransaction[0]);
     }
 
+    public String determineContractAddress()
+    {
+        if (log_events == null || log_events.length == 0) return "";
+        for (LogEvent le : log_events)
+        {
+            if (le.sender_address != null)
+            {
+                return le.sender_address;
+            }
+        }
+
+        return "";
+    }
+
+    private EtherscanEvent getEtherscanTransferEvent(LogEvent logEvent) throws Exception
+    {
+        if (logEvent == null || logEvent.decoded == null || !logEvent.decoded.name.equals("Transfer")) return null;
+
+        EtherscanEvent ev = new EtherscanEvent();
+        ev.tokenDecimal = String.valueOf(logEvent.sender_contract_decimals);
+        ev.timeStamp = format.parse(block_signed_at).getTime() / 1000;
+        ev.hash = tx_hash;
+        ev.nonce = 0;
+        ev.tokenName = logEvent.sender_name;
+        ev.tokenSymbol = logEvent.sender_contract_ticker_symbol;
+        ev.contractAddress = logEvent.sender_address;
+        ev.blockNumber = block_height;
+
+        Map<String, Param> logParams = logEvent.getParams();
+
+        ev.from = logParams.get("from").value;
+        ev.to = logParams.get("to").value;
+
+        logParams.remove("from");
+        logParams.remove("to");
+
+        if (logEvent.sender_contract_decimals == 0)
+        {
+            //get TokenId
+            ev.tokenID = logParams.values().iterator().next().valueBI.toString();
+        }
+        else
+        {
+            ev.value = logParams.values().iterator().next().valueBI.toString();
+        }
+
+        ev.gasUsed = gas_spent;
+        ev.gasPrice = gas_price;
+        ev.gas = String.valueOf(gas_offered);
+
+        return ev;
+    }
+
+    public static EtherscanEvent[] toEtherscanEvents(CovalentTransaction[] transactions)
+    {
+        List<EtherscanEvent> converted = new ArrayList<>();
+        for (CovalentTransaction tx : transactions)
+        {
+            try
+            {
+                if (tx.log_events != null)
+                {
+                    for (LogEvent logEvent : tx.log_events)
+                    {
+                        if (logEvent.decoded != null && logEvent.decoded.name.equals("Transfer"))
+                        {
+                            EtherscanEvent ev = tx.getEtherscanTransferEvent(logEvent);
+                            converted.add(ev);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                //
+            }
+        }
+
+        return converted.toArray(new EtherscanEvent[0]);
+    }
+
+    public static EtherscanTransaction[] toRawEtherscanTransactions(CovalentTransaction[] transactions, NetworkInfo info)
+    {
+        List<EtherscanTransaction> converted = new ArrayList<>();
+        for (CovalentTransaction tx : transactions)
+        {
+            try
+            {
+                if (tx.log_events == null)
+                {
+                    Transaction rawTransaction = tx.fetchRawTransaction(info);
+                    converted.add(new EtherscanTransaction(tx, rawTransaction));
+                }
+                else
+                {
+                    boolean hasTransfer = false;
+                    for (LogEvent logEvent : tx.log_events)
+                    {
+                        if (logEvent.decoded != null && logEvent.decoded.name.equals("Transfer"))
+                        {
+                            hasTransfer = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasTransfer)
+                    {
+                        Transaction rawTransaction = tx.fetchRawTransaction(info);
+                        converted.add(new EtherscanTransaction(tx, rawTransaction));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                //
+            }
+        }
+
+        return converted.toArray(new EtherscanTransaction[0]);
+    }
+
     private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
 
     private Transaction fetchRawTransaction(NetworkInfo info) throws Exception
     {
         long transactionTime = format.parse(block_signed_at).getTime() / 1000;
-        Web3j web3j = getWeb3jService(info.chainId);
-
-        return EventUtils.getTransactionDetails(tx_hash, web3j)
-                .map(ethTx -> new Transaction(ethTx.getResult(), info.chainId, true, transactionTime)).blockingGet();
+        return new Transaction(this, info.chainId, transactionTime);
     }
 }

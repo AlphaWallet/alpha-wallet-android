@@ -48,6 +48,8 @@ public abstract class C {
     public static final String ARBITRUM_ONE_NETWORK = "Arbitrum One";
     public static final String PALM_NAME = "PALM";
     public static final String PALM_TEST_NAME = "PALM (Test)";
+    public static final String KLAYTN_NAME = "Klaytn Cypress";
+    public static final String KLAYTN_BAOBAB_NAME = "Klaytn Baobab (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -75,6 +77,7 @@ public abstract class C {
     public static final String ARBITRUM_SYMBOL = "AETH";
     public static final String ARBITRUM_TEST_SYMBOL = "ARETH";
     public static final String PALM_SYMBOL = "PALM";
+    public static final String KLAYTN_SYMBOL = "KLAY";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 

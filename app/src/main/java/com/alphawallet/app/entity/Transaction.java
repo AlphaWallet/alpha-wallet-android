@@ -153,6 +153,36 @@ public class Transaction implements Parcelable
 		this.maxPriorityFee = tx.maxPriorityFeePerGas.toString();
 	}
 
+	public Transaction(CovalentTransaction cTx, long chainId, long transactionTime)
+	{
+		if (cTx.to_address == null || cTx.to_address.equals("null"))
+		{
+			isConstructor = true;
+			input = CONSTRUCTOR;
+			//determine creation address from events
+			to = cTx.determineContractAddress();
+		}
+		else
+		{
+			to = cTx.to_address;
+			input = "";
+		}
+
+		this.hash = cTx.tx_hash;
+		this.blockNumber = cTx.block_height;
+		this.timeStamp = transactionTime;
+		this.error = cTx.successful ? "0" : "1";
+		this.nonce = 0; //don't know this
+		this.from = cTx.from_address;
+		this.value = cTx.value;
+		this.gas = String.valueOf(cTx.gas_offered);
+		this.gasPrice = cTx.gas_price;
+		this.gasUsed = cTx.gas_spent;
+		this.chainId = chainId;
+		this.maxFeePerGas = "";
+		this.maxPriorityFee = "";
+	}
+
 	public Transaction(org.web3j.protocol.core.methods.response.Transaction ethTx, long chainId, boolean isSuccess, long timeStamp)
 	{
 		// Get contract address if constructor

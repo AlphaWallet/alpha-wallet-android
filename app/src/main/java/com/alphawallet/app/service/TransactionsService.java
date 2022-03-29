@@ -239,7 +239,7 @@ public class TransactionsService
                     Timber.tag(TAG).d("Transaction check for: %s (%s) %s", t.tokenInfo.chainId, t.getNetworkName(), tick);
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(t.tokenInfo.chainId);
                 fetchTransactionDisposable =
-                        transactionsClient.storeNewTransactions(tokensService.getCurrentAddress(), network, t.getAddress(), t.lastBlockCheck)
+                        transactionsClient.storeNewTransactions(tokensService, network, t.getAddress(), t.lastBlockCheck)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
@@ -284,7 +284,7 @@ public class TransactionsService
     public Single<TransactionMeta[]> fetchAndStoreTransactions(long chainId, long lastTxTime)
     {
         NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
-        return transactionsClient.fetchMoreTransactions(tokensService.getCurrentAddress(), network, lastTxTime);
+        return transactionsClient.fetchMoreTransactions(tokensService, network, lastTxTime);
     }
 
     private List<Long> getPendingChains()

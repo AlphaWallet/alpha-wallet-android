@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="?android:colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,17 +17,8 @@
             android:id="@+id/splash_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/ic_logo"
+            android:background="@drawable/ic_logo_vertical"
             android:gravity="center_horizontal" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="9dp"
-            android:gravity="center_horizontal"
-            android:text="@string/welcome_to_alphawallet"
-            android:textColor="@color/text_black"
-            android:textSize="26sp" />
 
     </LinearLayout>
 
@@ -35,62 +27,36 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_margin="@dimen/standard_16"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:visibility="gone"
+        tools:visibility="visible">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_create"
-            style="@style/AwButton.Primary"
+            style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/create_new_wallet_margin_bottom"
+            android:layout_marginBottom="@dimen/standard_16"
             android:text="@string/create_a_new_wallet" />
 
-        <LinearLayout
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_import"
+            style="@style/Aw.Component.Button.Secondary"
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="@dimen/divider_margin_top"
-            android:layout_marginEnd="16dp"
-            android:background="@color/grey_bar" />
+            android:layout_height="wrap_content"
+            android:text="@string/i_already_have_a_wallet" />
 
-        <TextView
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_watch"
+            style="@style/Aw.Component.Button.Secondary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/already_label_margin_top"
-            android:text="@string/already_have_a_wallet"
-            android:textColor="@color/text_dark_gray"
-            android:textSize="16sp" />
+            android:layout_marginEnd="@dimen/mini_4"
+            android:layout_weight="1.0"
+            android:text="@string/watch"
+            android:visibility="gone" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="@dimen/bottom_buttons_holder_margin_bottom"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/button_watch"
-                style="@style/AwButton.Secondary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
-                android:layout_weight="1.0"
-                android:text="@string/watch" />
-
-            <Button
-                android:id="@+id/button_import"
-                style="@style/AwButton.Secondary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_weight="1.0"
-                android:text="@string/action_import" />
-
-        </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

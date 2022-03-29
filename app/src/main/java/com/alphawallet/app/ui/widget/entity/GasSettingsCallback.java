@@ -7,5 +7,5 @@ import java.math.BigInteger;
  */
 public interface GasSettingsCallback
 {
-    void gasSettingsUpdate(BigInteger gasPrice, BigInteger gasLimit);
+    void gasSettingsUpdate(BigInteger gasPriceMax, BigInteger priorityFee, BigInteger gasLimit);
 }

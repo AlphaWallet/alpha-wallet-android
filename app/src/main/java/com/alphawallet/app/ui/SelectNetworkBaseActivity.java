@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,17 +12,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
+import com.alphawallet.app.widget.StandardHeader;
 import com.alphawallet.app.widget.TestNetDialog;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
-public abstract class SelectNetworkBaseActivity extends BaseActivity {
+public abstract class SelectNetworkBaseActivity extends BaseActivity
+{
     RecyclerView mainnetRecyclerView;
     RecyclerView testnetRecyclerView;
+    StandardHeader mainnetHeader;
+    StandardHeader testnetHeader;
     SwitchMaterial mainnetSwitch;
     SwitchMaterial testnetSwitch;
     TestNetDialog testnetDialog;
-    FrameLayout mainnetFrame;
-    FrameLayout testnetFrame;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -38,7 +39,8 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu_add, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -72,11 +74,11 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity {
 
     private void initViews()
     {
-        mainnetFrame = findViewById(R.id.mainnet_frame);
-        testnetFrame = findViewById(R.id.testnet_frame);
+        mainnetHeader = findViewById(R.id.mainnet_header);
+        testnetHeader = findViewById(R.id.testnet_header);
 
-        mainnetSwitch = findViewById(R.id.mainnet_switch);
-        testnetSwitch = findViewById(R.id.testnet_switch);
+        mainnetSwitch = mainnetHeader.getSwitch();
+        testnetSwitch = testnetHeader.getSwitch();
 
         mainnetRecyclerView = findViewById(R.id.main_list);
         testnetRecyclerView = findViewById(R.id.test_list);
@@ -90,8 +92,8 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity {
 
     void hideSwitches()
     {
-        testnetFrame.setVisibility(View.GONE);
-        mainnetFrame.setVisibility(View.GONE);
+        mainnetHeader.setVisibility(View.GONE);
+        testnetHeader.setVisibility(View.GONE);
     }
 
     void toggleListVisibility(boolean isMainNetActive)

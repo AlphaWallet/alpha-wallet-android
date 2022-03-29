@@ -12,7 +12,7 @@ data class JsonRpcRequest<T>(
 data class JsonRpcResponse<T>(
         val jsonrpc: String = JSONRPC_VERSION,
         val id: Long,
-        val result: T
+        val result: T?
 )
 
 data class JsonRpcErrorResponse(
@@ -31,5 +31,6 @@ data class JsonRpcError(
         fun invalidRequest(message: String) = JsonRpcError(-32600, message)
         fun parseError(message: String) = JsonRpcError(-32700, message)
         fun methodNotFound(message: String) = JsonRpcError(-32601, message)
+        fun unrecognisedChain(message: String) = JsonRpcError(4902, message)
     }
 }

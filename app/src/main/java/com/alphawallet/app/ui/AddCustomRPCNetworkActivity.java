@@ -13,21 +13,19 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.viewmodel.CustomNetworkViewModel;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputView;
-import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class AddCustomRPCNetworkActivity extends BaseActivity implements StandardFunctionInterface {
+public class AddCustomRPCNetworkActivity extends BaseActivity implements StandardFunctionInterface
+{
 
     public static final String CHAIN_ID = "chain_id";
 
@@ -39,7 +37,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
     private InputView symbolInputView;
     private InputView blockExplorerUrlInputView;
     private InputView blockExplorerApiUrl;
-    private SwitchMaterial testNetSwitch;
+    private MaterialCheckBox testNetCheckBox;
 
     private final Handler handler = new Handler();
 
@@ -50,6 +48,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
         setContentView(R.layout.activity_add_custom_rpc_network);
 
         toolbar();
+        setTitle(getString(R.string.title_activity_add_custom_rpcnetwork));
 
         nameInputView = findViewById(R.id.input_network_name);
         nameInputView.getEditText().setImeOptions(EditorInfo.IME_ACTION_NEXT);
@@ -77,41 +76,49 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
         blockExplorerApiUrl.getEditText().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
         blockExplorerApiUrl.getEditText().setHint("https://api.etherscan.io/api?");
 
-        testNetSwitch = findViewById(R.id.testnet_switch);
+        testNetCheckBox = findViewById(R.id.checkbox_testnet);
 
         initViewModel();
 
         long chainId = getIntent().getLongExtra(CHAIN_ID, -1);
 
-        if (chainId >= 0) {
+        if (chainId >= 0)
+        {
             // get network info and fill ui
             NetworkInfo network = viewModel.getNetworkInfo(chainId);
 
             nameInputView.setText(network.name);
-            rpcUrlInputView.setText(network.rpcServerUrl.replaceAll("(/)([0-9a-fA-F]{32})","/********************************"));
+            rpcUrlInputView.setText(network.rpcServerUrl.replaceAll("(/)([0-9a-fA-F]{32})", "/********************************"));
             chainIdInputView.setText(String.valueOf(network.chainId));
             symbolInputView.setText(network.symbol);
             blockExplorerUrlInputView.setText(network.etherscanUrl);
             blockExplorerApiUrl.setText(network.etherscanAPI);
-            testNetSwitch.setChecked(viewModel.isTestNetwork(network));
+            testNetCheckBox.setChecked(viewModel.isTestNetwork(network));
             // disable editing for hardcoded networks
-            if (!network.isCustom) {
+            if (!network.isCustom)
+            {
+                setTitle(getString(R.string.title_network_info));
                 nameInputView.getEditText().setEnabled(false);
                 rpcUrlInputView.getEditText().setEnabled(false);
                 chainIdInputView.getEditText().setEnabled(false);
                 symbolInputView.getEditText().setEnabled(false);
                 blockExplorerUrlInputView.getEditText().setEnabled(false);
                 blockExplorerApiUrl.getEditText().setEnabled(false);
-                findViewById(R.id.view_click_hider).setVisibility(View.VISIBLE); //disable clicking on the switch
-            } else {
+                testNetCheckBox.setEnabled(false);
+            }
+            else
+            {
                 addFunctionBar(true);
             }
-        } else {
+        }
+        else
+        {
             addFunctionBar(false);
         }
     }
 
-    private void addFunctionBar(boolean update) {
+    private void addFunctionBar(boolean update)
+    {
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(update ? R.string.action_update_network : R.string.action_add_network)));
         functionBar.revealButtons();
@@ -123,27 +130,38 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
                 .get(CustomNetworkViewModel.class);
     }
 
-    private boolean validateInputs() {
-        if (TextUtils.isEmpty(nameInputView.getText())) {
+    private boolean validateInputs()
+    {
+        if (TextUtils.isEmpty(nameInputView.getText()))
+        {
             nameInputView.setError(getString(R.string.error_field_required));
             return false;
         }
 
-        if (TextUtils.isEmpty(rpcUrlInputView.getText())) {
+        if (TextUtils.isEmpty(rpcUrlInputView.getText()))
+        {
             rpcUrlInputView.setError(getString(R.string.error_field_required));
             return false;
-        } else if (!URLUtil.isValidUrl(rpcUrlInputView.getText().toString())) {
+        }
+        else if (!URLUtil.isValidUrl(rpcUrlInputView.getText().toString()))
+        {
             rpcUrlInputView.setError(getString(R.string.error_invalid_url));
             return false;
         }
 
-        if (TextUtils.isEmpty(chainIdInputView.getText())) {
+        if (TextUtils.isEmpty(chainIdInputView.getText()))
+        {
             chainIdInputView.setError(getString(R.string.error_field_required));
             return false;
-        } else {
-            try {
+        }
+        else
+        {
+            try
+            {
                 Long.parseLong(chainIdInputView.getText().toString());
-            } catch (NumberFormatException ex) {
+            }
+            catch (NumberFormatException ex)
+            {
                 chainIdInputView.setError(getString(R.string.error_must_numeric));
                 return false;
             }
@@ -151,15 +169,18 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
 
         long newChainId = Long.parseLong(chainIdInputView.getText().toString());
         long chainId = getIntent().getLongExtra(CHAIN_ID, -1);
-        if (newChainId != chainId) {
+        if (newChainId != chainId)
+        {
             NetworkInfo network = viewModel.getNetworkInfo(newChainId);
-            if (network != null) {
+            if (network != null)
+            {
                 chainIdInputView.setError(getString(R.string.error_chainid_already_taken));
                 return false;
             }
         }
 
-        if (TextUtils.isEmpty(symbolInputView.getText())) {
+        if (TextUtils.isEmpty(symbolInputView.getText()))
+        {
             symbolInputView.setError(getString(R.string.error_field_required));
             return false;
         }
@@ -169,7 +190,8 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             blockExplorerUrlInputView.setError(getString(R.string.error_field_required));
             return false;
         } else*/
-        if (!TextUtils.isEmpty(blockExplorerUrlInputView.getText().toString()) && !URLUtil.isValidUrl(blockExplorerUrlInputView.getText().toString())) {
+        if (!TextUtils.isEmpty(blockExplorerUrlInputView.getText().toString()) && !URLUtil.isValidUrl(blockExplorerUrlInputView.getText().toString()))
+        {
             blockExplorerUrlInputView.setError(getString(R.string.error_invalid_url));
             return false;
         }
@@ -178,7 +200,8 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
             blockExplorerApiUrl.setError(getString(R.string.error_field_required));
             return false;
         } else*/
-        if (!TextUtils.isEmpty(blockExplorerApiUrl.getText().toString()) && !URLUtil.isValidUrl(blockExplorerApiUrl.getText().toString())) {
+        if (!TextUtils.isEmpty(blockExplorerApiUrl.getText().toString()) && !URLUtil.isValidUrl(blockExplorerApiUrl.getText().toString()))
+        {
             blockExplorerApiUrl.setError(getString(R.string.error_invalid_url));
             return false;
         }
@@ -186,7 +209,8 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
         return true;
     }
 
-    private void resetValidateErrors() {
+    private void resetValidateErrors()
+    {
         nameInputView.setError(null);
         rpcUrlInputView.setError(null);
         chainIdInputView.setError(null);
@@ -197,7 +221,8 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
     @Override
     public void handleClick(String action, int actionId)
     {
-        if (validateInputs()) {
+        if (validateInputs())
+        {
             long oldChainId = getIntent().getLongExtra(CHAIN_ID, -1);
 
             // add network
@@ -206,9 +231,11 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
                     Long.parseLong(chainIdInputView.getText().toString()),
                     symbolInputView.getText().toString(),
                     blockExplorerUrlInputView.getText().toString(),
-                    blockExplorerApiUrl.getText().toString(), testNetSwitch.isChecked(), oldChainId != -1L ? oldChainId : null);
+                    blockExplorerApiUrl.getText().toString(), testNetCheckBox.isChecked(), oldChainId != -1L ? oldChainId : null);
             finish();
-        } else {
+        }
+        else
+        {
             handler.postDelayed(this::resetValidateErrors, 2000);
         }
     }

@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <include layout="@layout/layout_url_bar_full" />
 
+    <View
+        android:id="@+id/separator"
+        style="@style/Aw.Component.Separator"
+        android:layout_below="@id/address_bar" />
+
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:layout_below="@id/address_bar"
-        android:indeterminate="false"
-        android:progressDrawable="@drawable/background_horizontal_progress" />
+        android:layout_height="@dimen/horizontal_toolbar_progress_height"
+        android:layout_below="@id/separator"
+        android:indeterminate="false" />
 
     <View
         android:id="@+id/anchor"
@@ -26,7 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/anchor"
-        android:layout_marginBottom="?android:attr/actionBarSize"
+        android:layout_marginBottom="?actionBarSize"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
@@ -45,42 +48,39 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:layout_gravity="end"
-            android:paddingStart="6dp"
-            android:paddingEnd="2dp"
-            android:layout_marginEnd="@dimen/dp8"
+            android:layout_marginTop="@dimen/mini_4"
+            android:layout_marginEnd="@dimen/tiny_8"
+            android:background="@drawable/background_eth_lozenge"
             android:clickable="false"
             android:focusable="false"
-            android:background="@drawable/background_eth_lozenge">
+            android:gravity="center_horizontal"
+            android:paddingStart="@dimen/tiny_8"
+            android:paddingEnd="@dimen/tiny_8">
 
             <TextView
                 android:id="@+id/balance"
+                style="@style/Aw.Typography.Caption"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
-                android:fontFamily="@font/font_regular"
-                android:gravity="center_vertical"
+                android:layout_marginEnd="@dimen/mini_4"
                 android:clickable="false"
                 android:focusable="false"
-                android:text="0.0"
-                android:textColor="@color/black"
-                android:textSize="15sp" />
+                android:gravity="center_vertical"
+                android:text="0.0" />
 
             <TextView
                 android:id="@+id/symbol"
+                style="@style/Aw.Typography.Caption"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/eth"
-                android:gravity="center_vertical"
                 android:clickable="false"
                 android:focusable="false"
-                android:textColor="@color/black"
-                android:textSize="15sp" />
+                android:gravity="center_vertical"
+                android:text="@string/eth" />
 
         </LinearLayout>
 
     </FrameLayout>
+
 </RelativeLayout>

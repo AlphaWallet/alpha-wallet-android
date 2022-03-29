@@ -286,16 +286,16 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         {
             case ERROR:
                 boxLayout.setBackgroundResource(R.drawable.background_input_error);
-                labelText.setTextColor(context.getColor(R.color.danger));
+                labelText.setTextColor(context.getColor(R.color.error));
                 break;
             case UNSELECTED:
                 boxLayout.setBackgroundResource(R.drawable.background_password_entry);
-                labelText.setTextColor(context.getColor(R.color.dove));
+                labelText.setTextColor(context.getColor(R.color.text_secondary));
                 errorText.setVisibility(View.GONE);
                 break;
             case SELECTED:
                 boxLayout.setBackgroundResource(R.drawable.background_input_selected);
-                labelText.setTextColor(context.getColor(R.color.azure));
+                labelText.setTextColor(context.getColor(R.color.brand));
                 errorText.setVisibility(View.GONE);
                 break;
         }

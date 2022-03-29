@@ -103,9 +103,4 @@ public class AWalletConfirmationDialog extends Dialog {
         extraText.setVisibility(View.VISIBLE);
         extraText.setText(context.getResources().getString(resId));
     }
-
-    public void showShareLink() {
-        ImageView shareIcon = findViewById(R.id.image_share);
-        shareIcon.setVisibility(View.VISIBLE);
-    }
 }

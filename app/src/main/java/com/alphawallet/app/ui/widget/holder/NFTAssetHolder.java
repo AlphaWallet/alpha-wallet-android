@@ -27,7 +27,6 @@ public class NFTAssetHolder extends BinderViewHolder<Pair<BigInteger, NFTAsset>>
     final TextView title;
     final TextView assetCategory;
     final TextView assetCount;
-    final TextView selectionAmount;
     final TextView tokenId;
 
     public NFTAssetHolder(ViewGroup parent)
@@ -38,7 +37,6 @@ public class NFTAssetHolder extends BinderViewHolder<Pair<BigInteger, NFTAsset>>
         title = findViewById(R.id.title);
         assetCategory = findViewById(R.id.subtitle);
         assetCount = findViewById(R.id.count);
-        selectionAmount = findViewById(R.id.text_count);
         tokenId = findViewById(R.id.token_id);
     }
 

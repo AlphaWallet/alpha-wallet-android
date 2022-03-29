@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.util.BalanceUtils;
 
@@ -74,10 +75,8 @@ public class GenericWalletInteract
 		return walletRepository.getWalletBackupWarning(walletAddr);
 	}
 
-	public void updateWalletInfo(Wallet wallet, String name, Realm.Transaction.OnSuccess onSuccess)
-	{
-		wallet.name = name;
-		walletRepository.updateWalletData(wallet, onSuccess);
+	public void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess) {
+		walletRepository.updateWalletItem(wallet, item, onSuccess);
 	}
 
 	public void updateBalanceIfRequired(Wallet wallet, BigDecimal newBalance)
@@ -86,7 +85,7 @@ public class GenericWalletInteract
 		if (!newBalance.equals(BigDecimal.valueOf(-1)) && !wallet.balance.equals(newBalanceStr))
 		{
 			wallet.balance = newBalanceStr;
-			walletRepository.updateWalletData(wallet, () -> {
+			walletRepository.updateWalletItem(wallet, WalletItem.BALANCE, () -> {
 				Timber.tag(getClass().getCanonicalName()).d("Updated balance");
 			});
 		}

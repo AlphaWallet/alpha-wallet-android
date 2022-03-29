@@ -1,31 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingStart="@dimen/dp24"
-        android:paddingTop="@dimen/dp18"
-        android:paddingEnd="@dimen/dp24"
-        android:paddingBottom="@dimen/dp18">
+        android:paddingHorizontal="@dimen/base_24"
+        android:paddingVertical="@dimen/standard_16">
 
         <TextView
             android:id="@+id/label"
+            style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="start|center_vertical"
             android:layout_weight="0.4"
             android:ellipsize="end"
-            android:fontFamily="@font/font_regular"
             android:singleLine="true"
-            tools:text="Balance"
-            android:textColor="@color/dove"
-            android:textSize="@dimen/sp15" />
+            tools:text="Balance" />
 
         <TextView
             android:id="@+id/value"
@@ -33,12 +29,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
             android:ellipsize="end"
-            android:fontFamily="@font/font_regular"
             android:gravity="end|center_vertical"
             android:singleLine="true"
-            tools:text="-"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp17" />
+            tools:text="0.00" />
 
         <TextView
             android:id="@+id/value_long"
@@ -46,20 +39,16 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
             android:ellipsize="end"
-            android:fontFamily="@font/font_semibold"
             android:gravity="end|center_vertical"
             android:maxLines="2"
-            tools:text="The smallest of the seven inhabited Aeolian Islands"
             android:visibility="gone"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp16" />
+            tools:text="The smallest of the seven inhabited Aeolian Islands"
+            tools:visibility="visible" />
 
     </LinearLayout>
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
+        style="@style/Aw.Component.Separator"
         android:layout_marginStart="@dimen/dp16"
-        android:layout_marginEnd="@dimen/dp16"
-        android:background="@color/mercury" />
+        android:layout_marginEnd="@dimen/dp16" />
 </LinearLayout>

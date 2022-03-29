@@ -8,6 +8,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
@@ -687,6 +688,7 @@ public class TickerService
         ethTickers.clear();
     }
 
+    // Update this list from here: https://api.coingecko.com/api/v3/asset_platforms
     public static final Map<Long, String> coinGeckoChainIdToAPIName = new HashMap<Long, String>(){{
         put(MAINNET_ID, "ethereum");
         put(XDAI_ID, "xdai");
@@ -702,6 +704,7 @@ public class TickerService
         put(321L, "kucoin-community-chain");
         put(88L, "tomochain");
         put(42220L, "celo");
+        put(KLAYTN_ID, "klay-token");
     }};
 
     private static final Map<Long, String> dexGuruChainIdToAPISymbol = new HashMap<Long, String>(){{
@@ -716,6 +719,7 @@ public class TickerService
         localSource.deleteTickers();
     }
 
+    // Update from https://api.coingecko.com/api/v3/coins/list
     public static final Map<Long, String> chainPairs = new HashMap<Long, String>(){{
         put(MAINNET_ID, "ethereum");
         put(CLASSIC_ID, "ethereum-classic");
@@ -728,6 +732,7 @@ public class TickerService
         put(MATIC_ID, "matic-network");
         put(ARBITRUM_MAIN_ID, "ethereum");
         put(OPTIMISTIC_MAIN_ID, "ethereum");
+        put(KLAYTN_ID, "klay-token");
     }};
 
     public static boolean validateCoinGeckoAPI(Token token)

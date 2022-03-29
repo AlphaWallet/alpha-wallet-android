@@ -10,7 +10,9 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.util.EnsResolver;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -49,41 +51,89 @@ public class NameThisWalletViewModel extends BaseViewModel
     protected void onCleared()
     {
         super.onCleared();
-        if (ensResolveDisposable != null && !ensResolveDisposable.isDisposed()) ensResolveDisposable.dispose();
+        if (ensResolveDisposable != null && !ensResolveDisposable.isDisposed())
+            ensResolveDisposable.dispose();
     }
 
-    public LiveData<Wallet> defaultWallet() { return defaultWallet; }
-    public LiveData<String> ensName() { return ensName; }
+    public LiveData<Wallet> defaultWallet()
+    {
+        return defaultWallet;
+    }
 
-    public void prepare() {
+    public LiveData<String> ensName()
+    {
+        return ensName;
+    }
+
+    public void prepare()
+    {
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(Wallet wallet)
+    {
         defaultWallet.setValue(wallet);
 
         // skip resolve if wallet already has an ENSName
-        if (!TextUtils.isEmpty(wallet.ENSname)) {
+        if (!TextUtils.isEmpty(wallet.ENSname))
+        {
             onENSSuccess(wallet.ENSname);
-            return ;
+            return;
         }
 
         ensResolveDisposable = ensResolver.reverseResolveEns(wallet.address)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onENSSuccess);
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onENSSuccess);
 
     }
 
-    private void onENSSuccess(String address) {
+    private void onENSSuccess(String address)
+    {
         ensName.setValue(address);
     }
 
     public void setWalletName(String name, Realm.Transaction.OnSuccess onSuccess)
     {
-        genericWalletInteract.updateWalletInfo(defaultWallet.getValue(), name, onSuccess);
+        Wallet wallet = defaultWallet().getValue();
+        wallet.name = name;
+        genericWalletInteract.updateWalletItem(wallet, WalletItem.NAME, onSuccess);
+    }
+
+    public boolean checkEnsName(String newName, Realm.Transaction.OnSuccess onSuccess)
+    {
+        if (!TextUtils.isEmpty(newName) && EnsResolver.isValidEnsName(newName))
+        {
+            //does this new name correspond to ENS?
+            ensResolver.resolveENSAddress(newName)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(addr -> checkAddress(addr, newName, onSuccess))
+                    .isDisposed();
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    //check if this is a valid ENS name, if so then replace the ENS name
+    private void checkAddress(String address, String ensName, Realm.Transaction.OnSuccess onSuccess)
+    {
+        if (defaultWallet.getValue() != null && !TextUtils.isEmpty(address) && address.equalsIgnoreCase(defaultWallet.getValue().address))
+        {
+            Wallet wallet = defaultWallet().getValue();
+            wallet.ENSname = ensName;
+            genericWalletInteract.updateWalletItem(wallet, WalletItem.ENS_NAME, onSuccess);
+        }
+        else
+        {
+            onSuccess.onSuccess();
+        }
     }
 }
 

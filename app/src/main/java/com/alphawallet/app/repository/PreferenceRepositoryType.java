@@ -43,6 +43,9 @@ public interface PreferenceRepositoryType {
 
     void setFullScreenState(boolean state);
 
+    void setUse1559Transactions(boolean toggleState);
+    boolean getUse1559Transactions();
+
     boolean isActiveMainnet();
 
     void setActiveMainnet(boolean state);
@@ -90,4 +93,7 @@ public interface PreferenceRepositoryType {
 
     int getLastVersionCode(int currentCode);
     void setLastVersionCode(int code);
+
+    int getTheme();
+    void setTheme(int state);
 }

@@ -17,6 +17,8 @@ public class RealmTransaction extends RealmObject {
     private String gasUsed;
     private String input;
     private String error;
+    private String maxFeePerGas;
+    private String maxPriorityFee;
     private long chainId;
     private long expectedCompletion;
     private String contractAddress; // this is so we can efficiently lookup transactions relating to contracts,
@@ -126,6 +128,13 @@ public class RealmTransaction extends RealmObject {
     {
         this.chainId = chainId;
     }
+
+    public void setMaxFeePerGas(String maxFee) { this.maxFeePerGas = maxFee; }
+
+    public String getMaxFeePerGas() { return maxFeePerGas; }
+
+    public void setMaxPriorityFee(String maxPriorityFee) { this.maxPriorityFee = maxPriorityFee; }
+    public String getPriorityFee() { return maxPriorityFee; }
 
     public boolean isPending()
     {

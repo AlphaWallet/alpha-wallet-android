@@ -155,7 +155,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         layoutParams.setMarginStart(10);
         String failure = getString(R.string.failed) + " ☹";
         supplemental.setText(failure);
-        supplemental.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+        supplemental.setTextColor(ContextCompat.getColor(getContext(), R.color.error));
     }
 
     private void setTransactionStatus(String blockNumber, String error, boolean isPending)
@@ -177,11 +177,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         {
             tokenIcon.setStatusIcon(StatusType.PENDING);
             type.setText(R.string.pending_transaction);
-            transactionBackground.setBackgroundResource(R.drawable.background_pending_transaction);
-        }
-        else if (transactionBackground != null)
-        {
-            transactionBackground.setBackgroundResource(R.color.white);
         }
     }
 }

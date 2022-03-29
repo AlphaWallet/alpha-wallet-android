@@ -56,7 +56,6 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     private TokenFunctionViewModel viewModel;
 
     private NFTImageView assetImage;
-    private TextView title;
     private TextView name;
     private TextView desc;
     private TextView id;
@@ -72,7 +71,6 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     private BigInteger tokenId;
 
     private void initViews() {
-        title = findViewById(R.id.title);
         assetImage = findViewById(R.id.layout_image);
         name = findViewById(R.id.name);
         desc = findViewById(R.id.description);
@@ -321,5 +319,14 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     public void notifyConfirm(String mode)
     {
         viewModel.actionSheetConfirm(mode);
+    }
+
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> confirmationDialog.setCurrentGasIndex(result));
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
     }
 }

@@ -1,9 +1,7 @@
 package com.alphawallet.app;
 
 import android.content.Context;
-import android.util.Log;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.alphawallet.app.entity.Wallet;
@@ -25,6 +23,7 @@ import timber.log.Timber;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static io.realm.Realm.getApplicationContext;
 
 @RunWith(AndroidJUnit4.class)
 public class GetKeystoreWalletRepoTest {
@@ -36,7 +35,7 @@ public class GetKeystoreWalletRepoTest {
 
 	@Before
 	public void setUp() {
-		Context context = InstrumentationRegistry.getTargetContext();
+		Context context = getApplicationContext();
 		accountKeystoreService = new KeystoreAccountService(new File(context.getFilesDir(), "store"),
 															new File(context.getFilesDir(), ""),
 															new KeyService(null, null));

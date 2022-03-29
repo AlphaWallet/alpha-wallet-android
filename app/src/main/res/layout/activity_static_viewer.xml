@@ -3,10 +3,9 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/colorPrimaryDark">
+    android:orientation="vertical">
 
-    <include layout="@layout/layout_white_toolbar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <WebView
         android:id="@+id/webview"

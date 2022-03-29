@@ -1,118 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:paddingHorizontal="@dimen/standard_16"
+    android:paddingVertical="@dimen/small_12">
 
-<LinearLayout
-    android:id="@+id/main_wrapper"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
-
-    <RelativeLayout
+    <LinearLayout
+        android:id="@+id/main_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:layout_marginTop="4dp">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/token_definition_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="@dimen/dp16"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp17"
-            tools:text="Setting Title" />
-
-        <TextView
-            android:id="@+id/token_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/token_definition_name"
-            android:layout_toEndOf="@id/token_definition_name"
-            android:layout_marginStart="@dimen/dp10"
-            android:fontFamily="@font/font_regular"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp15"
-            tools:text="" />
-
-        <ImageView
-            android:id="@+id/image_lock"
-            android:layout_alignParentEnd="true"
-            android:layout_width="@dimen/dp25"
-            android:layout_height="@dimen/dp25"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            android:src="@mipmap/ic_locked"/>
-
-    </RelativeLayout>
-
-    <TextView
-        android:id="@+id/token_file"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/dp16"
-        android:fontFamily="@font/font_regular"
-        android:paddingStart="@dimen/dp16"
-        android:paddingEnd="@dimen/dp16"
-        android:textColor="@color/black"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textSize="14sp"
-        tools:text="Setting Title" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:id="@+id/token_address"
-            android:layout_alignParentStart="true"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="@dimen/dp16"
-            android:layout_marginBottom="8dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/font_light"
-            android:lines="1"
-            android:maxLines="1"
-            tools:text="Setting Subtitle"
-            android:textColor="@color/black"
-            android:textSize="12sp" />
+            android:gravity="center_vertical">
 
-        <com.alphawallet.app.widget.ChainName
-            android:id="@+id/chain_name"
-            android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/token_definition_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                tools:text="Setting Title" />
+
+            <TextView
+                android:id="@+id/token_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/token_definition_name"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="@dimen/small_12"
+                android:layout_toEndOf="@id/token_definition_name"
+                tools:text="Token Name" />
+
+            <ImageView
+                android:id="@+id/image_lock"
+                android:layout_width="@dimen/dp25"
+                android:layout_height="@dimen/dp25"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/ic_locked"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/token_file"
+            style="@style/Aw.Typography.Caption"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="2dp"
-            android:visibility="gone" />
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingVertical="@dimen/tiny_8"
+            tools:text="Setting Title" />
 
-    </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/silver" />
+            <TextView
+                android:id="@+id/token_address"
+                style="@style/Aw.Typography.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:ellipsize="end"
+                android:lines="1"
+                android:maxLines="1"
+                android:paddingVertical="@dimen/tiny_8"
+                tools:text="Setting Subtitle" />
 
-</LinearLayout>
+            <com.alphawallet.app.widget.ChainName
+                android:id="@+id/chain_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+        </RelativeLayout>
+
+        <View style="@style/Aw.Component.Separator" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layout_override"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/main_wrapper"
         android:layout_alignTop="@id/main_wrapper"
-        android:background="@color/translucentWhite"
+        android:layout_alignBottom="@id/main_wrapper"
+        android:background="@color/translucent_light"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:visibility="gone"
+        tools:visibility="visible">
 
     </LinearLayout>
 
@@ -120,8 +107,8 @@
         android:id="@+id/layout_click_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/main_wrapper"
         android:layout_alignTop="@id/main_wrapper"
+        android:layout_alignBottom="@id/main_wrapper"
         android:background="@color/transparent"
         android:gravity="center"
         android:orientation="vertical"

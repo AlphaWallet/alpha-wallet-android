@@ -1,19 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Default screen margins, per the Android Design guidelines. -->
-
-    <dimen name="normal_padding">8dp</dimen>
-	<dimen name="big_padding">16dp</dimen>
-
-    <dimen name="small_margin">4dp</dimen>
-	<dimen name="normal_margin">8dp</dimen>
-	<dimen name="big_margin">16dp</dimen>
-	<dimen name="half_large_margin">32dp</dimen>
-	<dimen name="full_large_margin">64dp</dimen>
-
-    <dimen name="list_group_head">14sp</dimen>
-
-    <dimen name="design_bottom_navigation_active_text_size" tools:override="true">12sp</dimen>
-	<dimen name="design_bottom_navigation_text_size" tools:override="true">10sp</dimen>
+<!--    <dimen name="design_bottom_navigation_active_text_size" tools:override="true">12sp</dimen>-->
+<!--	<dimen name="design_bottom_navigation_text_size" tools:override="true">10sp</dimen>-->
 
     <!-- Text Dimens -->
     <dimen name="sp12">11sp</dimen>
@@ -54,7 +42,7 @@
     <dimen name="dp30">30dp</dimen>
 
     <!-- Collectible Grid Item -->
-    <dimen name="grid_icon_height">85dp</dimen>
+<!--    <dimen name="grid_icon_height">85dp</dimen>-->
 
     <!-- Standard Token Icon size -->
     <dimen name="token_icon">43dp</dimen>

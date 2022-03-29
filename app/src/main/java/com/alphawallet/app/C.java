@@ -48,6 +48,8 @@ public abstract class C {
     public static final String ARBITRUM_ONE_NETWORK = "Arbitrum One";
     public static final String PALM_NAME = "PALM";
     public static final String PALM_TEST_NAME = "PALM (Test)";
+    public static final String KLAYTN_NAME = "Klaytn Cypress";
+    public static final String KLAYTN_BAOBAB_NAME = "Klaytn Baobab (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -75,6 +77,7 @@ public abstract class C {
     public static final String ARBITRUM_SYMBOL = "AETH";
     public static final String ARBITRUM_TEST_SYMBOL = "ARETH";
     public static final String PALM_SYMBOL = "PALM";
+    public static final String KLAYTN_SYMBOL = "KLAY";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -138,6 +141,13 @@ public abstract class C {
     public static final String DAPP_URL_LOAD = "DAPP_URL";
     public static final String EXTRA_LOCAL_NETWORK_SELECT_FLAG = "EXTRA_LOCAL_NETWORK_SELECT";
     public static final String EXTRA_PRICE_ALERT = "EXTRA_PRICE_ALERT";
+    public static final String EXTRA_SESSION_ID = "SESSION_ID";
+    public static final String EXTRA_WC_REQUEST_ID = "REQUEST_ID";
+    public static final String EXTRA_APPROVED = "APPROVED";
+    public static final String EXTRA_CHAIN_AVAILABLE = "CHAIN_AVAILABLE";
+    public static final String EXTRA_NAME = "NAME";
+    public static final String EXTRA_CHAIN_OBJ = "CHAIN_OBJ";
+    public static final String EXTRA_1559_TX = "1559_TX";
 
     public static final String PRUNE_ACTIVITY =
             "com.stormbird.wallet.PRUNE_ACTIVITY";
@@ -174,6 +184,10 @@ public abstract class C {
             "com.stormbird.wallet.WC_CCHANGE";
     public static final String WALLET_CONNECT_CLIENT_TERMINATE =
             "com.stormbird.wallet.WC_CLIENT_TERMINATE";
+    public static final String WALLET_CONNECT_SWITCH_CHAIN =
+            "com.stormbird.wallet.WC_SWITCH_CHAIN";
+    public static final String WALLET_CONNECT_ADD_CHAIN =
+            "com.stormbird.wallet.WC_ADD_CHAIN";
     public static final String SHOW_BACKUP = "com.stormbird.wallet.CHECK_BACKUP";
     public static final String HANDLE_BACKUP = "com.stormbird.wallet.HANDLE_BACKUP";
     public static final String FROM_HOME_ROUTER = "HomeRouter";
@@ -265,4 +279,17 @@ public abstract class C {
     public static final String APP_NAME = "PACKAGE_NAME";
 
     public static final String ALPHAWALLET_LOGO_URI = "https://alphawallet.com/wp-content/themes/alphawallet/img/alphawallet-logo.svg";
+
+    // Theme/Dark Mode
+    public static final int THEME_LIGHT = 0;
+    public static final int THEME_DARK = 1;
+    public static final int THEME_AUTO = 2;
+
+    // OpenSea APIs
+    public static final String OPENSEA_ASSETS_API_MAINNET = "https://api.opensea.io/api/v1/assets/";
+    public static final String OPENSEA_ASSETS_API_RINKEBY = "https://rinkeby-api.opensea.io/api/v1/assets/";
+    public static final String OPENSEA_ASSETS_API_MATIC = "https://api.opensea.io/api/v2/assets/matic/";
+    public static final String OPENSEA_SINGLE_ASSET_API_MAINNET = "https://api.opensea.io/api/v1/asset/";
+    public static final String OPENSEA_SINGLE_ASSET_API_RINKEBY = "https://rinkeby-api.opensea.io/api/v1/asset/";
+    public static final String OPENSEA_SINGLE_ASSET_API_MATIC = "https://api.opensea.io/api/v2/metadata/matic/";
 }

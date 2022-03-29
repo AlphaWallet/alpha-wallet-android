@@ -300,16 +300,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
     {
         disposable = createTransactionInteract
                 .createWithSig(wallet, finalTx, chainId)
-                .subscribe(txData -> processTransaction(txData, wallet, overridenTxHash),
+                .subscribe(transactionFinalised::postValue,
                         transactionError::postValue);
-    }
-
-    private void processTransaction(TransactionData txData, Wallet wallet, String overridenTxHash)
-    {
-        //remove old tx from database
-        fetchTransactionsInteract.removeOverridenTransaction(wallet, overridenTxHash);
-        //update Activity
-        transactionFinalised.postValue(txData);
     }
 
     public void actionSheetConfirm(String mode)

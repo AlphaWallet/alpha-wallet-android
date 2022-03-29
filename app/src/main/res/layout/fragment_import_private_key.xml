@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/input_view_layout"
@@ -13,25 +13,23 @@
         android:layout_alignParentTop="true"
         android:orientation="vertical">
 
-    <com.alphawallet.app.widget.PasswordInputView
-        android:id="@+id/input_private_key"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="20dp"
-        android:textSize="18sp"
-        custom:minHeightValue="90"
-        custom:imeOptions="actionDone"
-        custom:lines="2"
-        custom:label="@string/enter_private_key" />
+        <com.alphawallet.app.widget.PasswordInputView
+            android:id="@+id/input_private_key"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/cozy_20"
+            custom:imeOptions="actionDone"
+            custom:label="@string/enter_private_key"
+            custom:lines="2"
+            custom:minHeightValue="90" />
 
-    <TextView
-        android:id="@+id/text_privatekey_hint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/font_light"
-        android:gravity="center"
-        android:text="@string/suggestion_private_key" />
+        <TextView
+            android:id="@+id/text_privatekey_hint"
+            style="@style/Aw.Typography.Sub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/standard_16"
+            android:text="@string/suggestion_private_key" />
 
     </LinearLayout>
 
@@ -44,26 +42,24 @@
         android:orientation="vertical">
 
         <TextView
+            style="@style/Aw.Typography.Caption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginEnd="30dp"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="@dimen/base_24"
+            android:layout_marginEnd="@dimen/base_24"
+            android:layout_marginBottom="@dimen/cozy_20"
             android:autoLink="web"
             android:gravity="center_horizontal"
             android:linksClickable="true"
             android:text="@string/import_from_cloud"
-            android:textColor="@color/colorPrimary"
-            android:textSize="14sp" />
+            tools:text="@string/import_from_cloud" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/import_action_pk"
-            style="@style/AwButton.Primary"
+            style="@style/Aw.Component.Button.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dp16"
-            android:layout_marginEnd="@dimen/dp16"
-            android:layout_marginBottom="@dimen/dp16"
+            android:layout_margin="@dimen/standard_16"
             android:text="@string/title_import" />
 
     </LinearLayout>
@@ -72,8 +68,8 @@
         android:id="@+id/bottom_marker_pk"
         android:layout_width="wrap_content"
         android:layout_height="1dp"
-        android:visibility="invisible"
         android:layout_alignParentBottom="true"
-        android:orientation="vertical">
-    </LinearLayout>
+        android:orientation="vertical"
+        android:visibility="invisible"
+        tools:visibility="visible" />
 </RelativeLayout>

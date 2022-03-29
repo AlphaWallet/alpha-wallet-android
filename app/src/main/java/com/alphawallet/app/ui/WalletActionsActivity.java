@@ -199,8 +199,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
             findViewById(R.id.layout_backup_method).setVisibility(View.GONE);
         }
 
-        walletSelectedIcon.setImageResource(R.drawable.ic_copy);
-
         inputAddress.setAddress(wallet.ENSname);
         inputAddress.setAddressCallback(this);
     }

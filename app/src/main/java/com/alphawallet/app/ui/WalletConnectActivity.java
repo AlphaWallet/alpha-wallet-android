@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.MenuItem;
@@ -26,15 +25,14 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DAppFunction;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -43,7 +41,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
-import com.alphawallet.app.util.StyledStringBuilder;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
@@ -52,6 +49,7 @@ import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.walletconnect.entity.WalletConnectCallback;
 import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.ChainName;
@@ -102,6 +100,15 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private ActionSheetDialog confirmationDialog;
     private ActionSheetDialog walletConnectDialog;
+    private AddEthereumChainPrompt addEthereumChainPrompt;
+    private long switchChainDialogCallbackId = 1;
+
+    // data for switch chain request
+    private long switchChainRequestId;  // rpc request id
+    private long switchChainId;         // new chain to switch to
+    private String name;                // remote peer name
+    private String currentSessionId;    // sessionId for which chain is switched
+    private boolean chainAvailable;     // flag denoting chain available in AW or not
 
     private ImageView icon;
     private TextView peerName;
@@ -115,7 +122,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private FunctionButtonBar functionBar;
     private boolean fromDappBrowser = false;  //if using this from dappBrowser (which is a bit strange but could happen) then return back to browser once signed
     private boolean fromPhoneBrowser = false; //if from phone browser, clicking 'back' should take user back to dapp running on the phone's browser,
-                                              // -- according to WalletConnect's expected UX docs.
+    // -- according to WalletConnect's expected UX docs.
     private boolean fromSessionActivity = false;
 
     private String qrCode;
@@ -254,11 +261,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void parseSessionCode(String wcCode)
     {
-        if (wcCode != null && wcCode.startsWith(WC_LOCAL_PREFIX)) {
+        if (wcCode != null && wcCode.startsWith(WC_LOCAL_PREFIX))
+        {
             wcCode = wcCode.replace(WC_LOCAL_PREFIX, "");
             fromDappBrowser = true;
         }
-        else if (wcCode != null && wcCode.startsWith(WC_INTENT)) {
+        else if (wcCode != null && wcCode.startsWith(WC_INTENT))
+        {
             wcCode = wcCode.replace(WC_INTENT, "");
             fromPhoneBrowser = true; //don't use this yet, but could use it for switching between apps
         }
@@ -371,9 +380,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-    private final BroadcastReceiver walletConnectActionReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver walletConnectActionReceiver = new BroadcastReceiver()
+    {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, Intent intent)
+        {
             Timber.tag(TAG).d("Received message");
             String action = intent.getAction();
             switch (action)
@@ -384,10 +395,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     Timber.tag(TAG).d("MSG: %s", action);
 //                    getPendingRequest();
                     WCRequest wcRequest = (WCRequest) intent.getParcelableExtra("wcrequest");
-                    if (wcRequest != null) {
+                    if (wcRequest != null)
+                    {
                         executedPendingRequest(wcRequest.id);
                         receiveRequest(wcRequest);
-                    } else {
+                    }
+                    else
+                    {
                         // something went wrong
                     }
                     break;
@@ -400,6 +414,15 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         finish();
                     }
                     break;
+                case C.WALLET_CONNECT_SWITCH_CHAIN:
+                    Timber.tag(TAG).d("MSG: SWITCH CHAIN: ");
+                    onSwitchChainRequest(intent);
+                    break;
+                case C.WALLET_CONNECT_ADD_CHAIN:
+                    Timber.tag(TAG).d("MSG: ADD CHAIN");
+                    onAddChainRequest(intent);
+                    break;
+
             }
         }
     };
@@ -492,6 +515,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         filter.addAction(C.WALLET_CONNECT_NEW_SESSION);
         filter.addAction(C.WALLET_CONNECT_FAIL);
         filter.addAction(C.WALLET_CONNECT_CLIENT_TERMINATE);
+        filter.addAction(C.WALLET_CONNECT_SWITCH_CHAIN);
+        filter.addAction(C.WALLET_CONNECT_ADD_CHAIN);
         registerReceiver(walletConnectActionReceiver, filter);
     }
 
@@ -613,17 +638,17 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         viewModel.getClient(this, sessionId, client ->
                 runOnUiThread(() -> {
-            if (client == null || !client.isConnected())
-            {
-                statusText.setText(R.string.not_connected);
-                statusText.setTextColor(getColor(R.color.cancel_red));
-            }
-            else
-            {
-                statusText.setText(R.string.online);
-                statusText.setTextColor(getColor(R.color.nasty_green));
-            }
-        }));
+                    if (client == null || !client.isConnected())
+                    {
+                        statusText.setText(R.string.not_connected);
+                        statusText.setTextColor(getColor(R.color.error));
+                    }
+                    else
+                    {
+                        statusText.setText(R.string.online);
+                        statusText.setTextColor(getColor(R.color.positive));
+                    }
+                }));
     }
 
     private void displaySessionStatus(String sessionId)
@@ -632,7 +657,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         functionBar.setVisibility(View.VISIBLE);
         infoLayout.setVisibility(View.VISIBLE);
         WCPeerMeta remotePeerData = viewModel.getRemotePeer(sessionId);
-
+        this.remotePeerMeta = remotePeerData;   // init meta to access in other places
         if (remotePeerData != null)
         {
             if (remotePeerData.getIcons().isEmpty())
@@ -666,12 +691,17 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void onSessionRequest(Long id, WCPeerMeta peer, long chainId)
     {
-        if (peer == null) { finish(); }
+        if (peer == null)
+        {
+            finish();
+        }
 
         closeErrorDialog();
 
-        if (walletConnectDialog != null) {
-            if (walletConnectDialog.isShowing()) {      // if already opened
+        if (walletConnectDialog != null)
+        {
+            if (walletConnectDialog.isShowing())
+            {      // if already opened
                 walletConnectDialog.forceDismiss();
             }
         }
@@ -1035,26 +1065,14 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
+            if (confirmationDialog != null && confirmationDialog.isShowing())
+                confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
         }
         if (resultCode == RESULT_OK)
         {
             if (requestCode == C.REQUEST_TRANSACTION_CALLBACK)
             {
                 handleTransactionCallback(resultCode, data);
-            }
-            else if (requestCode == C.SET_GAS_SETTINGS)
-            {
-                //will either be an index, or if using custom then it will contain a price and limit
-                if (data != null && confirmationDialog != null)
-                {
-                    int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
-                    long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
-                    BigDecimal customGasPrice = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE));
-                    BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
-                    long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
-                    confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
-                }
             }
             else if (signCallback != null) signCallback.gotAuthorisation(true);
         }
@@ -1156,6 +1174,15 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         viewModel.actionSheetConfirm(mode);
     }
 
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> confirmationDialog.setCurrentGasIndex(result));
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
+    }
+
     @Override
     public void signTransaction(Web3Transaction tx)
     {
@@ -1216,11 +1243,143 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     }
 
     @Override
-    public void openChainSelection() {
+    public void openChainSelection()
+    {
         ActionSheetCallback.super.openChainSelection();
         Intent intent = new Intent(WalletConnectActivity.this, SelectNetworkActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
         getNetwork.launch(intent);
+    }
+
+    private void showSwitchChainDialog() {
+        try
+        {
+            String message = getString(R.string.request_change_chain, EthereumNetworkBase.getShortChainName(switchChainId), String.valueOf(switchChainId));
+            Token baseToken = viewModel.getTokenService().getTokenOrBase(switchChainId, viewModel.defaultWallet().getValue().address);
+            NetworkInfo newNetwork = EthereumNetworkBase.getNetworkInfo(switchChainId);
+            NetworkInfo activeNetwork = EthereumNetworkBase.getNetworkInfo(client.chainIdVal());
+
+            if (newNetwork != null && activeNetwork != null)
+            {
+                if (newNetwork.hasRealValue() && !activeNetwork.hasRealValue())
+                {
+                    message += "\n" + getString(R.string.warning_switch_to_main);
+                }
+                else if (!newNetwork.hasRealValue() && activeNetwork.hasRealValue())
+                {
+                    message += "\n" + getString(R.string.warning_switching_to_test);
+                }
+            }
+
+            if (walletConnectDialog.isShowing())
+                return;
+
+            // show action sheet
+            walletConnectDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, message, R.string.switch_and_reload,
+                    switchChainDialogCallbackId, baseToken);
+
+            walletConnectDialog.setOnDismissListener(dialog -> {
+                viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, false, chainAvailable);
+                walletConnectDialog.setOnDismissListener(null);         // remove from here as dialog is multi-purpose
+            });
+            walletConnectDialog.setCanceledOnTouchOutside(false);
+            walletConnectDialog.show();
+            walletConnectDialog.fullExpand();
+        } catch (Exception e) {
+            Timber.e(e);
+        }
+    }
+
+    private void onSwitchChainRequest(Intent intent)
+    {
+        name = intent.getStringExtra(C.EXTRA_NAME);
+        switchChainRequestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
+        switchChainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
+        currentSessionId = intent.getStringExtra(C.EXTRA_SESSION_ID);
+        Timber.tag(TAG).d("MSG: SWITCH CHAIN: name: %s, chainId: %s", name, switchChainId);
+
+        if (currentSessionId == null || !session.getTopic().equals(currentSessionId))
+        {
+            Timber.tag(TAG).d("Wrong session");
+            return;
+        }
+        if (switchChainId == -1 || requestId == -1)
+        {
+            Timber.tag(TAG).d("Cant find data");
+            return;
+        }
+        chainAvailable = EthereumNetworkBase.getNetworkInfo(switchChainId) != null;
+        // reject with error message as the chain is not added
+        if (!chainAvailable)
+        {
+            viewModel.approveSwitchEthChain(WalletConnectActivity.this, requestId, currentSessionId, switchChainId, false, false);
+        }
+        else
+        {
+            showSwitchChainDialog();
+        }
+    }
+
+    private void onAddChainRequest(Intent intent)
+    {
+        long requestId = intent.getLongExtra(C.EXTRA_WC_REQUEST_ID, -1);
+        String currentSessionId = intent.getStringExtra(C.EXTRA_SESSION_ID);
+        WalletAddEthereumChainObject chainObject = intent.getParcelableExtra(C.EXTRA_CHAIN_OBJ);
+        if (chainObject != null)
+        {
+            // showing dialog because chain is not added
+            addEthereumChainPrompt = new AddEthereumChainPrompt(
+                    this,
+                    chainObject,
+                    chainObject1 -> {
+                        this.addEthereumChainPrompt.setOnDismissListener(null);
+                        this.addEthereumChainPrompt.dismiss();
+                        viewModel.approveAddEthereumChain(
+                                WalletConnectActivity.this,
+                                requestId,
+                                currentSessionId,
+                                chainObject,
+                                true
+                        );
+                        viewModel.updateSession(currentSessionId, chainObject.getChainId());
+                        displaySessionStatus(currentSessionId);
+                    }
+            );
+
+            addEthereumChainPrompt.setOnDismissListener(dialog -> {
+                viewModel.approveAddEthereumChain(
+                        WalletConnectActivity.this,
+                        requestId,
+                        currentSessionId,
+                        chainObject,
+                        false
+                );
+            });
+            addEthereumChainPrompt.show();
+        }
+        else
+        {
+            viewModel.approveAddEthereumChain(
+                    WalletConnectActivity.this,
+                    requestId,
+                    currentSessionId,
+                    chainObject,
+                    false
+            );
+        }
+    }
+
+    @Override
+    public void buttonClick(long callbackId, Token baseToken)
+    {
+        if (callbackId == switchChainDialogCallbackId)
+        {
+            walletConnectDialog.setOnDismissListener(null);
+            walletConnectDialog.dismiss();
+            viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, true, chainAvailable);
+            viewModel.updateSession(currentSessionId, switchChainId);
+            displaySessionStatus(session.getTopic());
+        }
     }
 }

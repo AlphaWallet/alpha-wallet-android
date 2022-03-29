@@ -50,6 +50,7 @@ public class NFTImageView extends RelativeLayout {
     private final ProgressBar progressBar;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Request loadRequest;
+
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */

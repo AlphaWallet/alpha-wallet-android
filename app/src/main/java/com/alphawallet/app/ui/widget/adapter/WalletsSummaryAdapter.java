@@ -15,6 +15,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.TextHolder;
@@ -40,6 +41,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     private final Wallet summaryWallet = new Wallet(ZERO_ADDRESS);
     private final Context context;
     private final Realm realm;
+    private final GenericWalletInteract walletInteract;
 
     public WalletsSummaryAdapter(Context ctx,
                                  OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract) {
@@ -47,6 +49,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         this.wallets = new ArrayList<>();
         this.context = ctx;
         this.realm = genericWalletInteract.getWalletRealm();
+        this.walletInteract = genericWalletInteract;
     }
 
     @NotNull
@@ -289,8 +292,8 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     @Override
     public void ensAvatar(Wallet wallet)
     {
-        // we received a wallet avatar URL (wallet.ENSAvatar)
-        //TODO: Michael - does the view need to be updated?
+        //update the ENS avatar in the database
+        walletInteract.updateWalletItem(wallet, WalletItem.ENS_AVATAR, () -> { });
     }
 
     public void onDestroy()

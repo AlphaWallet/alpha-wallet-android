@@ -22,6 +22,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.WalletActionsActivity;
+import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.UserAvatar;
@@ -32,7 +33,7 @@ import java.math.RoundingMode;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements View.OnClickListener
+public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements View.OnClickListener, AvatarWriteCallback
 {
 
     public static final int VIEW_TYPE = 1001;
@@ -115,7 +116,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
                 walletNameText.setVisibility(View.GONE);
             }
 
-            walletIcon.bind(wallet);
+            walletIcon.bind(wallet, this);
 
             String walletBalance = wallet.balance;
             if (!TextUtils.isEmpty(walletBalance) && walletBalance.startsWith("*"))
@@ -271,5 +272,11 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
                 getContext().startActivity(intent);
                 break;
         }
+    }
+
+    @Override
+    public void avatarFound(Wallet wallet)
+    {
+        if (clickCallback != null) clickCallback.ensAvatar(wallet);
     }
 }

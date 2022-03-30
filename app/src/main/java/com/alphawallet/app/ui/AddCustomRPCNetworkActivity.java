@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.URLUtil;
 
@@ -19,9 +18,11 @@ import com.alphawallet.app.widget.InputView;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
+
+import static java.util.Collections.singletonList;
 
 @AndroidEntryPoint
 public class AddCustomRPCNetworkActivity extends BaseActivity implements StandardFunctionInterface
@@ -40,6 +41,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
     private MaterialCheckBox testNetCheckBox;
 
     private final Handler handler = new Handler();
+    private long chainId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -80,38 +82,37 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
 
         initViewModel();
 
-        long chainId = getIntent().getLongExtra(CHAIN_ID, -1);
+        chainId = getIntent().getLongExtra(CHAIN_ID, -1);
+        boolean isEditMode = chainId >= 0;
 
-        if (chainId >= 0)
+        if (isEditMode)
         {
+            setTitle(getString(R.string.title_network_info));
             // get network info and fill ui
             NetworkInfo network = viewModel.getNetworkInfo(chainId);
 
-            nameInputView.setText(network.name);
-            rpcUrlInputView.setText(network.rpcServerUrl.replaceAll("(/)([0-9a-fA-F]{32})", "/********************************"));
-            chainIdInputView.setText(String.valueOf(network.chainId));
-            symbolInputView.setText(network.symbol);
-            blockExplorerUrlInputView.setText(network.etherscanUrl);
-            blockExplorerApiUrl.setText(network.etherscanAPI);
-            testNetCheckBox.setChecked(viewModel.isTestNetwork(network));
-            
+            renderNetwork(network);
+
+            List<Integer> buttons = new ArrayList<>();
+            buttons.add(R.string.action_update_network);
+
             if (!network.isCustom)
             {
-                setTitle(getString(R.string.title_network_info));
                 chainIdInputView.getEditText().setEnabled(false);
+                buttons.add(R.string.action_reset_network);
             }
-            addFunctionBar(true);
+            addFunctionBar(buttons);
         }
         else
         {
-            addFunctionBar(false);
+            addFunctionBar(singletonList(R.string.action_add_network));
         }
     }
 
-    private void addFunctionBar(boolean update)
+    private void addFunctionBar(List<Integer> functionResources)
     {
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(update ? R.string.action_update_network : R.string.action_add_network)));
+        functionBar.setupFunctions(this, functionResources);
         functionBar.revealButtons();
     }
 
@@ -212,22 +213,42 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
     @Override
     public void handleClick(String action, int actionId)
     {
+        if (actionId == R.string.action_reset_network)
+        {
+            resetDefault();
+            return;
+        }
+
         if (validateInputs())
         {
-            long oldChainId = getIntent().getLongExtra(CHAIN_ID, -1);
-
-            // add network
-            viewModel.addNetwork(nameInputView.getText().toString(),
+            viewModel.saveNetwork(nameInputView.getText().toString(),
                     rpcUrlInputView.getText().toString(),
                     Long.parseLong(chainIdInputView.getText().toString()),
                     symbolInputView.getText().toString(),
                     blockExplorerUrlInputView.getText().toString(),
-                    blockExplorerApiUrl.getText().toString(), testNetCheckBox.isChecked(), oldChainId != -1L ? oldChainId : null);
+                    blockExplorerApiUrl.getText().toString(), testNetCheckBox.isChecked(), chainId != -1L ? chainId : null);
             finish();
         }
         else
         {
             handler.postDelayed(this::resetValidateErrors, 2000);
         }
+    }
+
+    private void resetDefault()
+    {
+        NetworkInfo network = viewModel.getBuiltInNetwork(chainId);
+        renderNetwork(network);
+    }
+
+    private void renderNetwork(NetworkInfo network)
+    {
+        nameInputView.setText(network.name);
+        rpcUrlInputView.setText(network.rpcServerUrl.replaceAll("(/)([0-9a-fA-F]{32})", "/********************************"));
+        chainIdInputView.setText(String.valueOf(network.chainId));
+        symbolInputView.setText(network.symbol);
+        blockExplorerUrlInputView.setText(network.etherscanUrl);
+        blockExplorerApiUrl.setText(network.etherscanAPI);
+        testNetCheckBox.setChecked(viewModel.isTestNetwork(network));
     }
 }

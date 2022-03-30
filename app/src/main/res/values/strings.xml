@@ -804,6 +804,7 @@
     <string name="hint_network_symbol">Symbol</string>
     <string name="hint_network_block_explorer_url">Transaction Explorer URL</string>
     <string name="action_add_network">Add Network</string>
+    <string name="action_reset_network">Reset</string>
     <string name="error_invalid_url">Invalid URL</string>
 
     <string name="text_speedup_note">Note that speeding up this transaction does not guarantee your original transaction will be accelerated. If your attempt is successful, you will be charged the miner fee as above.</string>

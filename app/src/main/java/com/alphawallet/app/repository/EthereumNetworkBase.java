@@ -56,6 +56,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BAOBAB_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BOABAB_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
@@ -145,6 +147,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/" + getInfuraKey();
     public static final String PALM_RPC_FALLBACK_URL = "https://palm-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String PALM_TEST_RPC_FALLBACK_URL = "https://palm-testnet.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String IOTEX_MAINNET_RPC_URL = "https://babel-api.mainnet.iotex.io";
+    public static final String IOTEX_MAINNET_RPC_FALLBACK_URL = "https://rpc.ankr.com/iotex";
+    public static final String IOTEX_TESTNET_RPC_URL = "https://babel-api.testnet.iotex.io";
 
     //All chains that have fiat/real value (not testnet) must be put here
     //Note: This list also determines the order of display for main net chains in the wallet.
@@ -152,7 +157,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //Then xDai would appear as the first token at the top of the wallet
     private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
             MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
-            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID));
+            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID));
 
     //List of network details. Note, the advantage of using LongSparseArray is efficiency and also
     //the entries are automatically sorted into numerical order
@@ -278,6 +283,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     KLAYTN_BAOBAB_RPC,
                     "https://baobab.scope.klaytn.com/tx/", KLAYTN_BOABAB_ID, "",
                     ""));
+            put(IOTEX_MAINNET_ID, new NetworkInfo(C.IOTEX_NAME, C.IOTEX_SYMBOL,
+                    IOTEX_MAINNET_RPC_URL,
+                    "https://iotexscan.io/tx/", IOTEX_MAINNET_ID, IOTEX_MAINNET_RPC_FALLBACK_URL,
+                    "https://api.covalenthq.com/v1/" + COVALENT));
+            put(IOTEX_TESTNET_ID, new NetworkInfo(C.IOTEX_TESTNET_NAME, C.IOTEX_SYMBOL,
+                    IOTEX_TESTNET_RPC_URL,
+                    "https://testnet.iotexscan.io/tx", IOTEX_TESTNET_ID, "",
+                    "https://api.covalenthq.com/v1/" + COVALENT));
         }
     };
 
@@ -313,6 +326,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(PALM_TEST_ID, R.drawable.palm_logo_test);
             put(KLAYTN_ID, R.drawable.ic_klaytn_network_logo);
             put(KLAYTN_BOABAB_ID, R.drawable.ic_klaytn_test);
+            put(IOTEX_MAINNET_ID, R.drawable.ic_iotex);
+            put(IOTEX_TESTNET_ID, R.drawable.ic_iotex_test);
         }
     };
 
@@ -348,6 +363,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(PALM_TEST_ID, R.drawable.palm_logo_test);
             put(KLAYTN_ID, R.drawable.ic_klaytn_network_logo);
             put(KLAYTN_BOABAB_ID, R.drawable.ic_klaytn_test);
+            put(IOTEX_MAINNET_ID, R.drawable.ic_iotex);
+            put(IOTEX_TESTNET_ID, R.drawable.ic_iotex_test);
         }
     };
 
@@ -383,6 +400,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(PALM_TEST_ID, R.color.palm_test);
             put(KLAYTN_ID, R.color.klaytn_main);
             put(KLAYTN_BOABAB_ID, R.color.klaytn_test);
+            put(IOTEX_MAINNET_ID, R.color.iotex_mainnet);
+            put(IOTEX_TESTNET_ID, R.color.iotex_mainnet);
         }
     };
 

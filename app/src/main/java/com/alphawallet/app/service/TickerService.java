@@ -8,6 +8,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
@@ -705,6 +706,7 @@ public class TickerService
         put(88L, "tomochain");
         put(42220L, "celo");
         put(KLAYTN_ID, "klay-token");
+        put(IOTEX_MAINNET_ID, "iotex");
     }};
 
     private static final Map<Long, String> dexGuruChainIdToAPISymbol = new HashMap<Long, String>(){{
@@ -733,6 +735,7 @@ public class TickerService
         put(ARBITRUM_MAIN_ID, "ethereum");
         put(OPTIMISTIC_MAIN_ID, "ethereum");
         put(KLAYTN_ID, "klay-token");
+        put(IOTEX_MAINNET_ID, "iotex");
     }};
 
     public static boolean validateCoinGeckoAPI(Token token)

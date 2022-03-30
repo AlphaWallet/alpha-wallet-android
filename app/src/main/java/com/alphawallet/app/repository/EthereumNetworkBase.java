@@ -159,9 +159,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
             FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID));
 
-    //List of network details. Note, the advantage of using LongSparseArray is efficiency and also
-    //the entries are automatically sorted into numerical order
-    private static final LongSparseArray<NetworkInfo> networkMap = new LongSparseArray<NetworkInfo>() {
+    // for reset built-in network
+    private static final LongSparseArray<NetworkInfo> builtinNetworkMap = new LongSparseArray<NetworkInfo>() {
         {
             put(MAINNET_ID, new NetworkInfo(C.ETHEREUM_NETWORK_NAME, C.ETH_SYMBOL,
                     MAINNET_RPC_URL,
@@ -293,6 +292,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://api.covalenthq.com/v1/" + COVALENT));
         }
     };
+
+    //List of network details. Note, the advantage of using LongSparseArray is efficiency and also
+    //the entries are automatically sorted into numerical order
+    private static final LongSparseArray<NetworkInfo> networkMap = builtinNetworkMap.clone();
 
     private static final LongSparseArray<Integer> chainLogos = new LongSparseArray<Integer>() {
         {
@@ -503,33 +506,54 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             }
         }
 
-        public void addCustomNetwork(NetworkInfo info, boolean isTestnet, Long oldChainId)
+        public void save(NetworkInfo info, boolean isTestnet, Long oldChainId)
         {
             if (oldChainId != null) {
-                for (NetworkInfo in : list) {
-                    if (in.chainId == oldChainId) {
-                        list.remove(in);
-                        break;
-                    }
-                }
-                hasValue.remove(oldChainId);
-                mapToTestNet.remove(oldChainId);
-                networkMap.remove(oldChainId);
+                updateNetwork(info, isTestnet, oldChainId);
+            } else {
+                addNetwork(info, isTestnet);
             }
 
+            String networks = new Gson().toJson(this);
+            preferences.setCustomRPCNetworks(networks);
+        }
+
+        private void updateNetwork(NetworkInfo info, boolean isTestnet, long oldChainId)
+        {
+            removeNetwork(oldChainId);
+            list.add(info);
+
+            if (!isTestnet) {
+                hasValue.add(info.chainId);
+            }
+
+            mapToTestNet.put(info.chainId, isTestnet);
+            networkMap.put(info.chainId, info);
+        }
+
+        private void addNetwork(NetworkInfo info, boolean isTestnet)
+        {
             list.add(info);
             if (!isTestnet) {
                 hasValue.add(info.chainId);
             }
             mapToTestNet.put(info.chainId, isTestnet);
             networkMap.put(info.chainId, info);
+        }
+
+        public void remove(long chainId) {
+            removeNetwork(chainId);
+
             String networks = new Gson().toJson(this);
             preferences.setCustomRPCNetworks(networks);
         }
 
-        public void remove(long chainId) {
-            for (NetworkInfo in : list) {
-                if (in.chainId == chainId) {
+        private void removeNetwork(long chainId)
+        {
+            for (NetworkInfo in : list)
+            {
+                if (in.chainId == chainId)
+                {
                     list.remove(in);
                     break;
                 }
@@ -537,9 +561,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             hasValue.remove(chainId);
             mapToTestNet.remove(chainId);
             networkMap.remove(chainId);
-
-            String networks = new Gson().toJson(this);
-            preferences.setCustomRPCNetworks(networks);
         }
     }
 
@@ -942,9 +963,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         preferences.setActiveMainnet(isMainNet);
     }
 
-    public void addCustomRPCNetwork(String networkName, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId) {
-        NetworkInfo info = new NetworkInfo(networkName, symbol, rpcUrl, blockExplorerUrl, chainId, null, explorerApiUrl, true);
-        customNetworks.addCustomNetwork(info, isTestnet, oldChainId);
+    public void saveCustomRPCNetwork(String networkName, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId) {
+
+        NetworkInfo builtInNetwork = builtinNetworkMap.get(chainId);
+        boolean isCustom = builtInNetwork == null;
+        NetworkInfo info = new NetworkInfo(networkName, symbol, rpcUrl, blockExplorerUrl, chainId, isCustom ? null : builtInNetwork.backupNodeUrl, explorerApiUrl, isCustom);
+        customNetworks.save(info, isTestnet, oldChainId);
     }
 
     public void removeCustomRPCNetwork(long chainId) {
@@ -986,5 +1010,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             return networkMap.get(MAINNET_ID).symbol;
         }
+    }
+
+    @Override
+    public NetworkInfo getBuiltInNetwork(long chainId)
+    {
+        return builtinNetworkMap.get(chainId);
     }
 }

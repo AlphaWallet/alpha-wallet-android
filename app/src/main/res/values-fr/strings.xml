@@ -893,4 +893,5 @@
     <string name="toast_qr_scanning_requires_api_24">La numérisation QR nécessite Android 7.0 (API niveau 24) ou supérieur.</string>
     <string name="experimental_1559">Use 1559 Transactions</string>
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
+    <string name="action_reset_network" >Réinitialiser</string>
 </resources>

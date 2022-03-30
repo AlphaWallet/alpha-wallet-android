@@ -2,4 +2,5 @@
 <resources>
     <string name="send_multiple_tokens">Send Multiple Tokens</string>
     <string name="toast_qr_scanning_requires_api_24">QR scanning requires Android 7.0 (API level 24) or above.</string>
+    <string name="action_reset_network" >Reset</string>
 </resources>

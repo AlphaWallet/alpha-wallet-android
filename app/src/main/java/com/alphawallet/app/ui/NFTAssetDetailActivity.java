@@ -52,6 +52,7 @@ import java.util.Map;
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 
@@ -72,6 +73,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private TextView tokenDescription;
     private ActionMenuItemView refreshMenu;
     private Animation rotation;
+
+    @Nullable
+    private Disposable nftAssetLoader;
 
     private final ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result ->
@@ -192,16 +196,15 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         fetchAsset(tokenId, asset);
     }
 
+    //TODO: Add NFTAsset realm listener, and only update the image when the data changes
     private void fetchAsset(BigInteger tokenId, NFTAsset nftAsset)
     {
-        nftAsset.metaDataLoader =
+        nftAssetLoader =
                 Single.fromCallable(() -> token.fetchTokenMetadata(tokenId))
                         .map(newAsset -> storeAsset(tokenId, newAsset, nftAsset))
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(asset -> loadAssetData(asset), e ->
-                        {
-                        });
+                        .subscribe(this::loadAssetData, e -> { });
     }
 
     private NFTAsset storeAsset(BigInteger tokenId, NFTAsset fetchedAsset, NFTAsset oldAsset)
@@ -278,6 +281,14 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private void onAttributes(NFTAsset asset)
     {
         nftAttributeLayout.bind(token, asset);
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        if (nftAssetLoader != null && !nftAssetLoader.isDisposed()) nftAssetLoader.dispose();
+
+        super.onDestroy();
     }
 
     @Override

@@ -957,6 +957,9 @@ public class Token
     {
         if (TextUtils.isEmpty(tokenURI)) return "";
 
+        //check if this is direct metadata, some tokens do this
+        if (Utils.isJson(tokenURI)) return tokenURI;
+
         setupClient();
 
         Request request = new Request.Builder()

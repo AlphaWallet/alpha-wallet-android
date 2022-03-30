@@ -35,6 +35,7 @@ import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
@@ -906,5 +907,18 @@ public class Utils {
         calculatedAddressAsBytes = Arrays.copyOfRange(calculatedAddressAsBytes,
                 12, calculatedAddressAsBytes.length);
         return Keys.toChecksumAddress(Numeric.toHexString(calculatedAddressAsBytes));
+    }
+
+    public static boolean isJson(String value)
+    {
+        try
+        {
+            JSONObject stateData = new JSONObject(value);
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 }

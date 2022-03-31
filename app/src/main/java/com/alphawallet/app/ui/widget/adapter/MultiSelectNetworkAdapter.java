@@ -10,7 +10,9 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
+import com.alphawallet.app.widget.TokenIcon;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +23,7 @@ import java.util.List;
 public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectNetworkAdapter.ViewHolder> {
     private final List<NetworkItem> networkList;
     private boolean hasClicked = false;
+    private TokensService tokensService;
 
     public interface EditNetworkListener {
         void onEditNetwork(long chainId, View parent);
@@ -29,10 +32,11 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
     private final EditNetworkListener editListener;
 
 
-    public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks, EditNetworkListener editNetworkListener)
+    public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks, EditNetworkListener editNetworkListener, TokensService tokensService)
     {
         networkList = selectedNetworks;
         editListener = editNetworkListener;
+        this.tokensService = tokensService;
     }
 
     public Long[] getSelectedItems()
@@ -55,7 +59,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
-        int buttonTypeId = R.layout.item_simple_check;
+        int buttonTypeId = R.layout.item_network_check;
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(buttonTypeId, parent, false);
 
@@ -70,10 +74,12 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         if (item != null)
         {
             holder.name.setText(item.getName());
+            holder.chainId.setText("ChainID: "+item.getChainId());
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
             holder.manageView.setVisibility(View.VISIBLE);
             holder.manageView.setOnClickListener(v ->  editListener.onEditNetwork(networkList.get(position).getChainId(), holder.manageView));
             holder.checkbox.setChecked(item.isSelected());
+            holder.tokenIcon.bindData(tokensService.getServiceToken(item.getChainId()));
         }
     }
 
@@ -95,6 +101,8 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         TextView name;
         View itemLayout;
         View manageView;
+        TokenIcon tokenIcon;
+        TextView chainId;
 
         ViewHolder(View view)
         {
@@ -103,6 +111,8 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
             name = view.findViewById(R.id.name);
             itemLayout = view.findViewById(R.id.layout_list_item);
             manageView = view.findViewById(R.id.manage_btn);
+            tokenIcon = view.findViewById(R.id.token_icon);
+            chainId = view.findViewById(R.id.chain_id);
         }
     }
 }

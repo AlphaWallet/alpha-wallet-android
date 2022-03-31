@@ -55,44 +55,40 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/standard_16"
-        android:layout_marginEnd="@dimen/standard_16"
+        android:layout_marginEnd="@dimen/tiny_8"
         android:layout_toStartOf="@id/arrow_right"
         android:layout_toEndOf="@+id/layout_manage_wallet"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/wallet_balance"
                 style="@style/Aw.Typography.Title.SemiBold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginEnd="@dimen/tiny_8"
+                android:layout_weight="0.7"
+                android:lines="1"
                 android:textIsSelectable="true"
-                tools:text="3.2345" />
-
-            <TextView
-                android:id="@+id/wallet_currency"
-                style="@style/Aw.Typography.Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textIsSelectable="true"
-                android:visibility="gone"
-                tools:text="ETH"
-                tools:visibility="visible" />
+                app:autoSizeTextType="uniform"
+                tools:text="123,567,890.1234" />
 
             <TextView
                 android:id="@+id/wallet_24h_change"
                 style="@style/Aw.Typography.Title"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/tiny_8"
+                android:layout_weight="0.3"
+                android:gravity="end|center_vertical"
+                android:lines="1"
                 android:textColor="@color/positive"
                 android:textIsSelectable="true"
-                tools:text="+2.53%" />
+                app:autoSizeTextType="uniform"
+                tools:text="+123.45%" />
 
         </LinearLayout>
 

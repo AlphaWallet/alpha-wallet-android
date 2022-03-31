@@ -467,8 +467,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
                 for (NetworkInfo info : list) {
                     networkMap.put(info.chainId, info);
-                    if (mapToTestNet.containsKey(info.chainId) && !mapToTestNet.get(info.chainId)) {
-                       hasValue.add(info.chainId);
+                    Boolean value = mapToTestNet.get(info.chainId);
+                    boolean isTestnet = value != null && value;
+                    if (!isTestnet && !hasValue.contains(info.chainId)) {
+                        hasValue.add(info.chainId);
                     }
                 }
             }
@@ -479,7 +481,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 List<NetworkInfo> copyList = new ArrayList<>(list);
                 list.clear();
                 for (NetworkInfo n : copyList) {
-                    NetworkInfo newInfo = new NetworkInfo(n.name, n.symbol, n.rpcServerUrl, n.etherscanUrl, n.chainId, n.backupNodeUrl, n.etherscanAPI, true);
+                    boolean isCustom = builtinNetworkMap.indexOfKey(n.chainId) == -1;
+                    NetworkInfo newInfo = new NetworkInfo(n.name, n.symbol, n.rpcServerUrl, n.etherscanUrl, n.chainId, n.backupNodeUrl, n.etherscanAPI, isCustom);
                     list.add(newInfo);
                 }
                 //record back

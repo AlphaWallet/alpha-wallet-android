@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
@@ -28,19 +27,18 @@
 
         <TextView
             android:id="@+id/peer_name"
+            style="@style/Aw.Typography.Title.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:fontFamily="@font/font_semibold"
             android:gravity="center_horizontal"
             android:paddingStart="@dimen/dp16"
             android:paddingEnd="@dimen/dp16"
-            tools:text="Sample Peer Name"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp24" />
+            tools:text="Sample Peer Name" />
 
         <TextView
             android:id="@+id/peer_url"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
@@ -50,13 +48,9 @@
             android:lines="1"
             android:maxLines="1"
             tools:text="https://samplepeer.com"
-            android:textColor="@color/black"
             android:textSize="16sp" />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/mercury" />
 
+        <View style="@style/Aw.Component.Separator" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -66,8 +60,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                >
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:id="@+id/layout_wallets"
@@ -80,13 +73,11 @@
                     android:paddingEnd="@dimen/dp16">
 
                     <TextView
-                        android:layout_width="95dp"
+                        style="@style/Aw.Typography.Caption.SemiBold"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_regular"
                         android:text="@string/your_wallets"
-                        android:paddingTop="@dimen/dp16"
-                        android:textColor="@color/dove"
-                        android:textSize="18sp" />
+                        android:paddingTop="@dimen/dp16" />
 
                     <ListView
                         android:id="@+id/wallet_list"
@@ -108,13 +99,11 @@
                     android:paddingEnd="@dimen/dp16">
 
                     <TextView
-                        android:layout_width="95dp"
+                        style="@style/Aw.Typography.Caption.SemiBold"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_regular"
                         android:text="@string/subtitle_network"
-                        android:paddingTop="@dimen/dp16"
-                        android:textColor="@color/dove"
-                        android:textSize="18sp" />
+                        android:paddingTop="@dimen/dp16" />
 
                     <ListView
                         android:id="@+id/chain_list"
@@ -136,13 +125,11 @@
                     android:paddingEnd="@dimen/dp16">
 
                     <TextView
-                        android:layout_width="95dp"
+                        style="@style/Aw.Typography.Caption.SemiBold"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_regular"
                         android:text="@string/wc_methods"
-                        android:paddingTop="@dimen/dp16"
-                        android:textColor="@color/dove"
-                        android:textSize="18sp" />
+                        android:paddingTop="@dimen/dp16" />
 
                     <ListView
                         android:id="@+id/method_list"

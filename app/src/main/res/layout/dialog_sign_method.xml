@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:background="@drawable/background_card">
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -56,8 +55,7 @@
         android:background="@color/mercury" />
     <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/background_card">
+            android:layout_height="wrap_content">
 
         <LinearLayout
                 android:layout_width="match_parent"
@@ -67,20 +65,20 @@
                 android:paddingRight="15dp">
 
             <TextView
-                style="@style/TransactionDetailsSubTitleStyle"
+                style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/wc_sign_dapp_name" />
 
             <TextView
                 android:id="@+id/dapp_name"
-                style="@style/TransactionDetailsStyle"
+                style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="React Sample DApp" />
 
             <TextView
-                style="@style/TransactionDetailsSubTitleStyle"
+                style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="URL"
@@ -88,25 +86,25 @@
 
             <TextView
                 android:id="@+id/url"
-                style="@style/TransactionDetailsStyle"
+                style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="https://app.walletconnect.com" />
 
             <TextView
-                style="@style/TransactionDetailsSubTitleStyle"
+                style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/wc_wallet" />
 
             <TextView
                 android:id="@+id/wallet"
-                style="@style/TransactionDetailsStyle"
+                style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
             <TextView
-                style="@style/TransactionDetailsSubTitleStyle"
+                style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/subtitle_network" />
@@ -128,7 +126,7 @@
 
                 <com.alphawallet.app.widget.ChainName
                     android:id="@+id/network_name"
-                    style="@style/TransactionDetailsStyle"
+                    style="@style/Aw.Typography.Label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="2dp"
@@ -136,15 +134,15 @@
             </LinearLayout>
 
             <TextView
-                    style="@style/TransactionDetailsSubTitleStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dp16"
-                    android:text="@string/message_to_sign" />
+                style="@style/Aw.Typography.Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp16"
+                android:text="@string/message_to_sign" />
 
             <TextView
                 android:id="@+id/message"
-                style="@style/TransactionDetailsStyle"
+                style="@style/Aw.Typography.Label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:text="0xabced" />

@@ -59,7 +59,7 @@ public class SignMethodDialog extends BottomSheetDialog
 
     public SignMethodDialog(@NonNull Activity activity, WalletConnect.Model.SettledSession settledSession, WalletConnect.Model.SessionRequest sessionRequest, BaseRequest request)
     {
-        super(activity, R.style.FullscreenBottomSheetDialogStyle);
+        super(activity);
         this.activity = activity;
         this.settledSession = settledSession;
         this.sessionRequest = sessionRequest;

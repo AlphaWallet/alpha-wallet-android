@@ -14,6 +14,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.widget.UserAvatar;
+import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,7 +113,7 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
         TextView balance;
         TextView walletAddressSeparator;
         UserAvatar userAvatar;
-        ImageView checkbox;
+        MaterialCheckBox checkbox;
 
         public ViewHolder(@NonNull View view)
         {

@@ -2,6 +2,7 @@ package com.alphawallet.app.walletconnect;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -99,6 +101,12 @@ public class TransactionDialogBuilder
             @Override
             public void notifyConfirm(String mode)
             {
+            }
+
+            @Override
+            public ActivityResultLauncher<Intent> gasSelectLauncher()
+            {
+                return null;
             }
         });
         if (signOnly)

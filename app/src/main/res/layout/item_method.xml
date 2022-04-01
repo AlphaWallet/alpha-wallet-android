@@ -7,10 +7,8 @@
 
     <TextView
         android:id="@+id/tv_method_name"
+        style="@style/Aw.Component.TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/font_regular"
-        android:textSize="@dimen/sp16"
-        android:textColor="@color/blur"
         android:layout_marginStart="@dimen/dp16" />
 </LinearLayout>

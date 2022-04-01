@@ -4,7 +4,6 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
     android:descendantFocusability="blocksDescendants"
     android:focusable="false"
     android:minHeight="50dp"
@@ -48,25 +47,20 @@
 
             <TextView
                 android:id="@+id/wallet_balance"
+                style="@style/Aw.Typography.Sub"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:fontFamily="@font/font_semibold"
-                android:textColor="@color/text_black"
                 android:textIsSelectable="true"
-                custom:font_size="16"
-                tools:text="3.2345" />
+                tools:text="0" />
 
             <TextView
                 android:id="@+id/wallet_currency"
+                style="@style/Aw.Typography.Sub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
-                android:fontFamily="@font/font_light"
-                android:textColor="@color/text_black"
                 android:textIsSelectable="true"
-                android:visibility="gone"
-                custom:font_size="16"
                 tools:text="ETH" />
 
         </LinearLayout>
@@ -79,49 +73,40 @@
 
             <TextView
                 android:id="@+id/wallet_name"
+                style="@style/Aw.Typography.Sub.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
-                tools:text="user.eth"
-                android:textColor="@color/dove"
-                android:textSize="12sp" />
+                tools:text="user.eth" />
 
             <TextView
                 android:id="@+id/wallet_address_separator"
+                style="@style/Aw.Typography.Sub.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:text="|"
-                android:textColor="@color/dove"
-                android:textSize="12sp"
                 tools:ignore="HardcodedText" />
 
             <TextView
                 android:id="@+id/wallet_address"
+                style="@style/Aw.Typography.Sub.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="middle"
-                android:fontFamily="@font/font_regular"
                 android:maxLength="20"
                 android:singleLine="true"
-                tools:text="0xe9f5cc10a54125828d7fc6b6fb0f784f731e33bf"
-                android:textColor="@color/dove"
-                android:textSize="12sp" />
+                tools:text="0xe9f5cc10a54125828d7fc6b6fb0f784f731e33bf" />
         </LinearLayout>
 
     </LinearLayout>
 
-    <ImageView
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical"
-        android:layout_marginEnd="12dp"
-        android:src="@drawable/selector_checkbox"
         android:contentDescription="Selection"
         tools:ignore="HardcodedText" />
 

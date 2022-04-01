@@ -35,12 +35,14 @@
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/Aw.Typography.Title"
             tools:text="Ethereum" />
 
         <TextView
             android:id="@+id/chain_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/Aw.Typography.Sub"
             tools:text="ChainID: 1"/>
 
     </LinearLayout>

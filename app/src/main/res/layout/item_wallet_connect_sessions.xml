@@ -7,8 +7,7 @@
     android:animateLayoutChanges="true"
     android:background="@color/solitude"
     android:elevation="1dp"
-    android:orientation="horizontal"
-    >
+    android:orientation="horizontal">
 
     <ImageView
         android:id="@+id/logo"
@@ -28,17 +27,15 @@
         android:orientation="vertical">
 
         <TextView
+            style="@style/Aw.Typography.Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/wc_card_title"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp20" />
+            android:text="@string/wc_card_title" />
 
         <TextView
+            style="@style/Aw.Typography.Sub"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/wc_card_subtitle"
-            android:textColor="@color/dove"
-            android:textSize="@dimen/sp12" />
+            android:text="@string/wc_card_subtitle" />
     </LinearLayout>
 </LinearLayout>

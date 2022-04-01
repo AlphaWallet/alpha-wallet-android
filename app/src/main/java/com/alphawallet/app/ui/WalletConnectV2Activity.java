@@ -22,6 +22,7 @@ import com.alphawallet.app.ui.widget.adapter.MethodAdapter;
 import com.alphawallet.app.ui.widget.adapter.WalletAdapter;
 import com.alphawallet.app.util.LayoutHelper;
 import com.alphawallet.app.viewmodel.WalletConnectV2ViewModel;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.bumptech.glide.Glide;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
@@ -244,17 +245,15 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     {
         runOnUiThread(() ->
         {
-            AlertDialog.Builder builder = new AlertDialog.Builder(WalletConnectV2Activity.this);
-            AlertDialog dialog = builder.setTitle(R.string.dialog_title_disconnect_session)
-                    .setPositiveButton(R.string.dialog_ok, (d, w) ->
-                    {
-                        killSession(session.sessionId);
-                    })
-                    .setNegativeButton(R.string.action_cancel, (d, w) ->
-                    {
-                        d.dismiss();
-                    })
-                    .create();
+
+            AWalletAlertDialog dialog = new AWalletAlertDialog(this, AWalletAlertDialog.ERROR);
+            dialog.setTitle(R.string.dialog_title_disconnect_session);
+            dialog.setButton(R.string.action_close, v -> {
+                dialog.dismiss();
+                killSession(session.sessionId);
+            });
+            dialog.setSecondaryButton(R.string.action_cancel, v -> dialog.dismiss());
+            dialog.setCancelable(false);
             dialog.show();
         });
     }

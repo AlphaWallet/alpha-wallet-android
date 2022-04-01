@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.content.BroadcastReceiver;
@@ -1118,6 +1119,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             @Override
             public void transactionError(long callbackId, Throwable error)
             {
+                displayTransactionError(error);
                 confirmationDialog.dismiss();
                 viewModel.rejectRequest(getApplication(), getSessionId(), lastId, getString(R.string.message_authentication_failed));
                 requestId = 0;
@@ -1125,6 +1127,24 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         };
 
         viewModel.sendTransaction(finalTx, viewModel.getChainId(getSessionId()), callback);
+    }
+
+    //Transaction failed to be sent
+    private void displayTransactionError(final Throwable throwable)
+    {
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            runOnUiThread(() -> {
+                closeErrorDialog();
+                dialog = new AWalletAlertDialog(this, AWalletAlertDialog.ERROR);
+                dialog.setTitle(R.string.invalid_walletconnect_session);
+                dialog.setTitle(R.string.error_transaction_failed);
+                dialog.setMessage(throwable.getMessage());
+                dialog.setButtonText(R.string.button_ok);
+                dialog.setButtonListener(v -> dialog.dismiss());
+                dialog.show();
+            });
+        }
     }
 
     @Override

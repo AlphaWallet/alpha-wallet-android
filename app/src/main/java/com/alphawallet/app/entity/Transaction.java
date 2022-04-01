@@ -117,12 +117,43 @@ public class Transaction implements Parcelable
 			String input,
 			String gasUsed,
             long chainId,
-            EthTxnNetwork txnNetwork,
             boolean isConstructor) {
         this.hash = hash;
         this.error = error;
         this.blockNumber = blockNumber;
         this.timeStamp = timeStamp;
+		this.nonce = nonce;
+		this.from = from;
+		this.to = to;
+		this.value = value;
+		this.gas = gas;
+		this.gasPrice = gasPrice;
+		this.input = input;
+		this.gasUsed = gasUsed;
+		this.chainId = chainId;
+		this.isConstructor = isConstructor;
+	}
+
+	public Transaction(
+			String hash,
+			String error,
+			String blockNumber,
+			long timeStamp,
+			int nonce,
+			String from,
+			String to,
+			String value,
+			String gas,
+			String gasPrice,
+			String input,
+			String gasUsed,
+			long chainId,
+			EthTxnNetwork txnNetwork,
+			boolean isConstructor) {
+		this.hash = hash;
+		this.error = error;
+		this.blockNumber = blockNumber;
+		this.timeStamp = timeStamp;
 		this.nonce = nonce;
 		this.from = from;
 		this.to = to;

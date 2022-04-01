@@ -149,10 +149,10 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
             }
         }
 
-        mainNetAdapter = new SingleSelectNetworkAdapter(mainNetList, viewModel.getTokensService());
+        mainNetAdapter = new SingleSelectNetworkAdapter(mainNetList);
         mainnetRecyclerView.setAdapter(mainNetAdapter);
 
-        testNetAdapter = new SingleSelectNetworkAdapter(testNetList, viewModel.getTokensService());
+        testNetAdapter = new SingleSelectNetworkAdapter(testNetList);
         testnetRecyclerView.setAdapter(testNetAdapter);
     }
 

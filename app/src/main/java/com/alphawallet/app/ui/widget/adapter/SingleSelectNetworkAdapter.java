@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.widget.TokenIcon;
 import com.google.android.material.radiobutton.MaterialRadioButton;
@@ -23,12 +22,10 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
 {
     private final ArrayList<NetworkItem> networkList;
     private boolean hasSelection;
-    private TokensService tokensService;
 
-    public SingleSelectNetworkAdapter(ArrayList<NetworkItem> data, TokensService tokensService)
+    public SingleSelectNetworkAdapter(ArrayList<NetworkItem> data)
     {
         this.networkList = data;
-        this.tokensService = tokensService;
 
         for (NetworkItem item : data)
         {
@@ -76,7 +73,7 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
             holder.chainId.setText(holder.itemLayout.getContext().getString(R.string.chain_id, item.getChainId()));
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
             holder.radio.setChecked(item.isSelected());
-            holder.tokenIcon.bindData(tokensService.getServiceToken(item.getChainId()));
+            holder.tokenIcon.bindData(item.getChainId());
         }
     }
 

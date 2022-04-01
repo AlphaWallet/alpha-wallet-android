@@ -4,13 +4,11 @@ package com.alphawallet.app.ui.widget.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.widget.TokenIcon;
 import com.google.android.material.checkbox.MaterialCheckBox;
@@ -23,7 +21,6 @@ import java.util.List;
 public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectNetworkAdapter.ViewHolder> {
     private final List<NetworkItem> networkList;
     private boolean hasClicked = false;
-    private TokensService tokensService;
 
     public interface EditNetworkListener {
         void onEditNetwork(long chainId, View parent);
@@ -32,11 +29,10 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
     private final EditNetworkListener editListener;
 
 
-    public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks, EditNetworkListener editNetworkListener, TokensService tokensService)
+    public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks, EditNetworkListener editNetworkListener)
     {
         networkList = selectedNetworks;
         editListener = editNetworkListener;
-        this.tokensService = tokensService;
     }
 
     public Long[] getSelectedItems()
@@ -79,7 +75,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
             holder.manageView.setVisibility(View.VISIBLE);
             holder.manageView.setOnClickListener(v ->  editListener.onEditNetwork(networkList.get(position).getChainId(), holder.manageView));
             holder.checkbox.setChecked(item.isSelected());
-            holder.tokenIcon.bindData(tokensService.getServiceToken(item.getChainId()));
+            holder.tokenIcon.bindData(item.getChainId());
         }
     }
 

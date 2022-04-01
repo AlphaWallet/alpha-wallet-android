@@ -146,10 +146,10 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
             }
         };
 
-        mainNetAdapter = new MultiSelectNetworkAdapter(mainNetList, editNetworkListener, viewModel.getTokensService());
+        mainNetAdapter = new MultiSelectNetworkAdapter(mainNetList, editNetworkListener);
         mainnetRecyclerView.setAdapter(mainNetAdapter);
 
-        testNetAdapter = new MultiSelectNetworkAdapter(testNetList, editNetworkListener, viewModel.getTokensService());
+        testNetAdapter = new MultiSelectNetworkAdapter(testNetList, editNetworkListener);
         testnetRecyclerView.setAdapter(testNetAdapter);
     }
 

@@ -919,4 +919,5 @@
     <string name="experimental_1559">Use 1559 Transactions</string>
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
     <string name="action_reset_network" >ပြန်လည်သတ်မှတ်ပါ။</string>
+    <string name="chain_id">Chain ID: %1d</string>
 </resources>

@@ -416,6 +416,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     private static final List<Long> hasOpenSeaAPI = Arrays.asList(MAINNET_ID, MATIC_ID, RINKEBY_ID);
 
+    private static final LongSparseArray<BigInteger> blockGasLimit = new LongSparseArray<BigInteger>()
+    {
+        {
+            put(MAINNET_ID, BigInteger.valueOf(C.GAS_LIMIT_MAX));
+            put(KLAYTN_ID, BigInteger.valueOf(C.GAS_LIMIT_MAX_KLAYTN));
+        }
+    };
+
     public static String getGasOracle(long chainId)
     {
         if (hasGasOracleAPI.contains(chainId) && networkMap.indexOfKey(chainId) >= 0)
@@ -772,6 +780,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             return R.color.text_primary;
         }
+    }
+
+    public static BigInteger getMaxGasLimit(long chainId)
+    {
+        return blockGasLimit.get(chainId, blockGasLimit.get(MAINNET_ID));
     }
 
     public static String getNodeURLByNetworkId(long networkId)

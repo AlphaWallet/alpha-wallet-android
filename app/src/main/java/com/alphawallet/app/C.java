@@ -203,13 +203,14 @@ public abstract class C {
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";
     public static final String DEFAULT_GAS_LIMIT_FOR_TOKENS = "144000";
     public static final String DEFAULT_UNKNOWN_FUNCTION_GAS_LIMIT = "1000000"; //if we don't know the specific function, we default to 1 million gas limit
-    public static final String DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS = "432000"; //NFT's typically require more gas
+    public static final String DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS = "432000"; //NFTs typically require more gas
     public static final long GAS_LIMIT_MIN = 21000L;
     public static final long GAS_LIMIT_DEFAULT = 90000L;
     public static final long GAS_LIMIT_CONTRACT = 1000000L;
-    public static final long GAS_LIMIT_MAX = 1800000L;
     public static final long GAS_PRICE_MIN = 400000000L;
     public static final int ETHER_DECIMALS = 18;
+    public static final long GAS_LIMIT_MAX =          4712380L;  //Max block gas for most chains
+    public static final long GAS_LIMIT_MAX_KLAYTN = 100000000L;  //Klaytn gas limit, see https://docs.klaytn.com/klaytn/design/computation/computation-cost
 
     //FOR DEMOS ETC
     public static final boolean SHOW_NEW_ACCOUNT_PROMPT = false;   //this will switch off the splash screen 'please make a key' message

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -20,21 +21,20 @@
             android:background="@color/transparent"
             android:contentDescription="@string/action_close"
             android:padding="5dp"
-            android:src="@drawable/ic_close" />
+            android:src="@drawable/ic_close"
+            app:tint="?colorControlNormal" />
 
         <TextView
             android:id="@+id/text_sign_title"
+            style="@style/Aw.Typography.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginBottom="@dimen/dp8"
-            android:layout_marginTop="@dimen/dp8"
             android:layout_centerHorizontal="true"
-            android:fontFamily="@font/font_semibold"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="@dimen/dp8"
+            android:layout_marginBottom="@dimen/dp8"
             android:gravity="center_horizontal"
             android:text="@string/dialog_title_sign_message"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp20"
             tools:ignore="RelativeOverlap" />
 
         <ImageView
@@ -49,69 +49,85 @@
 
     </RelativeLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+    <View style="@style/Aw.Component.Separator" />
+
     <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp">
 
             <TextView
                 style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp8"
+                android:layout_marginBottom="@dimen/dp8"
                 android:text="@string/wc_sign_dapp_name" />
 
             <TextView
                 android:id="@+id/dapp_name"
-                style="@style/Aw.Typography.Label"
+                style="@style/Aw.Typography.Label.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dp8"
                 tools:text="React Sample DApp" />
+
+            <View style="@style/Aw.Component.Separator" />
 
             <TextView
                 style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp8"
+                android:layout_marginBottom="@dimen/dp8"
                 android:text="URL"
                 tools:ignore="HardcodedText" />
 
             <TextView
                 android:id="@+id/url"
-                style="@style/Aw.Typography.Label"
+                style="@style/Aw.Typography.Label.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dp8"
                 tools:text="https://app.walletconnect.com" />
+
+            <View style="@style/Aw.Component.Separator" />
 
             <TextView
                 style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp8"
+                android:layout_marginBottom="@dimen/dp8"
                 android:text="@string/wc_wallet" />
 
             <TextView
                 android:id="@+id/wallet"
-                style="@style/Aw.Typography.Label"
+                style="@style/Aw.Typography.Label.Small"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dp8" />
+
+            <View style="@style/Aw.Component.Separator" />
 
             <TextView
                 style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp8"
+                android:layout_marginBottom="@dimen/dp8"
                 android:text="@string/subtitle_network" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dp8"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -119,8 +135,8 @@
                     android:id="@+id/network_icon"
                     android:layout_width="@dimen/dp24"
                     android:layout_height="@dimen/dp24"
-                    android:layout_marginEnd="@dimen/dp5"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="@dimen/dp5"
                     android:src="@drawable/ic_coin_eth_small"
                     tools:ignore="ContentDescription" />
 
@@ -133,16 +149,19 @@
                     android:text="@string/ethereum" />
             </LinearLayout>
 
+            <View style="@style/Aw.Component.Separator" />
+
             <TextView
                 style="@style/Aw.Typography.Label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp16"
+                android:layout_marginTop="@dimen/dp8"
+                android:layout_marginBottom="@dimen/dp8"
                 android:text="@string/message_to_sign" />
 
             <TextView
                 android:id="@+id/message"
-                style="@style/Aw.Typography.Label"
+                style="@style/Aw.Typography.Label.Small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:text="0xabced" />
@@ -152,7 +171,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                custom:noTitle="true"/>
+                custom:noTitle="true" />
 
         </LinearLayout>
     </ScrollView>
@@ -160,7 +179,7 @@
     <com.alphawallet.app.widget.ConfirmationWidget
         android:id="@+id/confirmation_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
     <com.alphawallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"

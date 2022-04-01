@@ -157,6 +157,11 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         }
     }
 
+    public void setWaiting()
+    {
+        walletIcon.setWaiting();
+    }
+
     private void setWalletChange(double percentChange24h)
     {
         //This sets the 24hr percentage change (rightmost value)

@@ -16,6 +16,7 @@
         android:layout_height="wrap_content"
         android:background="@color/transparent"
         android:src="@drawable/ic_menu"
+        android:contentDescription="@string/manage_tokens"
         android:layout_gravity="center_vertical"
         android:visibility="gone"
         app:tint="?colorControlNormal"

@@ -73,7 +73,7 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
         if (item != null)
         {
             holder.name.setText(item.getName());
-            holder.chainId.setText("ChainID: " + item.getChainId());
+            holder.chainId.setText(holder.itemLayout.getContext().getString(R.string.chain_id, item.getChainId()));
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
             holder.radio.setChecked(item.isSelected());
             holder.tokenIcon.bindData(tokensService.getServiceToken(item.getChainId()));

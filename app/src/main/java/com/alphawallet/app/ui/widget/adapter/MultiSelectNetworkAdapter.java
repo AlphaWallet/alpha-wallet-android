@@ -74,7 +74,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         if (item != null)
         {
             holder.name.setText(item.getName());
-            holder.chainId.setText("ChainID: "+item.getChainId());
+            holder.chainId.setText(holder.itemLayout.getContext().getString(R.string.chain_id, item.getChainId()));
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
             holder.manageView.setVisibility(View.VISIBLE);
             holder.manageView.setOnClickListener(v ->  editListener.onEditNetwork(networkList.get(position).getChainId(), holder.manageView));

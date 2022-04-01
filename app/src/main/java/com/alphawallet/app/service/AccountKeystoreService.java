@@ -82,11 +82,6 @@ public interface AccountKeystoreService {
 			Signable message,
 			long chainId);
 
-	Single<SignatureFromKey> signTransaction(
-			Wallet signer,
-			byte[] rawTx,
-			long chainId);
-
 	Single<byte[]> signTransactionFast(
 			Wallet signer,
 			String password,

@@ -157,7 +157,14 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         int index = getWalletIndex(wallet);
         if (index >= 0)
         {
-            valueMap.put(wallet.toLowerCase(), value);
+            if (value != null)
+            {
+                valueMap.put(wallet.toLowerCase(), value);
+            }
+            else
+            {
+                wallets.get(index).isSynced = false;
+            }
             notifyItemChanged(index);
             updateWalletSummary();
         }

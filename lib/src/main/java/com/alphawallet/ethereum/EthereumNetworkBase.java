@@ -38,6 +38,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final long PALM_TEST_ID = 0x2a15c3083L; //11297108099
     public static final long KLAYTN_ID = 8217;
     public static final long KLAYTN_BOABAB_ID = 1001;
+    public static final long IOTEX_MAINNET_ID = 4689;
+    public static final long IOTEX_TESTNET_ID = 4690;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";

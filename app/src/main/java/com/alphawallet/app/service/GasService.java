@@ -3,7 +3,6 @@ package com.alphawallet.app.service;
 import static com.alphawallet.app.C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS;
 import static com.alphawallet.app.C.GAS_LIMIT_CONTRACT;
 import static com.alphawallet.app.C.GAS_LIMIT_DEFAULT;
-import static com.alphawallet.app.C.GAS_LIMIT_MAX;
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
@@ -24,6 +23,7 @@ import com.alphawallet.app.entity.SuggestEIP1559Kt;
 import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
@@ -358,13 +358,13 @@ public class GasService implements ContractGasProvider
         if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
-                    .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), finalTxData))
-                    .map(estimate -> convertToGasLimit(estimate, BigInteger.valueOf(GAS_LIMIT_CONTRACT)));
+                    .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), EthereumNetworkBase.getMaxGasLimit(chainId), finalTxData))
+                    .map(estimate -> convertToGasLimit(estimate, EthereumNetworkBase.getMaxGasLimit(chainId)));
         }
         else
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
-                    .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), BigInteger.valueOf(GAS_LIMIT_MAX), toAddress, amount, finalTxData))
+                    .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), EthereumNetworkBase.getMaxGasLimit(chainId), toAddress, amount, finalTxData))
                     .flatMap(estimate -> handleOutOfGasError(estimate, chainId, toAddress, amount, finalTxData))
                     .map(estimate -> convertToGasLimit(estimate, defaultLimit));
         }
@@ -417,6 +417,7 @@ public class GasService implements ContractGasProvider
         }
     }
 
+    // For Constructor only
     private Single<EthEstimateGas> ethEstimateGas(String fromAddress, BigInteger nonce, BigInteger gasPrice,
                                                   BigInteger gasLimit, String txData)
     {

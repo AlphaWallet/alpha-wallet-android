@@ -876,5 +876,6 @@
     <string name="toast_qr_scanning_requires_api_24">El escaneo QR requiere Android 7.0 (API nivel 24) o superior.</string>
     <string name="experimental_1559">Use 1559 Transactions</string>
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
+    <string name="action_reset_network" >Reiniciar</string>
     <string name="chain_id">Chain ID: %1d</string>
 </resources>

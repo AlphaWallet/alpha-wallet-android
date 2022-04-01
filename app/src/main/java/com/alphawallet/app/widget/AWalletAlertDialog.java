@@ -63,6 +63,12 @@ public class AWalletAlertDialog extends Dialog {
         secondaryButton.setOnClickListener(v -> dismiss());
     }
 
+    public AWalletAlertDialog(@NonNull Context context, int iconRes)
+    {
+        this(context);
+        setIcon(iconRes);
+    }
+
     public void makeWide()
     {
         float scale = context.getResources().getDisplayMetrics().density;
@@ -92,6 +98,12 @@ public class AWalletAlertDialog extends Dialog {
         titleText.setText(message);
     }
 
+    public void setButton(int resId, View.OnClickListener listener)
+    {
+        setButtonText(resId);
+        setButtonListener(listener);
+    }
+
     public void setButtonText(int resId) {
         button.setVisibility(View.VISIBLE);
         button.setText(context.getResources().getString(resId));
@@ -99,6 +111,12 @@ public class AWalletAlertDialog extends Dialog {
 
     public void setButtonListener(View.OnClickListener listener) {
         button.setOnClickListener(listener);
+    }
+
+    public void setSecondaryButton(int resId, View.OnClickListener listener)
+    {
+        setSecondaryButtonText(resId);
+        setSecondaryButtonListener(listener);
     }
 
     public void setSecondaryButtonText(int resId) {
@@ -129,6 +147,7 @@ public class AWalletAlertDialog extends Dialog {
         if (resId == NONE) {
             this.icon.setVisibility(View.GONE);
         } else {
+            this.icon.setVisibility(View.VISIBLE);
             this.icon.setImageResource(resId);
         }
     }

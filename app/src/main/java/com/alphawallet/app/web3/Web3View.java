@@ -162,18 +162,6 @@ public class Web3View extends WebView {
         init();
     }
 
-    private static boolean isJson(String value)
-    {
-        try
-        {
-            JSONObject stateData = new JSONObject(value);
-            return true;
-        } catch (Exception e)
-        {
-            return false;
-        }
-    }
-
     @Override
     public void setWebChromeClient(WebChromeClient client)
     {

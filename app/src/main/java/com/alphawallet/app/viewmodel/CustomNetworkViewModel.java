@@ -20,8 +20,8 @@ public class CustomNetworkViewModel extends BaseViewModel
         this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
-    public void addNetwork(String name, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId) {
-        this.ethereumNetworkRepository.addCustomRPCNetwork(name, rpcUrl, chainId, symbol, blockExplorerUrl, explorerApiUrl, isTestnet, oldChainId);
+    public void saveNetwork(String name, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId) {
+        this.ethereumNetworkRepository.saveCustomRPCNetwork(name, rpcUrl, chainId, symbol, blockExplorerUrl, explorerApiUrl, isTestnet, oldChainId);
     }
 
     public NetworkInfo getNetworkInfo(long chainId) {
@@ -30,5 +30,10 @@ public class CustomNetworkViewModel extends BaseViewModel
 
     public boolean isTestNetwork(NetworkInfo network) {
         return !EthereumNetworkRepository.hasRealValue(network.chainId);
+    }
+
+    public NetworkInfo getBuiltInNetwork(long chainId)
+    {
+        return this.ethereumNetworkRepository.getBuiltInNetwork(chainId);
     }
 }

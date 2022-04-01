@@ -4,11 +4,11 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.widget.ImageView;
+import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alphawallet.app.R;
@@ -26,7 +26,6 @@ public class CopyTextView extends LinearLayout {
     private boolean showToast;
     private boolean boldFont;
     private boolean removePadding;
-    private String rawAddress;
     private float marginRight;
 
     public CopyTextView(Context context, AttributeSet attrs)
@@ -57,7 +56,8 @@ public class CopyTextView extends LinearLayout {
             boldFont = a.getBoolean(R.styleable.CopyTextView_bold, false);
             removePadding = a.getBoolean(R.styleable.CopyTextView_removePadding, false);
             marginRight = a.getDimension(R.styleable.CopyTextView_marginRight, 0.0f);
-        } finally
+        }
+        finally
         {
             a.recycle();
         }
@@ -66,51 +66,32 @@ public class CopyTextView extends LinearLayout {
     private void bindViews()
     {
         button = findViewById(R.id.button);
-        button.setText(textResId);
-//        text.setText(textResId);
-//        text.setTextColor(textColor);
-//        text.setGravity(gravity);
-
-//        LayoutParams layoutParams = (LayoutParams) text.getLayoutParams();
-//        layoutParams.rightMargin = (int) marginRight;
-//        text.setLayoutParams(layoutParams);
-
-//        if(boldFont)
-//        {
-//            text.setTypeface(text.getTypeface(), Typeface.BOLD);
-//        }
-//
-//        if(removePadding)
-//        {
-//            copy.setPadding(0, 0, 0, 0);
-//        }
-
+        setText(getContext().getString(textResId));
         button.setOnClickListener(v -> copyToClipboard());
-//        copy.setOnClickListener(v -> copyToClipboard());
     }
 
     public String getText()
     {
-        return rawAddress;
+        return button.getText().toString();
     }
 
     public void setText(CharSequence text)
     {
-//        rawAddress = text.toString();
-//        String breakAddr = rawAddress;
-//        if ((gravity & Gravity.CENTER_HORIZONTAL) == Gravity.CENTER_HORIZONTAL && WalletUtils.isValidAddress(breakAddr)) //split string across two lines
-//        {
-//            breakAddr = breakAddr.substring(0, 22) + " " + breakAddr.substring(22);
-//        }
-//
-//        this.button.setText(breakAddr);
-        this.button.setText(text.toString());
+        if (TextUtils.isEmpty(text))
+        {
+            setVisibility(View.GONE);
+        }
+        else
+        {
+            setVisibility(View.VISIBLE);
+            button.setText(text.toString());
+        }
     }
 
     private void copyToClipboard()
     {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, rawAddress);
+        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, button.getText().toString());
         if (clipboard != null)
         {
             clipboard.setPrimaryClip(clip);

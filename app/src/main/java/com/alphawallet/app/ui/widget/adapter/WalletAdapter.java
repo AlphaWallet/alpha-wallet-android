@@ -7,8 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
+import android.widget.CheckBox;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
@@ -18,9 +21,6 @@ import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 public class WalletAdapter extends ArrayAdapter<Wallet>
 {
@@ -79,13 +79,13 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
         } else {
             if (wallet.address.equals(defaultWallet.address))
             {
-                holder.checkbox.setSelected(true);
+                holder.checkbox.setChecked(true);
                 selected[position] = true;
             }
 
             holder.container.setOnClickListener(v ->
             {
-                holder.checkbox.setSelected(!holder.checkbox.isSelected());
+                holder.checkbox.setChecked(!holder.checkbox.isChecked());
                 selected[position] = !selected[position];
             });
 

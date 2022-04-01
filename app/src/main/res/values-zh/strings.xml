@@ -883,4 +883,5 @@
     <string name="wc_sign_dapp_name">名称</string>
     <string name="wc_wallet">钱包</string>
     <string name="wc_wallet_not_match">钱包不存在或者你只能查看钱包</string>
+    <string name="chain_id">Chain ID: %1d</string>
 </resources>

@@ -673,7 +673,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             peerUrl.setText(remotePeerData.getUrl());
             chainName.setChainID(viewModel.getChainId(sessionId));
             chainIcon.setVisibility(View.VISIBLE);
-            chainIcon.bindData(viewModel.getTokensService().getServiceToken(viewModel.getChainId(sessionId)));
+            chainIcon.bindData(viewModel.getChainId(sessionId));
             viewModel.startGasCycle(viewModel.getChainId(sessionId));
         }
     }
@@ -709,7 +709,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         peerUrl.setText(peer.getUrl());
         chainName.setChainID(chainIdOverride);
         chainIcon.setVisibility(View.VISIBLE);
-        chainIcon.bindData(viewModel.getTokensService().getServiceToken(chainIdOverride));
+        chainIcon.bindData(chainIdOverride);
         remotePeerMeta = peer;
 
         walletConnectDialog = new ActionSheetDialog(this, peer, chainId, displayIcon, this);
@@ -1190,7 +1190,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 new Gson().toJson(session), new Gson().toJson(remotePeerMeta), selectedChain);
         chainName.setChainID(selectedChain);
         chainIcon.setVisibility(View.VISIBLE);
-        chainIcon.bindData(viewModel.getTokensService().getServiceToken(selectedChain));
+        chainIcon.bindData(selectedChain);
         progressBar.setVisibility(View.GONE);
         functionBar.setVisibility(View.VISIBLE);
         infoLayout.setVisibility(View.VISIBLE);

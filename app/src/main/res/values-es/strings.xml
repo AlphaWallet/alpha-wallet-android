@@ -883,4 +883,5 @@
     <string name="wc_sign_dapp_name">Nombre</string>
     <string name="wc_wallet">Billetera</string>
     <string name="wc_wallet_not_match">La billetera no existe o es solo reloj</string>
+    <string name="chain_id">Chain ID: %1d</string>
 </resources>

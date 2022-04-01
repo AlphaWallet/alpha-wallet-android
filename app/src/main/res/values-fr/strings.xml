@@ -900,4 +900,5 @@
     <string name="wc_sign_dapp_name">Nom</string>
     <string name="wc_wallet">Portefeuille</string>
     <string name="wc_wallet_not_match">Le portefeuille n\'existe pas ou il ne s\'agit que d\'une montre</string>
+    <string name="chain_id">Chain ID: %1d</string>
 </resources>

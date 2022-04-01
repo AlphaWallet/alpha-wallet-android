@@ -144,6 +144,19 @@ public class TokenIcon extends ConstraintLayout
         bind(token, getIconUrl(token));
     }
 
+    public void bindData(long chainId)
+    {
+        this.handler.removeCallbacks(null);
+        statusBackground.setVisibility(View.GONE);
+        chainIconBackground.setVisibility(View.GONE);
+        chainIcon.setVisibility(View.GONE);
+
+        textIcon.setVisibility(View.GONE);
+        icon.setImageResource(EthereumNetworkRepository.getChainLogo(chainId));
+        icon.setVisibility(View.VISIBLE);
+        findViewById(R.id.circle).setVisibility(View.VISIBLE);
+    }
+
     public void bindData(Token token, @NotNull TokensService svs)
     {
         if (token == null) return;
@@ -266,7 +279,7 @@ public class TokenIcon extends ConstraintLayout
      */
     private void loadFromAltRepo()
     {
-        if (getContext() == null) return;
+        if (getContext() == null || this.fallbackIconUrl == null) return;
         if (getContext() instanceof Activity)
         {
             Activity myAct = (Activity) getContext();

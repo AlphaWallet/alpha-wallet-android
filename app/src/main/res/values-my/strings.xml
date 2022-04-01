@@ -925,4 +925,5 @@
     <string name="wc_sign_dapp_name">နာမည်</string>
     <string name="wc_wallet">ပိုက်ဆံအိတ်</string>
     <string name="wc_wallet_not_match">ပိုက်ဆံအိတ် မရှိပါ သို့မဟုတ် ၎င်းသည် နာရီသာဖြစ်သည်</string>
+    <string name="chain_id">Chain ID: %1d</string>
 </resources>

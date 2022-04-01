@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
+import com.alphawallet.app.widget.TokenIcon;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
-        int buttonTypeId = R.layout.item_simple_radio;
+        int buttonTypeId = R.layout.item_network_radio;
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(buttonTypeId, parent, false);
         return new ViewHolder(itemView);
@@ -69,8 +70,10 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
         if (item != null)
         {
             holder.name.setText(item.getName());
+            holder.chainId.setText(holder.itemLayout.getContext().getString(R.string.chain_id, item.getChainId()));
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
             holder.radio.setChecked(item.isSelected());
+            holder.tokenIcon.bindData(item.getChainId());
         }
     }
 
@@ -104,14 +107,18 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
     {
         MaterialRadioButton radio;
         TextView name;
+        TextView chainId;
         View itemLayout;
+        TokenIcon tokenIcon;
 
         ViewHolder(View view)
         {
             super(view);
             radio = view.findViewById(R.id.radio);
             name = view.findViewById(R.id.name);
+            chainId = view.findViewById(R.id.chain_id);
             itemLayout = view.findViewById(R.id.layout_list_item);
+            tokenIcon = view.findViewById(R.id.token_icon);
         }
     }
 }

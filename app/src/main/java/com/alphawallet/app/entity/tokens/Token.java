@@ -10,16 +10,21 @@ import android.util.Pair;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.SyncDef;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.BalanceUtils;
@@ -56,6 +61,7 @@ public class Token
 {
     public final static int TOKEN_BALANCE_PRECISION = 4;
     public final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
+    protected static final long MAX_SYNC_DEPTH_TEMP = 500000L;
 
     protected static OkHttpClient client;
 
@@ -1003,5 +1009,107 @@ public class Token
     public boolean isBatchTransferAvailable()
     {
         return false;
+    }
+
+    protected SyncDef getSyncDef(Realm realm)
+    {
+        BigInteger currentBlock = TransactionsService.getCurrentBlock(tokenInfo.chainId);
+        BigInteger startingBlock = BigInteger.valueOf(getEarliestEventRead(realm));
+        BigInteger lastBlockRead = BigInteger.valueOf(getLastEventRead(realm));
+        BigInteger eventReadStartBlock;
+        BigInteger eventReadEndBlock;
+
+        if (currentBlock.equals(BigInteger.ZERO)) return null;
+
+        boolean upwardSync = false;
+
+        if (startingBlock.compareTo(BigInteger.ZERO) < 0) //first sync
+        {
+            eventReadStartBlock = currentBlock.subtract(EthereumNetworkBase.getMaxEventFetch(tokenInfo.chainId));
+            eventReadEndBlock = currentBlock;
+        }
+        else if (lastBlockRead.compareTo(BigInteger.ZERO) < 0) // keep syncing down
+        {
+            eventReadStartBlock = startingBlock.subtract(EthereumNetworkBase.getMaxEventFetch(tokenInfo.chainId));
+            eventReadEndBlock = startingBlock;
+        }
+        else // We have synced far enough back, now commence sync from last block read and continue
+        {
+            // TODO: Find earliest contract transaction; chains without API this is not currently possible; replace magic number
+            if (currentBlock.subtract(lastBlockRead).compareTo(BigInteger.valueOf(10)) >= 0) //we have synced downwards, now sync as normal
+            {
+                eventReadStartBlock = lastBlockRead;
+                eventReadEndBlock = lastBlockRead.add(EthereumNetworkBase.getMaxEventFetch(tokenInfo.chainId)).min(currentBlock);
+                upwardSync = true;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        if (eventReadStartBlock.compareTo(BigInteger.ZERO) <= 0)
+        {
+            eventReadStartBlock = BigInteger.ZERO;
+            upwardSync = true;
+        }
+        else if (currentBlock.subtract(eventReadStartBlock).compareTo(BigInteger.valueOf(MAX_SYNC_DEPTH_TEMP)) > 0)
+        {
+            upwardSync = true;
+        }
+
+        return new SyncDef(eventReadStartBlock, eventReadEndBlock, upwardSync);
+    }
+
+    protected long getEarliestEventRead(Realm instance)
+    {
+        RealmAuxData rd = instance.where(RealmAuxData.class)
+                .equalTo("instanceKey", TokensRealmSource.databaseKey(tokenInfo.chainId, getAddress()))
+                .findFirst();
+
+        if (rd == null)
+        {
+            return -1L;
+        }
+        else
+        {
+            return rd.getResultReceivedTime();
+        }
+    }
+
+    protected long getLastEventRead(Realm instance)
+    {
+        RealmAuxData rd = instance.where(RealmAuxData.class)
+                .equalTo("instanceKey", TokensRealmSource.databaseKey(tokenInfo.chainId, getAddress()))
+                .findFirst();
+
+        if (rd == null)
+        {
+            return -1L;
+        }
+        else
+        {
+            return rd.getResultTime();
+        }
+    }
+
+    protected void updateEventReads(Realm realm, long startRead, long lastRead)
+    {
+        if (realm == null) return;
+        realm.executeTransaction(r -> {
+            String key = TokensRealmSource.databaseKey(tokenInfo.chainId, getAddress());
+            RealmAuxData rd = r.where(RealmAuxData.class)
+                    .equalTo("instanceKey", key)
+                    .findFirst();
+
+            if (rd == null)
+            {
+                rd = r.createObject(RealmAuxData.class, key); //create asset in realm
+            }
+
+            rd.setResultReceivedTime(startRead);
+            rd.setResultTime(lastRead);
+            r.insertOrUpdate(rd);
+        });
     }
 }

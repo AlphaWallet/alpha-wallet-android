@@ -41,9 +41,12 @@ public class CreateTransactionInteract
 
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
     {
-        return transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, chainId)
-                                             .subscribeOn(Schedulers.computation())
-                                             .observeOn(AndroidSchedulers.mainThread());
+        return transactionRepository.createTransactionWithSig(from, to, subunitAmount,
+                gasPrice, gasLimit, -1,
+                data, chainId)
+                .map(txData -> txData.txHash)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Single<TransactionData> createWithSig(Wallet from, Web3Transaction web3Tx, long chainId)
@@ -71,18 +74,13 @@ public class CreateTransactionInteract
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<TransactionData> createWithSig(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
-    {
-        return transactionRepository.createTransactionWithSig(from, to, subunitAmount, gasPrice, gasLimit, -1, data, chainId)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
     public Single<TransactionData> createWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, long chainId)
     {
-        return transactionRepository.createTransactionWithSig(from, gasPrice, gasLimit, data, chainId)
-                                         .subscribeOn(Schedulers.computation())
-                                         .observeOn(AndroidSchedulers.mainThread());
+        return transactionRepository.createTransactionWithSig(from, "", BigInteger.ZERO,
+                gasPrice, gasLimit, -1,
+                !TextUtils.isEmpty(data) ? Numeric.hexStringToByteArray(data) : new byte[0], chainId)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Single<String> resend(Wallet from, BigInteger nonce, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
@@ -92,8 +90,10 @@ public class CreateTransactionInteract
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<TransactionData> signTransaction(Wallet wallet, Web3Transaction w3tx, long chainId)
+    public Single<TransactionData> signTransaction(Wallet from, Web3Transaction web3Tx, long chainId)
     {
-        return transactionRepository.getSignatureForTransaction(wallet, w3tx, chainId);
+        return transactionRepository.getSignatureForTransaction(from, web3Tx.recipient.toString(), web3Tx.value,
+                web3Tx.gasPrice, web3Tx.gasLimit, web3Tx.nonce,
+                !TextUtils.isEmpty(web3Tx.payload) ? Numeric.hexStringToByteArray(web3Tx.payload) : new byte[0], chainId);
     }
 }

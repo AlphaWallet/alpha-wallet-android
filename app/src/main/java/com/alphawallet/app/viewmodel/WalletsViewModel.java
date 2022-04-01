@@ -36,7 +36,8 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
 
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -83,6 +84,8 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private NetworkInfo currentNetwork;
     private final Map<String, Wallet> walletBalances = new HashMap<>();
     private final Map<String, TokensService> walletServices = new ConcurrentHashMap<>();
+    private final Map<String, Wallet> walletUpdate = new ConcurrentHashMap<>();
+    private final Map<String, Disposable> currentWalletUpdates = new ConcurrentHashMap<>();
     private SyncCallback syncCallback;
 
     @Nullable
@@ -96,9 +99,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
 
     @Nullable
     private Disposable ensWrappingCheck;
-
-    @Nullable
-    private Disposable walletSync;
 
     @Inject
     WalletsViewModel(
@@ -189,14 +189,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                 .subscribe(this::onWallets, this::onError);
     }
 
-    private void updateWallets()
-    {
-        //now load the current wallets from database
-        disposable = fetchWalletsInteract
-                .fetch()
-                .subscribe(this::getWalletsBalance, this::onError);
-    }
-
     private void onWallets(Wallet[] items)
     {
         progress.postValue(false);
@@ -212,30 +204,47 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         }
         wallets.postValue(items);
 
-        if (ethereumNetworkRepository.isMainNetSelected())
+        for (Wallet w : items)
         {
-            startBalanceUpdateTimer(items);
-            startFullWalletSync(items);
+            if (w.type == WalletType.WATCH) continue;
+            syncFromDBOnly(w, true);
         }
-        else
-        {
-            for (Wallet w : items)
-            {
-                if (w.type == WalletType.WATCH) continue;
-                syncFromDBOnly(w, true);
-            }
-        }
+
+        disposable = fetchWalletsInteract.fetch().subscribe(this::startBalanceUpdateTimer);
+    }
+
+    private Disposable startWalletSyncProcess(Wallet w)
+    {
+        walletUpdate.remove(w.address);
+        return startWalletSync(w)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::sendUnsyncedValue, e -> { });
     }
 
     private void startFullWalletSync(Wallet[] items)
     {
+        if (!ethereumNetworkRepository.isMainNetSelected()) return;
+
+        walletUpdate.clear();
+        for (Wallet w : items)
+        {
+            if (w.type != WalletType.WATCH)
+            {
+                walletUpdate.put(w.address, w);
+                syncCallback.syncStarted(w.address, null);
+            }
+        }
+
+        int counter = 0;
+
         //set all wallets as syncing
-        walletSync = Observable.fromArray(items)
-                .filter(wallet -> wallet.type != WalletType.WATCH) //no need to sync watch wallets
-                .forEach(wallet -> startWalletSync(wallet)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::sendUnsyncedValue, e -> { }).isDisposed());
+        for (Wallet w : items)
+        {
+            if (w.type == WalletType.WATCH) continue;
+            if (counter++ == 4) break;
+            currentWalletUpdates.put(w.address, startWalletSyncProcess(w));
+        }
     }
 
     private void syncFromDBOnly(Wallet wallet, boolean complete)
@@ -292,6 +301,8 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         {
             service.stopUpdateCycle();
             walletServices.remove(service.getCurrentAddress().toLowerCase());
+            currentWalletUpdates.remove(service.getCurrentAddress().toLowerCase());
+            updateNextWallet();
         }
 
         if (syncCallback == null) return;
@@ -304,6 +315,17 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                     if (syncCount == 1) { syncCallback.syncCompleted(service.getCurrentAddress().toLowerCase(), value); }
                         else { syncCallback.syncUpdate(service.getCurrentAddress().toLowerCase(), value); }
                 }).isDisposed();
+    }
+
+    private void updateNextWallet()
+    {
+        String nextWalletToCheck = walletUpdate.keySet().iterator().hasNext() ? walletUpdate.keySet().iterator().next() : null;
+
+        if (nextWalletToCheck != null)
+        {
+            Wallet w = walletUpdate.get(nextWalletToCheck);
+            currentWalletUpdates.put(nextWalletToCheck, startWalletSyncProcess(w));
+        }
     }
 
     public void swipeRefreshWallets()
@@ -319,7 +341,10 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(w -> fetchWalletsInteract.updateWalletData(w, () -> { }), this::onError));
 
-        updateWallets();
+        //now load the current wallets from database
+        disposable = fetchWalletsInteract
+                .fetch()
+                .subscribe(this::startFullWalletSync, this::onError);
     }
 
     public void fetchWallets()
@@ -371,7 +396,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         if (walletBalanceUpdate != null && !walletBalanceUpdate.isDisposed()) walletBalanceUpdate.dispose();
         if (ensCheck != null && !ensCheck.isDisposed()) ensCheck.dispose();
         if (ensWrappingCheck != null && !ensWrappingCheck.isDisposed()) ensWrappingCheck.dispose();
-        if (walletSync != null && !walletSync.isDisposed()) walletSync.dispose();
     }
 
     private void onCreateWalletError(Throwable throwable)
@@ -450,6 +474,12 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
             svs.stopUpdateCycle();
         }
 
+        for (Disposable d : currentWalletUpdates.values())
+        {
+            if (!d.isDisposed()) d.dispose();
+        }
+
         walletServices.clear();
+        currentWalletUpdates.clear();
     }
 }

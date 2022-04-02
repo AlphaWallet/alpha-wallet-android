@@ -9,7 +9,9 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -24,6 +26,7 @@ import android.webkit.URLUtil;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.RawRes;
+import androidx.fragment.app.FragmentActivity;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -915,6 +918,30 @@ public class Utils {
             return true;
         }
         catch (Exception e)
+        {
+            return false;
+        }
+    }
+
+    public static boolean stillAvailable(Context context)
+    {
+        if (context == null)
+        {
+            return false;
+        }
+        else if (context instanceof FragmentActivity)
+        {
+            return !((FragmentActivity) context).isDestroyed();
+        }
+        else if (context instanceof Activity)
+        {
+            return !((Activity) context).isDestroyed();
+        }
+        else if (context instanceof ContextWrapper)
+        {
+            return stillAvailable(((ContextWrapper) context).getBaseContext());
+        }
+        else
         {
             return false;
         }

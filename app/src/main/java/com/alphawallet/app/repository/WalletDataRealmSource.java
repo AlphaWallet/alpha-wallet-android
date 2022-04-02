@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository;
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
@@ -7,6 +9,8 @@ import com.alphawallet.app.repository.entity.RealmKeyType;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
+
+import org.web3j.crypto.WalletUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -124,7 +128,7 @@ public class WalletDataRealmSource {
     private Wallet composeKeyType(RealmKeyType keyType)
     {
         Wallet wallet = null;
-        if (keyType != null)
+        if (keyType != null && !TextUtils.isEmpty(keyType.getAddress()) && WalletUtils.isValidAddress(keyType.getAddress()))
         {
             wallet = new Wallet(keyType.getAddress());
             wallet.type = keyType.getType();

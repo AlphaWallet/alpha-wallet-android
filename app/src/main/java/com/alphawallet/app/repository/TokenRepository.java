@@ -169,11 +169,13 @@ public class TokenRepository implements TokenRepositoryType {
                             if (TextUtils.isEmpty(tInfo.name + tInfo.symbol)) tInfo = new TokenInfo(tInfo.address, " ", " ", tInfo.decimals, tInfo.isEnabled, tInfo.chainId); //ensure we don't keep overwriting this
                             t = new ERC721Token(tInfo, NFTBalance, t.balance, System.currentTimeMillis(), t.getNetworkName(), type);
                             t.lastTxTime = tokens[i].lastTxTime;
+                            t.setTokenWallet(wallet.address);
                             tokens[i] = t;
                             break;
                         case ERC721_TICKET:
                             List<BigInteger> balanceFromOpenSea = t.getArrayBalance();
                             t = new ERC721Ticket(t.tokenInfo, balanceFromOpenSea, System.currentTimeMillis(), t.getNetworkName(), ContractType.ERC721_TICKET);
+                            t.setTokenWallet(wallet.address);
                             tokens[i] = t;
                             break;
                         default:

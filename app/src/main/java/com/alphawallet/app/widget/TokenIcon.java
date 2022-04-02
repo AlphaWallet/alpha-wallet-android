@@ -2,7 +2,6 @@ package com.alphawallet.app.widget;
 
 import static androidx.core.content.ContextCompat.getColorStateList;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -16,7 +15,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -35,14 +33,11 @@ import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.CustomViewTarget;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.transition.Transition;
 
 import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
@@ -279,15 +274,7 @@ public class TokenIcon extends ConstraintLayout
      */
     private void loadFromAltRepo()
     {
-        if (getContext() == null || this.fallbackIconUrl == null) return;
-        if (getContext() instanceof Activity)
-        {
-            Activity myAct = (Activity) getContext();
-            if (myAct.isFinishing() || myAct.isDestroyed())
-            {
-                return;
-            }
-        }
+        if (!Utils.stillAvailable(getContext()) || this.fallbackIconUrl == null) return;
 
         final RequestOptions optionalCircleCrop = squareToken ? new RequestOptions() : new RequestOptions().circleCrop();
 

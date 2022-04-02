@@ -1,5 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -52,6 +54,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -61,10 +65,6 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import timber.log.Timber;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-
-import javax.inject.Inject;
 
 @HiltViewModel
 public class WalletConnectViewModel extends BaseViewModel

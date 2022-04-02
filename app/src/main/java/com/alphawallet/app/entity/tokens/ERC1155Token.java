@@ -1,12 +1,17 @@
 package com.alphawallet.app.entity.tokens;
 
 
+import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunctionArray;
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.app.util.Utils.parseTokenId;
+import static org.web3j.tx.Contract.staticExtractEventParameters;
+
 import android.app.Activity;
 import android.util.Pair;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.SyncDef;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -53,11 +58,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.realm.Realm;
 import timber.log.Timber;
-
-import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunctionArray;
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
-import static com.alphawallet.app.util.Utils.parseTokenId;
-import static org.web3j.tx.Contract.staticExtractEventParameters;
 
 public class ERC1155Token extends Token
 {
@@ -538,12 +538,12 @@ public class ERC1155Token extends Token
         return new Event("TransferBatch", paramList);
     }
 
-    private EthFilter getReceiveBalanceFilter(Event event, DefaultBlockParameter startBlock)
+    private EthFilter getReceiveBalanceFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
     {
         final org.web3j.protocol.core.methods.request.EthFilter filter =
                 new org.web3j.protocol.core.methods.request.EthFilter(
                         startBlock,
-                        DefaultBlockParameterName.LATEST,
+                        endBlock,
                         tokenInfo.address) // retort contract address
                         .addSingleTopic(EventEncoder.encode(event));// commit event format
 
@@ -587,25 +587,18 @@ public class ERC1155Token extends Token
     {
         try
         {
-            BigInteger lastEventBlockRead = getLastBlockRead(realm);
-            Pair<HashSet<BigInteger>, BigInteger> eventResult;
+            SyncDef sync = getSyncDef(realm);
+            if (sync == null) return balance;
+
+            DefaultBlockParameter startBlock = DefaultBlockParameter.valueOf(sync.eventReadStartBlock);
+            DefaultBlockParameter endBlock = DefaultBlockParameter.valueOf(sync.eventReadEndBlock);
+
             final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
 
-            DefaultBlockParameter startBlock = DefaultBlockParameter.valueOf(lastEventBlockRead);
+            HashSet<BigInteger> tokenIds = processSingleTransferEvents(web3j, startBlock, endBlock);
 
-            eventResult = processSingleTransferEvents(web3j, startBlock);
-            HashSet<BigInteger> tokenIds = new HashSet<>(eventResult.first);
-            lastEventBlockRead = eventResult.second;
-
-            eventResult = processBatchTransferEvents(web3j, startBlock);
-            tokenIds.addAll(eventResult.first);
-            if (lastEventBlockRead.compareTo(eventResult.second) > 0)
-                lastEventBlockRead = eventResult.second;
-
-            if (tokenIds.size() > 0)
-            {
-                updateEventBlock(realm, lastEventBlockRead);
-            }
+            HashSet<BigInteger> eventResult = processBatchTransferEvents(web3j, startBlock, endBlock);
+            tokenIds.addAll(eventResult);
 
             //combine the tokenIds with existing assets
             tokenIds.addAll(assets.keySet());
@@ -613,6 +606,10 @@ public class ERC1155Token extends Token
             List<Uint256> balances = fetchBalances(tokenIds);
             //update realm
             updateRealmBalance(realm, tokenIds, balances);
+
+            //update read points
+            updateEventReads(realm, sync.eventReadStartBlock.longValue(), sync.upwardSync
+                    ? sync.eventReadEndBlock.longValue() : 0L);
         }
         catch (Exception e)
         {
@@ -622,21 +619,18 @@ public class ERC1155Token extends Token
         return new BigDecimal(assets.keySet().size());
     }
 
-    private Pair<HashSet<BigInteger>, BigInteger> processBatchTransferEvents(Web3j web3j, DefaultBlockParameter startBlock) throws IOException
+    private HashSet<BigInteger> processBatchTransferEvents(Web3j web3j, DefaultBlockParameter startBlock,
+                                                           DefaultBlockParameter endBlock) throws IOException
     {
         final Event event = getBatchBalanceUpdateEvents();
-        EthFilter filter = getReceiveBalanceFilter(event, startBlock);
+        EthFilter filter = getReceiveBalanceFilter(event, startBlock, endBlock);
         EthLog receiveLogs = web3j.ethGetLogs(filter).send();
         HashSet<BigInteger> tokenIds = new HashSet<>();
-        BigInteger lastEventBlockRead = Numeric.toBigInt(startBlock.getValue());
-
-
 
         for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())
         {
             String block = ((Log) ethLog.get()).getBlockNumberRaw();
             if (block == null || block.length() == 0) continue;
-            BigInteger blockNumber = new BigInteger(Numeric.cleanHexPrefix(block), 16);
 
             final EventValues eventValues = staticExtractEventParameters(event, (Log) ethLog.get());
             ArrayList<Uint256> idResult = (ArrayList<Uint256>)eventValues.getNonIndexedValues().get(0).getValue();
@@ -644,37 +638,30 @@ public class ERC1155Token extends Token
             {
                 tokenIds.add(_id.getValue());
             }
-
-            if (blockNumber.compareTo(lastEventBlockRead) > 0)
-                lastEventBlockRead = blockNumber;
         }
 
-        return new Pair<>(tokenIds, lastEventBlockRead);
+        return tokenIds;
     }
 
-    private Pair<HashSet<BigInteger>, BigInteger> processSingleTransferEvents(Web3j web3j, DefaultBlockParameter startBlock) throws IOException
+    private HashSet<BigInteger> processSingleTransferEvents(Web3j web3j, DefaultBlockParameter startBlock,
+                                                            DefaultBlockParameter endBlock) throws IOException
     {
         final Event event = getBalanceUpdateEvents();
-        EthFilter filter = getReceiveBalanceFilter(event, startBlock);
+        EthFilter filter = getReceiveBalanceFilter(event, startBlock, endBlock);
         EthLog receiveLogs = web3j.ethGetLogs(filter).send();
         HashSet<BigInteger> tokenIds = new HashSet<>();
-        BigInteger lastEventBlockRead = Numeric.toBigInt(startBlock.getValue());
 
         for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())
         {
             String block = ((Log) ethLog.get()).getBlockNumberRaw();
             if (block == null || block.length() == 0) continue;
-            BigInteger blockNumber = new BigInteger(Numeric.cleanHexPrefix(block), 16);
 
             final EventValues eventValues = staticExtractEventParameters(event, (Log) ethLog.get());
             BigInteger _id = new BigInteger(eventValues.getNonIndexedValues().get(0).getValue().toString());
             tokenIds.add(_id);
-
-            if (blockNumber.compareTo(lastEventBlockRead) > 0)
-                lastEventBlockRead = blockNumber;
         }
 
-        return new Pair<>(tokenIds, lastEventBlockRead);
+        return tokenIds;
     }
 
     private BigInteger getLastBlockRead(Realm realm)

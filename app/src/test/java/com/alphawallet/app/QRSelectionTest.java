@@ -69,19 +69,7 @@ public class QRSelectionTest
         transactionRepository = new TransactionRepositoryType()
         {
             @Override
-            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
-            {
-                return null;
-            }
-
-            @Override
             public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId)
-            {
-                return null;
-            }
-
-            @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, long chainId)
             {
                 return null;
             }
@@ -92,7 +80,7 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<TransactionData> getSignatureForTransaction(Wallet wallet, Web3Transaction w3tx, long chainId)
+            public Single<TransactionData> getSignatureForTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId)
             {
                 return null;
             }

@@ -23,6 +23,7 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.StrongBoxUnavailableException;
 import android.security.keystore.UserNotAuthenticatedException;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -50,6 +51,7 @@ import com.alphawallet.app.widget.SignTransactionDialog;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayOutputStream;
@@ -1369,7 +1371,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             while (keys.hasMoreElements())
             {
                 String thisKey = keys.nextElement();
-                if (walletList.get(thisKey.toLowerCase()) == null)
+                if (!TextUtils.isEmpty(thisKey) && WalletUtils.isValidAddress(thisKey) && walletList.get(thisKey.toLowerCase()) == null)
                 {
                     orphanedWallets.add(thisKey);
                 }

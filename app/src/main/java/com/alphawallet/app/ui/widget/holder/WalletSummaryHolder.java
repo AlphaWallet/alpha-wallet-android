@@ -46,7 +46,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     private final UserAvatar walletIcon;
     private final LinearLayout walletClickLayout;
     private final TextView walletBalanceText;
-    private final TextView walletBalanceCurrency;
     private final TextView walletNameText;
     private final TextView walletAddressSeparator;
     private final TextView walletAddressText;
@@ -64,7 +63,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         manageWalletBtn = findViewById(R.id.manage_wallet_btn);
         walletIcon = findViewById(R.id.wallet_icon);
         walletBalanceText = findViewById(R.id.wallet_balance);
-        walletBalanceCurrency = findViewById(R.id.wallet_currency);
         walletNameText = findViewById(R.id.wallet_name);
         walletAddressSeparator = findViewById(R.id.wallet_address_separator);
         walletAddressText = findViewById(R.id.wallet_address);
@@ -123,8 +121,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
             {
                 walletBalance = walletBalance.substring(1);
             }
-            walletBalanceText.setText(walletBalance);
-            walletBalanceCurrency.setText(wallet.balanceSymbol);
+            walletBalanceText.setText(String.format("%s %s", walletBalance, wallet.balanceSymbol));
 
             walletAddressText.setText(Utils.formatAddress(wallet.address));
 
@@ -155,6 +152,11 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
             checkLastBackUpTime();
             startRealmListener();
         }
+    }
+
+    public void setWaiting()
+    {
+        walletIcon.setWaiting();
     }
 
     private void setWalletChange(double percentChange24h)

@@ -34,12 +34,10 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
-import com.alphawallet.app.widget.ChainName;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -48,10 +46,9 @@ import dagger.hilt.android.AndroidEntryPoint;
  * Created by JB on 9/09/2020.
  */
 @AndroidEntryPoint
-public class WalletConnectSessionActivity extends BaseActivity
-{
+public class WalletConnectSessionActivity extends BaseActivity {
+    private final Handler handler = new Handler(Looper.getMainLooper());
     WalletConnectViewModel viewModel;
-
     private RecyclerView recyclerView;
     private Button btnConnectWallet;
     private View bottomDivider;
@@ -59,10 +56,19 @@ public class WalletConnectSessionActivity extends BaseActivity
     private CustomAdapter adapter;
     private Wallet wallet;
     private List<WalletConnectSessionItem> wcSessions;
-
-    private final Handler handler = new Handler(Looper.getMainLooper());
-
     private int connectionCount = -1;
+    private final BroadcastReceiver walletConnectChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            String action = intent.getAction();
+            if (action.equals(C.WALLET_CONNECT_COUNT_CHANGE))
+            {
+                handler.post(() -> adapter.notifyDataSetChanged());
+                connectionCount = intent.getIntExtra("count", 0);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -147,13 +153,15 @@ public class WalletConnectSessionActivity extends BaseActivity
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu_scan_wc, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         if (item.getItemId() == android.R.id.home)
         {
             finish();
@@ -174,8 +182,47 @@ public class WalletConnectSessionActivity extends BaseActivity
         startActivity(intent);
     }
 
-    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>
+    private void setupClient(final String sessionId, final CustomAdapter.CustomViewHolder holder)
     {
+        viewModel.getClient(this, sessionId, client -> handler.post(() -> {
+            if (client == null || !client.isConnected())
+            {
+                holder.statusIcon.setVisibility(View.GONE);
+            }
+            else
+            {
+                holder.statusIcon.setVisibility(View.VISIBLE);
+                holder.statusIcon.setImageResource(R.drawable.ic_connected);
+            }
+        }));
+    }
+
+    private void dialogConfirmDelete(WalletConnectSessionItem session)
+    {
+        AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.title_delete_session);
+        dialog.setMessage(getString(R.string.delete_session, session.name));
+        dialog.setButton(R.string.delete, v -> {
+            dialog.dismiss();
+            viewModel.deleteSession(session.sessionId);
+            setupList();
+        });
+        dialog.setSecondaryButton(R.string.action_cancel, v -> dialog.dismiss());
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    private void startConnectionCheck()
+    {
+        registerReceiver(walletConnectChangeReceiver, new IntentFilter(C.WALLET_CONNECT_COUNT_CHANGE));
+    }
+
+    private void stopConnectionCheck()
+    {
+        unregisterReceiver(walletConnectChangeReceiver);
+    }
+
+    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
         @Override
         public CustomAdapter.CustomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
@@ -183,29 +230,6 @@ public class WalletConnectSessionActivity extends BaseActivity
                     .inflate(R.layout.item_wc_session, parent, false);
 
             return new CustomAdapter.CustomViewHolder(itemView);
-        }
-
-        class CustomViewHolder extends RecyclerView.ViewHolder
-        {
-            final ImageView icon;
-            final ImageView statusIcon;
-            final TextView peerName;
-            final TextView peerUrl;
-            final LinearLayout clickLayer;
-            final ImageView chainIcon;
-
-            CustomViewHolder(View view)
-            {
-                super(view);
-                icon = view.findViewById(R.id.icon);
-                statusIcon = view.findViewById(R.id.status_icon);
-                peerName = view.findViewById(R.id.session_name);
-                peerUrl = view.findViewById(R.id.session_url);
-                clickLayer = view.findViewById(R.id.item_layout);
-                chainIcon = view.findViewById(R.id.status_chain_icon);
-                chainIcon.setVisibility(View.VISIBLE);
-                view.findViewById(R.id.chain_icon_background).setVisibility(View.VISIBLE);
-            }
         }
 
         @Override
@@ -241,59 +265,27 @@ public class WalletConnectSessionActivity extends BaseActivity
         {
             return wcSessions.size();
         }
-    }
 
-    private void setupClient(final String sessionId, final CustomAdapter.CustomViewHolder holder)
-    {
-        viewModel.getClient(this, sessionId, client -> handler.post(() -> {
-            if (client == null || !client.isConnected())
-            {
-                holder.statusIcon.setVisibility(View.GONE);
-            }
-            else
-            {
-                holder.statusIcon.setVisibility(View.VISIBLE);
-                holder.statusIcon.setImageResource(R.drawable.ic_connected);
-            }
-        }));
-    }
+        class CustomViewHolder extends RecyclerView.ViewHolder {
+            final ImageView icon;
+            final ImageView statusIcon;
+            final TextView peerName;
+            final TextView peerUrl;
+            final LinearLayout clickLayer;
+            final ImageView chainIcon;
 
-    private void dialogConfirmDelete(WalletConnectSessionItem session)
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        AlertDialog dialog = builder.setTitle(R.string.title_delete_session)
-                .setMessage(getString(R.string.delete_session, session.name))
-                .setPositiveButton(R.string.delete, (d, w) -> {
-                    viewModel.deleteSession(session.sessionId);
-                    setupList();
-                })
-                .setNegativeButton(R.string.action_cancel, (d, w) -> {
-                    d.dismiss();
-                })
-                .setCancelable(false)
-                .create();
-        dialog.show();
-    }
-
-    private final BroadcastReceiver walletConnectChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(C.WALLET_CONNECT_COUNT_CHANGE))
+            CustomViewHolder(View view)
             {
-                handler.post(() -> adapter.notifyDataSetChanged());
-                connectionCount = intent.getIntExtra("count", 0);
+                super(view);
+                icon = view.findViewById(R.id.icon);
+                statusIcon = view.findViewById(R.id.status_icon);
+                peerName = view.findViewById(R.id.session_name);
+                peerUrl = view.findViewById(R.id.session_url);
+                clickLayer = view.findViewById(R.id.item_layout);
+                chainIcon = view.findViewById(R.id.status_chain_icon);
+                chainIcon.setVisibility(View.VISIBLE);
+                view.findViewById(R.id.chain_icon_background).setVisibility(View.VISIBLE);
             }
         }
-    };
-
-    private void startConnectionCheck()
-    {
-        registerReceiver(walletConnectChangeReceiver, new IntentFilter(C.WALLET_CONNECT_COUNT_CHANGE));
-    }
-
-    private void stopConnectionCheck()
-    {
-        unregisterReceiver(walletConnectChangeReceiver);
     }
 }

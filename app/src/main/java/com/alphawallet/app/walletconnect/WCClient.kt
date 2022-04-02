@@ -101,6 +101,7 @@ open class WCClient(
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
+        if (text.startsWith("Missing or invalid")) { return }
         var decrypted: String? = null
         try {
             Timber.d("<== message $text")

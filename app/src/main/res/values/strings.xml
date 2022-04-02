@@ -887,7 +887,7 @@
     <string name="tab_info">Info</string>
     <string name="tab_activity">Activity</string>
     <string name="tab_alert">Alerts</string>
-    <string name="unknown_network_title">Unkown Network</string>
+    <string name="unknown_network_title">Unknown Network</string>
     <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
     <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
     <string name="wc_no_active_sessions">No Active sessions</string>
@@ -914,4 +914,5 @@
     <string name="trait_rarity_suppl_text">%1$s%% have this trait</string>
     <string name="experimental_1559">Use 1559 Transactions</string>
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
+    <string name="chain_id">Chain ID: %1d</string>
 </resources>

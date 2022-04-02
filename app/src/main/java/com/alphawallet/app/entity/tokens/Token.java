@@ -140,7 +140,7 @@ public class Token
         {
             for (BigInteger id : getArrayBalance())
             {
-                if (!uniqueIds.contains(id) && !id.equals(BigInteger.ZERO)) uniqueIds.add(id);
+                if (!uniqueIds.contains(id) && !(this.contractType == ContractType.ERC875 && id.equals(BigInteger.ZERO))) uniqueIds.add(id);
             }
         }
         else

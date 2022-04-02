@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Aw.Component.SeedWord" parent="Widget.MaterialComponents.TextView">
+        <item name="android:maxLines">1</item>
+        <item name="android:background">@drawable/selector_seed_word_background</item>
+        <item name="android:textColor">@color/selector_seed_word_text</item>
+        <item name="android:paddingStart">@dimen/standard_16</item>
+        <item name="android:paddingEnd">@dimen/standard_16</item>
+        <item name="android:paddingTop">@dimen/small_12</item>
+        <item name="android:paddingBottom">@dimen/small_12</item>
+        <item name="android:textSize">@dimen/sp14</item>
+        <item name="android:gravity">center</item>
+    </style>
+</resources>

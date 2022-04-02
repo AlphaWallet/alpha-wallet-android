@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -266,18 +268,6 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                 }
                 break;
 
-            case C.SET_GAS_SETTINGS:
-                if (data != null && actionDialog != null)
-                {
-                    int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
-                    long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
-                    BigDecimal customGasPrice = data.hasExtra(C.EXTRA_GAS_PRICE) ?
-                            new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE)) : BigDecimal.ZERO; //may not have set a custom gas price
-                    BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
-                    long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
-                    actionDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
-                }
-                break;
             case C.COMPLETED_TRANSACTION:
                 Intent i = new Intent();
                 i.putExtra(C.EXTRA_TXHASH, data.getStringExtra(C.EXTRA_TXHASH));
@@ -431,6 +421,15 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
 
     @Override
     public void notifyConfirm(String mode) { viewModel.actionSheetConfirm(mode); }
+
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> actionDialog.setCurrentGasIndex(result));
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
+    }
 
     private void txWritten(TransactionData transactionData)
     {

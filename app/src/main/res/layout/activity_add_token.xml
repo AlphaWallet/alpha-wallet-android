@@ -4,15 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
-    <include
-        layout="@layout/layout_app_bar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <com.alphawallet.app.widget.InputAddress
         android:id="@+id/input_address_view"
-        android:layout_below="@id/_app_bar"
+        android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
@@ -44,8 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/dp15"
-            android:text="@string/chains_to_scan"
-            android:textSize="@dimen/sp16" />
+            android:text="@string/chains_to_scan" />
 
         <TextView
             android:id="@+id/text_check_counter"
@@ -53,12 +50,10 @@
             android:layout_height="36dp"
             android:background="@drawable/blue_circle"
             android:gravity="center"
-            android:textColor="@color/white"
-            android:textSize="@dimen/sp18"
+            android:textColor="?colorOnPrimary"
             tools:text="1" />
 
     </LinearLayout>
-
 
     <com.alphawallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"

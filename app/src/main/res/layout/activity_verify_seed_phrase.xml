@@ -1,66 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_white_toolbar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <RelativeLayout
         android:id="@+id/relativeLayout3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/background_card"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
         <TextView
             android:id="@+id/text_title"
+            style="@style/Aw.Typography.Headline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:fontFamily="@font/font_regular"
             android:gravity="center_horizontal"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
+            android:paddingStart="@dimen/base_24"
+            android:paddingEnd="@dimen/base_24"
             android:text="@string/verify_seed_phrase"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="28sp" />
+            android:textAlignment="center" />
 
-        <TextView
-            android:id="@+id/text_verify"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/text_title"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="47dp"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/background_verify_window"
-            android:minHeight="110dp"
-            android:padding="15dp"
-            android:textColor="@color/dove"
-            android:textSize="18sp" />
+            android:layout_marginStart="@dimen/standard_16"
+            android:layout_marginTop="@dimen/double_base_48"
+            android:layout_marginEnd="@dimen/standard_16"
+            app:cardBackgroundColor="@color/transparent"
+            app:cardElevation="0dp"
+            app:strokeColor="?android:textColorSecondary"
+            app:strokeWidth="1dp">
+
+            <TextView
+                android:id="@+id/text_verify"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:minHeight="110dp"
+                android:padding="@dimen/standard_16"
+                tools:text="Verify" />
+
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
+            style="@style/Aw.Typography.Caption"
             android:id="@+id/text_invalid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/text_verify"
+            android:layout_below="@id/container"
             android:layout_gravity="center_horizontal"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="10dp"
-            android:paddingStart="5dp"
-            android:paddingEnd="5dp"
+            android:layout_marginStart="@dimen/small_12"
+            android:padding="@dimen/tiny_8"
             android:text="@string/invalid_phrase"
-            android:textColor="@color/danger"
-            android:textSize="14sp"
-            android:visibility="invisible" />
+            android:textColor="?colorError"
+            android:visibility="invisible"
+            tools:visibility="visible" />
 
         <LinearLayout
             android:id="@+id/flexbox_container"
@@ -74,8 +77,8 @@
                 android:id="@+id/layout_word_holder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"
+                android:layout_marginStart="@dimen/standard_16"
+                android:layout_marginEnd="@dimen/standard_16"
                 app:flexDirection="row"
                 app:flexWrap="wrap" />
 

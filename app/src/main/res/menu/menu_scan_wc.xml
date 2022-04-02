@@ -6,6 +6,6 @@
         android:id="@+id/action_scan"
         android:icon="@drawable/ic_camera_scan"
         android:title="@string/title_wallet_connect"
-        app:showAsAction="always"
-        />
+        app:iconTint="?colorControlNormal"
+        app:showAsAction="always" />
 </menu>

@@ -329,7 +329,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-//        getMenuInflater().inflate(R.menu.menu_qr, menu);
+//        getMenuInflater().inflate(R.menu.menu_show_contract, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -340,7 +340,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         {
             finish();
         }
-        else if (item.getItemId() == R.id.action_qr)
+        else if (item.getItemId() == R.id.action_show_contract)
         {
             viewModel.showContractInfo(this, wallet, token);
         }

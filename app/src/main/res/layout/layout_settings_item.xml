@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_setting"
     android:layout_width="match_parent"
     android:layout_height="61dp"
-    android:background="@drawable/selector_settings_item"
     android:clickable="true"
     android:focusable="true">
 
@@ -13,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/standard_16"
         android:src="@drawable/ic_settings_wallet_address" />
 
     <LinearLayout
@@ -21,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/standard_16"
         android:layout_toStartOf="@id/layout_controls"
         android:layout_toEndOf="@id/setting_icon"
         android:orientation="vertical">
@@ -30,24 +31,19 @@
             android:id="@+id/setting_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:text="Setting Title"
-            android:textColor="@color/black"
-            android:textSize="17sp" />
+            tools:text="Setting Title" />
 
         <TextView
+            style="@style/Aw.Typography.Sub"
             android:id="@+id/setting_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="middle"
-            android:fontFamily="@font/font_regular"
             android:lines="1"
             android:maxLines="1"
-
-            android:text="Setting Subtitle"
-            android:textColor="@color/dove"
-            android:textSize="15sp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:text="Setting Subtitle"
+            tools:visibility="visible" />
     </LinearLayout>
 
     <LinearLayout
@@ -62,24 +58,26 @@
             android:id="@+id/arrow_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="@dimen/small_12"
             android:src="@drawable/ic_arrow_right"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:tint="?colorControlNormal"
+            tools:visibility="visible" />
 
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/setting_switch"
+            style="@style/Aw.Component.Switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="@dimen/standard_16"
+            android:checked="true"
             android:clickable="false"
             android:focusable="false"
-            android:theme="@style/SettingsItemSwitchAppearance"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:visibility="visible" />
     </LinearLayout>
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/mercury" />
+        style="@style/Aw.Component.Separator"
+        android:layout_alignParentBottom="true" />
 </RelativeLayout>

@@ -69,25 +69,18 @@ public class QRSelectionTest
         transactionRepository = new TransactionRepositoryType()
         {
             @Override
-            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
-            {
-                return null;
-            }
-
-            @Override
             public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, long chainId)
-            {
+            public Single<TransactionData> create1559TransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasLimit, BigInteger gasPremium, BigInteger gasMax, long nonce, byte[] data, long chainId) {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> getSignatureForTransaction(Wallet wallet, Web3Transaction w3tx, long chainId)
+            public Single<TransactionData> getSignatureForTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId)
             {
                 return null;
             }
@@ -138,12 +131,6 @@ public class QRSelectionTest
             public Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
             {
                 return Single.fromCallable(() -> { return ""; });
-            }
-
-            @Override
-            public void removeOverridenTransaction(Wallet wallet, String oldTxHash)
-            {
-
             }
 
             @Override

@@ -155,7 +155,8 @@ public class WCRequest implements Parcelable
             String gas = readStringFromParcelIfNotNull(in);
             String gasLimit = readStringFromParcelIfNotNull(in);
             String value = readStringFromParcelIfNotNull(in);
-            String data = in.readString();
+            String checkData = readStringFromParcelIfNotNull(in);
+            String data = checkData != null ? checkData : "";
 
             this.tx = new WCEthereumTransaction(
                     from,

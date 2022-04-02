@@ -492,7 +492,6 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> sellLinkFinal(universalLink));
         dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
-        dialog.showShareLink();
         dialog.show();
     }
 

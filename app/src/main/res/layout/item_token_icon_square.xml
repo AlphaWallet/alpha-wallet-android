@@ -5,8 +5,8 @@
     android:id="@+id/view_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:layout_constraintDimensionRatio="1:1"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    app:layout_constraintDimensionRatio="1:1">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guidelineRight"
@@ -91,52 +91,52 @@
         android:layout_height="0dp"
         android:layout_gravity="center"
         android:contentDescription="@string/empty"
-        app:layout_constraintDimensionRatio="H,1:1"
         android:gravity="center"
-        tools:src="@drawable/ic_ropsten"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"
+        app:layout_constraintDimensionRatio="H,1:1"
         app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
         app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
-        app:layout_constraintTop_toTopOf="@id/guidelineTop" />
+        app:layout_constraintTop_toTopOf="@id/guidelineTop"
+        tools:src="@drawable/ic_ropsten" />
 
     <TextView
         android:id="@+id/text_icon"
+        style="@style/Aw.Typography.Title.Large.Bold"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_gravity="center"
-        android:background="@color/azure"
-        android:backgroundTint="@color/azure"
-        android:fontFamily="@font/font_bold"
+        android:background="?colorPrimary"
+        android:backgroundTint="?colorPrimary"
         android:gravity="center"
         android:lines="1"
-        android:textColor="@color/white"
+        android:paddingLeft="@dimen/tiny_8"
+        android:paddingRight="@dimen/tiny_8"
+        android:textColor="?colorOnPrimary"
         android:visibility="gone"
-        tools:visibility="gone"
-        android:paddingLeft="@dimen/dp5"
-        android:paddingRight="@dimen/dp5"
         app:autoSizeMaxTextSize="@dimen/sp24"
         app:autoSizeMinTextSize="@dimen/sp12"
         app:autoSizeStepGranularity="1sp"
         app:autoSizeTextType="uniform"
-        app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
-        app:layout_constraintTop_toTopOf="@id/guidelineTop"
-        app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
         app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"
-        tools:text="UEFA" />
+        app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
+        app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
+        app:layout_constraintTop_toTopOf="@id/guidelineTop"
+        tools:text="UEFA"
+        tools:visibility="visible" />
 
     <ImageView
         android:id="@+id/chain_icon_background"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:visibility="gone"
-        tools:visibility="visible"
         android:contentDescription="@string/empty"
         android:src="@drawable/grey_circle"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/guidelineBottom2"
         app:layout_constraintEnd_toStartOf="@id/guidelineLeftMid"
-        app:layout_constraintTop_toTopOf="@id/guidelineBottomMid"
         app:layout_constraintStart_toEndOf="@id/guidelineLeft"
-        app:layout_constraintBottom_toTopOf="@id/guidelineBottom2" />
+        app:layout_constraintTop_toTopOf="@id/guidelineBottomMid"
+        tools:visibility="visible" />
 
     <ImageView
         android:id="@+id/status_chain_icon"
@@ -155,25 +155,25 @@
         android:id="@+id/status_icon_background"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:visibility="gone"
         android:contentDescription="@string/empty"
         android:src="@drawable/grey_circle"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/guidelineBottom2"
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"
-        app:layout_constraintTop_toTopOf="@id/guidelineBottomMid"
         app:layout_constraintStart_toEndOf="@id/guidelineRightMid"
-        app:layout_constraintBottom_toTopOf="@id/guidelineBottom2" />
+        app:layout_constraintTop_toTopOf="@id/guidelineBottomMid" />
 
     <ImageView
         android:id="@+id/status_icon"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:visibility="gone"
         android:contentDescription="@string/empty"
         android:src="@drawable/ic_rejected_small"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/guidelineBottom2"
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"
-        app:layout_constraintTop_toTopOf="@id/guidelineBottomMid"
         app:layout_constraintStart_toEndOf="@id/guidelineRightMid"
-        app:layout_constraintBottom_toTopOf="@id/guidelineBottom2" />
+        app:layout_constraintTop_toTopOf="@id/guidelineBottomMid" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

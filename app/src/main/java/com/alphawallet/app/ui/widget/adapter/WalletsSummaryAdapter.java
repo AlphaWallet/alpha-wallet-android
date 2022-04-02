@@ -15,6 +15,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.TextHolder;
@@ -40,6 +41,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     private final Wallet summaryWallet = new Wallet(ZERO_ADDRESS);
     private final Context context;
     private final Realm realm;
+    private final GenericWalletInteract walletInteract;
 
     public WalletsSummaryAdapter(Context ctx,
                                  OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract) {
@@ -47,6 +49,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         this.wallets = new ArrayList<>();
         this.context = ctx;
         this.realm = genericWalletInteract.getWalletRealm();
+        this.walletInteract = genericWalletInteract;
     }
 
     @NotNull
@@ -58,7 +61,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
                 binderViewHolder = new WalletSummaryHolder(R.layout.item_wallet_summary_manage, parent, this, realm);
             break;
             case TextHolder.VIEW_TYPE:
-                binderViewHolder = new TextHolder(R.layout.item_text_view, parent);
+                binderViewHolder = new TextHolder(R.layout.item_standard_header, parent);
                 break;
             case WalletSummaryHeaderHolder.VIEW_TYPE:
                 binderViewHolder = new WalletSummaryHeaderHolder(R.layout.item_wallet_summary_large_title, parent,this, realm);
@@ -154,7 +157,14 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         int index = getWalletIndex(wallet);
         if (index >= 0)
         {
-            valueMap.put(wallet.toLowerCase(), value);
+            if (value != null)
+            {
+                valueMap.put(wallet.toLowerCase(), value);
+            }
+            else
+            {
+                wallets.get(index).isSynced = false;
+            }
             notifyItemChanged(index);
             updateWalletSummary();
         }
@@ -289,8 +299,8 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     @Override
     public void ensAvatar(Wallet wallet)
     {
-        // we received a wallet avatar URL (wallet.ENSAvatar)
-        //TODO: Michael - does the view need to be updated?
+        //update the ENS avatar in the database
+        walletInteract.updateWalletItem(wallet, WalletItem.ENS_AVATAR, () -> { });
     }
 
     public void onDestroy()

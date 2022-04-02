@@ -23,6 +23,7 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.token.entity.TicketRange;
+import com.google.android.material.radiobutton.MaterialRadioButton;
 
 /**
  * Created by James on 26/03/2019.
@@ -38,7 +39,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private final LinearLayout webWrapper;
     private final boolean iconified;
     private TokensAdapterCallback tokenClickListener;
-    private final AppCompatRadioButton itemSelect;
+    private final MaterialRadioButton itemSelect;
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
     private boolean activeClick;
     private final Handler handler = new Handler();

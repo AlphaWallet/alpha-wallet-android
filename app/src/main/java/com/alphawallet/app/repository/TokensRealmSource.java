@@ -648,6 +648,7 @@ public class TokensRealmSource implements TokenLocalSource {
         realm.insertOrUpdate(realmNFT);
     }
 
+    // NFT Assets From Opensea
     @Override
     public Token[] initNFTAssets(Wallet wallet, Token[] tokens)
     {

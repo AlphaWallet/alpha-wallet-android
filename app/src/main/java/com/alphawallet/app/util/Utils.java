@@ -9,7 +9,9 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -23,7 +25,9 @@ import android.util.Patterns;
 import android.util.TypedValue;
 import android.webkit.URLUtil;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.RawRes;
+import androidx.fragment.app.FragmentActivity;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -34,8 +38,13 @@ import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
+import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.rlp.RlpEncoder;
+import org.web3j.rlp.RlpList;
+import org.web3j.rlp.RlpString;
 import org.web3j.utils.Numeric;
 
 import java.io.FileInputStream;
@@ -879,5 +888,64 @@ public class Utils {
         }
 
         return cleanInput.length() == 64;
+    }
+
+    public static @ColorInt int getColorFromAttr(Context context, int resId)
+    {
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        theme.resolveAttribute(resId, typedValue, true);
+        return typedValue.data;
+    }
+
+    public static String calculateContractAddress(String account, long nonce)
+    {
+        byte[] addressAsBytes = Numeric.hexStringToByteArray(account);
+        byte[] calculatedAddressAsBytes =
+                Hash.sha3(RlpEncoder.encode(
+                        new RlpList(
+                                RlpString.create(addressAsBytes),
+                                RlpString.create((nonce)))));
+
+        calculatedAddressAsBytes = Arrays.copyOfRange(calculatedAddressAsBytes,
+                12, calculatedAddressAsBytes.length);
+        return Keys.toChecksumAddress(Numeric.toHexString(calculatedAddressAsBytes));
+    }
+
+    public static boolean isJson(String value)
+    {
+        try
+        {
+            JSONObject stateData = new JSONObject(value);
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+
+    public static boolean stillAvailable(Context context)
+    {
+        if (context == null)
+        {
+            return false;
+        }
+        else if (context instanceof FragmentActivity)
+        {
+            return !((FragmentActivity) context).isDestroyed();
+        }
+        else if (context instanceof Activity)
+        {
+            return !((Activity) context).isDestroyed();
+        }
+        else if (context instanceof ContextWrapper)
+        {
+            return stillAvailable(((ContextWrapper) context).getBaseContext());
+        }
+        else
+        {
+            return false;
+        }
     }
 }

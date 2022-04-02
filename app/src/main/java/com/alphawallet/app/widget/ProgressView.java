@@ -92,7 +92,7 @@ public class ProgressView extends RelativeLayout {
 
     public void setWhiteCircle()
     {
-        int colour = ContextCompat.getColor(context, R.color.white);
+        int colour = ContextCompat.getColor(context, R.color.surface);
         setTint(colour, false);
     }
 

@@ -124,7 +124,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
                 return new EventHolder(parent, tokensService, fetchTransactionsInteract,
                         assetService, this);
             case TransactionDateHolder.VIEW_TYPE:
-                return new TransactionDateHolder(R.layout.item_transactions_date_head, parent);
+                return new TransactionDateHolder(R.layout.item_standard_header, parent);
             case LabelSortedItem.VIEW_TYPE:
                 return new LabelHolder(R.layout.item_activity_label, parent);
             case TransferHolder.VIEW_TYPE:

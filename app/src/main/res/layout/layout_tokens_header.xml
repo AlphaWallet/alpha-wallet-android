@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/white">
+    android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/title"
+        style="@style/Aw.Typography.Title.Large.Bold"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/font_bold"
-        android:textSize="@dimen/sp24"
-        android:layout_marginStart="@dimen/dp16"
-        android:layout_marginEnd="@dimen/dp16"
-        android:layout_marginTop="@dimen/dp16"
-        android:layout_marginBottom="@dimen/dp8"
-        android:textColor="@color/black"/>
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginTop="@dimen/standard_16"
+        android:layout_marginEnd="@dimen/standard_16"
+        android:layout_marginBottom="@dimen/tiny_8"
+        tools:text="Header Title" />
+
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_gravity="bottom"
-        android:background="@color/mercury"/>
+        style="@style/Aw.Component.Separator"
+        android:layout_gravity="bottom" />
 </FrameLayout>

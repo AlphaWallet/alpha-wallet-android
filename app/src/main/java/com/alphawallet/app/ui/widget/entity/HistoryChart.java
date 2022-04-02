@@ -18,6 +18,8 @@ import androidx.annotation.Nullable;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.util.Utils;
+import com.google.android.material.color.MaterialColors;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -45,7 +47,8 @@ public class HistoryChart extends View
             .retryOnConnectionFailure(false)
             .build();
 
-    public enum Range {
+    public enum Range
+    {
 
         Day(1),
         Week(7),
@@ -55,23 +58,28 @@ public class HistoryChart extends View
 
         private final int value;
 
-        Range(int value) {
+        Range(int value)
+        {
             this.value = value;
         }
 
-        public int getValue() {
+        public int getValue()
+        {
             return value;
         }
 
     }
 
     // store tokens mapping and chart data
-    static class Cache {
+    static class Cache
+    {
         Range range;
         Map<Range, Datasource> datasourceMap = new HashMap<>();
 
-        Datasource getCurrentDatasource(Range range) {
-            if (datasourceMap.containsKey(range)) {
+        Datasource getCurrentDatasource(Range range)
+        {
+            if (datasourceMap.containsKey(range))
+            {
                 return datasourceMap.get(range);
             }
             return null;
@@ -93,7 +101,8 @@ public class HistoryChart extends View
 
         static Single<Datasource> fetchHistory(Range range, String tokenId)
         {
-            return Single.fromCallable(() -> {
+            return Single.fromCallable(() ->
+            {
                 ArrayList<Pair<Long, Float>> entries = new ArrayList<>();
                 try
                 {
@@ -103,7 +112,8 @@ public class HistoryChart extends View
                             .build();
                     okhttp3.Response response = httpClient.newCall(request)
                             .execute();
-                    if (response.code() / 200 == 1) {
+                    if (response.code() / 200 == 1)
+                    {
                         JSONArray prices = new JSONObject(response.body().string()).getJSONArray("prices");
                         float minValue = Float.MAX_VALUE;
                         float maxValue = 0;
@@ -128,7 +138,9 @@ public class HistoryChart extends View
                         ds.maxValue = maxValue;
                         return ds;
                     }
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     e.printStackTrace();
                 }
                 return null;
@@ -171,41 +183,28 @@ public class HistoryChart extends View
 
     private void init()
     {
-        paint.setColor(getResources().getColor(R.color.green, getContext().getTheme()));
+        paint.setColor(getResources().getColor(R.color.positive, getContext().getTheme()));
 
         Resources r = getResources();
         int strokeWidth = (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
-                3,
+                2,
                 r.getDisplayMetrics()
         );
 
         paint.setStrokeWidth(strokeWidth);
         paint.setDither(true);
 
-
-        greyPaint.setColor(getResources().getColor(R.color.black_12,getContext().getTheme()));
+        greyPaint.setColor(Utils.getColorFromAttr(getContext(), R.attr.colorSurfaceDark));
         greyPaint.setStrokeWidth(1);
 
         noDataTextPaint.setTextAlign(Paint.Align.CENTER);
-        int textSize = (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_SP,
-                14,
-                r.getDisplayMetrics()
-        );
-        noDataTextPaint.setTextSize(textSize);
-        noDataTextPaint.setColor(getResources().getColor(R.color.black_12, getContext().getTheme()));
+        noDataTextPaint.setTextSize((int) getResources().getDimension(R.dimen.sp14));
+        noDataTextPaint.setColor(getResources().getColor(R.color.text_primary, getContext().getTheme()));
 
         edgeValPaint.setTextAlign(Paint.Align.RIGHT);
-        edgeValPaint.setTextSize(
-                TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_SP,
-                        12,
-                        r.getDisplayMetrics()
-                )
-        );
-        edgeValPaint.setColor(getResources().getColor(R.color.black, getContext().getTheme()));
-
+        edgeValPaint.setTextSize((int) getResources().getDimension(R.dimen.sp12));
+        edgeValPaint.setColor(getResources().getColor(R.color.text_primary, getContext().getTheme()));
     }
 
     public HistoryChart(Context context, @Nullable AttributeSet attrs)
@@ -229,29 +228,28 @@ public class HistoryChart extends View
             return;
         }
 
-
         // draw chart
         float width = getWidth();
         float height = getHeight();
 
         //colour changes depending on first and last values
         path.reset();
-        int color = datasource.isGreen() ? R.color.green : R.color.danger;
-        paint.setColor(getResources().getColor(color,getContext().getTheme()));
-
+        int color = datasource.isGreen() ? R.color.positive : R.color.negative;
+        paint.setColor(getResources().getColor(color, getContext().getTheme()));
 
         float xScale = width / (datasource.maxTime() - datasource.minTime());
         float yScale = ((height * 0.9f) / (datasource.maxValue() - datasource.minValue()));
 
         for (float i = datasource.minValue();
              i <= datasource.maxValue();
-             i = i + (datasource.maxValue() - datasource.minValue())/4) {
+             i = i + (datasource.maxValue() - datasource.minValue()) / 4)
+        {
             float lineVal = height - (i - datasource.minValue()) * yScale;
             greyLines.moveTo(0, lineVal);
             greyLines.lineTo(width, lineVal);
         }
         greyPaint.setStyle(Paint.Style.STROKE);
-        canvas.drawPath(greyLines,greyPaint);
+        canvas.drawPath(greyLines, greyPaint);
 
         for (int i = 0; i < datasource.entries.size(); i++)
         {
@@ -263,7 +261,8 @@ public class HistoryChart extends View
             if (i == 0)
             {
                 path.moveTo(x, y);
-            } else
+            }
+            else
             {
                 path.lineTo(x, y);
             }
@@ -274,20 +273,24 @@ public class HistoryChart extends View
         canvas.drawPath(path, paint);
 
         // add min/max values to chart
-        canvas.drawText(String.format("%.02f", datasource.minValue()),width - TEXT_MARGIN,height,edgeValPaint);
-        canvas.drawText(String.format("%.02f",datasource.maxValue()),width - TEXT_MARGIN,0.05f*height,edgeValPaint);
+        canvas.drawText(String.format("%.02f", datasource.minValue()), width - TEXT_MARGIN, height, edgeValPaint);
+        canvas.drawText(String.format("%.02f", datasource.maxValue()), width - TEXT_MARGIN, 0.05f * height, edgeValPaint);
     }
 
     public void fetchHistory(Token token, final Range range)
     {
         // use cache
         cache.range = range;
-        if (cache.getCurrentDatasource(range) != null) {
+        if (cache.getCurrentDatasource(range) != null)
+        {
             invalidate();
             return;
         }
 
-        if (!TickerService.validateCoinGeckoAPI(token)) { return; } //wouldn't have tickers
+        if (!TickerService.validateCoinGeckoAPI(token))
+        {
+            return;
+        } //wouldn't have tickers
 
         String coingeckoTokenId = token.isEthereum() ? chainPairs.get(token.tokenInfo.chainId)
                 : coinGeckoChainIdToAPIName.get(token.tokenInfo.chainId) + "/contract/" + token.getAddress().toLowerCase();
@@ -301,7 +304,6 @@ public class HistoryChart extends View
         }
     }
 
-
     private void onEntries(Range range, Datasource datasource)
     {
         // invalidate
@@ -309,7 +311,8 @@ public class HistoryChart extends View
         invalidate();
     }
 
-    private void onError(Throwable throwable) {
+    private void onError(Throwable throwable)
+    {
         throwable.printStackTrace();
     }
 }

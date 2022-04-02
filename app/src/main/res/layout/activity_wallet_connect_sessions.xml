@@ -2,25 +2,20 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
     android:orientation="vertical"
     android:scrollbarAlwaysDrawVerticalTrack="true"
     android:scrollbars="vertical">
 
-    <include layout="@layout/layout_app_bar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <LinearLayout
         android:id="@+id/layout_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?android:attr/actionBarSize"
-        android:background="@color/alabaster"
         android:orientation="vertical">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/mercury" />
+        <View style="@style/Aw.Component.Separator" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list"
@@ -29,9 +24,7 @@
 
         <View
             android:id="@+id/bottom_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/mercury" />
+            style="@style/Aw.Component.Separator" />
 
         <LinearLayout
             android:id="@+id/layout_no_sessions"
@@ -53,14 +46,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/wc_no_active_sessions"
-                android:textColor="@color/mine"
-                android:textSize="@dimen/sp17" />
+                android:text="@string/wc_no_active_sessions" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_connect_wallet"
-                style="@style/AwButton.Primary"
+                style="@style/Aw.Component.Button.Primary"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dp24"

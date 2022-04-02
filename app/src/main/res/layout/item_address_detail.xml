@@ -1,56 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/layout_holder"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_holder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:maxHeight="300dp"
     android:orientation="vertical">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+    <View style="@style/Aw.Component.Separator" />
 
     <LinearLayout
-        android:paddingTop="@dimen/dp20"
-        android:paddingBottom="@dimen/dp20"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginVertical="@dimen/standard_16">
 
-    <TextView
-        android:id="@+id/text_recipient_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1.1"
-        android:layout_marginStart="@dimen/dp16"
-        android:text="@string/recipient"
-        android:textColor="@color/dove"
-        android:fontFamily="@font/font_regular"
-        android:gravity="start"
-        android:textSize="@dimen/sp13"/>
+        <TextView
+            android:id="@+id/text_recipient_title"
+            style="@style/Aw.Typography.Label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="start"
+            android:text="@string/recipient" />
 
-    <TextView
-        android:id="@+id/text_recipient"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="3.1"
-        android:textColor="@color/black"
-        android:fontFamily="@font/font_semibold"
-        android:gravity="start"
-        tools:text="pablo.eth | 0x123456...0421"
-        android:textSize="@dimen/sp16"/>
+        <TextView
+            android:id="@+id/text_recipient"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_weight="3.5"
+            android:gravity="start"
+            tools:text="pablo.eth | 0x123456...0421" />
 
-    <ImageView
-        android:id="@+id/image_more"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.6"
-        android:src="@drawable/ic_expand_more"
-        android:padding="3dp"
-        android:layout_gravity="start"
-        android:background="@color/transparent"/>
+        <ImageView
+            android:id="@+id/image_more"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="0.6"
+            android:background="@color/transparent"
+            android:padding="@dimen/mini_4"
+            android:src="@drawable/ic_expand_more"
+            app:tint="?colorControlNormal" />
 
     </LinearLayout>
 
@@ -59,67 +54,59 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <TextView
+            style="@style/Aw.Typography.Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dp16"
-            android:text="@string/wallet_address"
-            android:textColor="@color/dove"
-            android:fontFamily="@font/font_regular"
+            android:layout_marginStart="@dimen/standard_16"
             android:gravity="start"
-            android:textSize="@dimen/sp13"/>
+            android:text="@string/wallet_address" />
 
         <TextView
             android:id="@+id/text_recipient_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp5"
-            android:layout_marginStart="@dimen/dp16"
-            android:layout_marginEnd="40dp"
-            android:textColor="@color/black"
+            android:layout_marginStart="@dimen/standard_16"
+            android:layout_marginTop="@dimen/tiny_8"
+            android:layout_marginEnd="@dimen/standard_16"
             android:gravity="start"
-            android:fontFamily="@font/font_regular"
-            tools:text="0x6EBaF477F83E055589C1188bCC6DDCCD8C9B131a"
-            android:textSize="@dimen/sp18"/>
+            tools:text="0x6EBaF477F83E055589C1188bCC6DDCCD8C9B131a" />
 
         <TextView
             android:id="@+id/label_ens"
+            style="@style/Aw.Typography.Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dp16"
-            android:layout_marginTop="@dimen/dp10"
-            android:layout_marginBottom="@dimen/dp10"
-            android:text="@string/ens_name"
-            android:textColor="@color/dove"
-            android:fontFamily="@font/font_regular"
+            android:layout_marginStart="@dimen/standard_16"
+            android:layout_marginTop="@dimen/standard_16"
+            android:layout_marginBottom="@dimen/tiny_8"
             android:gravity="start"
-            android:textSize="@dimen/sp13"/>
+            android:text="@string/ens_name" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dp16"
-            android:layout_marginEnd="@dimen/dp16"
+            android:layout_marginStart="@dimen/standard_16"
+            android:layout_marginEnd="@dimen/standard_16"
+            android:layout_marginBottom="@dimen/standard_16"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-        <com.alphawallet.app.widget.UserAvatar
-            android:id="@+id/blockie"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/big_green_tick"/>
+            <com.alphawallet.app.widget.UserAvatar
+                android:id="@+id/blockie"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/big_green_tick" />
 
-        <TextView
-            android:id="@+id/text_ens_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dp16"
-            android:textColor="@color/black"
-            android:fontFamily="@font/font_regular"
-            tools:text="pablo.eth"
-            android:textSize="@dimen/sp18"/>
+            <TextView
+                android:id="@+id/text_ens_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/tiny_8"
+                tools:text="pablo.eth" />
 
         </LinearLayout>
 

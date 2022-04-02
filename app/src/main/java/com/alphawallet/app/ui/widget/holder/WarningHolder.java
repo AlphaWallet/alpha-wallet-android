@@ -1,9 +1,6 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +10,13 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.entity.WarningData;
+import com.google.android.material.card.MaterialCardView;
 
 /**
  * Created by James on 18/07/2019.
@@ -26,7 +28,7 @@ public class WarningHolder extends BinderViewHolder<WarningData>
     public static final int VIEW_TYPE = 1015;
     private final TextView title;
     private final TextView detail;
-    private final LinearLayout layoutBackground;
+    private final MaterialCardView layoutBackground;
     private final ImageView menuButton;
     private final Button backupButton;
     private final View popupAnchor;
@@ -36,21 +38,28 @@ public class WarningHolder extends BinderViewHolder<WarningData>
     {
         title.setText(data.title);
         detail.setText(data.detail);
-        layoutBackground.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), data.colour));
+        layoutBackground.setCardBackgroundColor(ContextCompat.getColor(getContext(), data.colour));
         backupButton.setText(data.buttonText);
         backupButton.setBackgroundColor(data.buttonColour);
-        backupButton.setOnClickListener(v -> { data.callback.BackupClick(data.wallet); });
-        menuButton.setOnClickListener(v -> {
+        backupButton.setOnClickListener(v ->
+        {
+            data.callback.BackupClick(data.wallet);
+        });
+        menuButton.setOnClickListener(v ->
+        {
             showPopup(popupAnchor, data);
         });
     }
-    private void showPopup(View view, WarningData data) {
+
+    private void showPopup(View view, WarningData data)
+    {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View popupView = inflater.inflate(R.layout.popup_remind_later, null);
         int width = LinearLayout.LayoutParams.WRAP_CONTENT;
         int height = LinearLayout.LayoutParams.WRAP_CONTENT;
         final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
-        popupView.setOnClickListener(v -> {
+        popupView.setOnClickListener(v ->
+        {
             data.callback.remindMeLater(data.wallet);
             popupWindow.dismiss();
         });
@@ -62,7 +71,7 @@ public class WarningHolder extends BinderViewHolder<WarningData>
         super(res_id, parent);
         title = findViewById(R.id.text_title);
         detail = findViewById(R.id.text_detail);
-        layoutBackground = findViewById(R.id.layout_item_warning);
+        layoutBackground = findViewById(R.id.card_backup);
         backupButton = findViewById(R.id.button_backup);
         menuButton = findViewById(R.id.btn_menu);
         popupAnchor = findViewById(R.id.popup_anchor);

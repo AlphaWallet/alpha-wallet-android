@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_list_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -12,18 +13,16 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="20dp"
-        android:fontFamily="@font/font_regular"
-        android:textColor="@color/black"
-        android:textSize="17sp" />
+        tools:text="Name" />
 
-    <ImageView
-        android:id="@+id/checkbox"
+    <com.google.android.material.radiobutton.MaterialRadioButton
+        android:id="@+id/radio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical"
-        android:layout_marginEnd="12dp"
-        android:src="@drawable/selector_radio" />
+        android:layout_marginEnd="@dimen/tiny_8"
+        android:clickable="false"
+        android:focusable="false" />
 
 </RelativeLayout>

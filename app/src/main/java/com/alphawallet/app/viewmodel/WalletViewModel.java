@@ -30,6 +30,7 @@ import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
@@ -243,7 +244,7 @@ public class WalletViewModel extends BaseViewModel
             context.startActivity(intent);
         });
 
-        dialog = new BottomSheetDialog(context, R.style.FullscreenBottomSheetDialogStyle);
+        dialog = new BottomSheetDialog(context);
         dialog.setContentView(actionsView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
@@ -377,7 +378,7 @@ public class WalletViewModel extends BaseViewModel
 
     public void saveAvatar(Wallet wallet)
     {
-        genericWalletInteract.updateWalletInfo(wallet, wallet.name, () -> { });
+        genericWalletInteract.updateWalletItem(wallet, WalletItem.ENS_AVATAR, () -> { });
     }
 
     public Intent getBuyIntent(String address) {

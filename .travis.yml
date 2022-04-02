@@ -26,18 +26,17 @@ licenses:
   - 'android-sdk-license-.+'
   - 'google-gdk-license-.+'
 
+env:
+  - JAVA_OPTS='-XX:+IgnoreUnrecognizedVMOptions --add-modules java.se.ee'
+
+jdk:
+  - openjdk11
+
 before_install:
-- yes | sdkmanager "platforms;android-30"
 
 install:
   - true
 
 script:
 # go and test other modules before going on to app, can only have one travis file per repo.
-- cd dmz && ../gradlew -i build && ../gradlew -i test && cd ..
-- cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
-- cd util && ../gradlew -i build && ../gradlew -i test && cd ..
-- ./gradlew build
-
-after_success:
- - bash <(curl -s https://codecov.io/bash)
+- java -version

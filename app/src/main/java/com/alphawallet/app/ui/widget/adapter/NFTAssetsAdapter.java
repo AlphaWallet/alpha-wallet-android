@@ -232,7 +232,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         //clear all loaders
         for (Pair<BigInteger, NFTAsset> assetPair : displayData)
         {
-            if (assetPair.second.metaDataLoader != null && !assetPair.second.metaDataLoader.isDisposed())
+            if (assetPair.second != null && assetPair.second.metaDataLoader != null && !assetPair.second.metaDataLoader.isDisposed())
             {
                 assetPair.second.metaDataLoader.dispose();
             }

@@ -42,7 +42,7 @@ public class FetchTransactionsInteract {
 
     public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
     {
-        //can resolve erc20, erc721 and erc875 from a getbalance check and look at decimals. Otherwise try more esoteric
+        //can resolve erc20, erc721, erc875 and erc1155 from a getbalance check and look at decimals. Otherwise try more esoteric
         return tokenRepository.determineCommonType(tokenInfo);
     }
 
@@ -70,10 +70,5 @@ public class FetchTransactionsInteract {
     public void restartTransactionService()
     {
         transactionRepository.restartService();
-    }
-
-    public void removeOverridenTransaction(Wallet wallet, String overridenTxHash)
-    {
-        transactionRepository.removeOverridenTransaction(wallet, overridenTxHash);
     }
 }

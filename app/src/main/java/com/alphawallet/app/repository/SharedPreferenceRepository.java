@@ -18,6 +18,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String NETWORK_FILTER_KEY = "network_filters";
     private static final String CUSTOM_NETWORKS_KEY = "custom_networks";
     private static final String NOTIFICATIONS_KEY = "notifications";
+    private static final String THEME_KEY = "theme";
     private static final String DEFAULT_SET_KEY = "default_net_set";
     private static final String LOCALE_KEY = "locale";
     private static final String BACKUP_WALLET_SHOWN = "backup_wallet_shown";
@@ -27,6 +28,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String USER_LOCALE_PREF = "user_locale_pref";
     public static final String HIDE_ZERO_BALANCE_TOKENS = "hide_zero_balance_tokens";
     public static final String FULL_SCREEN_STATE = "full_screen";
+    public static final String EXPERIMENTAL_1559_TX = "ex_1559_tx";
     public static final String ACTIVE_MAINNET = "active_mainnet";
     public static final String SHOWN_WARNING = "shown_warning";
     public static final String PRICE_ALERTS = "price_alerts";
@@ -172,10 +174,23 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         pref.edit().putBoolean(FULL_SCREEN_STATE, state).apply();
     }
 
+
     @Override
     public boolean getFullScreenState()
     {
         return pref.getBoolean(FULL_SCREEN_STATE, false);
+    }
+
+    @Override
+    public void setUse1559Transactions(boolean state)
+    {
+        pref.edit().putBoolean(EXPERIMENTAL_1559_TX, state).apply();
+    }
+
+    @Override
+    public boolean getUse1559Transactions()
+    {
+        return pref.getBoolean(EXPERIMENTAL_1559_TX, false);
     }
 
     @SuppressLint("ApplySharedPref")
@@ -348,5 +363,17 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setLastVersionCode(int code) {
         pref.edit().putInt(LAST_VERSION_CODE, code).apply();
+    }
+
+    @Override
+    public int getTheme()
+    {
+        return pref.getInt(THEME_KEY, C.THEME_AUTO);
+    }
+
+    @Override
+    public void setTheme(int state)
+    {
+        pref.edit().putInt(THEME_KEY, state).apply();
     }
 }

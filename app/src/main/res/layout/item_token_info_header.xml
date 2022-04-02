@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingTop="@dimen/dp30"
-    android:paddingBottom="@dimen/dp16">
+    android:paddingTop="@dimen/large_32"
+    android:paddingBottom="@dimen/base_24">
 
     <com.alphawallet.app.widget.TokenIcon
         android:id="@+id/token_icon"
@@ -19,27 +20,23 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/token_icon"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/dp5"
+        android:layout_marginTop="@dimen/mini_4"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/token_amount"
+            style="@style/Aw.Typography.Title.XLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/dp10"
-            android:fontFamily="@font/font_regular"
-            android:text="-"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp36" />
+            android:layout_marginEnd="@dimen/small_12"
+            tools:text="0" />
 
         <TextView
             android:id="@+id/token_symbol"
+            style="@style/Aw.Typography.Title.XLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_regular"
-            android:text="ETH"
-            android:textColor="@color/black"
-            android:textSize="@dimen/sp36" />
+            tools:text="ETH" />
     </LinearLayout>
 
     <LinearLayout
@@ -52,30 +49,23 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/dp5"
-            android:fontFamily="@font/font_regular"
-            android:text="Market Price:"
-            android:textColor="@color/dove"
-            android:textSize="@dimen/sp17" />
+            android:layout_marginEnd="@dimen/mini_4"
+            android:text="@string/label_market_price" />
 
         <TextView
             android:id="@+id/market_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/dp5"
-            android:fontFamily="@font/font_regular"
-            android:text="$0.00"
-            android:textColor="@color/mine"
-            android:textSize="@dimen/sp17" />
+            android:layout_marginEnd="@dimen/mini_4"
+            tools:text="$0.00" />
 
         <TextView
             android:id="@+id/price_change"
+            style="@style/Aw.Typography.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/font_semibold"
-            android:text="(+0.00%)"
-            android:textColor="@color/green"
-            android:textSize="@dimen/sp17" />
+            android:textColor="@color/positive"
+            tools:text="(+0.00%)" />
     </LinearLayout>
 
 </RelativeLayout>

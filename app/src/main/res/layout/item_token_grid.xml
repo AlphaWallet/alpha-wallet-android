@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
-    android:layout_margin="@dimen/dp10"
+    android:layout_margin="@dimen/small_12"
     android:background="@drawable/background_grid_icon"
     android:gravity="center_horizontal"
     android:orientation="vertical">
@@ -23,32 +23,28 @@
 
     <TextView
         android:id="@+id/token_name"
+        style="@style/Aw.Typography.Title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/token_icon"
-        android:layout_marginStart="@dimen/dp8"
-        android:layout_marginTop="@dimen/dp8"
-        android:layout_marginEnd="@dimen/dp8"
+        android:layout_marginStart="@dimen/tiny_8"
+        android:layout_marginTop="@dimen/tiny_8"
+        android:layout_marginEnd="@dimen/tiny_8"
         android:ellipsize="end"
-        android:fontFamily="@font/font_regular"
         android:gravity="center_horizontal"
         android:maxLines="1"
-        android:textColor="@color/black"
-        android:textSize="@dimen/sp20"
         tools:text="Fifa World Cup" />
 
     <TextView
         android:id="@+id/token_count"
+        style="@style/Aw.Typography.Sub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/token_name"
-        android:layout_marginStart="6dp"
-        android:layout_marginEnd="6dp"
-        android:layout_marginBottom="@dimen/dp10"
-        android:fontFamily="@font/font_regular"
+        android:layout_marginStart="@dimen/tiny_8"
+        android:layout_marginEnd="@dimen/tiny_8"
+        android:layout_marginBottom="@dimen/small_12"
         android:gravity="center_horizontal"
-        android:textColor="@color/dove"
-        android:textSize="@dimen/sp15"
         tools:text="2 Tokens" />
 
     <LinearLayout
@@ -62,7 +58,6 @@
         android:background="@color/transparent"
         android:clickable="true"
         android:focusable="true"
-        android:fontFamily="@font/font_regular"
         android:orientation="vertical" />
 
 </RelativeLayout>

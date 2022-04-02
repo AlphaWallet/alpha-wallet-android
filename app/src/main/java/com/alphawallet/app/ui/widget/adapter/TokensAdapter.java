@@ -366,10 +366,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         switch (filterType)
         {
             case ALL:
-                if (token.isNFT())
-                {
-                    allowThroughFilter = false;
-                }
+                // Show all
+                // if (token.isNFT()) allowThroughFilter = false;
                 break;
             case ASSETS:
                 allowThroughFilter = allowThroughFilter && token.group == TokenGroup.ASSET;

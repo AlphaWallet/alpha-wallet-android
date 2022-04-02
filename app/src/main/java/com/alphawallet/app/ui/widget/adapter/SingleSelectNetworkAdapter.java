@@ -1,10 +1,11 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,12 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
+import com.alphawallet.app.widget.TokenIcon;
+import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-
-public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelectNetworkAdapter.ViewHolder> {
+public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelectNetworkAdapter.ViewHolder>
+{
     private final ArrayList<NetworkItem> networkList;
     private boolean hasSelection;
 
@@ -55,7 +57,7 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
-        int buttonTypeId = R.layout.item_simple_radio;
+        int buttonTypeId = R.layout.item_network_radio;
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(buttonTypeId, parent, false);
         return new ViewHolder(itemView);
@@ -68,8 +70,10 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
         if (item != null)
         {
             holder.name.setText(item.getName());
+            holder.chainId.setText(holder.itemLayout.getContext().getString(R.string.chain_id, item.getChainId()));
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
-            holder.checkbox.setSelected(item.isSelected());
+            holder.radio.setChecked(item.isSelected());
+            holder.tokenIcon.bindData(item.getChainId());
         }
     }
 
@@ -81,7 +85,7 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
         }
         networkList.get(position).setSelected(true);
         notifyDataSetChanged();
-        holder.checkbox.setSelected(networkList.get(position).isSelected());
+        holder.radio.setChecked(networkList.get(position).isSelected());
     }
 
     @Override
@@ -99,17 +103,22 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
         }
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView checkbox;
+    class ViewHolder extends RecyclerView.ViewHolder
+    {
+        MaterialRadioButton radio;
         TextView name;
+        TextView chainId;
         View itemLayout;
+        TokenIcon tokenIcon;
 
         ViewHolder(View view)
         {
             super(view);
-            checkbox = view.findViewById(R.id.checkbox);
+            radio = view.findViewById(R.id.radio);
             name = view.findViewById(R.id.name);
+            chainId = view.findViewById(R.id.chain_id);
             itemLayout = view.findViewById(R.id.layout_list_item);
+            tokenIcon = view.findViewById(R.id.token_icon);
         }
     }
 }

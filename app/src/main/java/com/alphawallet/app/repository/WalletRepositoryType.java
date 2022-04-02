@@ -1,13 +1,10 @@
 package com.alphawallet.app.repository;
 
-import java.math.BigDecimal;
+import com.alphawallet.app.entity.Wallet;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
 import io.realm.Realm;
-
-import com.alphawallet.app.entity.Wallet;
 
 public interface WalletRepositoryType {
     Single<Wallet[]> fetchWallets();
@@ -33,6 +30,7 @@ public interface WalletRepositoryType {
 
     Single<Wallet> storeWallet(Wallet wallet);
     void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess);
+    void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess);
 
     Single<String> getName(String address);
 

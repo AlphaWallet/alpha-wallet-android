@@ -41,8 +41,6 @@ import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
 
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -342,7 +340,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     }
 
     public void addCustomChain(WalletAddEthereumChainObject chainObject) {
-        this.ethereumNetworkRepository.addCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
+        this.ethereumNetworkRepository.saveCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
                 chainObject.nativeCurrency.symbol, "", "", false, -1L);
 
         tokensService.createBaseToken(chainObject.getChainId())

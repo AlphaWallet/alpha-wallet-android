@@ -10,8 +10,9 @@ import android.widget.ImageView;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.app.R;
+import com.google.android.material.appbar.MaterialToolbar;
 
-public class CertifiedToolbarView extends androidx.appcompat.widget.Toolbar
+public class CertifiedToolbarView extends MaterialToolbar
 {
     private Activity activity;
     private AWalletAlertDialog dialog;

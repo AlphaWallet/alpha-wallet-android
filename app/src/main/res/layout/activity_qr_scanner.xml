@@ -1,63 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <include
         android:id="@+id/toolbar"
         layout="@layout/layout_simple_toolbar" />
 
-    <com.journeyapps.barcodescanner.DecoratedBarcodeView
-        android:id="@+id/scanner_view"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar"/>
+        android:layout_below="@id/toolbar"
+        android:theme="@style/AppTheme.DarkOverlay">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center|bottom"
-        android:text=""
-        android:textColor="#ffffff" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/scanner_view"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/full_large_margin"
-        android:text="@string/message_scan_camera"
-        android:textColor="@color/white"
-        android:textSize="@dimen/sp17" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/half_large_margin"
-        android:orientation="horizontal">
+        <com.journeyapps.barcodescanner.DecoratedBarcodeView
+            android:id="@+id/scanner_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <TextView
-            android:id="@+id/flash_button"
-            style="@style/QRScannerTextView"
-            app:drawableTopCompat="@drawable/ic_flash"
-            android:text="@string/light" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/scanner_view"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/double_large_64"
+            android:text="@string/message_scan_camera" />
 
-        <TextView
-            android:id="@+id/my_address_button"
-            style="@style/QRScannerTextView"
-            app:drawableTopCompat="@drawable/ic_qr_rounded_white"
-            android:text="@string/my_qr_code" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/large_32"
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/browse_button"
-            style="@style/QRScannerTextView"
-            app:drawableTopCompat="@drawable/ic_browse"
-            android:text="@string/browse"
-            android:visibility="visible"/>
+            <TextView
+                android:id="@+id/flash_button"
+                style="@style/Aw.Component.QrScannerControl"
+                android:text="@string/light"
+                app:drawableTopCompat="@drawable/ic_flash" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/my_address_button"
+                style="@style/Aw.Component.QrScannerControl"
+                android:text="@string/my_qr_code"
+                app:drawableTopCompat="@drawable/ic_qr_rounded_white" />
+
+            <TextView
+                android:id="@+id/browse_button"
+                style="@style/Aw.Component.QrScannerControl"
+                android:text="@string/browse"
+                android:visibility="visible"
+                app:drawableTopCompat="@drawable/ic_browse" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
 </RelativeLayout>

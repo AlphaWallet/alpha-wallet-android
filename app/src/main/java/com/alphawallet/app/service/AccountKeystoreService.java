@@ -59,14 +59,27 @@ public interface AccountKeystoreService {
 			byte[] data,
 			long chainId);
 
+	/**
+	 * Sign transaction EIP1559
+	 * @param signer {@link Wallet}
+	 * @param toAddress transaction destination address
+	 * @param nonce
+	 * @return sign data
+	 */
+	Single<SignatureFromKey> signTransactionEIP1559(
+			Wallet signer,
+			String toAddress,
+			BigInteger amount,
+			BigInteger gasLimit,
+			BigInteger gasPremium,
+			BigInteger gasMax,
+			long nonce,
+			byte[] data,
+			long chainId);
+
 	Single<SignatureFromKey> signMessage(
 			Wallet signer,
 			Signable message,
-			long chainId);
-
-	Single<SignatureFromKey> signTransaction(
-			Wallet signer,
-			byte[] rawTx,
 			long chainId);
 
 	Single<byte[]> signTransactionFast(

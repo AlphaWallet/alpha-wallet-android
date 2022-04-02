@@ -1,32 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/alabaster">
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+    android:layout_height="@dimen/standard_header_height"
+    android:background="?colorSurfaceSecondary"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/text_header"
+        style="@style/Aw.Typography.StandardHeader"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:fontFamily="@font/font_semibold"
-        android:gravity="center_vertical|end"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        tools:text="@string/recipient"
-        android:textAllCaps="true"
-        android:textColor="@color/dove"
-        android:textSize="15sp" />
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingEnd="@dimen/standard_16"
+        tools:text="@string/recipient" />
+
+    <com.alphawallet.app.widget.ChainName
+        android:id="@+id/chain_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="@dimen/standard_16"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switch_material"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="@dimen/tiny_8"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
+        android:id="@+id/separator"
+        style="@style/Aw.Component.Separator"
+        android:layout_alignParentBottom="true" />
 
-</LinearLayout>
+</RelativeLayout>

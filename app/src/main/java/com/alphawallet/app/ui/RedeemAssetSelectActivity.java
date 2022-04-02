@@ -29,8 +29,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 
 import static com.alphawallet.app.C.Key.TICKET_RANGE;
 
@@ -49,7 +47,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
     protected RedeemAssetSelectViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
-    private int currentMenu = R.menu.send_menu;
+    private int currentMenu = R.menu.menu_send;
 
     private FinishReceiver finishReceiver;
 
@@ -103,7 +101,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
 
     private void setupRedeemSelector()
     {
-        currentMenu = R.menu.send_menu;
+        currentMenu = R.menu.menu_send;
         invalidateOptionsMenu();
 
         RecyclerView list = findViewById(R.id.listTickets);
@@ -112,7 +110,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
 
         nextButton.setVisibility(View.GONE);
         redeemButton.setVisibility(View.VISIBLE);
-        currentMenu = R.menu.redeem_menu;
+        currentMenu = R.menu.menu_redeem;
         invalidateOptionsMenu();
 
         list.setLayoutManager(new LinearLayoutManager(this));
@@ -181,7 +179,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
 
     @Override
     public void onTokenClick(View v, Token token, List<BigInteger> ids, boolean selected) {
-        currentMenu = R.menu.redeem_menu;
+        currentMenu = R.menu.menu_redeem;
         invalidateOptionsMenu();
     }
 

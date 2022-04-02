@@ -166,6 +166,12 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
+	public void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess)
+	{
+		walletDataRealmSource.updateWalletItem(wallet, item, onSuccess);
+	}
+
+	@Override
 	public Single<String> getName(String address)
 	{
 		return walletDataRealmSource.getName(address);

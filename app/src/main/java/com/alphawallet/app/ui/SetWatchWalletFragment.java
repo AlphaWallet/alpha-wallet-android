@@ -98,11 +98,7 @@ public class SetWatchWalletFragment extends ImportFragment implements AddressRea
     {
         try
         {
-            importButton.setActivated(enabled);
-            importButton.setClickable(enabled);
-            int colorId = enabled ? R.color.nasty_green : R.color.inactive_green;
-            if (getContext() != null)
-                importButton.setBackgroundColor(getContext().getColor(colorId));
+            importButton.setEnabled(enabled);
         }
         catch (Exception e)
         {

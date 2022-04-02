@@ -36,6 +36,10 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final long ARBITRUM_TEST_ID = 421611;
     public static final long PALM_ID = 0x2a15c308dL; //11297108109
     public static final long PALM_TEST_ID = 0x2a15c3083L; //11297108099
+    public static final long KLAYTN_ID = 8217;
+    public static final long KLAYTN_BOABAB_ID = 1001;
+    public static final long IOTEX_MAINNET_ID = 4689;
+    public static final long IOTEX_TESTNET_ID = 4690;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -66,7 +70,9 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String ARBITRUM_TEST_RPC_URL = "https://arbitrum-rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-  
+    public static final String KLAYTN_RPC = "https://public-node-api.klaytnapi.com/v1/cypress";
+    public static final String KLAYTN_BAOBAB_RPC = "https://api.baobab.klaytn.net:8651";
+
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>() {
         {
             put(MAINNET_ID, new NetworkInfo("Ethereum", "ETH", MAINNET_RPC_URL, "https://etherscan.io/tx/",
@@ -129,6 +135,11 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     PALM_ID, false));
             put(PALM_TEST_ID, new NetworkInfo("PALM (Test)", "PALM", PALM_TEST_RPC_URL, "https://explorer.palm-uat.xyz/tx/",
                     PALM_TEST_ID, false));
+
+            put(KLAYTN_ID, new NetworkInfo("Klaytn Cypress","KLAY", KLAYTN_RPC, "https://scope.klaytn.com/tx/",
+                    KLAYTN_ID, false));
+            put(KLAYTN_BOABAB_ID, new NetworkInfo("Klaytn Boabab (Test)","KLAY", KLAYTN_BAOBAB_RPC, "https://baobab.scope.klaytn.com/tx/",
+                    KLAYTN_BOABAB_ID, false));
         }
     };
 

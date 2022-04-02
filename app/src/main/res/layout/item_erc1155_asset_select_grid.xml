@@ -10,10 +10,9 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/Theme.MaterialComponents.Light"
         custom:cardCornerRadius="8dp"
         custom:cardElevation="0dp"
-        custom:strokeColor="@color/mercury"
+        custom:strokeColor="?colorSurfaceQuaternary"
         custom:strokeWidth="1dp">
 
         <LinearLayout
@@ -35,35 +34,34 @@
 
                 <TextView
                     android:id="@+id/text_count"
+                    style="@style/Aw.Typography.Title.SemiBold"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_centerInParent="true"
                     android:background="@drawable/value_amount_overlay"
-                    android:backgroundTint="@color/azure"
-                    android:fontFamily="@font/font_bold"
+                    android:backgroundTint="?colorPrimary"
                     android:gravity="center"
-                    android:textColor="@color/white"
+                    android:textColor="?colorOnPrimary"
                     android:visibility="gone"
-                    tools:text="25" />
+                    tools:text="25"
+                    tools:visibility="visible" />
 
                 <ProgressBar
                     android:id="@+id/loading_spinner"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:padding="@dimen/dp16"
-                    android:visibility="gone" />
+                    android:padding="@dimen/standard_16"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
 
             </RelativeLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/icon_wrapper"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
                 android:orientation="vertical"
-                android:padding="@dimen/dp16">
+                android:padding="@dimen/standard_16">
 
                 <TextView
                     android:id="@+id/title"
@@ -73,21 +71,19 @@
                     android:ellipsize="end"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/sp18"
                     tools:text="Title" />
 
                 <TextView
                     android:id="@+id/subtitle"
+                    style="@style/Aw.Typography.Sub"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/title"
                     android:gravity="center"
-                    android:visibility="gone"
                     android:singleLine="true"
-                    android:textColor="@color/dove"
-                    android:textSize="@dimen/sp15"
-                    tools:text="#1" />
+                    android:visibility="gone"
+                    tools:text="Subtitle"
+                    tools:visibility="visible" />
 
             </RelativeLayout>
         </LinearLayout>

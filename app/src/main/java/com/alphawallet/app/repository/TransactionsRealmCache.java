@@ -5,7 +5,10 @@ import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 
 import static java.lang.Thread.sleep;
 
+import android.os.Build;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ActivityMeta;
@@ -264,7 +267,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     {
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
-            instance.executeTransactionAsync(r -> {
+            instance.executeTransaction(r -> {
                 RealmTransaction realmTx = r.where(RealmTransaction.class)
                         .equalTo("hash", tx.hash)
                         .findFirst();
@@ -281,10 +284,11 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         catch (Exception e)
         {
             //do not record
-            Timber.e(e);
+            Timber.w(e);
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Transaction storeRawTx(Wallet wallet, long chainId, EthTransaction rawTx, long timeStamp, boolean isSuccessful)
     {
@@ -293,45 +297,24 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
         final Transaction tx = new Transaction(ethTx, chainId, isSuccessful, timeStamp);
 
-        deleteTransaction(wallet, ethTx.getHash());
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
-            instance.executeTransactionAsync(r -> {
-                RealmTransaction item = r.createObject(RealmTransaction.class, ethTx.getHash());
-                fill(item, tx);
-                r.insertOrUpdate(item);
+            instance.executeTransaction(r -> {
+                RealmTransaction realmTx = r.where(RealmTransaction.class)
+                        .equalTo("hash", ethTx.getHash())
+                        .findFirst();
+
+                if (realmTx == null) realmTx = r.createObject(RealmTransaction.class, ethTx.getHash());
+                fill(realmTx, tx);
+                r.insertOrUpdate(realmTx);
             });
         }
         catch (Exception e)
         {
-            //
+            Timber.w(e);
         }
 
         return tx;
-    }
-
-    @Override
-    public void deleteTransaction(Wallet wallet, String oldTxHash)
-    {
-        try (Realm instance = realmManager.getRealmInstance(wallet))
-        {
-            instance.executeTransactionAsync(r -> {
-                RealmTransaction realmTx = r.where(RealmTransaction.class)
-                        .equalTo("hash", oldTxHash)
-                        .findFirst();
-
-                if (realmTx != null)
-                {
-                    //deleteOperations(realmTx);
-                    realmTx.deleteFromRealm();
-                }
-            });
-        }
-        catch (Exception e)
-        {
-            //do not record
-            Timber.e(e);
-        }
     }
 
     @Override
@@ -421,13 +404,15 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         item.setValue(transaction.value);
         item.setGas(transaction.gas);
         item.setGasPrice(transaction.gasPrice);
+        item.setMaxFeePerGas(transaction.maxFeePerGas);
+        item.setMaxPriorityFee(transaction.maxPriorityFee);
         item.setInput(transaction.input);
         item.setGasUsed(transaction.gasUsed);
         item.setChainId(transaction.chainId);
     }
 
     public static Transaction convert(RealmTransaction rawItem) {
-        boolean isConstructor = rawItem.getInput() != null && rawItem.getInput().equals(Transaction.CONSTRUCTOR);
+        //boolean isConstructor = rawItem.getInput() != null && rawItem.getInput().equals(Transaction.CONSTRUCTOR);
 
 	    return new Transaction(
 	            rawItem.getHash(),
@@ -440,10 +425,12 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 rawItem.getValue(),
                 rawItem.getGas(),
                 rawItem.getGasPrice(),
+                rawItem.getMaxFeePerGas(),
+                rawItem.getPriorityFee(),
                 rawItem.getInput(),
                 rawItem.getGasUsed(),
                 rawItem.getChainId(),
-                isConstructor
+                rawItem.getContractAddress()
                 );
     }
 

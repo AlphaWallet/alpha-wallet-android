@@ -140,8 +140,6 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         //TODO: Send event details
         icon = findViewById(R.id.token_icon);
 
-        SystemView systemView = findViewById(R.id.system_view);
-        systemView.hide();
         toolbar();
         setTitle(getString(R.string.activity_label));
 
@@ -301,14 +299,15 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
         transaction.getDestination(token);
         eventAction.setText(operationName);
-        eventActionSymbol.setText(sym);
+        eventAction.append(" " + sym);
+
         //amount
         String transactionValue = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
 
         if (!token.shouldShowSymbol(transaction) && transaction.input.length() >= FUNCTION_LENGTH)
         {
             eventAmount.setText(transaction.input.substring(0, FUNCTION_LENGTH));
-            eventActionSymbol.setText(getString(R.string.sent_to, token.getFullName()));
+            eventAction.setText(operationName + " " + getString(R.string.sent_to, token.getFullName()));
         }
         else if (TextUtils.isEmpty(transactionValue))
         {
@@ -789,25 +788,12 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         viewModel.actionSheetConfirm(mode);
     }
 
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> confirmationDialog.setCurrentGasIndex(result));
+
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
-        switch (requestCode)
-        {
-            case C.SET_GAS_SETTINGS:
-                if (data != null && confirmationDialog != null)
-                {
-                    int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
-                    long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
-                    BigDecimal customGasPrice = data.hasExtra(C.EXTRA_GAS_PRICE) ?
-                            new BigDecimal(data.getStringExtra(C.EXTRA_GAS_PRICE)) : BigDecimal.ZERO; //may not have set a custom gas price
-                    BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
-                    long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
-                    confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
-                }
-                break;
-            default:
-                super.onActivityResult(requestCode, resultCode, data);
-        }
+        return getGasSettings;
     }
 }

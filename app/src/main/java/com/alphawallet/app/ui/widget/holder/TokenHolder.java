@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -55,14 +56,13 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final View     root24Hours;
     private final ImageView image24h;
     private final TextView textAppreciation;
-    private final View contractSeparator;
     private final View layoutAppreciation;
     private final LinearLayout extendedInfo;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
     private final TokensService tokensService;
-    private final TextView pendingText;
     private final RelativeLayout tokenLayout;
     private final MaterialCheckBox selectToken;
+    private final ProgressBar tickerProgress;
 
     public Token token;
     private TokensAdapterCallback tokensAdapterCallback;
@@ -79,12 +79,12 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         root24Hours = findViewById(R.id.root_24_hrs);
         image24h = findViewById(R.id.image_24_hrs);
         textAppreciation = findViewById(R.id.text_appreciation);
-        contractSeparator = findViewById(R.id.contract_seperator);
-        pendingText = findViewById(R.id.balance_eth_pending);
         tokenLayout = findViewById(R.id.token_layout);
         extendedInfo = findViewById(R.id.layout_extended_info);
         layoutAppreciation = findViewById(R.id.layout_appreciation);
         selectToken = findViewById(R.id.select_token);
+        tickerProgress = findViewById(R.id.ticker_progress);
+
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
@@ -94,7 +94,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     public void bind(@Nullable TokenCardMeta data, @NonNull Bundle addition)
     {
         layoutAppreciation.setForeground(null);
-        balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.black));
         if (data == null) { fillEmpty(); return; }
         try
         {
@@ -112,9 +111,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             }
 
             tokenLayout.setVisibility(View.VISIBLE);
-            tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
+//            tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
-            contractSeparator.setVisibility(View.GONE);
             if (!TextUtils.isEmpty(data.getFilterText()) && data.getFilterText().equals(CHECK_MARK))
             {
                 setupCheckButton(data);
@@ -142,8 +140,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
             populateTicker();
 
-            setPendingAmount();
-
         } catch (Exception ex) {
             fillEmpty();
         }
@@ -153,20 +149,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     public void onDestroyView()
     {
 
-    }
-
-    private void setPendingAmount()
-    {
-        String pendingDiff = token.getPendingDiff();
-        if (pendingDiff != null)
-        {
-            pendingText.setText(pendingDiff);
-            pendingText.setTextColor(ContextCompat.getColor(getContext(), (pendingDiff.startsWith("-")) ? R.color.red : R.color.green));
-        }
-        else
-        {
-            pendingText.setText("");
-        }
     }
 
     private void populateTicker()
@@ -197,7 +179,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         if (ticker != null)
         {
-            hideIssuerViews();
             layoutAppreciation.setVisibility(View.VISIBLE);
             balanceCurrency.setVisibility(View.VISIBLE);
             setTickerInfo(ticker);
@@ -215,13 +196,17 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         if ((System.currentTimeMillis() - ticker.updateTime) > TICKER_PERIOD_VALIDITY)
         {
-            layoutAppreciation.setForeground(AppCompatResources.getDrawable(getContext(), R.color.translucentWhiteSolid));
-            balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.dove_hint));
+            root24Hours.setVisibility(View.GONE);
+            textAppreciation.setVisibility(View.GONE);
+            tickerProgress.setVisibility(View.VISIBLE);
+            balanceCurrency.setAlpha(0.3f);
         }
         else
         {
-            layoutAppreciation.setForeground(null);
-            balanceCurrency.setTextColor(ContextCompat.getColor(getContext(), R.color.black));
+            tickerProgress.setVisibility(View.GONE);
+            root24Hours.setVisibility(View.VISIBLE);
+            textAppreciation.setVisibility(View.VISIBLE);
+            balanceCurrency.setAlpha(1.0f);
         }
     }
 
@@ -259,10 +244,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         this.tokensAdapterCallback = tokensAdapterCallback;
     }
 
-    private void hideIssuerViews() {
-        contractSeparator.setVisibility(View.GONE);
-    }
-
     private void setTickerInfo(TokenTicker ticker)
     {
         //Set the fiat equivalent (leftmost value)
@@ -290,7 +271,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         double percentage = 0;
         try {
             percentage = Double.parseDouble(ticker.percentChange24h);
-            color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
+            color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.negative : R.color.positive);
             formattedPercents = ticker.percentChange24h.replace("-", "") + "%";
             root24Hours.setBackgroundResource(percentage < 0 ? R.drawable.background_24h_change_red : R.drawable.background_24h_change_green);
             text24Hours.setText(formattedPercents);

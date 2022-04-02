@@ -23,6 +23,7 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.StrongBoxUnavailableException;
 import android.security.keystore.UserNotAuthenticatedException;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -50,6 +51,7 @@ import com.alphawallet.app.widget.SignTransactionDialog;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayOutputStream;
@@ -70,7 +72,9 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -1336,6 +1340,49 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                     break;
             }
         }
+    }
+
+    public boolean hasKeystore(String walletAddress)
+    {
+        try
+        {
+            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore.load(null);
+            String matchingAddr = findMatchingAddrInKeyStore(walletAddress);
+            return matchingAddr.equalsIgnoreCase(walletAddress);
+        }
+        catch (KeyStoreException|NoSuchAlgorithmException|CertificateException|IOException e)
+        {
+            Timber.e(e);
+        }
+
+        return false;
+    }
+
+    public List<String> detectOrphanedWallets(Map<String, Wallet> walletList)
+    {
+        List<String> orphanedWallets = new ArrayList<>();
+        try
+        {
+            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore.load(null);
+            Enumeration<String> keys = keyStore.aliases();
+
+            while (keys.hasMoreElements())
+            {
+                String thisKey = keys.nextElement();
+                if (!TextUtils.isEmpty(thisKey) && WalletUtils.isValidAddress(thisKey) && walletList.get(thisKey.toLowerCase()) == null)
+                {
+                    orphanedWallets.add(thisKey);
+                }
+            }
+        }
+        catch (KeyStoreException|NoSuchAlgorithmException|CertificateException|IOException e)
+        {
+            Timber.e(e);
+        }
+
+        return orphanedWallets;
     }
 
     public boolean detectWalletIssues(List<Wallet> walletList)

@@ -54,6 +54,7 @@
     <string name="label_gas_limit">ခွင့်ပြုလုပ်ငန်းဆောင်ရွက်ခ</string>
     <string name="label_gas_price">လုပ်ငန်းဆောင်ရွက်ခ</string>
     <string name="label_gas_price_gwei">လုပ်ငန်းဆောင်ရွက်ခ (GWEI)</string>
+    <string name="label_gas_price_max">Max Fee (GWEI)</string>
     <string name="label_old_gas_price">မူလလုပ်ငန်းဆောင်ရွက်ခ</string>
     <string name="label_network_fee">ကွန်ရက် အသုံးပြုခ (Maximum)</string>
     <string name="button_ok">OK</string>
@@ -555,7 +556,7 @@
     <string name="tokenscript_error_detail">Error in TokenScript element: %1$s</string>
     <string name="tokenscript_element_not_present">function input \'%1$s\' not found in HTML elements.</string>
     <string name="complete_tokenscript_value">Invalid input value: %1$s</string>
-    <string name="value">VALUE</string>
+    <string name="value">Value</string>
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">သော့ကိုဖန်တီး၍မရပါ။ သင်၏ဖုန်းတွင်လုံခြုုံရေးခွင့်ပြုချက်ပြုလုပ်ပေးပါ။</string>
     <string name="what_is_seed_phrase">Recovery Phrase(သို့) backup Seed Phrase သိမ်းဆည်းခြင်းဆိုသည်မှာ ခရစ်ပ်တိုဝေါလက်တစ်ခုကိုပြန်လည်ရယူရန်အတွက် လိုအပ်သောစကားလုံးများကိုသိမ်းဆည်းသော လုပ်ငန်းစဥ်ဖြစ်ပါသည်။ အသုံးပြုသူများသည်ပုံမှန်အားဖြင့်ဝေါလက်အသုံးပြုရန် seed phrase ကိုထည့်သွင်းရမည်ဖြစ်ပြီး ထို Seed Phrase ကို စာရွက်ပေါ်တွင် မှတ်သားထားရန်ညွှန်ကြားထားလေ့ရှိသည်။</string>
@@ -736,7 +737,10 @@
     <string name="new_balance">(New: %1$s %2$s)</string>
     <string name="set_speed_title">အမြန်နှုန်းသတ်မှတ်မည်</string>
     <string name="gas_price_widget">Gas Price: %1$s</string>
-    <string name="gas_message">လုပ်ငန်းဆောင်ရွက်ခများသည် AlphaWallet နှင့်မသက်ဆိုင်ပဲ Etheruem Blockchain ၏ကွန်ရက်ကြပ်မှုအပေါ်မူတည်ပါသည်။ AlphaWallet သည် လုပ်ငန်းဆောင်ရွက်ခကို ၁၅စက္ကန့်တကြိမ် gasnow.org မှကိုးကား၍ အသုံးပြုပါသည်။</string>
+    <string name="gas_max">Max Fee</string>
+    <string name="priority_fee">Priority Fee</string>
+    <string name="base_fee">Base Fee: %1$s</string>
+    <string name="gas_message">လုပ်ငန်းဆောင်ရွက်ခများသည် AlphaWallet နှင့်မသက်ဆိုင်ပဲ Etheruem Blockchain ၏ကွန်ရက်ကြပ်မှုအပေါ်မူတည်ပါသည်။ AlphaWallet သည် လုပ်ငန်းဆောင်ရွက်ခကို ၁၅စက္ကန့်တကြိမ် %1$s မှကိုးကား၍ အသုံးပြုပါသည်။</string>
     <string name="set_your_speed">ကိုယ်တိုင်အမြန်နှုန်းသတ်မှတ်မည်</string>
     <string name="nonce_optional">Nonce (optional)</string>
     <string name="calc_gas_limit">ခွင့်ပြုလုပ်ငန်းဆောင်ရွက်ခကိုတွက်ချက်ခြင်း</string>
@@ -846,6 +850,7 @@
     <string name="action_enable_switch_reload"><![CDATA[Enable, Switch & Reload]]></string>
     <string name="add_chain_dialog_message">ယခုဝက်ဘ်ဆိုဒ်သည် the %1$s Chain၊ chain ID: %2$s သို့ပြောင်းဖွင့်ရန်တောင်းဆိုနေပါသည်။</string>
     <string name="switch_chain_request">Chain တောင်းဆိုမှုကိုပြောင်းလဲမည်</string>
+    <string name="add_chain_request">Add Chain Request</string>
     <string name="no_chart_data_available">ဇယားအချက်အလက်မရရှိနိုင်ပါ</string>
     <string name="wallet_total_change">%1$s (%2$s%%) ယနေ့</string>
     <string name="title_wallets_summary">ဝေါလက်များ</string>
@@ -878,9 +883,14 @@
     <string name="label_external_link">External Link</string>
     <string name="label_description">Description</string>
     <string name="label_details">Details</string>
+    <string name="title_dark_mode">Dark Mode</string>
     <string name="switch_to_grid_view">Switch to Grid View</string>
     <string name="switch_to_list_view">Switch to List View</string>
     <string name="reload_metadata">Reload Metadata</string>
+    <string name="label_market_price">Market Price:</string>
+    <string name="i_already_have_a_wallet">I already have a Wallet</string>
+    <string name="title_select_theme">Select Mode</string>
+    <string name="title_network_info">Network Info</string>
     <string name="assets">Assets</string>
     <string name="defi_header">DeFi</string>
     <string name="governance_header">Governance</string>
@@ -900,4 +910,14 @@
     <string name="current_price">Current Price:</string>
     <string name="add_new_price_alert">Add New Price Alert</string>
     <string name="website_text">Website</string>
+    <string name="setting_theme_light">Light</string>
+    <string name="setting_theme_dark">Dark</string>
+    <string name="setting_theme_auto">Auto</string>
+    <string name="trait_rarity_unique">Unique</string>
+    <string name="trait_rarity_suppl_text">%1$s%% have this trait</string>
+    <string name="toast_qr_scanning_requires_api_24">QR စကင်န်ဖတ်ခြင်းတွင် Android 7.0 (API အဆင့် 24) နှင့်အထက် လိုအပ်သည်။</string>
+    <string name="experimental_1559">Use 1559 Transactions</string>
+    <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
+    <string name="action_reset_network" >ပြန်လည်သတ်မှတ်ပါ။</string>
+    <string name="chain_id">Chain ID: %1d</string>
 </resources>

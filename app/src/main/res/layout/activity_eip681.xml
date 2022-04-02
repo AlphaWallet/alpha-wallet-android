@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
@@ -12,47 +11,14 @@
     <RelativeLayout
         android:id="@+id/layout_holder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_card">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:id="@+id/holding_view"
-            android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
             android:orientation="vertical">
-
-            <LinearLayout
-                android:id="@+id/layout_select_address"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/title_my_address"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="20dp"
-                    android:fontFamily="@font/font_light"
-                    android:gravity="center"
-                    android:text="@string/my_wallet_address"
-                    android:textColor="@color/text_black"
-                    android:textSize="25sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_light"
-                    android:gravity="center"
-                    android:text="@string/scan_qr_label"
-                    android:textColor="@color/text_black"
-                    android:textSize="16sp" />
-
-            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/layout_define_request"
@@ -66,10 +32,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/dp5"
-                    custom:show_header="true"
-                    custom:show_allFunds="false"
+                    android:visibility="visible"
                     custom:label="@string/generate_payment_request"
-                    android:visibility="visible"/>
+                    custom:show_allFunds="false"
+                    custom:show_header="true" />
 
             </LinearLayout>
 
@@ -77,86 +43,26 @@
 
         <ImageView
             android:id="@+id/qr_image"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/holding_view"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:src="@drawable/ic_logo" />
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/ic_action_qrx" />
 
-        <TextView
-            android:id="@+id/address"
+        <com.alphawallet.app.widget.CopyTextView
+            android:id="@+id/copy_wallet_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/qr_image"
-            android:layout_gravity="center_horizontal"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/background_round_grey"
-            android:fontFamily="@font/font_semibold"
-            android:gravity="center"
-            android:padding="15dp"
-            android:textSize="13sp" />
-
-        <TextView
-            android:id="@+id/text_contract_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/address"
-            android:text="@string/contract_address"
-            android:layout_gravity="center_horizontal"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="5dp"
-            android:fontFamily="@font/font_regular"
-            android:textAllCaps="true"
-            android:textColor="@color/light_gray"
             android:visibility="gone"
-            android:textSize="10sp"/>
-
-        <LinearLayout
-            android:id="@+id/layout_contract"
-            android:layout_below="@id/text_contract_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/background_quantity"
-            android:orientation="horizontal"
-            android:padding="5dp"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/contract_address"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/background_round_grey"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:padding="5dp"
-                android:text=""
-                android:textSize="12sp" />
-
-            <Button
-                android:id="@+id/copy_contract_action"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/background_round_primary"
-                android:fontFamily="@font/font_regular"
-                android:text="Copy"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                android:textSize="16sp" />
-
-        </LinearLayout>
+            tools:visibility="visible" />
 
         <com.alphawallet.app.widget.FunctionButtonBar
-            android:layout_alignParentBottom="true"
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
 </LinearLayout>

@@ -49,6 +49,7 @@
     <string name="label_gas_price_gwei">Precio del gas (GWEI)</string>
     <string name="label_old_gas_price">Precio antiguo del gas</string>
     <string name="label_network_fee">Tarifa de red (máximo)</string>
+    <string name="label_gas_price_max">Max Fee (GWEI)</string>
     <string name="button_ok">OK</string>
     <!-- Subtitles -->
     <string name="subtitle_from">De</string>
@@ -533,7 +534,7 @@
     <string name="tokenscript_error_detail">Error en el elemento de TokenScript: %1$s</string>
     <string name="tokenscript_element_not_present">entrada de la función \"%1$s\" no encontrada en los elementos HTML.</string>
     <string name="complete_tokenscript_value">Valor de entrada no válido: %1$s</string>
-    <string name="value">VALOR</string>
+    <string name="value">Valor</string>
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">No ha sido posible crear la clave. Prueba a activar la seguridad en tu teléfono.</string>
     <string name="what_is_seed_phrase">Una frase semilla, frase semilla de recuperación o frase semilla de respaldo es una lista de palabras que almacena toda la información necesaria para recuperar un monedero criptográfico. Normalmente, el software del monedero genera una frase semilla e indica al usuario que la escriba en un papel.</string>
@@ -702,6 +703,9 @@
     <string name="new_balance">(Nuevo: %1$s %2$s)</string>
     <string name="set_speed_title">Velocidad de la Transacción</string>
     <string name="gas_price_widget">Precio del gas: %1$s</string>
+    <string name="gas_max">Max Fee</string>
+    <string name="priority_fee">Priority Fee</string>
+    <string name="base_fee">Base Fee: %1$s</string>
     <string name="gas_message">Fees are based on current Ethereum blockchain network load. They are not up to AlphaWallet. AlphaWallet uses the %1$s live oracle and updates the gas prices every 15 seconds.</string>
     <string name="set_your_speed">Establece tu propio</string>
     <string name="nonce_optional">Nonce (opcional)</string>
@@ -804,6 +808,7 @@
     <string name="action_enable_switch_reload"><![CDATA[Enable, Switch & Reload]]></string>
     <string name="add_chain_dialog_message">This site is requesting you to enable and switch to the %1$s Chain with chain ID: %2$s. This will reload the page</string>
     <string name="switch_chain_request">Switch Chain Request</string>
+    <string name="add_chain_request">Add Chain Request</string>
     <string name="no_chart_data_available">No chart data available</string>
     <string name="wallet_total_change">%1$s (%2$s%%) Hoy</string>
     <string name="title_wallets_summary">Wallets</string>
@@ -829,7 +834,7 @@
     <string name="online">Conectado</string>
     <string name="summary_change_24h">%1$s (%2$s) Hoy</string>
     <string name="performance">Performance</string>
-    <string name="token_name_hint">Token Name</string>
+    <string name="token_name_hint">Search token</string>
     <string name="assets">Assets</string>
     <string name="defi_header">DeFi</string>
     <string name="governance_header">Gobernancia</string>
@@ -852,10 +857,25 @@
     <string name="label_external_link">External Link</string>
     <string name="label_description">Description</string>
     <string name="label_details">Details</string>
+    <string name="title_dark_mode">Dark Mode</string>
     <string name="send_multiple_tokens">Send Multiple Tokens</string>
     <string name="switch_to_grid_view">Switch to Grid View</string>
     <string name="switch_to_list_view">Switch to List View</string>
     <string name="reload_metadata">Reload Metadata</string>
+    <string name="label_market_price">Market Price:</string>
+    <string name="i_already_have_a_wallet">I already have a Wallet</string>
+    <string name="title_select_theme">Select Mode</string>
+    <string name="title_network_info">Network Info</string>
     <string name="testnet">Testnet</string>
     <string name="website_text">Website</string>
+    <string name="setting_theme_light">Light</string>
+    <string name="setting_theme_dark">Dark</string>
+    <string name="setting_theme_auto">Auto</string>
+    <string name="trait_rarity_unique">Unique</string>
+    <string name="trait_rarity_suppl_text">%1$s%% have this trait</string>
+    <string name="toast_qr_scanning_requires_api_24">El escaneo QR requiere Android 7.0 (API nivel 24) o superior.</string>
+    <string name="experimental_1559">Use 1559 Transactions</string>
+    <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
+    <string name="action_reset_network" >Reiniciar</string>
+    <string name="chain_id">Chain ID: %1d</string>
 </resources>

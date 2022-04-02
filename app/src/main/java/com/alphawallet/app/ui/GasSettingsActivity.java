@@ -36,7 +36,6 @@ import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
-import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.GasSettingsCallback;
@@ -244,7 +243,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         result.putExtra(C.EXTRA_GAS_PRICE, custom.gasPrice.maxFeePerGas.toString());
         result.putExtra(C.EXTRA_MIN_GAS_PRICE, custom.gasPrice.maxPriorityFeePerGas.toString());
 
-        AWWalletConnectClient.gasData = result;
+        setResult(RESULT_OK, result);
         finish();
     }
 

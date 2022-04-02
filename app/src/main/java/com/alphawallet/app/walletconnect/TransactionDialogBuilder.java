@@ -3,9 +3,18 @@ package com.alphawallet.app.walletconnect;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.SendTransactionInterface;
@@ -31,25 +40,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-public class TransactionDialogBuilder
+public class TransactionDialogBuilder extends DialogFragment
 {
     private final Activity activity;
     private final WalletConnect.Model.SessionRequest sessionRequest;
     private final WalletConnect.Model.SettledSession settledSession;
+    private final AWWalletConnectClient awWalletConnectClient;
+    private final boolean signOnly;
     private WalletConnectViewModel viewModel;
     private ActionSheetDialog actionSheetDialog;
+    private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> actionSheetDialog.setCurrentGasIndex(result));
 
-    public TransactionDialogBuilder(Activity activity, WalletConnect.Model.SessionRequest sessionRequest, WalletConnect.Model.SettledSession settledSession)
+    public TransactionDialogBuilder(Activity activity, WalletConnect.Model.SessionRequest sessionRequest, WalletConnect.Model.SettledSession settledSession, AWWalletConnectClient awWalletConnectClient, boolean signOnly)
     {
         this.activity = activity;
         this.sessionRequest = sessionRequest;
         this.settledSession = settledSession;
+        this.awWalletConnectClient = awWalletConnectClient;
+        this.signOnly = signOnly;
 
         initViewModel();
     }
@@ -60,9 +72,13 @@ public class TransactionDialogBuilder
                 .get(WalletConnectViewModel.class);
     }
 
-    public Dialog build(AWWalletConnectClient awWalletConnectClient, boolean signOnly)
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState)
     {
-        Type listType = new TypeToken<ArrayList<WCEthereumTransaction>>() {}.getType();
+        Type listType = new TypeToken<ArrayList<WCEthereumTransaction>>()
+        {
+        }.getType();
         List<WCEthereumTransaction> list = new Gson().fromJson(sessionRequest.getRequest().getParams(), listType);
         WCEthereumTransaction wcTx = list.get(0);
         final Web3Transaction w3Tx = new Web3Transaction(wcTx, 0);
@@ -106,7 +122,7 @@ public class TransactionDialogBuilder
             @Override
             public ActivityResultLauncher<Intent> gasSelectLauncher()
             {
-                return null;
+                return activityResultLauncher;
             }
         });
         if (signOnly)

@@ -1,10 +1,16 @@
 package com.alphawallet.app.walletconnect;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.App;
 import com.alphawallet.app.BuildConfig;
@@ -25,16 +31,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.lifecycle.MutableLiveData;
 import timber.log.Timber;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
 {
-    public static Intent gasData;
     public static AuthenticationCallback authCallback;
     private final WalletConnectInteract walletConnectInteract;
     public static WalletConnect.Model.SessionProposal sessionProposal;

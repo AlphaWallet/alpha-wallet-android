@@ -81,27 +81,6 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
         speedWarning = findViewById(R.id.layout_speed_warning);
     }
 
-    @Override
-    protected void onWindowVisibilityChanged(int visibility)
-    {
-        super.onWindowVisibilityChanged(visibility);
-        if (visibility == VISIBLE && AWWalletConnectClient.gasData != null)
-        {
-            Intent data = AWWalletConnectClient.gasData;
-
-            int gasSelectionIndex = data.getIntExtra(C.EXTRA_SINGLE_ITEM, -1);
-            long customNonce = data.getLongExtra(C.EXTRA_NONCE, -1);
-            BigInteger customGasPrice = data.hasExtra(C.EXTRA_GAS_PRICE) ?
-                    new BigInteger(data.getStringExtra(C.EXTRA_GAS_PRICE)) : BigInteger.ZERO; //may not have set a custom gas price
-            BigInteger maxPriorityFee = data.hasExtra(C.EXTRA_MIN_GAS_PRICE) ?
-                    new BigInteger(data.getStringExtra(C.EXTRA_MIN_GAS_PRICE)) : BigInteger.ZERO;
-            BigDecimal customGasLimit = new BigDecimal(data.getStringExtra(C.EXTRA_GAS_LIMIT));
-            long expectedTxTime = data.getLongExtra(C.EXTRA_AMOUNT, 0);
-
-            setCurrentGasIndex(gasSelectionIndex, customGasPrice, maxPriorityFee, customGasLimit, expectedTxTime, customNonce);
-        }
-        AWWalletConnectClient.gasData = null;
-    }
     //For legacy transaction, either we are sending all or the chain doesn't support EIP1559
     //Since these chains are not so well used, we will compromise and send at the standard gas rate
     //That is - not allow selection of gas price

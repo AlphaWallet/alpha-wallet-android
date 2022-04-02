@@ -323,6 +323,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             web3.setWebLoadCallback(this);
         }
+
+        startBalanceListener();
     }
 
     @Nullable

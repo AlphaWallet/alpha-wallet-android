@@ -565,7 +565,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private void tryDismiss()
     {
-        if (isAttached && isShowing()) dismiss();
+        if (Utils.stillAvailable(activity) && isAttached && isShowing()) dismiss();
     }
 
     private void updateRealmTransactionFinishEstimate(String txHash)

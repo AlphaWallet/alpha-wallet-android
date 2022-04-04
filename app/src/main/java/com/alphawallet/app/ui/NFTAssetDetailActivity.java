@@ -4,12 +4,15 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -26,11 +29,12 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.opensea.Trait;
+import com.alphawallet.app.entity.opensea.OpenSeaAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -50,15 +54,11 @@ import java.util.List;
 import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
+import io.reactivex.functions.Consumer;
 
 
 @AndroidEntryPoint
-public class NFTAssetDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
-{
+public class NFTAssetDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback {
     private TokenFunctionViewModel viewModel;
     private Token token;
     private Wallet wallet;
@@ -73,24 +73,12 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private TextView tokenDescription;
     private ActionMenuItemView refreshMenu;
     private Animation rotation;
+    private TokenInfoCategoryView detailsLabel;
+    private TokenInfoCategoryView descriptionLabel;
+    private ProgressBar progressBar;
+    private ActivityResultLauncher<Intent> handleTransactionSuccess;
+    private ActivityResultLauncher<Intent> getGasSettings;
 
-    @Nullable
-    private Disposable nftAssetLoader;
-
-    private final ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                if (result.getData() == null) return;
-                String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
-                //process hash
-                if (!TextUtils.isEmpty(transactionHash))
-                {
-                    Intent intent = new Intent();
-                    intent.putExtra(C.EXTRA_TXHASH, transactionHash);
-                    setResult(RESULT_OK, intent);
-                    finish();
-                }
-            });
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -98,7 +86,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nft_asset_detail);
 
+        initViews();
+
         toolbar();
+
+        initIntents();
 
         initViewModel();
 
@@ -106,20 +98,51 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         setTitle(token.tokenInfo.name);
 
-        initViews();
-
         setupFunctionBar();
 
         asset = token.getTokenAssets().get(tokenId);
 
-        loadAssetData(asset);
+        updateDefaultTokenData();
+    }
+
+    private void initIntents()
+    {
+        handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result ->
+                {
+                    if (result.getData() == null) return;
+                    String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
+                    //process hash
+                    if (!TextUtils.isEmpty(transactionHash))
+                    {
+                        Intent intent = new Intent();
+                        intent.putExtra(C.EXTRA_TXHASH, transactionHash);
+                        setResult(RESULT_OK, intent);
+                        finish();
+                    }
+                });
+
+        getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result -> confirmationDialog.setCurrentGasIndex(result));
     }
 
     @Override
     public void onResume()
     {
         super.onResume();
-        if (viewModel != null) viewModel.prepare();
+        if (viewModel != null)
+        {
+            viewModel.prepare();
+            viewModel.getAsset(token, tokenId);
+            progressBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        viewModel.onDestroy();
+        super.onDestroy();
     }
 
     @Override
@@ -145,6 +168,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         tokenImage = findViewById(R.id.asset_image);
         nftAttributeLayout = findViewById(R.id.attributes);
         tokenDescription = findViewById(R.id.token_description);
+        detailsLabel = findViewById(R.id.label_details);
+        descriptionLabel = findViewById(R.id.label_description);
+        progressBar = findViewById(R.id.progress);
 
         rotation = AnimationUtils.loadAnimation(this, R.anim.rotate_refresh);
         rotation.setRepeatCount(Animation.INFINITE);
@@ -164,8 +190,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel = new ViewModelProvider(this)
                 .get(TokenFunctionViewModel.class);
         viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
-        viewModel.traits().observe(this, this::onTraits);
-        viewModel.attrs().observe(this, this::onAttributes);
+        viewModel.openSeaAsset().observe(this, this::onOpenSeaAsset);
+        viewModel.nftAsset().observe(this, this::onNftAsset);
     }
 
     private void setupFunctionBar()
@@ -179,6 +205,23 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
+    private void reloadMetadata()
+    {
+        refreshMenu = findViewById(R.id.action_reload_metadata);
+        refreshMenu.startAnimation(rotation);
+        progressBar.setVisibility(View.VISIBLE);
+        viewModel.getAsset(token, tokenId);
+    }
+
+    private void clearRefreshAnimation()
+    {
+        if (refreshMenu != null)
+        {
+            refreshMenu.clearAnimation();
+        }
+        progressBar.setVisibility(View.GONE);
+    }
+
     private void addInfoView(String elementName, String name)
     {
         if (!TextUtils.isEmpty(name))
@@ -189,36 +232,45 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
-    private void reloadMetadata()
+    private void onNftAsset(NFTAsset asset)
     {
-        refreshMenu = findViewById(R.id.action_reload_metadata);
-        refreshMenu.startAnimation(rotation);
-        fetchAsset(tokenId, asset);
+        loadAssetFromMetadata(asset);
     }
 
-    //TODO: Add NFTAsset realm listener, and only update the image when the data changes
-    private void fetchAsset(BigInteger tokenId, NFTAsset nftAsset)
+    private void updateDefaultTokenData()
     {
-        nftAssetLoader =
-                Single.fromCallable(() -> token.fetchTokenMetadata(tokenId))
-                        .map(newAsset -> storeAsset(tokenId, newAsset, nftAsset))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::loadAssetData, e -> { });
+        tokenInfoLayout.removeAllViews();
+
+        if (!TextUtils.isEmpty(sequenceId))
+        {
+            addInfoView(getString(R.string.label_token_id), sequenceId);
+        }
+        else
+        {
+            addInfoView(getString(R.string.label_token_id), tokenId.toString());
+        }
+
+        addInfoView(getString(R.string.subtitle_network), token.getNetworkName());
+
+        addInfoView(getString(R.string.contract_address), Utils.formatAddress(token.tokenInfo.address));
     }
 
-    private NFTAsset storeAsset(BigInteger tokenId, NFTAsset fetchedAsset, NFTAsset oldAsset)
+    private void loadAssetFromMetadata(NFTAsset asset)
     {
-        fetchedAsset.updateFromRaw(oldAsset);
-        viewModel.getTokensService().storeAsset(token, tokenId, fetchedAsset);
-        token.addAssetToTokenBalanceAssets(tokenId, fetchedAsset);
-        return fetchedAsset;
+        if (asset != null)
+        {
+            updateTokenImage(asset);
+
+            addMetaDataInfo(asset);
+
+            nftAttributeLayout.bind(token, asset);
+
+            clearRefreshAnimation();
+        }
     }
 
-    private void loadAssetData(NFTAsset asset)
+    private void updateTokenImage(NFTAsset asset)
     {
-        if (asset == null) return;
-
         if (asset.isBlank())
         {
             tokenImage.showFallbackLayout(token);
@@ -229,85 +281,137 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             tokenImage.showLoadingProgress(true);
             tokenImage.setupTokenImage(asset);
         }
+    }
 
-        tokenInfoLayout.removeAllViews();
-        nftAttributeLayout.removeAllViews();
-
-        tokenInfoLayout.addView(new TokenInfoCategoryView(this, getString(R.string.label_details)));
-
-        //can be either: FT with a balance (balance > 1)
-        //unique NFT with tokenId (sequenceId)
-        //TODO: This should be done in a common widget together with all other instances
-        if (!TextUtils.isEmpty(sequenceId))
+    private void updateTokenImage(OpenSeaAsset openSeaAsset)
+    {
+        if (TextUtils.isEmpty(openSeaAsset.getImageUrl()))
         {
-            addInfoView(getString(R.string.label_token_id), sequenceId);
+            tokenImage.showFallbackLayout(token);
         }
         else
         {
-            addInfoView(getString(R.string.label_token_id), tokenId.toString());
+            tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
+            tokenImage.showLoadingProgress(true);
+            tokenImage.setupTokenImage(openSeaAsset);
         }
+    }
+
+    private void addMetaDataInfo(NFTAsset asset)
+    {
+        updateDefaultTokenData();
+
         if (asset.isAssetMultiple())
         {
             addInfoView(getString(R.string.balance), asset.getBalance().toString());
         }
-        if (!TextUtils.isEmpty(asset.getName()))
+
+        String assetName = asset.getName();
+        if (assetName != null)
         {
-            addInfoView(getString(R.string.hint_contract_name), asset.getName());
+            addInfoView(getString(R.string.hint_contract_name), assetName);
+            setTitle(assetName);
         }
+
         addInfoView(getString(R.string.label_external_link), asset.getExternalLink());
 
-        String description = asset.getDescription();
-        if (description != null)
-        {
-            tokenInfoLayout.addView(new TokenInfoCategoryView(this, getString(R.string.label_description)));
-            tokenDescription.setText(asset.getDescription());
-        }
+        updateDescription(asset.getDescription());
 
-        tokenInfoLayout.forceLayout();
-
-        viewModel.getAsset(token, tokenId);
-
-        if (refreshMenu != null)
-        {
-            refreshMenu.clearAnimation();
-        }
-    }
-
-    private void onTraits(List<Trait> traits)
-    {
-        nftAttributeLayout.bind(token, traits);
-    }
-
-    private void onAttributes(NFTAsset asset)
-    {
         nftAttributeLayout.bind(token, asset);
     }
 
-    @Override
-    public void onDestroy()
+    private void updateDescription(String description)
     {
-        if (nftAssetLoader != null && !nftAssetLoader.isDisposed()) nftAssetLoader.dispose();
+        if (!TextUtils.isEmpty(description))
+        {
+            descriptionLabel.setVisibility(View.VISIBLE);
+            tokenDescription.setText(Html.fromHtml(description));
+        }
+    }
 
-        super.onDestroy();
+    private void loadFromOpenSeaData(OpenSeaAsset openSeaAsset)
+    {
+        updateDefaultTokenData();
+
+        updateTokenImage(openSeaAsset);
+
+        if (!TextUtils.isEmpty(openSeaAsset.name))
+        {
+            setTitle(openSeaAsset.name);
+            addInfoView(getString(R.string.hint_contract_name), openSeaAsset.name);
+        }
+
+        if (openSeaAsset.creator != null
+                && openSeaAsset.creator.user != null)
+        {
+            addInfoView(getString(R.string.asset_creator), openSeaAsset.creator.user.username);
+        }
+
+        if (openSeaAsset.assetContract != null)
+        {
+            addInfoView(getString(R.string.asset_schema), openSeaAsset.assetContract.getSchemaName());
+        }
+
+        if (openSeaAsset.collection != null
+                && openSeaAsset.collection.stats != null)
+        {
+            addInfoView(getString(R.string.asset_total_supply), String.valueOf(openSeaAsset.collection.stats.totalSupply));
+            addInfoView(getString(R.string.asset_number_of_owners), String.valueOf(openSeaAsset.collection.stats.numOwners));
+            nftAttributeLayout.bind(token, openSeaAsset.traits, openSeaAsset.collection.stats.count);
+        }
+        else
+        {
+            nftAttributeLayout.bind(token, openSeaAsset.traits, 0);
+        }
+
+        if (openSeaAsset.owner != null
+                && openSeaAsset.owner.user != null)
+        {
+            addInfoView(getString(R.string.asset_owner), openSeaAsset.owner.user.username);
+        }
+
+        if (openSeaAsset.lastSale != null
+                && openSeaAsset.lastSale.paymentToken != null)
+        {
+            String salePrice = openSeaAsset.lastSale.totalPrice;
+            int endIndex = salePrice.length() - openSeaAsset.lastSale.paymentToken.decimals;
+            String result = salePrice.substring(0, endIndex)
+                    + " " + openSeaAsset.lastSale.paymentToken.symbol;
+            addInfoView(getString(R.string.asset_last_sale), result);
+        }
+
+        addInfoView(getString(R.string.label_external_link), openSeaAsset.externalLink);
+
+        updateDescription(openSeaAsset.description);
+
+        clearRefreshAnimation();
+    }
+
+    private void onOpenSeaAsset(OpenSeaAsset openSeaAsset)
+    {
+        loadFromOpenSeaData(openSeaAsset);
     }
 
     @Override
     public void showTransferToken(List<BigInteger> selection)
     {
         NFTAsset asset = token.getTokenAssets().get(tokenId);
-        if (asset.isAssetMultiple())
+        if (asset != null)
         {
-            viewModel.showTransferSelectCount(this, token, tokenId)
-                    .subscribe(intent -> handleTransactionSuccess.launch(intent)).isDisposed();
-        }
-        else
-        {
-            if (asset.getSelectedBalance().compareTo(BigDecimal.ZERO) == 0)
+            if (asset.isAssetMultiple())
             {
-                asset.setSelectedBalance(BigDecimal.ONE);
+                viewModel.showTransferSelectCount(this, token, tokenId)
+                        .subscribe((Consumer<Intent>) handleTransactionSuccess::launch).isDisposed();
             }
-            viewModel.getTransferIntent(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset)))
-                    .subscribe(intent -> handleTransactionSuccess.launch(intent)).isDisposed();
+            else
+            {
+                if (asset.getSelectedBalance().compareTo(BigDecimal.ZERO) == 0)
+                {
+                    asset.setSelectedBalance(BigDecimal.ONE);
+                }
+                viewModel.getTransferIntent(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset)))
+                        .subscribe((Consumer<Intent>) handleTransactionSuccess::launch).isDisposed();
+            }
         }
     }
 
@@ -422,9 +526,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         viewModel.actionSheetConfirm(mode);
     }
-
-    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> confirmationDialog.setCurrentGasIndex(result));
 
     @Override
     public ActivityResultLauncher<Intent> gasSelectLauncher()

@@ -915,4 +915,10 @@
     <string name="experimental_1559">Use 1559 Transactions</string>
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
     <string name="chain_id">Chain ID: %1d</string>
+    <string name="asset_creator">Created By</string>
+    <string name="asset_schema">Token Standard</string>
+    <string name="asset_total_supply">Total Supply</string>
+    <string name="asset_number_of_owners">Owners</string>
+    <string name="asset_owner">Owner</string>
+    <string name="asset_last_sale">Last Sale</string>
 </resources>

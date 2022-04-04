@@ -163,7 +163,7 @@ public class AWEnsResolver extends EnsResolver
                 String tokenAddress = Numeric.prependHexPrefix(matcher.group(6));
                 String tokenId = matcher.group(8);
 
-                String asset = OpenSeaService.fetchAsset(chainId, tokenAddress, tokenId);
+                String asset = new OpenSeaService().fetchAsset(chainId, tokenAddress, tokenId);
                 JSONObject assetObj = new JSONObject(asset);
                 String url = assetObj.getString(OPENSEA_IMAGE_PREVIEW);
                 if (!TextUtils.isEmpty(url) && url.endsWith(".svg"))

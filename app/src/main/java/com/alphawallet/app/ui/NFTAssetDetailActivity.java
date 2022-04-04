@@ -98,7 +98,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         setTitle(token.tokenInfo.name);
 
-
         setupFunctionBar();
 
         asset = token.getTokenAssets().get(tokenId);
@@ -242,8 +241,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         tokenInfoLayout.removeAllViews();
 
-        addTokenImage(asset);
-
         if (!TextUtils.isEmpty(sequenceId))
         {
             addInfoView(getString(R.string.label_token_id), sequenceId);
@@ -262,6 +259,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         if (asset != null)
         {
+            updateTokenImage(asset);
+
             addMetaDataInfo(asset);
 
             nftAttributeLayout.bind(token, asset);
@@ -270,7 +269,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
-    private void addTokenImage(NFTAsset asset)
+    private void updateTokenImage(NFTAsset asset)
     {
         if (asset.isBlank())
         {
@@ -281,6 +280,20 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
             tokenImage.showLoadingProgress(true);
             tokenImage.setupTokenImage(asset);
+        }
+    }
+
+    private void updateTokenImage(OpenSeaAsset openSeaAsset)
+    {
+        if (TextUtils.isEmpty(openSeaAsset.getImageUrl()))
+        {
+            tokenImage.showFallbackLayout(token);
+        }
+        else
+        {
+            tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
+            tokenImage.showLoadingProgress(true);
+            tokenImage.setupTokenImage(openSeaAsset);
         }
     }
 
@@ -319,6 +332,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private void loadFromOpenSeaData(OpenSeaAsset openSeaAsset)
     {
         updateDefaultTokenData();
+
+        updateTokenImage(openSeaAsset);
 
         if (!TextUtils.isEmpty(openSeaAsset.name))
         {

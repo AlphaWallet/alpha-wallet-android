@@ -11,9 +11,29 @@ public class OpenSeaAsset
     @Expose
     public String id;
 
+    @SerializedName("background_color")
+    @Expose
+    public String backgroundColor;
+
+    @SerializedName("image")
+    @Expose
+    public String image;
+
     @SerializedName("image_url")
     @Expose
     public String imageUrl;
+
+    @SerializedName("image_preview_url")
+    @Expose
+    public String imagePreviewUrl;
+
+    @SerializedName("image_original_url")
+    @Expose
+    public String imageOriginalUrl;
+
+    @SerializedName("animationUrl")
+    @Expose
+    public String animationUrl;
 
     @SerializedName("name")
     @Expose
@@ -189,6 +209,34 @@ public class OpenSeaAsset
             @SerializedName("decimals")
             @Expose
             public int decimals;
+        }
+    }
+
+    public String getImageUrl()
+    {
+        if (image != null)
+        {
+            return image;
+        }
+        else if (imageUrl != null)
+        {
+            return imageUrl;
+        }
+        else if (animationUrl != null)
+        {
+            return animationUrl;
+        }
+        else if (imageOriginalUrl != null)
+        {
+            return imageOriginalUrl;
+        }
+        else if (imagePreviewUrl != null)
+        {
+            return imagePreviewUrl;
+        }
+        else
+        {
+            return "";
         }
     }
 }

@@ -415,7 +415,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     private static final List<Long> hasGasOracleAPI = Arrays.asList(MAINNET_ID, HECO_ID, BINANCE_MAIN_ID, MATIC_ID);
 
     //These chains don't allow custom gas
-    private static final List<Long> hasLockedGas = Arrays.asList(OPTIMISTIC_MAIN_ID, OPTIMISTIC_TEST_ID, ARBITRUM_MAIN_ID, ARBITRUM_TEST_ID);
+    private static final List<Long> hasLockedGas = Arrays.asList(OPTIMISTIC_MAIN_ID, OPTIMISTIC_TEST_ID, ARBITRUM_MAIN_ID, ARBITRUM_TEST_ID, KLAYTN_ID, KLAYTN_BOABAB_ID);
 
     private static final List<Long> hasOpenSeaAPI = Arrays.asList(MAINNET_ID, MATIC_ID, RINKEBY_ID);
 

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/layout_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/action_sheet_header"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/image_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="@color/transparent"
+            android:contentDescription="@string/action_close"
+            android:padding="5dp"
+            android:src="@drawable/ic_close"
+            app:tint="?colorControlNormal" />
+
+        <TextView
+            android:id="@+id/text_sign_title"
+            style="@style/Aw.Typography.Title.SemiBold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/dp8"
+            android:layout_marginBottom="@dimen/dp8"
+            android:layout_weight="2"
+            android:gravity="center_horizontal"
+            android:text=""
+            tools:text="Switch Chain Request" />
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_launcher_foreground" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/logo_old"
+        android:layout_width="@dimen/token_icon"
+        android:layout_height="@dimen/token_icon"
+        android:layout_marginTop="@dimen/dp8"
+        android:contentDescription="@string/app_name"
+        app:layout_constraintEnd_toStartOf="@id/arrow_right"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layout_header"
+        tools:src="@drawable/ic_ethereum" />
+
+    <TextView
+        android:id="@+id/name_old_chain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Aw.Typography.Title"
+        tools:text="Ethereum"
+        android:layout_marginTop="@dimen/dp8"
+        app:layout_constraintTop_toBottomOf="@id/logo_old"
+        app:layout_constraintStart_toStartOf="@id/logo_old"
+        app:layout_constraintEnd_toEndOf="@id/logo_old"/>
+
+    <ImageView
+        android:id="@+id/arrow_right"
+        android:layout_width="@dimen/token_icon"
+        android:layout_height="@dimen/token_icon"
+        android:layout_marginTop="@dimen/dp8"
+        android:contentDescription="@string/app_name"
+        android:layout_marginHorizontal="@dimen/dp16"
+        app:layout_constraintEnd_toStartOf="@id/name_new_chain"
+        app:layout_constraintStart_toEndOf="@id/name_old_chain"
+        app:layout_constraintTop_toBottomOf="@id/layout_header"
+        android:src="@drawable/ic_arrow_right" />
+
+    <ImageView
+        android:id="@+id/logo_new"
+        android:layout_width="@dimen/token_icon"
+        android:layout_height="@dimen/token_icon"
+        android:layout_marginTop="@dimen/dp8"
+        android:contentDescription="@string/app_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/arrow_right"
+        app:layout_constraintTop_toBottomOf="@id/layout_header"
+        tools:src="@drawable/ic_optimism_logo" />
+
+    <TextView
+        android:id="@+id/name_new_chain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Aw.Typography.Title"
+        tools:text="Optimistic"
+        android:layout_marginTop="@dimen/dp8"
+        app:layout_constraintTop_toBottomOf="@id/logo_new"
+        app:layout_constraintStart_toStartOf="@id/logo_new"
+        app:layout_constraintEnd_toEndOf="@id/logo_new"/>
+
+    <TextView
+        android:id="@+id/text_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp24"
+        android:layout_marginTop="@dimen/dp16"
+        android:layout_marginEnd="@dimen/dp24"
+        android:layout_marginBottom="@dimen/dp8"
+        android:gravity="center_horizontal"
+        android:text=""
+        app:layout_constraintTop_toBottomOf="@id/name_old_chain"
+        tools:text="This site is requesting you to switch to the Mumbai Testnet (Test) chain with chain ID: 80001. This will reload the page." />
+
+    <com.alphawallet.app.widget.FunctionButtonBar
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/text_message" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

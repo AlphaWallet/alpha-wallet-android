@@ -1339,8 +1339,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             message += "\n" + getString(R.string.warning_switching_to_test);
         }
 
-        confirmationDialog = new ActionSheetDialog(requireActivity(), this, R.string.switch_chain_request, message, R.string.switch_and_reload,
-                callbackId, baseToken);
+        confirmationDialog = new ActionSheetDialog(requireActivity(), this, R.string.switch_chain_request, message,
+                R.string.switch_and_reload, callbackId, baseToken, activeNetwork.chainId, newNetwork.chainId);
 
         confirmationDialog.setCanceledOnTouchOutside(true);
         confirmationDialog.show();

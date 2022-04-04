@@ -5,6 +5,7 @@ import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.Image;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -25,6 +26,7 @@ import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmTransaction;
@@ -321,6 +323,55 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         functionList.add(R.string.dialog_reject);
         functionBar.setupFunctions(this, functionList);
         functionBar.revealButtons();
+    }
+
+    // switch chain
+    public ActionSheetDialog(Activity activity, ActionSheetCallback aCallback, int titleId, String message, int buttonTextId,
+                             long cId, Token baseToken, long oldChainId, long newChainId) {
+        super(activity);
+        setContentView(R.layout.dialog_action_sheet_switch_chain);
+
+        TextView titleView = findViewById(R.id.text_sign_title);
+        TextView messageView = findViewById(R.id.text_message);
+        ImageView oldChainIcon = findViewById(R.id.logo_old);
+        ImageView newChainIcon = findViewById(R.id.logo_new);
+        TextView oldChainName = findViewById(R.id.name_old_chain);
+        TextView newChainName = findViewById(R.id.name_new_chain);
+
+        oldChainIcon.setImageResource(EthereumNetworkBase.getChainLogo(oldChainId));
+        newChainIcon.setImageResource(EthereumNetworkBase.getChainLogo(newChainId));
+        oldChainName.setText(EthereumNetworkBase.getShortChainName(oldChainId));
+        newChainName.setText(EthereumNetworkBase.getShortChainName(newChainId));
+
+        functionBar = findViewById(R.id.layoutButtons);
+        this.activity = activity;
+
+        actionSheetCallback = aCallback;
+        mode = ActionSheetMode.MESSAGE;
+
+        titleView.setText(titleId);
+        messageView.setText(message);
+
+        gasWidget = null;
+        balanceDisplay = null;
+        cancelButton = findViewById(R.id.image_close);
+        confirmationWidget = null;
+        addressDetail  = null;
+        amountDisplay = null;
+        assetDetailView = null;
+        detailWidget = null;
+        callbackId = cId;
+        token = baseToken;
+        tokensService = null;
+        candidateTransaction = null;
+        walletConnectRequestWidget = null;
+        gasWidgetLegacy = null;
+        gasWidgetInterface = null;
+
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(buttonTextId)));
+        functionBar.revealButtons();
+        setupCancelListeners();
+        isAttached = true;
     }
 
     public void setSignOnly()

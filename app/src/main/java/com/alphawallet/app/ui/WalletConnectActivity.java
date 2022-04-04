@@ -1264,9 +1264,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             if (walletConnectDialog.isShowing())
                 return;
 
-            // show action sheet
-            walletConnectDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, message, R.string.switch_and_reload,
-                    switchChainDialogCallbackId, baseToken);
+            walletConnectDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, message,
+                    R.string.switch_and_reload, switchChainDialogCallbackId, null, client.chainIdVal(), switchChainId);
 
             walletConnectDialog.setOnDismissListener(dialog -> {
                 viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, false, chainAvailable);

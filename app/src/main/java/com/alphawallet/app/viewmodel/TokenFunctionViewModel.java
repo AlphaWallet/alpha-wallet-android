@@ -810,11 +810,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
 
         if (!loadedFromApi)
         {
-            NFTAsset a = token.getAssetForToken(tokenId);
-            if (a != null)
-            {
-                getTokenMetadata(token, tokenId, a);
-            }
+            getTokenMetadata(token, tokenId, token.getAssetForToken(tokenId));
         }
     }
 }

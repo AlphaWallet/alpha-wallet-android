@@ -406,8 +406,12 @@ public class NFTAsset implements Parcelable
     public void updateFromRaw(NFTAsset oldAsset)
     {
         //add thumbnail if it existed
-        if (oldAsset.assetMap.containsKey(IMAGE_PREVIEW)) assetMap.put(IMAGE_PREVIEW, oldAsset.getAssetValue(IMAGE_PREVIEW));
-        balance = oldAsset.balance;
+        if (oldAsset != null)
+        {
+            if (oldAsset.assetMap.containsKey(IMAGE_PREVIEW))
+                assetMap.put(IMAGE_PREVIEW, oldAsset.getAssetValue(IMAGE_PREVIEW));
+            balance = oldAsset.balance;
+        }
     }
 
     public void updateAsset(BigInteger tokenId, Map<BigInteger, NFTAsset> oldAssets)

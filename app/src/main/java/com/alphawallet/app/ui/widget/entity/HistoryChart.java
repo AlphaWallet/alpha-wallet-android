@@ -219,7 +219,7 @@ public class HistoryChart extends View
         super.onDraw(canvas);
 
         Datasource datasource = cache.getCurrentDatasource(cache.range);
-        if (datasource == null || datasource.entries.size() == 0)
+        if (datasource == null || datasource.entries.size() <= 1)
         {
             // draw no chart data available message
             int xPos = (getWidth() / 2);

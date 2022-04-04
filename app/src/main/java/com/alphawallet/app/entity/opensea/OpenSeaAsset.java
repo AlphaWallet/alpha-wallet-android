@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity.opensea;
 
+import android.text.TextUtils;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -238,5 +240,12 @@ public class OpenSeaAsset
         {
             return "";
         }
+    }
+
+    public boolean isValid()
+    {
+        return !TextUtils.isEmpty(getImageUrl())
+                || !TextUtils.isEmpty(name)
+                || !TextUtils.isEmpty(description);
     }
 }

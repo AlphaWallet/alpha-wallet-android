@@ -761,7 +761,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
 
     private void onAssetMetadataError(Throwable t)
     {
-        Timber.e(t);
+        Timber.w(t);
     }
 
     private void onAssetMetadata(NFTAsset asset)
@@ -791,7 +791,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
             {
                 JSONObject assetJson = new JSONObject(result);
                 OpenSeaAsset osAsset = new Gson().fromJson(assetJson.toString(), OpenSeaAsset.class);
-                if (osAsset != null)
+                if (osAsset != null && osAsset.isValid()) //check to ensure OpenSea has data
                 {
                     openSeaAsset.postValue(osAsset);
                     loadedFromApi = true;
@@ -799,12 +799,12 @@ public class TokenFunctionViewModel extends BaseViewModel {
             }
             catch (JSONException e)
             {
-                Timber.e(e);
+                Timber.w(e);
                 Timber.d("Error fetching from OpenSea: %s", result);
             }
             catch (Exception e)
             {
-                Timber.e(e);
+                Timber.w(e);
             }
         }
 

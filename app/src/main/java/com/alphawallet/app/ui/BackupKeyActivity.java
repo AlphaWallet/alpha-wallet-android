@@ -242,25 +242,25 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     @Override
-    public void keyUpgraded(final KeyService.UpgradeKeyResult result)
+    public void keyUpgraded(final KeyService.UpgradeKeyResult upgrade)
     {
         handler.post(() ->
         {
-            switch (result)
+            switch (upgrade.result)
             {
                 case REQUESTING_SECURITY: //Deprecated
                     //Do nothing, callback will return to 'CreatedKey()'. If it fails the returned key is empty. //Update - this should never happen - remove
                     break;
                 case NO_SCREENLOCK:
                     hasNoLock = true;
-                    DisplayKeyFailureDialog("Unable to upgrade key: Enable screenlock on phone");
+                    DisplayKeyFailureDialog(getString(R.string.enable_screenlock));
                     break;
                 case ALREADY_LOCKED:
                     finishBackupSuccess(false); // already upgraded to top level
                     break;
                 case ERROR:
                     hasNoLock = true;
-                    DisplayKeyFailureDialog("Unable to upgrade key: Unknown Error");
+                    DisplayKeyFailureDialog(getString(R.string.unable_to_upgrade_key, upgrade.message));
                     break;
                 case SUCCESSFULLY_UPGRADED:
                     createdKey(wallet.address);

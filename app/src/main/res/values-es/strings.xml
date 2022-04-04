@@ -884,4 +884,8 @@
     <string name="asset_number_of_owners">Owners</string>
     <string name="asset_owner">Owner</string>
     <string name="asset_last_sale">Last Sale</string>
+    <string name="enable_screenlock">Unable to upgrade key: Enable screenlock on phone</string>
+    <string name="unable_to_upgrade_key">Unable to upgrade key: %1$s</string>
+    <string name="no_key_found">No Key found</string>
+    <string name="unable_store_key">Unable to store key: %1$s</string>
 </resources>

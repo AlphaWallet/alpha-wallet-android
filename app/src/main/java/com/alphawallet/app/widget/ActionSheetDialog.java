@@ -20,6 +20,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TXSpeed;
@@ -326,22 +327,14 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     }
 
     // switch chain
-    public ActionSheetDialog(Activity activity, ActionSheetCallback aCallback, int titleId, String message, int buttonTextId,
-                             long cId, Token baseToken, long oldChainId, long newChainId) {
+    public ActionSheetDialog(Activity activity, ActionSheetCallback aCallback, int titleId, int buttonTextId,
+                             long cId, Token baseToken, NetworkInfo oldNetwork, NetworkInfo newNetwork) {
         super(activity);
         setContentView(R.layout.dialog_action_sheet_switch_chain);
 
         TextView titleView = findViewById(R.id.text_sign_title);
-        TextView messageView = findViewById(R.id.text_message);
-        ImageView oldChainIcon = findViewById(R.id.logo_old);
-        ImageView newChainIcon = findViewById(R.id.logo_new);
-        TextView oldChainName = findViewById(R.id.name_old_chain);
-        TextView newChainName = findViewById(R.id.name_new_chain);
-
-        oldChainIcon.setImageResource(EthereumNetworkBase.getChainLogo(oldChainId));
-        newChainIcon.setImageResource(EthereumNetworkBase.getChainLogo(newChainId));
-        oldChainName.setText(EthereumNetworkBase.getShortChainName(oldChainId));
-        newChainName.setText(EthereumNetworkBase.getShortChainName(newChainId));
+        SwitchChainWidget switchChainWidget = findViewById(R.id.switch_chain_widget);
+        switchChainWidget.setupSwitchChainData(oldNetwork, newNetwork);
 
         functionBar = findViewById(R.id.layoutButtons);
         this.activity = activity;
@@ -350,7 +343,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         mode = ActionSheetMode.MESSAGE;
 
         titleView.setText(titleId);
-        messageView.setText(message);
 
         gasWidget = null;
         balanceDisplay = null;

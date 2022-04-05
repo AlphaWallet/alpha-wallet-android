@@ -12,8 +12,8 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 
 public class SwitchChainWidget extends LinearLayout
 {
-    private final ImageView oldChainLogo;
-    private final ImageView newChainLogo;
+    private final TokenIcon oldChainLogo;
+    private final TokenIcon newChainLogo;
     private final TextView oldChainName;
     private final TextView newChainName;
     private final TextView textMessage;
@@ -41,8 +41,8 @@ public class SwitchChainWidget extends LinearLayout
             message += "\n" + getContext().getString(R.string.warning_switching_to_test);
         }
 
-        oldChainLogo.setImageResource(EthereumNetworkBase.getChainLogo(oldNetwork.chainId));
-        newChainLogo.setImageResource(EthereumNetworkBase.getChainLogo(newNetwork.chainId));
+        oldChainLogo.bindData(oldNetwork.chainId);
+        newChainLogo.bindData(newNetwork.chainId);
         oldChainName.setText(EthereumNetworkBase.getShortChainName(oldNetwork.chainId));
         newChainName.setText(EthereumNetworkBase.getShortChainName(newNetwork.chainId));
         textMessage.setText(message);

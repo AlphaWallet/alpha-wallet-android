@@ -375,9 +375,12 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         {
             String salePrice = openSeaAsset.lastSale.totalPrice;
             int endIndex = salePrice.length() - openSeaAsset.lastSale.paymentToken.decimals;
-            String result = salePrice.substring(0, endIndex)
-                    + " " + openSeaAsset.lastSale.paymentToken.symbol;
-            addInfoView(getString(R.string.asset_last_sale), result);
+            if (endIndex > 0)
+            {
+                String result = salePrice.substring(0, endIndex)
+                        + " " + openSeaAsset.lastSale.paymentToken.symbol;
+                addInfoView(getString(R.string.asset_last_sale), result);
+            }
         }
 
         addInfoView(getString(R.string.label_external_link), openSeaAsset.externalLink);

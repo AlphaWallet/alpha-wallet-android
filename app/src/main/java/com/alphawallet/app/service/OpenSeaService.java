@@ -12,6 +12,7 @@ import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.util.JsonUtils;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.gson.Gson;
 
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Single;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
 import timber.log.Timber;
 
@@ -37,7 +39,6 @@ import timber.log.Timber;
 
 public class OpenSeaService
 {
-    private static final String EMPTY_RESULT = "{\"noresult\":[]}";
     private static OkHttpClient httpClient;
     private static final int PAGE_SIZE = 50;
     private final Map<String, String> imageUrls = new HashMap<>();
@@ -63,7 +64,7 @@ public class OpenSeaService
                 .build();
     }
 
-    private static Request buildRequest(long networkId, String api)
+    private Request buildRequest(long networkId, String api)
     {
         Request.Builder requestB = new Request.Builder()
                 .url(api)
@@ -80,14 +81,22 @@ public class OpenSeaService
         return requestB.build();
     }
 
-    private static String executeRequest(long networkId, String api)
+    private String executeRequest(long networkId, String api)
     {
         try (okhttp3.Response response = httpClient.newCall(buildRequest(networkId, api)).execute())
         {
-            ResponseBody responseBody = response.body();
-            if (responseBody != null)
+            if (response.isSuccessful())
             {
-                return responseBody.string();
+                ResponseBody responseBody = response.body();
+                if (responseBody != null)
+                {
+                    return responseBody.string();
+                }
+            }
+            else
+            {
+                Timber.d(response.toString());
+                return JsonUtils.EMPTY_RESULT;
             }
         }
         catch (Exception e)
@@ -95,7 +104,7 @@ public class OpenSeaService
             Timber.e(e);
         }
 
-        return EMPTY_RESULT;
+        return JsonUtils.EMPTY_RESULT;
     }
 
     public Single<Token[]> getTokens(String address,
@@ -120,7 +129,7 @@ public class OpenSeaService
             do
             {
                 String jsonData = fetchAssets(networkId, address, pageOffset);
-                if (!hasAssets(jsonData))
+                if (!JsonUtils.hasAssets(jsonData))
                 {
                     return foundTokens.values().toArray(new Token[0]); //on error return results found so far
                 }
@@ -303,11 +312,6 @@ public class OpenSeaService
         }
     }
 
-    private boolean hasAssets(String jsonData)
-    {
-        return jsonData != null && jsonData.length() >= 10 && jsonData.contains("assets"); //validate return from API
-    }
-
     public void resetOffsetRead(List<Long> networkFilter)
     {
         long offsetTime = System.currentTimeMillis() - 57 * DateUtils.SECOND_IN_MILLIS;
@@ -334,7 +338,7 @@ public class OpenSeaService
                 fetchAsset(token.tokenInfo.chainId, token.tokenInfo.address, tokenId.toString()));
     }
 
-    public static String fetchAssets(long networkId, String address, int offset)
+    public String fetchAssets(long networkId, String address, int offset)
     {
         String api = "";
         String ownerOption = "owner";
@@ -361,7 +365,7 @@ public class OpenSeaService
         return executeRequest(networkId, builder.build().toString());
     }
 
-    public static String fetchAsset(long networkId, String contractAddress, String tokenId)
+    public String fetchAsset(long networkId, String contractAddress, String tokenId)
     {
         String api = "";
         if (networkId == EthereumNetworkBase.MAINNET_ID)

@@ -58,7 +58,8 @@ import io.reactivex.functions.Consumer;
 
 
 @AndroidEntryPoint
-public class NFTAssetDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback {
+public class NFTAssetDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
+{
     private TokenFunctionViewModel viewModel;
     private Token token;
     private Wallet wallet;
@@ -370,18 +371,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             addInfoView(getString(R.string.asset_owner), openSeaAsset.owner.user.username);
         }
 
-        if (openSeaAsset.lastSale != null
-                && openSeaAsset.lastSale.paymentToken != null)
-        {
-            String salePrice = openSeaAsset.lastSale.totalPrice;
-            int endIndex = salePrice.length() - openSeaAsset.lastSale.paymentToken.decimals;
-            if (endIndex > 0)
-            {
-                String result = salePrice.substring(0, endIndex)
-                        + " " + openSeaAsset.lastSale.paymentToken.symbol;
-                addInfoView(getString(R.string.asset_last_sale), result);
-            }
-        }
+        addInfoView(getString(R.string.asset_last_sale), openSeaAsset.getLastSale());
 
         addInfoView(getString(R.string.label_external_link), openSeaAsset.externalLink);
 

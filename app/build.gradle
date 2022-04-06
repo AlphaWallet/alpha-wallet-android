@@ -216,10 +216,10 @@ dependencies {
 
     // Component tests
     testImplementation 'org.robolectric:robolectric:4.7.3'
+    testImplementation 'androidx.test:core:1.4.0'
 
     // E2e tests
     androidTestImplementation 'androidx.test:core:1.4.0'
-//    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {
         exclude group: "com.android.support", module: "support-annotations"
     })

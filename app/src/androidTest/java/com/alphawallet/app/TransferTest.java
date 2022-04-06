@@ -8,6 +8,7 @@ import static androidx.test.espresso.action.ViewActions.scrollTo;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
 import static androidx.test.espresso.matcher.ViewMatchers.isChecked;
+import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static androidx.test.espresso.matcher.ViewMatchers.isNotChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withHint;
@@ -130,13 +131,15 @@ public class TransferTest {
         gotoSettingsPage();
         ViewInteraction selectActiveNetworks = onView(withText("Select Active Networks"));
         selectActiveNetworks.perform(scrollTo(), ViewActions.click());
-        click(withId(R.id.main));
+        toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
-        onView(withId(R.id.mainnet_header)).check(matches(isNotChecked()));
-        onView(withId(R.id.testnet_header)).check(matches(isChecked()));
         onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(0, ViewActions.click()));
         onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(1, ViewActions.click()));
         pressBack();
+    }
+
+    private void toggleSwitch(int id) {
+        onView(allOf(withId(R.id.switch_material), isDescendantOfA(withId(id)))).perform(ViewActions.click());
     }
 
     private void sendBalanceTo(String receiverAddress, double amount) {

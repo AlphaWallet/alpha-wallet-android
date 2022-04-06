@@ -1,27 +1,5 @@
 package com.alphawallet.app;
 
-import android.os.Build;
-
-import com.alphawallet.app.ui.SplashActivity;
-import com.alphawallet.app.util.CustomFailureHandler;
-import com.alphawallet.app.util.GetTextAction;
-import com.alphawallet.app.util.Helper;
-import com.alphawallet.app.util.SnapshotUtil;
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import androidx.test.espresso.ViewInteraction;
-import androidx.test.espresso.action.ViewActions;
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.platform.app.InstrumentationRegistry;
-
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.Espresso.setFailureHandler;
@@ -46,6 +24,28 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.fail;
+
+import android.os.Build;
+
+import androidx.test.espresso.ViewInteraction;
+import androidx.test.espresso.action.ViewActions;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.alphawallet.app.ui.SplashActivity;
+import com.alphawallet.app.util.CustomFailureHandler;
+import com.alphawallet.app.util.GetTextAction;
+import com.alphawallet.app.util.Helper;
+import com.alphawallet.app.util.SnapshotUtil;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(AndroidJUnit4.class)
 public class TransferTest {
@@ -91,7 +91,7 @@ public class TransferTest {
     }
 
     private void gotoSettingsPage() {
-        click(withId(R.id.nav_settings));
+        click(withId(R.id.nav_settings_text));
     }
 
     private void assertBalanceIs(double balance) {
@@ -130,17 +130,17 @@ public class TransferTest {
         gotoSettingsPage();
         ViewInteraction selectActiveNetworks = onView(withText("Select Active Networks"));
         selectActiveNetworks.perform(scrollTo(), ViewActions.click());
-        click(withId(R.id.mainnet_switch));
+        click(withId(R.id.main));
         click(withText(R.string.action_enable_testnet));
-        onView(withId(R.id.mainnet_switch)).check(matches(isNotChecked()));
-        onView(withId(R.id.testnet_switch)).check(matches(isChecked()));
+        onView(withId(R.id.mainnet_header)).check(matches(isNotChecked()));
+        onView(withId(R.id.testnet_header)).check(matches(isChecked()));
         onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(0, ViewActions.click()));
         onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(1, ViewActions.click()));
         pressBack();
     }
 
     private void sendBalanceTo(String receiverAddress, double amount) {
-        click(withId(R.id.nav_wallet));
+        click(withId(R.id.nav_wallet_text));
         onView(isRoot()).perform(waitUntil(R.id.eth_data, withText(not(startsWith("0")))));
         click(withId(R.id.eth_data));
         click(withText("Send"));

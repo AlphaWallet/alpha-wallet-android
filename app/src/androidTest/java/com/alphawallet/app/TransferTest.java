@@ -2,7 +2,6 @@ package com.alphawallet.app;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.pressBack;
-import static androidx.test.espresso.Espresso.setFailureHandler;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
 import static androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
@@ -27,26 +26,17 @@ import android.os.Build;
 
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.action.ViewActions;
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.alphawallet.app.ui.SplashActivity;
-import com.alphawallet.app.util.CustomFailureHandler;
 import com.alphawallet.app.util.GetTextAction;
 import com.alphawallet.app.util.Helper;
 import com.alphawallet.app.util.SnapshotUtil;
 
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@RunWith(AndroidJUnit4.class)
-public class TransferTest {
+public class TransferTest extends BaseE2ETest {
     // On CI server, run tests on different API levels concurrently may cause failure: Replacement transaction underpriced.
     // Use different wallet to transfer token from can avoid this error
     private static final Map<String, String[]> WALLETS = new HashMap<String, String[]>() {{
@@ -54,15 +44,6 @@ public class TransferTest {
         put("30", new String[]{"deputy review citizen bacon measure combine bag dose chronic retreat attack fly", "0xD8790c1eA5D15F8149C97F80524AC87f56301204"});
         put("31", new String[]{"omit mobile upgrade warm flock two era hamster local cat wink virus", "0x32f6F38137a79EA8eA237718b0AFAcbB1c58ca2e"});
     }};
-
-    @Before
-    public void setUp() {
-        setFailureHandler(new CustomFailureHandler(InstrumentationRegistry.getInstrumentation().getTargetContext()));
-    }
-
-    @Rule
-    public ActivityScenarioRule<SplashActivity> activityScenarioRule
-            = new ActivityScenarioRule<>(SplashActivity.class);
 
     @Test
     public void should_transfer_from_an_account_to_another() {

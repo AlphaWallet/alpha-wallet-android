@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Base64;
 import android.view.MotionEvent;
@@ -24,10 +25,10 @@ import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.opensea.OpenSeaAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.Request;
@@ -110,6 +111,29 @@ public class NFTImageView extends RelativeLayout {
     {
         progressBar.setVisibility(showProgress? View.VISIBLE : View.GONE);
         loadTokenImage(asset, asset.getImage());
+    }
+
+    public void setupTokenImage(OpenSeaAsset asset)
+    {
+        progressBar.setVisibility(showProgress? View.VISIBLE : View.GONE);
+        loadTokenImage(asset);
+    }
+
+    private void loadTokenImage(OpenSeaAsset asset)
+    {
+        if (!TextUtils.isEmpty(asset.backgroundColor))
+        {
+            int color = Color.parseColor("#" + asset.backgroundColor);
+            holdingView.setBackgroundColor(color);
+        }
+
+        loadRequest = Glide.with(image.getContext())
+                .load(asset.getImageUrl())
+                .centerCrop()
+                .transition(withCrossFade())
+                .override(Target.SIZE_ORIGINAL)
+                .listener(requestListener)
+                .into(new DrawableImageViewTarget(image)).getRequest();
     }
 
     private void loadTokenImage(NFTAsset asset, String imageUrl)

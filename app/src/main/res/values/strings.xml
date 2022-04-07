@@ -922,4 +922,14 @@
     <string name="wc_wallet">Wallet</string>
     <string name="wc_wallet_not_match">Wallet not exist or it\'s watch only</string>
     <string name="chain_id">Chain ID: %1d</string>
+    <string name="asset_creator">Created By</string>
+    <string name="asset_schema">Token Standard</string>
+    <string name="asset_total_supply">Total Supply</string>
+    <string name="asset_number_of_owners">Owners</string>
+    <string name="asset_owner">Owner</string>
+    <string name="asset_last_sale">Last Sale</string>
+    <string name="enable_screenlock">Unable to upgrade key: Enable screenlock on phone</string>
+    <string name="unable_to_upgrade_key">Unable to upgrade key: %1$s</string>
+    <string name="no_key_found">No Key found</string>
+    <string name="unable_store_key">Unable to store key: %1$s</string>
 </resources>

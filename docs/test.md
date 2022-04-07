@@ -1,4 +1,29 @@
 ## E2E test
+### Quick Start
+1. Create a test class under source set `androidTest` and extends `BaseE2ETest`
+```Java
+package com.alphawallet.app;
+
+public class ManageNetworkTest extends BaseE2ETest
+{
+}
+```
+
+2. Generate JUnit test method
+```Java
+@Test
+public void should_add_custom_network()
+{
+}
+```
+
+3. Add steps
+```Java
+Steps.createNewWallet();
+Steps.gotoSettingsPage();
+```
+
+4. Create your steps
 
 ### Concepts
 __Operation__
@@ -45,29 +70,3 @@ You can also take screenshots by specifying a file name:
 >SnapshotUtil.take("file-name");
 
 After GitHub action jobs done, you can download the screenshots and logcat from the artifacts.
-
-### Quick Start
-1. Create a test class under source set `androidTest` and extends `BaseE2ETest`
-```Java
-package com.alphawallet.app;
-
-public class ManageNetworkTest extends BaseE2ETest
-{
-}
-```
-
-2. Generate JUnit test method
-```Java
-@Test
-public void should_add_custom_network()
-{
-}
-```
-
-3. Add steps
-```Java
-Steps.createNewWallet();
-Steps.gotoSettingsPage();
-```
-
-4. Create your steps

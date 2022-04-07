@@ -25,9 +25,14 @@ import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.action.ViewActions;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.assertions.Should;
 import com.alphawallet.app.util.GetTextAction;
 import com.alphawallet.app.util.Helper;
 
+/**
+ * Every step consists of several operations, step name stands for user perspective actions.
+ * You can add steps as you wish to reuse code between test cases.
+ */
 public class Steps
 {
     public static void createNewWallet()
@@ -54,8 +59,7 @@ public class Steps
     public static void selectTestNet()
     {
         gotoSettingsPage();
-        ViewInteraction selectActiveNetworks = onView(withText("Select Active Networks"));
-        selectActiveNetworks.perform(scrollTo(), ViewActions.click());
+        selectMenu("Select Active Networks");
         toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
         onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(1, ViewActions.click())); // Rinkeby
@@ -63,8 +67,14 @@ public class Steps
         pressBack();
     }
 
+    private static void selectMenu(String text)
+    {
+        ViewInteraction selectActiveNetworks = onView(withText(text));
+        selectActiveNetworks.perform(scrollTo(), ViewActions.click());
+    }
+
     public static void assertBalanceIs(String balanceStr) {
-        onView(isRoot()).perform(waitUntil(withSubstring(balanceStr), 10 * 60));
+        Should.shouldSee(balanceStr);
     }
 
     public static void ensureTransactionConfirmed() {
@@ -121,4 +131,23 @@ public class Steps
     private static void toggleSwitch(int id) {
         onView(allOf(withId(R.id.switch_material), isDescendantOfA(withId(id)))).perform(ViewActions.click());
     }
+
+    public static void addNewNetwork(String name)
+    {
+        selectMenu("Select Active Networks");
+        click(withId(R.id.action_add));
+        input(R.id.input_network_name, name);
+        input(R.id.input_network_rpc_url,"http://xxx.yyy.zzz");
+        input(R.id.input_network_chain_id, "123456");
+        input(R.id.input_network_symbol, "MTNSYM");
+        input(R.id.input_network_explorer_api, "http://xxx.yyy.zzz");
+        input(R.id.input_network_block_explorer_url, "http://xxx.yyy.zzz");
+        click(withId(R.string.action_add_network));
+    }
+
+    private static void input(int id, String text)
+    {
+        onView(allOf(withId(R.id.edit_text), isDescendantOfA(withId(id)))).perform(replaceText(text));
+    }
+
 }

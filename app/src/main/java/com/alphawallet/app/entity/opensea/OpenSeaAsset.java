@@ -182,13 +182,13 @@ public class OpenSeaAsset
         public float getTraitRarity(long totalSupply)
         {
             setUnique(traitCount == 1);
-            traitRarity =  ((float) traitCount * 100) / totalSupply;
+            traitRarity = ((float) traitCount * 100) / totalSupply;
             return traitRarity;
         }
 
         public void updateTraitRarity(long totalSupply)
         {
-            traitRarity =  ((float) traitCount * 100) / totalSupply;
+            traitRarity = ((float) traitCount * 100) / totalSupply;
         }
     }
 
@@ -212,6 +212,71 @@ public class OpenSeaAsset
             @Expose
             public int decimals;
         }
+    }
+
+    public String getLastSale()
+    {
+        if (lastSale != null && lastSale.paymentToken != null)
+        {
+            StringBuilder res = computeLastSale(lastSale.totalPrice, lastSale.paymentToken.decimals);
+            if (!TextUtils.isEmpty(res))
+            {
+                return res.append(" ").append(lastSale.paymentToken.symbol).toString();
+            }
+        }
+        return "";
+    }
+
+    private StringBuilder computeLastSale(String totalPrice, int decimals)
+    {
+        StringBuilder result = new StringBuilder();
+        if (totalPrice.equals("0"))
+        {
+            return result;
+        }
+        else if (totalPrice.length() <= decimals)
+        {
+            result.append("0.");
+            int diff = decimals - totalPrice.length();
+            for (int i = 0; i < diff; i++)
+            {
+                result.append("0");
+            }
+
+            for (int i = 0; i < totalPrice.length(); i++)
+            {
+                char c = totalPrice.charAt(i);
+                if (c == '0')
+                {
+                    break;
+                }
+                else
+                {
+                    result.append(c);
+                }
+            }
+        }
+        else
+        {
+            int endIndex = totalPrice.length() - decimals;
+            result.append(totalPrice.substring(0, endIndex));
+            result.append(".");
+
+            for (int i = 0; i < totalPrice.length(); i++)
+            {
+                char c = totalPrice.charAt(i);
+                if (c == '0')
+                {
+                    result.append(c);
+                    break;
+                }
+                else
+                {
+                    result.append(c);
+                }
+            }
+        }
+        return result;
     }
 
     public String getImageUrl()

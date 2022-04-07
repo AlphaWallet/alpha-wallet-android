@@ -29,7 +29,6 @@ import androidx.test.espresso.action.ViewActions;
 
 import com.alphawallet.app.util.GetTextAction;
 import com.alphawallet.app.util.Helper;
-import com.alphawallet.app.util.SnapshotUtil;
 
 import org.junit.Test;
 
@@ -63,23 +62,18 @@ public class TransferTest extends BaseE2ETest {
         assertThat(getWalletAddress(), equalTo(existedWalletAddress));
 
         selectTestNet();
-        sendBalanceTo(newWalletAddress, 0.001);
+        sendBalanceTo(newWalletAddress, "0.00001");
         ensureTransactionConfirmed();
         switchToWallet(newWalletAddress);
-        assertBalanceIs(0.001);
+        assertBalanceIs("0.00001");
     }
 
     private void gotoSettingsPage() {
         click(withId(R.id.nav_settings_text));
     }
 
-    private void assertBalanceIs(double balance) {
-//        click(withId(R.id.nav_wallet));
-        String balanceString = String.valueOf(balance);
-        if (balance == 0) {
-            balanceString = "0";
-        }
-        onView(isRoot()).perform(waitUntil(withText(startsWith(balanceString)), 10 * 60));
+    private void assertBalanceIs(String balanceStr) {
+        onView(isRoot()).perform(waitUntil(withSubstring(balanceStr), 10 * 60));
     }
 
     private void ensureTransactionConfirmed() {
@@ -111,8 +105,8 @@ public class TransferTest extends BaseE2ETest {
         selectActiveNetworks.perform(scrollTo(), ViewActions.click());
         toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
-        onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(0, ViewActions.click()));
         onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(1, ViewActions.click()));
+        onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(3, ViewActions.click()));
         pressBack();
     }
 
@@ -120,12 +114,12 @@ public class TransferTest extends BaseE2ETest {
         onView(allOf(withId(R.id.switch_material), isDescendantOfA(withId(id)))).perform(ViewActions.click());
     }
 
-    private void sendBalanceTo(String receiverAddress, double amount) {
+    private void sendBalanceTo(String receiverAddress, String amountStr) {
         click(withId(R.id.nav_wallet_text));
         onView(isRoot()).perform(waitUntil(R.id.eth_data, withText(not(startsWith("0")))));
         click(withId(R.id.eth_data));
         click(withText("Send"));
-        onView(withHint("0")).perform(replaceText(String.valueOf(amount)));
+        onView(withHint("0")).perform(replaceText(amountStr));
         onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));
         click(withId(R.string.action_next));
         Helper.wait(5);
@@ -152,9 +146,8 @@ public class TransferTest extends BaseE2ETest {
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
         Helper.wait(10);
-        SnapshotUtil.take("before-add");
         click(withId(R.id.action_add));
-        SnapshotUtil.take("after-add");
+//        SnapshotUtil.take("after-add");
         click(withId(R.id.import_account_action));
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_seed)))))).perform(replaceText(seedPhrase));
         Helper.wait(2); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis

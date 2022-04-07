@@ -19,7 +19,7 @@ jobs:
       - name: Build the app
         run: sh ./build.sh
 
-      - name: run e2e tests
+      - name: Run e2e tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
@@ -30,9 +30,9 @@ jobs:
           sdcard-path-or-size: 4096M
           script: ./e2e.sh --CI
 
-      - name: E2E tests results
+      - name: Collect E2E tests results
         if: ${{ failure() }}
         uses: actions/upload-artifact@v1
         with:
           name: e2e-tests-results
-          path: DCIM/
+          path: output/

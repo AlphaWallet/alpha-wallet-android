@@ -617,8 +617,7 @@ public class HomeViewModel extends BaseViewModel {
 
                     BottomSheetDialog dialog = new BottomSheetDialog(context);
 
-                    WhatsNewView view = new WhatsNewView(context, releases, v -> dialog.dismiss());
-
+                    WhatsNewView view = new WhatsNewView(context, releases, v -> dialog.dismiss(), true);
                     dialog.setContentView(view);
                     dialog.setCancelable(true);
                     dialog.setCanceledOnTouchOutside(true);

@@ -2,23 +2,22 @@ package com.alphawallet.app.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 
 public class SwitchChainWidget extends LinearLayout
 {
     private final TokenIcon oldChainLogo;
     private final TokenIcon newChainLogo;
-    private final TextView oldChainName;
-    private final TextView newChainName;
+    private final ChainName oldChainName;
+    private final ChainName newChainName;
     private final TextView textMessage;
 
-    public SwitchChainWidget(Context context, AttributeSet attributeSet) {
+    public SwitchChainWidget(Context context, AttributeSet attributeSet)
+    {
         super(context, attributeSet);
 
         inflate(context, R.layout.item_switch_chain, this);
@@ -29,8 +28,8 @@ public class SwitchChainWidget extends LinearLayout
         textMessage = findViewById(R.id.text_message);
     }
 
-    public void setupSwitchChainData(NetworkInfo oldNetwork, NetworkInfo newNetwork) {
-
+    public void setupSwitchChainData(NetworkInfo oldNetwork, NetworkInfo newNetwork)
+    {
         String message = getContext().getString(R.string.request_change_chain, newNetwork.name, String.valueOf(newNetwork.chainId));
         if (newNetwork.hasRealValue() && !oldNetwork.hasRealValue())
         {
@@ -43,8 +42,8 @@ public class SwitchChainWidget extends LinearLayout
 
         oldChainLogo.bindData(oldNetwork.chainId);
         newChainLogo.bindData(newNetwork.chainId);
-        oldChainName.setText(EthereumNetworkBase.getShortChainName(oldNetwork.chainId));
-        newChainName.setText(EthereumNetworkBase.getShortChainName(newNetwork.chainId));
+        oldChainName.setChainID(oldNetwork.chainId);
+        newChainName.setChainID(newNetwork.chainId);
         textMessage.setText(message);
     }
 

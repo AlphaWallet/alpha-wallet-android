@@ -34,19 +34,15 @@ public class ChainName extends LinearLayout
         chainName.setText(EthereumNetworkBase.getShortChainName(chainId));
         if (invertNameColour)
         {
-            invertChainID(chainId);
+            chainName.setTextColor(getContext().getColor(EthereumNetworkBase.getChainColour(chainId)));
+            chainName.setBackgroundResource(R.drawable.background_chain_inverse);
         }
         else
         {
+            chainName.setTextColor(getContext().getColor(R.color.white));
             chainName.getBackground().setTint(ContextCompat.getColor(getContext(),
                     EthereumNetworkBase.getChainColour(chainId)));
         }
-    }
-
-    public void invertChainID(long chainId)
-    {
-        chainName.setTextColor(getContext().getColor(EthereumNetworkBase.getChainColour(chainId)));
-        chainName.setBackgroundResource(0);
     }
 
     private void getAttrs(Context context, AttributeSet attrs)

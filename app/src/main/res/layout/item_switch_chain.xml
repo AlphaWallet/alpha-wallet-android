@@ -3,12 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/standard_16"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -25,14 +27,13 @@
                 android:contentDescription="@string/app_name"
                 android:layout_gravity="center" />
 
-            <TextView
+            <com.alphawallet.app.widget.ChainName
                 android:id="@+id/name_old_chain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/Aw.Typography.Title"
-                tools:text="Ethereum"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/dp8" />
+                custom:font_size="10"
+                android:layout_gravity="center" />
+
         </LinearLayout>
 
         <ImageView
@@ -58,20 +59,21 @@
                 android:contentDescription="@string/app_name"
                 android:layout_gravity="center" />
 
-            <TextView
+            <com.alphawallet.app.widget.ChainName
                 android:id="@+id/name_new_chain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/Aw.Typography.Title"
-                tools:text="Optimistic"
-                android:layout_marginTop="@dimen/dp8"
-                android:layout_gravity="center"/>
+                custom:font_size="10"
+                android:layout_gravity="center" />
         </LinearLayout>
 
     </LinearLayout>
 
+    <View style="@style/Aw.Component.Separator"/>
+
     <TextView
         android:id="@+id/text_message"
+        android:layout_marginBottom="@dimen/standard_16"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/dp24"
@@ -79,7 +81,8 @@
         android:layout_marginEnd="@dimen/dp24"
         android:gravity="center_horizontal"
         android:text=""
-        app:layout_constraintTop_toBottomOf="@id/name_old_chain"
         tools:text="This site is requesting you to switch to the Mumbai Testnet (Test) chain with chain ID: 80001. This will reload the page." />
+
+    <View style="@style/Aw.Component.Separator"/>
 
 </LinearLayout>

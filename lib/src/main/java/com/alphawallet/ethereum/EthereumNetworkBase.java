@@ -40,6 +40,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final long KLAYTN_BOABAB_ID = 1001;
     public static final long IOTEX_MAINNET_ID = 4689;
     public static final long IOTEX_TESTNET_ID = 4690;
+    public static final long AURORA_MAINNET_ID = 1313161554;
+    public static final long AURORA_TESTNET_ID = 1313161555;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -72,6 +74,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String KLAYTN_RPC = "https://public-node-api.klaytnapi.com/v1/cypress";
     public static final String KLAYTN_BAOBAB_RPC = "https://api.baobab.klaytn.net:8651";
+
 
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>() {
         {

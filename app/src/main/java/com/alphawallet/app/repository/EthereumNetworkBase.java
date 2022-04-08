@@ -41,6 +41,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
@@ -150,6 +152,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String IOTEX_MAINNET_RPC_URL = "https://babel-api.mainnet.iotex.io";
     public static final String IOTEX_MAINNET_RPC_FALLBACK_URL = "https://rpc.ankr.com/iotex";
     public static final String IOTEX_TESTNET_RPC_URL = "https://babel-api.testnet.iotex.io";
+    public static final String AURORA_MAINNET_RPC_URL = "https://mainnet.aurora.dev";
+    public static final String AURORA_TESTNET_RPC_URL = " https://testnet.aurora.dev";
 
     //All chains that have fiat/real value (not testnet) must be put here
     //Note: This list also determines the order of display for main net chains in the wallet.
@@ -157,7 +161,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //Then xDai would appear as the first token at the top of the wallet
     private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
             MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
-            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID));
+            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID));
 
     // for reset built-in network
     private static final LongSparseArray<NetworkInfo> builtinNetworkMap = new LongSparseArray<NetworkInfo>() {
@@ -290,6 +294,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     IOTEX_TESTNET_RPC_URL,
                     "https://testnet.iotexscan.io/tx", IOTEX_TESTNET_ID, "",
                     "https://api.covalenthq.com/v1/" + COVALENT));
+            put(AURORA_MAINNET_ID, new NetworkInfo(C.AURORA_MAINNET_NAME, C.ETH_SYMBOL, AURORA_TESTNET_RPC_URL,
+                    "https://aurorascan.dev/tx/", AURORA_MAINNET_ID, "",
+                    "https://api.aurorascan.dev/api?"));
+            put(AURORA_TESTNET_ID, new NetworkInfo(C.AURORA_TESTNET_NAME, C.ETH_SYMBOL, AURORA_TESTNET_RPC_URL,
+                    "https://testnet.aurorascan.dev/tx/", AURORA_TESTNET_ID, "",
+                    "https://api-testnet.aurorascan.dev/api?"));
         }
     };
 
@@ -331,6 +341,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(KLAYTN_BOABAB_ID, R.drawable.ic_klaytn_test);
             put(IOTEX_MAINNET_ID, R.drawable.ic_iotex);
             put(IOTEX_TESTNET_ID, R.drawable.ic_iotex_test);
+            put(AURORA_MAINNET_ID, R.drawable.ic_aurora);
+            put(AURORA_TESTNET_ID, R.drawable.ic_aurora_test);
         }
     };
 
@@ -368,6 +380,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(KLAYTN_BOABAB_ID, R.drawable.ic_klaytn_test);
             put(IOTEX_MAINNET_ID, R.drawable.ic_iotex);
             put(IOTEX_TESTNET_ID, R.drawable.ic_iotex_test);
+            put(AURORA_MAINNET_ID, R.drawable.ic_aurora);
+            put(AURORA_TESTNET_ID, R.drawable.ic_aurora_test);
         }
     };
 
@@ -405,6 +419,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(KLAYTN_BOABAB_ID, R.color.klaytn_test);
             put(IOTEX_MAINNET_ID, R.color.iotex_mainnet);
             put(IOTEX_TESTNET_ID, R.color.iotex_mainnet);
+            put(AURORA_MAINNET_ID, R.color.aurora_mainnet);
+            put(AURORA_TESTNET_ID, R.color.aurora_testnet);
         }
     };
 
@@ -424,6 +440,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             put(MAINNET_ID, BigInteger.valueOf(C.GAS_LIMIT_MAX));
             put(KLAYTN_ID, BigInteger.valueOf(C.GAS_LIMIT_MAX_KLAYTN));
+            put(AURORA_MAINNET_ID, BigInteger.valueOf(C.GAS_LIMIT_MAX_AURORA));
         }
     };
 
@@ -843,6 +860,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static boolean hasGasOverride(long chainId)
     {
+        if (chainId == AURORA_MAINNET_ID || chainId == AURORA_TESTNET_ID)
+            return true;
         return false;
     }
     public static boolean hasOpenseaAPI(long chainId)

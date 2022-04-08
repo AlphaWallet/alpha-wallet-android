@@ -41,6 +41,7 @@
     <color name="klaytn_main">#FE3300</color>
     <color name="klaytn_test">#313557</color>
     <color name="iotex_mainnet">#00D4D5</color>
-
+    <color name="aurora_mainnet">#6BBE47</color>
+    <color name="aurora_testnet">#B2C6D8</color>
 
 </resources>

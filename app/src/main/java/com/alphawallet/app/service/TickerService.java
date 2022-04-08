@@ -3,6 +3,7 @@ package com.alphawallet.app.service;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
@@ -707,6 +708,7 @@ public class TickerService
         put(42220L, "celo");
         put(KLAYTN_ID, "klay-token");
         put(IOTEX_MAINNET_ID, "iotex");
+        put(AURORA_MAINNET_ID, "aurora");
     }};
 
     private static final Map<Long, String> dexGuruChainIdToAPISymbol = new HashMap<Long, String>(){{
@@ -736,6 +738,7 @@ public class TickerService
         put(OPTIMISTIC_MAIN_ID, "ethereum");
         put(KLAYTN_ID, "klay-token");
         put(IOTEX_MAINNET_ID, "iotex");
+        put(AURORA_MAINNET_ID, "aurora");
     }};
 
     public static boolean validateCoinGeckoAPI(Token token)

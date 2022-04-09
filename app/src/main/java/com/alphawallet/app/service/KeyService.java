@@ -111,9 +111,21 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     }
 
     //Return values for requesting security upgrade of key
-    public enum UpgradeKeyResult
+    public enum UpgradeKeyResultType
     {
         REQUESTING_SECURITY, NO_SCREENLOCK, ALREADY_LOCKED, ERROR, SUCCESSFULLY_UPGRADED
+    }
+
+    public class UpgradeKeyResult
+    {
+        public final UpgradeKeyResultType result;
+        public final String message;
+
+        public UpgradeKeyResult(UpgradeKeyResultType res, String msg)
+        {
+            result = res;
+            message = msg;
+        }
     }
 
     //Check performed at service start to determine API strength
@@ -331,7 +343,9 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         currentWallet = wallet;
         //first check we have ability to generate the key
         if (!deviceIsLocked())
-            return UpgradeKeyResult.NO_SCREENLOCK;
+        {
+            return new UpgradeKeyResult(UpgradeKeyResultType.NO_SCREENLOCK, "Device is not locked");
+        }
 
         return upgradeKey();
     }
@@ -556,16 +570,19 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                     break;
             }
 
-            if (secretData == null) return UpgradeKeyResult.ERROR;
+            if (secretData == null)
+            {
+                return new UpgradeKeyResult(UpgradeKeyResultType.ERROR, context.getString(R.string.no_key_found));
+            }
 
             boolean keyStored = storeEncryptedBytes(secretData.getBytes(), true, currentWallet.address);
             if (keyStored)
             {
-                return UpgradeKeyResult.SUCCESSFULLY_UPGRADED;
+                return new UpgradeKeyResult(UpgradeKeyResultType.SUCCESSFULLY_UPGRADED, "");
             }
             else
             {
-                return UpgradeKeyResult.ERROR;
+                return new UpgradeKeyResult(UpgradeKeyResultType.ERROR, context.getString(R.string.unable_store_key, currentWallet.address));
             }
         }
         catch (ServiceErrorException e)
@@ -573,12 +590,12 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             //Legacy keystore error
             if (!BuildConfig.DEBUG) analyticsService.recordException(e);
             e.printStackTrace();
-            return UpgradeKeyResult.ERROR;
+            return new UpgradeKeyResult(UpgradeKeyResultType.ERROR, e.getLocalizedMessage());
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            return UpgradeKeyResult.ERROR;
+            return new UpgradeKeyResult(UpgradeKeyResultType.ERROR, e.getLocalizedMessage());
         }
     }
 

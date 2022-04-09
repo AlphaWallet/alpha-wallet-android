@@ -186,7 +186,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
         if (TextUtils.isEmpty(name))
         {
-            return hasPositiveBalance() ? Long.MAX_VALUE - tokenAddress.hashCode() : Long.MAX_VALUE;
+            return hasPositiveBalance() ? Long.MAX_VALUE - Math.abs(tokenAddress.hashCode()) : Long.MAX_VALUE;
         }
 
         int i = 4;

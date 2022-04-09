@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -25,8 +24,8 @@ import java.util.Locale;
 
 public class WhatsNewView extends ConstraintLayout
 {
-
     private RecyclerView recyclerView;
+    private boolean limitToLatest;
 
     public WhatsNewView(Context context, List<GitHubRelease> items, View.OnClickListener onCloseListener)
     {
@@ -40,6 +39,12 @@ public class WhatsNewView extends ConstraintLayout
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
     }
 
+    public WhatsNewView(Context context, List<GitHubRelease> items, View.OnClickListener onCloseListener, boolean limitToLatest)
+    {
+        this(context, items, onCloseListener);
+        this.limitToLatest = limitToLatest;
+    }
+
     private void init(@LayoutRes int layoutId)
     {
         LayoutInflater.from(getContext()).inflate(layoutId, this, true);
@@ -47,7 +52,6 @@ public class WhatsNewView extends ConstraintLayout
 
     public class WhatsNewAdapter extends RecyclerView.Adapter<WhatsNewAdapter.WhatsNewItemViewHolder>
     {
-
         final SimpleDateFormat formatterFrom = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'", Locale.ROOT);
         final SimpleDateFormat formatterTo = new SimpleDateFormat("dd.MM.yy", Locale.ROOT);
 
@@ -86,18 +90,12 @@ public class WhatsNewView extends ConstraintLayout
             String[] body = release.getBody().split("\r\n- ");
             holder.details.removeAllViews();
             int index = 0;
-            for (String entry : body) {
-//                LinearLayout ll = new LinearLayout(getContext());
-
-//                ll.setOrientation(LinearLayout.HORIZONTAL);
-
+            for (String entry : body)
+            {
                 TextView tv = new TextView(getContext(), null, R.attr.whatsNewEntryStyle);
                 tv.setText(entry.trim());
-//                ImageView iv = new ImageView(getContext());
-//                iv.setImageDrawable(getContext().getDrawable(R.drawable.ic_icons_system_border_circle));
-//                ll.addView(iv);
-//                ll.addView(tv);
-                if (index++ == 0) {
+                if (index++ == 0)
+                {
                     String first = tv.getText().toString();
                     if (first.startsWith("- "))
                     {
@@ -111,7 +109,14 @@ public class WhatsNewView extends ConstraintLayout
         @Override
         public int getItemCount()
         {
-            return items.size();
+            if (limitToLatest)
+            {
+                return 1;
+            }
+            else
+            {
+                return items.size();
+            }
         }
 
         class WhatsNewItemViewHolder extends RecyclerView.ViewHolder

@@ -1,10 +1,6 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.TextUtils;
-import android.util.Pair;
 import android.view.ViewGroup;
 
 import androidx.activity.result.ActivityResultLauncher;

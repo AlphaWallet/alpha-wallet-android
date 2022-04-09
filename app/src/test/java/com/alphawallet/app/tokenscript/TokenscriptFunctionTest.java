@@ -1,15 +1,18 @@
-package com.alphawallet.app.entity.tokenscript;
+package com.alphawallet.app.tokenscript;
 
 import com.alphawallet.token.entity.As;
 import com.alphawallet.token.entity.ParseResult;
 import com.alphawallet.token.tools.TokenDefinition;
+
 import org.junit.Test;
 import org.xml.sax.SAXException;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -539,9 +542,9 @@ public class TokenscriptFunctionTest implements ParseResult {
         boolean holdingTokenMatchesName = entryToken.holdingToken.equals("EntryToken");
         assertTrue("should contain a holdingToken", hasHoldingToken);
         assertTrue("should contain contract object matching the holding token name", holdingTokenMatchesName);
-        boolean hasMainnet = entryToken.contracts.get(entryToken.holdingToken).addresses.containsKey(1);
-        boolean correctContract = entryToken.contracts.get(entryToken.holdingToken).addresses.get(1).contains("0x63ccef733a093e5bd773b41c96d3ece361464942");
+        boolean hasMainnet = entryToken.contracts.get(entryToken.holdingToken).addresses.containsKey(1L);
         assertTrue("underlying token has mainnet", hasMainnet);
+        boolean correctContract = entryToken.contracts.get(entryToken.holdingToken).addresses.get(1L).contains("0x63ccef733a093e5bd773b41c96d3ece361464942");
         assertTrue("underlying token has the correct address", correctContract);
     }
 

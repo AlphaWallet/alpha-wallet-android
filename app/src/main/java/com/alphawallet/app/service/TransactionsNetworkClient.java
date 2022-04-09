@@ -75,6 +75,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String ETHERSCAN_API_KEY;
     private final String BSC_EXPLORER_API_KEY;
     private final String POLYGONSCAN_API_KEY;
+    private final String AURORASCAN_API_KEY;
 
     private final OkHttpClient httpClient;
     private final Gson gson;
@@ -88,6 +89,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     public static native String getBSCExplorerKey();
     public static native String getCovalentKey();
     public static native String getPolygonScanKey();
+    public static native String getAuroraScanKey();
 
     public TransactionsNetworkClient(
             OkHttpClient httpClient,
@@ -101,6 +103,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         BSC_EXPLORER_API_KEY = getBSCExplorerKey().length() > 0 ? "&apikey=" + getBSCExplorerKey() : "";
         ETHERSCAN_API_KEY = "&apikey=" + getEtherscanKey();
         POLYGONSCAN_API_KEY = getPolygonScanKey().length() > 3 ? "&apikey=" + getPolygonScanKey() : "";
+        AURORASCAN_API_KEY = getAuroraScanKey().length() > 3 ? "&apikey=" + getAuroraScanKey() : "";
     }
 
     @Override
@@ -712,6 +715,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             return POLYGONSCAN_API_KEY;
         }
+        //else if (networkInfo.chainId == AURORA_MAIN_ID || networkInfo.chainId == AURORA_TEST_ID)
+        //{
+        //  return AURORASCAN_API_KEY;
+        //}
         else
         {
             return "";

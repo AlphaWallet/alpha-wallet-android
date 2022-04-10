@@ -85,6 +85,21 @@ public class AppSiteController implements AttributeInterface
             "    ]\n" +
             "  }\n" +
             "}";
+    private static final String androidAssociationConfig = "[\n" +
+            "  {\n" +
+            "    \"relation\": [\n" +
+            "      \"delegate_permission/common.handle_all_urls\"\n" +
+            "    ],\n" +
+            "    \"target\": {\n" +
+            "      \"namespace\": \"android_app\",\n" +
+            "      \"package_name\": \"io.stormbird.wallet\",\n" +
+            "      \"sha256_cert_fingerprints\": [\n" +
+            "        \"8E:1E:C7:92:44:E2:AE:8F:5E:BE:A6:09:E5:CC:05:8F:01:9F:67:F4:A6:FF:E7:60:6E:DA:C8:64:8F:29:AB:C0\"\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  }\n" +
+            "]";
+
     private final MagicLinkData magicLinkData = new MagicLinkData();
     private final TokenscriptFunction tokenscriptFunction = new TokenscriptFunction() { };
     private static Path repoDir;
@@ -94,6 +109,12 @@ public class AppSiteController implements AttributeInterface
     @ResponseBody
     public String getAppleDeepLinkConfigure() {
         return appleAssociationConfig;
+    }
+
+    @GetMapping(value = { "/assetlinks.json", "/assetlinks" }, produces = "application/json")
+    @ResponseBody
+    public String getAndroidDeepLinkConfigure() {
+        return androidAssociationConfig;
     }
 
     @GetMapping("/")

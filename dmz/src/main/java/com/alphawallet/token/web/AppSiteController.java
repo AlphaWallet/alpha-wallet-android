@@ -111,7 +111,7 @@ public class AppSiteController implements AttributeInterface
         return appleAssociationConfig;
     }
 
-    @GetMapping(value = { "/assetlinks.json", "/assetlinks" }, produces = "application/json")
+    @GetMapping(value = { "/.well-known/assetlinks.json", "/assetlinks.json" }, produces = "application/json")
     @ResponseBody
     public String getAndroidDeepLinkConfigure() {
         return androidAssociationConfig;

@@ -1,14 +1,38 @@
 name: Build
-on: [pull_request, push]
+on: pull_request
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        api-level: [31]
+        target: [default]
     steps:
-      - name: Checkout the code
+      - name: checkout
         uses: actions/checkout@v2
+        
       - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
           java-version: 11
+
       - name: Build the app
         run: sh ./build.sh
+
+      - name: Run e2e tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: x86_64
+          profile: Nexus 6
+          ram-size: 4096M
+          sdcard-path-or-size: 4096M
+          script: ./e2e.sh --CI
+
+      - name: Collect E2E tests results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: e2e-tests-results
+          path: output/

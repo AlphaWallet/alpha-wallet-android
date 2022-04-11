@@ -56,7 +56,7 @@ android {
         }
     }
     defaultConfig {
-        versionCode 183
+        versionCode 185
         versionName "3.52.0"
 
         applicationId "io.stormbird.wallet"
@@ -141,6 +141,7 @@ android {
             returnDefaultValues = true
             includeAndroidResources = true
         }
+        animationsDisabled = true
     }
 }
 
@@ -155,7 +156,7 @@ dependencies {
     // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
 
     // Ethereum client
-    implementation "org.web3j:core:4.8.7-android"
+    implementation "org.web3j:core:4.8.8-android"
 
     // Http client
     implementation "com.squareup.okhttp3:okhttp:4.9.0"

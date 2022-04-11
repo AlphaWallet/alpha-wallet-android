@@ -433,12 +433,15 @@ public class AppSiteController implements AttributeInterface
 	}
 
     private static void addContractAddresses(Path path) {
-        try (InputStream input = Files.newInputStream(path)) {
+        try (InputStream input = Files.newInputStream(path))
+        {
             TokenDefinition token = new TokenDefinition(input, new Locale("en"), null);
             ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
             if (holdingContracts != null)
                 holdingContracts.addresses.keySet().stream().forEach(network -> addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), path.toString())));
-        } catch (IOException | SAXException e) {
+        } catch (SAXException e) {
+            System.out.println("Parse Error: " + e.getMessage());
+        } catch (IOException e) {
             throw new RuntimeException(e); // make it safe to use in stream
         }
     }

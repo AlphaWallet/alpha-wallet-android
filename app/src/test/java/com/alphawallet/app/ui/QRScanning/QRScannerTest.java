@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui.QRScanning;
 
 import com.alphawallet.shadows.ShadowRealm;
+import com.alphawallet.shadows.ShadowWalletConnectClient;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +16,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {ShadowRealm.class})
+@Config(shadows = {ShadowRealm.class, ShadowWalletConnectClient.class})
 public class QRScannerTest
 {
 

@@ -77,5 +77,7 @@
   {"name": "NAOS Finance", "description": "A DeFi lending protocol allowing lenders and SME borrowers to facilitate permissionless and borderless loaning/borrowing transactions", "url": "https://naos.finance", "category": "Finance"},
   {"name": "DASLA", "description": "A DAS (Decentralized Account System) account registration tool.", "url": "https://das.la", "category": "Tool"},
   {"name": ".bit (Previously DAS)", "description": "Your decentralized identity for Web3.0 life", "url": "https://did.id/", "category": "Tool"},
-  {"name": "NFTSCAN", "description": "NFT Explorer.", "url": "https://nftscan.com/", "category": "Tool"}
+  {"name": "NFTSCAN", "description": "NFT Explorer.", "url": "https://nftscan.com/", "category": "Tool"},
+  {"name": "MetaPath", "description": "Assets can be routed across different blockchains", "url": "https://dapp.path.finance?source=alpha", "category": "Exchange"},
+  {"name": "SWFT", "description": "One Stop Cross-Chain swap, supporting 300+ tokens on 30+ chains", "url": "https://defi.swft.pro?sourceFlag=alpha", "category": "Exchange"}
 ]

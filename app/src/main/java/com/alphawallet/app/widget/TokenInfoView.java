@@ -2,8 +2,11 @@ package com.alphawallet.app.widget;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.net.Uri;
 import android.text.Spanned;
+import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -17,22 +20,48 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class TokenInfoView extends LinearLayout {
-    private final TextView label;
-    private final TextView value;
-    private final TextView valueLongText;
+    private TextView label;
+    private TextView value;
+    private TextView valueLongText;
+    private String valueStr;
     private boolean isLink;
     private boolean hasPrefix = false;
 
     public TokenInfoView(Context context, String labelText)
     {
-        super(context);
-        inflate(context, R.layout.item_token_info, this);
-        label = findViewById(R.id.label);
-        value = findViewById(R.id.value);
-        valueLongText = findViewById(R.id.value_long);
-
+        this(context, (AttributeSet) null);
         label.setText(labelText);
         isLink = false;
+    }
+
+    public TokenInfoView(Context context, AttributeSet attrs)
+    {
+        super(context, attrs);
+        inflate(context, R.layout.item_token_info, this);
+        getAttrs(context, attrs);
+    }
+
+    private void getAttrs(Context context, AttributeSet attrs)
+    {
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.TokenInfoView,
+                0, 0
+        );
+
+        try
+        {
+            int labelRes = a.getResourceId(R.styleable.TokenInfoView_tokenInfoLabel, R.string.empty);
+            label = findViewById(R.id.label);
+            value = findViewById(R.id.value);
+            valueLongText = findViewById(R.id.value_long);
+
+            label.setText(labelRes);
+        }
+        finally
+        {
+            a.recycle();
+        }
     }
 
     public void setLabel(String text)
@@ -40,21 +69,31 @@ public class TokenInfoView extends LinearLayout {
         label.setText(text);
     }
 
-    public void setValue(Spanned text)
-    {
-        TextView useView = getTextView(text.length());
-        useView.setText(text);
-    }
-
     public void setValue(String text)
     {
-        if (text.startsWith("http")) { setLink(); }
-        TextView useView = getTextView(text.length());
-        useView.setText(text);
+        if (!TextUtils.isEmpty(text))
+        {
+            if (TextUtils.isEmpty(valueStr))
+            {
+                valueStr = text;
+                setVisibility(View.VISIBLE);
+                if (text.startsWith("http"))
+                {
+                    setLink();
+                }
+                TextView useView = getTextView(text.length());
+                useView.setText(text);
+            }
+        }
+        else
+        {
+            setVisibility(View.GONE);
+        }
     }
 
     public void setCurrencyValue(double v)
     {
+        setVisibility(View.VISIBLE);
         value.setVisibility(View.VISIBLE);
         valueLongText.setVisibility(View.GONE);
         String prefix = hasPrefix && v > 0 ? "+" : "";

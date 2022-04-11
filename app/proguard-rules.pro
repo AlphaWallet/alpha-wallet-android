@@ -36,4 +36,22 @@
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
 
 #---------------Begin: proguard configuration for support library  ----------
--keep class wallet.core {*;}
+
+-keepclasseswithmembernames,includedescriptorclasses class * {
+    native <methods>;
+}
+
+#trust wallet
+-keep class wallet.core.jni.** { *; }
+-keep class wallet.core.jni.proto.** { *; }
+-keep class org.web3j.** { *; }
+
+#entities, jsInterface & listeners
+-keep class com.alphawallet.token.** { *; }
+-keep class com.alphawallet.app.walletconnect.** { *; }
+-keep class com.alphawallet.app.web3.** { *; }
+-keep class com.alphawallet.app.web3j.** { *; }
+-keep class com.alphawallet.app.entity.** { *; }
+
+#-dontobfuscate
+#-printconfiguration ../full-r8-config.txt

@@ -54,6 +54,8 @@ import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.repository.TransactionsRealmCache.convert;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
@@ -715,10 +717,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             return POLYGONSCAN_API_KEY;
         }
-        //else if (networkInfo.chainId == AURORA_MAIN_ID || networkInfo.chainId == AURORA_TEST_ID)
-        //{
-        //  return AURORASCAN_API_KEY;
-        //}
+        else if (networkInfo.chainId == AURORA_MAINNET_ID || networkInfo.chainId == AURORA_TESTNET_ID)
+        {
+          return AURORASCAN_API_KEY;
+        }
         else
         {
             return "";

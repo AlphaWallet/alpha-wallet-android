@@ -153,7 +153,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String IOTEX_MAINNET_RPC_FALLBACK_URL = "https://rpc.ankr.com/iotex";
     public static final String IOTEX_TESTNET_RPC_URL = "https://babel-api.testnet.iotex.io";
     public static final String AURORA_MAINNET_RPC_URL = "https://mainnet.aurora.dev";
-    public static final String AURORA_TESTNET_RPC_URL = " https://testnet.aurora.dev";
+    public static final String AURORA_TESTNET_RPC_URL = "https://testnet.aurora.dev";
 
     //All chains that have fiat/real value (not testnet) must be put here
     //Note: This list also determines the order of display for main net chains in the wallet.
@@ -294,7 +294,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     IOTEX_TESTNET_RPC_URL,
                     "https://testnet.iotexscan.io/tx", IOTEX_TESTNET_ID, "",
                     "https://api.covalenthq.com/v1/" + COVALENT));
-            put(AURORA_MAINNET_ID, new NetworkInfo(C.AURORA_MAINNET_NAME, C.ETH_SYMBOL, AURORA_TESTNET_RPC_URL,
+            put(AURORA_MAINNET_ID, new NetworkInfo(C.AURORA_MAINNET_NAME, C.ETH_SYMBOL, AURORA_MAINNET_RPC_URL,
                     "https://aurorascan.dev/tx/", AURORA_MAINNET_ID, "",
                     "https://api.aurorascan.dev/api?"));
             put(AURORA_TESTNET_ID, new NetworkInfo(C.AURORA_TESTNET_NAME, C.ETH_SYMBOL, AURORA_TESTNET_RPC_URL,
@@ -860,8 +860,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static boolean hasGasOverride(long chainId)
     {
-        if (chainId == AURORA_MAINNET_ID || chainId == AURORA_TESTNET_ID)
-            return true;
+        //if (chainId == AURORA_MAINNET_ID || chainId == AURORA_TESTNET_ID)
+        //    return true;
         return false;
     }
     public static boolean hasOpenseaAPI(long chainId)

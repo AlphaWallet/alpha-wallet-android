@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/standard_16"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/dp16"
+            android:layout_weight="2">
+
+            <com.alphawallet.app.widget.TokenIcon
+                android:id="@+id/logo_old"
+                android:layout_width="@dimen/token_icon"
+                android:layout_height="@dimen/token_icon"
+                android:contentDescription="@string/app_name"
+                android:layout_gravity="center" />
+
+            <com.alphawallet.app.widget.ChainName
+                android:id="@+id/name_old_chain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                custom:font_size="10"
+                android:layout_gravity="center" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/arrow_right"
+            android:layout_width="@dimen/token_icon"
+            android:layout_height="@dimen/token_icon"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_arrow_right"
+            android:layout_gravity="center"
+            android:layout_weight="1"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/dp16"
+            android:layout_weight="2">
+
+            <com.alphawallet.app.widget.TokenIcon
+                android:id="@+id/logo_new"
+                android:layout_width="@dimen/token_icon"
+                android:layout_height="@dimen/token_icon"
+                android:contentDescription="@string/app_name"
+                android:layout_gravity="center" />
+
+            <com.alphawallet.app.widget.ChainName
+                android:id="@+id/name_new_chain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                custom:font_size="10"
+                android:layout_gravity="center" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <View style="@style/Aw.Component.Separator"/>
+
+    <TextView
+        android:id="@+id/text_message"
+        android:layout_marginBottom="@dimen/standard_16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp24"
+        android:layout_marginTop="@dimen/dp16"
+        android:layout_marginEnd="@dimen/dp24"
+        android:gravity="center_horizontal"
+        android:text=""
+        tools:text="This site is requesting you to switch to the Mumbai Testnet (Test) chain with chain ID: 80001. This will reload the page." />
+
+    <View style="@style/Aw.Component.Separator"/>
+
+</LinearLayout>

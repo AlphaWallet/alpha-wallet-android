@@ -134,7 +134,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
                 walletIcon.setWaiting();
             }
 
-            /*if (addition.getDouble(FIAT_VALUE, -1.00) != -1.00)
+            if (addition.getDouble(FIAT_VALUE, -1.00) != -1.00)
             {
                 double fiatValue = addition.getDouble(FIAT_VALUE, 0.00);
                 double oldFiatValue = addition.getDouble(FIAT_CHANGE, 0.00);
@@ -144,7 +144,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
                 walletBalanceText.setText(balanceTxt);
                 setWalletChange(fiatValue != 0 ? ((fiatValue - oldFiatValue) / oldFiatValue) * 100.0 : 0.0);
             }
-            else*/
+            else
             {
                 wallet24hChange.setVisibility(View.GONE);
             }

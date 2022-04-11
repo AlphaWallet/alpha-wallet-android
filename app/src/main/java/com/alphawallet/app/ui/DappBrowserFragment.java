@@ -1321,19 +1321,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private void showChainChangeDialog(long callbackId, NetworkInfo newNetwork)
     {
         Token baseToken = viewModel.getTokenService().getTokenOrBase(newNetwork.chainId, wallet.address);
-        String message = getString(R.string.request_change_chain, newNetwork.name, String.valueOf(newNetwork.chainId));
-        if (newNetwork.hasRealValue() && !activeNetwork.hasRealValue())
-        {
-            message += "\n" + getString(R.string.warning_switch_to_main);
-        }
-        else if (!newNetwork.hasRealValue() && activeNetwork.hasRealValue())
-        {
-            message += "\n" + getString(R.string.warning_switching_to_test);
-        }
-
-        confirmationDialog = new ActionSheetDialog(requireActivity(), this, R.string.switch_chain_request, message, R.string.switch_and_reload,
-                callbackId, baseToken);
-
+        confirmationDialog = new ActionSheetDialog(requireActivity(), this, R.string.switch_chain_request, R.string.switch_and_reload,
+                callbackId, baseToken, activeNetwork, newNetwork);
         confirmationDialog.setCanceledOnTouchOutside(true);
         confirmationDialog.show();
         confirmationDialog.fullExpand();

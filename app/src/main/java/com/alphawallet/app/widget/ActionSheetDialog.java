@@ -5,6 +5,7 @@ import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.Image;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -19,12 +20,14 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmTransaction;
@@ -321,6 +324,46 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         functionList.add(R.string.dialog_reject);
         functionBar.setupFunctions(this, functionList);
         functionBar.revealButtons();
+    }
+
+    // switch chain
+    public ActionSheetDialog(Activity activity, ActionSheetCallback aCallback, int titleId, int buttonTextId,
+                             long cId, Token baseToken, NetworkInfo oldNetwork, NetworkInfo newNetwork) {
+        super(activity);
+        setContentView(R.layout.dialog_action_sheet_switch_chain);
+
+        TextView titleView = findViewById(R.id.text_sign_title);
+        SwitchChainWidget switchChainWidget = findViewById(R.id.switch_chain_widget);
+        switchChainWidget.setupSwitchChainData(oldNetwork, newNetwork);
+
+        functionBar = findViewById(R.id.layoutButtons);
+        this.activity = activity;
+
+        actionSheetCallback = aCallback;
+        mode = ActionSheetMode.MESSAGE;
+
+        titleView.setText(titleId);
+
+        gasWidget = null;
+        balanceDisplay = null;
+        cancelButton = findViewById(R.id.image_close);
+        confirmationWidget = null;
+        addressDetail  = null;
+        amountDisplay = null;
+        assetDetailView = null;
+        detailWidget = null;
+        callbackId = cId;
+        token = baseToken;
+        tokensService = null;
+        candidateTransaction = null;
+        walletConnectRequestWidget = null;
+        gasWidgetLegacy = null;
+        gasWidgetInterface = null;
+
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(buttonTextId)));
+        functionBar.revealButtons();
+        setupCancelListeners();
+        isAttached = true;
     }
 
     public void setSignOnly()

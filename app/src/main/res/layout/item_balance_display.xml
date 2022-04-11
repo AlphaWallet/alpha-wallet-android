@@ -69,6 +69,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 custom:font_size="10"
+                custom:invert="true"
                 custom:layout_constraintBottom_toBottomOf="parent"
                 custom:layout_constraintEnd_toEndOf="parent" />
 

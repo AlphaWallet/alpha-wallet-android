@@ -45,7 +45,6 @@ public class BalanceDisplayWidget extends LinearLayout
     public void setupBalance(Token token, TokensService tokenService, Transaction tx)
     {
         chainName.setChainID(token.tokenInfo.chainId);
-        chainName.invertChainID(token.tokenInfo.chainId);
         chainIcon.bindData(tokenService.getToken(token.tokenInfo.chainId, tokenService.getCurrentAddress()), tokenService);
 
         if (token.isNonFungible())

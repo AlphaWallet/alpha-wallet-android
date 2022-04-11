@@ -1244,30 +1244,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         try
         {
-            String message = getString(R.string.request_change_chain, EthereumNetworkBase.getShortChainName(switchChainId), String.valueOf(switchChainId));
             Token baseToken = viewModel.getTokenService().getTokenOrBase(switchChainId, viewModel.defaultWallet().getValue().address);
             NetworkInfo newNetwork = EthereumNetworkBase.getNetworkInfo(switchChainId);
             NetworkInfo activeNetwork = EthereumNetworkBase.getNetworkInfo(client.chainIdVal());
-
-            if (newNetwork != null && activeNetwork != null)
-            {
-                if (newNetwork.hasRealValue() && !activeNetwork.hasRealValue())
-                {
-                    message += "\n" + getString(R.string.warning_switch_to_main);
-                }
-                else if (!newNetwork.hasRealValue() && activeNetwork.hasRealValue())
-                {
-                    message += "\n" + getString(R.string.warning_switching_to_test);
-                }
-            }
-
             if (walletConnectDialog.isShowing())
                 return;
-
-            // show action sheet
-            walletConnectDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, message, R.string.switch_and_reload,
-                    switchChainDialogCallbackId, baseToken);
-
+            walletConnectDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, R.string.switch_and_reload,
+                    switchChainDialogCallbackId, baseToken, activeNetwork, newNetwork);
             walletConnectDialog.setOnDismissListener(dialog -> {
                 viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, false, chainAvailable);
                 walletConnectDialog.setOnDismissListener(null);         // remove from here as dialog is multi-purpose

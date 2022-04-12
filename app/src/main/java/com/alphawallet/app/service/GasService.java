@@ -130,10 +130,6 @@ public class GasService implements ContractGasProvider
         {
             Timber.d("Network error, no chain, trying to pick: %s", chainId);
         }
-        else if (EthereumNetworkRepository.hasGasOverride(chainId))
-        {
-            currentChainId = chainId;
-        }
         else if (web3j == null || web3j.ethChainId().getId() != chainId)
         {
             currentChainId = chainId;
@@ -497,9 +493,13 @@ public class GasService implements ContractGasProvider
                     return new Gson().fromJson(jsonData.getJSONObject("result").toString(), FeeHistory.class);
                 }
             }
+            catch (org.json.JSONException j)
+            {
+                Timber.d("Note: " + info.getShortName() + " does not appear to have EIP1559 support");
+            }
             catch (Exception e)
             {
-                Timber.e(e);
+                Timber.w(e);
             }
 
             return new FeeHistory();

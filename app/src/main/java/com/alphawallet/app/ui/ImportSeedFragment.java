@@ -124,7 +124,9 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
     private void processSeed(View view)
     {
         this.seedPhrase.setError(null);
-        String newMnemonic = seedPhrase.getText().toString();
+        String newMnemonic = seedPhrase.getText().toString().toLowerCase();
+        seedPhrase.getEditText().setText("");
+        seedPhrase.getEditText().append(newMnemonic);
         if (TextUtils.isEmpty(newMnemonic)) {
             this.seedPhrase.setError(getString(R.string.error_field_required));
         } else {

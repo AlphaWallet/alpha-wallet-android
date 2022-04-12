@@ -858,12 +858,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return 0;
     }
 
+    //Note: this is used by chains which have a fixed, invariable gas price.
+    //      it mainly only applies to private or custom chains, eg a Kaleido based chain
+    //      public chains will almost never use this.
     public static boolean hasGasOverride(long chainId)
     {
-        //if (chainId == AURORA_MAINNET_ID || chainId == AURORA_TESTNET_ID)
-        //    return true;
         return false;
     }
+
     public static boolean hasOpenseaAPI(long chainId)
     {
         return hasOpenSeaAPI.contains(chainId);

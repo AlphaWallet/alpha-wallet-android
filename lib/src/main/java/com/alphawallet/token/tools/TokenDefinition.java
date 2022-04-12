@@ -1020,7 +1020,9 @@ public class TokenDefinition {
                         break;
                     case "sequence":
                         if (namedType == null) {
-                            throw new SAXException("Sequence must be enclosed within <namedType name=... />");
+                            String contractAddress = "";
+                            if (contracts.size() > 0) { contractAddress = contracts.keySet().iterator().next(); }
+                            throw new SAXException("[" + contractAddress + "] Sequence must be enclosed within <namedType name=... />");
                         }
                         NamedType eventDataType = handleElementSequence(element, namedType);
                         namedTypeLookup.put(namedType, eventDataType);

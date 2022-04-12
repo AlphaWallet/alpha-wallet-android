@@ -45,60 +45,16 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="aw.app"
-                    android:pathPrefix="/"
-                    android:scheme="https" />
-                <data
-                    android:host="classic.aw.app"
-                    android:pathPrefix="/"
-                    android:scheme="https" />
-                <data
-                    android:host="kovan.aw.app"
-                    android:pathPrefix="/"
-                    android:scheme="https" />
-                <data
-                    android:host="ropsten.aw.app"
-                    android:pathPrefix="/"
-                    android:scheme="https" />
-                <data
-                    android:host="rinkeby.aw.app"
-                    android:pathPrefix="/"
-                    android:scheme="https" />
-                <data
-                    android:host="poa.aw.app"
-                    android:pathPrefix="/"
-                    android:scheme="https" />
-                <data
-                    android:host="sokol.aw.app"
-                    android:pathPrefix="/"
-                    android:scheme="https" />
-                <data
-                    android:host="xdai.aw.app"
-                    android:pathPrefix="/"
-                    android:scheme="https" />
-                <data
-                    android:host="app.awallet.io"
-                    android:pathPrefix="/"
-                    android:scheme="https" />
-                <data
-                    android:host="goerli.aw.app"
-                    android:pathPrefix="/"
-                    android:scheme="https" />
-                <data
-                    android:host="artissigma1.aw.app"
-                    android:pathPrefix="/"
-                    android:scheme="https" />
-                <data
-                    android:host="artistau1.aw.app"
-                    android:pathPrefix="/"
-                    android:scheme="https" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="aw.app" />
+                <data android:host="www.aw.app" />
+                <data android:pathPrefix="/" />
             </intent-filter>
             <intent-filter>
                 <data android:scheme="wc" />

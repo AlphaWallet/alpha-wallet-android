@@ -172,7 +172,7 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
     @Override
     public void afterTextChanged(Editable editable)
     {
-        String value = seedPhrase.getText().toString();
+        String value = seedPhrase.getText().toString().toLowerCase();
         passwordPhraseCounter = new PasswordPhraseCounter(wordCount(value));
 
         if (seedPhrase.isErrorState()) seedPhrase.setError(null);
@@ -297,6 +297,10 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
     @Override
     public void onSuggestionClick(String value)
     {
-        seedPhrase.getEditText().append(value + " ");
+        StringBuilder seed = new StringBuilder(seedPhrase.getEditText().getText().toString());
+        seed.append(value);
+        seed.append(" ");
+        seedPhrase.getEditText().setText("");
+        seedPhrase.getEditText().append(seed.toString().toLowerCase());
     }
 }

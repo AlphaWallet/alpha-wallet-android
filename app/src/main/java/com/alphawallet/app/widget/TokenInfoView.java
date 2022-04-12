@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.net.Uri;
-import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -16,10 +15,8 @@ import androidx.core.content.ContextCompat;
 import com.alphawallet.app.R;
 import com.alphawallet.app.service.TickerService;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
-public class TokenInfoView extends LinearLayout {
+public class TokenInfoView extends LinearLayout
+{
     private TextView label;
     private TextView value;
     private TextView valueLongText;
@@ -71,19 +68,16 @@ public class TokenInfoView extends LinearLayout {
 
     public void setValue(String text)
     {
-        if (!TextUtils.isEmpty(text))
+        if (!TextUtils.isEmpty(text) && TextUtils.isEmpty(valueStr))
         {
-            if (TextUtils.isEmpty(valueStr))
+            valueStr = text;
+            setVisibility(View.VISIBLE);
+            if (text.startsWith("http"))
             {
-                valueStr = text;
-                setVisibility(View.VISIBLE);
-                if (text.startsWith("http"))
-                {
-                    setLink();
-                }
-                TextView useView = getTextView(text.length());
-                useView.setText(text);
+                setLink();
             }
+            TextView useView = getTextView(text.length());
+            useView.setText(text);
         }
         else
         {
@@ -134,7 +128,8 @@ public class TokenInfoView extends LinearLayout {
         });
     }
 
-    public void setHasPrefix(boolean hasPrefix) {
+    public void setHasPrefix(boolean hasPrefix)
+    {
         this.hasPrefix = hasPrefix;
     }
 }

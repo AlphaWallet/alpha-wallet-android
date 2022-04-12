@@ -769,8 +769,19 @@ public class TokenFunctionViewModel extends BaseViewModel {
         nftAsset.postValue(asset);
     }
 
+    private void loadExistingMetadata(Token token, BigInteger tokenId)
+    {
+        NFTAsset asset = token.getAssetForToken(tokenId);
+        if (asset != null && !asset.needsLoading())
+        {
+            nftAsset.postValue(asset);
+        }
+    }
+
     public void getAsset(Token token, BigInteger tokenId)
     {
+        loadExistingMetadata(token, tokenId);
+
         openseaDisposable = openseaService.getAsset(token, tokenId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -79,10 +79,6 @@ public class TokenInfoView extends LinearLayout
             TextView useView = getTextView(text.length());
             useView.setText(text);
         }
-        else
-        {
-            setVisibility(View.GONE);
-        }
     }
 
     public void setCurrencyValue(double v)

@@ -42,6 +42,9 @@
     <declare-styleable name="TokenInfoCategoryView">
         <attr name="title" format="string"/>
     </declare-styleable>
+    <declare-styleable name="TokenInfoView">
+        <attr name="tokenInfoLabel" format="integer"/>
+    </declare-styleable>
     <declare-styleable name="InputView">
         <attr name="label" format="integer" />
         <attr name="imeOptions" format="string" />

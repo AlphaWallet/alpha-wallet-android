@@ -121,6 +121,9 @@ public class NFTImageView extends RelativeLayout {
 
     private void loadTokenImage(OpenSeaAsset asset)
     {
+        fallbackLayout.setVisibility(View.GONE);
+        image.setVisibility(View.VISIBLE);
+
         if (!TextUtils.isEmpty(asset.backgroundColor))
         {
             int color = Color.parseColor("#" + asset.backgroundColor);
@@ -138,6 +141,7 @@ public class NFTImageView extends RelativeLayout {
 
     private void loadTokenImage(NFTAsset asset, String imageUrl)
     {
+        fallbackLayout.setVisibility(View.GONE);
         image.setVisibility(View.VISIBLE);
 
         loadRequest = Glide.with(image.getContext())

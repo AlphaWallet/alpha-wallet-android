@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui.widget.entity;
 
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+
 import com.bumptech.glide.signature.ObjectKey;
 
 import java.util.Map;
@@ -8,22 +10,19 @@ import java.util.concurrent.ConcurrentHashMap;
 public class IconItem {
     private final String url;
     private final UseIcon useText;
-    private final String correctedAddress;
-    private final long chainId;
 
     private final static Map<String, Boolean> iconLoadType = new ConcurrentHashMap<>();
 
-    public IconItem(String url, String correctedAddress, long chainId) {
+    public IconItem(String url, long chainId, String correctedAddress) {
         this.url = url;
-        this.useText = getLoadType(correctedAddress);
-        this.correctedAddress = correctedAddress;
-        this.chainId = chainId;
+        this.useText = getLoadType(chainId, correctedAddress);
     }
 
-    private UseIcon getLoadType(String correctedAddress)
+    private UseIcon getLoadType(long chainId, String correctedAddress)
     {
-        return iconLoadType.containsKey(correctedAddress.toLowerCase())
-                ? (iconLoadType.get(correctedAddress.toLowerCase()) ? UseIcon.SECONDARY : UseIcon.NO_ICON)
+        String key = databaseKey(chainId, correctedAddress);
+        return iconLoadType.containsKey(key)
+                ? (iconLoadType.get(key) ? UseIcon.SECONDARY : UseIcon.NO_ICON)
                 : UseIcon.PRIMARY;
     }
 
@@ -39,20 +38,16 @@ public class IconItem {
         return useText == UseIcon.PRIMARY;
     }
 
-    public ObjectKey getSignature() {
-        return new ObjectKey(correctedAddress + "-" + chainId);
-    }
-
     //Use Secondary icon
-    public static void secondaryFound(String address)
+    public static void secondaryFound(long chainId, String address)
     {
-        iconLoadType.put(address.toLowerCase(), true);
+        iconLoadType.put(databaseKey(chainId, address.toLowerCase()), true);
     }
 
     //Use TextIcon
-    public static void noIconFound(String address)
+    public static void noIconFound(long chainId, String address)
     {
-        iconLoadType.put(address.toLowerCase(), false);
+        iconLoadType.put(databaseKey(chainId, address.toLowerCase()), false);
     }
 
     /**

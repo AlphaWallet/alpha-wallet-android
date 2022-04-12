@@ -110,6 +110,15 @@ public class TokenIcon extends ConstraintLayout
         layout.setOnClickListener(this::performTokenClick);
     }
 
+    public void clearLoad()
+    {
+        handler.removeCallbacks(null);
+        if (currentRq != null && currentRq.isRunning())
+        {
+            currentRq.clear();
+        }
+    }
+
     /**
      * This method is necessary to call from the binder to show information correctly.
      *
@@ -122,7 +131,12 @@ public class TokenIcon extends ConstraintLayout
         {
             return;
         }
-        else if (token.isEthereum())
+        else
+        {
+            this.token = token;
+        }
+
+        if (token.isEthereum())
         {
             bindData(token.tokenInfo.chainId);
             return;
@@ -132,11 +146,7 @@ public class TokenIcon extends ConstraintLayout
         Pair<String, Boolean> iconFallback = assetDefinition.getFallbackUrlForToken(token);
         String mainIcon = iconFallback.second ? iconFallback.first : getPrimaryIconURL(token);
         this.fallbackIconUrl = iconFallback.second ? getPrimaryIconURL(token) : iconFallback.first;
-
-        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
-        String tURL = Utils.getTokenImageUrl(correctedAddr);
-
-        bind(token, new IconItem(mainIcon, tURL, token.tokenInfo.chainId));
+        bind(token, new IconItem(mainIcon, token.tokenInfo.chainId, token.getAddress()));
     }
 
     public void bindData(Token token)
@@ -154,6 +164,7 @@ public class TokenIcon extends ConstraintLayout
 
     public void bindData(Token token, @NotNull TokensService svs)
     {
+        this.handler.removeCallbacks(null);
         if (token == null) return;
         this.tokenName = token.getName();
         this.fallbackIconUrl = svs.getFallbackUrlForToken(token);
@@ -179,16 +190,15 @@ public class TokenIcon extends ConstraintLayout
         chainIcon.setImageResource(EthereumNetworkRepository.getSmallChainLogo(chainId));
     }
 
-    private void setupDefaultIcon(boolean loadFailed)
+    private void setupDefaultIcon()
     {
-        if (currentRq != null && currentRq.isRunning()) currentRq.clear(); //clear current load request if this is replacing an old asset that didn't finish loading
         if (token.isEthereum() || EthereumNetworkRepository.getChainOverrideAddress(token.tokenInfo.chainId).equalsIgnoreCase(token.getAddress()))
         {
             loadImageFromResource(EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId));
         }
         else
         {
-            setupTextIcon(token, loadFailed);
+            setupTextIcon(token);
         }
     }
 
@@ -197,7 +207,8 @@ public class TokenIcon extends ConstraintLayout
      */
     private void displayTokenIcon(IconItem iconItem)
     {
-        setupDefaultIcon(iconItem.useTextSymbol());
+        setupDefaultIcon();
+
         if (token.isEthereum()
                 || token.getWallet().equalsIgnoreCase(token.getAddress())
                 || iconItem.useTextSymbol()) return;
@@ -229,7 +240,7 @@ public class TokenIcon extends ConstraintLayout
     {
         String correctedAddr = Keys.toChecksumAddress(token.getAddress());
         String tURL = Utils.getTokenImageUrl(correctedAddr);
-        return new IconItem(tURL, correctedAddr, token.tokenInfo.chainId);
+        return new IconItem(tURL, token.tokenInfo.chainId, token.getAddress());
     }
 
     public void setStatusIcon(StatusType type)
@@ -287,7 +298,7 @@ public class TokenIcon extends ConstraintLayout
      * This method is used to set TextIcon and make Icon hidden as there is no icon available for the token.
      * @param token Token
      */
-    private void setupTextIcon(@NotNull Token token, boolean loadFailed)
+    private void setupTextIcon(@NotNull Token token)
     {
         icon.setImageResource(R.drawable.ic_clock);
         textIcon.setVisibility(View.VISIBLE);
@@ -344,7 +355,7 @@ public class TokenIcon extends ConstraintLayout
             if (model == null || token == null || !model.toString().toLowerCase().contains(token.getAddress())) return false;
             if (token != null)
             {
-                IconItem.noIconFound(token.getAddress()); //don't try to load this asset again for this session
+                IconItem.noIconFound(token.tokenInfo.chainId, token.getAddress()); //don't try to load this asset again for this session
             }
             return false;
         }
@@ -352,7 +363,10 @@ public class TokenIcon extends ConstraintLayout
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
             if (model == null) return false;
-            IconItem.secondaryFound(Utils.getTokenAddrFromUrl(model.toString()));
+            if (token != null)
+            {
+                IconItem.secondaryFound(token.tokenInfo.chainId, token.getAddress());
+            }
             if (token == null || !model.toString().toLowerCase().contains(token.getAddress())) return false;
 
             textIcon.setVisibility(View.GONE);
@@ -372,7 +386,6 @@ public class TokenIcon extends ConstraintLayout
     private void loadImageFromResource(int resourceId)
     {
         handler.removeCallbacks(null);
-        if (currentRq != null && currentRq.isRunning()) currentRq.clear();
         statusBackground.setVisibility(View.GONE);
         chainIconBackground.setVisibility(View.GONE);
         chainIcon.setVisibility(View.GONE);

@@ -93,6 +93,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     @Override
     public void bind(@Nullable TokenCardMeta data, @NonNull Bundle addition)
     {
+        tokenIcon.clearLoad();
         layoutAppreciation.setForeground(null);
         if (data == null) { fillEmpty(); return; }
         try

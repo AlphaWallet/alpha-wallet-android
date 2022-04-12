@@ -124,7 +124,7 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
     private void processSeed(View view)
     {
         this.seedPhrase.setError(null);
-        String newMnemonic = seedPhrase.getText().toString().toLowerCase();
+        String newMnemonic = seedPhrase.getText().toString().toLowerCase(Locale.ENGLISH);
         seedPhrase.getEditText().setText("");
         seedPhrase.getEditText().append(newMnemonic);
         if (TextUtils.isEmpty(newMnemonic)) {
@@ -174,7 +174,7 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
     @Override
     public void afterTextChanged(Editable editable)
     {
-        String value = seedPhrase.getText().toString().toLowerCase();
+        String value = seedPhrase.getText().toString().toLowerCase(Locale.ENGLISH);
         passwordPhraseCounter = new PasswordPhraseCounter(wordCount(value));
 
         if (seedPhrase.isErrorState()) seedPhrase.setError(null);
@@ -303,6 +303,6 @@ public class ImportSeedFragment extends ImportFragment implements OnSuggestionCl
         seed.append(value);
         seed.append(" ");
         seedPhrase.getEditText().setText("");
-        seedPhrase.getEditText().append(seed.toString().toLowerCase());
+        seedPhrase.getEditText().append(seed.toString().toLowerCase(Locale.ENGLISH));
     }
 }

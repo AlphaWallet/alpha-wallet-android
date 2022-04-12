@@ -41,7 +41,8 @@ import java.nio.charset.StandardCharsets;
 /**
  * Created by JB on 30/05/2021.
  */
-public class NFTImageView extends RelativeLayout {
+public class NFTImageView extends RelativeLayout
+{
     private final ImageView image;
     private final RelativeLayout webLayout;
     private final WebView webView;
@@ -50,17 +51,17 @@ public class NFTImageView extends RelativeLayout {
     private final TokenIcon fallbackIcon;
     private final ProgressBar progressBar;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private Request loadRequest;
-
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
-    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>()
+    {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
         {
             //couldn't load using glide, fallback to webview
-            if (model != null) {
+            if (model != null)
+            {
                 progressBar.setVisibility(View.GONE);
                 setWebView(model.toString());
             }
@@ -74,7 +75,8 @@ public class NFTImageView extends RelativeLayout {
             return false;
         }
     };
-
+    private Request loadRequest;
+    private String imageUrl;
     private boolean hasContent;
     private boolean showProgress;
 
@@ -109,18 +111,19 @@ public class NFTImageView extends RelativeLayout {
 
     public void setupTokenImage(NFTAsset asset)
     {
-        progressBar.setVisibility(showProgress? View.VISIBLE : View.GONE);
+        progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
         loadTokenImage(asset, asset.getImage());
     }
 
     public void setupTokenImage(OpenSeaAsset asset)
     {
-        progressBar.setVisibility(showProgress? View.VISIBLE : View.GONE);
+        progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
         loadTokenImage(asset);
     }
 
     private void loadTokenImage(OpenSeaAsset asset)
     {
+        this.imageUrl = asset.getImageUrl();
         fallbackLayout.setVisibility(View.GONE);
         image.setVisibility(View.VISIBLE);
 
@@ -131,7 +134,7 @@ public class NFTImageView extends RelativeLayout {
         }
 
         loadRequest = Glide.with(image.getContext())
-                .load(asset.getImageUrl())
+                .load(this.imageUrl)
                 .centerCrop()
                 .transition(withCrossFade())
                 .override(Target.SIZE_ORIGINAL)
@@ -141,11 +144,12 @@ public class NFTImageView extends RelativeLayout {
 
     private void loadTokenImage(NFTAsset asset, String imageUrl)
     {
+        this.imageUrl = imageUrl;
         fallbackLayout.setVisibility(View.GONE);
         image.setVisibility(View.VISIBLE);
 
         loadRequest = Glide.with(image.getContext())
-                .load(imageUrl)
+                .load(this.imageUrl)
                 .centerCrop()
                 .transition(withCrossFade())
                 .override(Target.SIZE_ORIGINAL)
@@ -195,7 +199,8 @@ public class NFTImageView extends RelativeLayout {
             {
                 setWebViewHeight(Utils.dp2px(getContext(), height));
             }
-        } finally
+        }
+        finally
         {
             a.recycle();
         }
@@ -221,7 +226,8 @@ public class NFTImageView extends RelativeLayout {
         return hasContent;
     }
 
-    public void showLoadingProgress(boolean showProgress) {
+    public void showLoadingProgress(boolean showProgress)
+    {
         this.showProgress = showProgress;
     }
 
@@ -229,5 +235,24 @@ public class NFTImageView extends RelativeLayout {
     public boolean onInterceptTouchEvent(MotionEvent ev)
     {
         return true;
+    }
+
+    public boolean shouldLoad(String url)
+    {
+        if (this.imageUrl == null)
+        {
+            return true;
+        }
+        else
+        {
+            if (TextUtils.isEmpty(url))
+            {
+                return false;
+            }
+            else
+            {
+                return !this.imageUrl.equals(url);
+            }
+        }
     }
 }

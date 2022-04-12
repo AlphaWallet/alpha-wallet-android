@@ -269,7 +269,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         if (asset != null)
         {
-            updateTokenImage(asset);
+            updateTokenImage(asset.getImage());
 
             addMetaDataInfo(asset);
 
@@ -279,31 +279,20 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
-    private void updateTokenImage(NFTAsset asset)
+    private void updateTokenImage(String imageUrl)
     {
-        if (asset.isBlank())
+        if (tokenImage.shouldLoad(imageUrl))
         {
-            tokenImage.showFallbackLayout(token);
-        }
-        else
-        {
-            tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
-            tokenImage.showLoadingProgress(true);
-            tokenImage.setupTokenImage(asset);
-        }
-    }
-
-    private void updateTokenImage(OpenSeaAsset openSeaAsset)
-    {
-        if (TextUtils.isEmpty(openSeaAsset.getImageUrl()))
-        {
-            tokenImage.showFallbackLayout(token);
-        }
-        else
-        {
-            tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
-            tokenImage.showLoadingProgress(true);
-            tokenImage.setupTokenImage(openSeaAsset);
+            if (TextUtils.isEmpty(imageUrl))
+            {
+                tokenImage.showFallbackLayout(token);
+            }
+            else
+            {
+                tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
+                tokenImage.showLoadingProgress(true);
+                tokenImage.setupTokenImage(asset);
+            }
         }
     }
 
@@ -343,7 +332,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         updateDefaultTokenData();
 
-        updateTokenImage(openSeaAsset);
+        updateTokenImage(openSeaAsset.getImageUrl());
 
         String name = openSeaAsset.name;
         if (!TextUtils.isEmpty(name))

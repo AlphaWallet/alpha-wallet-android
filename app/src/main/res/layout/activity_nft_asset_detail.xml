@@ -44,11 +44,89 @@
                 custom:title="@string/label_details"
                 tools:visibility="visible" />
 
-            <LinearLayout
-                android:id="@+id/layout_token_info"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical" />
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/token_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/label_token_id" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/network"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/subtitle_network" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/contract_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/contract_address" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/balance" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/hint_contract_name" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/external_link"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/label_external_link" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/creator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/asset_creator" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/token_standard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/asset_schema" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/total_supply"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/asset_total_supply" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/num_owners"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/asset_number_of_owners" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/owner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/asset_owner" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/last_sale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/asset_last_sale" />
 
             <ProgressBar
                 android:id="@+id/progress"

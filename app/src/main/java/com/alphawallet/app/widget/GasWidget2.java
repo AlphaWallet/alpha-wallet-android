@@ -289,6 +289,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     public void run()
     {
         GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
+        if (gs == null) return;
 
         Token baseCurrency = tokensService.getTokenOrBase(token.tokenInfo.chainId, token.getWallet());
         BigInteger networkFee = gs.gasPrice.maxFeePerGas.multiply(getUseGasLimit());
@@ -388,9 +389,8 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     private void checkCustomGasPrice(BigInteger customGasPrice)
     {
         double dGasPrice = customGasPrice.doubleValue();
-
-        GasSpeed2 ug = gasSpread.getSelectedGasFee(TXSpeed.RAPID); //rapid
-        GasSpeed2 lg = gasSpread.getSelectedGasFee(TXSpeed.SLOW); //slow
+        GasSpeed2 ug = gasSpread.getQuickestGasSpeed();
+        GasSpeed2 lg = gasSpread.getSlowestGasSpeed();
 
         if (resendGasPrice.compareTo(BigInteger.ZERO) > 0)
         {

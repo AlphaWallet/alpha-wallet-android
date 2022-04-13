@@ -462,6 +462,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         if (handler != null) handler.removeCallbacksAndMessages(null);
         if (amountInput != null) amountInput.onDestroy();
         if (confirmationDialog != null) confirmationDialog.onDestroy();
+        if (addressInput != null) addressInput.setEnsNodeNotSyncCallback(null); // prevent leak by removing reference to activity method
     }
 
     private void setupTokenContent() {
@@ -470,6 +471,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         addressInput = findViewById(R.id.input_address);
         addressInput.setAddressCallback(this);
         addressInput.setChainOverrideForWalletConnect(token.tokenInfo.chainId);
+        addressInput.setEnsHandlerNodeSyncFlag(true);   // allow node sync
+        addressInput.setEnsNodeNotSyncCallback(this::showNodeNotSyncSheet);  // callback to invoke if node not synced
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
         functionBar.revealButtons();
         List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_next));
@@ -676,5 +679,40 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         });
 
         dialog.show();
+    }
+
+    void showNodeNotSyncSheet() {
+        Timber.d("showNodeNotSync: ");
+        try
+        {
+            confirmationDialog = new ActionSheetDialog(this, this, R.string.title_ens_lookup_warning, getString(R.string.message_ens_node_not_sync),
+                    R.string.action_cancel, R.string.ignore);
+            confirmationDialog.show();
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
+
+    }
+
+    @Override
+    public void buttonClick(String action, int id)
+    {
+        Timber.d("buttonClick: ");
+        if (id == R.string.action_cancel)
+        {
+            confirmationDialog.dismiss();
+        }
+        else if (id == R.string.ignore)
+        {
+            addressInput.setEnsHandlerNodeSyncFlag(false);  // skip node sync check
+            // re enter current input to resolve again
+            String currentInput = addressInput.getEditText().getText().toString();
+            addressInput.getEditText().setText("");
+            addressInput.getEditText().setText(currentInput);
+            addressInput.getEditText().setSelection(currentInput.length());
+            confirmationDialog.dismiss();
+        }
     }
 }

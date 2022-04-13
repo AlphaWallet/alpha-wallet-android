@@ -1,8 +1,11 @@
 package com.alphawallet.app.util;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.entity.EnsNodeNotSyncCallback;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.TokenRepository;
@@ -52,6 +55,8 @@ public class EnsResolver {
     private final int addressLength;
     private long syncThreshold; // non-final in case this value needs to be tweaked
 
+    public EnsNodeNotSyncCallback nodeNotSyncCallback = null;
+
     public EnsResolver(Web3j web3j, long syncThreshold, int addressLength) {
         this.web3j = web3j;
         this.syncThreshold = syncThreshold;
@@ -80,15 +85,21 @@ public class EnsResolver {
      * @param ensName
      * @return
      */
-    public String resolve(String ensName)
+    public String resolve(String ensName, boolean performSync)
     {
+        Timber.d("resolve %s, %s", ensName, performSync);
         String contractAddress = ensName;
         if (isValidEnsName(ensName, addressLength))
         {
             try
-            {
-                if (!isSynced()) //ensure node is synced
+            {   // performSync used to skip syncing if required by user
+                if (performSync && !isSynced()) //ensure node is synced
                 {
+                    Timber.d("resolve: node not synced");
+                    if (nodeNotSyncCallback != null)
+                    {
+                        new Handler(Looper.getMainLooper()).post(() -> nodeNotSyncCallback.onNodeNotSynced());
+                    }
                     throw new EnsResolutionException("Node is not currently synced");
                 }
                 else if (ensName.endsWith(".crypto")) //check crypto namespace

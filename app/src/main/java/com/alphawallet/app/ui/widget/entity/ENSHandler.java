@@ -17,6 +17,7 @@ import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.EnsNodeNotSyncCallback;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.util.AWEnsResolver;
@@ -33,6 +34,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
@@ -53,6 +55,9 @@ public class ENSHandler implements Runnable
     private Disposable disposable;
     public volatile boolean waitingForENS = false;
     private boolean hostCallbackAfterENS = false;
+
+    /** Used to skip node sync check when user clicks ignore*/
+    public boolean performEnsSync = true;
 
     public ENSHandler(InputAddress host, AutoCompleteAddressAdapter adapter)
     {
@@ -221,7 +226,7 @@ public class ENSHandler implements Runnable
             host.setWaitingSpinner(true);
             host.ENSName(to);
 
-            disposable = ensResolver.resolveENSAddress(to)
+            disposable = ensResolver.resolveENSAddress(to, performEnsSync)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(resolvedAddress -> onENSSuccess(resolvedAddress, to), this::onENSError);
@@ -319,5 +324,11 @@ public class ENSHandler implements Runnable
     {
         String historyJson = new Gson().toJson(history);
         PreferenceManager.getDefaultSharedPreferences(host.getContext()).edit().putString(C.ENS_HISTORY_PAIR, historyJson).apply();
+    }
+
+    public void setEnsNodeNotSyncCallback(EnsNodeNotSyncCallback callback)
+    {
+        Timber.d("setEnsNodeNotSyncCallback: ");
+        ensResolver.nodeNotSyncCallback = callback;
     }
 }

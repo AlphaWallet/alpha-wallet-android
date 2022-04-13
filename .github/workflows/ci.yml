@@ -2,7 +2,7 @@ name: Build
 on: pull_request
 jobs:
   test:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         api-level: [31]

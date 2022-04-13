@@ -28,6 +28,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.assertions.Should;
 import com.alphawallet.app.util.GetTextAction;
 import com.alphawallet.app.util.Helper;
+import com.alphawallet.app.util.SnapshotUtil;
 
 /**
  * Every step consists of several operations, step name stands for user perspective actions.
@@ -38,11 +39,15 @@ public class Steps
     public static void createNewWallet()
     {
         if (isDeviceRooted()) {
+            SnapshotUtil.take("1");
             click(withText(R.string.ok));
         }
+        SnapshotUtil.take("2");
         click(withId(R.id.button_create));
+        SnapshotUtil.take("3");
         Helper.wait(10);
         click(withText(R.string.action_close)); // works well locally but NOT work with GitHub actions
+        SnapshotUtil.take("4");
     }
 
     public static void visit(String urlString)

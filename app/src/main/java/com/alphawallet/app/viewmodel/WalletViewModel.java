@@ -57,6 +57,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import timber.log.Timber;
 
 @HiltViewModel
 public class WalletViewModel extends BaseViewModel
@@ -276,6 +277,8 @@ public class WalletViewModel extends BaseViewModel
 
     public void showTokenDetail(Activity activity, Token token)
     {
+        Timber.tag("seaborn").d("showTokenDetail:" + token.getInterfaceSpec());
+
         boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
         switch (token.getInterfaceSpec())
         {

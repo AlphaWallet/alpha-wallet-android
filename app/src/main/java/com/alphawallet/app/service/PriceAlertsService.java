@@ -33,6 +33,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class PriceAlertsService extends Service
@@ -142,6 +143,8 @@ public class PriceAlertsService extends Service
 
                         if (priceAlert.match(rate, currentTokenPrice))
                         {
+                            Timber.tag("seaborn").d("priceAlert matech");
+
                             String content = constructContent(priceAlert, Objects.requireNonNull(CurrencyRepository.getCurrencyByISO(priceAlert.getCurrency())));
                             notificationService.displayPriceAlertNotification(priceAlert.getToken(), content, 0, constructIntent(token));
                             // disable notification to avoid run multiple times

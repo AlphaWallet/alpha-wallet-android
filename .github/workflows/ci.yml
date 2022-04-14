@@ -24,8 +24,9 @@ jobs:
           target: ${{ matrix.target }}
           arch: x86_64
           profile: Nexus 6
+          ram-size: 4096M
           force-avd-creation: false
-          emulator-options: -no-window -accel on -noaudio -no-boot-anim -camera-back none -memory 4096
+          emulator-options: -no-window -accel on -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: ./e2e.sh --CI
 

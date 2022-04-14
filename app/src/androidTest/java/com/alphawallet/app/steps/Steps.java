@@ -38,17 +38,14 @@ public class Steps
 {
     public static void createNewWallet()
     {
-        SnapshotUtil.take("just-started");
         if (isDeviceRooted()) {
             click(withText(R.string.ok));
         }
-        SnapshotUtil.take("before-create");
         click(withId(R.id.button_create));
-        SnapshotUtil.take("after-create");
         Helper.wait(10);
         SnapshotUtil.take("before-close");
-        click(withText(R.string.action_close)); // works well locally but NOT work with GitHub actions
-        SnapshotUtil.take("1");
+        click(withId(R.id.btn_close)); // works well locally but NOT work with GitHub actions
+        SnapshotUtil.take("after-close");
     }
 
     public static void visit(String urlString)

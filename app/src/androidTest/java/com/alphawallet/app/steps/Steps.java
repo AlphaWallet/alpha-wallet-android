@@ -38,7 +38,6 @@ public class Steps
 {
     public static void createNewWallet()
     {
-        Helper.wait(30);
         if (isDeviceRooted()) {
             click(withText(R.string.ok));
         }

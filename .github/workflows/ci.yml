@@ -4,6 +4,7 @@ jobs:
   test:
     runs-on: macos-latest
     strategy:
+      fail-fast: false
       matrix:
         api-level: [29, 30, 31]
         target: [default]

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -16,8 +17,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="@dimen/standard_16">
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/title"
@@ -26,53 +26,40 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
                 android:gravity="center"
-                android:text="@string/edit_dapp" />
+                android:text="@string/edit_dapp"
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/icon"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="@dimen/token_icon_large"
+                android:layout_height="@dimen/token_icon_large"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="15dp"
+                android:layout_marginTop="@dimen/standard_16"
+                android:layout_marginBottom="@dimen/standard_16"
                 android:src="@drawable/ic_launcher_foreground" />
 
-            <TextView
-                style="@style/Aw.Typography.Label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/mini_4"
-                android:text="@string/dapp_title" />
-
-            <EditText
+            <com.alphawallet.app.widget.InputView
                 android:id="@+id/dapp_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:completionThreshold="1"
-                android:imeOptions="actionDone"
-                android:inputType="text"
-                android:lines="1"
-                android:maxLines="1"
-                android:paddingHorizontal="@dimen/standard_16" />
+                android:layout_marginBottom="@dimen/standard_16"
+                custom:imeOptions="actionDone"
+                custom:inputType="text"
+                custom:label="@string/dapp_title"
+                custom:lines="1"
+                custom:maxLines="1" />
 
-            <TextView
-                style="@style/Aw.Typography.Label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/cozy_20"
-                android:layout_marginBottom="@dimen/mini_4"
-                android:text="@string/dapp_address" />
-
-            <EditText
+            <com.alphawallet.app.widget.InputView
                 android:id="@+id/dapp_url"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:completionThreshold="1"
-                android:imeOptions="actionDone"
-                android:inputType="textUri"
-                android:lines="1"
-                android:maxLines="1"
-                android:paddingHorizontal="@dimen/standard_16" />
+                android:layout_marginBottom="@dimen/standard_16"
+                custom:imeOptions="actionDone"
+                custom:inputType="text"
+                custom:label="@string/dapp_address"
+                custom:lines="1"
+                custom:maxLines="1" />
+
         </LinearLayout>
 
         <LinearLayout

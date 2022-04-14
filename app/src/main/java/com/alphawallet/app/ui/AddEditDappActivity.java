@@ -6,17 +6,15 @@ import android.text.TextUtils;
 import androidx.annotation.Nullable;
 
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.widget.InputView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.Utils;
 
-import java.net.URISyntaxException;
 import java.util.List;
 
 import com.alphawallet.app.R;
@@ -32,8 +30,8 @@ public class AddEditDappActivity extends BaseActivity {
     public static final int MODE_EDIT = 1;
 
     private TextView title;
-    private EditText name;
-    private EditText url;
+    private InputView name;
+    private InputView url;
     private Button button;
     private ImageView icon;
 
@@ -68,29 +66,31 @@ public class AddEditDappActivity extends BaseActivity {
             favicon = DappBrowserUtils.getIconUrl(visibleUrl);
             Glide.with(this)
                     .load(favicon)
-                    .override(42)
-                    .apply(new RequestOptions().circleCrop())
                     .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
                     .into(icon);
         }
 
         switch (mode) {
             case MODE_ADD: {
-                title.setText(R.string.add_to_my_dapps);
+                setTitle(getString(R.string.add_to_my_dapps));
                 button.setText(R.string.action_add);
                 name.setText(dapp.getName());
+                name.getEditText().setSelection(0);
                 url.setText(dapp.getUrl());
+                url.getEditText().setSelection(0);
                 button.setOnClickListener(v -> {
-                    dapp.setName(name.getEditableText().toString());
-                    dapp.setUrl(url.getEditableText().toString());
+                    dapp.setName(name.getText().toString());
+                    dapp.setUrl(url.getText().toString());
                     add(dapp); });
                 break;
             }
             case MODE_EDIT: {
-                title.setText(R.string.edit_dapp);
+                setTitle(getString(R.string.edit_dapp));
                 button.setText(R.string.action_save);
                 url.setText(dapp.getUrl());
+                url.getEditText().setSelection(0);
                 name.setText(dapp.getName());
+                name.getEditText().setSelection(0);
                 button.setOnClickListener(v -> {
                     save(dapp);
                 });

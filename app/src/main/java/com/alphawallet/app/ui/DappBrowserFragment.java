@@ -863,6 +863,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
         realmUpdate = realm.where(RealmToken.class)
                 .equalTo("address", TokensRealmSource.databaseKey(activeNetwork.chainId, "eth")).findAllAsync();
+        String shortName = activeNetwork.getShortName();
         realmUpdate.addChangeListener(realmTokens -> {
             //update balance
             if (realmTokens.size() == 0) return;
@@ -871,7 +872,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             symbol.setVisibility(View.VISIBLE);
             String newBalanceStr = BalanceUtils.getScaledValueFixed(new BigDecimal(realmToken.getBalance()), ETHER_DECIMALS, TOKEN_BALANCE_PRECISION);
             balance.setText(newBalanceStr);
-            symbol.setText(activeNetwork.getShortName());
+            symbol.setText(shortName);
         });
     }
 

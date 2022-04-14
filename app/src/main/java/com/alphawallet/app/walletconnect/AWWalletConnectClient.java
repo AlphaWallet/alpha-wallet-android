@@ -242,13 +242,20 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
                 true,
                 appMetaData);
 
-        WalletConnectClient.INSTANCE.initialize(init, e ->
+        try
         {
-            Timber.i("Init failed: %s", e.getMessage());
-            return null;
-        });
+            WalletConnectClient.INSTANCE.initialize(init, e ->
+            {
+                Timber.i("Init failed: %s", e.getMessage());
+                return null;
+            });
 
-        WalletConnectClient.INSTANCE.setWalletDelegate(this);
+            WalletConnectClient.INSTANCE.setWalletDelegate(this);
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
     }
 
     @NonNull

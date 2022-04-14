@@ -395,6 +395,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
 
     /**
      * Wait until we have fully resolved the ENS name if required
+     *
      * @return
      */
     public void getAddress()
@@ -494,7 +495,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         int amount = getInputLength();
         if (amount > 30 && ts == standardTextSize && !noCam)
         {
-            editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize*0.85f); //shrink text size to fit
+            editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize * 0.85f); //shrink text size to fit
         }
         else if (amount <= 30 && ts < standardTextSize)
         {
@@ -529,7 +530,8 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         ensHandler.setEnsNodeNotSyncCallback(callback);
     }
 
-    public void setEnsHandlerNodeSyncFlag(boolean performSync) {
+    public void setEnsHandlerNodeSyncFlag(boolean performSync)
+    {
         ensHandler.performEnsSync = performSync;
     }
 

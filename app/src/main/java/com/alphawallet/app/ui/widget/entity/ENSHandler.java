@@ -44,8 +44,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
  */
 public class ENSHandler implements Runnable
 {
-    public  static final int ENS_RESOLVE_DELAY = 750; //In milliseconds
-    public  static final int ENS_TIMEOUT_DELAY = 8000;
+    public static final int ENS_RESOLVE_DELAY = 750; //In milliseconds
+    public static final int ENS_TIMEOUT_DELAY = 8000;
     private final InputAddress host;
     private final Handler handler;
     private final AutoCompleteAddressAdapter adapterUrl;
@@ -56,7 +56,9 @@ public class ENSHandler implements Runnable
     public volatile boolean waitingForENS = false;
     private boolean hostCallbackAfterENS = false;
 
-    /** Used to skip node sync check when user clicks ignore*/
+    /**
+     * Used to skip node sync check when user clicks ignore
+     */
     public boolean performEnsSync = true;
 
     public ENSHandler(InputAddress host, AutoCompleteAddressAdapter adapter)
@@ -142,7 +144,8 @@ public class ENSHandler implements Runnable
         {
             host.getInputView().dismissDropDown();
             host.setENSAddress(resolvedAddress);
-            if (host.getInputView().hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
+            if (host.getInputView().hasFocus())
+                host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(resolvedAddress, ensDomain);
             host.ENSResolved(resolvedAddress, ensDomain);
@@ -152,7 +155,8 @@ public class ENSHandler implements Runnable
             host.getInputView().dismissDropDown();
             host.setENSName(host.getContext().getString(R.string.ens_resolved, resolvedAddress));
             //host.setStatus(host.getContext().getString(R.string.ens_resolved, resolvedAddress));
-            if (host.getInputView().hasFocus()) host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
+            if (host.getInputView().hasFocus())
+                host.hideKeyboard(); //user was waiting for ENS, not in the middle of typing a value etc
 
             storeItem(ensDomain, resolvedAddress);
             host.ENSResolved(ensDomain, resolvedAddress);
@@ -245,6 +249,7 @@ public class ENSHandler implements Runnable
 
     /**
      * This method will fetch stored ENS cached history of Reverse lookup
+     *
      * @return Key Value pair of Address vs ENS name
      */
     private static HashMap<String, String> getENSHistoryFromPrefs(Context ctx)
@@ -253,7 +258,9 @@ public class ENSHandler implements Runnable
         String historyJson = PreferenceManager.getDefaultSharedPreferences(ctx).getString(C.ENS_HISTORY_PAIR, "");
         if (!historyJson.isEmpty())
         {
-            history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>(){}.getType());
+            history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>()
+            {
+            }.getType());
         }
         else
         {
@@ -300,6 +307,7 @@ public class ENSHandler implements Runnable
 
     /**
      * This method will store Address vs ENS name key value pair in preference.
+     *
      * @param address Wallet Address
      * @param ensName Wallet Name
      */
@@ -318,6 +326,7 @@ public class ENSHandler implements Runnable
 
     /**
      * This method will store key value pair in preference
+     *
      * @param history Key value pair
      */
     private void storeHistory(HashMap<String, String> history)

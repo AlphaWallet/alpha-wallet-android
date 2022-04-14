@@ -46,8 +46,8 @@ window.AlphaWallet.init(__rpcURL, {
     const data = msgParams
     const { id = Math.floor((Math.random() * 100000) + 1) } = msgParams
     AlphaWallet.addCallback(id, cb)
-    //alpha.ethCall(id, JSON.stringify(msgParams));
-    alpha.ethCall(id, msgParams.to, msgParams.data);
+    alpha.ethCall(id, JSON.stringify(msgParams));
+    //alpha.ethCall(id, msgParams.to, msgParams.data, msgParams.value);
   },
   walletAddEthereumChain: function (msgParams, cb) {
     const data = msgParams

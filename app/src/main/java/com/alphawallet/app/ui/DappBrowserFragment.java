@@ -11,7 +11,7 @@ import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
 import static com.alphawallet.app.util.Utils.isValidUrl;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+import static org.web3j.protocol.core.methods.request.Transaction.createFunctionCallTransaction;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -1216,7 +1216,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             Web3j web3j = TokenRepository.getWeb3jService(activeNetwork.chainId);
             //construct call
             org.web3j.protocol.core.methods.request.Transaction transaction
-                    = createEthCallTransaction(wallet.address, call.to.toString(), call.payload);
+                    = createFunctionCallTransaction(wallet.address, null, null, call.gasLimit, call.to.toString(), call.value, call.payload);
             return web3j.ethCall(transaction, call.blockParam).send();
         }).map(EthCall::getValue)
                 .subscribeOn(Schedulers.io())

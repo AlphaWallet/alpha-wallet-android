@@ -278,6 +278,7 @@ public class WalletViewModel extends BaseViewModel
     public void showTokenDetail(Activity activity, Token token)
     {
         Timber.tag("seaborn").d("showTokenDetail:" + token.getInterfaceSpec());
+        Timber.tag("seaborn").d(Thread.currentThread().getStackTrace().toString());
 
         boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
         switch (token.getInterfaceSpec())

@@ -38,8 +38,8 @@ public class Steps
 {
     public static void createNewWallet()
     {
+        SnapshotUtil.take("1");
         if (isDeviceRooted()) {
-            SnapshotUtil.take("1");
             click(withText(R.string.ok));
         }
         SnapshotUtil.take("2");
@@ -131,6 +131,7 @@ public class Steps
 
     public static void gotoSettingsPage() {
         click(withId(R.id.nav_settings_text));
+        SnapshotUtil.take("5");
     }
 
     private static void toggleSwitch(int id) {

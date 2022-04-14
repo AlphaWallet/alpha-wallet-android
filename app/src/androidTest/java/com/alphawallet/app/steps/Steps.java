@@ -38,21 +38,20 @@ public class Steps
 {
     public static void createNewWallet()
     {
-        SnapshotUtil.take("1");
         if (isDeviceRooted()) {
             click(withText(R.string.ok));
         }
-        SnapshotUtil.take("2");
         click(withId(R.id.button_create));
-        SnapshotUtil.take("3");
         Helper.wait(10);
         click(withText(R.string.action_close)); // works well locally but NOT work with GitHub actions
-        SnapshotUtil.take("4");
+        SnapshotUtil.take("1");
     }
 
     public static void visit(String urlString)
     {
+        SnapshotUtil.take("2");
         navigateToBrowser();
+        SnapshotUtil.take("3");
         onView(withId(R.id.url_tv)).perform(replaceText(urlString), pressImeActionButton());
     }
 
@@ -131,7 +130,6 @@ public class Steps
 
     public static void gotoSettingsPage() {
         click(withId(R.id.nav_settings_text));
-        SnapshotUtil.take("5");
     }
 
     private static void toggleSwitch(int id) {

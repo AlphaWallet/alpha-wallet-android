@@ -89,8 +89,11 @@ public class Helper {
 
             @Override
             public void perform(final UiController uiController, final View view) {
+                SnapshotUtil.take("2.1");
                 uiController.loopMainThreadUntilIdle();
+                SnapshotUtil.take("2.2");
                 uiController.loopMainThreadForAtLeast(seconds * 1000L);
+                SnapshotUtil.take("2.3");
             }
         });
     }

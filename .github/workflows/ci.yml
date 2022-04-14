@@ -25,7 +25,7 @@ jobs:
           arch: x86_64
           profile: Nexus 6
           force-avd-creation: false
-          emulator-options: -no-window -accel on -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-window -accel on -noaudio -no-boot-anim -camera-back none -memory 4096
           disable-animations: true
           script: ./e2e.sh --CI
 

@@ -366,47 +366,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         isAttached = true;
     }
 
-    // action sheet with 2 buttons
-    public ActionSheetDialog(Activity activity, ActionSheetCallback aCallback, int titleId, String message, int primaryButton, int secondaryButton) {
-        super(activity);
-        setContentView(R.layout.dialog_action_sheet_message);
-
-        TextView titleView = findViewById(R.id.text_sign_title);
-        TextView messageView = findViewById(R.id.text_message);
-        functionBar = findViewById(R.id.layoutButtons);
-        this.activity = activity;
-
-        actionSheetCallback = aCallback;
-        mode = ActionSheetMode.MESSAGE2;
-
-        titleView.setText(titleId);
-        messageView.setText(message);
-
-        gasWidget = null;
-        balanceDisplay = null;
-        cancelButton = findViewById(R.id.image_close);
-        confirmationWidget = null;
-        addressDetail  = null;
-        amountDisplay = null;
-        assetDetailView = null;
-        detailWidget = null;
-        callbackId = -1;
-        token = null;
-        tokensService = null;
-        candidateTransaction = null;
-        walletConnectRequestWidget = null;
-        gasWidgetLegacy = null;
-        gasWidgetInterface = null;
-
-        ArrayList<Integer> buttonRes = new ArrayList<>();
-        buttonRes.add(primaryButton);
-        buttonRes.add(secondaryButton);
-        functionBar.setupFunctions(this, buttonRes);
-        functionBar.revealButtons();
-        setupCancelListeners();
-        isAttached = true;
-    }
-
     public void setSignOnly()
     {
         //sign only, and return signature to process
@@ -522,9 +481,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 {
                     actionSheetCallback.denyWalletConnect();
                 }
-                break;
-            case MESSAGE2:
-                actionSheetCallback.buttonClick(action, id);
                 break;
         }
 

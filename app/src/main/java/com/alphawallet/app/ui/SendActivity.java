@@ -89,6 +89,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     private BigDecimal sendAmount;
     private BigDecimal sendGasPrice;
     private ActionSheetDialog confirmationDialog;
+    private AWalletAlertDialog alertDialog;
 
     @Nullable
     private Disposable calcGasCost;
@@ -685,34 +686,27 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         Timber.d("showNodeNotSync: ");
         try
         {
-            confirmationDialog = new ActionSheetDialog(this, this, R.string.title_ens_lookup_warning, getString(R.string.message_ens_node_not_sync),
-                    R.string.action_cancel, R.string.ignore);
-            confirmationDialog.show();
+            if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
+            alertDialog = new AWalletAlertDialog(this, R.drawable.ic_warning);
+            alertDialog.setTitle(R.string.title_ens_lookup_warning);
+            alertDialog.setMessage(R.string.message_ens_node_not_sync);
+            alertDialog.setButtonText(R.string.action_cancel);
+            alertDialog.setButtonListener( v -> alertDialog.dismiss());
+            alertDialog.setSecondaryButtonText(R.string.ignore);
+            alertDialog.setSecondaryButtonListener( v -> {
+                addressInput.setEnsHandlerNodeSyncFlag(false);  // skip node sync check
+                // re enter current input to resolve again
+                String currentInput = addressInput.getEditText().getText().toString();
+                addressInput.getEditText().setText("");
+                addressInput.getEditText().setText(currentInput);
+                addressInput.getEditText().setSelection(currentInput.length());
+                alertDialog.dismiss();
+            });
+            alertDialog.show();
         }
         catch (Exception e)
         {
             Timber.e(e);
-        }
-
-    }
-
-    @Override
-    public void buttonClick(String action, int id)
-    {
-        Timber.d("buttonClick: ");
-        if (id == R.string.action_cancel)
-        {
-            confirmationDialog.dismiss();
-        }
-        else if (id == R.string.ignore)
-        {
-            addressInput.setEnsHandlerNodeSyncFlag(false);  // skip node sync check
-            // re enter current input to resolve again
-            String currentInput = addressInput.getEditText().getText().toString();
-            addressInput.getEditText().setText("");
-            addressInput.getEditText().setText(currentInput);
-            addressInput.getEditText().setSelection(currentInput.length());
-            confirmationDialog.dismiss();
         }
     }
 }

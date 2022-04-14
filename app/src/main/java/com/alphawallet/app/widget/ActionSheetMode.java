@@ -14,5 +14,4 @@ public enum ActionSheetMode
     CANCEL_TRANSACTION,
     MESSAGE,
     WALLET_CONNECT_REQUEST,
-    MESSAGE2
 }

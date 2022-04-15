@@ -41,9 +41,9 @@ public abstract class BaseE2ETest
         // Implies the use of ActivityScenario, instead of ActivityScenarioRule or ActivityTestRule
         activityScenario = ActivityScenario.launch(SplashActivity.class);
         activityScenario.onActivity(activity -> {
-            SnapshotUtil.take("before-test-" + System.currentTimeMillis());
+            SnapshotUtil.take("before-close");
             activity.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-            SnapshotUtil.take("after-test-" + System.currentTimeMillis());
+            SnapshotUtil.take("after-close");
         });
     }
 

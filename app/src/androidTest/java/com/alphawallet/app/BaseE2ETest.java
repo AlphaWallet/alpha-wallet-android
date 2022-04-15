@@ -11,6 +11,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.util.CustomFailureHandler;
+import com.alphawallet.app.util.SnapshotUtil;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,7 +38,9 @@ public abstract class BaseE2ETest
     public void setUp() {
         // Implies the use of ActivityScenario, instead of ActivityScenarioRule or ActivityTestRule
         ActivityScenario.launch(SplashActivity.class).onActivity(activity -> {
+            SnapshotUtil.take("before-test-" + System.currentTimeMillis());
             activity.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+            SnapshotUtil.take("after-test-" + System.currentTimeMillis());
         });
     }
 }

@@ -130,6 +130,7 @@ public class Steps
     }
 
     public static void gotoSettingsPage() {
+        SnapshotUtil.take("before-gotoSettingsPage");
         onView(withId(R.id.nav_settings_text)).perform(ViewActions.click());
     }
 

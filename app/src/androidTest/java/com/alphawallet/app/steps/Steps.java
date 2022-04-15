@@ -130,7 +130,7 @@ public class Steps
     }
 
     public static void gotoSettingsPage() {
-        click(withId(R.id.nav_settings_text));
+        onView(withId(R.id.nav_settings_text)).perform(ViewActions.click());
     }
 
     private static void toggleSwitch(int id) {

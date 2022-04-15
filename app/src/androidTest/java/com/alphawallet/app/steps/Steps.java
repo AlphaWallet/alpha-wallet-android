@@ -58,7 +58,7 @@ public class Steps
 
     public static void navigateToBrowser()
     {
-        click(withId(R.id.nav_browser_text));
+        onView(withId(R.id.nav_browser_text)).perform(ViewActions.click());
     }
 
     public static void selectTestNet()

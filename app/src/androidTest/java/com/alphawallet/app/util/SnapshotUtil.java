@@ -1,5 +1,6 @@
 package com.alphawallet.app.util;
 
+import android.os.Build;
 import android.os.Environment;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -15,6 +16,6 @@ public class SnapshotUtil {
         }
 
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-        device.takeScreenshot(new File(path, testName + ".png"));
+        device.takeScreenshot(new File(path, testName + "." + Build.VERSION.SDK_INT + ".png"));
     }
 }

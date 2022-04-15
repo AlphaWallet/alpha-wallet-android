@@ -254,7 +254,7 @@ public class AWWalletConnectClient implements WalletConnectClient.WalletDelegate
         }
         catch (Exception e)
         {
-            Timber.e(e);
+            Timber.tag("seaborn").e(e);
         }
     }
 

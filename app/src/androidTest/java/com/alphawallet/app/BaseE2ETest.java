@@ -28,6 +28,7 @@ public abstract class BaseE2ETest
     public TestRule watcher = new TestWatcher() {
         protected void starting(Description description) {
             setFailureHandler(new CustomFailureHandler(description.getMethodName(), InstrumentationRegistry.getInstrumentation().getTargetContext()));
+            SnapshotUtil.SNAPSHOT_DIR = description.getMethodName();
         }
     };
     private ActivityScenario<SplashActivity> activityScenario;

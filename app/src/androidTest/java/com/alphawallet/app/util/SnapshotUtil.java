@@ -9,8 +9,9 @@ import androidx.test.uiautomator.UiDevice;
 import java.io.File;
 
 public class SnapshotUtil {
+    public static String SNAPSHOT_DIR = "";
     public static void take(String testName) {
-        File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+        File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath() + "/" + SNAPSHOT_DIR);
         if (!path.exists()) {
             path.mkdirs();
         }

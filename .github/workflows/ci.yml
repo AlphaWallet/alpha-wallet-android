@@ -33,7 +33,7 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v3
         with:
-          name: e2e-tests-results
+          name: e2e-tests-result-${{matrix.api-level}}
           path: |
             output/
             app/build/**/logcat-*.txt

@@ -840,7 +840,16 @@ public class Utils {
         } catch (Exception ex) {
             Timber.tag("READ_JS_TAG").d(ex, "Ex");
         }
-        return new String(buffer);
+
+        try
+        {
+            return new String(buffer);
+        }
+        catch (Exception e)
+        {
+            Timber.tag("READ_JS_TAG").d(e, "Ex");
+        }
+        return "";
     }
 
     public static long timeUntil(long eventInMillis)

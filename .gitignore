@@ -70,3 +70,4 @@ gen-external-apklibs
 
 fastlane/.google-play-key.json
 DCIM/
+.project

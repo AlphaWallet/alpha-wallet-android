@@ -31,7 +31,9 @@ jobs:
 
       - name: Collect E2E tests results
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: e2e-tests-results
-          path: output/
+          path: |
+            output/
+            app/build/**/logcat-*.txt

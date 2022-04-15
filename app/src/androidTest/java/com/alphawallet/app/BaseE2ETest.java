@@ -13,6 +13,7 @@ import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.util.CustomFailureHandler;
 import com.alphawallet.app.util.SnapshotUtil;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
@@ -29,6 +30,7 @@ public abstract class BaseE2ETest
             setFailureHandler(new CustomFailureHandler(description.getMethodName(), InstrumentationRegistry.getInstrumentation().getTargetContext()));
         }
     };
+    private ActivityScenario<SplashActivity> activityScenario;
 
 //    @Rule
 //    public ActivityScenarioRule<SplashActivity> activityScenarioRule
@@ -37,10 +39,17 @@ public abstract class BaseE2ETest
     @Before
     public void setUp() {
         // Implies the use of ActivityScenario, instead of ActivityScenarioRule or ActivityTestRule
-        ActivityScenario.launch(SplashActivity.class).onActivity(activity -> {
+        activityScenario = ActivityScenario.launch(SplashActivity.class);
+        activityScenario.onActivity(activity -> {
             SnapshotUtil.take("before-test-" + System.currentTimeMillis());
             activity.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
             SnapshotUtil.take("after-test-" + System.currentTimeMillis());
         });
+    }
+
+    @After
+    public void tearDown()
+    {
+        activityScenario.close();
     }
 }

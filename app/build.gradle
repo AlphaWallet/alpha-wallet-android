@@ -138,6 +138,9 @@ android {
     kotlinOptions {
         jvmTarget = '11'
     }
+    dexOptions {
+        javaMaxHeapSize = "4g"
+    }
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"

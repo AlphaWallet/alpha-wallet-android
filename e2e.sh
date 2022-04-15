@@ -20,7 +20,8 @@ adb logcat >> output/emulator.log &
 
 ./gradlew :app:uninstallAll :app:connectedNoAnalyticsDebugAndroidTest -x lint -PdisablePreDex
 
-cp app/build/**/logcat-*.txt output
+ls
+cp **/logcat-*.txt output
 
 if [ "$?" != "0" ]; then
   adb pull /storage/emulated/0/DCIM/ output

@@ -82,7 +82,14 @@ public class App extends Application
             }
         }
 
-        awWalletConnectClient.init(this);
+        try
+        {
+            awWalletConnectClient.init(this);
+        }
+        catch (Exception e)
+        {
+            Timber.tag("WalletConnect").e(e);
+        }
 
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks()
         {

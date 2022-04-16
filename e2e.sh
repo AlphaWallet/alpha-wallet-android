@@ -7,7 +7,7 @@ adb shell settings put global animator_duration_scale 0.0
 
 # Sometimes Android Espresso performs longClick instead of click
 # https://stackoverflow.com/questions/32330671/android-espresso-performs-longclick-instead-of-click
-adb shell settings put secure long_press_timeout 1500
+adb shell settings put secure long_press_timeout 15000
 
 rm -rf output
 mkdir output

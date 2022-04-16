@@ -843,6 +843,7 @@ public class Utils {
 
         try
         {
+            Timber.tag("READ_JS_TAG").d("HeapSize:%s", Runtime.getRuntime().freeMemory());
             return new String(buffer);
         }
         catch (Exception e)

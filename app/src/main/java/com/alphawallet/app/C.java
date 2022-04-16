@@ -52,6 +52,8 @@ public abstract class C {
     public static final String KLAYTN_BAOBAB_NAME = "Klaytn Baobab (Test)";
     public static final String IOTEX_NAME = "IoTeX";
     public static final String IOTEX_TESTNET_NAME = "IoTeX (Test)";
+    public static final String AURORA_MAINNET_NAME = "Aurora";
+    public static final String AURORA_TESTNET_NAME = "Aurora (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -211,6 +213,7 @@ public abstract class C {
     public static final int ETHER_DECIMALS = 18;
     public static final long GAS_LIMIT_MAX =          4712380L;  //Max block gas for most chains
     public static final long GAS_LIMIT_MAX_KLAYTN = 100000000L;  //Klaytn gas limit, see https://docs.klaytn.com/klaytn/design/computation/computation-cost
+    public static final long GAS_LIMIT_MAX_AURORA = 6721975L;
 
     //FOR DEMOS ETC
     public static final boolean SHOW_NEW_ACCOUNT_PROMPT = false;   //this will switch off the splash screen 'please make a key' message

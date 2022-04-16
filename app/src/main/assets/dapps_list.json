@@ -77,5 +77,6 @@
   {"name": "NAOS Finance", "description": "A DeFi lending protocol allowing lenders and SME borrowers to facilitate permissionless and borderless loaning/borrowing transactions", "url": "https://naos.finance", "category": "Finance"},
   {"name": "DASLA", "description": "A DAS (Decentralized Account System) account registration tool.", "url": "https://das.la", "category": "Tool"},
   {"name": ".bit (Previously DAS)", "description": "Your decentralized identity for Web3.0 life", "url": "https://did.id/", "category": "Tool"},
-  {"name": "NFTSCAN", "description": "NFT Explorer.", "url": "https://nftscan.com/", "category": "Tool"}
+  {"name": "NFTSCAN", "description": "NFT Explorer.", "url": "https://nftscan.com/", "category": "Tool"},
+  {"name": "Swapzone", "description": "Swapzone is a custody-free cryptocurrency exchange aggregator with no registration needed.", "url": "https://swapzone.io/", "category": "Exchange"}
 ]

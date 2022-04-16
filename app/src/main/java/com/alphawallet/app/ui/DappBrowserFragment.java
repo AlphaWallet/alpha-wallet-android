@@ -11,7 +11,7 @@ import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
 import static com.alphawallet.app.util.Utils.isValidUrl;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+import static org.web3j.protocol.core.methods.request.Transaction.createFunctionCallTransaction;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -610,7 +610,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private void setupAddressBar()
     {
         adapter = new DappBrowserSuggestionsAdapter(
-                getContext(),
+                requireContext(),
                 viewModel.getDappsMasterList(getContext()),
                 this::onItemClick
         );
@@ -967,7 +967,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         Intent bIntent = new Intent(getContext(), WalletConnectService.class);
         bIntent.setAction(String.valueOf(WalletConnectActions.CLOSE.ordinal()));
         bIntent.putExtra("session", sessionId);
-        getContext().startService(bIntent);
+        requireActivity().startService(bIntent);
         reloadPage();
     }
 
@@ -975,7 +975,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         handler.post(() -> {
             if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
-            resultDialog = new AWalletAlertDialog(getContext());
+            resultDialog = new AWalletAlertDialog(requireContext());
             resultDialog.setIcon(WARNING);
             resultDialog.setTitle(R.string.title_wallet_connect);
             resultDialog.setMessage(getString(R.string.unsupported_walletconnect));
@@ -1216,7 +1216,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             Web3j web3j = TokenRepository.getWeb3jService(activeNetwork.chainId);
             //construct call
             org.web3j.protocol.core.methods.request.Transaction transaction
-                    = createEthCallTransaction(wallet.address, call.to.toString(), call.payload);
+                    = createFunctionCallTransaction(wallet.address, null, null, call.gasLimit, call.to.toString(), call.value, call.payload);
             return web3j.ethCall(transaction, call.blockParam).send();
         }).map(EthCall::getValue)
                 .subscribeOn(Schedulers.io())
@@ -1758,7 +1758,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
             addressRecovered = "0x" + Keys.getAddress(recoveredKey);
-            Timber.d("Recovered: " + addressRecovered);
+            Timber.d("Recovered: %s", addressRecovered);
         }
         catch (SignatureException e)
         {

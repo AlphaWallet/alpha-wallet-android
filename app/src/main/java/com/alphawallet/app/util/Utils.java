@@ -925,6 +925,27 @@ public class Utils {
         }
     }
 
+    public static BigInteger stringToBigInteger(String value)
+    {
+        if (TextUtils.isEmpty(value)) return BigInteger.ZERO;
+        try
+        {
+            if (Numeric.containsHexPrefix(value))
+            {
+                return Numeric.toBigInt(value);
+            }
+            else
+            {
+                return new BigInteger(value);
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            Timber.e(e);
+            return BigInteger.ZERO;
+        }
+    }
+
     public static boolean stillAvailable(Context context)
     {
         if (context == null)

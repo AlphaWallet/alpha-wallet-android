@@ -4,7 +4,7 @@
     android:viewportHeight="32" xmlns:android="http://schemas.android.com/apk/res/android">
     <path
         android:pathData="M16,16m-16,0a16,16 0,1 1,32 0a16,16 0,1 1,-32 0"
-        android:fillColor="#292929"/>
+        android:fillColor="#242424"/>
     <group android:scaleX="0.15" android:scaleY="0.15" android:translateX="1.5" android:translateY="8.3">
         <path android:fillColor="#FFFFFF" android:pathData="M179,35.45l13.54,23.43 -71.3,41.17S77.6,126.44 46.21,72l22.2,-12.82s14.42,31.89 39.43,17.41S179,35.45 179,35.45Z"/>
         <path android:fillColor="#FFFFFF" android:pathData="M13.54,71.87 L0,48.44l72.82,-42s43.66,-26.39 75.05,28L125.66,47.23S111.24,15.34 86.23,29.82 13.54,71.87 13.54,71.87Z"/>

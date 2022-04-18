@@ -47,6 +47,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.jetbrains.annotations.NotNull;
+import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -227,7 +228,7 @@ public class WalletViewModel extends BaseViewModel
         actionsView.setOnCopyWalletAddressClickListener(v -> {
             dialog.dismiss();
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText(KEY_ADDRESS, getWalletAddr());
+            ClipData clip = ClipData.newPlainText(KEY_ADDRESS, Keys.toChecksumAddress(getWalletAddr()));
             if (clipboard != null) {
                 clipboard.setPrimaryClip(clip);
             }

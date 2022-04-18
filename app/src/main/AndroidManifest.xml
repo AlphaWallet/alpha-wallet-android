@@ -24,7 +24,7 @@
         android:name=".App"
         android:allowBackup="false"
         android:extractNativeLibs="true"
-        android:hardwareAccelerated="true"
+        android:hardwareAccelerated="false"
         android:largeHeap="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

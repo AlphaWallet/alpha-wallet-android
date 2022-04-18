@@ -338,7 +338,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     MILKOMEDA_C1_RPC,
                     "https://explorer-mainnet-cardano-evm.c1.milkomeda.com/tx/", MILKOMEDA_C1_ID, "",
                     "https://explorer-mainnet-cardano-evm.c1.milkomeda.com/api?"));
-            put(MILKOMEDA_C1_TEST_ID, new NetworkInfo(C.MILKOMEDA_TESTNET_NAME, C.MILKOMEDA_SYMBOL,
+            put(MILKOMEDA_C1_TEST_ID, new NetworkInfo(C.MILKOMEDA_TESTNET_NAME, C.MILKOMEDA_TEST_SYMBOL,
                     MILKOMEDA_C1_TEST_RPC,
                     "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/", MILKOMEDA_C1_TEST_ID, "",
                     "https://explorer-devnet-cardano-evm.c1.milkomeda.com/api?"));

@@ -86,6 +86,7 @@ public abstract class C {
     public static final String KLAYTN_SYMBOL = "KLAY";
     public static final String IOTEX_SYMBOL = "IOTX";
     public static final String MILKOMEDA_SYMBOL = "milkADA";
+    public static final String MILKOMEDA_TEST_SYMBOL = "milktADA";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 

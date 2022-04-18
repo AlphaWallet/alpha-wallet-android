@@ -153,9 +153,9 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
             put(AURORA_TESTNET_ID, new NetworkInfo("Aurora (Test)","ETH", AURORA_TESTNET_RPC_URL, "https://testnet.aurorascan.dev/tx/",
                     AURORA_TESTNET_ID, false));
 
-            put(MILKOMEDA_C1_ID, new NetworkInfo("Milkomeda Cardano","milkADA", KLAYTN_RPC, "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/",
+            put(MILKOMEDA_C1_ID, new NetworkInfo("Milkomeda Cardano","milkADA", MILKOMEDA_C1_RPC, "https://explorer-mainnet-cardano-evm.c1.milkomeda.com/tx/",
                     MILKOMEDA_C1_ID, false));
-            put(MILKOMEDA_C1_TEST_ID, new NetworkInfo("Milkomeda Cardano (Test)","milkADA", KLAYTN_BAOBAB_RPC, "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/",
+            put(MILKOMEDA_C1_TEST_ID, new NetworkInfo("Milkomeda Cardano (Test)","milktADA", MILKOMEDA_C1_TEST_RPC, "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/",
                     MILKOMEDA_C1_TEST_ID, false));
         }
     };

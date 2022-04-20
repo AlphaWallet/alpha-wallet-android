@@ -18,6 +18,7 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 
 import org.web3j.abi.EventEncoder;
@@ -63,7 +64,8 @@ public class ERC721Token extends Token
 {
     private final Map<BigInteger, NFTAsset> tokenBalanceAssets;
 
-    public ERC721Token(TokenInfo tokenInfo, Map<BigInteger, NFTAsset> balanceList, BigDecimal balance, long blancaTime, String networkName, ContractType type) {
+    public ERC721Token(TokenInfo tokenInfo, Map<BigInteger, NFTAsset> balanceList, BigDecimal balance, long blancaTime, String networkName, ContractType type)
+    {
         super(tokenInfo, balance, blancaTime, networkName, type);
         if (balanceList != null)
         {
@@ -78,12 +80,14 @@ public class ERC721Token extends Token
     }
 
     @Override
-    public Map<BigInteger, NFTAsset> getTokenAssets() {
+    public Map<BigInteger, NFTAsset> getTokenAssets()
+    {
         return tokenBalanceAssets;
     }
 
     @Override
-    public void addAssetToTokenBalanceAssets(BigInteger tokenId, NFTAsset asset) {
+    public void addAssetToTokenBalanceAssets(BigInteger tokenId, NFTAsset asset)
+    {
         tokenBalanceAssets.put(tokenId, asset);
     }
 
@@ -108,14 +112,21 @@ public class ERC721Token extends Token
     @Override
     public String getStringBalance()
     {
-        if (balance.compareTo(BigDecimal.ZERO) > 0) { return balance.toString(); }
-        else { return "0"; }
+        if (balance.compareTo(BigDecimal.ZERO) > 0)
+        {
+            return balance.toString();
+        }
+        else
+        {
+            return "0";
+        }
     }
 
     @Override
     public byte[] getTransferBytes(String to, ArrayList<Pair<BigInteger, NFTAsset>> transferData) throws NumberFormatException
     {
-        if (transferData == null || transferData.size() != 1) return Numeric.hexStringToByteArray("0x");
+        if (transferData == null || transferData.size() != 1)
+            return Numeric.hexStringToByteArray("0x");
         Function txFunc = getTransferFunction(to, new ArrayList<>(Collections.singleton(transferData.get(0).first)));
         String encodedFunction = FunctionEncoder.encode(txFunc);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
@@ -129,9 +140,9 @@ public class ERC721Token extends Token
             throw new NumberFormatException("ERC721Ticket can't handle batched transfers");
         }
 
-        Function               function    = null;
-        List<Type>             params;
-        BigInteger             tokenIdBI   = tokenIds.get(0);
+        Function function = null;
+        List<Type> params;
+        BigInteger tokenIdBI = tokenIds.get(0);
         List<TypeReference<?>> returnTypes = Collections.emptyList();
         if (tokenUsesLegacyTransfer())
         {
@@ -166,7 +177,8 @@ public class ERC721Token extends Token
     }
 
     @Override
-    public boolean isToken() {
+    public boolean isToken()
+    {
         return false;
     }
 
@@ -188,12 +200,20 @@ public class ERC721Token extends Token
         realmToken.setBalance(balance.toString());
     }
 
-    public boolean isERC721() { return true; }
-    public boolean isNonFungible() { return true; }
+    public boolean isERC721()
+    {
+        return true;
+    }
+
+    public boolean isNonFungible()
+    {
+        return true;
+    }
 
     /**
      * This is a list of legacy contracts which are known to use the old ERC721 source,
      * which only had 'transfer' as the transfer function.
+     *
      * @return
      */
     private boolean tokenUsesLegacyTransfer()
@@ -221,7 +241,8 @@ public class ERC721Token extends Token
     @Override
     public boolean checkRealmBalanceChange(RealmToken realmToken)
     {
-        if (contractType == null || contractType.ordinal() != realmToken.getInterfaceSpec()) return true;
+        if (contractType == null || contractType.ordinal() != realmToken.getInterfaceSpec())
+            return true;
         String currentState = realmToken.getBalance();
         if (currentState == null) return true;
         if (lastTxTime > realmToken.getLastTxTime()) return true;
@@ -275,9 +296,15 @@ public class ERC721Token extends Token
     {
         //event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
         List<TypeReference<?>> paramList = new ArrayList<>();
-        paramList.add(new TypeReference<Address>(true) {});
-        paramList.add(new TypeReference<Address>(true) {});
-        paramList.add(new TypeReference<Uint256>(true) {});
+        paramList.add(new TypeReference<Address>(true)
+        {
+        });
+        paramList.add(new TypeReference<Address>(true)
+        {
+        });
+        paramList.add(new TypeReference<Uint256>(true)
+        {
+        });
 
         return new Event("Transfer", paramList);
     }
@@ -286,9 +313,9 @@ public class ERC721Token extends Token
      * Uses both events and balance call. Each call to updateBalance uses 3 Node calls:
      * 1. Get new Transfer events since last call
      * 2.
-     *
+     * <p>
      * Once we have the current balance for potential tokens the database is updated to reflect the current status
-     *
+     * <p>
      * Note that this function is used even for contracts covered by OpenSea: This is because we could be looking at
      * a contract 'join' between successive opensea reads. With accounts with huge quantity of NFT, this happens a lot
      *
@@ -309,7 +336,8 @@ public class ERC721Token extends Token
 
             final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
 
-            HashSet<BigInteger> eventIds = processTransferEvents(web3j, startBlock, endBlock);
+            HashSet<BigInteger> eventIds = processTransferEvents(web3j, startBlock, endBlock, realm);
+            Timber.d("processTransferEvents: tokenIds: %s", eventIds);
             updateEventReads(realm, sync.eventReadStartBlock.longValue(), sync.upwardSync
                     ? sync.eventReadEndBlock.longValue() : 0L);
 
@@ -372,14 +400,30 @@ public class ERC721Token extends Token
         });
     }
 
-    private HashSet<BigInteger> processTransferEvents(Web3j web3j, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) throws IOException
+    private HashSet<BigInteger> processTransferEvents(Web3j web3j, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock, Realm realm) throws IOException
     {
+        Timber.d("processTransferEvents: startBlock: %s, endBlock: %s", startBlock.getValue(), endBlock.getValue());
+        HashSet<BigInteger> tokenIds = new HashSet<>();
+        HashSet<String> txHashes = new HashSet<>();
         final Event event = getTransferEvents();
-        EthFilter filter = getTransferFilter(event, startBlock, endBlock);
-        EthLog receiveLogs = web3j.ethGetLogs(filter).send();
+
+        EthFilter incomingFilter = getIncomingTransferFilter(event, startBlock, endBlock);
+        EthLog receiveLogs = web3j.ethGetLogs(incomingFilter).send();
+        Timber.d("processTransferEvents: incoming: ");
+        tokenIds.addAll(processLogsAndStoreEvents(startBlock, receiveLogs, event, txHashes, realm));
+
+        EthFilter outgoingFilter = getOutgoingTransferFilter(event, startBlock, endBlock);
+        EthLog sentLogs = web3j.ethGetLogs(outgoingFilter).send();
+        Timber.d("processTransferEvents: outgoing: ");
+        tokenIds.addAll(processLogsAndStoreEvents(startBlock, sentLogs, event, txHashes, realm));
+
+        return tokenIds;
+    }
+
+    private HashSet<BigInteger> processLogsAndStoreEvents(DefaultBlockParameter startBlock, EthLog receiveLogs, Event event, HashSet<String> txHashes, Realm realm)
+    {
         HashSet<BigInteger> tokenIds = new HashSet<>();
         BigInteger lastEventBlockRead = Numeric.toBigInt(startBlock.getValue());
-
         for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())
         {
             String block = ((Log) ethLog.get()).getBlockNumberRaw();
@@ -389,11 +433,22 @@ public class ERC721Token extends Token
             final EventValues eventValues = staticExtractEventParameters(event, (Log) ethLog.get());
             BigInteger _id = new BigInteger(eventValues.getIndexedValues().get(2).getValue().toString());
             tokenIds.add(_id);
+            Timber.d("processLogsAndStoreEvents: tokenId: %s", _id);
 
+            // generating transfer record and storing it
+            String from = eventValues.getIndexedValues().get(0).getValue().toString();  // from address
+            String to = eventValues.getIndexedValues().get(1).getValue().toString();    // to address
+            String activityName = getActivityName(from, to);
+            String valueList = generateValueListForTransferEvent(to, from, _id.toString());
+            String txHash = ((Log) ethLog.get()).getTransactionHash();
+            txHashes.add(txHash);
+            realm.executeTransaction(r -> {
+                storeTransferData(realm, txHash, valueList, activityName, getAddress());
+            });
             if (blockNumber.compareTo(lastEventBlockRead) > 0)
                 lastEventBlockRead = blockNumber;
-        }
 
+        }
         return tokenIds;
     }
 
@@ -412,8 +467,9 @@ public class ERC721Token extends Token
         return heldTokens;
     }
 
-    private EthFilter getTransferFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
+    private EthFilter getIncomingTransferFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
     {
+        Timber.d("getIncomingTransferFilter: ");
         final org.web3j.protocol.core.methods.request.EthFilter filter =
                 new org.web3j.protocol.core.methods.request.EthFilter(
                         startBlock,
@@ -423,6 +479,22 @@ public class ERC721Token extends Token
 
         filter.addSingleTopic(null);
         filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(getWallet()))); //listen for events 'to' our wallet, we can check balance at end
+        filter.addSingleTopic(null);
+        return filter;
+    }
+
+    private EthFilter getOutgoingTransferFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
+    {
+        Timber.d("getOutgoingTransferFilter: ");
+        final org.web3j.protocol.core.methods.request.EthFilter filter =
+                new org.web3j.protocol.core.methods.request.EthFilter(
+                        startBlock,
+                        endBlock,
+                        tokenInfo.address) // retort contract address
+                        .addSingleTopic(EventEncoder.encode(event));// commit event format
+
+        filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(getWallet()))); //listen for events 'from' our wallet
+        filter.addSingleTopic(null);
         filter.addSingleTopic(null);
         return filter;
     }
@@ -461,6 +533,7 @@ public class ERC721Token extends Token
 
     /**
      * Returns false if the Asset balance appears to be entries with only TokenId - indicating an ERC721Ticket
+     *
      * @return
      */
     @Override
@@ -548,6 +621,7 @@ public class ERC721Token extends Token
      * From where this is called, the current assets are those loaded from opensea call
      * If there is a token that previously was there, but now isn't, it could be because
      * the opensea call was split or that the owner transferred the token
+     *
      * @param assetMap Loaded Assets from Realm
      * @return map of currently known live assets
      */
@@ -637,16 +711,76 @@ public class ERC721Token extends Token
         return null;
     }
 
-    private static Function ownerOf(BigInteger token) {
+    private static Function ownerOf(BigInteger token)
+    {
         return new Function(
                 "ownerOf",
                 Collections.singletonList(new Uint256(token)),
-                Collections.singletonList(new TypeReference<Address>() {}));
+                Collections.singletonList(new TypeReference<Address>()
+                {
+                }));
     }
 
     @Override
     public List<Integer> getStandardFunctions()
     {
         return Arrays.asList(R.string.action_transfer);
+    }
+
+    private String getActivityName(String fromAddress, String toAddress)
+    {
+        String activityName = "";
+        if (fromAddress.equalsIgnoreCase("0x0000000000000000000000000000000000000000"))
+        {
+            // activity = MINT
+            activityName = "mint";
+            Timber.d("getActivityName: Activity: mint");
+        }
+        else if (toAddress.equalsIgnoreCase(getWallet()))
+        {
+            // activity = RECEIVE
+            activityName = "received";
+            Timber.d("getActivityName: Activity: received");
+        }
+        else if (fromAddress.equalsIgnoreCase(getWallet()))
+        {
+            // activity = SEND
+            activityName = "sent";
+            Timber.d("getActivityName: Activity: sent");
+        }
+        return activityName;
+    }
+
+    private String generateValueListForTransferEvent(String to, String from, String tokenID)
+    {
+        String TO_TOKEN = "[TO_ADDRESS]";
+        String FROM_TOKEN = "[FROM_ADDRESS]";
+        String AMOUNT_TOKEN = "[AMOUNT_TOKEN]";
+        String VALUES = "from,address," + FROM_TOKEN + ",to,address," + TO_TOKEN + ",amount,uint256," + AMOUNT_TOKEN;
+
+        return VALUES.replace(TO_TOKEN, to).replace(FROM_TOKEN, from).replace(AMOUNT_TOKEN, tokenID);
+    }
+
+    private void storeTransferData(Realm instance, String hash, String valueList, String activityName, String tokenAddress)
+    {
+        RealmTransfer matchingEntry = instance.where(RealmTransfer.class)
+                .equalTo("hash", hash)
+                .equalTo("tokenAddress", tokenAddress)
+                .equalTo("eventName", activityName)
+                .equalTo("transferDetail", valueList)
+                .findFirst();
+
+        if (matchingEntry == null) //prevent duplicates
+        {
+            RealmTransfer realmTransfer = instance.createObject(RealmTransfer.class);
+            realmTransfer.setHash(hash);
+            realmTransfer.setTokenAddress(tokenAddress);
+            realmTransfer.setEventName(activityName);
+            realmTransfer.setTransferDetail(valueList);
+        }
+        else
+        {
+            Timber.d("storeTransferData: Prevented collision: %s", tokenAddress);
+        }
     }
 }

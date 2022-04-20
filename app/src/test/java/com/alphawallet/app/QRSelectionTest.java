@@ -36,7 +36,6 @@ import javax.inject.Inject;
 
 import io.reactivex.Single;
 import io.realm.Realm;
-import web3j.crypto.*;
 
 public class QRSelectionTest
 {

@@ -171,6 +171,10 @@ dependencies {
 
     // Ethereum client
     //implementation "org.web3j:core:4.8.8-android"
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
+    implementation 'org.slf4j:slf4j-api:2.0.0-alpha7'
 
     // Http client
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
@@ -212,10 +216,6 @@ dependencies {
 
     // dagger-hilt
     implementation "com.google.dagger:hilt-android:2.40.5"
-    implementation files('app/libs/coreandroid.jar')
-    implementation files('app/libs/abiandroid.jar')
-    implementation files('app/libs/utilsandroid.jar')
-    //implementation files('app/libs/crypto-4.8.8-android.jar')
     annotationProcessor "com.google.dagger:hilt-compiler:2.40.5"
 
     // WebKit - for WebView Dark Mode

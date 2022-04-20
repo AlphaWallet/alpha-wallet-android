@@ -11,6 +11,10 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java-library'
 
 dependencies {
+    implementation files('..\\app\\libs\\abi-4.8.8-android.jar')
+    implementation files('..\\app\\libs\\core-4.8.8-android.jar')
+    implementation files('..\\app\\libs\\crypto-4.8.8-android.jar')
+    implementation files('..\\app\\libs\\utils-4.8.8-android.jar')
     testImplementation 'junit:junit:4.12'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.62'
     // https://mvnrepository.com/artifact/com.github.cliftonlabs/json-simple

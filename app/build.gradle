@@ -78,7 +78,10 @@ android {
             abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
         }
         packagingOptions {
-
+            pickFirst 'META-INF/LICENSE.md'
+            pickFirst 'META-INF/NOTICE.md'
+            pickFirst 'META-INF/LICENSE-notice.md'
+            pickFirst 'solidity/ens/build/AbstractENS.bin'
         }
 
         externalNativeBuild {
@@ -123,6 +126,14 @@ android {
     packagingOptions {
         exclude 'META-INF/NOTICE' // will not include NOTICE file
         exclude 'META-INF/LICENSE' // will not include LICENSE file
+        exclude 'META-INF/LICENSE.md'
+        exclude 'META-INF/NOTICE.md'
+        exclude 'META-INF/LICENSE-notice.md'
+        exclude 'solidity/ens/build/*.bin'
+        exclude 'solidity/ens/*.sol'
+        exclude 'solidity/ens/build/*.abi'
+        exclude 'en-mnemonic-word-list.txt'
+        exclude 'solidity/*'
     }
     lintOptions {
         baseline file("./check/lint-baseline.xml")
@@ -159,7 +170,7 @@ dependencies {
     // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
 
     // Ethereum client
-    implementation "org.web3j:core:4.8.8-android"
+    //implementation "org.web3j:core:4.8.8-android"
 
     // Http client
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
@@ -194,10 +205,17 @@ dependencies {
     // Keyboard visibility
     implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3'
 
+    //implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.2.2'
+    //implementation 'org.slf4j:slf4j-nop:1.7.25'
+
     // Dagger 2
 
     // dagger-hilt
     implementation "com.google.dagger:hilt-android:2.40.5"
+    implementation files('app/libs/coreandroid.jar')
+    implementation files('app/libs/abiandroid.jar')
+    implementation files('app/libs/utilsandroid.jar')
+    //implementation files('app/libs/crypto-4.8.8-android.jar')
     annotationProcessor "com.google.dagger:hilt-compiler:2.40.5"
 
     // WebKit - for WebView Dark Mode
@@ -246,7 +264,7 @@ dependencies {
     implementation 'com.google.android:flexbox:2.0.1'
 
     // PW
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 

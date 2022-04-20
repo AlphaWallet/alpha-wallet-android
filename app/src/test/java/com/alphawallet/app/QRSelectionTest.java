@@ -14,7 +14,6 @@ import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.interact.SignatureGenerateInteract;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.entity.RealmAuxData;
-import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.Signable;
 
@@ -37,6 +36,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Single;
 import io.realm.Realm;
+import web3j.crypto.*;
 
 public class QRSelectionTest
 {

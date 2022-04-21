@@ -30,11 +30,10 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.TokenListAdapter;
+import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.TokenManagementViewModel;
 
 import java.util.ArrayList;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
@@ -78,6 +77,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         saveButton = findViewById(R.id.btn_apply);
         search = findViewById(R.id.edit_search);
 
+        tokenList.addItemDecoration(new ListDivider(this));
         tokenList.setLayoutManager(new LinearLayoutManager(this));
 
         saveButton.setOnClickListener(v -> {

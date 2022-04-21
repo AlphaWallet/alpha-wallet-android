@@ -230,11 +230,12 @@ public class ActivityHistoryList extends LinearLayout
 
     public void onDestroy()
     {
+        stopUpdateCheck();
+        handler.removeCallbacksAndMessages(null);
         if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
         if (realm != null && !realm.isClosed()) realm.close();
-        handler.removeCallbacksAndMessages(null);
-        stopUpdateCheck();
         if (activityAdapter != null && recentTransactionsView != null) activityAdapter.onDestroy(recentTransactionsView);
+        realmUpdateQuery = null;
     }
 
     //Start update check on the database if anything is pending. Sometimes the listener doesn't pick up the change.
@@ -255,12 +256,12 @@ public class ActivityHistoryList extends LinearLayout
 
     private void checkTransactions(final Wallet wallet)
     {
-        if (realmUpdateQuery != null)
-        {
-            handler.post(() -> {
+        handler.post(() -> {
+            if (realmUpdateQuery != null && realmUpdateQuery.isValid())
+            {
                 RealmResults<RealmTransaction> rTx = realmUpdateQuery.findAll();
                 handleRealmTransactions(rTx, wallet);
-            });
-        }
+            }
+        });
     }
 }

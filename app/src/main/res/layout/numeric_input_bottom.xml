@@ -72,7 +72,7 @@
         app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
         app:layout_constraintTop_toBottomOf="@id/divider">
 
-        <Button
+        <ImageButton
             android:id="@+id/number_down"
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -90,7 +90,7 @@
             android:inputType="numberDecimal"
             tools:text="25" />
 
-        <Button
+        <ImageButton
             android:id="@+id/number_up"
             android:layout_width="32dp"
             android:layout_height="32dp"

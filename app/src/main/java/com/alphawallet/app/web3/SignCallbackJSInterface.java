@@ -1,5 +1,7 @@
 package com.alphawallet.app.web3;
 
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+
 import android.text.TextUtils;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -128,18 +130,31 @@ public class SignCallbackJSInterface
     }
 
     @JavascriptInterface
-    public void ethCall(int callbackId, String recipient, String payload) {
-        DefaultBlockParameter defaultBlockParameter;
-        if (payload.equals("undefined")) payload = "0x";
-        defaultBlockParameter = DefaultBlockParameterName.LATEST;
+    public void ethCall(int callbackId, String recipient) {
+        try
+        {
+            JSONObject json = new JSONObject(recipient);
+            DefaultBlockParameter defaultBlockParameter;
+            String to = json.has("to") ? json.getString("to") : ZERO_ADDRESS;
+            String payload = json.has("data") ? json.getString("data") : "0x";
+            String value = json.has("value") ? json.getString("value") : null;
+            String gasLimit = json.has("gas") ? json.getString("gas") : null;
+            defaultBlockParameter = DefaultBlockParameterName.LATEST; //TODO: Take block param from query if present
 
-        Web3Call call = new Web3Call(
-                new Address(recipient),
+            Web3Call call = new Web3Call(
+                new Address(to),
                 defaultBlockParameter,
                 payload,
+                value,
+                gasLimit,
                 callbackId);
 
-        webView.post(() -> onEthCallListener.onEthCall(call));
+            webView.post(() -> onEthCallListener.onEthCall(call));
+        }
+        catch (Exception e)
+        {
+            //
+        }
     }
 
     @JavascriptInterface

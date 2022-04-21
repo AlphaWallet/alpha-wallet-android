@@ -65,7 +65,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private Wallet wallet;
     private BigInteger tokenId;
     private String sequenceId;
-    private LinearLayout tokenInfoLayout;
     private ActionSheetDialog confirmationDialog;
     private AWalletAlertDialog dialog;
     private NFTAsset asset;
@@ -73,13 +72,24 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private NFTAttributeLayout nftAttributeLayout;
     private TextView tokenDescription;
     private ActionMenuItemView refreshMenu;
-    private Animation rotation;
+    private ProgressBar progressBar;
     private TokenInfoCategoryView detailsLabel;
     private TokenInfoCategoryView descriptionLabel;
-    private ProgressBar progressBar;
+    private TokenInfoView tivTokenId;
+    private TokenInfoView tivNetwork;
+    private TokenInfoView tivContractAddress;
+    private TokenInfoView tivBalance;
+    private TokenInfoView tivName;
+    private TokenInfoView tivExternalLink;
+    private TokenInfoView tivCreator;
+    private TokenInfoView tivTokenStandard;
+    private TokenInfoView tivTotalSupply;
+    private TokenInfoView tivNumOwners;
+    private TokenInfoView tivOwner;
+    private TokenInfoView tivLastSale;
+    private Animation rotation;
     private ActivityResultLauncher<Intent> handleTransactionSuccess;
     private ActivityResultLauncher<Intent> getGasSettings;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -165,13 +175,24 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void initViews()
     {
-        tokenInfoLayout = findViewById(R.id.layout_token_info);
         tokenImage = findViewById(R.id.asset_image);
         nftAttributeLayout = findViewById(R.id.attributes);
         tokenDescription = findViewById(R.id.token_description);
         detailsLabel = findViewById(R.id.label_details);
         descriptionLabel = findViewById(R.id.label_description);
         progressBar = findViewById(R.id.progress);
+        tivTokenId = findViewById(R.id.token_id);
+        tivNetwork = findViewById(R.id.network);
+        tivContractAddress = findViewById(R.id.contract_address);
+        tivBalance = findViewById(R.id.balance);
+        tivName = findViewById(R.id.name);
+        tivExternalLink = findViewById(R.id.external_link);
+        tivCreator = findViewById(R.id.creator);
+        tivTokenStandard = findViewById(R.id.token_standard);
+        tivTotalSupply = findViewById(R.id.total_supply);
+        tivNumOwners = findViewById(R.id.num_owners);
+        tivOwner = findViewById(R.id.owner);
+        tivLastSale = findViewById(R.id.last_sale);
 
         rotation = AnimationUtils.loadAnimation(this, R.anim.rotate_refresh);
         rotation.setRepeatCount(Animation.INFINITE);
@@ -223,16 +244,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         progressBar.setVisibility(View.GONE);
     }
 
-    private void addInfoView(String elementName, String name)
-    {
-        if (!TextUtils.isEmpty(name))
-        {
-            TokenInfoView v = new TokenInfoView(this, elementName);
-            v.setValue(name);
-            tokenInfoLayout.addView(v);
-        }
-    }
-
     private void onNftAsset(NFTAsset asset)
     {
         loadAssetFromMetadata(asset);
@@ -240,27 +251,25 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void updateDefaultTokenData()
     {
-        tokenInfoLayout.removeAllViews();
-
         if (!TextUtils.isEmpty(sequenceId))
         {
-            addInfoView(getString(R.string.label_token_id), sequenceId);
+            tivTokenId.setValue(sequenceId);
         }
         else
         {
-            addInfoView(getString(R.string.label_token_id), tokenId.toString());
+            tivTokenId.setValue(tokenId.toString());
         }
 
-        addInfoView(getString(R.string.subtitle_network), token.getNetworkName());
+        tivNetwork.setValue(token.getNetworkName());
 
-        addInfoView(getString(R.string.contract_address), Utils.formatAddress(token.tokenInfo.address));
+        tivContractAddress.setValue(Utils.formatAddress(token.tokenInfo.address));
     }
 
     private void loadAssetFromMetadata(NFTAsset asset)
     {
         if (asset != null)
         {
-            updateTokenImage(asset);
+            updateTokenImage(asset.getImage());
 
             addMetaDataInfo(asset);
 
@@ -270,31 +279,20 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
-    private void updateTokenImage(NFTAsset asset)
+    private void updateTokenImage(String imageUrl)
     {
-        if (asset.isBlank())
+        if (tokenImage.shouldLoad(imageUrl))
         {
-            tokenImage.showFallbackLayout(token);
-        }
-        else
-        {
-            tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
-            tokenImage.showLoadingProgress(true);
-            tokenImage.setupTokenImage(asset);
-        }
-    }
-
-    private void updateTokenImage(OpenSeaAsset openSeaAsset)
-    {
-        if (TextUtils.isEmpty(openSeaAsset.getImageUrl()))
-        {
-            tokenImage.showFallbackLayout(token);
-        }
-        else
-        {
-            tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
-            tokenImage.showLoadingProgress(true);
-            tokenImage.setupTokenImage(openSeaAsset);
+            if (TextUtils.isEmpty(imageUrl))
+            {
+                tokenImage.showFallbackLayout(token);
+            }
+            else
+            {
+                tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
+                tokenImage.showLoadingProgress(true);
+                tokenImage.setupTokenImage(asset);
+            }
         }
     }
 
@@ -304,17 +302,17 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         if (asset.isAssetMultiple())
         {
-            addInfoView(getString(R.string.balance), asset.getBalance().toString());
+            tivBalance.setValue(asset.getBalance().toString());
         }
 
         String assetName = asset.getName();
         if (assetName != null)
         {
-            addInfoView(getString(R.string.hint_contract_name), assetName);
+            tivName.setValue(assetName);
             setTitle(assetName);
         }
 
-        addInfoView(getString(R.string.label_external_link), asset.getExternalLink());
+        tivExternalLink.setValue(asset.getExternalLink());
 
         updateDescription(asset.getDescription());
 
@@ -334,30 +332,31 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         updateDefaultTokenData();
 
-        updateTokenImage(openSeaAsset);
+        updateTokenImage(openSeaAsset.getImageUrl());
 
-        if (!TextUtils.isEmpty(openSeaAsset.name))
+        String name = openSeaAsset.name;
+        if (!TextUtils.isEmpty(name))
         {
-            setTitle(openSeaAsset.name);
-            addInfoView(getString(R.string.hint_contract_name), openSeaAsset.name);
+            setTitle(name);
+            tivName.setValue(name);
         }
 
         if (openSeaAsset.creator != null
                 && openSeaAsset.creator.user != null)
         {
-            addInfoView(getString(R.string.asset_creator), openSeaAsset.creator.user.username);
+            tivCreator.setValue(openSeaAsset.creator.user.username);
         }
 
         if (openSeaAsset.assetContract != null)
         {
-            addInfoView(getString(R.string.asset_schema), openSeaAsset.assetContract.getSchemaName());
+            tivTokenStandard.setValue(openSeaAsset.assetContract.getSchemaName());
         }
 
         if (openSeaAsset.collection != null
                 && openSeaAsset.collection.stats != null)
         {
-            addInfoView(getString(R.string.asset_total_supply), String.valueOf(openSeaAsset.collection.stats.totalSupply));
-            addInfoView(getString(R.string.asset_number_of_owners), String.valueOf(openSeaAsset.collection.stats.numOwners));
+            tivTotalSupply.setValue(String.valueOf(openSeaAsset.collection.stats.totalSupply));
+            tivNumOwners.setValue(String.valueOf(openSeaAsset.collection.stats.numOwners));
             nftAttributeLayout.bind(token, openSeaAsset.traits, openSeaAsset.collection.stats.count);
         }
         else
@@ -368,12 +367,12 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (openSeaAsset.owner != null
                 && openSeaAsset.owner.user != null)
         {
-            addInfoView(getString(R.string.asset_owner), openSeaAsset.owner.user.username);
+            tivOwner.setValue(openSeaAsset.owner.user.username);
         }
 
-        addInfoView(getString(R.string.asset_last_sale), openSeaAsset.getLastSale());
+        tivLastSale.setValue(openSeaAsset.getLastSale());
 
-        addInfoView(getString(R.string.label_external_link), openSeaAsset.externalLink);
+        tivExternalLink.setValue(openSeaAsset.externalLink);
 
         updateDescription(openSeaAsset.description);
 

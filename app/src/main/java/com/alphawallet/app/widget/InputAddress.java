@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ENSCallback;
+import com.alphawallet.app.entity.EnsNodeNotSyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
@@ -394,6 +395,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
 
     /**
      * Wait until we have fully resolved the ENS name if required
+     *
      * @return
      */
     public void getAddress()
@@ -493,7 +495,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         int amount = getInputLength();
         if (amount > 30 && ts == standardTextSize && !noCam)
         {
-            editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize*0.85f); //shrink text size to fit
+            editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, standardTextSize * 0.85f); //shrink text size to fit
         }
         else if (amount <= 30 && ts < standardTextSize)
         {
@@ -521,4 +523,16 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
             ensHandler.checkAddress();
         }
     }
+
+    public void setEnsNodeNotSyncCallback(EnsNodeNotSyncCallback callback)
+    {
+        Timber.d("setEnsNodeNotSyncCallback: ");
+        ensHandler.setEnsNodeNotSyncCallback(callback);
+    }
+
+    public void setEnsHandlerNodeSyncFlag(boolean performSync)
+    {
+        ensHandler.performEnsSync = performSync;
+    }
+
 }

@@ -750,10 +750,10 @@ public class TokenFunctionViewModel extends BaseViewModel {
         return fetchedAsset;
     }
 
-    public void getTokenMetadata(Token token, BigInteger tokenId, NFTAsset a)
+    public void getTokenMetadata(Token token, BigInteger tokenId, NFTAsset oldAsset)
     {
         metadataDisposable = Single.fromCallable(() -> token.fetchTokenMetadata(tokenId))
-                .map(newAsset -> storeAsset(token, tokenId, newAsset, a))
+                .map(fetchedAsset -> storeAsset(token, tokenId, fetchedAsset, oldAsset))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onAssetMetadata, this::onAssetMetadataError);
@@ -769,8 +769,19 @@ public class TokenFunctionViewModel extends BaseViewModel {
         nftAsset.postValue(asset);
     }
 
+    private void loadExistingMetadata(Token token, BigInteger tokenId)
+    {
+        NFTAsset asset = token.getAssetForToken(tokenId);
+        if (asset != null && !asset.needsLoading())
+        {
+            nftAsset.postValue(asset);
+        }
+    }
+
     public void getAsset(Token token, BigInteger tokenId)
     {
+        loadExistingMetadata(token, tokenId);
+
         openseaDisposable = openseaService.getAsset(token, tokenId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -784,6 +795,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
 
     private void onAsset(String result, Token token, BigInteger tokenId)
     {
+        NFTAsset oldAsset = token.getAssetForToken(tokenId);
         boolean loadedFromApi = false;
         if (JsonUtils.isValidAsset(result))
         {
@@ -791,10 +803,20 @@ public class TokenFunctionViewModel extends BaseViewModel {
             {
                 JSONObject assetJson = new JSONObject(result);
                 OpenSeaAsset osAsset = new Gson().fromJson(assetJson.toString(), OpenSeaAsset.class);
-                if (osAsset != null && osAsset.isValid()) //check to ensure OpenSea has data
+                if (osAsset != null)
                 {
                     openSeaAsset.postValue(osAsset);
-                    loadedFromApi = true;
+
+                    if (osAsset.isValid())
+                    {
+                        // If asset does not have name, description or image, load from contract later
+                        loadedFromApi = true;
+                    }
+                    else
+                    {
+                        // Search OpenSeaAsset for name, description or image later when `NFTAsset.updateFromRaw()` is invoked
+                        oldAsset.attachOpenSeaAssetData(osAsset);
+                    }
                 }
             }
             catch (JSONException e)
@@ -810,7 +832,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
 
         if (!loadedFromApi)
         {
-            getTokenMetadata(token, tokenId, token.getAssetForToken(tokenId));
+            getTokenMetadata(token, tokenId, oldAsset);
         }
     }
 }

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -69,14 +70,14 @@ public class NotificationService
         //openAppIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         openAppIntent.setData(Uri.parse(AWSTARTUP + content));
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-                                                                openAppIntent, PendingIntent.FLAG_ONE_SHOT);
+                                                                openAppIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_alpha_notification)
                 .setColor(color)
                 .setContentTitle(title)
                 .setContentText(content)
-                .setSound(notification, 1)
+                .setSound(notification, AudioManager.STREAM_NOTIFICATION)
                 .setAutoCancel(true)
                 .setOngoing(true)
                 .setCategory(NotificationCompat.CATEGORY_EVENT)
@@ -98,7 +99,7 @@ public class NotificationService
         openAppIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-                openAppIntent, PendingIntent.FLAG_ONE_SHOT);
+                openAppIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_alpha_notification)

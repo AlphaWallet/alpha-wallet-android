@@ -25,7 +25,6 @@ if [ "$?" != "0" ]; then
   if [ "$1" != "--CI" ]; then
     open output/DCIM/*.png
   else
-    ls app/build/outputs/androidTest-results/connected/flavors/noAnalytics/
     cp app/build/outputs/androidTest-results/connected/flavors/noAnalytics/*/logcat-*.txt output
   fi
 

@@ -121,7 +121,6 @@ public class Steps
         click(withText("Change / Add Wallet"));
         Helper.wait(10);
         click(withId(R.id.action_add));
-//        SnapshotUtil.take("after-add");
         click(withId(R.id.import_account_action));
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_seed)))))).perform(replaceText(seedPhrase));
         Helper.wait(2); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis

@@ -1,11 +1,12 @@
 package com.alphawallet.app.util;
 
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static org.hamcrest.core.AllOf.allOf;
+
 import android.view.View;
-
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-
-import java.util.concurrent.TimeoutException;
 
 import androidx.test.espresso.PerformException;
 import androidx.test.espresso.UiController;
@@ -14,11 +15,10 @@ import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static org.hamcrest.core.AllOf.allOf;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
+
+import java.util.concurrent.TimeoutException;
 
 public class Helper {
     private static final int DEFAULT_TIMEOUT_IN_SECONDS = 10;
@@ -89,11 +89,8 @@ public class Helper {
 
             @Override
             public void perform(final UiController uiController, final View view) {
-                SnapshotUtil.take("2.1");
                 uiController.loopMainThreadUntilIdle();
-                SnapshotUtil.take("2.2");
                 uiController.loopMainThreadForAtLeast(seconds * 1000L);
-                SnapshotUtil.take("2.3");
             }
         });
     }

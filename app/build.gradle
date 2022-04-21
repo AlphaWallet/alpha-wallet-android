@@ -263,9 +263,6 @@ dependencies {
     // Do not upgrade unless we have migrated to AndroidX
     implementation 'com.google.android:flexbox:2.0.1'
 
-    // PW
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 
     implementation 'com.github.mailchimp:mailchimp-sdk-android:1.0.0'

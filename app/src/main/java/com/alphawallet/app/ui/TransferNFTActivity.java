@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.EnsNodeNotSyncCallback;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -74,7 +75,7 @@ import timber.log.Timber;
  * Created by JB on 11/08/2021
  */
 @AndroidEntryPoint
-public class TransferNFTActivity extends BaseActivity implements TokensAdapterCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
+public class TransferNFTActivity extends BaseActivity implements TokensAdapterCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback, EnsNodeNotSyncCallback
 {
     protected TransferTicketDetailViewModel viewModel;
     private AWalletAlertDialog dialog;
@@ -116,6 +117,7 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
 
         addressInput = findViewById(R.id.input_address);
         addressInput.setAddressCallback(this);
+        addressInput.setEnsNodeNotSyncCallback(this);
 
         sendAddress = null;
         ensAddress = null;
@@ -494,5 +496,38 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
         }
 
         return assetList;
+    }
+
+    @Override
+    public void onNodeNotSynced()
+    {
+        Timber.d("onNodeNotSynced: ");
+        if (dialog != null && dialog.isShowing())
+        {
+            dialog.dismiss();
+        }
+        try
+        {
+            dialog = new AWalletAlertDialog(this, R.drawable.ic_warning);
+            dialog.setTitle(R.string.title_ens_lookup_warning);
+            dialog.setMessage(R.string.message_ens_node_not_sync);
+            dialog.setButtonText(R.string.action_cancel);
+            dialog.setButtonListener(v -> dialog.dismiss());
+            dialog.setSecondaryButtonText(R.string.ignore);
+            dialog.setSecondaryButtonListener(v -> {
+                addressInput.setEnsHandlerNodeSyncFlag(false);  // skip node sync check
+                // re enter current input to resolve again
+                String currentInput = addressInput.getEditText().getText().toString();
+                addressInput.getEditText().setText("");
+                addressInput.getEditText().setText(currentInput);
+                addressInput.getEditText().setSelection(currentInput.length());
+                dialog.dismiss();
+            });
+            dialog.show();
+        }
+        catch (Exception e)
+        {
+            Timber.e(e, "onNodeNotSynced: ");
+        }
     }
 }

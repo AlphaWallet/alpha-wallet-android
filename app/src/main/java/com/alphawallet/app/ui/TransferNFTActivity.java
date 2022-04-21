@@ -213,7 +213,8 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
     }
 
     @Override
-    public void onTokenClick(View view, Token token, List<BigInteger> ids, boolean selection) {
+    public void onTokenClick(View view, Token token, List<BigInteger> ids, boolean selection)
+    {
         Context context = view.getContext();
         //TODO: what action should be performed when clicking on a range?
     }
@@ -277,7 +278,8 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                 finish();
                 break;
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
-                if (actionDialog != null && actionDialog.isShowing()) actionDialog.completeSignRequest(resultCode == RESULT_OK);
+                if (actionDialog != null && actionDialog.isShowing())
+                    actionDialog.completeSignRequest(resultCode == RESULT_OK);
                 break;
 
             default:
@@ -362,7 +364,8 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
     /**
      * Called to check if we're ready to send user to confirm screen / activity sheet popup
      */
-    private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress) {
+    private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
+    {
 
         Web3Transaction w3tx = new Web3Transaction(
                 new Address(txSendAddress),
@@ -413,7 +416,8 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
     public void dismissed(String txHash, long callbackId, boolean actionCompleted)
     {
         //ActionSheet was dismissed
-        if (!TextUtils.isEmpty(txHash)) {
+        if (!TextUtils.isEmpty(txHash))
+        {
             Intent intent = new Intent();
             intent.putExtra(C.EXTRA_TXHASH, txHash);
             setResult(RESULT_OK, intent);
@@ -422,7 +426,10 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
     }
 
     @Override
-    public void notifyConfirm(String mode) { viewModel.actionSheetConfirm(mode); }
+    public void notifyConfirm(String mode)
+    {
+        viewModel.actionSheetConfirm(mode);
+    }
 
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> actionDialog.setCurrentGasIndex(result));

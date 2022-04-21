@@ -3,7 +3,6 @@ package com.alphawallet.app.walletconnect
 import com.alphawallet.app.walletconnect.entity.*
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
-import com.alphawallet.app.walletconnect.entity.ethTransactionSerializer;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject
 import com.alphawallet.token.tools.Numeric
 import com.github.salomonbrys.kotson.fromJson
@@ -13,9 +12,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonSyntaxException
 import okhttp3.*
-import okhttp3.internal.toHexString
 import okio.ByteString
-import org.web3j.abi.datatypes.Bool
 import timber.log.Timber
 import java.util.*
 

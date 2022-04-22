@@ -3,7 +3,7 @@ package com.alphawallet.app;
 import static com.alphawallet.app.steps.Steps.assertBalanceIs;
 import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.steps.Steps.ensureTransactionConfirmed;
-import static com.alphawallet.app.steps.Steps.getWalletAddress;
+import static com.alphawallet.app.steps.Steps.getWalletAddressFromMainPage;
 import static com.alphawallet.app.steps.Steps.importWalletFromSettingsPage;
 import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.steps.Steps.sendBalanceTo;
@@ -40,10 +40,10 @@ public class TransferTest extends BaseE2ETest {
         String existedWalletAddress = array[1];
 
         createNewWallet();
-        String newWalletAddress = getWalletAddress();
+        String newWalletAddress = getWalletAddressFromMainPage();
 
         importWalletFromSettingsPage(seedPhrase);
-        assertThat(getWalletAddress(), equalTo(existedWalletAddress));
+        assertThat(getWalletAddressFromMainPage(), equalTo(existedWalletAddress));
 
         selectTestNet();
         sendBalanceTo(newWalletAddress, "0.00001");

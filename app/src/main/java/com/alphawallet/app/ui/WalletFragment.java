@@ -72,6 +72,8 @@ import com.alphawallet.app.widget.UserAvatar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
+import org.web3j.crypto.Keys;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -214,6 +216,7 @@ public class WalletFragment extends BaseFragment implements
 
     private void onDefaultWallet(Wallet wallet)
     {
+        largeTitleView.walletAddress.setText(Keys.toChecksumAddress(wallet.address));
         if (CustomViewSettings.showManageTokens())
         {
             adapter.setWalletAddress(wallet.address);

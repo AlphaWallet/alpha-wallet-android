@@ -16,7 +16,6 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
-
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
@@ -64,7 +63,9 @@ public class Steps
         toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
         onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(1, ViewActions.click())); // Rinkeby
-        onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(3, ViewActions.click())); // Kovan
+        onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(1, ViewActions.click()));
+        //onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(3, ViewActions.click())); // Kovan
+        //onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(6, ViewActions.click())); // BSC
         pressBack();
     }
 
@@ -112,6 +113,13 @@ public class Steps
         return getTextAction.getText().toString().replace(" ", ""); // The address show on 2 lines so there is a blank space
     }
 
+    public static String getWalletAddressFromMainPage() {
+        gotoWalletPage();
+        GetTextAction getTextAction = new GetTextAction();
+        onView(withText(startsWith("0x"))).perform(getTextAction);
+        return getTextAction.getText().toString();
+    }
+
     public static void importWalletFromSettingsPage(String seedPhrase) {
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
@@ -127,6 +135,10 @@ public class Steps
 
     public static void gotoSettingsPage() {
         click(withId(R.id.nav_settings_text));
+    }
+
+    public static void gotoWalletPage() {
+        click(withId(R.id.nav_wallet_text));
     }
 
     private static void toggleSwitch(int id) {

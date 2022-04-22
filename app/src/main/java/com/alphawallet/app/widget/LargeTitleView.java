@@ -14,6 +14,7 @@ public class LargeTitleView extends LinearLayout {
 
     public final TextView title;
     public final TextView subtitle;
+    public final TextView walletAddress;
 
     public LargeTitleView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -22,5 +23,6 @@ public class LargeTitleView extends LinearLayout {
 
         title = findViewById(R.id.title);
         subtitle = findViewById(R.id.subtitle);
+        walletAddress = findViewById(R.id.waddr);
     }
 }

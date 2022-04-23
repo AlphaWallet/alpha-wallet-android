@@ -74,7 +74,6 @@
     <string name="action_share">Partager</string>
     <string name="action_more_details">Plus de détails</string>
     <string name="action_add_wallet">Ajouter portefeuille</string>
-    <string name="action_add_token">Ajouter Token</string>
     <string name="action_open_etherscan">Voir sur Block Explorer</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>

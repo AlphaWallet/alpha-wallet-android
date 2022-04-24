@@ -27,4 +27,5 @@ public interface ActionSheetCallback
     default void notifyWalletConnectApproval(long chainId) { };    // used by WalletConnectRequest
     default void denyWalletConnect() { };
     default void openChainSelection() { };      // used by WalletConnectRequest
+    default void buttonClick(String action, int Id) { };    // for passing
 }

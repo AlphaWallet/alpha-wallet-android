@@ -24,8 +24,8 @@
     </LinearLayout>
 
     <TextView
-        style="@style/Aw.Typography.Title"
         android:id="@+id/name"
+        style="@style/Aw.Typography.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -40,17 +40,5 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_marginHorizontal="@dimen/standard_16" />
-
-    <View
-        style="@style/Aw.Component.Separator"
-        android:layout_alignParentBottom="true" />
-
-    <View
-        android:id="@+id/view_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/translucent_light"
-        android:visibility="gone"
-        tools:visibility="visible" />
 
 </RelativeLayout>

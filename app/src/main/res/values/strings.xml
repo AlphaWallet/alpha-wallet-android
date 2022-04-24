@@ -673,7 +673,7 @@
     <string name="transaction_fail_warning">Transaction Fail Warning</string>
     <string name="node_predicts_tx_will_fail">The Node predicts this transaction will fail: %1$s</string>
     <string name="error_browse_selection">Selected image doesn\'t contain any data.</string>
-    <string name="display_tokens">Display Tokens</string>
+    <string name="display_tokens">Displayed Tokens</string>
     <string name="hidden_tokens">Hidden Tokens</string>
     <string name="ignore">Ignore</string>
     <string name="search_for_tokens">Search for Tokens...</string>
@@ -925,4 +925,6 @@
     <string name="unable_to_upgrade_key">Unable to upgrade key: %1$s</string>
     <string name="no_key_found">No Key found</string>
     <string name="unable_store_key">Unable to store key: %1$s</string>
+    <string name="title_ens_lookup_warning">ENS Lookup Warning</string>
+    <string name="message_ens_node_not_sync">AlphaWallet has detected a discrepancy between ethereum\'s timestamp and your device\'s current time, or possibly the blockchain connection is not synchronized, please check your phone\'s time is correct, or ignore this warning.</string>
 </resources>

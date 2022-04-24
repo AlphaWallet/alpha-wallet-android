@@ -173,7 +173,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private GasWidgetInterface setupGasWidget()
     {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        boolean canUse1559Transactions = prefs.getBoolean(SharedPreferenceRepository.EXPERIMENTAL_1559_TX,false);
+        boolean canUse1559Transactions = prefs.getBoolean(SharedPreferenceRepository.EXPERIMENTAL_1559_TX, false);
 
         use1559Transactions = canUse1559Transactions && has1559Gas() //1559 Transactions toggled on in settings and this chain supports 1559
                 && !(token.isEthereum() && candidateTransaction.leafPosition == -2) //User not sweeping wallet (if so we need to use legacy tx)
@@ -257,7 +257,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         balanceDisplay = null;
         cancelButton = findViewById(R.id.image_close);
         confirmationWidget = null;
-        addressDetail  = null;
+        addressDetail = null;
         amountDisplay = null;
         assetDetailView = null;
         detailWidget = null;
@@ -276,7 +276,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     }
 
     // wallet connect request
-    public ActionSheetDialog(Activity activity, WCPeerMeta wcPeerMeta, long chainIdOverride, String iconUrl, ActionSheetCallback actionSheetCallback) {
+    public ActionSheetDialog(Activity activity, WCPeerMeta wcPeerMeta, long chainIdOverride, String iconUrl, ActionSheetCallback actionSheetCallback)
+    {
         super(activity);
         setContentView(R.layout.dialog_wallet_connect_sheet);
         mode = ActionSheetMode.WALLET_CONNECT_REQUEST;
@@ -313,7 +314,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         TextView title = findViewById(R.id.text_title);
         title.setText(wcPeerMeta.getName());
 
-        cancelButton.setOnClickListener( v -> {
+        cancelButton.setOnClickListener(v -> {
             actionSheetCallback.denyWalletConnect();
         });
 
@@ -328,7 +329,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     // switch chain
     public ActionSheetDialog(Activity activity, ActionSheetCallback aCallback, int titleId, int buttonTextId,
-                             long cId, Token baseToken, NetworkInfo oldNetwork, NetworkInfo newNetwork) {
+                             long cId, Token baseToken, NetworkInfo oldNetwork, NetworkInfo newNetwork)
+    {
         super(activity);
         setContentView(R.layout.dialog_action_sheet_switch_chain);
 
@@ -348,7 +350,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         balanceDisplay = null;
         cancelButton = findViewById(R.id.image_close);
         confirmationWidget = null;
-        addressDetail  = null;
+        addressDetail = null;
         amountDisplay = null;
         assetDetailView = null;
         detailWidget = null;
@@ -374,8 +376,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     public void onDestroy()
     {
-        gasWidgetInterface.onDestroy();
-        assetDetailView.onDestroy();
+        if (gasWidgetInterface != null) gasWidgetInterface.onDestroy();
+        if (assetDetailView != null) assetDetailView.onDestroy();
     }
 
     public void setURL(String url)
@@ -747,7 +749,11 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
             public void gotAuthorisation(boolean gotAuth)
             {
                 actionCompleted = true;
-                if (!gotAuth) { cancelAuthentication(); return; }
+                if (!gotAuth)
+                {
+                    cancelAuthentication();
+                    return;
+                }
                 confirmationWidget.startProgressCycle(4);
                 //send the transaction
                 actionSheetCallback.sendTransaction(formTransaction());
@@ -801,6 +807,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     }
 
     private boolean isAttached;
+
     public void closingActionSheet()
     {
         isAttached = false;

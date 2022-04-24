@@ -2,12 +2,9 @@ package com.alphawallet.app.service;
 
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.Nullable;
@@ -955,6 +952,7 @@ public class TokensService
     {
         return tokenRepository.determineCommonType(info)
                 .map(contractType -> tokenFactory.createToken(info, contractType, ethereumNetworkRepository.getNetworkByChain(info.chainId).getShortName()))
+                .map(token -> { token.setTokenWallet(walletAddress); return token; })
                 .flatMap(token -> tokenRepository.updateTokenBalance(walletAddress, token).map(newBalance -> {
                     token.balance = newBalance;
                     return token;

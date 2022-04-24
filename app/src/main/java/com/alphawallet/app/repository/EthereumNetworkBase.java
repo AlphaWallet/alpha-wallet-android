@@ -3,40 +3,6 @@ package com.alphawallet.app.repository;
 /* Please don't add import android at this point. Later this file will be shared
  * between projects including non-Android projects */
 
-import android.text.TextUtils;
-import android.util.LongSparseArray;
-
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.CustomViewSettings;
-import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.util.Utils;
-import com.alphawallet.token.entity.ChainSpec;
-import com.google.gson.Gson;
-
-import org.web3j.abi.datatypes.Address;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.http.HttpService;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import io.reactivex.Single;
-
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
@@ -77,6 +43,40 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SOKOL_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
+
+import android.text.TextUtils;
+import android.util.LongSparseArray;
+
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractLocator;
+import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.util.Utils;
+import com.alphawallet.token.entity.ChainSpec;
+import com.google.gson.Gson;
+
+import org.web3j.abi.datatypes.Address;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.http.HttpService;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import io.reactivex.Single;
 
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
@@ -201,7 +201,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(RINKEBY_ID, new NetworkInfo(C.RINKEBY_NETWORK_NAME, C.ETH_SYMBOL,
                     RINKEBY_RPC_URL,
                     "https://rinkeby.etherscan.io/tx/", RINKEBY_ID,
-                    RINKEBY_FALLBACK_RPC_URL, "https://api-rinkeby.etherscan.io/api?"));
+                    RINKEBY_FALLBACK_RPC_URL, ""));
+                    //RINKEBY_FALLBACK_RPC_URL, "https://api-rinkeby.etherscan.io/api?"));
             put(GOERLI_ID, new NetworkInfo(C.GOERLI_NETWORK_NAME, C.GOERLI_SYMBOL,
                     GOERLI_RPC_URL,
                     "https://goerli.etherscan.io/tx/", GOERLI_ID,

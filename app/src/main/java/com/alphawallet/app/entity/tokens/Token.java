@@ -21,12 +21,13 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.StatusType;
+import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
@@ -34,9 +35,13 @@ import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 
 import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.methods.request.EthFilter;
+import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -45,15 +50,16 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Single;
 import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import timber.log.Timber;
 
 public class Token
 {
@@ -518,9 +524,10 @@ public class Token
         return idList;
     }
 
-    public String convertValue(String prefix, String value, int precision)
+    public String convertValue(String prefix, EventResult vResult, int precision)
     {
-        return prefix + BalanceUtils.getScaledValueFixed(new BigDecimal(value),
+        BigDecimal val = (vResult != null) ? new BigDecimal(vResult.value) : BigDecimal.ZERO;
+        return prefix + BalanceUtils.getScaledValueFixed(val,
                 tokenInfo.decimals, precision);
     }
 
@@ -1010,54 +1017,51 @@ public class Token
         return false;
     }
 
-    protected String getActivityName(String toAddress)
+    public Single<List<NFTAsset>> buildAssetList(TokenTransferData transferData)
     {
-        String activityName = "";
-        if (toAddress.equalsIgnoreCase(getWallet()))
-        {
-            Timber.d("getActivityName: Activity: received");
-            // activity = RECEIVE
-            activityName = "received";
-        }
-        else
-        {
-            // activity = SEND
-            activityName = "sent";
-            Timber.d("getActivityName: Activity: sent");
-        }
-        return activityName;
+        return Single.fromCallable(() -> {
+            List<NFTAsset> assets = new ArrayList<>();
+            if (transferData == null || !isNonFungible()) return assets;
+            Map<String, EventResult> result = transferData.getEventResultMap();
+            EventResult amounts = result.get("amount");
+            EventResult counts = result.get("value");
+            if (amounts == null) return assets;
+
+            for (int i = 0; i < amounts.values.length; i++)
+            {
+                String tokenId = amounts.values[i];
+                String count = (counts == null || counts.values.length < i) ? "1" : counts.values[i];
+
+                NFTAsset asset = getAssetForToken(tokenId);
+                if (asset == null) asset = fetchTokenMetadata(new BigInteger(tokenId));
+
+                if (asset != null)
+                {
+                    asset.setSelectedBalance(new BigDecimal(count));
+                    assets.add(asset);
+                }
+            }
+
+            return assets;
+        });
     }
 
-    protected String generateValueListForTransferEvent(String to, String from, String tokenID)
-    {
-        String TO_TOKEN = "[TO_ADDRESS]";
-        String FROM_TOKEN = "[FROM_ADDRESS]";
-        String AMOUNT_TOKEN = "[AMOUNT_TOKEN]";
-        String VALUES = "from,address," + FROM_TOKEN + ",to,address," + TO_TOKEN + ",amount,uint256," + AMOUNT_TOKEN;
 
-        return VALUES.replace(TO_TOKEN, to).replace(FROM_TOKEN, from).replace(AMOUNT_TOKEN, tokenID);
+    /**
+     * Event filters for send and receive of the token, overriden by the token type
+     */
+    public EthFilter getReceiveBalanceFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
+    {
+        return null;
     }
 
-    protected void storeTransferData(Realm instance, String hash, String valueList, String activityName)
+    public EthFilter getSendBalanceFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
     {
-        RealmTransfer matchingEntry = instance.where(RealmTransfer.class)
-                .equalTo("hash", hash)
-                .equalTo("tokenAddress", tokenInfo.address)
-                .equalTo("eventName", activityName)
-                .equalTo("transferDetail", valueList)
-                .findFirst();
+        return null;
+    }
 
-        if (matchingEntry == null) //prevent duplicates
-        {
-            RealmTransfer realmTransfer = instance.createObject(RealmTransfer.class);
-            realmTransfer.setHash(hash);
-            realmTransfer.setTokenAddress(tokenInfo.address);
-            realmTransfer.setEventName(activityName);
-            realmTransfer.setTransferDetail(valueList);
-        }
-        else
-        {
-            Timber.d("storeTransferData: Prevented collision: %s", tokenInfo.address);
-        }
+    public HashSet<BigInteger> processLogsAndStoreTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, Realm realm)
+    {
+        return null;
     }
 }

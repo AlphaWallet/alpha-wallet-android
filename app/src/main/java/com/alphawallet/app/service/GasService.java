@@ -445,7 +445,7 @@ public class GasService implements ContractGasProvider
 
     private void handleError(Throwable err)
     {
-        System.out.println("ERR: " + err.getMessage());
+        Timber.w(err);
     }
 
     public static BigInteger getDefaultGasLimit(Token token, Web3Transaction tx)

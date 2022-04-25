@@ -104,7 +104,7 @@ public class EventDetailWidget extends LinearLayout
         if (resultMap.get("amount") != null)
         {
             value = transferData.eventName.equals("sent") ? "- " : "+ ";
-            value = token.convertValue(value, resultMap.get("amount").value, token.isNonFungible() ? 128 : TRANSACTION_BALANCE_PRECISION + 2);
+            value = token.convertValue(value, resultMap.get("amount"), token.isNonFungible() ? 128 : TRANSACTION_BALANCE_PRECISION + 2);
         }
 
         //get 'from'

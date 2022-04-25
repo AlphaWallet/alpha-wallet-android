@@ -17,6 +17,7 @@ import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -44,7 +45,6 @@ import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.utils.Numeric;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -162,6 +162,42 @@ public class ERC1155Token extends Token
     public List<Integer> getStandardFunctions()
     {
         return Arrays.asList(R.string.action_transfer);
+    }
+
+    @Override
+    public String convertValue(String prefix, EventResult vResult, int precision)
+    {
+        precision++;
+        String value = vResult != null ? vResult.value : "0";
+        if (value.length() > precision)
+        {
+            return prefix + "1";
+        }
+        else
+        {
+            return "#" + value;
+        }
+    }
+
+    @Override
+    public String getTransactionResultValue(Transaction transaction, int precision)
+    {
+
+
+        if (isEthereum() && !transaction.hasInput())
+        {
+            //basic eth transaction
+            return getTransactionValue(transaction, precision) + " " + getSymbol();
+        }
+        else if (transaction.hasInput())
+        {
+            //smart contract call
+            return transaction.getOperationResult(this, precision);
+        }
+        else
+        {
+            return "";
+        }
     }
 
     @Override
@@ -539,7 +575,8 @@ public class ERC1155Token extends Token
         return new Event("TransferBatch", paramList);
     }
 
-    private EthFilter getReceiveBalanceFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
+    @Override
+    public EthFilter getReceiveBalanceFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
     {
         final org.web3j.protocol.core.methods.request.EthFilter filter =
                 new org.web3j.protocol.core.methods.request.EthFilter(
@@ -554,7 +591,8 @@ public class ERC1155Token extends Token
         return filter;
     }
 
-    private EthFilter getSendBalanceFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
+    @Override
+    public EthFilter getSendBalanceFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
     {
         final org.web3j.protocol.core.methods.request.EthFilter filter =
                 new org.web3j.protocol.core.methods.request.EthFilter(
@@ -589,11 +627,6 @@ public class ERC1155Token extends Token
         SyncDef sync = eventSync.getSyncDef(realm);
         if (sync == null) return balance;
 
-        if (tokenInfo.address.equalsIgnoreCase("0xf5b48F1ab6fa44962E3a4479E7C1E0b1D6bBa4D7"))
-        {
-            System.out.println("YOLESS");
-        }
-
         DefaultBlockParameter startBlock = DefaultBlockParameter.valueOf(sync.eventReadStartBlock);
         DefaultBlockParameter endBlock = DefaultBlockParameter.valueOf(sync.eventReadEndBlock);
         if (sync.eventReadEndBlock.compareTo(BigInteger.valueOf(-1L)) == 0) endBlock = DefaultBlockParameterName.LATEST;
@@ -605,13 +638,12 @@ public class ERC1155Token extends Token
         {
             final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
 
-            Pair<Integer, HashSet<BigInteger>> evRead = processSingleTransferEvents(web3j, startBlock, endBlock, realm);
+            Pair<Integer, HashSet<BigInteger>> evRead = eventSync.processTransferEvents(web3j,
+                    getBalanceUpdateEvents(), startBlock, endBlock, realm);
 
-            //HashSet<BigInteger> tokenIds = processSingleTransferEvents(web3j, startBlock, endBlock);
+            Pair<Integer, HashSet<BigInteger>> batchRead = eventSync.processTransferEvents(web3j,
+                    getBatchBalanceUpdateEvents(), startBlock, endBlock, realm);
 
-            Pair<Integer, HashSet<BigInteger>> batchRead = processBatchTransferEvents(web3j, startBlock, endBlock, realm);
-
-            //HashSet<BigInteger> eventResult = processBatchTransferEvents(web3j, startBlock, endBlock);
             evRead.second.addAll(batchRead.second);
             //combine the tokenIds with existing assets
             evRead.second.addAll(assets.keySet());
@@ -623,7 +655,6 @@ public class ERC1155Token extends Token
 
             //update read points
             eventSync.updateEventReads(realm, sync, currentBlock, evRead.first); //means our event read was fine
-            //eventSync.updateEventReads(realm, sync.eventReadStartBlock.longValue(), BLOCK_SEARCH_INTERVAL, EventSyncState.DOWNWARD_SYNC);
         }
         catch (LogOverflowException e)
         {
@@ -642,149 +673,29 @@ public class ERC1155Token extends Token
         return new BigDecimal(assets.keySet().size());
     }
 
-    private Pair<Integer, HashSet<BigInteger>> processBatchTransferEvents(Web3j web3j, DefaultBlockParameter startBlock,
-                                                           DefaultBlockParameter endBlock, Realm realm) throws IOException, LogOverflowException
-    {
-        HashSet<String> txHashes = new HashSet<>();
-        final Event event = getBatchBalanceUpdateEvents();
-        EthFilter filter = getReceiveBalanceFilter(event, startBlock, endBlock);
-        EthLog receiveLogs = web3j.ethGetLogs(filter).send();
-
-        if (receiveLogs.hasError())
-        {
-            throw new LogOverflowException(receiveLogs.getError());
-        }
-
-        int eventCount = receiveLogs.getLogs().size();
-        HashSet<BigInteger> tokenIds = new HashSet<>(processLogsAndStoreMultipleTransferEvents(receiveLogs, event, txHashes, realm));
-
-        EthFilter outgoingFilter = getSendBalanceFilter(event, startBlock, endBlock);
-        EthLog sentLogs = web3j.ethGetLogs(outgoingFilter).send();
-
-        if (sentLogs.hasError())
-        {
-            throw new LogOverflowException(receiveLogs.getError());
-        }
-
-        if (sentLogs.getLogs().size() > eventCount) eventCount = sentLogs.getLogs().size();
-
-        processLogsAndStoreMultipleTransferEvents(sentLogs, event, txHashes, realm);
-
-        //register Transaction fetches
-        for (String txHash : txHashes)
-        {
-            TransactionsService.addTransactionHashFetch(txHash, tokenInfo.chainId, getWallet());
-        }
-
-        return new Pair<>(eventCount, tokenIds);
-    }
-
-    private Pair<Integer, HashSet<BigInteger>> processSingleTransferEvents(Web3j web3j, DefaultBlockParameter startBlock,
-                                                            DefaultBlockParameter endBlock, Realm realm) throws IOException, LogOverflowException
-    {
-        HashSet<String> txHashes = new HashSet<>();
-        final Event event = getBalanceUpdateEvents();
-        EthFilter filter = getReceiveBalanceFilter(event, startBlock, endBlock);
-        EthLog receiveLogs = web3j.ethGetLogs(filter).send();
-        if (receiveLogs.hasError())
-        {
-            throw new LogOverflowException(receiveLogs.getError());
-        }
-
-        int eventCount = receiveLogs.getLogs().size();
-        HashSet<BigInteger> tokenIds = new HashSet<>(processLogsAndStoreSingleTransferEvents(receiveLogs, event, txHashes, realm));
-
-        EthFilter outgoingFilter = getSendBalanceFilter(event, startBlock, endBlock);
-        EthLog sentLogs = web3j.ethGetLogs(outgoingFilter).send();
-
-        if (sentLogs.hasError())
-        {
-            throw new LogOverflowException(receiveLogs.getError());
-        }
-
-        if (sentLogs.getLogs().size() > eventCount) eventCount = sentLogs.getLogs().size();
-
-        processLogsAndStoreSingleTransferEvents(sentLogs, event, txHashes, realm);
-
-        //register Transaction fetches
-        for (String txHash : txHashes)
-        {
-            TransactionsService.addTransactionHashFetch(txHash, tokenInfo.chainId, getWallet());
-        }
-
-        return new Pair<>(eventCount, tokenIds);
-    }
-
-    private HashSet<BigInteger> processLogsAndStoreSingleTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, Realm realm)
+    @Override
+    public HashSet<BigInteger> processLogsAndStoreTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, Realm realm)
     {
         HashSet<BigInteger> tokenIds = new HashSet<>();
         for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())
         {
             String block = ((Log) ethLog.get()).getBlockNumberRaw();
             if (block == null || block.length() == 0) continue;
+            String txHash = ((Log) ethLog.get()).getTransactionHash();
 
             final EventValues eventValues = staticExtractEventParameters(event, (Log) ethLog.get());
-            BigInteger _id = new BigInteger(eventValues.getNonIndexedValues().get(0).getValue().toString());
-            tokenIds.add(_id);
+            Pair<List<BigInteger>, List<BigInteger>> idResult = eventSync.getEventIdResult(eventValues.getNonIndexedValues().get(0),
+                    eventValues.getNonIndexedValues().get(1));
+            tokenIds.addAll(idResult.first);
 
             // generating transfer record and storing it
             String from = eventValues.getIndexedValues().get(1).getValue().toString();  // from address
             String to = eventValues.getIndexedValues().get(2).getValue().toString();    // to address
-            String activityName = getActivityName(to);
-            String valueList = generateValueListForTransferEvent(to, from, _id.toString());
-            String txHash = ((Log) ethLog.get()).getTransactionHash();
+            eventSync.storeTransferData(realm, from, to, idResult, txHash);
             txHashes.add(txHash);
-            realm.executeTransaction(r -> {
-                storeTransferData(realm, txHash, valueList, activityName);
-            });
         }
 
         return tokenIds;
-    }
-
-    private HashSet<BigInteger> processLogsAndStoreMultipleTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, Realm realm)
-    {
-        HashSet<BigInteger> tokenIds = new HashSet<>();
-        for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())
-        {
-            String block = ((Log) ethLog.get()).getBlockNumberRaw();
-            if (block == null || block.length() == 0) continue;
-
-            final EventValues eventValues = staticExtractEventParameters(event, (Log) ethLog.get());
-            ArrayList<Uint256> idResult = (ArrayList<Uint256>) eventValues.getNonIndexedValues().get(0).getValue();
-            for (Uint256 _id : idResult)
-            {
-                tokenIds.add(_id.getValue());
-            }
-
-            // generating transfer record and storing it
-            String from = eventValues.getIndexedValues().get(1).getValue().toString();  // from address
-            String to = eventValues.getIndexedValues().get(2).getValue().toString();    // to address
-            String activityName = getActivityName(to);
-            String value = getIds(idResult);
-            String valueList = generateValueListForTransferEvent(to, from, value);
-            String txHash = ((Log) ethLog.get()).getTransactionHash();
-            txHashes.add(txHash);
-            realm.executeTransaction(r -> {
-                storeTransferData(realm, txHash, valueList, activityName);
-            });
-        }
-
-        return tokenIds;
-    }
-
-    private String getIds(ArrayList<Uint256> idResult)
-    {
-        StringBuilder sb = new StringBuilder();
-        boolean firstVal = true;
-        for (Uint256 _id : idResult)
-        {
-            if (!firstVal) sb.append("-");
-            sb.append(_id.getValue());
-            firstVal = false;
-        }
-
-        return sb.toString();
     }
 
     private Function balanceOfBatch(String address, Set<BigInteger> tokenIds)

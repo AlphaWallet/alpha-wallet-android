@@ -15,8 +15,8 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TransactionsService;
@@ -42,7 +42,6 @@ import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.utils.Numeric;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -274,9 +273,10 @@ public class ERC721Token extends Token
     }
 
     @Override
-    public String convertValue(String prefix, String value, int precision)
+    public String convertValue(String prefix, EventResult vResult, int precision)
     {
         precision++;
+        String value = vResult != null ? vResult.value : "0";
         if (value.length() > precision)
         {
             return prefix + "1";
@@ -340,8 +340,9 @@ public class ERC721Token extends Token
         try
         {
             final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
-            Pair<Integer, HashSet<BigInteger>> evRead = processTransferEvents(web3j, startBlock, endBlock, realm);
-            Timber.d("processTransferEvents: tokenIds: %s", evRead.second);
+            Pair<Integer, HashSet<BigInteger>> evRead = eventSync.processTransferEvents(web3j,
+                    getTransferEvents(), startBlock, endBlock, realm);
+
             eventSync.updateEventReads(realm, sync, currentBlock, evRead.first); //means our event read was fine
 
             HashSet<BigInteger> tokenIdsHeld = checkBalances(web3j, evRead.second);
@@ -412,81 +413,25 @@ public class ERC721Token extends Token
         });
     }
 
-    //Log fetch strategy for NFT:
-    //1. Try entire block range (1 -> LATEST). For most accounts, this will work correctly and will find all events (< 3500 for Polygon, < 10000 other chains)
-    //1a.   If successful, record newest event block# and use that as the starting point for next scans as per step 7.
-    //2. If it errors with "Too many events", try a smaller range but ending with LATEST. Track the range and go to 3.
-    //3.   If still "Too many events", reduce range by intervals, and do step 3. again (record the upper bound)
-    //4.   when we start receiving events, process and move downwards
-    //5.     scan again, if "Too many events" reduce range further and go back to 4.
-    //6.     if no events found, or less than full widen scan again and continue to 1
-    //7.     Start scanning from the upperbound to LATEST. Update upper bound if any event found.
-
-    private Pair<Integer, HashSet<BigInteger>> processTransferEvents(Web3j web3j, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock, Realm realm) throws IOException, LogOverflowException
-    {
-        Timber.d("processTransferEvents: startBlock: %s, endBlock: %s", startBlock.getValue(), endBlock.getValue());
-        HashSet<String> txHashes = new HashSet<>();
-        final Event event = getTransferEvents();
-
-        EthFilter incomingFilter = getIncomingTransferFilter(event, startBlock, endBlock);
-        EthLog receiveLogs = web3j.ethGetLogs(incomingFilter).send();
-
-        if (receiveLogs.hasError())
-        {
-            throw new LogOverflowException(receiveLogs.getError());
-        }
-
-        int eventCount = receiveLogs.getLogs().size();
-
-        Timber.d("processTransferEvents: incoming: ");
-        HashSet<BigInteger> tokenIds = new HashSet<>(processLogsAndStoreEvents(receiveLogs, event, txHashes, realm));
-
-        EthFilter outgoingFilter = getOutgoingTransferFilter(event, startBlock, endBlock);
-        EthLog sentLogs = web3j.ethGetLogs(outgoingFilter).send();
-
-        if (sentLogs.hasError())
-        {
-            throw new LogOverflowException(receiveLogs.getError());
-        }
-
-        if (sentLogs.getLogs().size() > eventCount) eventCount = sentLogs.getLogs().size();
-
-        Timber.d("processTransferEvents: outgoing: ");
-        processLogsAndStoreEvents(sentLogs, event, txHashes, realm);
-
-        //register Transaction fetches
-        for (String txHash : txHashes)
-        {
-            TransactionsService.addTransactionHashFetch(txHash, tokenInfo.chainId, getWallet());
-        }
-
-        return new Pair<>(eventCount, tokenIds);
-    }
-
-    private HashSet<BigInteger> processLogsAndStoreEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, Realm realm)
+    @Override
+    public HashSet<BigInteger> processLogsAndStoreTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, Realm realm)
     {
         HashSet<BigInteger> tokenIds = new HashSet<>();
         for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())
         {
             String block = ((Log) ethLog.get()).getBlockNumberRaw();
             if (block == null || block.length() == 0) continue;
-            if (((Log)ethLog.get()).getTopics().size() != 3) continue;
+            String txHash = ((Log) ethLog.get()).getTransactionHash();
 
             final EventValues eventValues = staticExtractEventParameters(event, (Log) ethLog.get());
-            BigInteger _id = new BigInteger(eventValues.getIndexedValues().get(2).getValue().toString());
-            tokenIds.add(_id);
-            Timber.d("processLogsAndStoreEvents: tokenId: %s", _id);
+            Pair<List<BigInteger>, List<BigInteger>> idResult = eventSync.getEventIdResult(eventValues.getIndexedValues().get(2), null);
+            tokenIds.addAll(idResult.first);
 
             // generating transfer record and storing it
             String from = eventValues.getIndexedValues().get(0).getValue().toString();  // from address
             String to = eventValues.getIndexedValues().get(1).getValue().toString();    // to address
-            String activityName = getActivityName(to);
-            String valueList = generateValueListForTransferEvent(to, from, _id.toString());
-            String txHash = ((Log) ethLog.get()).getTransactionHash();
+            eventSync.storeTransferData(realm, from, to, idResult, txHash);
             txHashes.add(txHash);
-            realm.executeTransaction(r -> {
-                storeTransferData(realm, txHash, valueList, activityName);
-            });
         }
         return tokenIds;
     }
@@ -506,9 +451,9 @@ public class ERC721Token extends Token
         return heldTokens;
     }
 
-    private EthFilter getIncomingTransferFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
+    @Override
+    public EthFilter getReceiveBalanceFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
     {
-        Timber.d("getIncomingTransferFilter: ");
         final org.web3j.protocol.core.methods.request.EthFilter filter =
                 new org.web3j.protocol.core.methods.request.EthFilter(
                         startBlock,
@@ -522,9 +467,9 @@ public class ERC721Token extends Token
         return filter;
     }
 
-    private EthFilter getOutgoingTransferFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
+    @Override
+    public EthFilter getSendBalanceFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
     {
-        Timber.d("getOutgoingTransferFilter: ");
         final org.web3j.protocol.core.methods.request.EthFilter filter =
                 new org.web3j.protocol.core.methods.request.EthFilter(
                         startBlock,
@@ -536,22 +481,6 @@ public class ERC721Token extends Token
         filter.addSingleTopic(null);
         filter.addSingleTopic(null);
         return filter;
-    }
-
-    private void updateEventBlock(Realm realm, BigInteger lastEventBlockRead)
-    {
-        if (realm == null) return;
-
-        realm.executeTransaction(r -> {
-            RealmToken realmToken = r.where(RealmToken.class)
-                    .equalTo("address", TokensRealmSource.databaseKey(tokenInfo.chainId, getAddress()))
-                    .findFirst();
-
-            if (realmToken != null)
-            {
-                realmToken.setErc1155BlockRead(lastEventBlockRead.add(BigInteger.ONE));
-            }
-        });
     }
 
     /**

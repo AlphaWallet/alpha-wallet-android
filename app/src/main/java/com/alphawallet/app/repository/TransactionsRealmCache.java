@@ -3,14 +3,6 @@ package com.alphawallet.app.repository;
 import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 
-import static java.lang.Thread.sleep;
-
-import android.os.Build;
-import android.util.Log;
-
-import androidx.annotation.RequiresApi;
-
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
@@ -24,13 +16,11 @@ import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.RealmManager;
 
-import org.jetbrains.annotations.NotNull;
 import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Phaser;
 
 import io.reactivex.Single;
 import io.realm.Case;
@@ -190,7 +180,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             {
                 final RealmResults<RealmTransaction> txs = generateRealmQuery(instance, fetchTime, fetchLimit).findAll();
                 Timber.tag("TRC").d( "Found %s TX Results", txs.size());
-                fixBadTXValues(instance, fetchTime, fetchLimit);
 
                 for (RealmTransaction item : txs)
                 {
@@ -225,26 +214,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     .sort("timeStamp", Sort.DESCENDING)
                     .limit(fetchLimit);
         }
-    }
-
-    //Correct any bad value that was previously recorded in a way that wrote the wrong time value
-    //TODO: Remove this after a couple more releases, but it's harmless
-    private void fixBadTXValues(@NotNull Realm instance, final long fetchTime, final int fetchLimit)
-    {
-        long currentTime = System.currentTimeMillis() / 1000L;
-        instance.executeTransactionAsync(r -> {
-            final RealmResults<RealmTransaction> txs = generateRealmQuery(r, fetchTime, fetchLimit).findAll();
-            for (RealmTransaction item : txs)
-            {
-                if ((currentTime - item.getTimeStamp()) < -3000 * 24 * 60 * 60 && (item.getBlockNumber().equals("-1") || item.getBlockNumber().equals("0")))
-                {
-                    // potentially incorrectly recorded tx, change to pending to re-scan
-                    item.setBlockNumber("0");
-                    item.setError("0");
-                    item.setTimeStamp(currentTime);
-                }
-            }
-        });
     }
 
     @Override
@@ -286,35 +255,6 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             //do not record
             Timber.w(e);
         }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    @Override
-    public Transaction storeRawTx(Wallet wallet, long chainId, EthTransaction rawTx, long timeStamp, boolean isSuccessful)
-    {
-        if (rawTx.getResult() == null) return null;
-        org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction().get();
-
-        final Transaction tx = new Transaction(ethTx, chainId, isSuccessful, timeStamp);
-
-        try (Realm instance = realmManager.getRealmInstance(wallet))
-        {
-            instance.executeTransaction(r -> {
-                RealmTransaction realmTx = r.where(RealmTransaction.class)
-                        .equalTo("hash", ethTx.getHash())
-                        .findFirst();
-
-                if (realmTx == null) realmTx = r.createObject(RealmTransaction.class, ethTx.getHash());
-                fill(realmTx, tx);
-                r.insertOrUpdate(realmTx);
-            });
-        }
-        catch (Exception e)
-        {
-            Timber.w(e);
-        }
-
-        return tx;
     }
 
     @Override

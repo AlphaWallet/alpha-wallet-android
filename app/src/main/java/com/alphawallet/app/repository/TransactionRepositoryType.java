@@ -6,10 +6,7 @@ import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.repository.entity.RealmAuxData;
-import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
-
-import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -37,7 +34,6 @@ public interface TransactionRepositoryType {
 	Realm getRealmInstance(Wallet wallet);
 
 	RealmAuxData fetchCachedEvent(String walletAddress, String eventKey);
-	Single<Transaction> storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp);
 
     void restartService();
 }

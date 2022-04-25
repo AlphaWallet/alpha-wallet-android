@@ -123,6 +123,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
+                <com.alphawallet.app.widget.AmountDisplayWidget
+                    android:id="@+id/amount_display"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
             </LinearLayout>
         </ScrollView>
 

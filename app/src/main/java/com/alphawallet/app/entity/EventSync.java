@@ -1,16 +1,29 @@
 package com.alphawallet.app.entity;
 
+import android.util.Pair;
+
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.service.TransactionsService;
 
+import org.web3j.abi.datatypes.Event;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.Response;
+import org.web3j.protocol.core.methods.request.EthFilter;
+import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.utils.Numeric;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import io.realm.Realm;
 import timber.log.Timber;
@@ -29,6 +42,16 @@ public class EventSync
         this.token = token;
     }
 
+    //Log fetch strategy for NFT:
+    //1. Try entire block range (1 -> LATEST). For most accounts, this will work correctly and will find all events (< 3500 for Polygon, < 10000 other chains)
+    //1a.   If successful, record newest event block# and use that as the starting point for next scans as per step 7.
+    //2. If it errors with "Too many events", try a smaller range but ending with LATEST. Track the range and go to 3.
+    //3.   If still "Too many events", reduce range by intervals, and do step 3. again (record the upper bound)
+    //4.   when we start receiving events, process and move downwards
+    //5.     scan again, if "Too many events" reduce range further and go back to 4.
+    //6.     if no events found, or less than full widen scan again and continue to 1
+    //7.     Start scanning from the upperbound to LATEST. Update upper bound if any event found.
+
     public SyncDef getSyncDef(Realm realm)
     {
         BigInteger currentBlock = TransactionsService.getCurrentBlock(token.tokenInfo.chainId);
@@ -45,7 +68,7 @@ public class EventSync
         switch (syncState)
         {
             default:
-            case DOWNWARD_SYNC_START:
+            case DOWNWARD_SYNC_START: //Start event sync, optimistically try the whole current event range from 1 -> LATEST
                 eventReadStartBlock = BigInteger.ONE;
                 eventReadEndBlock = BigInteger.valueOf(-1L);
                 //write the start point here
@@ -333,5 +356,176 @@ public class EventSync
         }
 
         return currentReadSize;
+    }
+
+    /***
+     * Event Handling
+     */
+
+    public Pair<Integer, HashSet<BigInteger>> processTransferEvents(Web3j web3j, Event transferEvent, DefaultBlockParameter startBlock,
+                                                                       DefaultBlockParameter endBlock, Realm realm)
+            throws IOException, LogOverflowException
+    {
+        HashSet<String> txHashes = new HashSet<>();
+        EthFilter receiveFilter = token.getReceiveBalanceFilter(transferEvent, startBlock, endBlock);
+        EthFilter sendFilter    = token.getSendBalanceFilter(transferEvent, startBlock, endBlock);
+
+        EthLog receiveLogs = web3j.ethGetLogs(receiveFilter).send();
+        if (receiveLogs.hasError())
+        {
+            throw new LogOverflowException(receiveLogs.getError());
+        }
+
+        int eventCount = receiveLogs.getLogs().size();
+
+        HashSet<BigInteger> tokenIds = new HashSet<>(token.processLogsAndStoreTransferEvents(receiveLogs, transferEvent, txHashes, realm));
+
+        EthLog sentLogs = web3j.ethGetLogs(sendFilter).send();
+
+        if (sentLogs.hasError())
+        {
+            throw new LogOverflowException(receiveLogs.getError());
+        }
+
+        if (sentLogs.getLogs().size() > eventCount) eventCount = sentLogs.getLogs().size();
+
+        token.processLogsAndStoreTransferEvents(sentLogs, transferEvent, txHashes, realm);
+
+        //register Transaction fetches
+        for (String txHash : txHashes)
+        {
+            TransactionsService.addTransactionHashFetch(txHash, token.tokenInfo.chainId, token.getWallet());
+        }
+
+        return new Pair<>(eventCount, tokenIds);
+    }
+
+    public String getActivityName(String toAddress)
+    {
+        String activityName = "";
+        if (toAddress.equalsIgnoreCase(token.getWallet()))
+        {
+            // activity = RECEIVE
+            activityName = "received";
+        }
+        else
+        {
+            // activity = SEND
+            activityName = "sent";
+        }
+        return activityName;
+    }
+
+    public String getIds(Pair<List<BigInteger>, List<BigInteger>> ids)
+    {
+        StringBuilder sbFirst = new StringBuilder();
+        StringBuilder sbSecond = new StringBuilder();
+        boolean firstVal = true;
+        //check lengths are the same
+        if (ids.first.size() != ids.second.size()) return "";
+        for (int i = 0; i < ids.first.size(); i++)
+        {
+            if (!firstVal)
+            {
+                sbFirst.append("-");
+                sbSecond.append("-");
+            }
+
+            sbFirst.append(ids.first.get(i).toString());
+            sbSecond.append(ids.second.get(i).toString());
+            firstVal = false;
+        }
+
+        return (ids.first.size() == 1 && ids.second.get(0).equals(BigInteger.ONE)) ? sbFirst.toString() :
+                sbFirst + ",value,uint256," + sbSecond;
+    }
+
+    public Pair<List<BigInteger>, List<BigInteger>> getEventIdResult(Type<?> ids, Type<?> values)
+    {
+        //int size = eventValues.getNonIndexedValues().size();
+        List<BigInteger> _ids = new ArrayList<>();
+        List<BigInteger> _count = new ArrayList<>();
+        if (values == null)
+        {
+            _ids.add(((Uint256) ids).getValue());
+            _count.add(BigInteger.ONE);
+        }
+        else
+        {
+            if (ids instanceof Uint256) //single
+            {
+               _ids.add((BigInteger) ids.getValue());
+                _count.add((BigInteger) values.getValue());
+            }
+            else //array type
+            {
+                for (Object val : (ArrayList<?>)ids.getValue())
+                {
+                    if (val instanceof Uint256)
+                    {
+                        _ids.add(((Uint256) val).getValue());
+                    }
+                }
+                for (Object val : (ArrayList<?>)values.getValue())
+                {
+                    if (val instanceof Uint256)
+                    {
+                        _count.add(((Uint256) val).getValue());
+                    }
+                }
+            }
+        }
+
+        return new Pair<>(_ids, _count);
+    }
+
+    private String generateValueListForTransferEvent(String to, String from, String tokenID)
+    {
+        String TO_TOKEN = "[TO_ADDRESS]";
+        String FROM_TOKEN = "[FROM_ADDRESS]";
+        String AMOUNT_TOKEN = "[AMOUNT_TOKEN]";
+        String VALUES = "from,address," + FROM_TOKEN + ",to,address," + TO_TOKEN + ",amount,uint256," + AMOUNT_TOKEN;
+
+        return VALUES.replace(TO_TOKEN, to).replace(FROM_TOKEN, from).replace(AMOUNT_TOKEN, tokenID);
+    }
+
+    public void storeTransferData(Realm realm, String from, String to,
+                                  Pair<List<BigInteger>, List<BigInteger>> idResult,
+                                  String txHash)
+    {
+        String activityName = getActivityName(to);
+        String value = getIds(idResult);
+        String valueList = generateValueListForTransferEvent(to, from, value);
+        realm.executeTransaction(r -> {
+            storeTransferData(realm, txHash, valueList, activityName);
+        });
+    }
+
+    private void storeTransferData(Realm instance, String hash, String valueList, String activityName)
+    {
+        if (activityName.equals("receive"))
+        {
+            instance.where(RealmTransfer.class)
+                    .equalTo("hash", hash)
+                    .findAll().deleteAllFromRealm();
+        }
+
+        RealmTransfer matchingEntry = instance.where(RealmTransfer.class)
+                .equalTo("hash", hash)
+                .equalTo("tokenAddress", token.tokenInfo.address)
+                .equalTo("eventName", activityName)
+                .equalTo("transferDetail", valueList)
+                .findFirst();
+
+        if (matchingEntry == null) //prevent duplicates
+        {
+            matchingEntry = instance.createObject(RealmTransfer.class);
+            matchingEntry.setHash(hash);
+            matchingEntry.setTokenAddress(token.tokenInfo.address);
+        }
+
+        matchingEntry.setEventName(activityName);
+        matchingEntry.setTransferDetail(valueList);
+        instance.insertOrUpdate(matchingEntry);
     }
 }

@@ -68,7 +68,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 25; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 26; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY;
     private final String BSC_EXPLORER_API_KEY;
@@ -305,7 +305,17 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private EtherscanTransaction[] getEtherscanTransactions(String response) throws JSONException
     {
-        JSONObject stateData = new JSONObject(response);
+        JSONObject stateData;
+        try
+        {
+            stateData = new JSONObject(response);
+        }
+        catch (JSONException e)
+        {
+            Timber.w(e);
+            return new EtherscanTransaction[0];
+        }
+
         JSONArray orders = stateData.getJSONArray("result");
         return gson.fromJson(orders.toString(), EtherscanTransaction[].class);
     }
@@ -659,8 +669,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long currentBlock, String queryType)
     {
-        if (TextUtils.isEmpty(networkInfo.etherscanAPI)) return "";
-        if (networkInfo.etherscanAPI.contains(COVALENT)) { return readCovalentTransfers(walletAddress, networkInfo, currentBlock, queryType); }
+        if (TextUtils.isEmpty(networkInfo.etherscanAPI) || networkInfo.etherscanAPI.contains(COVALENT)) return ""; //Covalent transfers are handled elsewhere
         String result = "0";
         if (currentBlock == 0) currentBlock = 1;
 
@@ -711,6 +720,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         else if (networkInfo.chainId == MATIC_ID || networkInfo.chainId == MATIC_TEST_ID)
         {
+
             return POLYGONSCAN_API_KEY;
         }
         else if (networkInfo.chainId == AURORA_MAINNET_ID || networkInfo.chainId == AURORA_TESTNET_ID)
@@ -721,13 +731,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             return "";
         }
-    }
-
-    //TODO: Instead of reading transfers we can read balances and track changes for ERC20 tokens
-    private String readCovalentTransfers(String walletAddress, NetworkInfo networkInfo, long lastBlockChecked, String queryType)
-    {
-        //update token balances from covalent
-        return ""; //Currently, covalent doesn't support fetching transfer events
     }
 
     private EtherscanTransaction[] readCovalentTransactions(TokensService svs, String accountAddress, NetworkInfo networkInfo, boolean ascending, int page, int pageSize) throws JSONException
@@ -765,7 +768,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             return new EtherscanTransaction[0];
         }
 
-        //CovalentTransaction[] covalentTransactions = new CovalentTransaction[0]; // getCovalentTransactions(result, svs.getCurrentAddress());
         CovalentTransaction[] covalentTransactions = getCovalentTransactions(result, svs.getCurrentAddress());
 
         EtherscanTransaction[] unhandledTxs = processCovalentEvents(covalentTransactions, svs, networkInfo);

@@ -3,6 +3,8 @@ package com.alphawallet.app.repository;
 import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 
+import android.util.LongSparseArray;
+
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
@@ -15,8 +17,6 @@ import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.RealmManager;
-
-import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -176,17 +176,20 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         return Single.fromCallable(() -> {
             List<ActivityMeta> metas = new ArrayList<>();
 
+            LongSparseArray<Integer> elementCount = new LongSparseArray<>();
             try (Realm instance = realmManager.getRealmInstance(wallet))
             {
-                final RealmResults<RealmTransaction> txs = generateRealmQuery(instance, fetchTime, fetchLimit).findAll();
+                final RealmResults<RealmTransaction> txs = generateRealmQuery(instance, fetchTime).findAll();
                 Timber.tag("TRC").d( "Found %s TX Results", txs.size());
 
                 for (RealmTransaction item : txs)
                 {
-                    if (networkFilters.contains(item.getChainId()))
+                    int currentCount = elementCount.get(item.getChainId(), 0);
+                    if (networkFilters.contains(item.getChainId()) && currentCount < fetchLimit && item.getTimeStamp() < fetchTime)
                     {
                         TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber());
                         metas.add(tm);
+                        elementCount.put(item.getChainId(), currentCount+1);
                     }
                 }
             }
@@ -199,20 +202,20 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         });
     }
 
-    private RealmQuery<RealmTransaction> generateRealmQuery(Realm instance, long fetchTime, int fetchLimit)
+    private RealmQuery<RealmTransaction> generateRealmQuery(Realm instance, long fetchTime)
     {
         if (fetchTime > 0)
         {
             return instance.where(RealmTransaction.class)
                     .sort("timeStamp", Sort.DESCENDING)
+                    .beginGroup()
                     .lessThan("timeStamp", fetchTime)
-                    .limit(fetchLimit);
+                    .endGroup();
         }
         else
         {
             return instance.where(RealmTransaction.class)
-                    .sort("timeStamp", Sort.DESCENDING)
-                    .limit(fetchLimit);
+                    .sort("timeStamp", Sort.DESCENDING);
         }
     }
 

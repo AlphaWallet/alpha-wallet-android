@@ -62,6 +62,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private final GasWidget2 gasWidget;
     private final GasWidget gasWidgetLegacy;
     private final BalanceDisplayWidget balanceDisplay;
+    private final NetworkDisplayWidget networkDisplay;
     private final ConfirmationWidget confirmationWidget;
     private final AddressDetailView addressDetail;
     private final AmountDisplayWidget amountDisplay;
@@ -101,6 +102,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         gasWidget = findViewById(R.id.gas_widgetx);
         gasWidgetLegacy = findViewById(R.id.gas_widget_legacy);
         balanceDisplay = findViewById(R.id.balance);
+        networkDisplay = findViewById(R.id.network_display_widget);
         cancelButton = findViewById(R.id.image_close);
         confirmationWidget = findViewById(R.id.confirmation_view);
         detailWidget = findViewById(R.id.detail_widget);
@@ -137,6 +139,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         transaction.transactionInput = Transaction.decoder.decodeInput(candidateTransaction, token.tokenInfo.chainId, token.getWallet());
 
         balanceDisplay.setupBalance(token, tokensService, transaction);
+        networkDisplay.setNetwork(token.tokenInfo.chainId);
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
         functionBar.revealButtons();
@@ -201,6 +204,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         gasWidget = findViewById(R.id.gas_widgetx);
         gasWidgetLegacy = findViewById(R.id.gas_widget_legacy);
         balanceDisplay = findViewById(R.id.balance);
+        networkDisplay = findViewById(R.id.network_display_widget);
         cancelButton = findViewById(R.id.image_close);
         confirmationWidget = findViewById(R.id.confirmation_view);
         addressDetail = findViewById(R.id.requester);
@@ -255,6 +259,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         gasWidget = null;
         balanceDisplay = null;
+        networkDisplay = null;
         cancelButton = findViewById(R.id.image_close);
         confirmationWidget = null;
         addressDetail = null;
@@ -293,6 +298,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         walletConnectRequestWidget = findViewById(R.id.wallet_connect_widget);
         gasWidget = null;
         balanceDisplay = null;
+        networkDisplay = null;
         confirmationWidget = null;
         addressDetail = null;
         amountDisplay = null;
@@ -348,6 +354,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         gasWidget = null;
         balanceDisplay = null;
+        networkDisplay = null;
         cancelButton = findViewById(R.id.image_close);
         confirmationWidget = null;
         addressDetail = null;
@@ -433,6 +440,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         mode = callingMode;
         gasWidgetInterface.setupResendSettings(mode, candidateTransaction.gasPrice);
         balanceDisplay.setVisibility(View.GONE);
+        networkDisplay.setVisibility(View.GONE);
         addressDetail.setVisibility(View.GONE);
         detailWidget.setVisibility(View.GONE);
         amountDisplay.setVisibility(View.GONE);

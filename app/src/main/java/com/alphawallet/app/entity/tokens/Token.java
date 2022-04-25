@@ -1,5 +1,8 @@
 package com.alphawallet.app.entity.tokens;
 
+import static android.text.Html.FROM_HTML_MODE_COMPACT;
+import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
+
 import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
@@ -10,23 +13,21 @@ import android.util.Pair;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.SyncDef;
+import com.alphawallet.app.entity.EventSync;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.StatusType;
+import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
@@ -34,9 +35,13 @@ import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 
 import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.methods.request.EthFilter;
+import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -45,23 +50,21 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Single;
 import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-
-import static android.text.Html.FROM_HTML_MODE_COMPACT;
-import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
 
 public class Token
 {
     public final static int TOKEN_BALANCE_PRECISION = 4;
     public final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
-    protected static final long MAX_SYNC_DEPTH_TEMP = 500000L;
 
     protected static OkHttpClient client;
 
@@ -80,6 +83,7 @@ public class Token
     public long lastTxTime;
     public int itemViewHeight;
     public TokenGroup group;
+    protected final EventSync eventSync;
 
     private final Map<BigInteger, Map<String, TokenScriptResult.Attribute>> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse, per tokenId
     private Map<BigInteger, List<String>> functionAvailabilityMap = null;
@@ -106,6 +110,7 @@ public class Token
         resultMap.clear();
 
         if (group == null) group = TokenGroup.ASSET; //default to Asset
+        eventSync = new EventSync(this);
     }
 
     public String getStringBalance()
@@ -519,9 +524,10 @@ public class Token
         return idList;
     }
 
-    public String convertValue(String prefix, String value, int precision)
+    public String convertValue(String prefix, EventResult vResult, int precision)
     {
-        return prefix + BalanceUtils.getScaledValueFixed(new BigDecimal(value),
+        BigDecimal val = (vResult != null) ? new BigDecimal(vResult.value) : BigDecimal.ZERO;
+        return prefix + BalanceUtils.getScaledValueFixed(val,
                 tokenInfo.decimals, precision);
     }
 
@@ -1011,105 +1017,51 @@ public class Token
         return false;
     }
 
-    protected SyncDef getSyncDef(Realm realm)
+    public Single<List<NFTAsset>> buildAssetList(TokenTransferData transferData)
     {
-        BigInteger currentBlock = TransactionsService.getCurrentBlock(tokenInfo.chainId);
-        BigInteger startingBlock = BigInteger.valueOf(getEarliestEventRead(realm));
-        BigInteger lastBlockRead = BigInteger.valueOf(getLastEventRead(realm));
-        BigInteger eventReadStartBlock;
-        BigInteger eventReadEndBlock;
+        return Single.fromCallable(() -> {
+            List<NFTAsset> assets = new ArrayList<>();
+            if (transferData == null || !isNonFungible()) return assets;
+            Map<String, EventResult> result = transferData.getEventResultMap();
+            EventResult amounts = result.get("amount");
+            EventResult counts = result.get("value");
+            if (amounts == null) return assets;
 
-        if (currentBlock.equals(BigInteger.ZERO)) return null;
-
-        boolean upwardSync = false;
-
-        if (startingBlock.compareTo(BigInteger.ZERO) < 0) //first sync
-        {
-            eventReadStartBlock = currentBlock.subtract(EthereumNetworkBase.getMaxEventFetch(tokenInfo.chainId));
-            eventReadEndBlock = currentBlock;
-        }
-        else if (lastBlockRead.compareTo(BigInteger.ZERO) < 0) // keep syncing down
-        {
-            eventReadStartBlock = startingBlock.subtract(EthereumNetworkBase.getMaxEventFetch(tokenInfo.chainId));
-            eventReadEndBlock = startingBlock;
-        }
-        else // We have synced far enough back, now commence sync from last block read and continue
-        {
-            // TODO: Find earliest contract transaction; chains without API this is not currently possible; replace magic number
-            if (currentBlock.subtract(lastBlockRead).compareTo(BigInteger.valueOf(10)) >= 0) //we have synced downwards, now sync as normal
+            for (int i = 0; i < amounts.values.length; i++)
             {
-                eventReadStartBlock = lastBlockRead;
-                eventReadEndBlock = lastBlockRead.add(EthereumNetworkBase.getMaxEventFetch(tokenInfo.chainId)).min(currentBlock);
-                upwardSync = true;
-            }
-            else
-            {
-                return null;
-            }
-        }
+                String tokenId = amounts.values[i];
+                String count = (counts == null || counts.values.length < i) ? "1" : counts.values[i];
 
-        if (eventReadStartBlock.compareTo(BigInteger.ZERO) <= 0)
-        {
-            eventReadStartBlock = BigInteger.ZERO;
-            upwardSync = true;
-        }
-        else if (currentBlock.subtract(eventReadStartBlock).compareTo(BigInteger.valueOf(MAX_SYNC_DEPTH_TEMP)) > 0)
-        {
-            upwardSync = true;
-        }
+                NFTAsset asset = getAssetForToken(tokenId);
+                if (asset == null) asset = fetchTokenMetadata(new BigInteger(tokenId));
 
-        return new SyncDef(eventReadStartBlock, eventReadEndBlock, upwardSync);
-    }
-
-    protected long getEarliestEventRead(Realm instance)
-    {
-        RealmAuxData rd = instance.where(RealmAuxData.class)
-                .equalTo("instanceKey", TokensRealmSource.databaseKey(tokenInfo.chainId, getAddress()))
-                .findFirst();
-
-        if (rd == null)
-        {
-            return -1L;
-        }
-        else
-        {
-            return rd.getResultReceivedTime();
-        }
-    }
-
-    protected long getLastEventRead(Realm instance)
-    {
-        RealmAuxData rd = instance.where(RealmAuxData.class)
-                .equalTo("instanceKey", TokensRealmSource.databaseKey(tokenInfo.chainId, getAddress()))
-                .findFirst();
-
-        if (rd == null)
-        {
-            return -1L;
-        }
-        else
-        {
-            return rd.getResultTime();
-        }
-    }
-
-    protected void updateEventReads(Realm realm, long startRead, long lastRead)
-    {
-        if (realm == null) return;
-        realm.executeTransaction(r -> {
-            String key = TokensRealmSource.databaseKey(tokenInfo.chainId, getAddress());
-            RealmAuxData rd = r.where(RealmAuxData.class)
-                    .equalTo("instanceKey", key)
-                    .findFirst();
-
-            if (rd == null)
-            {
-                rd = r.createObject(RealmAuxData.class, key); //create asset in realm
+                if (asset != null)
+                {
+                    asset.setSelectedBalance(new BigDecimal(count));
+                    assets.add(asset);
+                }
             }
 
-            rd.setResultReceivedTime(startRead);
-            rd.setResultTime(lastRead);
-            r.insertOrUpdate(rd);
+            return assets;
         });
+    }
+
+
+    /**
+     * Event filters for send and receive of the token, overriden by the token type
+     */
+    public EthFilter getReceiveBalanceFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
+    {
+        return null;
+    }
+
+    public EthFilter getSendBalanceFilter(Event event, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock)
+    {
+        return null;
+    }
+
+    public HashSet<BigInteger> processLogsAndStoreTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, Realm realm)
+    {
+        return null;
     }
 }

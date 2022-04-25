@@ -748,7 +748,7 @@
     <string name="transaction_progress_detail">လုပ်ငန်းစဥ်ကို Ethereum Blockchain ပေါ်သို့တင်ပြီးပြီပါပြီ။ အတည်ပြုသူများမှအတည်ပြုနေသည့်အတွက် မိနစ်အနည်းအငယ်ခန့်ကြာမြင့်နိုင်ပါသည်။</string>
     <string name="action_show_tx_details">လုပ်ငန်းစဥ်အသေးစိတ်ကိုဖော်ပြမည်</string>
     <string name="default_to">%1$s %2$s တို့သည် %3$sကိုပို့ပြီးပါပြီ</string>
-    <string name="default_from">%1$s နှင့် %2$s တို့သည် #3$sမှ လက်ခံရရှိပြီးပါပြီ</string>
+    <string name="default_from">%1$s နှင့် %2$s တို့သည် %3$sမှ လက်ခံရရှိပြီးပါပြီ</string>
     <string name="default_approved">%3$sမှ %1$s နှင့် %2$s သို့ရွှေ့ရန် သဘောတူလွှာကိုသင်လက်ခံရရှိပြီးပါပြီ</string>
     <string name="default_approve">%2$sကို %1$sသို့ပို့ရန်သဘောတူသည်</string>
     <string name="contract_call">စာချုပ်ချုပ်ဆိုခြင်း</string>

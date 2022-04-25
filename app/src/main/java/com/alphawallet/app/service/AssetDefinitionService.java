@@ -1342,18 +1342,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
                 storeActivityValue(walletAddress, ev, ethLog, blockTime, ev.activityName);
 
-                //do we need to fetch transaction from chain or do we have it already?
-                com.alphawallet.app.entity.Transaction tx = transactionRepository.fetchCachedTransaction(walletAddress, txHash);
-
-                if (tx == null)
-                {
-                    EventUtils.getTransactionDetails(txHash, web3j)
-                            .flatMap(ethTx -> transactionRepository.storeRawTx(new Wallet(walletAddress), ethTx, blockTime))
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(t -> Timber.d(t.toString()), this::onError)
-                            .isDisposed();
-                }
+                TransactionsService.addTransactionHashFetch(txHash, chainId, walletAddress);
             }
         }
 

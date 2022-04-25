@@ -24,13 +24,9 @@ import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
 import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmQuery;
@@ -46,12 +42,10 @@ public class ActivityHistoryList extends LinearLayout
     private Realm realm;
     private RealmResults<RealmTransaction> realmTransactionUpdates;
     private RealmQuery<RealmTransaction> realmUpdateQuery;
-    @Nullable private Disposable updateCheck; //performs a background check to ensure we get completion
     private final RecyclerView recentTransactionsView;
     private final LinearLayout noTxNotice;
     private final ProgressBar loadingTransactions;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final Context context;
 
     public ActivityHistoryList(Context context, @Nullable AttributeSet attrs)
     {
@@ -63,7 +57,6 @@ public class ActivityHistoryList extends LinearLayout
         recentTransactionsView.addItemDecoration(new ListDivider(getContext()));
         loadingTransactions = findViewById(R.id.loading_transactions);
         noTxNotice = findViewById(R.id.layout_no_recent_transactions);
-        this.context = context;
     }
 
     public void setupAdapter(ActivityAdapter adapter)
@@ -72,29 +65,26 @@ public class ActivityHistoryList extends LinearLayout
         recentTransactionsView.setAdapter(adapter);
     }
 
-    public void startActivityListeners(Realm realm, Wallet wallet, Token token, TokensService svs, BigInteger tokenId, final int historyCount)
+    public void startActivityListeners(Realm realm, Wallet wallet, Token token, TokensService svs, final int historyCount)
     {
         this.realm = realm;
 
         activityAdapter.setItemLimit(historyCount);
 
-        //stop any existing listeners (could be view refresh)
-        if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
-
+        //handle updated realm transactions
         if (!token.isEthereum() || svs.isChainToken(token.tokenInfo.chainId, token.getAddress()))
         {
             realmUpdateQuery = getContractListener(token.tokenInfo.chainId, token.getAddress(), historyCount);
-            initViews(false);
         }
         else
         {
             realmUpdateQuery = getEthListener(token.tokenInfo.chainId, wallet, historyCount);
-            initViews(true);
         }
+
+        if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
 
         realmTransactionUpdates = realmUpdateQuery.findAllAsync();
 
-        //handle updated realm transactions
         realmTransactionUpdates.addChangeListener(result -> handleRealmTransactions(result, wallet));
     }
 
@@ -127,11 +117,13 @@ public class ActivityHistoryList extends LinearLayout
 
         if (hasPending)
         {
-            startUpdateCheck(wallet);
-        }
-        else
-        {
-            stopUpdateCheck();
+            handler.postDelayed(() ->
+            {
+                if (realm != null && !realm.isClosed()) //in theory this shouldn't happen because we remove all handler messages in onDestroy
+                {
+                    realm.refresh();
+                }
+            }, 5000);
         }
     }
 
@@ -171,28 +163,13 @@ public class ActivityHistoryList extends LinearLayout
         return transferData;
     }
 
-    private void initViews(boolean isEth)
-    {
-//        TextView noTransactionsSubText = findViewById(R.id.no_recent_transactions_subtext);
-//
-//        if (isEth)
-//        {
-//            noTransactionsSubText.setText(context.getString(R.string.no_recent_transactions_subtext,
-//                    context.getString(R.string.no_recent_transactions_subtext_ether)));
-//        }
-//        else
-//        {
-//            noTransactionsSubText.setText(context.getString(R.string.no_recent_transactions_subtext,
-//                    context.getString(R.string.no_recent_transactions_subtext_tokens)));
-//        }
-    }
-
     private RealmQuery<RealmTransaction> getContractListener(long chainId, String tokenAddress, int count)
     {
         return realm.where(RealmTransaction.class)
                 .sort("timeStamp", Sort.DESCENDING)
-                .beginGroup().not().equalTo("input", "0x").and().equalTo("to", tokenAddress, Case.INSENSITIVE)
-                             .or().equalTo("contractAddress", tokenAddress).endGroup()
+                .beginGroup().not().equalTo("input", "0x").and()
+                .beginGroup().equalTo("to", tokenAddress, Case.INSENSITIVE)
+                .or().equalTo("contractAddress", tokenAddress, Case.INSENSITIVE).endGroup().endGroup()
                 .equalTo("chainId", chainId)
                 .limit(count);
     }
@@ -230,37 +207,10 @@ public class ActivityHistoryList extends LinearLayout
 
     public void onDestroy()
     {
+        handler.removeCallbacksAndMessages(null);
         if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
         if (realm != null && !realm.isClosed()) realm.close();
-        handler.removeCallbacksAndMessages(null);
-        stopUpdateCheck();
         if (activityAdapter != null && recentTransactionsView != null) activityAdapter.onDestroy(recentTransactionsView);
-    }
-
-    //Start update check on the database if anything is pending. Sometimes the listener doesn't pick up the change.
-    private void startUpdateCheck(final Wallet wallet)
-    {
-        if (updateCheck == null || updateCheck.isDisposed())
-        {
-            updateCheck = Observable.interval(0, 10, TimeUnit.SECONDS)
-                    .doOnNext(l -> checkTransactions(wallet)).subscribe();
-        }
-    }
-
-    private void stopUpdateCheck()
-    {
-        if (updateCheck != null && !updateCheck.isDisposed()) updateCheck.dispose();
-        updateCheck = null;
-    }
-
-    private void checkTransactions(final Wallet wallet)
-    {
-        if (realmUpdateQuery != null)
-        {
-            handler.post(() -> {
-                RealmResults<RealmTransaction> rTx = realmUpdateQuery.findAll();
-                handleRealmTransactions(rTx, wallet);
-            });
-        }
+        realmUpdateQuery = null;
     }
 }

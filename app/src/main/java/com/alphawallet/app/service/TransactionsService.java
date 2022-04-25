@@ -63,7 +63,6 @@ public class TransactionsService
 
     private final static int TRANSACTION_DROPPED = -1;
     private final static int TRANSACTION_SEEN = -2;
-    private boolean txSyncRunning = false;
 
     @Nullable
     private Disposable fetchTransactionDisposable;

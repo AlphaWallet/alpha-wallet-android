@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,8 +23,8 @@ public class NumericInputBottomSheet extends ConstraintLayout
 {
     private final TextView textAmountMax;
     private final NumericInput textAmount;
-    private final Button buttonUp;
-    private final Button buttonDown;
+    private final ImageButton buttonUp;
+    private final ImageButton buttonDown;
     private final ImageView cancel;
     private AmountReadyCallback amountReady;
     private final boolean gotFocus;

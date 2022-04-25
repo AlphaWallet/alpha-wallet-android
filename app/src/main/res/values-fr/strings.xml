@@ -74,7 +74,6 @@
     <string name="action_share">Partager</string>
     <string name="action_more_details">Plus de détails</string>
     <string name="action_add_wallet">Ajouter portefeuille</string>
-    <string name="action_add_token">Ajouter Token</string>
     <string name="action_open_etherscan">Voir sur Block Explorer</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>
@@ -905,4 +904,6 @@
     <string name="unable_to_upgrade_key">Unable to upgrade key: %1$s</string>
     <string name="no_key_found">No Key found</string>
     <string name="unable_store_key">Unable to store key: %1$s</string>
+    <string name="title_ens_lookup_warning">ENS Lookup Warning</string>
+    <string name="message_ens_node_not_sync">AlphaWallet has detected a discrepancy between ethereum\'s timestamp and your device\'s current time, or possibly the blockchain connection is not synchronized, please check your phone\'s time is correct, or ignore this warning.</string>
 </resources>

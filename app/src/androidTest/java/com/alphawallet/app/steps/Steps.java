@@ -47,6 +47,7 @@ public class Steps
 
     public static void visit(String urlString)
     {
+        Helper.wait(1);
         navigateToBrowser();
         onView(withId(R.id.url_tv)).perform(replaceText(urlString), pressImeActionButton());
     }

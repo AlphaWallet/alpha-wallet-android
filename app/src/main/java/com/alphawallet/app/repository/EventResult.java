@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository;
 
+import android.text.TextUtils;
+
 /**
  * Created by JB on 17/12/2020.
  */
@@ -13,7 +15,15 @@ public class EventResult
     {
         type = t;
 
-        values = v.split("-");
-        value = values[0];
+        if (!TextUtils.isEmpty(v))
+        {
+            values = v.split("-");
+            value = values[0];
+        }
+        else
+        {
+            values = new String[0];
+            value = "";
+        }
     }
 }

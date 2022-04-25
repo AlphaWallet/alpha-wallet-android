@@ -28,6 +28,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
+import com.alphawallet.app.util.LibraryHelper;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
@@ -86,7 +87,7 @@ public class GasService implements ContractGasProvider
     private Disposable gasFetchDisposable;
 
     static {
-        System.loadLibrary("keys");
+        LibraryHelper.loadKeysLibrary();
     }
 
     public static native String getEtherscanKey();

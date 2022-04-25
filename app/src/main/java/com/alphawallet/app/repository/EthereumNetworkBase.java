@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.util.LibraryHelper;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ChainSpec;
 import com.google.gson.Gson;
@@ -96,7 +97,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
      */
 
     static {
-        System.loadLibrary("keys");
+        LibraryHelper.loadKeysLibrary();
     }
 
     public static native String getAmberDataKey();

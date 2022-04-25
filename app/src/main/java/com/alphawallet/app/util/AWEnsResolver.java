@@ -48,7 +48,7 @@ public class AWEnsResolver extends EnsResolver
 
     static
     {
-        System.loadLibrary("keys");
+        LibraryHelper.loadKeysLibrary();
     }
 
     public static native String getOpenSeaKey();

@@ -17,6 +17,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.util.KeyboardUtils;
+import com.alphawallet.app.util.LibraryHelper;
 import com.alphawallet.app.util.Utils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.mailchimp.sdk.api.model.Contact;
@@ -32,7 +33,7 @@ import java.util.Collections;
 public class EmailPromptView extends LinearLayout implements StandardFunctionInterface {
 
     static {
-        System.loadLibrary("keys");
+        LibraryHelper.loadKeysLibrary();
     }
 
     private BottomSheetDialog parentDialog;

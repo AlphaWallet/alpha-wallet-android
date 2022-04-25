@@ -13,6 +13,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.util.JsonUtils;
+import com.alphawallet.app.util.LibraryHelper;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.gson.Gson;
 
@@ -28,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Single;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 import timber.log.Timber;
 
@@ -48,7 +48,7 @@ public class OpenSeaService
 
     static
     {
-        System.loadLibrary("keys");
+        LibraryHelper.loadKeysLibrary();
     }
 
     public static native String getOpenSeaKey();

@@ -197,8 +197,8 @@ dependencies {
     // Dagger 2
 
     // dagger-hilt
-    implementation "com.google.dagger:hilt-android:2.40.5"
-    annotationProcessor "com.google.dagger:hilt-compiler:2.40.5"
+    implementation "com.google.dagger:hilt-android:2.41"
+    annotationProcessor "com.google.dagger:hilt-compiler:2.41"
 
     // WebKit - for WebView Dark Mode
     implementation 'androidx.webkit:webkit:1.4.0'
@@ -218,10 +218,13 @@ dependencies {
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
+    testImplementation 'androidx.constraintlayout:constraintlayout-core:1.0.3'
 
     // Component tests
     testImplementation 'org.robolectric:robolectric:4.7.3'
     testImplementation 'androidx.test:core:1.4.0'
+    testImplementation 'com.google.dagger:hilt-android-testing:2.41'
+    testAnnotationProcessor 'com.google.dagger:hilt-compiler:2.41'
 
     // E2e tests
     androidTestImplementation 'androidx.test:runner:1.4.0'

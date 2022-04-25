@@ -24,7 +24,6 @@ import android.security.keystore.KeyProperties;
 import android.security.keystore.StrongBoxUnavailableException;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -46,6 +45,7 @@ import com.alphawallet.app.entity.cryptokeys.KeyEncodingType;
 import com.alphawallet.app.entity.cryptokeys.KeyServiceException;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
+import com.alphawallet.app.util.LibraryHelper;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 
@@ -72,7 +72,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -159,7 +158,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     public KeyService(Context ctx, AnalyticsServiceType<AnalyticsProperties> analyticsService)
     {
-        System.loadLibrary("TrustWalletCore");
+        LibraryHelper.loadKeysTrustWalletCoreLibrary();
         this.context = ctx;
         this.analyticsService = analyticsService;
         checkSecurity();

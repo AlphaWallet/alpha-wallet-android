@@ -20,7 +20,6 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.util.Patterns;
 import android.util.TypedValue;
 import android.webkit.URLUtil;
@@ -29,7 +28,6 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.RawRes;
 import androidx.fragment.app.FragmentActivity;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
@@ -76,7 +74,7 @@ public class Utils {
     private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
     private static final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
     private static final String TOKEN_LOGO = "/logo.png";
-    public  static final String ALPHAWALLET_REPO_NAME = "https://raw.githubusercontent.com/alphawallet/iconassets/master/";
+    public  static final String ALPHAWALLET_REPO_NAME = "https://raw.githubusercontent.com/alphawallet/iconassets/lowercased/";
     private static final String TRUST_ICON_REPO_BASE = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/";
     private static final String TRUST_ICON_REPO = TRUST_ICON_REPO_BASE + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
     private static final String ALPHAWALLET_ICON_REPO = ALPHAWALLET_REPO_NAME + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
@@ -709,16 +707,16 @@ public class Utils {
 
     public static String localiseUnixTime(Context ctx, long timeStampInSec)
     {
-        Date date = new java.util.Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
-        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
+        Date date = new Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
+        DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
         return timeFormat.format(date);
     }
 
     public static String localiseUnixDate(Context ctx, long timeStampInSec)
     {
-        Date date = new java.util.Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
-        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
-        DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(ctx));
+        Date date = new Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
+        DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
+        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(ctx));
         return timeFormat.format(date) + " | " + dateFormat.format(date);
     }
 
@@ -798,12 +796,7 @@ public class Utils {
     @NotNull
     public static String getTokenImageUrl(String address)
     {
-        return ALPHAWALLET_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, Keys.toChecksumAddress(address));
-    }
-
-    public static String getAWIconRepo(String address)
-    {
-        return ALPHAWALLET_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, Keys.toChecksumAddress(address));
+        return ALPHAWALLET_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, address.toLowerCase());
     }
 
     public static boolean isContractCall(Context context, String operationName)

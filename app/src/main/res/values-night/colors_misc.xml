@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Misc Palette -->
+    <color name="button_primary_disabled">@color/mine</color>
+    <color name="surface_faded">#B3424242</color>
+
+</resources>

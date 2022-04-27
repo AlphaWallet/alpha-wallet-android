@@ -5,6 +5,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -649,15 +650,17 @@ public class HomeViewModel extends BaseViewModel {
                 xmlInputStream, locale, null);
     }
 
-    public void importScriptFile(Context ctx, String importData, boolean appExternal)
+    public void importScriptFile(Context ctx, boolean appExternal, Intent startIntent)
     {
+        Uri uri = startIntent.getData();
+        final ContentResolver contentResolver = ctx.getContentResolver();
         try
         {
-            InputStream iStream = ctx.getApplicationContext().getContentResolver().openInputStream(Uri.parse(importData));
+            InputStream iStream = contentResolver.openInputStream(uri);
             TokenDefinition td = parseFile(ctx, iStream);
-            if (td.holdingToken == null || td.holdingToken.length() == 0) return; //tokenscript with no holding token is currently meaningless. Is this always the case?
+            if (td.holdingToken == null || td.holdingToken.length() == 0)
+                return; //tokenscript with no holding token is currently meaningless. Is this always the case?
 
-            byte[] writeBuffer = new byte[32768];
             String newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
             newFileName = newFileName + ".tsml";
 
@@ -670,22 +673,23 @@ public class HomeViewModel extends BaseViewModel {
                 newFileName = Environment.getExternalStorageDirectory() + File.separator + ALPHAWALLET_DIR + File.separator + newFileName;
             }
 
-            //Store
-            iStream = ctx.getApplicationContext().getContentResolver().openInputStream(Uri.parse(importData));
-            FileOutputStream fos = new FileOutputStream(newFileName);
-
-            while (iStream.available() > 0)
+            //Store the new Definition
+            try (FileOutputStream fos = new FileOutputStream(newFileName))
             {
-                fos.write(writeBuffer, 0, iStream.read(writeBuffer));
+                byte[] writeBuffer = new byte[32768];
+                iStream = contentResolver.openInputStream(uri);
+                while (iStream.available() > 0)
+                {
+                    fos.write(writeBuffer, 0, iStream.read(writeBuffer));
+                }
+                fos.flush();
             }
 
             iStream.close();
-            fos.flush();
-            fos.close();
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            Timber.w(e);
         }
     }
 

@@ -782,6 +782,11 @@ public class TokenFunctionViewModel extends BaseViewModel {
     {
         loadExistingMetadata(token, tokenId);
 
+        reloadMetadata(token, tokenId);
+    }
+
+    public void reloadMetadata(Token token, BigInteger tokenId)
+    {
         openseaDisposable = openseaService.getAsset(token, tokenId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

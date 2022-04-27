@@ -47,6 +47,7 @@ public class NFTAsset implements Parcelable
         }
     };
     private static final String LOADING_TOKEN = "*Loading*";
+    private static final String ID = "id";
     private static final String NAME = "name";
     private static final String IMAGE = "image";
     private static final String IMAGE_URL = "image_url";
@@ -249,12 +250,17 @@ public class NFTAsset implements Parcelable
         {
             JSONObject jsonData = new JSONObject(metaData);
             Iterator<String> keys = jsonData.keys();
+            String id = null;
 
             while (keys.hasNext())
             {
                 String key = keys.next();
                 String value = jsonData.getString(key);
-                if (!ATTRIBUTE_DESCRIPTOR.contains(key))
+                if (key.equals(ID))
+                {
+                    id = value;
+                }
+                else if (!ATTRIBUTE_DESCRIPTOR.contains(key))
                 {
                     if (validJSONString(value) && DESIRED_PARAMS.contains(key))
                         assetMap.put(key, value);
@@ -269,6 +275,12 @@ public class NFTAsset implements Parcelable
                             attributeMap.put(order.getString("trait_type"), order.getString("value"));
                     }
                 }
+            }
+
+            //create name if none present and metadata is valid (this handles an edge condition where there's no name)
+            if (!TextUtils.isEmpty(getImage()) && TextUtils.isEmpty(getName()) && id != null)
+            {
+                assetMap.put(NAME, "ID #" + id);
             }
         }
         catch (JSONException e)

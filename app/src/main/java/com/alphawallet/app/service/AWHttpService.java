@@ -39,6 +39,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 import okio.BufferedSource;
+import timber.log.Timber;
 
 /** HTTP implementation of our services API. */
 public class AWHttpService extends HttpService
@@ -144,12 +145,9 @@ public class AWHttpService extends HttpService
             }
             else
             {
+                Timber.d("performIO: throw SocketTimeoutException");
                 throw new SocketTimeoutException();
             }
-        }
-        catch (Exception e)
-        {
-            return buildNullInputStream();
         }
 
         if (response.code()/100 == 4) //rate limited
@@ -162,6 +160,7 @@ public class AWHttpService extends HttpService
 
     private InputStream trySecondaryNode(String request) throws IOException
     {
+        Timber.d("trySecondaryNode: ");
         RequestBody requestBody = RequestBody.create(request, JSON_MEDIA_TYPE);
         Headers headers = buildHeaders();
 
@@ -170,14 +169,7 @@ public class AWHttpService extends HttpService
 
         okhttp3.Response response;
 
-        try
-        {
-            response = httpClient.newCall(httpRequest).execute();
-        }
-        catch (InterruptedIOException e)
-        {
-            return buildNullInputStream();
-        }
+        response = httpClient.newCall(httpRequest).execute();
 
         return processNodeResponse(response, request, true);
     }

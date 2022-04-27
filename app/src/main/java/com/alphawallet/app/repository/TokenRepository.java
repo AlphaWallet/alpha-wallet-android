@@ -1180,11 +1180,18 @@ public class TokenRepository implements TokenRepositoryType {
         localSource.storeTokenUrl(networkId, address, imageUrl);
     }
 
+    // uses default timeout of 10 seconds
     public static Web3j getWeb3jService(long chainId)
+    {
+        return getWeb3jService(chainId, 10);
+    }
+
+    // create web3j service with specified timeout in httpclient
+    public static Web3j getWeb3jService(long chainId, long timeout)
     {
         OkHttpClient okClient = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(timeout, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();

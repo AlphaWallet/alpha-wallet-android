@@ -13,7 +13,6 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.BalanceUtils;
-import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -26,8 +25,6 @@ public class BalanceDisplayWidget extends LinearLayout
 {
     public final TextView balance;
     public final TextView newBalance;
-    private final ChainName chainName;
-    private final TokenIcon chainIcon;
     private final TokenIcon tokenIcon;
     private Transaction transaction;
 
@@ -37,16 +34,11 @@ public class BalanceDisplayWidget extends LinearLayout
         inflate(context, R.layout.item_balance_display, this);
         balance = findViewById(R.id.text_balance);
         newBalance = findViewById(R.id.text_new_balance);
-        chainName = findViewById(R.id.chain_name);
-        chainIcon = findViewById(R.id.chain_icon);
         tokenIcon = findViewById(R.id.token_icon);
     }
 
     public void setupBalance(Token token, TokensService tokenService, Transaction tx)
     {
-        chainName.setChainID(token.tokenInfo.chainId);
-        chainIcon.bindData(tokenService.getToken(token.tokenInfo.chainId, tokenService.getCurrentAddress()), tokenService);
-
         if (token.isNonFungible())
         {
             tokenIcon.setVisibility(View.VISIBLE);

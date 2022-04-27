@@ -67,7 +67,6 @@
     <string name="action_share">共享</string>
     <string name="action_more_details">更多详情</string>
     <string name="action_add_wallet">添加钱包</string>
-    <string name="action_add_token">添加通证</string>
     <string name="action_open_etherscan">在Block Explorer上查看</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>

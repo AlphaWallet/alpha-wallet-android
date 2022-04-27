@@ -74,7 +74,6 @@
     <string name="action_share">Chia sẻ</string>
     <string name="action_more_details">Chi tiết</string>
     <string name="action_add_wallet">Thêm ví</string>
-    <string name="action_add_token">Thêm loại tiền</string>
     <string name="action_open_etherscan">Xem trên Block Explorer</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>

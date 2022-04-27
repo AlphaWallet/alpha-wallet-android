@@ -106,59 +106,41 @@ public class NFTImageView extends RelativeLayout
 
     public void setupTokenImageThumbnail(NFTAsset asset)
     {
-        loadTokenImage(asset, asset.getThumbnail());
+        loadImage(asset.getThumbnail(), asset.getBackgroundColor());
     }
 
     public void setupTokenImage(NFTAsset asset)
     {
-        progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
-        loadTokenImage(asset, asset.getImage());
+        if (shouldLoad(asset.getImage()))
+        {
+            showLoadingProgress(true);
+            progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
+            loadImage(asset.getImage(), asset.getBackgroundColor());
+        }
     }
 
     public void setupTokenImage(OpenSeaAsset asset)
     {
-        progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
-        loadTokenImage(asset);
-    }
-
-    private void loadTokenImage(OpenSeaAsset asset)
-    {
-        this.imageUrl = asset.getImageUrl();
-        fallbackLayout.setVisibility(View.GONE);
-        image.setVisibility(View.VISIBLE);
-
-        if (!TextUtils.isEmpty(asset.backgroundColor))
+        if (shouldLoad(asset.getImageUrl()))
         {
-            int color = Color.parseColor("#" + asset.backgroundColor);
-            holdingView.setBackgroundColor(color);
+            showLoadingProgress(true);
+            progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
+            loadImage(asset.getImageUrl(), asset.backgroundColor);
         }
-
-        loadRequest = Glide.with(image.getContext())
-                .load(this.imageUrl)
-                .centerCrop()
-                .transition(withCrossFade())
-                .override(Target.SIZE_ORIGINAL)
-                .listener(requestListener)
-                .into(new DrawableImageViewTarget(image)).getRequest();
     }
 
-    private void loadTokenImage(NFTAsset asset, String imageUrl)
+    private void loadImage(String url, String backgroundColor)
     {
-        this.imageUrl = imageUrl;
+        setWebViewHeight((int)getLayoutParams().width);
+
+        this.imageUrl = url;
         fallbackLayout.setVisibility(View.GONE);
         image.setVisibility(View.VISIBLE);
+        webLayout.setVisibility(View.GONE);
 
-        loadRequest = Glide.with(image.getContext())
-                .load(this.imageUrl)
-                .centerCrop()
-                .transition(withCrossFade())
-                .override(Target.SIZE_ORIGINAL)
-                .listener(requestListener)
-                .into(new DrawableImageViewTarget(image)).getRequest();
-
-        if (!asset.needsLoading() && asset.getBackgroundColor() != null && !asset.getBackgroundColor().equals("null"))
+        if (!TextUtils.isEmpty(backgroundColor))
         {
-            int color = Color.parseColor("#" + asset.getBackgroundColor());
+            int color = Color.parseColor("#" + backgroundColor);
             holdingView.setBackgroundColor(color);
         }
         else
@@ -166,7 +148,13 @@ public class NFTImageView extends RelativeLayout
             holdingView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent));
         }
 
-        hasContent = true;
+        loadRequest = Glide.with(image.getContext())
+                .load(url)
+                .centerCrop()
+                .transition(withCrossFade())
+                .override(Target.SIZE_ORIGINAL)
+                .listener(requestListener)
+                .into(new DrawableImageViewTarget(image)).getRequest();
     }
 
     private void setWebView(String imageUrl)
@@ -239,7 +227,7 @@ public class NFTImageView extends RelativeLayout
 
     public boolean shouldLoad(String url)
     {
-        if (this.imageUrl == null)
+        if (!TextUtils.isEmpty(url) && this.imageUrl == null)
         {
             return true;
         }
@@ -254,5 +242,10 @@ public class NFTImageView extends RelativeLayout
                 return !this.imageUrl.equals(url);
             }
         }
+    }
+
+    public void clearImage()
+    {
+        imageUrl = null;
     }
 }

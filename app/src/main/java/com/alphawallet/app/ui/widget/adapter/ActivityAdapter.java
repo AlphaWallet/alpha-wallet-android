@@ -7,7 +7,6 @@ package com.alphawallet.app.ui.widget.adapter;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -15,7 +14,6 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.AdapterCallback;
@@ -145,9 +143,9 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         {
             holder.setFromTokenView();
         }
-        else if (position > lastItemPos && dataInteract != null && System.currentTimeMillis() > fetchData && position > items.size() - 100)
+        else if (position > lastItemPos && dataInteract != null && System.currentTimeMillis() > fetchData && position > items.size() - 5)
         {
-            fetchData = System.currentTimeMillis() + 500;
+            fetchData = System.currentTimeMillis() + 2500;
             handler.post(checkData);
         }
         lastItemPos = position;

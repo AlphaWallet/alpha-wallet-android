@@ -455,6 +455,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private BigDecimal updateERC721Balance(Token token, Wallet wallet)
     {
+        token.setTokenWallet(wallet.address);
         try (Realm realm = getRealmInstance(wallet))
         {
             token.updateBalance(realm);

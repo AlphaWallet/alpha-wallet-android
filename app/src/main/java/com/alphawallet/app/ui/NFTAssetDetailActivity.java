@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -90,6 +89,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private Animation rotation;
     private ActivityResultLauncher<Intent> handleTransactionSuccess;
     private ActivityResultLauncher<Intent> getGasSettings;
+    private boolean triggeredReload;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -229,10 +229,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void reloadMetadata()
     {
+        triggeredReload = true;
         refreshMenu = findViewById(R.id.action_reload_metadata);
         refreshMenu.startAnimation(rotation);
         progressBar.setVisibility(View.VISIBLE);
-        viewModel.getAsset(token, tokenId);
+        viewModel.reloadMetadata(token, tokenId);
     }
 
     private void clearRefreshAnimation()
@@ -269,7 +270,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         if (asset != null)
         {
-            updateTokenImage(asset.getImage());
+            this.asset = asset;
+
+            updateTokenImage(asset);
 
             addMetaDataInfo(asset);
 
@@ -279,20 +282,27 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
-    private void updateTokenImage(String imageUrl)
+    private void updateTokenImage(NFTAsset asset)
     {
-        if (tokenImage.shouldLoad(imageUrl))
+        if (triggeredReload) tokenImage.clearImage();
+        tokenImage.setupTokenImage(asset);
+        triggeredReload = false;
+
+        if (TextUtils.isEmpty(asset.getImage()))
         {
-            if (TextUtils.isEmpty(imageUrl))
-            {
-                tokenImage.showFallbackLayout(token);
-            }
-            else
-            {
-                tokenImage.setWebViewHeight(tokenImage.getLayoutParams().width);
-                tokenImage.showLoadingProgress(true);
-                tokenImage.setupTokenImage(asset);
-            }
+            tokenImage.showFallbackLayout(token);
+        }
+    }
+
+    private void updateTokenImage(OpenSeaAsset asset)
+    {
+        if (triggeredReload) tokenImage.clearImage();
+        tokenImage.setupTokenImage(asset);
+        triggeredReload = false;
+
+        if (TextUtils.isEmpty(asset.getImageUrl()))
+        {
+            tokenImage.showFallbackLayout(token);
         }
     }
 
@@ -332,7 +342,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         updateDefaultTokenData();
 
-        updateTokenImage(openSeaAsset.getImageUrl());
+        updateTokenImage(openSeaAsset);
 
         String name = openSeaAsset.name;
         if (!TextUtils.isEmpty(name))

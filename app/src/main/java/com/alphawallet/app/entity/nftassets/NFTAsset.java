@@ -405,6 +405,13 @@ public class NFTAsset implements Parcelable
                 assetMap.put(IMAGE_PREVIEW, oldAsset.getAssetValue(IMAGE_PREVIEW));
             balance = oldAsset.balance;
 
+            updateAsset(oldAsset);
+
+            if (assetMap.size() > 1)
+            {
+                assetMap.remove(LOADING_TOKEN);
+            }
+
             // Check OpenSeaAsset for meaningful data
             if (oldAsset.openSeaAsset != null)
             {

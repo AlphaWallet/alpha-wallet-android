@@ -22,9 +22,14 @@
             app:tint="?colorControlNormal" />
 
         <LinearLayout
+            android:id="@+id/title_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_toStartOf="@id/btn_max"
+            android:layout_toEndOf="@id/image_close"
+            android:gravity="center"
             android:orientation="horizontal">
 
             <TextView

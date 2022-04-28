@@ -2,7 +2,6 @@ package com.alphawallet.app.repository;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionData;
@@ -16,11 +15,6 @@ import com.alphawallet.token.entity.Signable;
 
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.core.methods.response.EthTransaction;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.rlp.RlpEncoder;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpType;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;

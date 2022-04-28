@@ -29,7 +29,6 @@ import java.util.List;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-import timber.log.Timber;
 
 public class TransactionRepository implements TransactionRepositoryType {
 

@@ -668,31 +668,12 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         Timber.d("txError: %s", throwable.getMessage());
         if (throwable instanceof SocketTimeoutException)
         {
-            // dismiss & show timeout dialog
-            if (dialog != null && dialog.isShowing()) dialog.dismiss();
-            dialog = new AWalletAlertDialog(this);
-            dialog.setIcon(WARNING);
-            dialog.setTitle(R.string.error_transaction_timeout);
-            dialog.setMessage(R.string.message_transaction_timeout);
-            dialog.setButton(R.string.ok, v -> {
-                dialog.dismiss();
-            });
-            dialog.show();
+            showTxnTimeoutDialog();
         }
         else
         {
-            if (dialog != null && dialog.isShowing()) dialog.dismiss();
-            dialog = new AWalletAlertDialog(this);
-            dialog.setIcon(ERROR);
-            dialog.setTitle(R.string.error_transaction_failed);
-            dialog.setMessage(throwable.getMessage());
-            dialog.setButtonText(R.string.button_ok);
-            dialog.setButtonListener(v -> {
-                dialog.dismiss();
-            });
-            dialog.show();
+            showTxnErrorDialog(throwable);
         }
-
         confirmationDialog.dismiss();
     }
 
@@ -744,5 +725,32 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         {
             Timber.e(e);
         }
+    }
+
+    void showTxnErrorDialog(Throwable t)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(ERROR);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(t.getMessage());
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    void showTxnTimeoutDialog()
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(WARNING);
+        dialog.setTitle(R.string.error_transaction_timeout);
+        dialog.setMessage(R.string.message_transaction_timeout);
+        dialog.setButton(R.string.ok, v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 }

@@ -91,7 +91,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<TransactionData> create1559TransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasLimit, BigInteger maxFeePerGas, BigInteger maxPriorityFee, long nonce, byte[] data, long chainId) {
-		final Web3j web3j = getWeb3jService(chainId, C.SEND_TRANSACTION_TIMEOUT);
+		final Web3j web3j = getWeb3jService(chainId);
 
 		TransactionData txData = new TransactionData();
 
@@ -121,7 +121,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
-		final Web3j web3j = getWeb3jService(chainId, C.SEND_TRANSACTION_TIMEOUT);
+		final Web3j web3j = getWeb3jService(chainId);
 		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
 
 		TransactionData txData = new TransactionData();
@@ -167,7 +167,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	 */
 	@Override
 	public Single<TransactionData> getSignatureForTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
-		final Web3j web3j = getWeb3jService(chainId, C.SEND_TRANSACTION_TIMEOUT);
+		final Web3j web3j = getWeb3jService(chainId);
 		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
 		TransactionData txData = new TransactionData();
 

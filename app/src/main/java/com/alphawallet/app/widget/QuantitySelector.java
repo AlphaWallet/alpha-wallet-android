@@ -85,7 +85,7 @@ public class QuantitySelector extends RelativeLayout implements TextWatcher, Tex
 
     public void reset()
     {
-        set(0);
+        set(min);
     }
 
     public int getQuantity()

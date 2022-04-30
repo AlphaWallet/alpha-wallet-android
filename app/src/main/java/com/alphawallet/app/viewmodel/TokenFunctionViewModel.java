@@ -816,6 +816,8 @@ public class TokenFunctionViewModel extends BaseViewModel {
                     {
                         // If asset does not have name, description or image, load from contract later
                         loadedFromApi = true;
+                        //update storage if required
+                        storeAsset(token, tokenId, new NFTAsset(result), oldAsset);
                     }
                     else
                     {

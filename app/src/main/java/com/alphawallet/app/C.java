@@ -299,4 +299,5 @@ public abstract class C {
     public static final String OPENSEA_SINGLE_ASSET_API_MAINNET = "https://api.opensea.io/api/v1/asset/";
     public static final String OPENSEA_SINGLE_ASSET_API_RINKEBY = "https://testnets-api.opensea.io/api/v1/asset/";
     public static final String OPENSEA_SINGLE_ASSET_API_MATIC = "https://api.opensea.io/api/v2/metadata/matic/";
+
 }

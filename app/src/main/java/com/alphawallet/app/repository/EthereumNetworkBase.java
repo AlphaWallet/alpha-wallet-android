@@ -114,11 +114,16 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String FREE_MUMBAI_RPC_URL = "https://rpc-mumbai.maticvigil.com";
     public static final String FREE_OPTIMISM_RPC_URL = "https://mainnet.optimism.io";
     public static final String FREE_ARBITRUM_TEST_RPC_URL = "https://rinkeby.arbitrum.io/rpc";
+    public static final String FREE_KOVAN_RPC_URL = "https://kovan.poa.network";
+    public static final String FREE_OPTIMISM_TESTRPC_URL = "https://kovan.optimism.io";
+    public static final String FREE_PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/3a961d6501e54add9a41aa53f15de99b";
 
     public static final String MAINNET_RPC_URL = usesProductionKey ? "https://mainnet.infura.io/v3/" + getInfuraKey()
             : FREE_MAINNET_RPC_URL;
     public static final String RINKEBY_RPC_URL = usesProductionKey ? "https://rinkeby.infura.io/v3/" + getInfuraKey()
             : FREE_RINKEBY_RPC_URL;
+    public static final String KOVAN_RPC_URL = usesProductionKey ? "https://kovan.infura.io/v3/" + getInfuraKey()
+            : FREE_KOVAN_RPC_URL;
     public static final String GOERLI_RPC_URL  = usesProductionKey ? "https://goerli.infura.io/v3/" + getInfuraKey()
             : FREE_GOERLI_RPC_URL;
     public static final String MATIC_RPC_URL   = usesProductionKey ? "https://polygon-mainnet.infura.io/v3/" + getInfuraKey()
@@ -129,8 +134,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             : FREE_MUMBAI_RPC_URL;
     public static final String OPTIMISTIC_MAIN_URL = usesProductionKey ? "https://optimism-mainnet.infura.io/v3/" + getInfuraKey()
             : FREE_OPTIMISM_RPC_URL;
+    public static final String OPTIMISTIC_TEST_URL = usesProductionKey ? "https://optimism-kovan.infura.io/v3/" + getInfuraKey()
+            : FREE_OPTIMISM_TESTRPC_URL;
     public static final String ARBITRUM_TESTNET_RPC = usesProductionKey ? "https://arbitrum-rinkeby.infura.io/v3/" + getInfuraKey()
             : FREE_ARBITRUM_TEST_RPC_URL;
+    public static final String PALM_RPC_URL = usesProductionKey ? "https://palm-mainnet.infura.io/v3/" + getInfuraKey()
+            : FREE_PALM_RPC_URL;
 
     //Note that AlphaWallet now uses a double node configuration. See class AWHttpService comment 'try primary node'.
     //If you supply a main RPC and secondary it will try the secondary if the primary node times out after 10 seconds.
@@ -143,7 +152,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + getInfuraKey();
     public static final String ROPSTEN_FALLBACK_RPC_URL = "https://ropsten.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String RINKEBY_FALLBACK_RPC_URL = "https://rinkeby.infura.io/v3/" + getSecondaryInfuraKey();
-    public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/" + getInfuraKey();
     public static final String KOVAN_FALLBACK_RPC_URL = "https://kovan.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
     public static final String GOERLI_FALLBACK_RPC_URL = "https://goerli.infura.io/v3/" + getSecondaryInfuraKey();
@@ -155,7 +163,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String BINANCE_MAIN_FALLBACK_RPC_URL = "https://bsc-dataseed2.ninicoin.io:443";
     public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
     public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
-    public static final String OPTIMISTIC_TEST_URL = "https://optimism-kovan.infura.io/v3/" + getInfuraKey();
     public static final String MATIC_FALLBACK_RPC_URL = "https://matic-mainnet.chainstacklabs.com";
     public static final String MUMBAI_FALLBACK_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";
@@ -163,7 +170,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String CRONOS_TEST_URL = "https://cronos-testnet.crypto.org:8545";
     public static final String ARBITRUM_FALLBACK_MAINNET_RPC = "https://arbitrum-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String ARBITRUM_FALLBACK_TESTNET_RPC = "https://rinkeby.arbitrum.io/rpc";
-    public static final String PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/" + getInfuraKey();
     public static final String PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/" + getInfuraKey();
     public static final String PALM_RPC_FALLBACK_URL = "https://palm-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String PALM_TEST_RPC_FALLBACK_URL = "https://palm-testnet.infura.io/v3/" + getSecondaryInfuraKey();

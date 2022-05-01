@@ -25,7 +25,7 @@ public class QuantitySelector extends RelativeLayout implements TextWatcher, Tex
     private final ImageButton decrementBtn;
     private final int min = 1;
     private OnQuantityChangedListener listener;
-    private int quantity = 0;
+    private int quantity = 1;
     private int max;
 
     public QuantitySelector(Context context, @Nullable AttributeSet attrs)
@@ -50,7 +50,7 @@ public class QuantitySelector extends RelativeLayout implements TextWatcher, Tex
         decrementBtn.setOnClickListener(v -> decrement());
         quantityText.setOnEditorActionListener(this);
         quantityText.addTextChangedListener(this);
-        reset();
+        set(quantity);
     }
 
     public void set(int q)

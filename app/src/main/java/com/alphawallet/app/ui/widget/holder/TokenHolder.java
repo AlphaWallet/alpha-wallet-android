@@ -40,6 +40,8 @@ import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.Locale;
 
 public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, View.OnLongClickListener {
 
@@ -127,6 +129,9 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
             String coinBalance = token.getStringBalance();
             if (!TextUtils.isEmpty(coinBalance)) {
+                DecimalFormat df = new DecimalFormat("#.####");     // show decimals only if non zero
+                coinBalance = df.format(Double.parseDouble(String.format(Locale.getDefault(), "%.4f", Double.parseDouble(coinBalance))));   // only 4 decimals
+
                 balanceCoin.setVisibility(View.VISIBLE);
 
                 String symbol = token.getSymbol().substring(0, Math.min(token.getSymbol().length(), 5))
@@ -273,7 +278,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         try {
             percentage = Double.parseDouble(ticker.percentChange24h);
             color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.negative : R.color.positive);
-            formattedPercents = ticker.percentChange24h.replace("-", "") + "%";
+            formattedPercents = String.format(Locale.getDefault(),"%.2f", percentage).replace("-", "") + "%";
             root24Hours.setBackgroundResource(percentage < 0 ? R.drawable.background_24h_change_red : R.drawable.background_24h_change_green);
             text24Hours.setText(formattedPercents);
             text24Hours.setTextColor(color);

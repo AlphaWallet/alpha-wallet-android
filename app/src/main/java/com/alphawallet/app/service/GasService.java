@@ -340,7 +340,8 @@ public class GasService implements ContractGasProvider
         return hasError;
     }
 
-    public Single<BigInteger> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress, BigInteger amount, Wallet wallet, final BigInteger defaultLimit)
+    public Single<BigInteger> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress,
+                                                   BigInteger amount, Wallet wallet, final BigInteger defaultLimit)
     {
         String txData = "";
         if (transactionBytes != null && transactionBytes.length > 0)
@@ -351,6 +352,7 @@ public class GasService implements ContractGasProvider
         updateChainId(chainId);
         String finalTxData = txData;
 
+        //do we have 1559 gas and can we use it?
         if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
@@ -360,7 +362,7 @@ public class GasService implements ContractGasProvider
         else
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
-                    .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getLowGasPrice(), EthereumNetworkBase.getMaxGasLimit(chainId), toAddress, amount, finalTxData))
+                    .flatMap(nonce -> ethEstimateGas(chainId, wallet.address, nonce, toAddress, amount, finalTxData))
                     .flatMap(estimate -> handleOutOfGasError(estimate, chainId, toAddress, amount, finalTxData))
                     .map(estimate -> convertToGasLimit(estimate, defaultLimit));
         }
@@ -398,19 +400,12 @@ public class GasService implements ContractGasProvider
     {
         if (!estimate.hasError() || chainId != 1) return Single.fromCallable(() -> estimate);
         else return networkRepository.getLastTransactionNonce(web3j, WHALE_ACCOUNT)
-            .flatMap(nonce -> ethEstimateGas(WHALE_ACCOUNT, nonce, getLowGasPrice(), getGasLimit(), toAddress, amount, finalTxData));
+            .flatMap(nonce -> ethEstimateGas(chainId, WHALE_ACCOUNT, nonce, toAddress, amount, finalTxData));
     }
 
     private BigInteger getLowGasPrice()
     {
-        if (currentLowGasPrice.compareTo(BigInteger.ZERO) > 0)
-        {
-            return currentLowGasPrice;
-        }
-        else
-        {
-            return currentGasPrice;
-        }
+        return currentGasPrice;
     }
 
     // For Constructor only
@@ -421,26 +416,47 @@ public class GasService implements ContractGasProvider
         return Single.fromCallable(() -> web3j.ethEstimateGas(transaction).send());
     }
 
+    private Single<EthEstimateGas> ethEstimateGas(long chainId, String fromAddress, BigInteger nonce, String toAddress,
+                                                  BigInteger amount, String txData)
+    {
+        final Transaction transaction = new Transaction (
+                fromAddress,
+                nonce,
+                currentGasPrice,
+                EthereumNetworkBase.getMaxGasLimit(chainId),
+                toAddress,
+                amount,
+                txData);
+
+        return Single.fromCallable(() -> web3j.ethEstimateGas(transaction).send());
+    }
+
     private Single<Map<Integer, EIP1559FeeOracleResult>> getEIP1559FeeStructure()
     {
         return getChainFeeHistory(100, "latest", "")
                 .flatMap(feeHistory -> SuggestEIP1559Kt.SuggestEIP1559(this, feeHistory));
     }
 
-    private Single<EthEstimateGas> ethEstimateGas(String fromAddress, BigInteger nonce, BigInteger gasPrice,
-                                                  BigInteger gasLimit, String toAddress,
-                                                  BigInteger amount, String txData)
+    private EIP1559FeeOracleResult get1559Gas(long chainId)
     {
-        final Transaction transaction = new Transaction (
-                fromAddress,
-                nonce,
-                gasPrice,
-                gasLimit,
-                toAddress,
-                amount,
-                txData);
+        EIP1559FeeOracleResult oracleResult = null;
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        {
+            Realm1559Gas rgs = realm.where(Realm1559Gas.class)
+                    .equalTo("chainId", chainId)
+                    .findFirst();
 
-        return Single.fromCallable(() -> web3j.ethEstimateGas(transaction).send());
+            if (rgs != null)
+            {
+                oracleResult = rgs.getResult().get(0);
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return oracleResult;
     }
 
     private void handleError(Throwable err)

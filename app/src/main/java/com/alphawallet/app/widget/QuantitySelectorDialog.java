@@ -50,19 +50,22 @@ public class QuantitySelectorDialog extends BottomSheetDialog implements OnQuant
         confirmButton.setOnClickListener(v -> confirm(position));
         btnMax.setOnClickListener(v -> quantitySelector.set(balance));
         setOnCancelListener(dialogInterface -> cancel(position));
+
+        if (quantitySelector.getQuantity() > balance)
+        {
+            quantitySelector.reset();
+        }
     }
 
     private void confirm(int position)
     {
         callback.onConfirm(position, getQuantity());
-        quantitySelector.reset();
         dismiss();
     }
 
     private void cancel(int position)
     {
         callback.onCancel(position);
-        quantitySelector.reset();
     }
 
     private boolean isValid(int quantity)

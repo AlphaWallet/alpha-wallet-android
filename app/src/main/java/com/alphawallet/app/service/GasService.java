@@ -437,28 +437,6 @@ public class GasService implements ContractGasProvider
                 .flatMap(feeHistory -> SuggestEIP1559Kt.SuggestEIP1559(this, feeHistory));
     }
 
-    private EIP1559FeeOracleResult get1559Gas(long chainId)
-    {
-        EIP1559FeeOracleResult oracleResult = null;
-        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
-        {
-            Realm1559Gas rgs = realm.where(Realm1559Gas.class)
-                    .equalTo("chainId", chainId)
-                    .findFirst();
-
-            if (rgs != null)
-            {
-                oracleResult = rgs.getResult().get(0);
-            }
-        }
-        catch (Exception e)
-        {
-            //
-        }
-
-        return oracleResult;
-    }
-
     private void handleError(Throwable err)
     {
         Timber.w(err);

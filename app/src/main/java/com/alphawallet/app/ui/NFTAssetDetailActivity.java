@@ -66,13 +66,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private String sequenceId;
     private ActionSheetDialog confirmationDialog;
     private AWalletAlertDialog dialog;
-    private NFTAsset asset;
     private NFTImageView tokenImage;
     private NFTAttributeLayout nftAttributeLayout;
     private TextView tokenDescription;
     private ActionMenuItemView refreshMenu;
     private ProgressBar progressBar;
-    private TokenInfoCategoryView detailsLabel;
     private TokenInfoCategoryView descriptionLabel;
     private TokenInfoView tivTokenId;
     private TokenInfoView tivNetwork;
@@ -110,8 +108,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         setTitle(token.tokenInfo.name);
 
         setupFunctionBar();
-
-        asset = token.getTokenAssets().get(tokenId);
 
         updateDefaultTokenData();
     }
@@ -178,7 +174,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         tokenImage = findViewById(R.id.asset_image);
         nftAttributeLayout = findViewById(R.id.attributes);
         tokenDescription = findViewById(R.id.token_description);
-        detailsLabel = findViewById(R.id.label_details);
         descriptionLabel = findViewById(R.id.label_description);
         progressBar = findViewById(R.id.progress);
         tivTokenId = findViewById(R.id.token_id);
@@ -212,7 +207,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel = new ViewModelProvider(this)
                 .get(TokenFunctionViewModel.class);
         viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
-        viewModel.openSeaAsset().observe(this, this::onOpenSeaAsset);
         viewModel.nftAsset().observe(this, this::onNftAsset);
     }
 
@@ -270,8 +264,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         if (asset != null)
         {
-            this.asset = asset;
-
             updateTokenImage(asset);
 
             addMetaDataInfo(asset);
@@ -279,6 +271,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             nftAttributeLayout.bind(token, asset);
 
             clearRefreshAnimation();
+
+            loadFromOpenSeaData(asset.getOpenSeaAsset());
         }
     }
 
@@ -289,18 +283,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         triggeredReload = false;
 
         if (TextUtils.isEmpty(asset.getImage()))
-        {
-            tokenImage.showFallbackLayout(token);
-        }
-    }
-
-    private void updateTokenImage(OpenSeaAsset asset)
-    {
-        if (triggeredReload) tokenImage.clearImage();
-        tokenImage.setupTokenImage(asset);
-        triggeredReload = false;
-
-        if (TextUtils.isEmpty(asset.getImageUrl()))
         {
             tokenImage.showFallbackLayout(token);
         }
@@ -340,9 +322,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void loadFromOpenSeaData(OpenSeaAsset openSeaAsset)
     {
-        updateDefaultTokenData();
+        if (openSeaAsset == null) return;
 
-        updateTokenImage(openSeaAsset);
+        updateDefaultTokenData();
 
         String name = openSeaAsset.name;
         if (!TextUtils.isEmpty(name))

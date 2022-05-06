@@ -542,6 +542,11 @@ public class NFTAsset implements Parcelable
         this.openSeaAsset = openSeaAsset;
     }
 
+    public OpenSeaAsset getOpenSeaAsset()
+    {
+        return this.openSeaAsset;
+    }
+
     public enum Category
     {
         NFT("NFT"), FT("Fungible Token"), COLLECTION("Collection"), SEMI_FT("Semi-Fungible");

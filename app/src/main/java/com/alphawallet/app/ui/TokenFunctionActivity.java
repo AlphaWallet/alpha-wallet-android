@@ -1,5 +1,9 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -34,7 +38,6 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
@@ -44,16 +47,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import timber.log.Timber;
-
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
-import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
 /**
  * Created by James on 2/04/2019.
@@ -167,7 +164,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
         activityHistoryList.setupAdapter(adapter);
         activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
-                token, viewModel.getTokensService(), idList.get(0), HISTORY_LENGTH);
+                token, viewModel.getTokensService(), HISTORY_LENGTH);
     }
 
     @Override

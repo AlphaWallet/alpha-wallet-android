@@ -782,6 +782,11 @@ public class TokenFunctionViewModel extends BaseViewModel {
     {
         loadExistingMetadata(token, tokenId);
 
+        reloadMetadata(token, tokenId);
+    }
+
+    public void reloadMetadata(Token token, BigInteger tokenId)
+    {
         openseaDisposable = openseaService.getAsset(token, tokenId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -811,6 +816,8 @@ public class TokenFunctionViewModel extends BaseViewModel {
                     {
                         // If asset does not have name, description or image, load from contract later
                         loadedFromApi = true;
+                        //update storage if required
+                        storeAsset(token, tokenId, new NFTAsset(result), oldAsset);
                     }
                     else
                     {

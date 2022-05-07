@@ -8,6 +8,7 @@ import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.util.Utils;
@@ -355,9 +356,9 @@ public class Ticket extends Token
     }
 
     @Override
-    public String convertValue(String prefix, String value, int precision)
+    public String convertValue(String prefix, EventResult vResult, int precision)
     {
-        return prefix + value;
+        return prefix + (vResult != null ? vResult.value : "");
     }
 
     @Override

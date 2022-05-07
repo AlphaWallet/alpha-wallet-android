@@ -86,7 +86,6 @@ import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.util.List;
 
@@ -1319,7 +1318,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             else if (importPath != null)
             {
                 boolean useAppExternalDir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !viewModel.checkDebugDirectory();
-                viewModel.importScriptFile(this, importData, useAppExternalDir);
+                viewModel.importScriptFile(this, useAppExternalDir, startIntent);
             }
         }
         catch (SalesOrderMalformed s)

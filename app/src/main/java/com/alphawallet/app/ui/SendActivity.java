@@ -58,6 +58,7 @@ import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -664,17 +665,15 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     //Transaction failed to be sent
     private void txError(Throwable throwable)
     {
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
-        dialog = new AWalletAlertDialog(this);
-        dialog.setIcon(ERROR);
-        dialog.setTitle(R.string.error_transaction_failed);
-        dialog.setMessage(throwable.getMessage());
-        dialog.setButtonText(R.string.button_ok);
-        dialog.setButtonListener(v -> {
-            dialog.dismiss();
-        });
-        dialog.show();
-
+        Timber.d("txError: %s", throwable.getMessage());
+        if (throwable instanceof SocketTimeoutException)
+        {
+            showTxnTimeoutDialog();
+        }
+        else
+        {
+            showTxnErrorDialog(throwable);
+        }
         confirmationDialog.dismiss();
     }
 
@@ -726,5 +725,32 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         {
             Timber.e(e);
         }
+    }
+
+    void showTxnErrorDialog(Throwable t)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(ERROR);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(t.getMessage());
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    void showTxnTimeoutDialog()
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(WARNING);
+        dialog.setTitle(R.string.error_transaction_timeout);
+        dialog.setMessage(R.string.message_transaction_timeout);
+        dialog.setButton(R.string.ok, v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 }

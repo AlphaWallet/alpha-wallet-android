@@ -1,7 +1,17 @@
 package com.alphawallet.app.service;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.app.repository.TransactionsRealmCache.convert;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
+
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -17,7 +27,6 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -29,14 +38,13 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.io.InterruptedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -49,18 +57,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import timber.log.Timber;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
-import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
-import static com.alphawallet.app.repository.TransactionsRealmCache.convert;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
-
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
     private static final String TAG = "TXNETCLIENT";
@@ -72,7 +68,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 25; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 26; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY;
     private final String BSC_EXPLORER_API_KEY;
@@ -309,7 +305,17 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private EtherscanTransaction[] getEtherscanTransactions(String response) throws JSONException
     {
-        JSONObject stateData = new JSONObject(response);
+        JSONObject stateData;
+        try
+        {
+            stateData = new JSONObject(response);
+        }
+        catch (JSONException e)
+        {
+            Timber.w(e);
+            return new EtherscanTransaction[0];
+        }
+
         JSONArray orders = stateData.getJSONArray("result");
         return gson.fromJson(orders.toString(), EtherscanTransaction[].class);
     }
@@ -663,8 +669,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long currentBlock, String queryType)
     {
-        if (TextUtils.isEmpty(networkInfo.etherscanAPI)) return "";
-        if (networkInfo.etherscanAPI.contains(COVALENT)) { return readCovalentTransfers(walletAddress, networkInfo, currentBlock, queryType); }
+        if (TextUtils.isEmpty(networkInfo.etherscanAPI) || networkInfo.etherscanAPI.contains(COVALENT)) return ""; //Covalent transfers are handled elsewhere
         String result = "0";
         if (currentBlock == 0) currentBlock = 1;
 
@@ -715,6 +720,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         else if (networkInfo.chainId == MATIC_ID || networkInfo.chainId == MATIC_TEST_ID)
         {
+
             return POLYGONSCAN_API_KEY;
         }
         else if (networkInfo.chainId == AURORA_MAINNET_ID || networkInfo.chainId == AURORA_TESTNET_ID)
@@ -725,13 +731,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             return "";
         }
-    }
-
-    //TODO: Instead of reading transfers we can read balances and track changes for ERC20 tokens
-    private String readCovalentTransfers(String walletAddress, NetworkInfo networkInfo, long lastBlockChecked, String queryType)
-    {
-        //update token balances from covalent
-        return ""; //Currently, covalent doesn't support fetching transfer events
     }
 
     private EtherscanTransaction[] readCovalentTransactions(TokensService svs, String accountAddress, NetworkInfo networkInfo, boolean ascending, int page, int pageSize) throws JSONException
@@ -769,7 +768,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             return new EtherscanTransaction[0];
         }
 
-        //CovalentTransaction[] covalentTransactions = new CovalentTransaction[0]; // getCovalentTransactions(result, svs.getCurrentAddress());
         CovalentTransaction[] covalentTransactions = getCovalentTransactions(result, svs.getCurrentAddress());
 
         EtherscanTransaction[] unhandledTxs = processCovalentEvents(covalentTransactions, svs, networkInfo);
@@ -996,7 +994,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         String AMOUNT_TOKEN = "[AMOUNT_TOKEN]";
         String VALUES = "from,address," + FROM_TOKEN + ",to,address," + TO_TOKEN + ",amount,uint256," + AMOUNT_TOKEN;
 
-        Map<String, Transaction> txFetches = new HashMap<>();
+        HashSet<String> txFetches = new HashSet<>();
 
         instance.executeTransaction(r -> {
             //write event list
@@ -1014,7 +1012,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
         });
 
-        fetchRequiredTransactions(instance, networkInfo.chainId, txFetches);
+        fetchRequiredTransactions(networkInfo.chainId, txFetches, walletAddress);
     }
 
     private void storeTransferData(Realm instance, String hash, String valueList, String activityName, String tokenAddress)
@@ -1047,7 +1045,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      * @param tx Transaction formed initially procedurally from the event, then from Ethereum node if we didn't already have it
      * @param txFetches build list of transactions that need fetching
      */
-    private void writeTransaction(Realm instance, Transaction tx, String contractAddress, Map<String, Transaction> txFetches)
+    private void writeTransaction(Realm instance, Transaction tx, String contractAddress, HashSet<String> txFetches)
     {
         RealmTransaction realmTx = instance.where(RealmTransaction.class)
                 .equalTo("hash", tx.hash)
@@ -1058,7 +1056,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             realmTx = instance.createObject(RealmTransaction.class, tx.hash);
 
             //fetch the actual transaction here
-            if (txFetches != null) txFetches.put(tx.hash, tx);
+            if (txFetches != null) txFetches.add(tx.hash);
         }
         else if (realmTx.getContractAddress() == null || !realmTx.getContractAddress().equalsIgnoreCase(contractAddress))
         {
@@ -1075,33 +1073,15 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     /**
      * This thread will execute in the background filling in transactions.
      * It doesn't have to be cancelled if we switch wallets because these transactions need to be fetched anyway
-     * @param instance instance of realm
      * @param chainId networkId
      * @param txFetches map of transactions that need writing. Note we use a map to de-duplicate
      */
-    private void fetchRequiredTransactions(Realm instance, long chainId, Map<String, Transaction> txFetches)
+    private void fetchRequiredTransactions(long chainId, HashSet<String> txFetches, String walletAddress)
     {
-        //TODO: this should go into the TX service, or be loaded at view time.
-        instance.executeTransactionAsync(r -> {
-            Web3j web3j = getWeb3jService(chainId);
-            for (Transaction tx : txFetches.values())
-            {
-                try
-                {
-                    EthTransaction etx = EventUtils.getTransactionDetails(tx.hash, web3j).blockingGet();
-                    Transaction newTx = new Transaction(etx.getResult(), tx.chainId, true, tx.timeStamp);
-                    //when we create placeholder tx, we put token contract address in the 'to' member - tx.to holds contract address
-                    if (!TextUtils.isEmpty(newTx.input) && newTx.input.length() > 2)
-                    {
-                        writeTransaction(r, newTx, tx.to, null);
-                    }
-                }
-                catch (Exception e)
-                {
-                    // No override of previously fetched tx
-                }
-            }
-        });
+        for (String txHash : txFetches)
+        {
+            TransactionsService.addTransactionHashFetch(txHash, chainId, walletAddress);
+        }
     }
 
     /**

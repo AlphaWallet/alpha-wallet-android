@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Single;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 import timber.log.Timber;
 

@@ -6,6 +6,6 @@
         android:id="@+id/action_add"
         android:icon="@drawable/ic_plus"
         android:orderInCategory="20"
-        android:title="@string/action_add_token"
+        android:title="@string/action_add"
         app:showAsAction="always" />
 </menu>

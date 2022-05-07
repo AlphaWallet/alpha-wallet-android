@@ -19,10 +19,6 @@ import com.alphawallet.app.viewmodel.TokenActivityViewModel;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
-import java.math.BigInteger;
-
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -70,6 +66,6 @@ public class TokenActivityFragment extends BaseFragment {
         adapter.setDefaultWallet(wallet);
         history.setupAdapter(adapter);
         history.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
-                token, viewModel.getTokensService(), BigInteger.ZERO, 15);
+                token, viewModel.getTokensService(),15);
     }
 }

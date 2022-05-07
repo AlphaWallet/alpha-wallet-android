@@ -763,7 +763,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      */
     public TokenDefinition getAssetDefinition(long chainId, String address)
     {
-        TokenDefinition assetDef = null;
         if (address == null) return null;
 
         if (address.equalsIgnoreCase(tokensService.getCurrentAddress()))
@@ -771,7 +770,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             address = "ethereum";
         }
         //is asset definition currently read?
-        assetDef = getDefinition(chainId, address.toLowerCase());
+        final TokenDefinition assetDef = getDefinition(chainId, address.toLowerCase());
         if (assetDef == null && !address.equals("ethereum"))
         {
             //try web
@@ -966,6 +965,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
+    //Call contract and check for script
+    private Single<File> fetchTokenScriptFromContract(Token token)
+    {
+        token.getScriptURI()
+                .map(fileName -> downloadFile(fileName))
+
+    }
+
     private Single<File> fetchXMLFromServer(String address)
     {
         return Single.fromCallable(() -> {
@@ -996,24 +1003,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             if (assetChecked.get(address) != null && (System.currentTimeMillis() > (assetChecked.get(address) + 1000L*60L*60L))) return result;
 
-            SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
-            format.setTimeZone(TimeZone.getTimeZone("UTC"));
-            String dateFormat = format.format(new Date(fileTime));
-
             StringBuilder sb = new StringBuilder();
             sb.append(TOKENSCRIPT_REPO_SERVER);
             sb.append(TOKENSCRIPT_CURRENT_SCHEMA);
             sb.append("/");
             sb.append(address);
-
-            //prepare Android headers
-            PackageManager manager = context.getPackageManager();
-            PackageInfo info = manager.getPackageInfo(
-                    context.getPackageName(), 0);
-            String appVersion = info.versionName;
-            String OSVersion = String.valueOf(Build.VERSION.RELEASE);
-
-            okhttp3.Response response = null;
 
             try
             {
@@ -1057,6 +1051,63 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             return result;
         });
+    }
+
+    private File downloadScript(String Uri, long currentFileTime)
+    {
+        try
+        {
+            File result = new File("");
+            SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
+            String dateFormat = format.format(new Date(currentFileTime));
+
+            //prepare Android headers
+            PackageManager manager = context.getPackageManager();
+            PackageInfo info = manager.getPackageInfo(
+                    context.getPackageName(), 0);
+            String appVersion = info.versionName;
+            String OSVersion = String.valueOf(Build.VERSION.RELEASE);
+
+            okhttp3.Response response = null;
+
+            Request request = new Request.Builder()
+                    .url(Uri)
+                    .get()
+                    .addHeader("Accept", "text/xml; charset=UTF-8")
+                    .addHeader("X-Client-Name", "AlphaWallet")
+                    .addHeader("X-Client-Version", appVersion)
+                    .addHeader("X-Platform-Name", "Android")
+                    .addHeader("X-Platform-Version", OSVersion)
+                    .addHeader("If-Modified-Since", dateFormat)
+                    .build();
+
+            response = okHttpClient.newCall(request).execute();
+
+            switch (response.code())
+            {
+                case HttpURLConnection.HTTP_NOT_MODIFIED:
+                    result = defaultReturn;
+                    break;
+                case HttpURLConnection.HTTP_OK:
+                    String xmlBody = response.body().string();
+                    result = storeFile(address, xmlBody);
+                    break;
+                default:
+                    result = defaultReturn;
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
+        finally
+        {
+            if (response != null) response.body().close();
+        }
+
+        assetChecked.put(address, System.currentTimeMillis());
     }
 
     private boolean definitionIsOutOfDate(TokenDefinition td)

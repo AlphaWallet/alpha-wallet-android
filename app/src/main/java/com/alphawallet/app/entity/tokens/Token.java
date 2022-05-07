@@ -1,7 +1,6 @@
 package com.alphawallet.app.entity.tokens;
 
 import static android.text.Html.FROM_HTML_MODE_COMPACT;
-import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,6 +11,7 @@ import android.text.format.DateUtils;
 import android.util.Pair;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractInteract;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.EventSync;
 import com.alphawallet.app.entity.TicketRangeElement;
@@ -34,11 +34,8 @@ import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 
-import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthLog;
@@ -54,19 +51,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
 import io.realm.Realm;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
 public class Token
 {
     public final static int TOKEN_BALANCE_PRECISION = 4;
     public final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
-
-    protected static OkHttpClient client;
 
     public final TokenInfo tokenInfo;
     public BigDecimal balance;
@@ -84,6 +76,7 @@ public class Token
     public int itemViewHeight;
     public TokenGroup group;
     protected final EventSync eventSync;
+    protected final ContractInteract contractInteract;
 
     private final Map<BigInteger, Map<String, TokenScriptResult.Attribute>> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse, per tokenId
     private Map<BigInteger, List<String>> functionAvailabilityMap = null;
@@ -111,6 +104,7 @@ public class Token
 
         if (group == null) group = TokenGroup.ASSET; //default to Asset
         eventSync = new EventSync(this);
+        contractInteract = new ContractInteract(this);
     }
 
     public String getStringBalance()
@@ -937,71 +931,7 @@ public class Token
 
     public NFTAsset fetchTokenMetadata(BigInteger tokenId)
     {
-        //1. get TokenURI (check for non-standard URI - check "tokenURI" and "uri")
-        String responseValue = callSmartContractFunction(tokenInfo.chainId, getTokenURI(tokenId), getAddress(), getWallet());
-        if (responseValue == null) responseValue = callSmartContractFunction(tokenInfo.chainId, getTokenURI2(tokenId), getAddress(), getWallet());
-        String metaData = loadMetaData(responseValue);
-        if (!TextUtils.isEmpty(metaData))
-        {
-            return new NFTAsset(metaData);
-        }
-        else
-        {
-            return new NFTAsset();
-        }
-    }
-
-    private Function getTokenURI(BigInteger tokenId)
-    {
-        return new Function("tokenURI",
-                Arrays.asList(new Uint256(tokenId)),
-                Arrays.asList(new TypeReference<Utf8String>() {}));
-    }
-
-    private Function getTokenURI2(BigInteger tokenId)
-    {
-        return new Function("uri",
-                Arrays.asList(new Uint256(tokenId)),
-                Arrays.asList(new TypeReference<Utf8String>() {}));
-    }
-
-    private String loadMetaData(String tokenURI)
-    {
-        if (TextUtils.isEmpty(tokenURI)) return "";
-
-        //check if this is direct metadata, some tokens do this
-        if (Utils.isJson(tokenURI)) return tokenURI;
-
-        setupClient();
-
-        Request request = new Request.Builder()
-                    .url(Utils.parseIPFS(tokenURI))
-                    .get()
-                    .build();
-
-        try (okhttp3.Response response = client.newCall(request).execute())
-        {
-            return response.body().string();
-        }
-        catch (Exception e)
-        {
-            //
-        }
-
-        return "";
-    }
-
-    private static void setupClient()
-    {
-        if (client == null)
-        {
-            client = new OkHttpClient.Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(10, TimeUnit.SECONDS)
-                    .retryOnConnectionFailure(true)
-                    .build();
-        }
+        return contractInteract.fetchTokenMetadata(tokenId);
     }
 
     public boolean checkInfoRequiresUpdate(RealmToken realmToken)
@@ -1044,6 +974,11 @@ public class Token
 
             return assets;
         });
+    }
+
+    public Single<String> getScriptURI()
+    {
+        return contractInteract.getScriptFileURI();
     }
 
 

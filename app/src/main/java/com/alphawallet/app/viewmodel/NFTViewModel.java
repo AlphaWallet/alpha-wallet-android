@@ -109,7 +109,7 @@ public class NFTViewModel extends BaseViewModel {
     public void checkForNewScript(Token token)
     {
         //check server for new tokenscript
-        assetDefinitionService.checkServerForScript(token.tokenInfo.chainId, token.getAddress())
+        assetDefinitionService.checkServerForScript(token)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.single())
                 .subscribe(this::handleFilename, this::onError)

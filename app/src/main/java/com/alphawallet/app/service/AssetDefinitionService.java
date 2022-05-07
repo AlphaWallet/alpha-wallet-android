@@ -70,6 +70,7 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.protocol.core.methods.response.Log;
+import org.xml.sax.SAXException;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -973,6 +974,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 .map(xmlBody -> storeFile(token.tokenInfo.address, xmlBody));
     }
 
+    private Single<File> tryServerIfRequired(File contractScript, String address)
+    {
+        if (contractScript.exists())
+        {
+            return Single.fromCallable(() -> contractScript);
+        }
+        else
+        {
+            return fetchXMLFromServer(address);
+        }
+    }
+
     private Single<File> fetchXMLFromServer(String address)
     {
         return Single.fromCallable(() -> {
@@ -1022,10 +1035,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private String downloadScript(String Uri, long currentFileTime) throws PackageManager.NameNotFoundException
     {
-        if (TextUtils.isEmpty(Uri.toString())) return "";
+        if (TextUtils.isEmpty(Uri)) return "";
         SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         String dateFormat = format.format(new Date(currentFileTime));
+
+        //convert uri if using IPFS:
+        Uri = Utils.parseIPFS(Uri);
 
         //prepare Android headers
         PackageManager manager = context.getPackageManager();
@@ -1034,16 +1050,25 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         String appVersion = info.versionName;
         String OSVersion = String.valueOf(Build.VERSION.RELEASE);
 
-        Request request = new Request.Builder()
+        Request.Builder bld = new Request.Builder()
                 .url(Uri)
-                .get()
-                .addHeader("Accept", "text/xml; charset=UTF-8")
-                .addHeader("X-Client-Name", "AlphaWallet")
-                .addHeader("X-Client-Version", appVersion)
-                .addHeader("X-Platform-Name", "Android")
-                .addHeader("X-Platform-Version", OSVersion)
-                .addHeader("If-Modified-Since", dateFormat)
-                .build();
+                .get();
+
+        if (!Uri.toLowerCase().contains("ipfs"))
+        {
+            bld     .addHeader("Accept", "text/xml; charset=UTF-8")
+                    .addHeader("X-Client-Name", "AlphaWallet")
+                    .addHeader("X-Client-Version", appVersion)
+                    .addHeader("X-Platform-Name", "Android")
+                    .addHeader("X-Platform-Version", OSVersion)
+                    .addHeader("If-Modified-Since", dateFormat);
+        }
+        else
+        {
+            System.out.println("YOLESS");
+        }
+
+        Request request = bld.build();
 
         try (okhttp3.Response response = okHttpClient.newCall(request)
                 .execute())
@@ -2443,6 +2468,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 tokenLocators.add(new TokenLocator(tokenDef.getTokenName(1), origins, tsf));
                             }
                         } // TODO: Catch specific tokenscript parse errors to report tokenscript errors.
+                        catch (SAXException e)
+                        {
+                            //not a legal XML TokenScript file. Just ignore
+                        }
                         catch (Exception e)
                         {
                             TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
@@ -2458,13 +2487,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    public Single<TokenDefinition> checkServerForScript(long chainId, String address)
+    public Single<TokenDefinition> checkServerForScript(Token token)
     {
-        TokenScriptFile tf = getTokenScriptFile(chainId, address);
-        if (tf != null && !isInSecureZone(tf)) return Single.fromCallable(TokenDefinition::new); //early return for debug script check
+        TokenScriptFile tf = getTokenScriptFile(token.tokenInfo.chainId, token.getAddress());
+        if ((tf != null && !TextUtils.isEmpty(tf.getName())) && !isInSecureZone(tf)) return Single.fromCallable(TokenDefinition::new); //early return for debug script check
 
-        //now try the server
-        return fetchXMLFromServer(address.toLowerCase())
+        //try the contractURI, then server
+        return fetchTokenScriptFromContract(token)
+                .flatMap(file -> tryServerIfRequired(file, token.getAddress().toLowerCase()))
                 .flatMap(this::cacheSignature)
                 .flatMap(this::handleNewTSFile)
                 .subscribeOn(Schedulers.io())

@@ -1,6 +1,5 @@
 package com.alphawallet.app.ui;
 
-import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.content.BroadcastReceiver;
@@ -849,17 +848,15 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private ActionSheetDialog generateTransactionRequest(Web3Transaction w3Tx, long chainId)
     {
-        ActionSheetDialog confDialog = null;
         try
         {
-            //minimum for transaction to be valid: recipient and value or payload
             if ((confirmationDialog == null || !confirmationDialog.isShowing()) &&
                     (w3Tx.recipient.equals(Address.EMPTY) && w3Tx.payload != null) // Constructor
                     || (!w3Tx.recipient.equals(Address.EMPTY) && (w3Tx.payload != null || w3Tx.value != null))) // Raw or Function TX
             {
                 WCPeerMeta remotePeerData = viewModel.getRemotePeer(getSessionId());
                 Token token = viewModel.getTokensService().getTokenOrBase(chainId, w3Tx.recipient.toString());
-                confDialog = new ActionSheetDialog(this, w3Tx, token, "",
+                final ActionSheetDialog confDialog = new ActionSheetDialog(this, w3Tx, token, "",
                         w3Tx.recipient.toString(), viewModel.getTokensService(), this);
                 confDialog.setURL(remotePeerData.getUrl());
                 confDialog.setCanceledOnTouchOutside(false);
@@ -869,18 +866,19 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         chainId, w3Tx.recipient.toString(), new BigDecimal(w3Tx.value), w3Tx.gasLimit)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(estimate -> confirmationDialog.setGasEstimate(estimate),
+                        .subscribe(confDialog::setGasEstimate,
                                 Throwable::printStackTrace)
                         .isDisposed();
+
+                return confDialog;
             }
         }
         catch (Exception e)
         {
-            confDialog = null;
             Timber.e(e);
         }
 
-        return confDialog;
+        return null;
     }
 
     private void killSession()

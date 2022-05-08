@@ -46,6 +46,8 @@ public class GasSliderView extends RelativeLayout
     private float scaleFactor; //used to convert slider value (0-100) into gas price
     private float priorityFeeScaleFactor;
     private float minimumPrice;  //minimum for slider
+    private long minimumGasLimit = C.GAS_LIMIT_MIN;
+    private long maximumGasLimit = C.GAS_LIMIT_MAX;
     private float gasLimitScaleFactor;
     private boolean limitInit = false;
     private final Handler handler = new Handler();
@@ -121,7 +123,7 @@ public class GasSliderView extends RelativeLayout
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser)
                 {
-                    BigDecimal scaledGasLimit = BigDecimal.valueOf((progress * gasLimitScaleFactor) + C.GAS_LIMIT_MIN)
+                    BigDecimal scaledGasLimit = BigDecimal.valueOf((progress * gasLimitScaleFactor) + minimumGasLimit)
                             .setScale(2, RoundingMode.HALF_DOWN); //to 2 dp
 
                     gasLimitValue.setText(scaledGasLimit.toBigInteger().toString());
@@ -258,7 +260,7 @@ public class GasSliderView extends RelativeLayout
         try
         {
             BigDecimal gasLimitGwei = new BigDecimal(gasLimitStr);
-            int progress = (int)((float)(gasLimitGwei.longValue() - C.GAS_LIMIT_MIN)/gasLimitScaleFactor);
+            int progress = (int)((float)(gasLimitGwei.longValue() - minimumGasLimit)/gasLimitScaleFactor);
             gasLimitSlider.setProgress(progress);
         }
         catch (Exception e)
@@ -312,18 +314,21 @@ public class GasSliderView extends RelativeLayout
     }
 
     @SuppressLint("SetTextI18n")
-    public void initGasLimit(BigInteger limit)
+    public void initGasLimit(BigInteger limit, BigInteger presetGas)
     {
+        minimumGasLimit = Math.max((presetGas.longValue()*5)/6, C.GAS_LIMIT_MIN); //reduce by 20% or min gas limit
+        maximumGasLimit = Math.min(minimumGasLimit * 5, C.GAS_LIMIT_MAX); // Max 500% of calculated gas or max gas limit
+        gasLimitScaleFactor = (float)(maximumGasLimit - minimumGasLimit)/100.0f;
         if (limitInit) return;
         gasLimitValue.setText(limit.toString());
-        int progress = (int)((float)(limit.longValue() - C.GAS_LIMIT_MIN)/gasLimitScaleFactor);
+        int progress = (int)((float)(limit.longValue() - minimumGasLimit)/gasLimitScaleFactor);
         gasLimitSlider.setProgress(progress);
     }
 
     private void calculateStaticScaleFactor()
     {
         scaleFactor = (maxDefaultPrice - minimumPrice)/100.0f; //default scale factor
-        gasLimitScaleFactor = (float)(C.GAS_LIMIT_MAX - C.GAS_LIMIT_MIN)/100.0f;
+        gasLimitScaleFactor = (float)(maximumGasLimit - minimumGasLimit)/100.0f;
         priorityFeeScaleFactor = maxPriorityFee/100.0f;
     }
 

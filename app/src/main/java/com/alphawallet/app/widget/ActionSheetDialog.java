@@ -5,7 +5,6 @@ import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.Image;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -27,7 +26,6 @@ import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmTransaction;
@@ -146,6 +144,11 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         gasWidgetInterface = setupGasWidget();
 
+        if (!tx.gasLimit.equals(BigInteger.ZERO))
+        {
+            setGasEstimate(tx.gasLimit);
+        }
+
         updateAmount();
 
         addressDetail.setupAddress(destAddress, destName, tokensService.getToken(token.tokenInfo.chainId, destAddress));
@@ -180,7 +183,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         use1559Transactions = canUse1559Transactions && has1559Gas() //1559 Transactions toggled on in settings and this chain supports 1559
                 && !(token.isEthereum() && candidateTransaction.leafPosition == -2) //User not sweeping wallet (if so we need to use legacy tx)
-                && !tokensService.hasLockedGas(token.tokenInfo.chainId); //Service has locked gas, can only use legacy (eg Optimism).
+                && !tokensService.hasLockedGas(token.tokenInfo.chainId) //Service has locked gas, can only use legacy (eg Optimism).
+                && !candidateTransaction.isConstructor(); //Currently cannot use EIP1559 for constructors due to gas calculation issues
 
         if (use1559Transactions)
         {

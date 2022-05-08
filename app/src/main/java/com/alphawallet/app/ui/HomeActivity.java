@@ -189,8 +189,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    int fragCount = 0;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {

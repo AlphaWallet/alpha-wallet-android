@@ -1056,16 +1056,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         if (!Uri.toLowerCase().contains("ipfs"))
         {
-            bld     .addHeader("Accept", "text/xml; charset=UTF-8")
-                    .addHeader("X-Client-Name", "AlphaWallet")
-                    .addHeader("X-Client-Version", appVersion)
-                    .addHeader("X-Platform-Name", "Android")
-                    .addHeader("X-Platform-Version", OSVersion)
-                    .addHeader("If-Modified-Since", dateFormat);
-        }
-        else
-        {
-            System.out.println("YOLESS");
+            bld.addHeader("Accept", "text/xml; charset=UTF-8")
+               .addHeader("X-Client-Name", "AlphaWallet")
+               .addHeader("X-Client-Version", appVersion)
+               .addHeader("X-Platform-Name", "Android")
+               .addHeader("X-Platform-Version", OSVersion)
+               .addHeader("If-Modified-Since", dateFormat);
         }
 
         Request request = bld.build();

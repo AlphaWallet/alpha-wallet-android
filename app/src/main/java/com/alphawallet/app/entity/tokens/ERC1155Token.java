@@ -479,7 +479,7 @@ public class ERC1155Token extends Token
     }
 
     @Override
-    public String getStringBalance()
+    public String getStringBalanceForUI(int scale)
     {
         return balance.toString();
     }

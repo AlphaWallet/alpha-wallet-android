@@ -23,6 +23,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
+                android:textColor="@color/control"
                 tools:text="Setting Title" />
 
             <TextView
@@ -33,6 +34,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginStart="@dimen/small_12"
                 android:layout_toEndOf="@id/token_definition_name"
+                android:textColor="@color/surface_dark"
                 tools:text="Token Name" />
 
             <ImageView
@@ -52,6 +54,7 @@
             style="@style/Aw.Typography.Caption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/surface_dark"
             android:ellipsize="end"
             android:maxLines="1"
             android:paddingVertical="@dimen/tiny_8"
@@ -72,6 +75,7 @@
                 android:lines="1"
                 android:maxLines="1"
                 android:paddingVertical="@dimen/tiny_8"
+                android:textColor="@color/control_activated"
                 tools:text="Setting Subtitle" />
 
             <com.alphawallet.app.widget.ChainName
@@ -85,7 +89,10 @@
 
         </RelativeLayout>
 
-        <View style="@style/Aw.Component.Separator" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/silver" />
 
     </LinearLayout>
 
@@ -95,7 +102,7 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/main_wrapper"
         android:layout_alignBottom="@id/main_wrapper"
-        android:background="@color/translucent_light"
+        android:background="@color/surface_translucent"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone"

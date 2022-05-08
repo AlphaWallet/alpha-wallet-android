@@ -68,4 +68,5 @@
     <color name="text_secondary_inverse">@color/white</color>
 
     <color name="surface_faded">@color/translucent_light</color>
+    <color name="surface_translucent">@color/translucent_light</color>
 </resources>

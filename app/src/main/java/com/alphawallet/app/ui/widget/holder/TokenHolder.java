@@ -36,7 +36,6 @@ import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.Locale;
 
 public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, View.OnLongClickListener {
@@ -61,9 +60,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final RelativeLayout tokenLayout;
     private final MaterialCheckBox selectToken;
     private final ProgressBar tickerProgress;
-
-    private final static DecimalFormat df = new DecimalFormat("#.####");
-
+    
     public Token token;
     private TokensAdapterCallback tokensAdapterCallback;
 

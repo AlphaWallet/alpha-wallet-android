@@ -113,11 +113,17 @@ public class Token
         eventSync = new EventSync(this);
     }
 
-    public String getStringBalance()
+    /**
+     * Display human readable balance, including thousands separator. DO NOT use the output of this for anything other than UI display
+     *
+     * @param scale
+     * @return
+     */
+    public String getStringBalanceForUI(int decimalPlaces)
     {
         int decimals = 18;
         if (tokenInfo != null) decimals = tokenInfo.decimals;
-        String balanceStr = BalanceUtils.getScaledValueScientific(balance, decimals);
+        String balanceStr = BalanceUtils.getScaledValueScientific(balance, decimals, decimalPlaces);
         if (balanceStr.equals("0") && balance.compareTo(BigDecimal.ZERO) > 0) { balanceStr = "~0"; }
         return balanceStr;
     }

@@ -1,7 +1,6 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_ID;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,17 +11,14 @@ import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
@@ -65,6 +61,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final RelativeLayout tokenLayout;
     private final MaterialCheckBox selectToken;
     private final ProgressBar tickerProgress;
+
+    private final static DecimalFormat df = new DecimalFormat("#.####");
 
     public Token token;
     private TokensAdapterCallback tokensAdapterCallback;
@@ -127,11 +125,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
             balanceEth.setText(shortTitle());
 
-            String coinBalance = token.getStringBalance();
+            String coinBalance = token.getStringBalanceForUI(4);
             if (!TextUtils.isEmpty(coinBalance)) {
-                DecimalFormat df = new DecimalFormat("#.####");     // show decimals only if non zero
-                coinBalance = df.format(Double.parseDouble(String.format(Locale.getDefault(), "%.4f", Double.parseDouble(coinBalance))));   // only 4 decimals
-
                 balanceCoin.setVisibility(View.VISIBLE);
 
                 String symbol = token.getSymbol().substring(0, Math.min(token.getSymbol().length(), 5))

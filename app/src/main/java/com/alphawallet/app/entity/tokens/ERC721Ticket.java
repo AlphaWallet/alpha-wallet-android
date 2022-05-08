@@ -44,7 +44,7 @@ public class ERC721Ticket extends Token
     }
 
     @Override
-    public String getStringBalance() {
+    public String getStringBalanceForUI(int scale) {
         return String.valueOf(getTokenCount());
     }
 

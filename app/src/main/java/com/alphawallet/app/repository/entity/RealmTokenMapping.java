@@ -8,12 +8,18 @@ import com.alphawallet.token.entity.ContractAddress;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
-public class RealmTokenMapping extends RealmObject {
+public class RealmTokenMapping implements RealmObject
+{
 
     @PrimaryKey
     public String address;  // ContractAddress String (addr-chainId) for derivative
     public String base;     // Base contract, usually main net (eg DAI)
     public int group;       // Ordinal for enum TokenGroup
+
+    public RealmTokenMapping(String address)
+    {
+        this.address = address;
+    }
 
     public ContractAddress getBase()
     {

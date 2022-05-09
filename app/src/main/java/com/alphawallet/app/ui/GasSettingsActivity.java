@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
-import io.realm.RealmQuery;
+import io.realm.query.RealmQuery;
 
 @AndroidEntryPoint
 public class GasSettingsActivity extends BaseActivity implements GasSettingsCallback

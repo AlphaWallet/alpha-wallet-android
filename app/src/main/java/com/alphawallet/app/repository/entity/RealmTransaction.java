@@ -3,7 +3,8 @@ package com.alphawallet.app.repository.entity;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
-public class RealmTransaction extends RealmObject {
+public class RealmTransaction implements RealmObject
+{
     @PrimaryKey
     private String hash;
     private String blockNumber;
@@ -22,7 +23,12 @@ public class RealmTransaction extends RealmObject {
     private long chainId;
     private long expectedCompletion;
     private String contractAddress; // this is so we can efficiently lookup transactions relating to contracts,
-                                    // if we discovered them using the Etherscan 'Transfers' API.
+
+    public RealmTransaction(String hash)
+    {
+        this.hash = hash;
+    }
+    // if we discovered them using the Etherscan 'Transfers' API.
                                     // NB: only transactions discovered by the Transfers API will have this field.
                                     // It allows us to lookup eg AirDrop tx's or Internal tx's that otherwise wouldn't
                                     // be indexable via RealmDB.

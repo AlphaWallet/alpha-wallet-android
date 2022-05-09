@@ -7,7 +7,7 @@ import io.realm.RealmObject;
 /**
  * Created by JB on 8/09/2020.
  */
-public class RealmWCSignElement extends RealmObject
+public class RealmWCSignElement implements RealmObject
 {
     private String sessionId;
     private byte[] signMessage;

@@ -5,7 +5,7 @@ import io.realm.annotations.PrimaryKey;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.service.KeyService;
 
-public class RealmKeyType extends RealmObject
+public class RealmKeyType implements RealmObject
 {
     @PrimaryKey
     private String address;

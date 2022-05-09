@@ -10,7 +10,7 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by JB on 4/09/2020.
  */
-public class RealmWCSession extends RealmObject
+public class RealmWCSession implements RealmObject
 {
     @PrimaryKey
     private String sessionId;       // This is the sessionKey, which is the 'x' part the WalletConnect code: wc:xxxx-xxxx-xxxx-xxxx@1.......
@@ -25,6 +25,11 @@ public class RealmWCSession extends RealmObject
                                     //   maybe add this as an advanced option).
 
     private long chainId;
+
+    public RealmWCSession(String sessionId)
+    {
+        this.sessionId = sessionId;
+    }
 
     public WCSession getSession()
     {

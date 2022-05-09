@@ -3,9 +3,6 @@ package com.alphawallet.app.interact;
 import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 
-import android.util.Log;
-
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.repository.WalletRepositoryType;
@@ -75,8 +72,8 @@ public class GenericWalletInteract
 		return walletRepository.getWalletBackupWarning(walletAddr);
 	}
 
-	public void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess) {
-		walletRepository.updateWalletItem(wallet, item, onSuccess);
+	public void updateWalletItem(Wallet wallet, WalletItem item, Runnable callback) {
+		walletRepository.updateWalletItem(wallet, item, callback);
 	}
 
 	public void updateBalanceIfRequired(Wallet wallet, BigDecimal newBalance)

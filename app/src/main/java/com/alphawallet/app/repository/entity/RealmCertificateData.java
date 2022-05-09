@@ -9,7 +9,7 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by JB on 4/02/2020.
  */
-public class RealmCertificateData extends RealmObject
+public class RealmCertificateData implements RealmObject
 {
     @PrimaryKey
     private String instanceKey; //File hash
@@ -20,6 +20,11 @@ public class RealmCertificateData extends RealmObject
     private String issuer;
     private String certificateName;
     private int type;
+
+    public RealmCertificateData(String instanceKey)
+    {
+        this.instanceKey = instanceKey;
+    }
 
     public void setFromSig(XMLDsigDescriptor sig)
     {

@@ -1,10 +1,8 @@
 package com.alphawallet.app.repository;
 
-import io.realm.DynamicRealm;
-import io.realm.FieldAttribute;
-import io.realm.RealmMigration;
-import io.realm.RealmObjectSchema;
-import io.realm.RealmSchema;
+import io.realm.dynamic.DynamicRealm;
+import io.realm.migration.RealmMigration;
+import io.realm.schema.RealmSchema;
 
 
 /**
@@ -16,7 +14,7 @@ public class AWRealmMigration implements RealmMigration
     @Override
     public void migrate(DynamicRealm realm, long oldVersion, long newVersion)
     {
-        RealmSchema schema = realm.getSchema();
+        RealmSchema schema = realm.schema();
         if (oldVersion == 4)
         {
             RealmObjectSchema realmTicker = schema.get("RealmTokenTicker");

@@ -13,7 +13,8 @@ import java.util.List;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
-public class RealmToken extends RealmObject {
+public class RealmToken implements RealmObject
+{
     @PrimaryKey
     private String address;
     private String name;
@@ -32,6 +33,11 @@ public class RealmToken extends RealmObject {
     private long earliestTxBlock;
     private boolean visibilityChanged;
     private String erc1155BlockRead;
+
+    public RealmToken(String address)
+    {
+        this.address = address;
+    }
 
     public int getDecimals() {
         return decimals;
@@ -217,5 +223,10 @@ public class RealmToken extends RealmObject {
     public void setErc1155BlockRead(BigInteger erc1155BlockRead)
     {
         this.erc1155BlockRead = erc1155BlockRead.toString(Character.MAX_RADIX);
+    }
+
+    public void setAddress(String address)
+    {
+        this.address = address;
     }
 }

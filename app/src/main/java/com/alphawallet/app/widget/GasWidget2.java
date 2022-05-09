@@ -37,7 +37,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import io.realm.Realm;
-import io.realm.RealmQuery;
+import io.realm.query.RealmQuery;
 
 /**
  * Created by JB on 20/01/2022.

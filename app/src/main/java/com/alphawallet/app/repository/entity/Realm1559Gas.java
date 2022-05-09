@@ -13,13 +13,18 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by JB on 19/01/2022.
  */
-public class Realm1559Gas extends RealmObject
+public class Realm1559Gas implements RealmObject
 {
     @PrimaryKey
     private long chainId;
 
     private long timeStamp;
     private String resultData; //JSON format string
+
+    public Realm1559Gas(long chainId)
+    {
+        this.chainId = chainId;
+    }
 
     public Map<Integer, EIP1559FeeOracleResult> getResult()
     {

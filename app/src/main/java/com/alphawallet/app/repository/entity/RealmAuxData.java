@@ -9,7 +9,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.StatusType;
-import com.alphawallet.app.util.Utils;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -19,10 +18,11 @@ import java.util.regex.Pattern;
 
 import io.realm.Realm;
 import io.realm.RealmObject;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import io.realm.annotations.PrimaryKey;
+import io.realm.query.RealmQuery;
+import io.realm.query.Sort;
+import kotlin.jvm.JvmClassMappingKt;
 
 import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 
@@ -30,7 +30,7 @@ import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
  * Created by James on 6/05/2019.
  * Stormbird in Sydney
  */
-public class RealmAuxData extends RealmObject
+public class RealmAuxData implements RealmObject
 {
     @PrimaryKey
     private String instanceKey; //should be token address, token Id, chainId
@@ -41,6 +41,11 @@ public class RealmAuxData extends RealmObject
     private String result;
     private long resultTime;
     private long resultReceivedTime; //allows us to filter new events
+
+    public RealmAuxData(String instanceKey)
+    {
+        this.instanceKey = instanceKey;
+    }
 
     public String getInstanceKey()
     {
@@ -314,19 +319,15 @@ public class RealmAuxData extends RealmObject
 
     public static RealmResults<RealmAuxData> getEventListener(Realm realm, Token token, BigInteger tokenId, int historyCount, long timeLimit)
     {
-        return getEventQuery(realm, token, tokenId, historyCount, timeLimit).findAllAsync();
+        return getEventQuery(realm, token, tokenId, historyCount, timeLimit).find();
     }
 
     public static RealmQuery<RealmAuxData> getEventQuery(Realm realm, Token token, BigInteger tokenId, int historyCount, long timeLimit)
     {
         String tokenIdHex = tokenId.toString(16);
-        return realm.where(RealmAuxData.class)
-                .endsWith("instanceKey", EVENT_CARDS)
-                .sort("resultTime", Sort.DESCENDING)
-                .greaterThan("resultTime", timeLimit)
-                .equalTo("chainId", token.tokenInfo.chainId)
-                .beginGroup().equalTo("tokenId", "0").or().equalTo("tokenId", tokenIdHex).endGroup()
-                .equalTo("tokenAddress", token.getAddress())
-                .limit(historyCount);
+        return realm.query(JvmClassMappingKt.getKotlinClass(RealmAuxData.class),
+                "instanceKey like %? AND resultTime > ? AND chainId = ? AND tokenAddress = ? GROUP BY tokenId = 0 or tokenId = ?", EVENT_CARDS, timeLimit, token.tokenInfo.chainId, token.getAddress(), tokenIdHex)
+                .limit(historyCount)
+                .sort("resultTime", Sort.DESCENDING);
     }
 }

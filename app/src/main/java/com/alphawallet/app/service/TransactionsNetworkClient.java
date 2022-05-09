@@ -56,7 +56,7 @@ import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import io.realm.Sort;
+import io.realm.query.Sort;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import timber.log.Timber;

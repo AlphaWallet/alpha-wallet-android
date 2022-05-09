@@ -13,7 +13,7 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by JB on 19/11/2020.
  */
-public class RealmGasSpread extends RealmObject
+public class RealmGasSpread implements RealmObject
 {
     @PrimaryKey
     private long chainId;
@@ -24,6 +24,11 @@ public class RealmGasSpread extends RealmObject
     private String slow;
     private String baseFee; //TODO: Remove in next DB Migration
     private long timeStamp;
+
+    public RealmGasSpread(long chainId)
+    {
+        this.chainId = chainId;
+    }
 
     public long getChainId()
     {

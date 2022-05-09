@@ -51,7 +51,9 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.MutableRealm;
 import io.realm.Realm;
+import kotlin.jvm.JvmClassMappingKt;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -300,37 +302,41 @@ public class GasService implements ContractGasProvider
      */
     private void updateRealm(final GasPriceSpread oracleResult, final long chainId)
     {
-        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        try
         {
-            realm.executeTransaction(r -> {
-                RealmGasSpread rgs = r.where(RealmGasSpread.class)
-                        .equalTo("chainId", chainId)
-                        .findFirst();
+            Realm realm = realmManager.getRealmInstance(TICKER_DB);
+            realm.writeBlocking(r -> {
+                RealmGasSpread rgs = r.query(JvmClassMappingKt.getKotlinClass(RealmGasSpread.class),
+                        "chainId = ?", chainId).first().find();
                 if (rgs == null)
-                    rgs = r.createObject(RealmGasSpread.class, chainId);
+                    rgs = new RealmGasSpread(chainId);
 
                 rgs.setGasSpread(oracleResult, System.currentTimeMillis());
-                r.insertOrUpdate(rgs);
+                r.copyToRealm(rgs, MutableRealm.UpdatePolicy.ALL);
+                return null;
             });
+        } catch (Exception e) {
+            Timber.e(e);
         }
     }
 
     private boolean updateEIP1559Realm(final Map<Integer, EIP1559FeeOracleResult> result, final long chainId)
     {
         boolean hasError = false;
-        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        try
         {
-            realm.executeTransaction(r -> {
-                Realm1559Gas rgs = r.where(Realm1559Gas.class)
-                        .equalTo("chainId", chainId)
-                        .findFirst();
+            Realm realm = realmManager.getRealmInstance(TICKER_DB);
+            realm.writeBlocking(r -> {
+                Realm1559Gas rgs = r.query(JvmClassMappingKt.getKotlinClass(Realm1559Gas.class),
+                        "chainId = ?", chainId).first().find();
                 if (rgs == null)
                 {
-                    rgs = r.createObject(Realm1559Gas.class, chainId);
+                    rgs = new Realm1559Gas(chainId);
                 }
 
                 rgs.setResultData(result, System.currentTimeMillis());
-                r.insertOrUpdate(rgs);
+                r.copyToRealm(rgs, MutableRealm.UpdatePolicy.ALL);
+                return null;
             });
         }
         catch (Exception e)

@@ -3,7 +3,8 @@ package com.alphawallet.app.repository.entity;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
-public class RealmTokenTicker extends RealmObject {
+public class RealmTokenTicker implements RealmObject
+{
     @PrimaryKey
     private String contract;
     private String price;
@@ -13,6 +14,11 @@ public class RealmTokenTicker extends RealmObject {
     private String image;
     private long updatedTime;
     private String currencySymbol;
+
+    public RealmTokenTicker(String contract)
+    {
+        this.contract = contract;
+    }
 
     public String getId() {
         return id;

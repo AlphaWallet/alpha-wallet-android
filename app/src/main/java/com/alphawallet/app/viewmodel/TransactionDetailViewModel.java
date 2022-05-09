@@ -48,7 +48,9 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.MutableRealm;
 import io.realm.Realm;
+import kotlin.jvm.JvmClassMappingKt;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
@@ -244,16 +246,18 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     private Transaction writeTransaction(Wallet wallet, Transaction tx)
     {
-        try (Realm instance = fetchTransactionsInteract.getRealmInstance(wallet))
+        try
         {
-            instance.beginTransaction();
-            RealmTransaction realmTx = instance.where(RealmTransaction.class)
-                    .equalTo("hash", tx.hash)
-                    .findFirst();
+            Realm instance = fetchTransactionsInteract.getRealmInstance(wallet);
+            instance.writeBlocking(r -> {
+                RealmTransaction realmTx = instance.query(JvmClassMappingKt.getKotlinClass(RealmTransaction.class),
+                        "hash = ?", tx.hash).first().find();
 
-            if (realmTx == null) realmTx = instance.createObject(RealmTransaction.class, tx.hash);
-            TransactionsRealmCache.fill(realmTx, tx);
-            instance.commitTransaction();
+                if (realmTx == null) realmTx = new RealmTransaction(tx.hash);
+                TransactionsRealmCache.fill(realmTx, tx);
+                r.copyToRealm(realmTx, MutableRealm.UpdatePolicy.ALL);
+                return null;
+            });
         }
         catch (Exception e)
         {

@@ -13,18 +13,18 @@ import androidx.preference.PreferenceManager;
 import com.alphawallet.app.util.ReleaseTree;
 
 import dagger.hilt.android.HiltAndroidApp;
-import io.realm.Realm;
 import timber.log.Timber;
 
 @HiltAndroidApp
 public class App extends Application
 {
+    public static Context context;
 
     @Override
     public void onCreate()
     {
         super.onCreate();
-        Realm.init(this);
+//        Realm.init(this);
 
         if (BuildConfig.DEBUG)
         {
@@ -58,6 +58,8 @@ public class App extends Application
                 AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO);
             }
         }
+
+        context = this.getApplicationContext();
 
         // enable pin code for the application
 //		LockManager<CustomPinActivity> lockManager = LockManager.getInstance();

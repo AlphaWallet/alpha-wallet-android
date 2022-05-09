@@ -4,12 +4,12 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.AWRealmMigration;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.exceptions.RealmMigrationNeededException;
 
 public class RealmManager {
 
@@ -28,33 +28,33 @@ public class RealmManager {
     }
 
     Realm getRealmInstanceInternal(String name) {
-        try
-        {
+//        try
+//        {
             RealmConfiguration config = realmConfigurations.get(name);
             if (config == null)
             {
-                config = new RealmConfiguration.Builder().name(name)
+                config = new RealmConfiguration.Builder(Collections.emptySet()).name(name)
                         .schemaVersion(BuildConfig.DB_VERSION)
                         .migration(new AWRealmMigration())
                         .build();
                 realmConfigurations.put(name, config);
             }
-            return Realm.getInstance(config);
-        }
-        catch (RealmMigrationNeededException e)
-        {
-            //we require a realm migration, but this wasn't provided.
-            RealmConfiguration config = realmConfigurations.get(name);
-            if (config == null)
-            {
-                config = new RealmConfiguration.Builder().name(name)
-                        .schemaVersion(BuildConfig.DB_VERSION)
-                        .deleteRealmIfMigrationNeeded()
-                        .build();
-                realmConfigurations.put(name, config);
-            }
-            return Realm.getInstance(config);
-        }
+            return Realm.Companion.open(config);
+//        }
+//        catch ( e)
+//        {
+//            //we require a realm migration, but this wasn't provided.
+//            RealmConfiguration config = realmConfigurations.get(name);
+//            if (config == null)
+//            {
+//                config = new RealmConfiguration.Builder().name(name)
+//                        .schemaVersion(BuildConfig.DB_VERSION)
+//                        .deleteRealmIfMigrationNeeded()
+//                        .build();
+//                realmConfigurations.put(name, config);
+//            }
+//            return Realm.Companion.open(config);
+//        }
     }
 
     public Realm getWalletDataRealmInstance() {

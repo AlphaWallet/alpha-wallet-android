@@ -31,11 +31,9 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
-import io.realm.Case;
 import io.realm.Realm;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
-import io.realm.Sort;
+import io.realm.query.RealmQuery;
 
 /**
  * Created by JB on 5/08/2020.

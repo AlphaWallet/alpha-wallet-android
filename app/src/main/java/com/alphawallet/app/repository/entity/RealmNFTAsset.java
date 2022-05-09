@@ -12,13 +12,18 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by JB on 10/07/2021.
  */
-public class RealmNFTAsset extends RealmObject
+public class RealmNFTAsset implements RealmObject
 {
     @PrimaryKey
     private String tokenIdAddr; //format is addr-chainId-tokenId
 
     private String metaData; //store as a JSON blob
     private String balance;  //for ERC1155
+
+    public RealmNFTAsset(String tokenIdAddr)
+    {
+        this.tokenIdAddr = tokenIdAddr;
+    }
 
     public String getTokenId()
     {

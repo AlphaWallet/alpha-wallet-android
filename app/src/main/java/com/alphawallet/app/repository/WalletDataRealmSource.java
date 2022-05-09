@@ -19,10 +19,10 @@ import java.util.Map;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Case;
+import io.realm.MutableRealm;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import io.realm.Sort;
+import kotlin.jvm.JvmClassMappingKt;
 import timber.log.Timber;
 
 /**
@@ -173,31 +173,33 @@ public class WalletDataRealmSource {
         }));
     }
 
-    public void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess)
+    public void updateWalletData(Wallet wallet, Runnable callback)
     {
-        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        try
         {
-            realm.executeTransactionAsync(r -> {
+            Realm realm = realmManager.getWalletDataRealmInstance();
+            realm.writeBlocking(r -> {
                 storeKeyData(wallet, r);
                 storeWalletData(wallet, r);
                 Timber.tag("RealmDebug").d("storedKeydata " + wallet.address);
-            }, onSuccess);
+                return null;
+            });
+            callback.run();
         }
         catch (Exception e)
         {
             Timber.e(e);
-            onSuccess.onSuccess();
+            callback.run();
         }
     }
 
-    public void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess)
+    public void updateWalletItem(Wallet wallet, WalletItem item, Runnable callback)
     {
-        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        try
         {
-            realm.executeTransactionAsync(r -> {
-                RealmWalletData walletData = r.where(RealmWalletData.class)
-                        .equalTo("address", wallet.address, Case.INSENSITIVE)
-                        .findFirst();
+            Realm realm = realmManager.getWalletDataRealmInstance();
+            realm.writeBlocking(r -> {
+                RealmWalletData walletData = r.query(JvmClassMappingKt.getKotlinClass(RealmWalletData.class), "address = ?", wallet.address).first().find();
 
                 if (walletData != null)
                 {
@@ -217,16 +219,20 @@ public class WalletDataRealmSource {
                             break;
                     }
 
-                    r.insertOrUpdate(walletData);
+//                    r.insertOrUpdate(walletData);
+                    r.copyToRealm(walletData, MutableRealm.UpdatePolicy.ALL);
                 }
                 Timber.tag("RealmDebug").d("storedKeydata " + wallet.address);
-            }, onSuccess);
+                callback.run();
+                return null;
+            });
+
 
         }
         catch (Exception e)
         {
             Timber.e(e);
-            onSuccess.onSuccess();
+            callback.run();
         }
     }
 
@@ -440,7 +446,7 @@ public class WalletDataRealmSource {
         return realmManager.getWalletDataRealmInstance();
     }
 
-    private void storeKeyData(Wallet wallet, Realm r)
+    private void storeKeyData(Wallet wallet, MutableRealm r)
     {
         RealmKeyType realmKey = r.where(RealmKeyType.class)
                 .equalTo("address", wallet.address, Case.INSENSITIVE)
@@ -470,7 +476,7 @@ public class WalletDataRealmSource {
         r.insertOrUpdate(realmKey);
     }
 
-    private void storeWalletData(Wallet wallet, Realm r)
+    private void storeWalletData(Wallet wallet, MutableRealm r)
     {
         RealmWalletData item = r.where(RealmWalletData.class)
                 .equalTo("address", wallet.address, Case.INSENSITIVE)

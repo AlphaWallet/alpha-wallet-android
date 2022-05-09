@@ -29,8 +29,8 @@ public interface WalletRepositoryType {
     Single<Wallet[]> storeWallets(Wallet[] wallets);
 
     Single<Wallet> storeWallet(Wallet wallet);
-    void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess);
-    void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess);
+    void updateWalletData(Wallet wallet, Runnable onSuccess);
+    void updateWalletItem(Wallet wallet, WalletItem item, Runnable callback);
 
     Single<String> getName(String address);
 

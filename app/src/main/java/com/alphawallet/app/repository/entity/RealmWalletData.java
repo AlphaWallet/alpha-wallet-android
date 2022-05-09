@@ -7,7 +7,7 @@ import io.realm.annotations.PrimaryKey;
  * Created by James on 8/11/2018.
  * Stormbird in Singapore
  */
-public class RealmWalletData extends RealmObject
+public class RealmWalletData implements RealmObject
 {
     private static final int DISMISS_WARNING_IN_SETTINGS_MASK = 0xFFFFFFFE;
 

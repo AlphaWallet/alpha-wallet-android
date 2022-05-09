@@ -19,11 +19,9 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import dagger.hilt.android.qualifiers.ApplicationContext;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
@@ -95,14 +93,14 @@ public class NameThisWalletViewModel extends BaseViewModel
         ensName.setValue(address);
     }
 
-    public void setWalletName(String name, Realm.Transaction.OnSuccess onSuccess)
+    public void setWalletName(String name, Runnable callback)
     {
         Wallet wallet = defaultWallet().getValue();
         wallet.name = name;
-        genericWalletInteract.updateWalletItem(wallet, WalletItem.NAME, onSuccess);
+        genericWalletInteract.updateWalletItem(wallet, WalletItem.NAME, callback);
     }
 
-    public boolean checkEnsName(String newName, Realm.Transaction.OnSuccess onSuccess)
+    public boolean checkEnsName(String newName, Runnable callback)
     {
         if (!TextUtils.isEmpty(newName) && EnsResolver.isValidEnsName(newName))
         {
@@ -110,7 +108,7 @@ public class NameThisWalletViewModel extends BaseViewModel
             ensResolver.resolveENSAddress(newName)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(addr -> checkAddress(addr, newName, onSuccess))
+                    .subscribe(addr -> checkAddress(addr, newName, callback))
                     .isDisposed();
 
             return true;
@@ -122,17 +120,17 @@ public class NameThisWalletViewModel extends BaseViewModel
     }
 
     //check if this is a valid ENS name, if so then replace the ENS name
-    private void checkAddress(String address, String ensName, Realm.Transaction.OnSuccess onSuccess)
+    private void checkAddress(String address, String ensName, Runnable callback)
     {
         if (defaultWallet.getValue() != null && !TextUtils.isEmpty(address) && address.equalsIgnoreCase(defaultWallet.getValue().address))
         {
             Wallet wallet = defaultWallet().getValue();
             wallet.ENSname = ensName;
-            genericWalletInteract.updateWalletItem(wallet, WalletItem.ENS_NAME, onSuccess);
+            genericWalletInteract.updateWalletItem(wallet, WalletItem.ENS_NAME, callback);
         }
         else
         {
-            onSuccess.onSuccess();
+            callback.run();
         }
     }
 }

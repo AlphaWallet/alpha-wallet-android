@@ -50,14 +50,17 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import io.realm.MutableRealm;
 import io.realm.Realm;
+import io.realm.RealmObject;
+import kotlin.jvm.JvmClassMappingKt;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import static android.text.Html.FROM_HTML_MODE_COMPACT;
 import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
 
-public class Token
+public class Token implements RealmObject
 {
     public final static int TOKEN_BALANCE_PRECISION = 4;
     public final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
@@ -1063,9 +1066,9 @@ public class Token
 
     protected long getEarliestEventRead(Realm instance)
     {
-        RealmAuxData rd = instance.where(RealmAuxData.class)
-                .equalTo("instanceKey", TokensRealmSource.databaseKey(tokenInfo.chainId, getAddress()))
-                .findFirst();
+        RealmAuxData rd = instance.query(JvmClassMappingKt.getKotlinClass(RealmAuxData.class),
+                "instanceKey = ?", TokensRealmSource.databaseKey(tokenInfo.chainId, getAddress()))
+                .first().find();
 
         if (rd == null)
         {
@@ -1079,9 +1082,9 @@ public class Token
 
     protected long getLastEventRead(Realm instance)
     {
-        RealmAuxData rd = instance.where(RealmAuxData.class)
-                .equalTo("instanceKey", TokensRealmSource.databaseKey(tokenInfo.chainId, getAddress()))
-                .findFirst();
+        RealmAuxData rd = instance.query(JvmClassMappingKt.getKotlinClass(RealmAuxData.class),
+                "instanceKey = ?", TokensRealmSource.databaseKey(tokenInfo.chainId, getAddress()))
+                .first().find();
 
         if (rd == null)
         {
@@ -1096,20 +1099,20 @@ public class Token
     protected void updateEventReads(Realm realm, long startRead, long lastRead)
     {
         if (realm == null) return;
-        realm.executeTransaction(r -> {
+        realm.writeBlocking(r -> {
             String key = TokensRealmSource.databaseKey(tokenInfo.chainId, getAddress());
-            RealmAuxData rd = r.where(RealmAuxData.class)
-                    .equalTo("instanceKey", key)
-                    .findFirst();
+            RealmAuxData rd = r.query(JvmClassMappingKt.getKotlinClass(RealmAuxData.class),
+                    "instanceKey = ?", key).first().find();
 
             if (rd == null)
             {
-                rd = r.createObject(RealmAuxData.class, key); //create asset in realm
+                rd = new RealmAuxData(key);
             }
 
             rd.setResultReceivedTime(startRead);
             rd.setResultTime(lastRead);
-            r.insertOrUpdate(rd);
+            r.copyToRealm(rd, MutableRealm.UpdatePolicy.ALL);
+            return null;
         });
     }
 }

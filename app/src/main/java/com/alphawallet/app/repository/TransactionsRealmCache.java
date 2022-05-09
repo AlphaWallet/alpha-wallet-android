@@ -3,14 +3,10 @@ package com.alphawallet.app.repository;
 import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
 
-import static java.lang.Thread.sleep;
-
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
@@ -30,14 +26,12 @@ import org.web3j.protocol.core.methods.response.EthTransaction;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Phaser;
 
 import io.reactivex.Single;
-import io.realm.Case;
 import io.realm.Realm;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
-import io.realm.Sort;
+import io.realm.query.RealmQuery;
+import io.realm.query.Sort;
 import timber.log.Timber;
 
 public class TransactionsRealmCache implements TransactionLocalSource {

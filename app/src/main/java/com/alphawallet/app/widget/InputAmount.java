@@ -38,10 +38,8 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
-import io.realm.Case;
 import io.realm.Realm;
-import io.realm.RealmQuery;
-import io.realm.Sort;
+import io.realm.query.RealmQuery;
 import timber.log.Timber;
 
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;

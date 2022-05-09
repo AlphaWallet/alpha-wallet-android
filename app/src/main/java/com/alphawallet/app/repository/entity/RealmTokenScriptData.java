@@ -16,7 +16,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 /**
  * Created by JB on 17/08/2020.
  */
-public class RealmTokenScriptData extends RealmObject
+public class RealmTokenScriptData implements RealmObject
 {
     @PrimaryKey
     private String instanceKey;
@@ -25,6 +25,11 @@ public class RealmTokenScriptData extends RealmObject
     private String names; //CSV list of token names allowing for plurals. //TODO: replace with RealmMap when available
     private String viewList; //CSV list of event views //TODO: replace with RealmMap when available
     private boolean hasEvents; //TokenScript has events
+
+    public RealmTokenScriptData(String instanceKey)
+    {
+        this.instanceKey = instanceKey;
+    }
 
     public long getChainId()
     {

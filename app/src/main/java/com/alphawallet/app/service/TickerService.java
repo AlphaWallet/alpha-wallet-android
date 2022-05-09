@@ -13,6 +13,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
@@ -709,6 +710,7 @@ public class TickerService
         put(KLAYTN_ID, "klay-token");
         put(IOTEX_MAINNET_ID, "iotex");
         put(AURORA_MAINNET_ID, "aurora");
+        put(MILKOMEDA_C1_ID, "cardano");
     }};
 
     private static final Map<Long, String> dexGuruChainIdToAPISymbol = new HashMap<Long, String>(){{
@@ -739,6 +741,7 @@ public class TickerService
         put(KLAYTN_ID, "klay-token");
         put(IOTEX_MAINNET_ID, "iotex");
         put(AURORA_MAINNET_ID, "aurora");
+        put(MILKOMEDA_C1_ID, "cardano");
     }};
 
     public static boolean validateCoinGeckoAPI(Token token)

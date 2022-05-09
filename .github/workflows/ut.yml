@@ -19,6 +19,6 @@ jobs:
           cache: gradle
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
-      - name: Run detekt
+      - name: Run tests
         run: ./gradlew :app:test
         continue-on-error: true

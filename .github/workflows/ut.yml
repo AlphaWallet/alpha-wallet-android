@@ -1,0 +1,24 @@
+name: Unit tests
+
+on: [push, pull_request]
+
+jobs:
+  ut:
+    name: Run Unit tests
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - name: set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+          cache: gradle
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+      - name: Run detekt
+        run: ./gradlew :app:test
+        continue-on-error: true

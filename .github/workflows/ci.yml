@@ -16,6 +16,9 @@ jobs:
         with:
           java-version: 11
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
       - name: Build the app
         run: sh ./build.sh
 

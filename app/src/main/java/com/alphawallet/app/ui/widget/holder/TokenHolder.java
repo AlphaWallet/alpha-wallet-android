@@ -1,7 +1,6 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_ID;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,17 +11,14 @@ import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
@@ -40,6 +36,7 @@ import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Locale;
 
 public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, View.OnLongClickListener {
 
@@ -63,7 +60,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final RelativeLayout tokenLayout;
     private final MaterialCheckBox selectToken;
     private final ProgressBar tickerProgress;
-
+    
     public Token token;
     private TokensAdapterCallback tokensAdapterCallback;
 
@@ -125,7 +122,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
             balanceEth.setText(shortTitle());
 
-            String coinBalance = token.getStringBalance();
+            String coinBalance = token.getStringBalanceForUI(4);
             if (!TextUtils.isEmpty(coinBalance)) {
                 balanceCoin.setVisibility(View.VISIBLE);
 
@@ -273,7 +270,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         try {
             percentage = Double.parseDouble(ticker.percentChange24h);
             color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.negative : R.color.positive);
-            formattedPercents = ticker.percentChange24h.replace("-", "") + "%";
+            formattedPercents = String.format(Locale.getDefault(),"%.2f", percentage).replace("-", "") + "%";
             root24Hours.setBackgroundResource(percentage < 0 ? R.drawable.background_24h_change_red : R.drawable.background_24h_change_green);
             text24Hours.setText(formattedPercents);
             text24Hours.setTextColor(color);

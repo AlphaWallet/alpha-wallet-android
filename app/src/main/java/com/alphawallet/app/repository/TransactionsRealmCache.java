@@ -185,7 +185,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 for (RealmTransaction item : txs)
                 {
                     int currentCount = elementCount.get(item.getChainId(), 0);
-                    if (networkFilters.contains(item.getChainId()) && currentCount < fetchLimit && item.getTimeStamp() < fetchTime)
+                    if (networkFilters.contains(item.getChainId()) && currentCount < fetchLimit && item.getTimeStamp() > fetchTime)
                     {
                         TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber());
                         metas.add(tm);

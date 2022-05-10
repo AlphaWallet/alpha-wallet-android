@@ -110,7 +110,7 @@ public class ERC721Token extends Token
     }
 
     @Override
-    public String getStringBalance()
+    public String getStringBalanceForUI(int scale)
     {
         if (balance.compareTo(BigDecimal.ZERO) > 0)
         {

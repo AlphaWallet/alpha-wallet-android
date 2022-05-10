@@ -177,7 +177,7 @@
     </string-array>
     <string-array name="filter_match">
         <item>Any</item>
-        <item>1-64</item>
+        <item>1–64</item>
     </string-array>
     <string-array name="filter_class">
         <item>Any</item>
@@ -929,4 +929,6 @@
     <string name="zero">0</string>
     <string name="decrease">Decrease</string>
     <string name="increase">Increase</string>
+    <string name="message_transaction_timeout">The transaction has timed out. You can view the status in activity page.</string>
+    <string name="error_transaction_timeout">Transaction Timeout</string>
 </resources>

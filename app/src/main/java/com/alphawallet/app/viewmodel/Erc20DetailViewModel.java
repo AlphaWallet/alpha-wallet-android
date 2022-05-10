@@ -10,11 +10,9 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ActivityMeta;
-import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
-import com.alphawallet.app.repository.OnRampRepository;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
@@ -125,7 +123,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public void checkForNewScript(Token token)
     {
         //check server for new tokenscript
-        assetDefinitionService.checkServerForScript(token.tokenInfo.chainId, token.getAddress())
+        assetDefinitionService.checkServerForScript(token)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.single())
                 .subscribe(this::handleFilename, this::onError)

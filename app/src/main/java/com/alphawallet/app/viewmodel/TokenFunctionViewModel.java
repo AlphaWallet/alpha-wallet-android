@@ -112,7 +112,6 @@ public class TokenFunctionViewModel extends BaseViewModel {
     private final MutableLiveData<List<OpenSeaAsset.Trait>> traits = new MutableLiveData<>();
     private final MutableLiveData<NFTAsset> attrs = new MutableLiveData<>();
     private final MutableLiveData<AssetContract> assetContract = new MutableLiveData<>();
-    private final MutableLiveData<OpenSeaAsset> openSeaAsset = new MutableLiveData<>();
     private final MutableLiveData<NFTAsset> nftAsset = new MutableLiveData<>();
 
     private Wallet wallet;
@@ -201,19 +200,9 @@ public class TokenFunctionViewModel extends BaseViewModel {
         return traits;
     }
 
-    public MutableLiveData<NFTAsset> attrs()
-    {
-        return attrs;
-    }
-
     public MutableLiveData<AssetContract> assetContract()
     {
         return assetContract;
-    }
-
-    public MutableLiveData<OpenSeaAsset> openSeaAsset()
-    {
-        return openSeaAsset;
     }
 
     public MutableLiveData<NFTAsset> nftAsset()
@@ -579,7 +568,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
     public void checkForNewScript(Token token)
     {
         //check server for new tokenscript
-        assetDefinitionService.checkServerForScript(token.tokenInfo.chainId, token.getAddress())
+        assetDefinitionService.checkServerForScript(token)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.single())
                 .subscribe(this::handleDefinition, this::onError)
@@ -808,20 +797,13 @@ public class TokenFunctionViewModel extends BaseViewModel {
             {
                 JSONObject assetJson = new JSONObject(result);
                 OpenSeaAsset osAsset = new Gson().fromJson(assetJson.toString(), OpenSeaAsset.class);
-                if (osAsset != null)
+                NFTAsset asset = new NFTAsset(result);
+                if (!TextUtils.isEmpty(asset.getImage()))
                 {
-                    openSeaAsset.postValue(osAsset);
-
-                    if (osAsset.isValid())
-                    {
-                        // If asset does not have name, description or image, load from contract later
-                        loadedFromApi = true;
-                    }
-                    else
-                    {
-                        // Search OpenSeaAsset for name, description or image later when `NFTAsset.updateFromRaw()` is invoked
-                        oldAsset.attachOpenSeaAssetData(osAsset);
-                    }
+                    loadedFromApi = true;
+                    storeAsset(token, tokenId, new NFTAsset(result), oldAsset);
+                    asset.attachOpenSeaAssetData(osAsset);
+                    nftAsset.postValue(asset);
                 }
             }
             catch (JSONException e)

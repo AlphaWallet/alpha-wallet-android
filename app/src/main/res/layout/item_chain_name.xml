@@ -6,6 +6,20 @@
 
     <TextView
         android:id="@+id/_text_chain_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|end"
+        android:fontFamily="@font/font_bold"
+        android:padding="2dp"
+        android:background="@drawable/background_chain_name"
+        android:text="@string/ethereum"
+        android:textColor="@color/white"
+        android:maxLines="1"
+        android:textSize="12sp"
+        android:visibility="visible" />
+
+    <!-- <TextView
+        android:id="@+id/_text_chain_name"
         style="@style/Aw.Typography.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,6 +30,6 @@
         android:padding="2dp"
         android:text="@string/ethereum"
         android:textColor="?colorOnPrimary"
-        android:visibility="visible" />
+        android:visibility="visible" /> -->
 
 </LinearLayout>

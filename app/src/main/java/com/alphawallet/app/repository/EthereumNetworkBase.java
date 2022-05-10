@@ -87,6 +87,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     private static final String POLYGON_HOMEPAGE = "https://alphawallet.com/browser-item-category/polygon/";
 
     private static final String GAS_API = "module=gastracker&action=gasoracle";
+
+    private static final String DEFAULT_INFURA_KEY = "da3717f25f824cc1baa32d812386d93f";
     /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
        These hardcoded keys are fallbacks used by AlphaWallet forks.
 
@@ -102,53 +104,80 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static native String getAmberDataKey();
     public static native String getInfuraKey();
     public static native String getSecondaryInfuraKey();
+    private static final boolean usesProductionKey = !getInfuraKey().equals(DEFAULT_INFURA_KEY);
 
-    //Fallback nodes: these nodes are used if there's no Amberdata key, and also as a fallback in case the primary node times out while attempting a call
-    public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/" + getInfuraKey();
-    public static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/" + getInfuraKey();
+    public static final String FREE_MAINNET_RPC_URL = "https://main-rpc.linkpool.io";
+    public static final String FREE_POLYGON_RPC_URL = "https://polygon-rpc.com";
+    public static final String FREE_ARBITRUM_RPC_URL = "https://arbitrum.public-rpc.com";
+    public static final String FREE_RINKEBY_RPC_URL = "https://rinkeby-light.eth.linkpool.io";
+    public static final String FREE_GOERLI_RPC_URL = "https://goerli-light.eth.linkpool.io";
+    public static final String FREE_MUMBAI_RPC_URL = "https://rpc-mumbai.maticvigil.com";
+    public static final String FREE_OPTIMISM_RPC_URL = "https://mainnet.optimism.io";
+    public static final String FREE_ARBITRUM_TEST_RPC_URL = "https://rinkeby.arbitrum.io/rpc";
+    public static final String FREE_KOVAN_RPC_URL = "https://kovan.poa.network";
+    public static final String FREE_OPTIMISM_TESTRPC_URL = "https://kovan.optimism.io";
+    public static final String FREE_PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/3a961d6501e54add9a41aa53f15de99b";
+    public static final String FREE_PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/3a961d6501e54add9a41aa53f15de99b";
+
+    public static final String MAINNET_RPC_URL = usesProductionKey ? "https://mainnet.infura.io/v3/" + getInfuraKey()
+            : FREE_MAINNET_RPC_URL;
+    public static final String RINKEBY_RPC_URL = usesProductionKey ? "https://rinkeby.infura.io/v3/" + getInfuraKey()
+            : FREE_RINKEBY_RPC_URL;
+    public static final String KOVAN_RPC_URL = usesProductionKey ? "https://kovan.infura.io/v3/" + getInfuraKey()
+            : FREE_KOVAN_RPC_URL;
+    public static final String GOERLI_RPC_URL  = usesProductionKey ? "https://goerli.infura.io/v3/" + getInfuraKey()
+            : FREE_GOERLI_RPC_URL;
+    public static final String MATIC_RPC_URL   = usesProductionKey ? "https://polygon-mainnet.infura.io/v3/" + getInfuraKey()
+            : FREE_POLYGON_RPC_URL;
+    public static final String ARBITRUM_MAINNET_RPC = usesProductionKey ? "https://arbitrum-mainnet.infura.io/v3/" + getInfuraKey()
+            : FREE_ARBITRUM_RPC_URL;
+    public static final String MUMBAI_TEST_RPC_URL = usesProductionKey ? "https://polygon-mumbai.infura.io/v3/" + getInfuraKey()
+            : FREE_MUMBAI_RPC_URL;
+    public static final String OPTIMISTIC_MAIN_URL = usesProductionKey ? "https://optimism-mainnet.infura.io/v3/" + getInfuraKey()
+            : FREE_OPTIMISM_RPC_URL;
+    public static final String OPTIMISTIC_TEST_URL = usesProductionKey ? "https://optimism-kovan.infura.io/v3/" + getInfuraKey()
+            : FREE_OPTIMISM_TESTRPC_URL;
+    public static final String ARBITRUM_TESTNET_RPC = usesProductionKey ? "https://arbitrum-rinkeby.infura.io/v3/" + getInfuraKey()
+            : FREE_ARBITRUM_TEST_RPC_URL;
+    public static final String PALM_RPC_URL = usesProductionKey ? "https://palm-mainnet.infura.io/v3/" + getInfuraKey()
+            : FREE_PALM_RPC_URL;
+    public static final String PALM_TEST_RPC_URL = usesProductionKey ? "https://palm-testnet.infura.io/v3/" + getInfuraKey()
+            : FREE_PALM_TEST_RPC_URL;
+
+    // Use the "Free" routes as backup in order to diversify node usage; to avoid single point of failure
+    public static final String MAINNET_FALLBACK_RPC_URL = usesProductionKey ? FREE_MAINNET_RPC_URL : "https://mainnet.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String RINKEBY_FALLBACK_RPC_URL = usesProductionKey ? FREE_RINKEBY_RPC_URL : "https://rinkeby.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String KOVAN_FALLBACK_RPC_URL = usesProductionKey ? FREE_KOVAN_RPC_URL : "https://kovan.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String GOERLI_FALLBACK_RPC_URL = usesProductionKey ? FREE_GOERLI_RPC_URL : "https://goerli.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String ARBITRUM_FALLBACK_MAINNET_RPC = usesProductionKey ? FREE_ARBITRUM_RPC_URL : "https://arbitrum-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String PALM_RPC_FALLBACK_URL = usesProductionKey ? FREE_PALM_RPC_URL : "https://palm-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String PALM_TEST_RPC_FALLBACK_URL = usesProductionKey ? FREE_PALM_RPC_URL : "https://palm-testnet.infura.io/v3/" + getSecondaryInfuraKey();
 
     //Note that AlphaWallet now uses a double node configuration. See class AWHttpService comment 'try primary node'.
     //If you supply a main RPC and secondary it will try the secondary if the primary node times out after 10 seconds.
     //See the declaration of NetworkInfo - it has a member backupNodeUrl. Put your secondary node here.
 
-    public static final String BACKUP_INFURA_KEY = getSecondaryInfuraKey();
-    public static final String MAINNET_FALLBACK_RPC_URL = "https://mainnet.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String ROPSTEN_FALLBACK_RPC_URL = "https://ropsten.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
     public static final String XDAI_RPC_URL = "https://rpc.xdaichain.com/";
     public static final String POA_RPC_URL = "https://core.poa.network/";
     public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + getInfuraKey();
-    public static final String ROPSTEN_FALLBACK_RPC_URL = "https://ropsten.infura.io/v3/" + getSecondaryInfuraKey();
-    public static final String RINKEBY_FALLBACK_RPC_URL = "https://rinkeby.infura.io/v3/" + getSecondaryInfuraKey();
-    public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/" + getInfuraKey();
-    public static final String KOVAN_FALLBACK_RPC_URL = "https://kovan.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
-    public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/" + getInfuraKey();
-    public static final String GOERLI_FALLBACK_RPC_URL = "https://goerli.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
     public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
     public static final String BINANCE_TEST_FALLBACK_RPC_URL = "https://data-seed-prebsc-2-s1.binance.org:8545";
     public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed.binance.org";
     public static final String BINANCE_MAIN_FALLBACK_RPC_URL = "https://bsc-dataseed2.ninicoin.io:443";
-    public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
+    public static final String HECO_RPC_URL = "https://http-mainnet.hecochain.com";
     public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
-    public static final String OPTIMISTIC_MAIN_URL = "https://optimism-mainnet.infura.io/v3/" + getInfuraKey();
-    public static final String OPTIMISTIC_TEST_URL = "https://optimism-kovan.infura.io/v3/" + getInfuraKey();
-    public static final String MATIC_RPC_URL = "https://polygon-mainnet.infura.io/v3/" + getInfuraKey();
-    public static final String MUMBAI_TEST_RPC_URL = "https://polygon-mumbai.infura.io/v3/" + getInfuraKey();
     public static final String MATIC_FALLBACK_RPC_URL = "https://matic-mainnet.chainstacklabs.com";
     public static final String MUMBAI_FALLBACK_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_FALLBACK_URL = "https://kovan.optimism.io";
     public static final String CRONOS_TEST_URL = "https://cronos-testnet.crypto.org:8545";
-    public static final String ARBITRUM_MAINNET_RPC = "https://arbitrum-mainnet.infura.io/v3/" + getInfuraKey();
-    public static final String ARBITRUM_FALLBACK_MAINNET_RPC = "https://arbitrum-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
-    public static final String ARBITRUM_TESTNET_RPC = "https://arbitrum-rinkeby.infura.io/v3/" + getInfuraKey();
     public static final String ARBITRUM_FALLBACK_TESTNET_RPC = "https://rinkeby.arbitrum.io/rpc";
-    public static final String PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/" + getInfuraKey();
-    public static final String PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/" + getInfuraKey();
-    public static final String PALM_RPC_FALLBACK_URL = "https://palm-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
-    public static final String PALM_TEST_RPC_FALLBACK_URL = "https://palm-testnet.infura.io/v3/" + getSecondaryInfuraKey();
+
     public static final String IOTEX_MAINNET_RPC_URL = "https://babel-api.mainnet.iotex.io";
     public static final String IOTEX_MAINNET_RPC_FALLBACK_URL = "https://rpc.ankr.com/iotex";
     public static final String IOTEX_TESTNET_RPC_URL = "https://babel-api.testnet.iotex.io";
@@ -177,7 +206,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(XDAI_ID, new NetworkInfo(C.XDAI_NETWORK_NAME, C.xDAI_SYMBOL,
                     XDAI_RPC_URL,
                     "https://blockscout.com/xdai/mainnet/tx/", XDAI_ID,
-                    "https://rpc.xdaichain.com", "https://blockscout.com/xdai/mainnet/api?"));
+                    "https://gnosis.public-rpc.com", "https://blockscout.com/xdai/mainnet/api?"));
             put(POA_ID, new NetworkInfo(C.POA_NETWORK_NAME, C.POA_SYMBOL,
                     POA_RPC_URL,
                     "https://blockscout.com/poa/core/tx/", POA_ID, POA_RPC_URL,

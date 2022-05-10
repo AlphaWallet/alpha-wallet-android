@@ -11,7 +11,14 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 1
+      - name: JDK Cache
+        id: jdk-cache
+        uses: actions/cache@v2
+        with:
+          path: /opt/hostedtoolcache/Java_Zulu_jdk
+          key: jdk-cache
       - name: set up JDK
+        if: steps.jdk-cache.outputs.cache-hit != 'true'
         uses: actions/setup-java@v3
         with:
           distribution: zulu

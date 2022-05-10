@@ -110,11 +110,13 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">@dimen/sp20</item>
         <item name="cornerRadius">99dp</item>
+        <item name="rippleColor">@color/transparent</item>
     </style>
 
     <style name="Aw.Component.Button.Primary">
         <item name="android:lines">1</item>
-        <item name="android:backgroundTint">?colorOnSurface</item>
+        <item name="android:backgroundTint">@color/selector_button_primary</item>
+        <item name="strokeWidth">0dp</item>
         <item name="android:textColor">?colorSurface</item>
     </style>
 

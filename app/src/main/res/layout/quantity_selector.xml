@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingVertical="@dimen/standard_16">
+
+    <ImageButton
+        android:id="@+id/number_down"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/quantity"
+        android:background="@drawable/ic_minus_circle"
+        android:contentDescription="@string/decrease" />
+
+    <EditText
+        android:id="@+id/quantity"
+        style="@style/Aw.Typography.Title.Large.Bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@color/transparent"
+        android:gravity="center"
+        android:hint="@string/zero"
+        android:imeOptions="actionDone"
+        android:importantForAutofill="no"
+        android:inputType="number"
+        android:longClickable="false"
+        android:maxLength="5"
+        android:minWidth="@dimen/hundred_100"
+        android:paddingHorizontal="@dimen/tiny_8"
+        android:selectAllOnFocus="true"
+        tools:text="12345" />
+
+    <ImageButton
+        android:id="@+id/number_up"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/quantity"
+        android:background="@drawable/ic_add_circle"
+        android:contentDescription="@string/increase" />
+
+</RelativeLayout>

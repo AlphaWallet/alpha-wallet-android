@@ -17,14 +17,15 @@ jobs:
           distribution: zulu
           java-version: 11
           cache: gradle
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
       - name: SDK Cache
         id: sdk-cache
         uses: actions/cache@v2
         with:
           path: /root/.android
           key: sdk-cache
+      - name: Setup Android SDK
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
+        uses: android-actions/setup-android@v2
       - name: Run tests
         run: ./gradlew :app:testNoAnalyticsDebugUnitTest
         continue-on-error: true

@@ -19,6 +19,12 @@ jobs:
           cache: gradle
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
+      - name: SDK Cache
+        id: sdk-cache
+        uses: actions/cache@v2
+        with:
+          path: /root/.android
+          key: sdk-cache
       - name: Run tests
-        run: ./gradlew :app:test
+        run: ./gradlew :app:testNoAnalyticsDebugUnitTest
         continue-on-error: true

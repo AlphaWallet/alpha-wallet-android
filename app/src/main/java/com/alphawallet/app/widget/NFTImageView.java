@@ -25,7 +25,6 @@ import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.opensea.OpenSeaAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
@@ -109,7 +108,7 @@ public class NFTImageView extends RelativeLayout
         loadImage(asset.getThumbnail(), asset.getBackgroundColor());
     }
 
-    public void setupTokenImage(NFTAsset asset)
+    public void setupTokenImage(NFTAsset asset) throws IllegalArgumentException
     {
         if (shouldLoad(asset.getImage()))
         {
@@ -119,18 +118,10 @@ public class NFTImageView extends RelativeLayout
         }
     }
 
-    public void setupTokenImage(OpenSeaAsset asset)
+    private void loadImage(String url, String backgroundColor) throws IllegalArgumentException
     {
-        if (shouldLoad(asset.getImageUrl()))
-        {
-            showLoadingProgress(true);
-            progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
-            loadImage(asset.getImageUrl(), asset.backgroundColor);
-        }
-    }
+        if (!Utils.stillAvailable(getContext())) return;
 
-    private void loadImage(String url, String backgroundColor)
-    {
         setWebViewHeight((int)getLayoutParams().width);
 
         this.imageUrl = url;
@@ -148,7 +139,7 @@ public class NFTImageView extends RelativeLayout
             holdingView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent));
         }
 
-        loadRequest = Glide.with(image.getContext())
+        loadRequest = Glide.with(getContext())
                 .load(url)
                 .centerCrop()
                 .transition(withCrossFade())

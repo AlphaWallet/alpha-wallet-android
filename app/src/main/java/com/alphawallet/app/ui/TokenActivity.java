@@ -230,6 +230,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         super.onDestroy();
         if (pendingTxUpdate != null && !pendingTxUpdate.isDisposed()) pendingTxUpdate.dispose();
         if (fetchMetadata != null && !fetchMetadata.isDisposed()) fetchMetadata.dispose();
+        if (eventDetail != null) eventDetail.onDestroy();
     }
 
     private void txWritten(TransactionData transactionData)

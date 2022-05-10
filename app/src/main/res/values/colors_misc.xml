@@ -45,5 +45,8 @@
     <color name="iotex_mainnet">#00D4D5</color>
     <color name="aurora_mainnet">#6BBE47</color>
     <color name="aurora_testnet">#B2C6D8</color>
+    <color name="milkomeda">#222222</color>
+    <color name="milkomeda_test">#292929</color>
+
 
 </resources>

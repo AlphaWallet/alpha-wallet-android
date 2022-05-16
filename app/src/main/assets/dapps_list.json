@@ -77,5 +77,6 @@
   {"name": "NAOS Finance", "description": "A DeFi lending protocol allowing lenders and SME borrowers to facilitate permissionless and borderless loaning/borrowing transactions", "url": "https://naos.finance", "category": "Finance"},
   {"name": "DASLA", "description": "A DAS (Decentralized Account System) account registration tool.", "url": "https://das.la", "category": "Tool"},
   {"name": ".bit (Previously DAS)", "description": "Your decentralized identity for Web3.0 life", "url": "https://did.id/", "category": "Tool"},
-  {"name": "NFTSCAN", "description": "NFT Explorer.", "url": "https://nftscan.com/", "category": "Tool"}
+  {"name": "NFTSCAN", "description": "NFT Explorer.", "url": "https://nftscan.com/", "category": "Tool"},
+  {"name": "AAG Staking", "description": "Stake your $1AAG or $1AAG-ONE LP Tokens on our staking website to earn huge rewards. Benefit from high APRs and Capital Boosts with our Genesis NFTs.", "url": "https://staking.aag.ventures/", "category": "Finance"}
 ]

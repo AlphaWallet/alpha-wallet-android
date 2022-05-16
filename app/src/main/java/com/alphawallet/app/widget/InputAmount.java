@@ -12,7 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.Token;
@@ -27,7 +26,6 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
 import com.alphawallet.app.ui.widget.entity.NumericInput;
 import com.alphawallet.app.util.BalanceUtils;
-import com.alphawallet.token.entity.ContractAddress;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +39,6 @@ import java.text.DecimalFormat;
 import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmQuery;
-import io.realm.Sort;
 import timber.log.Timber;
 
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
@@ -321,7 +318,7 @@ public class InputAmount extends LinearLayout
         icon.bindData(token, assetService);
         symbolText.setText(token.getSymbol());
         availableSymbol.setText(token.getSymbol());
-        availableAmount.setText(token.getStringBalance());
+        availableAmount.setText(token.getStringBalanceForUI(5));
         updateAllFundsAmount();
     }
 

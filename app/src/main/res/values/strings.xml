@@ -75,7 +75,6 @@
     <string name="action_share">Share</string>
     <string name="action_more_details">More details</string>
     <string name="action_add_wallet">Add wallet</string>
-    <string name="action_add_token">Add Token</string>
     <string name="action_open_etherscan">View in Block Explorer</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>
@@ -178,7 +177,7 @@
     </string-array>
     <string-array name="filter_match">
         <item>Any</item>
-        <item>1-64</item>
+        <item>1–64</item>
     </string-array>
     <string-array name="filter_class">
         <item>Any</item>
@@ -673,7 +672,7 @@
     <string name="transaction_fail_warning">Transaction Fail Warning</string>
     <string name="node_predicts_tx_will_fail">The Node predicts this transaction will fail: %1$s</string>
     <string name="error_browse_selection">Selected image doesn\'t contain any data.</string>
-    <string name="display_tokens">Display Tokens</string>
+    <string name="display_tokens">Displayed Tokens</string>
     <string name="hidden_tokens">Hidden Tokens</string>
     <string name="ignore">Ignore</string>
     <string name="search_for_tokens">Search for Tokens...</string>
@@ -804,6 +803,7 @@
     <string name="hint_network_symbol">Symbol</string>
     <string name="hint_network_block_explorer_url">Transaction Explorer URL</string>
     <string name="action_add_network">Add Network</string>
+    <string name="action_reset_network">Reset</string>
     <string name="error_invalid_url">Invalid URL</string>
 
     <string name="text_speedup_note">Note that speeding up this transaction does not guarantee your original transaction will be accelerated. If your attempt is successful, you will be charged the miner fee as above.</string>
@@ -845,8 +845,9 @@
     <string name="hint_network_explorer_api">Explorer API</string>
     <string name="action_update_network">Update Network</string>
     <string name="action_enable_switch_reload"><![CDATA[Enable, Switch & Reload]]></string>
-    <string name="add_chain_dialog_message">This site is requesting you to enable and switch to the %1$s Chain with chain ID: %2$s. This will reload the page</string>
+    <string name="add_chain_dialog_message">This site is requesting you to enable and add the %1$s Chain with chain ID: %2$s. This will reload the page</string>
     <string name="switch_chain_request">Switch Chain Request</string>
+    <string name="add_chain_request">Add Chain Request</string>
     <string name="no_chart_data_available">No chart data available</string>
     <string name="wallet_total_change">%1$s (%2$s%%) Today</string>
     <string name="title_wallets_summary">Wallets</string>
@@ -885,7 +886,7 @@
     <string name="tab_info">Info</string>
     <string name="tab_activity">Activity</string>
     <string name="tab_alert">Alerts</string>
-    <string name="unknown_network_title">Unkown Network</string>
+    <string name="unknown_network_title">Unknown Network</string>
     <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
     <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
     <string name="wc_no_active_sessions">No Active sessions</string>
@@ -912,4 +913,22 @@
     <string name="trait_rarity_suppl_text">%1$s%% have this trait</string>
     <string name="experimental_1559">Use 1559 Transactions</string>
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
+    <string name="chain_id">Chain ID: %1d</string>
+    <string name="asset_creator">Created By</string>
+    <string name="asset_schema">Token Standard</string>
+    <string name="asset_total_supply">Total Supply</string>
+    <string name="asset_number_of_owners">Owners</string>
+    <string name="asset_owner">Owner</string>
+    <string name="asset_last_sale">Last Sale</string>
+    <string name="enable_screenlock">Unable to upgrade key: Enable screenlock on phone</string>
+    <string name="unable_to_upgrade_key">Unable to upgrade key: %1$s</string>
+    <string name="no_key_found">No Key found</string>
+    <string name="unable_store_key">Unable to store key: %1$s</string>
+    <string name="title_ens_lookup_warning">ENS Lookup Warning</string>
+    <string name="message_ens_node_not_sync">AlphaWallet has detected a discrepancy between ethereum\'s timestamp and your device\'s current time, or possibly the blockchain connection is not synchronized, please check your phone\'s time is correct, or ignore this warning.</string>
+    <string name="zero">0</string>
+    <string name="decrease">Decrease</string>
+    <string name="increase">Increase</string>
+    <string name="message_transaction_timeout">The transaction has timed out. You can view the status in activity page.</string>
+    <string name="error_transaction_timeout">Transaction Timeout</string>
 </resources>

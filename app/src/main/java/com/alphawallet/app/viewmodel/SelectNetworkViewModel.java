@@ -79,4 +79,8 @@ public class SelectNetworkViewModel extends BaseViewModel {
         if (browserNetwork != null) { return browserNetwork.chainId; }
         else return -1;
     }
+
+    public TokensService getTokensService() {
+        return tokensService;
+    }
 }

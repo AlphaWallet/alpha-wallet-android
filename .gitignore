@@ -67,3 +67,6 @@ gen-external-apklibs
 
 # Java profiling
 *.hprof
+
+fastlane/.google-play-key.json
+DCIM/

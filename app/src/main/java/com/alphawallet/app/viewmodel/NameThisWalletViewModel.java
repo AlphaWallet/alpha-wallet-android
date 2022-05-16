@@ -10,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.EnsResolver;
 
@@ -96,7 +97,9 @@ public class NameThisWalletViewModel extends BaseViewModel
 
     public void setWalletName(String name, Realm.Transaction.OnSuccess onSuccess)
     {
-        genericWalletInteract.updateWalletInfo(defaultWallet.getValue(), name, onSuccess);
+        Wallet wallet = defaultWallet().getValue();
+        wallet.name = name;
+        genericWalletInteract.updateWalletItem(wallet, WalletItem.NAME, onSuccess);
     }
 
     public boolean checkEnsName(String newName, Realm.Transaction.OnSuccess onSuccess)
@@ -104,7 +107,7 @@ public class NameThisWalletViewModel extends BaseViewModel
         if (!TextUtils.isEmpty(newName) && EnsResolver.isValidEnsName(newName))
         {
             //does this new name correspond to ENS?
-            ensResolver.resolveENSAddress(newName)
+            ensResolver.resolveENSAddress(newName, true)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(addr -> checkAddress(addr, newName, onSuccess))
@@ -123,7 +126,9 @@ public class NameThisWalletViewModel extends BaseViewModel
     {
         if (defaultWallet.getValue() != null && !TextUtils.isEmpty(address) && address.equalsIgnoreCase(defaultWallet.getValue().address))
         {
-            genericWalletInteract.updateWalletENS(defaultWallet.getValue(), ensName, onSuccess);
+            Wallet wallet = defaultWallet().getValue();
+            wallet.ENSname = ensName;
+            genericWalletInteract.updateWalletItem(wallet, WalletItem.ENS_NAME, onSuccess);
         }
         else
         {

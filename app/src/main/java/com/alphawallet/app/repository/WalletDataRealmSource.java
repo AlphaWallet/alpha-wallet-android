@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository;
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
@@ -7,6 +9,8 @@ import com.alphawallet.app.repository.entity.RealmKeyType;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
+
+import org.web3j.crypto.WalletUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -124,7 +128,7 @@ public class WalletDataRealmSource {
     private Wallet composeKeyType(RealmKeyType keyType)
     {
         Wallet wallet = null;
-        if (keyType != null)
+        if (keyType != null && !TextUtils.isEmpty(keyType.getAddress()) && WalletUtils.isValidAddress(keyType.getAddress()))
         {
             wallet = new Wallet(keyType.getAddress());
             wallet.type = keyType.getType();
@@ -175,8 +179,49 @@ public class WalletDataRealmSource {
         {
             realm.executeTransactionAsync(r -> {
                 storeKeyData(wallet, r);
-                Timber.tag("RealmDebug").d("storedwalletdata " + wallet.address);
+                storeWalletData(wallet, r);
+                Timber.tag("RealmDebug").d("storedKeydata " + wallet.address);
             }, onSuccess);
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+            onSuccess.onSuccess();
+        }
+    }
+
+    public void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess)
+    {
+        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        {
+            realm.executeTransactionAsync(r -> {
+                RealmWalletData walletData = r.where(RealmWalletData.class)
+                        .equalTo("address", wallet.address, Case.INSENSITIVE)
+                        .findFirst();
+
+                if (walletData != null)
+                {
+                    switch (item)
+                    {
+                        case NAME:
+                            walletData.setName(wallet.name);
+                            break;
+                        case ENS_NAME:
+                            walletData.setENSName(wallet.ENSname);
+                            break;
+                        case BALANCE:
+                            walletData.setBalance(wallet.balance);
+                            break;
+                        case ENS_AVATAR:
+                            walletData.setENSAvatar(wallet.ENSAvatar);
+                            break;
+                    }
+
+                    r.insertOrUpdate(walletData);
+                }
+                Timber.tag("RealmDebug").d("storedKeydata " + wallet.address);
+            }, onSuccess);
+
         }
         catch (Exception e)
         {

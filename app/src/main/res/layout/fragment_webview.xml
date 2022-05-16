@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:custom="http://schemas.android.com/tools">
 
     <include layout="@layout/layout_url_bar_full" />
 
@@ -29,7 +30,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/anchor"
-        android:layout_marginBottom="?actionBarSize"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
@@ -67,7 +67,7 @@
                 android:clickable="false"
                 android:focusable="false"
                 android:gravity="center_vertical"
-                android:text="0.0" />
+                custom:text="0.0" />
 
             <TextView
                 android:id="@+id/symbol"

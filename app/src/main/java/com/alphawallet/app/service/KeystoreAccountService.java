@@ -1,5 +1,6 @@
 package com.alphawallet.app.service;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.alphawallet.app.BuildConfig;
@@ -230,22 +231,12 @@ public class KeystoreAccountService implements AccountKeystoreService
     @Override
     public Single<SignatureFromKey> signTransaction(Wallet signer, String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
         return Single.fromCallable(() -> {
-            Sign.SignatureData sigData;
-            String dataStr = data != null ? Numeric.toHexString(data) : "";
-
-            RawTransaction rtx = RawTransaction.createTransaction(
-                    BigInteger.valueOf(nonce),
-                    gasPrice,
-                    gasLimit,
-                    toAddress,
-                    amount,
-                    dataStr
-            );
-
+            RawTransaction rtx = formatRawTransaction(toAddress, amount, gasPrice, gasLimit, nonce, data);
             byte[] signData = TransactionEncoder.encode(rtx, chainId);
             SignatureFromKey returnSig = keyService.signData(signer, signData);
-            sigData = sigFromByteArray(returnSig.signature);
-            if (sigData == null) {
+            Sign.SignatureData sigData = sigFromByteArray(returnSig.signature);
+            if (sigData == null)
+            {
                 returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
                 returnSig.failMessage = "Incorrect signature length"; //should never see this message
             }
@@ -343,19 +334,6 @@ public class KeystoreAccountService implements AccountKeystoreService
             byte[] signed = bytesFromSignature(signatureData);
             signed = patchSignatureVComponent(signed);
             return signed;
-        }).subscribeOn(Schedulers.io());
-    }
-
-    //In all cases where we need to sign data the signature needs to be in Ethereum format
-    //Geth gives us the pure EC function, but for hash signing
-    @Override
-    public Single<SignatureFromKey> signTransaction(Wallet signer, byte[] message, long chainId)
-    {
-        return Single.fromCallable(() -> {
-            //byte[] messageHash = Hash.sha3(message);
-            SignatureFromKey returnSig = keyService.signData(signer, message);
-            returnSig.signature = patchSignatureVComponent(returnSig.signature);
-            return returnSig;
         }).subscribeOn(Schedulers.io());
     }
 
@@ -465,5 +443,30 @@ public class KeystoreAccountService implements AccountKeystoreService
         }
 
         return sigBytes;
+    }
+
+    private RawTransaction formatRawTransaction(String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data)
+    {
+        String dataStr = data != null ? Numeric.toHexString(data) : "";
+
+        if (TextUtils.isEmpty(toAddress))
+        {
+            return RawTransaction.createContractTransaction(
+                    BigInteger.valueOf(nonce),
+                    gasPrice,
+                    gasLimit,
+                    amount,
+                    dataStr);
+        }
+        else
+        {
+            return RawTransaction.createTransaction(
+                    BigInteger.valueOf(nonce),
+                    gasPrice,
+                    gasLimit,
+                    toAddress,
+                    amount,
+                    dataStr);
+        }
     }
 }

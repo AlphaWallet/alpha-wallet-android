@@ -14,8 +14,6 @@ import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -46,6 +44,9 @@ public class ActivityViewModel extends BaseViewModel
     @Nullable
     private Disposable queryUnknownTokensDisposable;
 
+    @Nullable
+    private Disposable fetchTransactions;
+
     public LiveData<Wallet> defaultWallet() {
         return wallet;
     }
@@ -69,7 +70,6 @@ public class ActivityViewModel extends BaseViewModel
 
     public void prepare()
     {
-        //load the activity meta list
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -97,12 +97,27 @@ public class ActivityViewModel extends BaseViewModel
 
     public void fetchMoreTransactions(long startTime)
     {
-        List<Long> currentChains = tokensService.getNetworkFilters();
-        disposable = Observable.fromIterable(currentChains)
-                .flatMap(chainId -> transactionsService.fetchAndStoreTransactions(chainId, startTime).toObservable())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(activityItems::postValue, this::onError);
+        disposable =
+                fetchTransactionsInteract.fetchTransactionMetas(wallet.getValue(), tokensService.getNetworkFilters(), startTime, TRANSACTION_FETCH_LIMIT)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(metas -> onMoreActivityMetas(metas, startTime), this::onError);
+    }
+
+    private void onMoreActivityMetas(ActivityMeta[] activityMetas, long startTime)
+    {
+        if (activityMetas.length == 0)
+        {
+            fetchTransactions = Observable.fromIterable(tokensService.getNetworkFilters())
+                    .flatMap(chainId -> transactionsService.fetchAndStoreTransactions(chainId, startTime).toObservable())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(activityItems::postValue, this::onError);
+        }
+        else
+        {
+            activityItems.postValue(activityMetas);
+        }
     }
 
     public void onDestroy()
@@ -111,6 +126,11 @@ public class ActivityViewModel extends BaseViewModel
             queryUnknownTokensDisposable.dispose();
 
         queryUnknownTokensDisposable = null;
+
+        if (fetchTransactions != null && !fetchTransactions.isDisposed())
+            fetchTransactions.dispose();
+
+        fetchTransactions = null;
     }
 
     public TokensService getTokensService()

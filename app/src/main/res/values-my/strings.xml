@@ -76,7 +76,6 @@
     <string name="action_share">မျှဝေမည်</string>
     <string name="action_more_details">ပို၍အသေးစိတ်ပြုလုပ်ရန်</string>
     <string name="action_add_wallet">ဝေါလက် ထည့်မည်</string>
-    <string name="action_add_token">တိုကင်ထည့်မည်</string>
     <string name="action_open_etherscan">Ethersacan တွင်ကြည့်မည်</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>
@@ -749,7 +748,7 @@
     <string name="transaction_progress_detail">လုပ်ငန်းစဥ်ကို Ethereum Blockchain ပေါ်သို့တင်ပြီးပြီပါပြီ။ အတည်ပြုသူများမှအတည်ပြုနေသည့်အတွက် မိနစ်အနည်းအငယ်ခန့်ကြာမြင့်နိုင်ပါသည်။</string>
     <string name="action_show_tx_details">လုပ်ငန်းစဥ်အသေးစိတ်ကိုဖော်ပြမည်</string>
     <string name="default_to">%1$s %2$s တို့သည် %3$sကိုပို့ပြီးပါပြီ</string>
-    <string name="default_from">%1$s နှင့် %2$s တို့သည် #3$sမှ လက်ခံရရှိပြီးပါပြီ</string>
+    <string name="default_from">%1$s နှင့် %2$s တို့သည် %3$sမှ လက်ခံရရှိပြီးပါပြီ</string>
     <string name="default_approved">%3$sမှ %1$s နှင့် %2$s သို့ရွှေ့ရန် သဘောတူလွှာကိုသင်လက်ခံရရှိပြီးပါပြီ</string>
     <string name="default_approve">%2$sကို %1$sသို့ပို့ရန်သဘောတူသည်</string>
     <string name="contract_call">စာချုပ်ချုပ်ဆိုခြင်း</string>
@@ -850,6 +849,7 @@
     <string name="action_enable_switch_reload"><![CDATA[Enable, Switch & Reload]]></string>
     <string name="add_chain_dialog_message">ယခုဝက်ဘ်ဆိုဒ်သည် the %1$s Chain၊ chain ID: %2$s သို့ပြောင်းဖွင့်ရန်တောင်းဆိုနေပါသည်။</string>
     <string name="switch_chain_request">Chain တောင်းဆိုမှုကိုပြောင်းလဲမည်</string>
+    <string name="add_chain_request">Add Chain Request</string>
     <string name="no_chart_data_available">ဇယားအချက်အလက်မရရှိနိုင်ပါ</string>
     <string name="wallet_total_change">%1$s (%2$s%%) ယနေ့</string>
     <string name="title_wallets_summary">ဝေါလက်များ</string>
@@ -917,4 +917,23 @@
     <string name="toast_qr_scanning_requires_api_24">QR စကင်န်ဖတ်ခြင်းတွင် Android 7.0 (API အဆင့် 24) နှင့်အထက် လိုအပ်သည်။</string>
     <string name="experimental_1559">Use 1559 Transactions</string>
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
+    <string name="action_reset_network" >ပြန်လည်သတ်မှတ်ပါ။</string>
+    <string name="chain_id">Chain ID: %1d</string>
+    <string name="asset_creator">Created By</string>
+    <string name="asset_schema">Token Standard</string>
+    <string name="asset_total_supply">Total Supply</string>
+    <string name="asset_number_of_owners">Owners</string>
+    <string name="asset_owner">Owner</string>
+    <string name="asset_last_sale">Last Sale</string>
+    <string name="enable_screenlock">Unable to upgrade key: Enable screenlock on phone</string>
+    <string name="unable_to_upgrade_key">Unable to upgrade key: %1$s</string>
+    <string name="no_key_found">No Key found</string>
+    <string name="unable_store_key">Unable to store key: %1$s</string>
+    <string name="title_ens_lookup_warning">ENS Lookup Warning</string>
+    <string name="message_ens_node_not_sync">AlphaWallet has detected a discrepancy between ethereum\'s timestamp and your device\'s current time, or possibly the blockchain connection is not synchronized, please check your phone\'s time is correct, or ignore this warning.</string>
+    <string name="zero">0</string>
+    <string name="decrease">ရုပ်ရည်</string>
+    <string name="increase">တိုးမြှင့်လာသည်</string>
+    <string name="message_transaction_timeout">The transaction has timed out. You can view the status in activity page.</string>
+    <string name="error_transaction_timeout">Transaction Timeout</string>
 </resources>

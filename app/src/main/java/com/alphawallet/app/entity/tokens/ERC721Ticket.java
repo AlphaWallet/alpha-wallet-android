@@ -9,6 +9,7 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
@@ -43,7 +44,7 @@ public class ERC721Ticket extends Token
     }
 
     @Override
-    public String getStringBalance() {
+    public String getStringBalanceForUI(int scale) {
         return String.valueOf(getTokenCount());
     }
 
@@ -175,9 +176,10 @@ public class ERC721Ticket extends Token
     }
 
     @Override
-    public String convertValue(String prefix, String value, int precision)
+    public String convertValue(String prefix, EventResult vResult, int precision)
     {
         precision += 1;
+        String value = (vResult != null) ? vResult.value : "";
         if (value.length() > precision)
         {
             return prefix + "1";

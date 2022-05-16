@@ -5,10 +5,8 @@ import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
 
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.util.Pair;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -648,6 +646,7 @@ public class TokensRealmSource implements TokenLocalSource {
         realm.insertOrUpdate(realmNFT);
     }
 
+    // NFT Assets From Opensea
     @Override
     public Token[] initNFTAssets(Wallet wallet, Token[] tokens)
     {
@@ -1471,6 +1470,9 @@ public class TokensRealmSource implements TokenLocalSource {
         try (Realm realm = realmManager.getRealmInstance(TOKENS_MAPPING_DB))
         {
             realm.executeTransaction(r -> {
+                //erase old mappings
+                r.where(RealmTokenMapping.class).findAll().deleteAllFromRealm();
+
                 for (String tokenMapping : mappings.first.keySet())
                 {
                     ContractAddress mapping = new ContractAddress(tokenMapping);

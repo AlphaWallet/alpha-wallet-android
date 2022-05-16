@@ -30,6 +30,7 @@ import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
@@ -44,6 +45,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.jetbrains.annotations.NotNull;
+import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 
@@ -220,7 +222,7 @@ public class WalletViewModel extends BaseViewModel
         actionsView.setOnCopyWalletAddressClickListener(v -> {
             dialog.dismiss();
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText(KEY_ADDRESS, getWalletAddr());
+            ClipData clip = ClipData.newPlainText(KEY_ADDRESS, Keys.toChecksumAddress(getWalletAddr()));
             if (clipboard != null) {
                 clipboard.setPrimaryClip(clip);
             }
@@ -377,7 +379,7 @@ public class WalletViewModel extends BaseViewModel
 
     public void saveAvatar(Wallet wallet)
     {
-        genericWalletInteract.updateWalletInfo(wallet, wallet.name, () -> { });
+        genericWalletInteract.updateWalletItem(wallet, WalletItem.ENS_AVATAR, () -> { });
     }
 
     public Intent getBuyIntent(String address) {

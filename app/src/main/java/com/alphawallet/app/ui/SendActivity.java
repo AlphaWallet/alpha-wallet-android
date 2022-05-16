@@ -58,6 +58,7 @@ import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -89,12 +90,14 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     private BigDecimal sendAmount;
     private BigDecimal sendGasPrice;
     private ActionSheetDialog confirmationDialog;
+    private AWalletAlertDialog alertDialog;
 
     @Nullable
     private Disposable calcGasCost;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
         toolbar();
@@ -115,7 +118,10 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         sendGasPrice = BigDecimal.ZERO;
         sendAmount = NEGATIVE;
 
-        if (!checkTokenValidity(currentChain, contractAddress)) { return; }
+        if (!checkTokenValidity(currentChain, contractAddress))
+        {
+            return;
+        }
 
         setTitle(getString(R.string.action_send_tkn, token.getShortName()));
         setupTokenContent();
@@ -157,12 +163,14 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         return (token != null);
     }
 
-    private void onBack() {
+    private void onBack()
+    {
         finish();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -182,27 +190,33 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
         onBack();
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
         Operation taskCode = null;
-        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10) {
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
             taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
             requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
         }
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
+            if (confirmationDialog != null && confirmationDialog.isShowing())
+                confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
         }
-        else if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
+        else if (requestCode == C.BARCODE_READER_REQUEST_CODE)
+        {
             switch (resultCode)
             {
                 case Activity.RESULT_OK:
-                    if (data != null) {
+                    if (data != null)
+                    {
                         String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
 
                         //if barcode is still null, ensure we don't GPF
@@ -269,11 +283,13 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                     break;
                 default:
                     Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
-                                                "Code: " + resultCode
+                            "Code: " + resultCode
                     ));
                     break;
             }
-        } else {
+        }
+        else
+        {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -395,7 +411,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             case FUNCTION_CALL:
                 //Generic function call, not handled yet
                 displayScanError(R.string.toast_qr_code_no_address, getString(R.string.no_tokens));
-                if (result.functionToAddress != null) addressInput.setAddress(result.functionToAddress);
+                if (result.functionToAddress != null)
+                    addressInput.setAddress(result.functionToAddress);
                 break;
 
             default:
@@ -452,7 +469,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy()
+    {
         if (dialog != null && dialog.isShowing())
         {
             dialog.dismiss();
@@ -462,14 +480,19 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         if (handler != null) handler.removeCallbacksAndMessages(null);
         if (amountInput != null) amountInput.onDestroy();
         if (confirmationDialog != null) confirmationDialog.onDestroy();
+        if (addressInput != null)
+            addressInput.setEnsNodeNotSyncCallback(null); // prevent leak by removing reference to activity method
     }
 
-    private void setupTokenContent() {
+    private void setupTokenContent()
+    {
         amountInput = findViewById(R.id.input_amount);
         amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
         addressInput = findViewById(R.id.input_address);
         addressInput.setAddressCallback(this);
         addressInput.setChainOverrideForWalletConnect(token.tokenInfo.chainId);
+        addressInput.setEnsHandlerNodeSyncFlag(true);   // allow node sync
+        addressInput.setEnsNodeNotSyncCallback(this::showNodeNotSyncSheet);  // callback to invoke if node not synced
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
         functionBar.revealButtons();
         List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_next));
@@ -482,7 +505,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     {
         //validate that we have sufficient balance
         if ((token.isEthereum() && token.balance.subtract(value).compareTo(BigDecimal.ZERO) > 0) // if sending base ethereum then check we have more than just the value
-             || (token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0)) // contract token, check sufficient token balance (gas widget will check sufficient gas)
+                || (token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0)) // contract token, check sufficient token balance (gas widget will check sufficient gas)
         {
             sendAmount = value;
             sendGasPrice = gasPrice;
@@ -558,12 +581,11 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     /**
      * Called to check if we're ready to send user to confirm screen / activity sheet popup
-     *
      */
     private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
         BigInteger ethValue = token.isEthereum() ? sendAmount.toBigInteger() : BigInteger.ZERO;
-        long leafCode = amountInput.isSendAll() ? -2: -1;
+        long leafCode = amountInput.isSendAll() ? -2 : -1;
         Web3Transaction w3tx = new Web3Transaction(
                 new Address(txSendAddress),
                 new Address(token.getAddress()),
@@ -643,17 +665,15 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     //Transaction failed to be sent
     private void txError(Throwable throwable)
     {
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
-        dialog = new AWalletAlertDialog(this);
-        dialog.setIcon(ERROR);
-        dialog.setTitle(R.string.error_transaction_failed);
-        dialog.setMessage(throwable.getMessage());
-        dialog.setButtonText(R.string.button_ok);
-        dialog.setButtonListener(v -> {
-            dialog.dismiss();
-        });
-        dialog.show();
-
+        Timber.d("txError: %s", throwable.getMessage());
+        if (throwable instanceof SocketTimeoutException)
+        {
+            showTxnTimeoutDialog();
+        }
+        else
+        {
+            showTxnErrorDialog(throwable);
+        }
         confirmationDialog.dismiss();
     }
 
@@ -675,6 +695,62 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             dialog.dismiss();
         });
 
+        dialog.show();
+    }
+
+    void showNodeNotSyncSheet()
+    {
+        Timber.d("showNodeNotSync: ");
+        try
+        {
+            if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
+            alertDialog = new AWalletAlertDialog(this, R.drawable.ic_warning);
+            alertDialog.setTitle(R.string.title_ens_lookup_warning);
+            alertDialog.setMessage(R.string.message_ens_node_not_sync);
+            alertDialog.setButtonText(R.string.action_cancel);
+            alertDialog.setButtonListener(v -> alertDialog.dismiss());
+            alertDialog.setSecondaryButtonText(R.string.ignore);
+            alertDialog.setSecondaryButtonListener(v -> {
+                addressInput.setEnsHandlerNodeSyncFlag(false);  // skip node sync check
+                // re enter current input to resolve again
+                String currentInput = addressInput.getEditText().getText().toString();
+                addressInput.getEditText().setText("");
+                addressInput.getEditText().setText(currentInput);
+                addressInput.getEditText().setSelection(currentInput.length());
+                alertDialog.dismiss();
+            });
+            alertDialog.show();
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
+    }
+
+    void showTxnErrorDialog(Throwable t)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(ERROR);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(t.getMessage());
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    void showTxnTimeoutDialog()
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(WARNING);
+        dialog.setTitle(R.string.error_transaction_timeout);
+        dialog.setMessage(R.string.message_transaction_timeout);
+        dialog.setButton(R.string.ok, v -> {
+            dialog.dismiss();
+        });
         dialog.show();
     }
 }

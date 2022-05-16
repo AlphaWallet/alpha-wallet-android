@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Base64;
 import android.view.MotionEvent;
@@ -27,7 +28,6 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.Request;
@@ -40,7 +40,8 @@ import java.nio.charset.StandardCharsets;
 /**
  * Created by JB on 30/05/2021.
  */
-public class NFTImageView extends RelativeLayout {
+public class NFTImageView extends RelativeLayout
+{
     private final ImageView image;
     private final RelativeLayout webLayout;
     private final WebView webView;
@@ -49,17 +50,17 @@ public class NFTImageView extends RelativeLayout {
     private final TokenIcon fallbackIcon;
     private final ProgressBar progressBar;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private Request loadRequest;
-
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
-    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>()
+    {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
         {
             //couldn't load using glide, fallback to webview
-            if (model != null) {
+            if (model != null)
+            {
                 progressBar.setVisibility(View.GONE);
                 setWebView(model.toString());
             }
@@ -73,7 +74,8 @@ public class NFTImageView extends RelativeLayout {
             return false;
         }
     };
-
+    private Request loadRequest;
+    private String imageUrl;
     private boolean hasContent;
     private boolean showProgress;
 
@@ -103,30 +105,33 @@ public class NFTImageView extends RelativeLayout {
 
     public void setupTokenImageThumbnail(NFTAsset asset)
     {
-        loadTokenImage(asset, asset.getThumbnail());
+        loadImage(asset.getThumbnail(), asset.getBackgroundColor());
     }
 
-    public void setupTokenImage(NFTAsset asset)
+    public void setupTokenImage(NFTAsset asset) throws IllegalArgumentException
     {
-        progressBar.setVisibility(showProgress? View.VISIBLE : View.GONE);
-        loadTokenImage(asset, asset.getImage());
-    }
-
-    private void loadTokenImage(NFTAsset asset, String imageUrl)
-    {
-        image.setVisibility(View.VISIBLE);
-
-        loadRequest = Glide.with(image.getContext())
-                .load(imageUrl)
-                .centerCrop()
-                .transition(withCrossFade())
-                .override(Target.SIZE_ORIGINAL)
-                .listener(requestListener)
-                .into(new DrawableImageViewTarget(image)).getRequest();
-
-        if (!asset.needsLoading() && asset.getBackgroundColor() != null && !asset.getBackgroundColor().equals("null"))
+        if (shouldLoad(asset.getImage()))
         {
-            int color = Color.parseColor("#" + asset.getBackgroundColor());
+            showLoadingProgress(true);
+            progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
+            loadImage(asset.getImage(), asset.getBackgroundColor());
+        }
+    }
+
+    private void loadImage(String url, String backgroundColor) throws IllegalArgumentException
+    {
+        if (!Utils.stillAvailable(getContext())) return;
+
+        setWebViewHeight((int)getLayoutParams().width);
+
+        this.imageUrl = url;
+        fallbackLayout.setVisibility(View.GONE);
+        image.setVisibility(View.VISIBLE);
+        webLayout.setVisibility(View.GONE);
+
+        if (!TextUtils.isEmpty(backgroundColor))
+        {
+            int color = Color.parseColor("#" + backgroundColor);
             holdingView.setBackgroundColor(color);
         }
         else
@@ -134,7 +139,13 @@ public class NFTImageView extends RelativeLayout {
             holdingView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent));
         }
 
-        hasContent = true;
+        loadRequest = Glide.with(getContext())
+                .load(url)
+                .centerCrop()
+                .transition(withCrossFade())
+                .override(Target.SIZE_ORIGINAL)
+                .listener(requestListener)
+                .into(new DrawableImageViewTarget(image)).getRequest();
     }
 
     private void setWebView(String imageUrl)
@@ -167,7 +178,8 @@ public class NFTImageView extends RelativeLayout {
             {
                 setWebViewHeight(Utils.dp2px(getContext(), height));
             }
-        } finally
+        }
+        finally
         {
             a.recycle();
         }
@@ -193,7 +205,8 @@ public class NFTImageView extends RelativeLayout {
         return hasContent;
     }
 
-    public void showLoadingProgress(boolean showProgress) {
+    public void showLoadingProgress(boolean showProgress)
+    {
         this.showProgress = showProgress;
     }
 
@@ -201,5 +214,29 @@ public class NFTImageView extends RelativeLayout {
     public boolean onInterceptTouchEvent(MotionEvent ev)
     {
         return true;
+    }
+
+    public boolean shouldLoad(String url)
+    {
+        if (!TextUtils.isEmpty(url) && this.imageUrl == null)
+        {
+            return true;
+        }
+        else
+        {
+            if (TextUtils.isEmpty(url))
+            {
+                return false;
+            }
+            else
+            {
+                return !this.imageUrl.equals(url);
+            }
+        }
+    }
+
+    public void clearImage()
+    {
+        imageUrl = null;
     }
 }

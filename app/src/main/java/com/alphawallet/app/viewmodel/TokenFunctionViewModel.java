@@ -22,8 +22,8 @@ import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.opensea.Stats;
-import com.alphawallet.app.entity.opensea.Trait;
+import com.alphawallet.app.entity.opensea.AssetContract;
+import com.alphawallet.app.entity.opensea.OpenSeaAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
@@ -46,6 +46,7 @@ import com.alphawallet.app.ui.TransferNFTActivity;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.JsonUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -62,7 +63,6 @@ import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -90,8 +90,7 @@ import timber.log.Timber;
  * Stormbird in Singapore
  */
 @HiltViewModel
-public class TokenFunctionViewModel extends BaseViewModel
-{
+public class TokenFunctionViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
@@ -110,9 +109,15 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
     private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
-    private final MutableLiveData<List<Trait>> traits = new MutableLiveData<>();
+    private final MutableLiveData<List<OpenSeaAsset.Trait>> traits = new MutableLiveData<>();
+    private final MutableLiveData<NFTAsset> attrs = new MutableLiveData<>();
+    private final MutableLiveData<AssetContract> assetContract = new MutableLiveData<>();
+    private final MutableLiveData<NFTAsset> nftAsset = new MutableLiveData<>();
 
     private Wallet wallet;
+
+    @Nullable
+    private Disposable metadataDisposable;
 
     @Nullable
     private Disposable openseaDisposable;
@@ -190,9 +195,19 @@ public class TokenFunctionViewModel extends BaseViewModel
         return gasEstimateComplete;
     }
 
-    public MutableLiveData<List<Trait>> traits()
+    public MutableLiveData<List<OpenSeaAsset.Trait>> traits()
     {
         return traits;
+    }
+
+    public MutableLiveData<AssetContract> assetContract()
+    {
+        return assetContract;
+    }
+
+    public MutableLiveData<NFTAsset> nftAsset()
+    {
+        return nftAsset;
     }
 
     public void prepare()
@@ -534,6 +549,10 @@ public class TokenFunctionViewModel extends BaseViewModel
         {
             openseaDisposable.dispose();
         }
+        if (metadataDisposable != null && !metadataDisposable.isDisposed())
+        {
+            metadataDisposable.dispose();
+        }
     }
 
     public OpenSeaService getOpenseaService()
@@ -549,7 +568,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void checkForNewScript(Token token)
     {
         //check server for new tokenscript
-        assetDefinitionService.checkServerForScript(token.tokenInfo.chainId, token.getAddress())
+        assetDefinitionService.checkServerForScript(token)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.single())
                 .subscribe(this::handleDefinition, this::onError)
@@ -656,7 +675,9 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     public void getAuthentication(Activity activity, SignAuthenticationCallback callback)
     {
-        keyService.getAuthenticationForSignature(wallet, activity, callback);
+        genericWalletInteract.find()
+                .subscribe(wallet -> keyService.getAuthenticationForSignature(wallet, activity, callback))
+                .isDisposed();
     }
 
     public void sendTransaction(Web3Transaction finalTx, long chainId, String overridenTxHash)
@@ -706,18 +727,61 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
-        intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(tokenIds, false));
+        intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(tokenIds, true));
         intent.putParcelableArrayListExtra(C.EXTRA_NFTASSET_LIST, selection);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
     }
 
+    private NFTAsset storeAsset(Token token, BigInteger tokenId, NFTAsset fetchedAsset, NFTAsset oldAsset)
+    {
+        fetchedAsset.updateFromRaw(oldAsset);
+        tokensService.storeAsset(token, tokenId, fetchedAsset);
+        token.addAssetToTokenBalanceAssets(tokenId, fetchedAsset);
+        return fetchedAsset;
+    }
+
+    public void getTokenMetadata(Token token, BigInteger tokenId, NFTAsset oldAsset)
+    {
+        metadataDisposable = Single.fromCallable(() -> token.fetchTokenMetadata(tokenId))
+                .map(fetchedAsset -> storeAsset(token, tokenId, fetchedAsset, oldAsset))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onAssetMetadata, this::onAssetMetadataError);
+    }
+
+    private void onAssetMetadataError(Throwable t)
+    {
+        Timber.w(t);
+    }
+
+    private void onAssetMetadata(NFTAsset asset)
+    {
+        nftAsset.postValue(asset);
+    }
+
+    private void loadExistingMetadata(Token token, BigInteger tokenId)
+    {
+        NFTAsset asset = token.getAssetForToken(tokenId);
+        if (asset != null && !asset.needsLoading())
+        {
+            nftAsset.postValue(asset);
+        }
+    }
+
     public void getAsset(Token token, BigInteger tokenId)
+    {
+        loadExistingMetadata(token, tokenId);
+
+        reloadMetadata(token, tokenId);
+    }
+
+    public void reloadMetadata(Token token, BigInteger tokenId)
     {
         openseaDisposable = openseaService.getAsset(token, tokenId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(asset -> onAsset(asset), this::onAssetError);
+                .subscribe(result -> onAsset(result, token, tokenId), this::onAssetError);
     }
 
     private void onAssetError(Throwable throwable)
@@ -725,49 +789,39 @@ public class TokenFunctionViewModel extends BaseViewModel
         Timber.d(throwable);
     }
 
-    private void onAsset(String asset)
+    private void onAsset(String result, Token token, BigInteger tokenId)
     {
-        try
+        NFTAsset oldAsset = token.getAssetForToken(tokenId);
+        boolean loadedFromApi = false;
+        if (JsonUtils.isValidAsset(result))
         {
-            JSONObject result = new JSONObject(asset);
-            if (result.has("collection") && result.has("traits"))
+            try
             {
-                computeRarity(getCountFromJson(result), getTraitsFromJson(result));
-            }
-        }
-        catch (JSONException e)
-        {
-            Timber.e(e);
-        }
-    }
-
-    private ArrayList<Trait> getTraitsFromJson(JSONObject result) throws JSONException
-    {
-        return new Gson().fromJson(result.getString("traits"),
-                new TypeToken<ArrayList<Trait>>()
+                JSONObject assetJson = new JSONObject(result);
+                OpenSeaAsset osAsset = new Gson().fromJson(assetJson.toString(), OpenSeaAsset.class);
+                NFTAsset asset = new NFTAsset(result);
+                if (!TextUtils.isEmpty(asset.getImage()))
                 {
-                }.getType());
-    }
-
-    private long getCountFromJson(JSONObject result) throws JSONException
-    {
-        JSONObject collectionJson = result.getJSONObject("collection");
-        Stats stats = new Gson().fromJson(collectionJson.getString("stats"), Stats.class);
-        return stats.getCount();
-    }
-
-    private void computeRarity(long count, List<Trait> traitList) throws JSONException
-    {
-        for (Trait trait : traitList)
-        {
-            if (trait.getTraitCount() == 1)
-            {
-                trait.setUnique(true);
+                    loadedFromApi = true;
+                    storeAsset(token, tokenId, new NFTAsset(result), oldAsset);
+                    asset.attachOpenSeaAssetData(osAsset);
+                    nftAsset.postValue(asset);
+                }
             }
-
-            trait.updateTraitRarity(count);
+            catch (JSONException e)
+            {
+                Timber.w(e);
+                Timber.d("Error fetching from OpenSea: %s", result);
+            }
+            catch (Exception e)
+            {
+                Timber.w(e);
+            }
         }
 
-        traits.postValue(traitList);
+        if (!loadedFromApi)
+        {
+            getTokenMetadata(token, tokenId, oldAsset);
+        }
     }
 }

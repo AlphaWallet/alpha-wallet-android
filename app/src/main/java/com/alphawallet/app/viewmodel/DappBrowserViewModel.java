@@ -1,5 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.app.C.Key.WALLET;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -41,12 +43,12 @@ import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
 
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
@@ -55,10 +57,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-
-import static com.alphawallet.app.C.Key.WALLET;
-
-import javax.inject.Inject;
 
 @HiltViewModel
 public class DappBrowserViewModel extends BaseViewModel  {
@@ -278,6 +276,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     public void onDestroy()
     {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
+        gasService.stopGasPriceCycle();
     }
 
     public void updateGasPrice(long chainId)
@@ -303,6 +302,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
         balanceTimerDisposable = null;
+        gasService.stopGasPriceCycle();
     }
 
     public void handleWalletConnect(Context context, String url, NetworkInfo activeNetwork)
@@ -342,7 +342,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     }
 
     public void addCustomChain(WalletAddEthereumChainObject chainObject) {
-        this.ethereumNetworkRepository.addCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
+        this.ethereumNetworkRepository.saveCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
                 chainObject.nativeCurrency.symbol, "", "", false, -1L);
 
         tokensService.createBaseToken(chainObject.getChainId())

@@ -9,7 +9,9 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -18,15 +20,14 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.util.Patterns;
 import android.util.TypedValue;
 import android.webkit.URLUtil;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.RawRes;
+import androidx.fragment.app.FragmentActivity;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
@@ -35,6 +36,7 @@ import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
@@ -72,7 +74,7 @@ public class Utils {
     private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
     private static final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
     private static final String TOKEN_LOGO = "/logo.png";
-    public  static final String ALPHAWALLET_REPO_NAME = "https://raw.githubusercontent.com/alphawallet/iconassets/master/";
+    public  static final String ALPHAWALLET_REPO_NAME = "https://raw.githubusercontent.com/alphawallet/iconassets/lowercased/";
     private static final String TRUST_ICON_REPO_BASE = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/";
     private static final String TRUST_ICON_REPO = TRUST_ICON_REPO_BASE + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
     private static final String ALPHAWALLET_ICON_REPO = ALPHAWALLET_REPO_NAME + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
@@ -705,16 +707,16 @@ public class Utils {
 
     public static String localiseUnixTime(Context ctx, long timeStampInSec)
     {
-        Date date = new java.util.Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
-        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
+        Date date = new Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
+        DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
         return timeFormat.format(date);
     }
 
     public static String localiseUnixDate(Context ctx, long timeStampInSec)
     {
-        Date date = new java.util.Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
-        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
-        DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(ctx));
+        Date date = new Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
+        DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
+        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(ctx));
         return timeFormat.format(date) + " | " + dateFormat.format(date);
     }
 
@@ -794,12 +796,7 @@ public class Utils {
     @NotNull
     public static String getTokenImageUrl(String address)
     {
-        return ALPHAWALLET_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, Keys.toChecksumAddress(address));
-    }
-
-    public static String getAWIconRepo(String address)
-    {
-        return ALPHAWALLET_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, Keys.toChecksumAddress(address));
+        return ALPHAWALLET_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, address.toLowerCase());
     }
 
     public static boolean isContractCall(Context context, String operationName)
@@ -906,5 +903,63 @@ public class Utils {
         calculatedAddressAsBytes = Arrays.copyOfRange(calculatedAddressAsBytes,
                 12, calculatedAddressAsBytes.length);
         return Keys.toChecksumAddress(Numeric.toHexString(calculatedAddressAsBytes));
+    }
+
+    public static boolean isJson(String value)
+    {
+        try
+        {
+            JSONObject stateData = new JSONObject(value);
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+
+    public static BigInteger stringToBigInteger(String value)
+    {
+        if (TextUtils.isEmpty(value)) return BigInteger.ZERO;
+        try
+        {
+            if (Numeric.containsHexPrefix(value))
+            {
+                return Numeric.toBigInt(value);
+            }
+            else
+            {
+                return new BigInteger(value);
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            Timber.e(e);
+            return BigInteger.ZERO;
+        }
+    }
+
+    public static boolean stillAvailable(Context context)
+    {
+        if (context == null)
+        {
+            return false;
+        }
+        else if (context instanceof FragmentActivity)
+        {
+            return !((FragmentActivity) context).isDestroyed();
+        }
+        else if (context instanceof Activity)
+        {
+            return !((Activity) context).isDestroyed();
+        }
+        else if (context instanceof ContextWrapper)
+        {
+            return stillAvailable(((ContextWrapper) context).getBaseContext());
+        }
+        else
+        {
+            return false;
+        }
     }
 }

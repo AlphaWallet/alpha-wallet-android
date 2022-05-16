@@ -3,13 +3,17 @@ package com.alphawallet.app.service;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
@@ -687,6 +691,7 @@ public class TickerService
         ethTickers.clear();
     }
 
+    // Update this list from here: https://api.coingecko.com/api/v3/asset_platforms
     public static final Map<Long, String> coinGeckoChainIdToAPIName = new HashMap<Long, String>(){{
         put(MAINNET_ID, "ethereum");
         put(XDAI_ID, "xdai");
@@ -702,6 +707,10 @@ public class TickerService
         put(321L, "kucoin-community-chain");
         put(88L, "tomochain");
         put(42220L, "celo");
+        put(KLAYTN_ID, "klay-token");
+        put(IOTEX_MAINNET_ID, "iotex");
+        put(AURORA_MAINNET_ID, "aurora");
+        put(MILKOMEDA_C1_ID, "cardano");
     }};
 
     private static final Map<Long, String> dexGuruChainIdToAPISymbol = new HashMap<Long, String>(){{
@@ -716,6 +725,7 @@ public class TickerService
         localSource.deleteTickers();
     }
 
+    // Update from https://api.coingecko.com/api/v3/coins/list
     public static final Map<Long, String> chainPairs = new HashMap<Long, String>(){{
         put(MAINNET_ID, "ethereum");
         put(CLASSIC_ID, "ethereum-classic");
@@ -728,6 +738,10 @@ public class TickerService
         put(MATIC_ID, "matic-network");
         put(ARBITRUM_MAIN_ID, "ethereum");
         put(OPTIMISTIC_MAIN_ID, "ethereum");
+        put(KLAYTN_ID, "klay-token");
+        put(IOTEX_MAINNET_ID, "iotex");
+        put(AURORA_MAINNET_ID, "aurora");
+        put(MILKOMEDA_C1_ID, "cardano");
     }};
 
     public static boolean validateCoinGeckoAPI(Token token)

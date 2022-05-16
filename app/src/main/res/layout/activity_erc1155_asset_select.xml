@@ -6,12 +6,17 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
+    <View
+        android:id="@+id/separator"
+        style="@style/Aw.Component.Separator"
+        android:layout_below="@id/toolbar" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/layoutButtons"
-        android:layout_below="@id/toolbar"
+        android:layout_below="@id/separator"
         android:background="@drawable/background_bottom_border" />
 
     <com.alphawallet.app.widget.FunctionButtonBar
@@ -19,12 +24,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true" />
-
-    <com.alphawallet.app.ui.widget.entity.NumericInputBottomSheet
-        android:id="@+id/numeric_input"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:visibility="gone" />
 
 </RelativeLayout>

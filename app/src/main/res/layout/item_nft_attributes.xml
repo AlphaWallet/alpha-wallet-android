@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <FrameLayout
-        android:id="@+id/layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <com.alphawallet.app.widget.TokenInfoCategoryView
+        android:id="@+id/label_attributes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        custom:title="@string/label_attributes"
+        tools:visibility="visible" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
@@ -16,15 +20,5 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/small_12"
         android:paddingHorizontal="@dimen/tiny_8" />
-
-    <androidx.gridlayout.widget.GridLayout
-        android:id="@+id/grid"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/tiny_8"
-        android:numColumns="2"
-        app:alignmentMode="alignBounds"
-        app:columnCount="2"
-        app:useDefaultMargins="true" />
 
 </LinearLayout>

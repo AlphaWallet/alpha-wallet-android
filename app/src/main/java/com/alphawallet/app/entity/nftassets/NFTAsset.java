@@ -6,6 +6,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
+import com.alphawallet.app.entity.opensea.OpenSeaAsset;
 import com.alphawallet.app.entity.tokens.ERC1155Token;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.util.Utils;
@@ -31,7 +32,22 @@ import io.reactivex.disposables.Disposable;
  */
 public class NFTAsset implements Parcelable
 {
+    public static final Creator<NFTAsset> CREATOR = new Creator<NFTAsset>()
+    {
+        @Override
+        public NFTAsset createFromParcel(Parcel in)
+        {
+            return new NFTAsset(in);
+        }
+
+        @Override
+        public NFTAsset[] newArray(int size)
+        {
+            return new NFTAsset[size];
+        }
+    };
     private static final String LOADING_TOKEN = "*Loading*";
+    private static final String ID = "id";
     private static final String NAME = "name";
     private static final String IMAGE = "image";
     private static final String IMAGE_URL = "image_url";
@@ -39,43 +55,23 @@ public class NFTAsset implements Parcelable
     private static final String DESCRIPTION = "description";
     private static final String IMAGE_ORIGINAL_URL = "image_original_url";
     private static final String IMAGE_ANIMATION = "animation_url";
-    private static final String[] IMAGE_DESIGNATORS = { IMAGE, IMAGE_URL, IMAGE_ANIMATION, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW };
-    private static final String[] SVG_OVERRIDE = { IMAGE_ORIGINAL_URL, IMAGE_ANIMATION, IMAGE, IMAGE_URL };
-    private static final String[] IMAGE_THUMBNAIL_DESIGNATORS = { IMAGE_PREVIEW, IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_ANIMATION };
+    private static final String[] IMAGE_DESIGNATORS = {IMAGE, IMAGE_URL, IMAGE_ANIMATION, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW};
+    private static final String[] SVG_OVERRIDE = {IMAGE_ORIGINAL_URL, IMAGE_ANIMATION, IMAGE, IMAGE_URL};
+    private static final String[] IMAGE_THUMBNAIL_DESIGNATORS = {IMAGE_PREVIEW, IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_ANIMATION};
     private static final String BACKGROUND_COLOUR = "background_color";
     private static final String EXTERNAL_LINK = "external_link";
     private static final List<String> DESIRED_PARAMS = Arrays.asList(NAME, BACKGROUND_COLOUR, IMAGE_URL, IMAGE, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW, DESCRIPTION, EXTERNAL_LINK, IMAGE_ANIMATION);
     private static final List<String> ATTRIBUTE_DESCRIPTOR = Arrays.asList("attributes", "traits");
-
-    public enum Category {
-        NFT("NFT"), FT("Fungible Token"), COLLECTION("Collection"), SEMI_FT("Semi-Fungible");
-
-        private final String category;
-
-        Category(String category)
-        {
-            this.category = category;
-        }
-
-        public String getValue()
-        {
-            return this.category;
-        }
-    }
-
     private final Map<String, String> assetMap = new HashMap<>();
     private final Map<String, String> attributeMap = new HashMap<>();
-
-    private BigDecimal balance; //for ERC1155
-    private BigDecimal selected; //for ERC1155 transfer
-
-    private List<BigInteger> tokenIdList; // for ERC1155 collections
-
     @Nullable
     public Disposable metaDataLoader;
-
     public boolean isChecked = false;
     public boolean exposeRadio = false;
+    private BigDecimal balance; //for ERC1155
+    private BigDecimal selected; //for ERC1155 transfer
+    private List<BigInteger> tokenIdList; // for ERC1155 collections
+    private OpenSeaAsset openSeaAsset;
 
     public NFTAsset(String metaData)
     {
@@ -124,12 +120,44 @@ public class NFTAsset implements Parcelable
         exposeRadio = asset.exposeRadio;
     }
 
+    protected NFTAsset(Parcel in)
+    {
+        balance = new BigDecimal(in.readString());
+        selected = new BigDecimal(in.readString());
+        int assetCount = in.readInt();
+        int attrCount = in.readInt();
+        int tokenIdCount = in.readInt();
+
+        for (int i = 0; i < assetCount; i++)
+        {
+            assetMap.put(in.readString(), in.readString());
+        }
+
+        for (int i = 0; i < attrCount; i++)
+        {
+            attributeMap.put(in.readString(), in.readString());
+        }
+
+        if (tokenIdCount > 0)
+        {
+            tokenIdList = new ArrayList<>();
+        }
+
+        for (int i = 0; i < tokenIdCount; i++)
+        {
+            tokenIdList.add(new BigInteger(in.readString()));
+        }
+    }
+
     public String getAssetValue(String key)
     {
         return assetMap.get(key);
     }
 
-    public Map<String, String> getAttributes() { return attributeMap; }
+    public Map<String, String> getAttributes()
+    {
+        return attributeMap;
+    }
 
     public String getAttributeValue(String key)
     {
@@ -163,7 +191,8 @@ public class NFTAsset implements Parcelable
     public String getThumbnail()
     {
         String svgOverride = getSVGOverride(); //always use SVG if available
-        if (!TextUtils.isEmpty(svgOverride)) {
+        if (!TextUtils.isEmpty(svgOverride))
+        {
             return svgOverride;
         }
 
@@ -196,7 +225,10 @@ public class NFTAsset implements Parcelable
     public boolean setBalance(BigDecimal value)
     {
         boolean retval = false;
-        if (this.balance == null || !this.balance.equals(value)) { retval = true; }
+        if (this.balance == null || !this.balance.equals(value))
+        {
+            retval = true;
+        }
         this.balance = value;
         return retval;
     }
@@ -211,32 +243,6 @@ public class NFTAsset implements Parcelable
         return this.balance != null && this.balance.compareTo(BigDecimal.ONE) > 0;
     }
 
-    protected NFTAsset(Parcel in)
-    {
-        balance = new BigDecimal(in.readString());
-        selected = new BigDecimal(in.readString());
-        int assetCount = in.readInt();
-        int attrCount = in.readInt();
-        int tokenIdCount = in.readInt();
-
-        for (int i = 0; i < assetCount; i++)
-        {
-            assetMap.put(in.readString(), in.readString());
-        }
-
-        for (int i = 0; i < attrCount; i++)
-        {
-            attributeMap.put(in.readString(), in.readString());
-        }
-
-        if (tokenIdCount > 0) { tokenIdList = new ArrayList<>(); }
-
-        for (int i = 0; i < tokenIdCount; i++)
-        {
-            tokenIdList.add(new BigInteger(in.readString()));
-        }
-    }
-
     private void loadFromMetaData(String metaData)
     {
         //build asset and trait map
@@ -244,14 +250,20 @@ public class NFTAsset implements Parcelable
         {
             JSONObject jsonData = new JSONObject(metaData);
             Iterator<String> keys = jsonData.keys();
+            String id = null;
 
             while (keys.hasNext())
             {
                 String key = keys.next();
                 String value = jsonData.getString(key);
-                if (!ATTRIBUTE_DESCRIPTOR.contains(key))
+                if (key.equals(ID))
                 {
-                    if (validJSONString(value) && DESIRED_PARAMS.contains(key)) assetMap.put(key, value);
+                    id = value;
+                }
+                else if (!ATTRIBUTE_DESCRIPTOR.contains(key))
+                {
+                    if (validJSONString(value) && DESIRED_PARAMS.contains(key))
+                        assetMap.put(key, value);
                 }
                 else
                 {
@@ -259,9 +271,16 @@ public class NFTAsset implements Parcelable
                     for (int i = 0; i < attrArray.length(); i++)
                     {
                         JSONObject order = (JSONObject) attrArray.get(i);
-                        if (validJSONString(order.getString("value"))) attributeMap.put(order.getString("trait_type"), order.getString("value"));
+                        if (validJSONString(order.getString("value")))
+                            attributeMap.put(order.getString("trait_type"), order.getString("value"));
                     }
                 }
+            }
+
+            //create name if none present and metadata is valid (this handles an edge condition where there's no name)
+            if (!TextUtils.isEmpty(getImage()) && TextUtils.isEmpty(getName()) && id != null)
+            {
+                assetMap.put(NAME, "ID #" + id);
             }
         }
         catch (JSONException e)
@@ -277,6 +296,7 @@ public class NFTAsset implements Parcelable
 
     /**
      * If the image has SVG, we need to display that. Opensea's preview renderer can't handle SVG
+     *
      * @return
      */
     private String getSVGOverride()
@@ -357,21 +377,6 @@ public class NFTAsset implements Parcelable
         return 0;
     }
 
-    public static final Creator<NFTAsset> CREATOR = new Creator<NFTAsset>()
-    {
-        @Override
-        public NFTAsset createFromParcel(Parcel in)
-        {
-            return new NFTAsset(in);
-        }
-
-        @Override
-        public NFTAsset[] newArray(int size)
-        {
-            return new NFTAsset[size];
-        }
-    };
-
     public boolean needsLoading()
     {
         return (assetMap.size() == 0 || assetMap.containsKey(LOADING_TOKEN));
@@ -406,8 +411,41 @@ public class NFTAsset implements Parcelable
     public void updateFromRaw(NFTAsset oldAsset)
     {
         //add thumbnail if it existed
-        if (oldAsset.assetMap.containsKey(IMAGE_PREVIEW)) assetMap.put(IMAGE_PREVIEW, oldAsset.getAssetValue(IMAGE_PREVIEW));
-        balance = oldAsset.balance;
+        if (oldAsset != null)
+        {
+            if (oldAsset.assetMap.containsKey(IMAGE_PREVIEW))
+                assetMap.put(IMAGE_PREVIEW, oldAsset.getAssetValue(IMAGE_PREVIEW));
+            balance = oldAsset.balance;
+
+            updateAsset(oldAsset);
+
+            if (assetMap.size() > 1)
+            {
+                assetMap.remove(LOADING_TOKEN);
+            }
+
+            // Check OpenSeaAsset for meaningful data
+            if (oldAsset.openSeaAsset != null)
+            {
+                String osName = oldAsset.openSeaAsset.name;
+                if (TextUtils.isEmpty(getName()) && !TextUtils.isEmpty(osName))
+                {
+                    assetMap.put(NAME, osName);
+                }
+
+                String osImageUrl = oldAsset.openSeaAsset.getImageUrl();
+                if (TextUtils.isEmpty(getImage()) && !TextUtils.isEmpty(osImageUrl))
+                {
+                    assetMap.put(IMAGE, osImageUrl);
+                }
+
+                String osDescription = oldAsset.openSeaAsset.description;
+                if (TextUtils.isEmpty(getDescription()) && !TextUtils.isEmpty(osDescription))
+                {
+                    assetMap.put(DESCRIPTION, osDescription);
+                }
+            }
+        }
     }
 
     public void updateAsset(BigInteger tokenId, Map<BigInteger, NFTAsset> oldAssets)
@@ -422,7 +460,8 @@ public class NFTAsset implements Parcelable
         {
             for (String param : oldAsset.assetMap.keySet()) //add anything that the old asset had, which new one doesn't (if it's still required)
             {
-                if (assetMap.get(param) == null && DESIRED_PARAMS.contains(param)) attributeMap.put(param, oldAsset.assetMap.get(param));
+                if (assetMap.get(param) == null && DESIRED_PARAMS.contains(param))
+                    attributeMap.put(param, oldAsset.assetMap.get(param));
             }
 
             if (oldAsset.getBalance().compareTo(BigDecimal.ZERO) > 0)
@@ -442,13 +481,14 @@ public class NFTAsset implements Parcelable
         this.isChecked = selected;
     }
 
-    public void setSelectedBalance(BigDecimal amount)
-    {
-        this.selected = amount;
-    }
     public BigDecimal getSelectedBalance()
     {
         return selected != null ? this.selected : BigDecimal.ZERO;
+    }
+
+    public void setSelectedBalance(BigDecimal amount)
+    {
+        this.selected = amount;
     }
 
     public void addCollectionToken(BigInteger nftTokenId)
@@ -494,6 +534,33 @@ public class NFTAsset implements Parcelable
         else
         {
             return Category.FT;
+        }
+    }
+
+    public void attachOpenSeaAssetData(OpenSeaAsset openSeaAsset)
+    {
+        this.openSeaAsset = openSeaAsset;
+    }
+
+    public OpenSeaAsset getOpenSeaAsset()
+    {
+        return this.openSeaAsset;
+    }
+
+    public enum Category
+    {
+        NFT("NFT"), FT("Fungible Token"), COLLECTION("Collection"), SEMI_FT("Semi-Fungible");
+
+        private final String category;
+
+        Category(String category)
+        {
+            this.category = category;
+        }
+
+        public String getValue()
+        {
+            return this.category;
         }
     }
 }

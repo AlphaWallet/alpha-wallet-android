@@ -34,7 +34,7 @@
             android:maxLines="1"
             android:paddingStart="@dimen/standard_16"
             android:paddingTop="@dimen/small_12"
-            android:paddingEnd="@dimen/tiny_8"
+            android:paddingEnd="@dimen/standard_16"
             android:paddingBottom="@dimen/small_12"
             tools:hint="Hint" />
 

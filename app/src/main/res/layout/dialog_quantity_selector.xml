@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/view_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/action_sheet_header">
+
+        <ImageView
+            android:id="@+id/image_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/small_12"
+            android:contentDescription="@string/action_close"
+            android:src="@drawable/ic_close"
+            app:tint="?colorControlNormal" />
+
+        <LinearLayout
+            android:id="@+id/title_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_toStartOf="@id/btn_max"
+            android:layout_toEndOf="@id/image_close"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Aw.Typography.SemiBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/tiny_8"
+                android:text="@string/select_amount" />
+
+            <TextView
+                android:id="@+id/max_text"
+                style="@style/Aw.Typography.SemiBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/input_amount_max" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/btn_max"
+            style="@style/Aw.Typography.Control"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:padding="@dimen/standard_16"
+            android:text="@string/seekbar_max" />
+
+    </RelativeLayout>
+
+    <com.alphawallet.app.widget.QuantitySelector
+        android:id="@+id/quantity_selector"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_confirm"
+        style="@style/Aw.Component.Button.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/standard_16"
+        android:enabled="false"
+        android:text="@string/action_confirm" />
+
+</LinearLayout>

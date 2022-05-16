@@ -25,7 +25,8 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="@dimen/cozy_20"
-                android:src="@drawable/ic_redeemed" />
+                android:visibility="gone"
+                tools:src="@drawable/ic_redeemed" />
 
             <TextView
                 android:id="@+id/dialog_main_text"

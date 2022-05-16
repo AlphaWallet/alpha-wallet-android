@@ -67,7 +67,6 @@
     <string name="action_share">Compartir</string>
     <string name="action_more_details">Más detalles</string>
     <string name="action_add_wallet">Añadir monedero</string>
-    <string name="action_add_token">Añadir token</string>
     <string name="action_open_etherscan">Ver en Block Explorer</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>
@@ -808,6 +807,7 @@
     <string name="action_enable_switch_reload"><![CDATA[Enable, Switch & Reload]]></string>
     <string name="add_chain_dialog_message">This site is requesting you to enable and switch to the %1$s Chain with chain ID: %2$s. This will reload the page</string>
     <string name="switch_chain_request">Switch Chain Request</string>
+    <string name="add_chain_request">Add Chain Request</string>
     <string name="no_chart_data_available">No chart data available</string>
     <string name="wallet_total_change">%1$s (%2$s%%) Hoy</string>
     <string name="title_wallets_summary">Wallets</string>
@@ -875,4 +875,23 @@
     <string name="toast_qr_scanning_requires_api_24">El escaneo QR requiere Android 7.0 (API nivel 24) o superior.</string>
     <string name="experimental_1559">Use 1559 Transactions</string>
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
+    <string name="action_reset_network" >Reiniciar</string>
+    <string name="chain_id">Chain ID: %1d</string>
+    <string name="asset_creator">Created By</string>
+    <string name="asset_schema">Token Standard</string>
+    <string name="asset_total_supply">Total Supply</string>
+    <string name="asset_number_of_owners">Owners</string>
+    <string name="asset_owner">Owner</string>
+    <string name="asset_last_sale">Last Sale</string>
+    <string name="enable_screenlock">Unable to upgrade key: Enable screenlock on phone</string>
+    <string name="unable_to_upgrade_key">Unable to upgrade key: %1$s</string>
+    <string name="no_key_found">No Key found</string>
+    <string name="unable_store_key">Unable to store key: %1$s</string>
+    <string name="title_ens_lookup_warning">ENS Lookup Warning</string>
+    <string name="message_ens_node_not_sync">AlphaWallet has detected a discrepancy between ethereum\'s timestamp and your device\'s current time, or possibly the blockchain connection is not synchronized, please check your phone\'s time is correct, or ignore this warning.</string>
+    <string name="zero">0</string>
+    <string name="decrease">Disminuir</string>
+    <string name="increase">Incrementar</string>
+    <string name="message_transaction_timeout">The transaction has timed out. You can view the status in activity page.</string>
+    <string name="error_transaction_timeout">Transaction Timeout</string>
 </resources>

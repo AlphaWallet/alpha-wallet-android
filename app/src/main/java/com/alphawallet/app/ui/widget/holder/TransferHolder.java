@@ -1,5 +1,9 @@
 package com.alphawallet.app.ui.widget.holder;
 
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
+import static com.alphawallet.app.ui.widget.holder.TransactionHolder.DEFAULT_ADDRESS_ADDITIONAL;
+import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -22,7 +26,6 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.TokenActivity;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.token.entity.EventDefinition;
 import com.alphawallet.token.entity.TSTokenView;
@@ -30,11 +33,6 @@ import com.alphawallet.token.tools.TokenDefinition;
 
 import java.math.BigInteger;
 import java.util.Map;
-
-import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
-import static com.alphawallet.app.ui.widget.holder.TransactionHolder.DEFAULT_ADDRESS_ADDITIONAL;
-import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by JB on 17/12/2020.
@@ -157,14 +155,14 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
                 if (value.length() == 0) value = "- ";
                 if (resultMap.get("amount") != null)
                 {
-                    value = token.convertValue(value, resultMap.get("amount").value, TRANSACTION_BALANCE_PRECISION);
+                    value = token.convertValue(value, resultMap.get("amount"), TRANSACTION_BALANCE_PRECISION);
                 }
                 break;
             case "approvalObtained":
             case "ownerApproved":
                 if (resultMap.get("value") != null)
                 {
-                    value = token.convertValue(value, resultMap.get("value").value, TRANSACTION_BALANCE_PRECISION);
+                    value = token.convertValue(value, resultMap.get("value"), TRANSACTION_BALANCE_PRECISION);
                 }
                 break;
             default:

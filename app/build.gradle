@@ -5,6 +5,14 @@
 buildscript {
     repositories {
         google()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.worker8.android_lint_reporter:android_lint_reporter:2.1.0"
+        classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.20.0-RC1"
     }
 }
 
@@ -15,6 +23,23 @@ apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 apply plugin: 'kotlin-android'
 apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'com.worker8.android_lint_reporter'
+apply plugin: 'io.gitlab.arturbosch.detekt'
+
+detekt {
+    toolVersion = "1.20.0-RC1"
+    buildUponDefaultConfig = true // preconfigure defaults
+    allRules = false // activate all available (even unstable) rules.
+    baseline = file("$projectDir/check/detekt-baseline.xml")
+}
+
+android_lint_reporter {
+    lintFilePath = "./build/reports/lint-results-analyticsDebug.xml"
+    detektFilePath = "./build/reports/detekt/detekt.xml"
+    githubOwner = "AlphaWallet"
+    githubRepositoryName = "alpha-wallet-android"
+    showLog = true // optional - default to false, show extra information, will slow things down
+}
 
 repositories {
     maven {
@@ -23,26 +48,28 @@ repositories {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion '30.0.3'
+    compileSdkVersion 32
+    buildToolsVersion '32.0.0'
     sourceSets {
         main {
 
         }
     }
     defaultConfig {
-        versionCode 183
-        versionName "3.52.0"
+        versionCode 186
+        versionName "3.54.0"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdkVersion 32
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunnerArguments clearPackageData: 'true'
         def XInfuraAPI = "XInfuraAPI"
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\""
-        def DEFAULT_OPENSEA_API_KEY = "\"...\""; //Put your OpenSea developer API key in here, otherwise you are reliant on the backup NFT fetch method
+        def DEFAULT_OPENSEA_API_KEY = "\"...\""; //Put your OpenSea developer API key in here, otherwise you are reliant on the backup NFT fetch method (which usually works ok)
         def DEFAULT_POLYGONSCAN_API_KEY = "\"\""; //Put your Polygonscan developer API key in here to get access to Polygon/Mumbai token discovery and transactions
+        def DEFAULT_AURORA_API_KEY = "\"HFDDY5BNKGXBB82DE2G8S64C3C41B76PYI\""; //Put your Aurorascan.dev API key here - this one will rate limit as it is common
 
         buildConfigField 'int', 'DB_VERSION', '45'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
@@ -51,7 +78,10 @@ android {
             abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
         }
         packagingOptions {
-
+            pickFirst 'META-INF/LICENSE.md'
+            pickFirst 'META-INF/NOTICE.md'
+            pickFirst 'META-INF/LICENSE-notice.md'
+            pickFirst 'solidity/ens/build/AbstractENS.bin'
         }
 
         externalNativeBuild {
@@ -59,6 +89,7 @@ android {
                 cFlags "-DIFKEY=\\\"" + DEFAULT_INFURA_API_KEY + "\\\""
                 cFlags "-DOSKEY=\\\"" + DEFAULT_OPENSEA_API_KEY + "\\\""
                 cFlags "-DPSKEY=\\\"" + DEFAULT_POLYGONSCAN_API_KEY + "\\\""
+                cFlags "-DASKEY=\\\"" + DEFAULT_AURORA_API_KEY + "\\\""
             }
         }
     }
@@ -83,6 +114,7 @@ android {
     buildTypes {
         debug {
             minifyEnabled false
+            shrinkResources false
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'),
 //                    'proguard-rules.pro'
         }
@@ -94,8 +126,18 @@ android {
     packagingOptions {
         exclude 'META-INF/NOTICE' // will not include NOTICE file
         exclude 'META-INF/LICENSE' // will not include LICENSE file
+        exclude 'META-INF/LICENSE.md'
+        exclude 'META-INF/NOTICE.md'
+        exclude 'META-INF/LICENSE-notice.md'
+        exclude 'solidity/ens/build/*.bin'
+        exclude 'solidity/ens/*.sol'
+        exclude 'solidity/ens/build/*.abi'
+        exclude 'en-mnemonic-word-list.txt'
+        exclude 'solidity/*'
     }
     lintOptions {
+        baseline file("./check/lint-baseline.xml")
+        lintConfig file('./check/lint-rules.xml')
         abortOnError false
     }
     compileOptions {
@@ -108,10 +150,12 @@ android {
         }
     }
     testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
         unitTests {
             returnDefaultValues = true
             includeAndroidResources = true
         }
+        animationsDisabled = true
     }
 }
 
@@ -126,18 +170,22 @@ dependencies {
     // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
 
     // Ethereum client
-    implementation "org.web3j:core:4.8.7-android"
+    //implementation "org.web3j:core:4.8.8-android"
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
+    implementation 'org.slf4j:slf4j-api:2.0.0-alpha7'
 
     // Http client
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
-    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.google.code.gson:gson:2.9.0'
     implementation "com.squareup.picasso:picasso:2.71828"
     //noinspection GradleDependency
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1' //This cannot be updated until minSdkVersion is 31.
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     //noinspection GradleDependency,GradleCompatible
     implementation 'androidx.appcompat:appcompat:1.3.1' //Do not update; next version is incompatible with API30 and below
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'com.google.android.material:material:1.5.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.biometric:biometric:1.1.0'
@@ -148,7 +196,7 @@ dependencies {
     implementation 'com.google.zxing:core:3.4.1'
 
     // Sugar
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
     implementation 'com.github.apl-devs:appintro:v4.2.2'
     implementation 'com.romandanylyk:pageindicatorview:1.0.0'
 
@@ -160,6 +208,9 @@ dependencies {
 
     // Keyboard visibility
     implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3'
+
+    //implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.2.2'
+    //implementation 'org.slf4j:slf4j-nop:1.7.25'
 
     // Dagger 2
 
@@ -181,22 +232,29 @@ dependencies {
 
     // Unit tests
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.mockito:mockito-core:3.4.6'
-    testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '1.7.4'
-    testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.2'
-    testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.2'
+    testImplementation 'org.mockito:mockito-core:3.12.4'
+    testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '2.0.9'
+    testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
+    testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
 
     // Component tests
-    testImplementation 'androidx.test:core:1.4.0'
     testImplementation 'org.robolectric:robolectric:4.7.3'
+    testImplementation 'androidx.test:core:1.4.0'
 
     // E2e tests
+    androidTestImplementation 'androidx.test:runner:1.4.0'
+    androidTestImplementation 'androidx.test:core:1.4.0'
+    androidTestUtil 'androidx.test:orchestrator:1.4.1'
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {
         exclude group: "com.android.support", module: "support-annotations"
     })
     androidTestImplementation('tools.fastlane:screengrab:2.1.1', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.4.0'
 
     implementation group: 'com.trustwallet', name: 'wallet-core', version: '2.6.3'
 
@@ -205,22 +263,21 @@ dependencies {
     // Do not upgrade unless we have migrated to AndroidX
     implementation 'com.google.android:flexbox:2.0.1'
 
-    // PW
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 
     implementation 'com.github.mailchimp:mailchimp-sdk-android:1.0.0'
-    implementation 'androidx.preference:preference-ktx:1.1.1'
+    implementation 'androidx.preference:preference-ktx:1.2.0'
 
     //Timber
     implementation 'com.jakewharton.timber:timber:5.0.1'
 
+    implementation 'androidx.work:work-runtime:2.7.1'
+
     //Analytics
-    analyticsImplementation 'com.google.android.play:core:1.10.2'
-    analyticsImplementation 'com.google.firebase:firebase-analytics:20.0.0'
+    analyticsImplementation 'com.google.android.play:core:1.10.3'
+    analyticsImplementation 'com.google.firebase:firebase-analytics:20.1.2'
     analyticsImplementation 'com.mixpanel.android:mixpanel-android:5.8.4'
-    analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.2.5'
+    analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.2.9'
 }
 
 // WARNING WARNING WARNING

@@ -62,28 +62,6 @@
                 custom:layout_constraintTop_toBottomOf="@id/text_balance"
                 tools:text="(New: 31.1818 ETH)" />
 
-            <com.alphawallet.app.widget.ChainName
-                android:id="@+id/chain_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                custom:font_size="10"
-                custom:layout_constraintBottom_toBottomOf="parent"
-                custom:layout_constraintEnd_toEndOf="parent" />
-
-            <com.alphawallet.app.widget.TokenIcon
-                android:id="@+id/chain_icon"
-                android:layout_width="@dimen/token_icon"
-                android:layout_height="@dimen/token_icon"
-                custom:layout_constrainedHeight="true"
-                custom:layout_constrainedWidth="true"
-                custom:layout_constraintBottom_toTopOf="@+id/chain_name"
-                custom:layout_constraintDimensionRatio="W,1:1"
-                custom:layout_constraintEnd_toEndOf="@+id/chain_name"
-                custom:layout_constraintStart_toStartOf="@+id/chain_name"
-                custom:layout_constraintTop_toTopOf="parent" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>

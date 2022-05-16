@@ -195,7 +195,7 @@
         android:id="@+id/pending_progress"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/item_white_circle"
+        android:background="@drawable/grey_circle"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/guidelineBottom"
         app:layout_constraintEnd_toStartOf="@id/guidelineRight"

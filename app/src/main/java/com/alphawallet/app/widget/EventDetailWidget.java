@@ -1,5 +1,7 @@
 package com.alphawallet.app.widget;
 
+import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -15,8 +17,6 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 
 import java.util.Map;
-
-import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
 
 /**
  * Created by JB on 8/12/2020.
@@ -104,7 +104,7 @@ public class EventDetailWidget extends LinearLayout
         if (resultMap.get("amount") != null)
         {
             value = transferData.eventName.equals("sent") ? "- " : "+ ";
-            value = token.convertValue(value, resultMap.get("amount").value, token.isNonFungible() ? 128 : TRANSACTION_BALANCE_PRECISION + 2);
+            value = token.convertValue(value, resultMap.get("amount"), token.isNonFungible() ? 128 : TRANSACTION_BALANCE_PRECISION + 2);
         }
 
         //get 'from'
@@ -144,6 +144,11 @@ public class EventDetailWidget extends LinearLayout
             title.setVisibility(View.GONE);
             symbol.setVisibility(View.GONE);
         }
+    }
+
+    public void onDestroy()
+    {
+        tokenView.onDestroy();
     }
 }
 

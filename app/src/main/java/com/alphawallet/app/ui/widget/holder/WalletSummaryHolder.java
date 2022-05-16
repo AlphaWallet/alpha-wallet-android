@@ -22,6 +22,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.WalletActionsActivity;
+import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.UserAvatar;
@@ -32,7 +33,7 @@ import java.math.RoundingMode;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements View.OnClickListener
+public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements View.OnClickListener, AvatarWriteCallback
 {
 
     public static final int VIEW_TYPE = 1001;
@@ -45,7 +46,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     private final UserAvatar walletIcon;
     private final LinearLayout walletClickLayout;
     private final TextView walletBalanceText;
-    private final TextView walletBalanceCurrency;
     private final TextView walletNameText;
     private final TextView walletAddressSeparator;
     private final TextView walletAddressText;
@@ -63,7 +63,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         manageWalletBtn = findViewById(R.id.manage_wallet_btn);
         walletIcon = findViewById(R.id.wallet_icon);
         walletBalanceText = findViewById(R.id.wallet_balance);
-        walletBalanceCurrency = findViewById(R.id.wallet_currency);
         walletNameText = findViewById(R.id.wallet_name);
         walletAddressSeparator = findViewById(R.id.wallet_address_separator);
         walletAddressText = findViewById(R.id.wallet_address);
@@ -115,15 +114,14 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
                 walletNameText.setVisibility(View.GONE);
             }
 
-            walletIcon.bind(wallet);
+            walletIcon.bind(wallet, this);
 
             String walletBalance = wallet.balance;
             if (!TextUtils.isEmpty(walletBalance) && walletBalance.startsWith("*"))
             {
                 walletBalance = walletBalance.substring(1);
             }
-            walletBalanceText.setText(walletBalance);
-            walletBalanceCurrency.setText(wallet.balanceSymbol);
+            walletBalanceText.setText(String.format("%s %s", walletBalance, wallet.balanceSymbol));
 
             walletAddressText.setText(Utils.formatAddress(wallet.address));
 
@@ -154,6 +152,11 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
             checkLastBackUpTime();
             startRealmListener();
         }
+    }
+
+    public void setWaiting()
+    {
+        walletIcon.setWaiting();
     }
 
     private void setWalletChange(double percentChange24h)
@@ -271,5 +274,11 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
                 getContext().startActivity(intent);
                 break;
         }
+    }
+
+    @Override
+    public void avatarFound(Wallet wallet)
+    {
+        if (clickCallback != null) clickCallback.ensAvatar(wallet);
     }
 }

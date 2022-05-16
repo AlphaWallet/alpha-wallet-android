@@ -2,6 +2,7 @@ package com.alphawallet.app.interact;
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.repository.WalletRepositoryType;
 
 import io.reactivex.Single;
@@ -40,6 +41,10 @@ public class FetchWalletsInteract {
 
     public void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess) {
         accountRepository.updateWalletData(wallet, onSuccess);
+    }
+
+    public void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess) {
+        accountRepository.updateWalletItem(wallet, item, onSuccess);
     }
 
     /**

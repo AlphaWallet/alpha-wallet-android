@@ -10,19 +10,21 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.opensea.Trait;
+import com.alphawallet.app.entity.opensea.OpenSeaAsset;
 
 import java.text.DecimalFormat;
 import java.util.List;
 
 public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder> {
-    private List<Trait> traitList;
-    private Context context;
+    private final List<OpenSeaAsset.Trait> traitList;
+    private final Context context;
+    private final long totalSupply;
 
-    public TraitsAdapter(Context context, List<Trait> data)
+    public TraitsAdapter(Context context, List<OpenSeaAsset.Trait> data, long totalSupply)
     {
         this.context = context;
         this.traitList = data;
+        this.totalSupply = totalSupply;
     }
 
     @NonNull
@@ -37,20 +39,28 @@ public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull TraitsAdapter.ViewHolder viewHolder, int i)
     {
-        Trait trait = traitList.get(i);
-        viewHolder.trait.setText(trait.getTraitType());
-        viewHolder.value.setText(trait.getValue());
+        OpenSeaAsset.Trait trait = traitList.get(i);
+        viewHolder.trait.setText(trait.traitType);
+        viewHolder.value.setText(trait.value);
 
-        float rarity = trait.getTraitRarity();
-        if (trait.isUnique())
+        if (trait.traitCount > 0)
         {
-            viewHolder.rarity.setText(R.string.trait_rarity_unique);
+            viewHolder.rarity.setVisibility(View.VISIBLE);
+            float rarity = trait.getTraitRarity(totalSupply);
+            if (trait.isUnique())
+            {
+                viewHolder.rarity.setText(R.string.trait_rarity_unique);
+            }
+            else
+            {
+                DecimalFormat df = new DecimalFormat("#0");
+                String s = context.getString(R.string.trait_rarity_suppl_text, df.format(rarity));
+                viewHolder.rarity.setText(s);
+            }
         }
         else
         {
-            DecimalFormat df = new DecimalFormat("#0");
-            String s = context.getString(R.string.trait_rarity_suppl_text, df.format(rarity));
-            viewHolder.rarity.setText(s);
+            viewHolder.rarity.setVisibility(View.GONE);
         }
     }
 
@@ -60,7 +70,7 @@ public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder
         return traitList.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         TextView trait;
         TextView value;
         TextView rarity;

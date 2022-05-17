@@ -56,6 +56,7 @@
         tools:background="@drawable/ic_circle_green"
         android:clickable="false"
         android:focusable="false"
+        android:contentDescription="@string/status"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"

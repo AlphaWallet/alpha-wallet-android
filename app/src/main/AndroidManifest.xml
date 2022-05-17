@@ -297,6 +297,10 @@
             android:name=".ui.QRScanning.QRScanner"
             android:label="@string/qr_scanner" />
 
+        <activity
+            android:name=".ui.NodeStatusActivity"
+            android:label="@string/action_node_status" />
+
         <service
             android:name=".service.PriceAlertsService"
             android:enabled="true"

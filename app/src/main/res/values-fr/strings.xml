@@ -911,4 +911,5 @@
     <string name="increase">Augmenter</string>
     <string name="message_transaction_timeout">The transaction has timed out. You can view the status in activity page.</string>
     <string name="error_transaction_timeout">Transaction Timeout</string>
+    <string name="action_node_status">Node Status</string>
 </resources>

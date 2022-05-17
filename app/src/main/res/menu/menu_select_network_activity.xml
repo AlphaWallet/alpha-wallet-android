@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_node_status"
+        android:icon="@drawable/ic_node_status_check"
+        android:orderInCategory="20"
+        android:title="@string/action_node_status"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_add"
+        android:icon="@drawable/ic_plus"
+        android:orderInCategory="20"
+        android:title="@string/action_add"
+        app:showAsAction="always" />
+</menu>

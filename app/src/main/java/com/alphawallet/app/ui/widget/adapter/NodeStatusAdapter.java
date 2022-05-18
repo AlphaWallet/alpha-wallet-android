@@ -34,6 +34,8 @@ public class NodeStatusAdapter extends RecyclerView.Adapter<NodeStatusAdapter.Vi
     private final List<NetworkInfo> networkList;
     private final Map<Long, NodeStatus> statusMap = new ConcurrentHashMap<Long, NodeStatus>();
     private final ArrayList<Disposable> disposables = new ArrayList<>();
+    /** Stores whether node status is being fetched or not. Key: chainId, value: fetching status*/
+    private final Map<Long, Boolean> fetchStatusMap = new ConcurrentHashMap<>();
 
     public NodeStatusAdapter(List<NetworkInfo> networkList)
     {
@@ -58,6 +60,7 @@ public class NodeStatusAdapter extends RecyclerView.Adapter<NodeStatusAdapter.Vi
             holder.chainId.setText(holder.itemLayout.getContext().getString(R.string.chain_id, item.chainId));
             holder.tokenIcon.bindData(item.chainId);
             NodeStatus nodeStatus = statusMap.get(item.chainId);
+            holder.itemLayout.setOnClickListener(v -> refreshNodeStatus(item.chainId, holder));
             if (nodeStatus == null) return;
 
             if (nodeStatus == NodeStatus.STRONG)
@@ -86,16 +89,13 @@ public class NodeStatusAdapter extends RecyclerView.Adapter<NodeStatusAdapter.Vi
     {
         for (NetworkInfo item : networkList)
         {
-            Disposable disposable = Single.fromCallable( () -> fetchNodeStatus(item.chainId))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe( (nodeStatus) -> updateStatus(item.chainId, nodeStatus) );
-            disposables.add(disposable);
+            refreshNodeStatus(item.chainId, null);
         }
     }
 
     private NodeStatus fetchNodeStatus(long chainId)
     {
+        fetchStatusMap.put(chainId, true);
         NodeStatus status = NodeStatus.NOT_RESPONDING;
         final Web3j web3j = TokenRepository.getWeb3jService(chainId);
         try
@@ -110,6 +110,7 @@ public class NodeStatusAdapter extends RecyclerView.Adapter<NodeStatusAdapter.Vi
         {
             Timber.e(e, "checkNodeStatus: exception: chainID: %s ", chainId);
         }
+        fetchStatusMap.put(chainId, false);
         return status;
     }
 
@@ -127,6 +128,25 @@ public class NodeStatusAdapter extends RecyclerView.Adapter<NodeStatusAdapter.Vi
         }
         notifyItemChanged(position);
         Timber.d("updateStatus: chain: %s-%s: %s", chainId, EthereumNetworkBase.getShortChainName(chainId),status);
+    }
+
+    private void refreshNodeStatus(long chainId, ViewHolder holder)
+    {
+        Boolean isFetching = fetchStatusMap.get(chainId);
+        if (isFetching == null || !isFetching)
+        {
+            Timber.d("refreshNodeStatus: chainId: %s", chainId);
+            if (holder != null)     // if called on click ie refreshing
+            {
+                holder.loader.setVisibility(View.VISIBLE);
+                holder.status.setVisibility(View.INVISIBLE);
+            }
+            Disposable disposable = Single.fromCallable( () -> fetchNodeStatus(chainId))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe( (nodeStatus) -> updateStatus(chainId, nodeStatus) );
+            disposables.add(disposable);
+        }
     }
 
     public void dispose()
@@ -169,6 +189,5 @@ public class NodeStatusAdapter extends RecyclerView.Adapter<NodeStatusAdapter.Vi
     {
         NOT_RESPONDING, STRONG, MEDIUM, WEAK
     }
-
 }
 

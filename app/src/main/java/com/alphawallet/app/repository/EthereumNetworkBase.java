@@ -179,7 +179,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String MUMBAI_FALLBACK_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_FALLBACK_URL = "https://kovan.optimism.io";
-    public static final String CRONOS_TEST_URL = "https://cronos-testnet.crypto.org:8545";
+    public static final String CRONOS_TEST_URL = "https://evm-t3.cronos.org";
     public static final String ARBITRUM_FALLBACK_TESTNET_RPC = "https://rinkeby.arbitrum.io/rpc";
 
     public static final String IOTEX_MAINNET_RPC_URL = "https://babel-api.mainnet.iotex.io";
@@ -292,8 +292,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://api-kovan-optimistic.etherscan.io/api?"));
             put(CRONOS_TEST_ID, new NetworkInfo(C.CRONOS_TEST_NETWORK, C.CRONOS_SYMBOL,
                     CRONOS_TEST_URL,
-                    "https://cronos-explorer.crypto.org/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
-                    "https://cronos-explorer.crypto.org/api?"));
+                    "https://testnet.cronoscan.com/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
+                    "https://testnet.cronoscan.com/api?"));
             put(ARBITRUM_MAIN_ID, new NetworkInfo(C.ARBITRUM_ONE_NETWORK, C.ARBITRUM_SYMBOL,
                     ARBITRUM_MAINNET_RPC,
                     "https://arbiscan.io/tx/", ARBITRUM_MAIN_ID, ARBITRUM_FALLBACK_MAINNET_RPC,

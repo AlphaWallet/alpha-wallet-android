@@ -151,6 +151,8 @@ public class HomeViewModel extends BaseViewModel {
         this.analyticsService = analyticsService;
         this.externalBrowserRouter = externalBrowserRouter;
         this.httpClient = httpClient;
+
+        this.preferenceRepository.incrementLaunchCount();
     }
 
     @Override

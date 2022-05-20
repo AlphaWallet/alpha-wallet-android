@@ -49,7 +49,7 @@ public class SplashViewModel extends ViewModel
         this.keyService = keyService;
 
         // increase launch count
-        this.preferenceRepository.incrementLaunchCount();
+//        this.preferenceRepository.incrementLaunchCount();
     }
 
     public void fetchWallets()

@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
 import android.content.Intent;
@@ -25,6 +26,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -208,6 +210,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
                 .get(TokenFunctionViewModel.class);
         viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
         viewModel.nftAsset().observe(this, this::onNftAsset);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionError().observe(this, this::txError);
     }
 
     private void setupFunctionBar()
@@ -374,6 +378,31 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private void onOpenSeaAsset(OpenSeaAsset openSeaAsset)
     {
         loadFromOpenSeaData(openSeaAsset);
+    }
+
+    /**
+     * Final return path
+     * @param transactionData write success hash back to ActionSheet
+     */
+    private void txWritten(TransactionData transactionData)
+    {
+        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+    }
+
+    //Transaction failed to be sent
+    private void txError(Throwable throwable)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(ERROR);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(throwable.getMessage());
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+        confirmationDialog.dismiss();
     }
 
     @Override

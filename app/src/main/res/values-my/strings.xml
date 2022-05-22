@@ -637,7 +637,7 @@
     <string name="title_no_need_to_watch">စောင့်ကြည့်နေပြီးဖြစ်သည်</string>
     <string name="error_while_signing_transaction">လုပ်ငန်းစဥ်လက်မှတ်ထိုးရာတွင် အမှားအယွင်းဖြစ်ပွားခဲ့ပါသည်။ ကျေးဇူးပြု၍ ယခု ဝေါလက်အတွက် Key များကို ပြန်လည်ထည့်သွင်းပါ။</string>
     <string name="error_not_whitelisted">စာမျက်နှာကို ခွင့်ပြုစာရင်းတွင်မထည့်ရသေးပါ။</string>
-    <string name="explain_not_whitelisted">TokenScript သည် ခွင့်ပြုစာရင်းတွင်မပါဝင်သောဝက်ဘ်စာမျက်နှာနှင့်ချိတ်ဆက်ရန်ပြုလုပ်နေပါသည်။ သင်သည်ဝက်ဘ်ဆိုဒ်ပိုင်ရှင်ဖြစ်လျှင်ခွင့်ပြုစာရင်းတင်ရန်အတွက် ကျေးဇူးပြု၍PRကို Alphawalletကိုတင်ပေးပါ။</string>
+    <string name="explain_not_whitelisted">TokenScript သည် ခွင့်ပြုစာရင်းတွင်မပါဝင်သောဝက်ဘ်စာမျက်နှာနှင့်ချိတ်ဆက်ရန်ပြုလုပ်နေပါသည်။ သင်သည်ဝက်ဘ်ဆိုဒ်ပိုင်ရှင်ဖြစ်လျှင်ခွင့်ပြုစာရင်းတင်ရန်အတွက် ကျေးဇူးပြု၍PRကို Alphawalletကိုတင်ပေးပါ။\n%1$s</string>
     <string name="token_spec">%1$s (%2$s)</string>
     <string name="check_function_availability">လုပ်ဆောင်နိုင်သောလုပ်ငန်းများ</string>
     <string name="invalid_parameters">Invalid parameter while calling TokenScript Transaction. Please check inputs.</string>

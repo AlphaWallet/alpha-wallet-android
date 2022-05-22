@@ -25,7 +25,6 @@ import android.text.format.DateUtils;
 
 import androidx.annotation.Nullable;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CoinGeckoTicker;
 import com.alphawallet.app.entity.DexGuruTicker;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
@@ -148,7 +147,7 @@ public class TickerService
 
     private void tickersUpdated(int tickerCount)
     {
-        Timber.d("Tickers Updated: " + tickerCount);
+        Timber.d("Tickers Updated: %s", tickerCount);
         mainTickerUpdate = null;
     }
 

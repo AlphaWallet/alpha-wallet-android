@@ -110,7 +110,7 @@ public class Token
     /**
      * Display human readable balance, including thousands separator. DO NOT use the output of this for anything other than UI display
      *
-     * @param scale
+     * @param decimalPlaces How many decimals to display
      * @return
      */
     public String getStringBalanceForUI(int decimalPlaces)

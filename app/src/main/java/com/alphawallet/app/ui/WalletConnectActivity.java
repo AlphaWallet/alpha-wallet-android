@@ -745,9 +745,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         lastId = id;
         final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
-        confirmationDialog = generateTransactionRequest(w3Tx, chainId);
-        if (confirmationDialog != null)
+        final ActionSheetDialog confDialog = generateTransactionRequest(w3Tx, chainId);
+        if (confDialog != null)
         {
+            confirmationDialog = confDialog;
             confirmationDialog.setSignOnly(); //sign transaction only
             confirmationDialog.show();
         }

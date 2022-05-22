@@ -47,7 +47,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class NFTActivity extends BaseActivity implements StandardFunctionInterface {
     NFTViewModel viewModel;
 
-    private Menu menu;
     private Wallet wallet;
     private Token token;
     private FunctionButtonBar functionBar;
@@ -59,7 +58,7 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
 
     private NFTAssetsFragment assetsFragment;
 
-    private ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    private final ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getData() == null) return;
                 String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
@@ -84,6 +83,9 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         setTitle(token.tokenInfo.name);
         isGridView = !hasTokenScriptOverride(token);
         setupViewPager();
+
+        //check NFT events, expedite balance update
+        viewModel.checkEventsForToken(token);
     }
 
     private boolean hasTokenScriptOverride(Token t)
@@ -107,6 +109,21 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         viewModel = new ViewModelProvider(this)
                 .get(NFTViewModel.class);
         viewModel.sig().observe(this, this::onSignature);
+        viewModel.tokenUpdate().observe(this, this::onBalanceUpdate);
+    }
+
+    private void onBalanceUpdate(Token token)
+    {
+        assetsFragment.updateToken(token); //ensure token has the latest assets
+
+        if (isGridView)
+        {
+            assetsFragment.showGridView();
+        }
+        else
+        {
+            assetsFragment.showListView();
+        }
     }
 
     private void getIntentData()
@@ -222,7 +239,6 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        this.menu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_nft_display, menu);
         sendMultipleTokensMenuItem = menu.findItem(R.id.action_send_multiple_tokens);
@@ -263,6 +279,13 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
             handleTransactionSuccess.launch(viewModel.openSelectionModeIntent(this, token, wallet));
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        viewModel.onDestroy();
     }
 
     private void setupFunctionBar()

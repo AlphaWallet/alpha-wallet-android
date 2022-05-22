@@ -41,7 +41,6 @@ import com.alphawallet.app.ui.widget.divider.ItemOffsetDecoration;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.NFTAssetsViewModel;
 import com.alphawallet.ethereum.EthereumNetworkBase;
-import com.google.android.material.color.MaterialColors;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -61,7 +60,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     private LinearLayout searchLayout;
     private RecyclerView.Adapter<?> adapter;
 
-    private ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    private final ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getData() == null) return;
                 String transactionHash = result.getData().getStringExtra(C.EXTRA_TXHASH);
@@ -139,6 +138,11 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     public void onLongTokenClick(View view, Token token, List<BigInteger> tokenIds)
     {
 
+    }
+
+    public void updateToken(Token newToken)
+    {
+        token = newToken;
     }
 
     public void showGridView()

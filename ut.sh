@@ -5,4 +5,4 @@ cmd='./gradlew testNoAnalyticsDebugUnitTest'
 if [[ "$(docker images -q $image 2> /dev/null)" == "" ]]; then
   docker pull $image
 fi
-docker run -it --rm -v $(pwd):/code $image bash -c "cd /code && $cmd"
+docker run --platform linux/amd64 -it --rm -v $(pwd):/code $image bash -c "cd /code && $cmd"

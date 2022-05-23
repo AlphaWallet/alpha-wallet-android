@@ -29,6 +29,11 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
+import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.repository.entity.RealmWalletToken;
+import com.alphawallet.app.repository.entity.RealmStaticToken;
+import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
@@ -54,6 +59,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import io.realm.RealmResults;
 import timber.log.Timber;
 
 public class TokensService
@@ -87,6 +93,8 @@ public class TokensService
     private ServiceSyncCallback completionCallback;
     private int syncCount = 0;
 
+    RealmManager realmManager;
+
     @Nullable
     private Disposable eventTimer;
     @Nullable
@@ -104,11 +112,14 @@ public class TokensService
 
     private static boolean done = false;
 
+    public static boolean normaliseTokens = false;
+
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
                          TokenRepositoryType tokenRepository,
                          TickerService tickerService,
                          OpenSeaService openseaService,
-                         AnalyticsServiceType<AnalyticsProperties> analyticsService) {
+                         AnalyticsServiceType<AnalyticsProperties> analyticsService,
+                         RealmManager realmManager) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
         this.tickerService = tickerService;
@@ -123,6 +134,85 @@ public class TokensService
         appHasFocus = true;
         transferCheckChain = 0;
         completionCallback = null;
+        this.realmManager = realmManager;
+
+        Timber.tag(TAG).d("doNormalize: %s", normaliseTokens);
+
+        if (normaliseTokens)
+        {
+            Timber.tag(TAG).d("Normalizing tokens");
+            try
+            {
+                normaliseTokensDB()
+                        .subscribe( () -> {
+                            Timber.tag(TAG).d("Normalization processed without errors");
+                        }, t -> Timber.tag(TAG).e(t, "Error while normalising Tokens"))
+                        .isDisposed();;
+            } catch (Exception e)
+            {
+                Timber.tag(TAG).e(e, "Error while normalising Tokens");
+            }
+        }
+    }
+
+    private Completable normaliseTokensDB()
+    {
+        return Completable.fromRunnable( () -> {
+            Timber.tag(TAG).d("normaliseDb: ");
+            Realm walletDataRealm = realmManager.getWalletDataRealmInstance();
+            // get all wallets
+            RealmResults<RealmWalletData> walletDataRealmResults = walletDataRealm.where(RealmWalletData.class).findAll();
+            Timber.tag(TAG).d("normaliseTokensDB: No Of wallets: %s", walletDataRealmResults.size());
+            for (int i = 0; i < walletDataRealmResults.size(); i++) // process found wallets
+            {
+                stripTokensForWallet(walletDataRealmResults.get(i).getAddress());
+            }
+            walletDataRealm.close();
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    private void stripTokensForWallet(String walletAddress)
+    {
+        Timber.tag(TAG).d("stripTokenForWallet: %s", walletAddress);
+        Realm tokenInfoRealm = realmManager.getTokenInfoInstance();     // realm for static data
+        Realm walletRealm = realmManager.getRealmInstance(walletAddress);   // realm for wallet dynamic data
+        RealmResults<RealmToken> tokenResult = walletRealm.where(RealmToken.class).findAll();
+        Timber.tag(TAG).d("stripTokensForWallet: No. Of RealmTokens: %s", tokenResult.size());
+        for (int i = 0; i < tokenResult.size(); i++) {
+            separateTokenData(tokenResult.get(i), walletRealm, tokenInfoRealm);
+        }
+        walletRealm.close();
+        tokenInfoRealm.close();
+    }
+
+    /**
+     * @param realmToken Existing Token to normalise
+     * @param dynamicDataRealm Per wallet Realm for dynamic data
+     * @param staticDataRealm Common Realm for static data
+     */
+    private void separateTokenData(RealmToken realmToken, Realm dynamicDataRealm, Realm staticDataRealm)
+    {
+        // no need for base tokens
+        if (realmToken.getTokenAddress().equalsIgnoreCase("eth"))
+        {
+            return;
+        }
+        String primaryKey = TokensRealmSource.databaseKey(realmToken.getChainId(), realmToken.getTokenAddress());
+        // create object
+        Timber.tag(TAG).d("separateTokenData: Creating static token");
+        staticDataRealm.executeTransaction( r -> {
+            RealmStaticToken st = r.createObject(RealmStaticToken.class, primaryKey);
+            st.populate(realmToken);
+        });
+        // get current static token
+        RealmStaticToken staticToken = staticDataRealm.where(RealmStaticToken.class)
+                .equalTo("address", primaryKey)
+                .findFirst();
+        Timber.tag(TAG).d("separateTokenData: Created staticToken: %s", staticToken);
+
+        // TODO separate dynamic data
     }
 
     private void checkUnknownTokens()

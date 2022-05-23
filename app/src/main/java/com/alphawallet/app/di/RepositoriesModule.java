@@ -161,8 +161,9 @@ public class RepositoriesModule {
 									   TokenRepositoryType tokenRepository,
 									   TickerService tickerService,
 									   OpenSeaService openseaService,
-									   AnalyticsServiceType analyticsService) {
-		return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService);
+									   AnalyticsServiceType analyticsService,
+									   RealmManager realmManager) {
+		return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService, realmManager);
 	}
 
 	@Singleton

@@ -64,4 +64,9 @@ public class RealmManager {
     public Realm getWalletTypeRealmInstance() {
         return getRealmInstanceInternal("WalletType-db.realm");
     }
+
+    // common realm for storing static token info
+    public Realm getTokenInfoInstance() {
+        return getRealmInstanceInternal("TokenInfo-db.realm");
+    }
 }

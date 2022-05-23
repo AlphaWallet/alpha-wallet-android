@@ -1,10 +1,14 @@
 package com.alphawallet.app.repository;
 
+import com.alphawallet.app.repository.entity.RealmStaticToken;
+import com.alphawallet.app.service.TokensService;
+
 import io.realm.DynamicRealm;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmSchema;
+import timber.log.Timber;
 
 
 /**
@@ -423,6 +427,39 @@ public class AWRealmMigration implements RealmMigration
                 if (!realmData.hasField("maxFeePerGas")) realmData.addField("maxFeePerGas", String.class);
                 if (!realmData.hasField("maxPriorityFee")) realmData.addField("maxPriorityFee", String.class);
             }
+            oldVersion++;
+        }
+
+        if (oldVersion == 46)
+        {
+            RealmObjectSchema realmObjectSchema = schema.get("RealmStaticToken");
+            if (realmObjectSchema == null)
+            {
+                schema.create("RealmStaticToken")
+                        .addField("address", String.class, FieldAttribute.PRIMARY_KEY)
+                        .addField("name", String.class)
+                        .addField("symbol", String.class)
+                        .addField("decimals", int.class)
+                        .addField("interfaceSpec", int.class)
+                        .addField("auxData", String.class);
+            }
+
+            RealmObjectSchema dynamicTokenSchema = schema.get("RealmWalletToken");
+            if (dynamicTokenSchema == null)
+            {
+                schema.create("RealmWalletToken")
+                        .addField("address", String.class, FieldAttribute.PRIMARY_KEY)
+                        .addField("addedTime", long.class)
+                        .addField("updatedTime", long.class)
+                        .addField("balance", String.class)
+                        .addField("isEnabled", boolean.class)
+                        .addField("lastBlockRead", long.class)
+                        .addField("earliestTxBlock", long.class)
+                        .addField("visibilityChanged", boolean.class)
+                        .addField("lastTxTime", long.class);
+            }
+            Timber.d("Enabling Normalization: ");
+            TokensService.normaliseTokens = true;
             oldVersion++;
         }
     }

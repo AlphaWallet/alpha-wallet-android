@@ -1,0 +1,1 @@
+docker run -it -v $(pwd):/app dependency-cached sh -c "cd /app && ./gradlew clean testNoAnalyticsDebugJava --no-daemon"

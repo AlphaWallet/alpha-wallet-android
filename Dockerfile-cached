@@ -1,0 +1,5 @@
+FROM dependency-cached:latest
+USER root
+WORKDIR /app
+COPY ./ ./
+CMD gradle clean compileNoAnalyticsDebugJavaWithJavac --no-daemon

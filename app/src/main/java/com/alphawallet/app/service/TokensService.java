@@ -135,42 +135,6 @@ public class TokensService
         transferCheckChain = 0;
         completionCallback = null;
         this.realmManager = realmManager;
-
-        Timber.tag(TAG).d("doNormalize: %s", normaliseTokens);
-
-        if (normaliseTokens)
-        {
-            Timber.tag(TAG).d("Normalizing tokens");
-            try
-            {
-                normaliseTokensDB()
-                        .subscribe( () -> {
-                            Timber.tag(TAG).d("Normalization processed without errors");
-                        }, t -> Timber.tag(TAG).e(t, "Error while normalising Tokens"))
-                        .isDisposed();;
-            } catch (Exception e)
-            {
-                Timber.tag(TAG).e(e, "Error while normalising Tokens");
-            }
-        }
-    }
-
-    private Completable normaliseTokensDB()
-    {
-        return Completable.fromRunnable( () -> {
-            Timber.tag(TAG).d("normaliseDb: ");
-            Realm walletDataRealm = realmManager.getWalletDataRealmInstance();
-            // get all wallets
-            RealmResults<RealmWalletData> walletDataRealmResults = walletDataRealm.where(RealmWalletData.class).findAll();
-            Timber.tag(TAG).d("normaliseTokensDB: No Of wallets: %s", walletDataRealmResults.size());
-            for (int i = 0; i < walletDataRealmResults.size(); i++) // process found wallets
-            {
-                stripTokensForWallet(walletDataRealmResults.get(i).getAddress());
-            }
-            walletDataRealm.close();
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
     }
 
     private void stripTokensForWallet(String walletAddress)
@@ -200,17 +164,30 @@ public class TokensService
             return;
         }
         String primaryKey = TokensRealmSource.databaseKey(realmToken.getChainId(), realmToken.getTokenAddress());
-        // create object
-        Timber.tag(TAG).d("separateTokenData: Creating static token");
-        staticDataRealm.executeTransaction( r -> {
-            RealmStaticToken st = r.createObject(RealmStaticToken.class, primaryKey);
-            st.populate(realmToken);
-        });
+
         // get current static token
         RealmStaticToken staticToken = staticDataRealm.where(RealmStaticToken.class)
                 .equalTo("address", primaryKey)
                 .findFirst();
-        Timber.tag(TAG).d("separateTokenData: Created staticToken: %s", staticToken);
+        Timber.tag(TAG).d("separateTokenData: staticToken: %s", staticToken);
+
+        // create static data if not exist
+        if (staticToken == null)
+        {
+            // create object
+            Timber.tag(TAG).d("separateTokenData: Creating static token");
+            staticDataRealm.executeTransaction( r -> {
+                RealmStaticToken st = r.createObject(RealmStaticToken.class, primaryKey);
+                st.populate(realmToken);
+            });
+            staticToken = staticDataRealm.where(RealmStaticToken.class)
+                    .equalTo("address", primaryKey)
+                    .findFirst();
+            Timber.tag(TAG).d("Created static token: %s", staticToken);
+        } else
+        {
+            Timber.tag(TAG).d("separateTokenData: Token already exist: %s", staticToken);
+        }
 
         // TODO separate dynamic data
     }
@@ -328,6 +305,7 @@ public class TokensService
         setupFilters();
 
         eventTimer = Single.fromCallable(() -> {
+            checkRealmUpgradeRequired();
             startupPass();
             addUnresolvedContracts(ethereumNetworkRepository.getAllKnownContracts(getNetworkFilters()));
             checkIssueTokens();
@@ -336,6 +314,31 @@ public class TokensService
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::updateCycle, this::onError);
+    }
+
+    private void checkRealmUpgradeRequired()
+    {
+        Timber.tag(TAG).d("checkRealmUpgradeRequired: doNormalize: %s", normaliseTokens);
+        if (normaliseTokens)
+        {
+            Timber.tag(TAG).d("Normalizing tokens");
+            try
+            {
+                Realm walletDataRealm = realmManager.getWalletDataRealmInstance();
+                // get all wallets
+                RealmResults<RealmWalletData> walletDataRealmResults = walletDataRealm.where(RealmWalletData.class).findAll();
+                Timber.tag(TAG).d("normaliseTokensDB: No Of wallets: %s", walletDataRealmResults.size());
+                for (int i = 0; i < walletDataRealmResults.size(); i++) // process found wallets
+                {
+                    stripTokensForWallet(walletDataRealmResults.get(i).getAddress());
+                }
+                walletDataRealm.close();
+                normaliseTokens = false;    // disable once done
+            } catch (Exception e)
+            {
+                Timber.tag(TAG).e(e, "checkRealmUpgradeRequired: Error while normalising Tokens");
+            }
+        }
     }
 
     // Constructs a map of tokens requiring update

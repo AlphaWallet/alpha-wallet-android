@@ -56,8 +56,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 186
-        versionName "3.54.0"
+        versionCode 188
+        versionName "3.56"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
@@ -170,6 +170,12 @@ android {
 task printVersionName {
     doLast {
         println android.defaultConfig.versionName
+    }
+}
+
+task printVersionCode {
+    doLast {
+        println android.defaultConfig.versionCode
     }
 }
 

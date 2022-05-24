@@ -920,4 +920,5 @@
     <string name="label_current_price">Current Price</string>
     <string name="label_minimum_received">Minimum Received</string>
     <string name="label_balance">Balance: </string>
+    <string name="action_node_status">Node Status</string>
 </resources>

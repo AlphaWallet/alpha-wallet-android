@@ -120,7 +120,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private void txError(Throwable throwable)
     {
         throwable.getStackTrace();
-        Timber.d("ERROR: " + throwable.getMessage());
+        Timber.d("ERROR: %s", throwable.getMessage());
     }
 
     private void onWalletUpdate(Wallet w)

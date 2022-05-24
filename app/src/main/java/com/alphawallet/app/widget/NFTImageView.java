@@ -4,6 +4,7 @@ import static com.alphawallet.app.util.Utils.loadFile;
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -30,6 +31,8 @@ import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
@@ -105,7 +108,7 @@ public class NFTImageView extends RelativeLayout
 
     public void setupTokenImageThumbnail(NFTAsset asset)
     {
-        loadImage(asset.getThumbnail(), asset.getBackgroundColor());
+        loadImage(asset.getThumbnail(), asset.getBackgroundColor(), 1);
     }
 
     public void setupTokenImage(NFTAsset asset) throws IllegalArgumentException
@@ -114,11 +117,11 @@ public class NFTImageView extends RelativeLayout
         {
             showLoadingProgress(true);
             progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
-            loadImage(asset.getImage(), asset.getBackgroundColor());
+            loadImage(asset.getImage(), asset.getBackgroundColor(), 16);
         }
     }
 
-    private void loadImage(String url, String backgroundColor) throws IllegalArgumentException
+    private void loadImage(String url, String backgroundColor, int corners) throws IllegalArgumentException
     {
         if (!Utils.stillAvailable(getContext())) return;
 
@@ -132,7 +135,8 @@ public class NFTImageView extends RelativeLayout
         if (!TextUtils.isEmpty(backgroundColor))
         {
             int color = Color.parseColor("#" + backgroundColor);
-            holdingView.setBackgroundColor(color);
+            ColorStateList sl = ColorStateList.valueOf(color);
+            holdingView.setBackgroundTintList(sl);
         }
         else
         {
@@ -141,9 +145,10 @@ public class NFTImageView extends RelativeLayout
 
         loadRequest = Glide.with(getContext())
                 .load(url)
-                .centerCrop()
+                .transform(new CenterCrop(), new RoundedCorners(corners))
                 .transition(withCrossFade())
                 .override(Target.SIZE_ORIGINAL)
+                .timeout(30 * 1000)
                 .listener(requestListener)
                 .into(new DrawableImageViewTarget(image)).getRequest();
     }

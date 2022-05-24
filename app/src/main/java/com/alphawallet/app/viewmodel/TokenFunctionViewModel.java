@@ -675,7 +675,9 @@ public class TokenFunctionViewModel extends BaseViewModel {
 
     public void getAuthentication(Activity activity, SignAuthenticationCallback callback)
     {
-        keyService.getAuthenticationForSignature(wallet, activity, callback);
+        genericWalletInteract.find()
+                .subscribe(wallet -> keyService.getAuthenticationForSignature(wallet, activity, callback))
+                .isDisposed();
     }
 
     public void sendTransaction(Web3Transaction finalTx, long chainId, String overridenTxHash)

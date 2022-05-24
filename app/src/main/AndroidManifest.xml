@@ -47,6 +47,7 @@
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
@@ -301,6 +302,10 @@
             android:name=".ui.SwapActivity"
             android:label="Native Swap"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.NodeStatusActivity"
+            android:label="@string/action_node_status" />
 
         <service
             android:name=".service.PriceAlertsService"

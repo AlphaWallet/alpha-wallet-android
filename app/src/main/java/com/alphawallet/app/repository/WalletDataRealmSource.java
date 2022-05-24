@@ -4,7 +4,6 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.entity.RealmKeyType;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.KeyService;
@@ -504,23 +503,6 @@ public class WalletDataRealmSource {
                         walletList.put(w.address.toLowerCase(), w);
                     }
                 }
-            }
-
-            //try to recover lost HD Wallets
-            for (String walletAddr : keyService.detectOrphanedWallets(walletList))
-            {
-                //create HD Wallet if required
-                RealmKeyType realmKey = r.where(RealmKeyType.class)
-                        .equalTo("address", walletAddr, Case.INSENSITIVE)
-                        .findFirst();
-
-                if (realmKey != null || walletAddr.equals(TokenscriptFunction.ZERO_ADDRESS)) continue;
-                Wallet w = new Wallet(walletAddr);
-                w.type = WalletType.HDKEY;
-                w.authLevel = KeyService.AuthenticationLevel.TEE_AUTHENTICATION;
-                w.lastBackupTime = System.currentTimeMillis();
-                storeKeyData(w, r);
-                walletList.put(w.address.toLowerCase(), w);
             }
         });
     }

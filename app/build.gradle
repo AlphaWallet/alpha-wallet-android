@@ -167,6 +167,12 @@ android {
     }
 }
 
+task printVersionName {
+    doLast {
+        println android.defaultConfig.versionName
+    }
+}
+
 dependencies {
     implementation project(":lib")
 

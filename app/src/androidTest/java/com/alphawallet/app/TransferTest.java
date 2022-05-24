@@ -46,10 +46,10 @@ public class TransferTest extends BaseE2ETest {
         assertThat(getWalletAddress(), equalTo(existedWalletAddress));
 
         selectTestNet();
-        sendBalanceTo(newWalletAddress, "0.00001");
+        sendBalanceTo(newWalletAddress, "0.001");
         ensureTransactionConfirmed();
         switchToWallet(newWalletAddress);
-        assertBalanceIs("0.00001");
+        assertBalanceIs("0.001");
     }
 
 }

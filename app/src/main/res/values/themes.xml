@@ -125,6 +125,10 @@
         <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
         <item name="android:textColorSecondaryInverse">@color/text_secondary_inverse</item>
+        <item name="materialButtonStyle">@style/Aw.Component.Button.Primary</item>
+        <item name="switchStyle">@style/Aw.Component.Switch</item>
+        <item name="checkboxStyle">@style/Aw.Component.CheckBox</item>
+        <item name="radioButtonStyle">@style/Aw.Component.RadioButton</item>
     </style>
 
 </resources>

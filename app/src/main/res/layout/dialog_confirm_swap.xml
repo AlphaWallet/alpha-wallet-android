@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/action_sheet_header">
+
+        <ImageView
+            android:id="@+id/image_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/small_12"
+            android:contentDescription="@string/action_close"
+            android:src="@drawable/ic_close"
+            app:tint="?colorControlNormal" />
+
+        <TextView
+            style="@style/Aw.Typography.SemiBold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="@dimen/dp8"
+            android:layout_marginBottom="@dimen/dp8"
+            android:layout_toStartOf="@id/logo"
+            android:layout_toEndOf="@id/image_close"
+            android:gravity="center_horizontal"
+            android:text="Confirm Transaction" />
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="@dimen/token_icon"
+            android:layout_height="@dimen/token_icon"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="@dimen/mini_4"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_launcher_foreground" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_info"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <View style="@style/Aw.Component.Separator" />
+
+    <com.google.android.material.button.MaterialButton
+        style="@style/Aw.Component.Button.Primary"
+        android:id="@+id/btn_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/standard_16"
+        android:text="@string/action_confirm" />
+</LinearLayout>

@@ -27,9 +27,10 @@
             android:id="@+id/value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_weight="0.6"
             android:ellipsize="end"
-            android:gravity="end|center_vertical"
+            android:gravity="end"
             android:singleLine="true"
             tools:text="0.00" />
 
@@ -37,9 +38,10 @@
             android:id="@+id/value_long"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_weight="0.6"
             android:ellipsize="end"
-            android:gravity="end|center_vertical"
+            android:gravity="end"
             android:maxLines="2"
             android:visibility="gone"
             tools:text="The smallest of the seven inhabited Aeolian Islands"

@@ -297,6 +297,11 @@
             android:name=".ui.QRScanning.QRScanner"
             android:label="@string/qr_scanner" />
 
+        <activity
+            android:name=".ui.SwapActivity"
+            android:label="Native Swap"
+            android:windowSoftInputMode="adjustResize" />
+
         <service
             android:name=".service.PriceAlertsService"
             android:enabled="true"

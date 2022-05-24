@@ -913,4 +913,11 @@
     <string name="increase">Tăng lên</string>
     <string name="message_transaction_timeout">The transaction has timed out. You can view the status in activity page.</string>
     <string name="error_transaction_timeout">Transaction Timeout</string>
+    <string name="label_slippage">Slippage</string>
+    <string name="action_open_settings">Open Settings</string>
+    <string name="message_no_connections_found">No connections found for this chain.</string>
+    <string name="label_fees">Fees</string>
+    <string name="label_current_price">Current Price</string>
+    <string name="label_minimum_received">Minimum Received</string>
+    <string name="label_balance">Balance: </string>
 </resources>

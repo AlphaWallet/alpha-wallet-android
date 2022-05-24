@@ -47,7 +47,7 @@ public class BalanceDisplayWidget extends LinearLayout
         else
         {
             tokenIcon.setVisibility(View.GONE);
-            balance.setText(getContext().getString(R.string.total_cost, token.getStringBalance(), token.getSymbol()));
+            balance.setText(getContext().getString(R.string.total_cost, token.getStringBalanceForUI(5), token.getSymbol()));
         }
         transaction = tx;
     }

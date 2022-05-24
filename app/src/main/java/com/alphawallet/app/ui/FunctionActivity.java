@@ -1,9 +1,16 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
+import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.TOKENSCRIPT_CONVERSION_ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.view.Menu;
@@ -11,19 +18,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
@@ -65,17 +74,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
-
-import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
-import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.TOKENSCRIPT_CONVERSION_ERROR;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
 /**
  * Created by James on 4/04/2019.
@@ -87,7 +89,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                                                               StandardFunctionInterface, TokenScriptRenderCallback, WebCompletionCallback,
                                                               OnSetValuesListener, ActionSheetCallback
 {
-
     private TokenFunctionViewModel viewModel;
 
     private Token token;
@@ -98,8 +99,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private final Map<String, String> args = new HashMap<>();
     private StringBuilder attrs;
     private AWalletAlertDialog alertDialog;
-    private FunctionButtonBar functionBar;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private int parsePass = 0;
     private int resolveInputCheckCount;
     private TSAction action;
@@ -135,6 +135,9 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
         parsePass = 0;
+
+        ProgressBar loadSpinner = findViewById(R.id.ticket_load_spinner);
+        handler.postDelayed(() -> loadSpinner.setVisibility(View.GONE), 2500);
     }
 
     private void displayFunction(String tokenAttrs)
@@ -277,11 +280,14 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 .get(TokenFunctionViewModel.class);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
+        viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionError().observe(this, this::txError);
     }
 
     private void setupFunctions()
     {
-        functionBar = findViewById(R.id.layoutButtons);
+        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
         functionBar.setupFunctionList(this, actionMethod);
     }
 
@@ -403,11 +409,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             estimateError(w3tx);
         }
-        else
+        else if (confirmationDialog == null || !confirmationDialog.isShowing())
         {
-            if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
             confirmationDialog = new ActionSheetDialog(this, w3tx, token, "", //TODO: Reverse resolve address
                     w3tx.recipient.toString(), viewModel.getTokenService(), this);
+            confirmationDialog.setURL("TokenScript");
             confirmationDialog.setCanceledOnTouchOutside(false);
             confirmationDialog.show();
         }
@@ -489,6 +495,22 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         alertDialog.show();
     }
 
+    //Transaction failed to be sent
+    private void txError(Throwable throwable)
+    {
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
+        alertDialog = new AWalletAlertDialog(this);
+        alertDialog.setIcon(ERROR);
+        alertDialog.setTitle(R.string.error_transaction_failed);
+        alertDialog.setMessage(throwable.getMessage());
+        alertDialog.setButtonText(R.string.button_ok);
+        alertDialog.setButtonListener(v -> {
+            alertDialog.dismiss();
+        });
+        alertDialog.show();
+        confirmationDialog.dismiss();
+    }
+
     private void tokenScriptError(String elementName, String title)
     {
         hideDialog();
@@ -540,7 +562,16 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         handler.postDelayed(closer, 1000);
     }
 
-    private final Runnable closer = () -> finish();
+    /**
+     * Final return path
+     * @param transactionData write success hash back to ActionSheet
+     */
+    private void txWritten(TransactionData transactionData)
+    {
+        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+    }
+
+    private final Runnable closer = this::finish;
 
     private final Runnable progress = () -> onProgress(true);
 
@@ -549,7 +580,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void functionFailed()
     {
-        Timber.d("ATTR/FA: FAIL: " + actionMethod);
+        Timber.d("ATTR/FA: FAIL: %s", actionMethod);
     }
 
     @Override
@@ -586,7 +617,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         viewModel.resetSignDialog();
     }
 
-    public void onSaveInstanceState(Bundle savedInstanceState)
+    public void onSaveInstanceState(@NonNull Bundle savedInstanceState)
     {
         super.onSaveInstanceState(savedInstanceState);
         tokenView.saveState(savedInstanceState);
@@ -610,22 +641,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         confirmationDialog.setCanceledOnTouchOutside(false);
         confirmationDialog.show();
         confirmationDialog.fullExpand();
-
-        /*
-                dialog = new SignMessageDialog(this, message);
-        dialog.setAddress(token.getAddress());
-        dialog.setMessage(message.getMessage());
-        dialog.setOnApproveListener(v -> {
-            dialog.dismiss();
-            messageToSign = message;
-            viewModel.getAuthorisation(this, this);
-        });
-        dialog.setOnRejectListener(v -> {
-            tokenView.onSignCancel(message);
-            dialog.dismiss();
-        });
-        dialog.show();
-         */
     }
 
     public void testRecoverAddressFromSignature(String message, String sig)
@@ -647,7 +662,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
             addressRecovered = "0x" + Keys.getAddress(recoveredKey);
-            Timber.d("Recovered: " + addressRecovered);
+            Timber.d("Recovered: %s", addressRecovered);
         }
         catch (SignatureException e)
         {

@@ -42,6 +42,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final long IOTEX_TESTNET_ID = 4690;
     public static final long AURORA_MAINNET_ID = 1313161554;
     public static final long AURORA_TESTNET_ID = 1313161555;
+    public static final long MILKOMEDA_C1_ID = 2001;
+    public static final long MILKOMEDA_C1_TEST_ID = 200101;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -67,7 +69,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String MUMBAI_TEST_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_URL = "https://kovan.optimism.io";
-    public static final String CRONOS_TEST_URL = "http://cronos-testnet.crypto.org:8545";
+    public static final String CRONOS_TEST_URL = "https://evm-t3.cronos.org";
     public static final String ARBITRUM_RPC_URL = "https://arbitrum-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String ARBITRUM_TEST_RPC_URL = "https://arbitrum-rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -76,7 +78,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String KLAYTN_BAOBAB_RPC = "https://api.baobab.klaytn.net:8651";
     public static final String AURORA_MAINNET_RPC_URL = "https://mainnet.aurora.dev";
     public static final String AURORA_TESTNET_RPC_URL = "https://testnet.aurora.dev";
-
+    public static final String MILKOMEDA_C1_RPC = "https://rpc-mainnet-cardano-evm.c1.milkomeda.com";
+    public static final String MILKOMEDA_C1_TEST_RPC = "https://rpc-devnet-cardano-evm.c1.milkomeda.com";
 
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>() {
         {
@@ -130,7 +133,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     OPTIMISTIC_MAIN_ID, false));
             put(OPTIMISTIC_TEST_ID, new NetworkInfo("Optimistic (Test)", "ETH", OPTIMISTIC_TEST_URL, "https://kovan-optimistic.etherscan.io/tx/",
                     OPTIMISTIC_TEST_ID, false));
-            put(CRONOS_TEST_ID, new NetworkInfo("Cronos (Test)", "tCRO", CRONOS_TEST_URL, "https://cronos-explorer.crypto.org/tx/",CRONOS_TEST_ID, false));
+            put(CRONOS_TEST_ID, new NetworkInfo("Cronos (Test)", "tCRO", CRONOS_TEST_URL, "https://testnet.cronoscan.com/tx/", CRONOS_TEST_ID, false));
             put(ARBITRUM_MAIN_ID, new NetworkInfo("Arbitrum One","AETH", ARBITRUM_RPC_URL, "https://arbiscan.io/tx/",
                     ARBITRUM_MAIN_ID, false));
             put(ARBITRUM_TEST_ID, new NetworkInfo("Arbitrum Test", "ARETH", ARBITRUM_TEST_RPC_URL, "https://rinkeby-explorer.arbitrum.io/tx/",
@@ -149,6 +152,11 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     AURORA_MAINNET_ID, false));
             put(AURORA_TESTNET_ID, new NetworkInfo("Aurora (Test)","ETH", AURORA_TESTNET_RPC_URL, "https://testnet.aurorascan.dev/tx/",
                     AURORA_TESTNET_ID, false));
+
+            put(MILKOMEDA_C1_ID, new NetworkInfo("Milkomeda Cardano","milkADA", MILKOMEDA_C1_RPC, "https://explorer-mainnet-cardano-evm.c1.milkomeda.com/tx/",
+                    MILKOMEDA_C1_ID, false));
+            put(MILKOMEDA_C1_TEST_ID, new NetworkInfo("Milkomeda Cardano (Test)","milktADA", MILKOMEDA_C1_TEST_RPC, "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/",
+                    MILKOMEDA_C1_TEST_ID, false));
         }
     };
 

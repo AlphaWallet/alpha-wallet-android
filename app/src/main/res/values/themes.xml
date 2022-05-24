@@ -120,6 +120,7 @@
         <item name="colorSurface">@color/background_floating</item>
         <item name="colorSecondary">@color/brand</item>
         <item name="colorControlNormal">@color/surface_inverse</item>
+        <item name="colorError">@color/error</item>
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>

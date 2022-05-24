@@ -14,6 +14,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.util.Utils;
 
 import java.math.BigInteger;
 
@@ -69,8 +70,9 @@ public class AssetDetailView extends LinearLayout
         }
     }
 
-    private void setupAssetDetail(NFTAsset asset, ActionSheetInterface actionSheetInterface)
+    private void setupAssetDetail(NFTAsset asset, ActionSheetInterface actionSheetInterface) throws IllegalArgumentException
     {
+        if (!Utils.stillAvailable(getContext())) return;
         loadingSpinner.setVisibility(View.GONE);
 
         layoutHolder.setVisibility(View.VISIBLE);

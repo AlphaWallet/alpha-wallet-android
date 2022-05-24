@@ -34,6 +34,10 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_RPC;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_TEST_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_ID;
@@ -169,13 +173,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String BINANCE_TEST_FALLBACK_RPC_URL = "https://data-seed-prebsc-2-s1.binance.org:8545";
     public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed.binance.org";
     public static final String BINANCE_MAIN_FALLBACK_RPC_URL = "https://bsc-dataseed2.ninicoin.io:443";
-    public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
+    public static final String HECO_RPC_URL = "https://http-mainnet.hecochain.com";
     public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
     public static final String MATIC_FALLBACK_RPC_URL = "https://matic-mainnet.chainstacklabs.com";
     public static final String MUMBAI_FALLBACK_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_FALLBACK_URL = "https://kovan.optimism.io";
-    public static final String CRONOS_TEST_URL = "https://cronos-testnet.crypto.org:8545";
+    public static final String CRONOS_TEST_URL = "https://evm-t3.cronos.org";
     public static final String ARBITRUM_FALLBACK_TESTNET_RPC = "https://rinkeby.arbitrum.io/rpc";
 
     public static final String IOTEX_MAINNET_RPC_URL = "https://babel-api.mainnet.iotex.io";
@@ -190,7 +194,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //Then xDai would appear as the first token at the top of the wallet
     private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
             MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
-            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID));
+            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID));
 
     // for reset built-in network
     private static final LongSparseArray<NetworkInfo> builtinNetworkMap = new LongSparseArray<NetworkInfo>() {
@@ -288,8 +292,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://api-kovan-optimistic.etherscan.io/api?"));
             put(CRONOS_TEST_ID, new NetworkInfo(C.CRONOS_TEST_NETWORK, C.CRONOS_SYMBOL,
                     CRONOS_TEST_URL,
-                    "https://cronos-explorer.crypto.org/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
-                    "https://cronos-explorer.crypto.org/api?"));
+                    "https://testnet.cronoscan.com/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
+                    "https://testnet.cronoscan.com/api?"));
             put(ARBITRUM_MAIN_ID, new NetworkInfo(C.ARBITRUM_ONE_NETWORK, C.ARBITRUM_SYMBOL,
                     ARBITRUM_MAINNET_RPC,
                     "https://arbiscan.io/tx/", ARBITRUM_MAIN_ID, ARBITRUM_FALLBACK_MAINNET_RPC,
@@ -321,7 +325,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://api.covalenthq.com/v1/" + COVALENT));
             put(IOTEX_TESTNET_ID, new NetworkInfo(C.IOTEX_TESTNET_NAME, C.IOTEX_SYMBOL,
                     IOTEX_TESTNET_RPC_URL,
-                    "https://testnet.iotexscan.io/tx", IOTEX_TESTNET_ID, "",
+                    "https://testnet.iotexscan.io/tx/", IOTEX_TESTNET_ID, "",
                     "https://api.covalenthq.com/v1/" + COVALENT));
             put(AURORA_MAINNET_ID, new NetworkInfo(C.AURORA_MAINNET_NAME, C.ETH_SYMBOL, AURORA_MAINNET_RPC_URL,
                     "https://aurorascan.dev/tx/", AURORA_MAINNET_ID, "",
@@ -329,6 +333,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(AURORA_TESTNET_ID, new NetworkInfo(C.AURORA_TESTNET_NAME, C.ETH_SYMBOL, AURORA_TESTNET_RPC_URL,
                     "https://testnet.aurorascan.dev/tx/", AURORA_TESTNET_ID, "",
                     "https://api-testnet.aurorascan.dev/api?"));
+
+            put(MILKOMEDA_C1_ID, new NetworkInfo(C.MILKOMEDA_NAME, C.MILKOMEDA_SYMBOL,
+                    MILKOMEDA_C1_RPC,
+                    "https://explorer-mainnet-cardano-evm.c1.milkomeda.com/tx/", MILKOMEDA_C1_ID, "",
+                    "https://explorer-mainnet-cardano-evm.c1.milkomeda.com/api?"));
+            put(MILKOMEDA_C1_TEST_ID, new NetworkInfo(C.MILKOMEDA_TESTNET_NAME, C.MILKOMEDA_TEST_SYMBOL,
+                    MILKOMEDA_C1_TEST_RPC,
+                    "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/", MILKOMEDA_C1_TEST_ID, "",
+                    "https://explorer-devnet-cardano-evm.c1.milkomeda.com/api?"));
         }
     };
 
@@ -372,6 +385,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(IOTEX_TESTNET_ID, R.drawable.ic_iotex_test);
             put(AURORA_MAINNET_ID, R.drawable.ic_aurora);
             put(AURORA_TESTNET_ID, R.drawable.ic_aurora_test);
+            put(MILKOMEDA_C1_ID, R.drawable.ic_milkomeda);
+            put(MILKOMEDA_C1_TEST_ID, R.drawable.ic_milkomeda_test);
         }
     };
 
@@ -411,6 +426,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(IOTEX_TESTNET_ID, R.drawable.ic_iotex_test);
             put(AURORA_MAINNET_ID, R.drawable.ic_aurora);
             put(AURORA_TESTNET_ID, R.drawable.ic_aurora_test);
+            put(MILKOMEDA_C1_ID, R.drawable.ic_milkomeda);
+            put(MILKOMEDA_C1_TEST_ID, R.drawable.ic_milkomeda_test);
         }
     };
 
@@ -450,6 +467,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(IOTEX_TESTNET_ID, R.color.iotex_mainnet);
             put(AURORA_MAINNET_ID, R.color.aurora_mainnet);
             put(AURORA_TESTNET_ID, R.color.aurora_testnet);
+            put(MILKOMEDA_C1_ID, R.color.milkomeda);
+            put(MILKOMEDA_C1_TEST_ID, R.color.milkomeda_test);
         }
     };
 

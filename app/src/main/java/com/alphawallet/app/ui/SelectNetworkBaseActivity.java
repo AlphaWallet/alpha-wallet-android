@@ -41,7 +41,7 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.menu_add, menu);
+        getMenuInflater().inflate(R.menu.menu_select_network_activity, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -55,6 +55,10 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity
         else if (item.getItemId() == R.id.action_add)
         {
             startActivity(new Intent(this, AddCustomRPCNetworkActivity.class));
+        }
+        else if (item.getItemId() == R.id.action_node_status)
+        {
+            startActivity(new Intent(this, NodeStatusActivity.class));
         }
         return false;
     }

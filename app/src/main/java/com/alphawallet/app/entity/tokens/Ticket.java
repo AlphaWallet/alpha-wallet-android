@@ -56,7 +56,7 @@ public class Ticket extends Token
     }
 
     @Override
-    public String getStringBalance() {
+    public String getStringBalanceForUI(int scale) {
         return String.valueOf(getTokenCount());
     }
 

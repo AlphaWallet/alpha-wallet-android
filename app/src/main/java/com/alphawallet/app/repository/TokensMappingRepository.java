@@ -60,11 +60,9 @@ public class TokensMappingRepository {
 
                 for (TokensMapping thisMapping : tokensMapping)
                 {
-                    if (thisMapping.getContracts().size() < 2) continue;
                     ContractAddress baseAddress = thisMapping.getContracts().get(0);
-                    for (int i = 1; i < thisMapping.getContracts().size(); i++)
-                    {
-                        sourceMap.put(thisMapping.getContracts().get(i).getAddressKey(), baseAddress);
+                    for (ContractAddress contract : thisMapping.getContracts()) {
+                        sourceMap.put(contract.getAddressKey(), baseAddress);
                     }
                     baseMappings.put(baseAddress.getAddressKey(), thisMapping.getGroup());
                 }

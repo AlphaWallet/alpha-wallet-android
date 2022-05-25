@@ -318,7 +318,6 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                     }
                 });
 
-        // TODO Check default if selector is null
         if (sourceSelector.getToken() == null)
         {
             long id = token.tokenInfo.chainId;
@@ -415,7 +414,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void updateInfoSummary(Quote quote)
     {
-        fees.setValue("TODO"); // TODO
+        fees.setValue(quote.transactionRequest.gasPrice);
 
         BigDecimal s = new BigDecimal(quote.action.fromToken.priceUSD);
         BigDecimal d = new BigDecimal(quote.action.toToken.priceUSD);

@@ -56,7 +56,7 @@ public class ConfirmSwapDialog extends BottomSheetDialog
         {
             infoLayout.removeAllViews();
             infoLayout.addView(buildNetworkDisplayWidget((int) quote.action.fromChainId));
-            infoLayout.addView(buildFeeWidget(quote));
+//            infoLayout.addView(buildFeeWidget(quote)); // TODO: Determine fees
             infoLayout.addView(buildGasWidget(quote));
             infoLayout.addView(buildFromWidget(quote));
             infoLayout.addView(buildToWidget(quote));

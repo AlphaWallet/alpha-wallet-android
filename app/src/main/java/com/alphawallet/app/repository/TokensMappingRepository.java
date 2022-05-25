@@ -4,7 +4,6 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 
 import android.util.Pair;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.TokensMapping;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.token.entity.ContractAddress;
@@ -33,8 +32,8 @@ public class TokensMappingRepository {
         //find when we last updated
         if (source.getLastMappingsUpdate() < (System.currentTimeMillis() - DAY_IN_MILLIS))
         {
-            fetchTokenList()
-                    .map(source::storeTokensMapping)
+            fetchTokenList() //Fetch the token list from github and store into a pair of mappings, 1st mapping is the derivative tokens with a pointer to their base token. Second is the base token and grouping
+                    .map(source::storeTokensMapping) //Store these mappings into an optimal database. Note the mappings are not used again, we instead use the realm database
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe()
@@ -55,27 +54,26 @@ public class TokensMappingRepository {
             Map<String, TokenGroup> baseMappings = new HashMap<>();
 
             try (okhttp3.Response response = httpClient.newCall(request)
-                    .execute()) {
+                    .execute())
+            {
                 TokensMapping[] tokensMapping = new Gson().fromJson(response.body().string(), new TypeToken<TokensMapping[]>() {}.getType());
 
                 for (TokensMapping thisMapping : tokensMapping)
                 {
                     ContractAddress baseAddress = thisMapping.getContracts().get(0);
-                    for (ContractAddress contract : thisMapping.getContracts()) {
-                        sourceMap.put(contract.getAddressKey(), baseAddress);
+                    baseMappings.put(baseAddress.getAddressKey(), thisMapping.getGroup()); //insert base mapping (eg DAI on mainnet) along with token type
+                    for (int i = 1; i < thisMapping.getContracts().size(); i++)
+                    {
+                        sourceMap.put(thisMapping.getContracts().get(i).getAddressKey(), baseAddress); //insert mirrored token with pointer to base token (eg DAI on Arbitrum).
                     }
-                    baseMappings.put(baseAddress.getAddressKey(), thisMapping.getGroup());
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 Timber.e(e);
             }
 
             return new Pair<>(sourceMap, baseMappings);
         });
-    }
-
-    public ContractAddress getBaseToken(long chainId, String address)
-    {
-        return source.getBaseToken(chainId, address);
     }
 }

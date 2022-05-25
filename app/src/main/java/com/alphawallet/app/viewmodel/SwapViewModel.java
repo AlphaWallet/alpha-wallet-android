@@ -89,7 +89,7 @@ public class SwapViewModel extends BaseViewModel
     {
         return quote;
     }
-    
+
     public LiveData<Long> network()
     {
         return network;

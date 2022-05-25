@@ -92,6 +92,11 @@ public class SelectTokenDialog extends BottomSheetDialog
         });
     }
 
+    public void setSelectedToken(String address)
+    {
+        adapter.setSelectedToken(address);
+    }
+
     public interface SelectTokenDialogEventListener
     {
         void onChainSelected(Connection.LToken tokenItem);

@@ -172,6 +172,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
                 infoLayout.setVisibility(View.GONE);
 
+                sourceTokenDialog.setSelectedToken(token.address);
+
                 getQuote();
             }
 
@@ -206,6 +208,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 destSelector.setBalance(viewModel.getBalance(wallet.address, token));
 
                 infoLayout.setVisibility(View.GONE);
+
+                destTokenDialog.setSelectedToken(token.address);
 
                 getQuote();
             }

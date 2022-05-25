@@ -23,12 +23,11 @@ import java.util.List;
 
 public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.ViewHolder>
 {
-//    private final List<Chain> chains;
     private final List<Connection.LToken> tokens;
     private final List<Connection.LToken> displayData;
-    private boolean hasSelection;
     private Context context;
     private SelectTokenDialog.SelectTokenDialogEventListener callback;
+    private String selectedTokenAddress;
 
     public SelectTokenAdapter(Context context, List<Connection.LToken> tokens, SelectTokenDialog.SelectTokenDialogEventListener callback)
     {
@@ -58,7 +57,6 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
             holder.name.append(" (");
             holder.name.append(item.symbol);
             holder.name.append(")");
-//            holder.tokenIcon.bindData(item.getChainId());
 
             Glide.with(context)
                     .load(item.logoURI)
@@ -70,15 +68,18 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
             {
                 holder.balance.setText(balance);
                 holder.balance.append(" ");
-                holder.balance.append(item.symbol);
             }
             else
             {
                 holder.balance.setText("0 ");
-                holder.balance.append(item.symbol);
             }
 
-//            holder.balance.append(" " + item.metamask.nativeCurrency.symbol);
+            if (item.address.equalsIgnoreCase(selectedTokenAddress))
+            {
+                holder.radio.setChecked(true);
+            }
+
+            holder.balance.append(item.symbol);
 
             holder.itemLayout.setOnClickListener(v -> callback.onChainSelected(item));
         }
@@ -105,6 +106,12 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
     {
         displayData.clear();
         displayData.addAll(filteredList);
+        notifyDataSetChanged();
+    }
+
+    public void setSelectedToken(String address)
+    {
+        selectedTokenAddress = address;
         notifyDataSetChanged();
     }
 

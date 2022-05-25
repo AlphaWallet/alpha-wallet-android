@@ -45,6 +45,7 @@ public class SwapViewModel extends BaseViewModel
     private final MutableLiveData<List<Connection>> connections = new MutableLiveData<>();
     private final MutableLiveData<Quote> quote = new MutableLiveData<>();
     private final MutableLiveData<Long> network = new MutableLiveData<>();
+    private final MutableLiveData<String> progressInfo = new MutableLiveData<>();
     private Disposable chainsDisposable;
     private Disposable connectionsDisposable;
     private Disposable quoteDisposable;
@@ -95,6 +96,11 @@ public class SwapViewModel extends BaseViewModel
         return network;
     }
 
+    public LiveData<String> progressInfo()
+    {
+        return progressInfo;
+    }
+
     public Chain getChain()
     {
         return chain.getValue();
@@ -107,6 +113,7 @@ public class SwapViewModel extends BaseViewModel
 
     public void getChains()
     {
+        progressInfo.postValue("Fetching chains");
         progress.postValue(true);
 
         chainsDisposable = swapService.getChains()
@@ -117,6 +124,7 @@ public class SwapViewModel extends BaseViewModel
 
     public void getConnections(long from, long to)
     {
+        progressInfo.postValue("Fetching connections");
         progress.postValue(true);
 
         connectionsDisposable = swapService.getConnections(from, to)
@@ -129,6 +137,7 @@ public class SwapViewModel extends BaseViewModel
     {
         if (hasEnoughBalance(address, source, amount))
         {
+            progressInfo.postValue("Fetching quote");
             progress.postValue(true);
 
             quoteDisposable = swapService.getQuote(source, dest, address, amount, slippage)
@@ -156,9 +165,9 @@ public class SwapViewModel extends BaseViewModel
             JSONObject obj = new JSONObject(result);
             if (obj.has("chains"))
             {
-                JSONArray chainz = obj.getJSONArray("chains");
+                JSONArray json = obj.getJSONArray("chains");
 
-                List<Chain> chainList = new Gson().fromJson(chainz.toString(), new TypeToken<List<Chain>>()
+                List<Chain> chainList = new Gson().fromJson(json.toString(), new TypeToken<List<Chain>>()
                 {
                 }.getType());
 
@@ -182,13 +191,13 @@ public class SwapViewModel extends BaseViewModel
             JSONObject obj = new JSONObject(result);
             if (obj.has("connections"))
             {
-                JSONArray connz = obj.getJSONArray("connections");
+                JSONArray json = obj.getJSONArray("connections");
 
-                List<Connection> connectionz = new Gson().fromJson(connz.toString(), new TypeToken<List<Connection>>()
+                List<Connection> connectionList = new Gson().fromJson(json.toString(), new TypeToken<List<Connection>>()
                 {
                 }.getType());
 
-                connections.postValue(connectionz);
+                connections.postValue(connectionList);
             }
             else
             {

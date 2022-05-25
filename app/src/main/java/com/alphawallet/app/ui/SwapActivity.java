@@ -97,6 +97,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         viewModel.connections().observe(this, this::onConnections);
         viewModel.quote().observe(this, this::onQuote);
         viewModel.progress().observe(this, this::onProgress);
+        viewModel.progressInfo().observe(this, this::onProgressInfo);
     }
 
     private void getIntentData()
@@ -122,7 +123,6 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         progressDialog = new AWalletAlertDialog(this);
         progressDialog.setCancelable(false);
-        progressDialog.setTitle("Fetching quote");
         progressDialog.setProgressMode();
 
         chainName.setOnClickListener(v -> {
@@ -426,6 +426,11 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         minReceived.setValue(minReceivedVal.trim());
 
         infoLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void onProgressInfo(String message)
+    {
+        progressDialog.setTitle(message);
     }
 
     private void onProgress(Boolean shouldShowProgress)

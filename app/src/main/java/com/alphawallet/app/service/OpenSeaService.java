@@ -238,6 +238,11 @@ public class OpenSeaService
                 tInfo = checkToken.tokenInfo;
                 type = checkToken.getInterfaceSpec();
                 lastCheckTime = checkToken.lastTxTime;
+
+                if (TextUtils.isEmpty(checkToken.tokenInfo.name) && !TextUtils.isEmpty(assetJSON.getString("name")))
+                {
+                    tInfo = new TokenInfo(assetContract.getAddress(), assetJSON.getString("name"), assetContract.getSymbol(), 0, tInfo.isEnabled, networkId);
+                }
             }
             else //if we haven't seen the contract before, or it was previously logged as something other than a ERC721 variant then specify undetermined flag
             {

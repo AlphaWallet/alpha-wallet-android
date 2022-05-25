@@ -236,6 +236,10 @@ public abstract class C {
         int CANT_GET_STORE_PASSWORD = 2;
         int ALREADY_ADDED = 3;
         int EMPTY_COLLECTION = 4;
+
+        // Swap Error Codes
+        int INSUFFICIENT_BALANCE = 5;
+        int SWAP_API_ERROR = 6;
     }
 
     public interface Key {

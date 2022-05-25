@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.lifi.Connection;
+import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 
@@ -28,12 +29,14 @@ public class TokenSelector extends LinearLayout
     private final Context context;
     private final ImageView icon;
     private final TextView label;
+    private final TextView address;
     private final TextView symbolText;
     private final MaterialButton btnSelectToken;
     private final LinearLayout tokenLayout;
     private final EditText editText;
     private final TextView balance;
     private final TextView maxBtn;
+    private final TextView error;
     private Runnable runnable;
     private TokenSelectorEventListener callback;
     private Connection.LToken tokenItem;
@@ -45,12 +48,14 @@ public class TokenSelector extends LinearLayout
         inflate(context, R.layout.token_selector, this);
 
         label = findViewById(R.id.label);
+        address = findViewById(R.id.address);
         icon = findViewById(R.id.token_icon);
         symbolText = findViewById(R.id.text_token_symbol);
         btnSelectToken = findViewById(R.id.btn_select_token);
         tokenLayout = findViewById(R.id.layout_token);
         editText = findViewById(R.id.amount_entry);
         balance = findViewById(R.id.balance);
+        error = findViewById(R.id.error);
         maxBtn = findViewById(R.id.btn_max);
         maxBtn.setOnClickListener(v -> {
             callback.onMaxClicked();
@@ -108,7 +113,6 @@ public class TokenSelector extends LinearLayout
             }
 
             maxBtn.setVisibility(showMaxBtn ? View.VISIBLE : View.GONE);
-
         }
         finally
         {
@@ -128,7 +132,11 @@ public class TokenSelector extends LinearLayout
 
         editText.getText().clear();
 
+        address.setText(R.string.empty);
+
         balance.setVisibility(View.INVISIBLE);
+
+        error.setVisibility(View.GONE);
 
         setVisibility(View.INVISIBLE);
     }
@@ -155,6 +163,8 @@ public class TokenSelector extends LinearLayout
 
         symbolText.setText(tokenItem.symbol);
 
+        address.setText(Utils.formatAddress(tokenItem.address));
+
         setVisibility(View.VISIBLE);
     }
 
@@ -168,7 +178,7 @@ public class TokenSelector extends LinearLayout
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
             {
-
+                error.setVisibility(View.GONE);
             }
 
             @Override
@@ -220,6 +230,12 @@ public class TokenSelector extends LinearLayout
         balanceStr.append(tokenItem.symbol);
         balance.setText(balanceStr.toString());
         balance.setVisibility(View.VISIBLE);
+    }
+
+    public void setError(String message)
+    {
+        error.setVisibility(View.VISIBLE);
+        error.setText(message);
     }
 
     public void setMaxButtonEnabled(boolean enabled)

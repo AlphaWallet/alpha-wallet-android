@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -74,6 +73,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_swap);
 
         toolbar();
@@ -284,6 +284,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void getQuote()
     {
+        continueBtn.setEnabled(false);
+
         if (sourceSelector.getToken() != null
                 && destSelector.getToken() != null
                 && !TextUtils.isEmpty(sourceSelector.getAmount()))
@@ -378,6 +380,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         else
         {
             tokenLayout.setVisibility(View.GONE);
+            infoLayout.setVisibility(View.GONE);
             noConnectionsLayout.setVisibility(View.VISIBLE);
         }
 
@@ -436,11 +439,19 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void onError(ErrorEnvelope errorEnvelope)
     {
-        AWalletAlertDialog errorDialog = new AWalletAlertDialog(this);
-        errorDialog.setTitle(R.string.title_dialog_error);
-        errorDialog.setMessage(errorEnvelope.message);
-        errorDialog.setButton(R.string.action_cancel, v -> errorDialog.dismiss());
-        errorDialog.show();
+        switch (errorEnvelope.code)
+        {
+            case C.ErrorCode.INSUFFICIENT_BALANCE:
+                sourceSelector.setError(getString(R.string.error_insufficient_balance, sourceSelector.getToken().symbol));
+                break;
+            default:
+                AWalletAlertDialog errorDialog = new AWalletAlertDialog(this);
+                errorDialog.setTitle(R.string.title_dialog_error);
+                errorDialog.setMessage(errorEnvelope.message);
+                errorDialog.setButton(R.string.action_cancel, v -> errorDialog.dismiss());
+                errorDialog.show();
+                break;
+        }
     }
 
     @Override

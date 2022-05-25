@@ -3,6 +3,7 @@ package com.alphawallet.app.viewmodel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
@@ -22,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -87,21 +89,20 @@ public class SwapViewModel extends BaseViewModel
     {
         return quote;
     }
-
-
+    
     public LiveData<Long> network()
     {
         return network;
     }
 
-    public void setChain(Chain c)
-    {
-        chain.postValue(c);
-    }
-
     public Chain getChain()
     {
         return chain.getValue();
+    }
+
+    public void setChain(Chain c)
+    {
+        chain.postValue(c);
     }
 
     public void getChains()
@@ -126,12 +127,26 @@ public class SwapViewModel extends BaseViewModel
 
     public void getQuote(Connection.LToken source, Connection.LToken dest, String address, String amount, String slippage)
     {
-        progress.postValue(true);
+        if (hasEnoughBalance(address, source, amount))
+        {
+            progress.postValue(true);
 
-        quoteDisposable = swapService.getQuote(source, dest, address, amount, slippage)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onQuote, this::onError);
+            quoteDisposable = swapService.getQuote(source, dest, address, amount, slippage)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onQuote, this::onError);
+        }
+        else
+        {
+            error.postValue(new ErrorEnvelope(C.ErrorCode.INSUFFICIENT_BALANCE, ""));
+        }
+    }
+
+    public boolean hasEnoughBalance(String address, Connection.LToken source, String amount)
+    {
+        BigDecimal bal = new BigDecimal(getBalance(address, source));
+        BigDecimal reqAmount = new BigDecimal(amount);
+        return bal.compareTo(reqAmount) >= 0;
     }
 
     private void onChains(String result)
@@ -151,12 +166,12 @@ public class SwapViewModel extends BaseViewModel
             }
             else
             {
-                error.postValue(new ErrorEnvelope(result));
+                error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, result));
             }
         }
         catch (JSONException e)
         {
-            error.postValue(new ErrorEnvelope(e.getMessage()));
+            error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, e.getMessage()));
         }
     }
 
@@ -177,12 +192,12 @@ public class SwapViewModel extends BaseViewModel
             }
             else
             {
-                error.postValue(new ErrorEnvelope(result));
+                error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, result));
             }
         }
         catch (JSONException e)
         {
-            error.postValue(new ErrorEnvelope(e.getMessage()));
+            error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, e.getMessage()));
         }
 
         progress.postValue(false);
@@ -192,7 +207,7 @@ public class SwapViewModel extends BaseViewModel
     {
         if (!isValidQuote(result))
         {
-            error.postValue(new ErrorEnvelope(result));
+            error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, result));
         }
         else
         {
@@ -218,7 +233,8 @@ public class SwapViewModel extends BaseViewModel
             address = walletAddress;
         }
         Token t = tokensService.getToken(token.chainId, address);
-        if (t != null) return BalanceUtils.getShortFormat(t.balance.toString(), t.tokenInfo.decimals);
+        if (t != null)
+            return BalanceUtils.getShortFormat(t.balance.toString(), t.tokenInfo.decimals);
         else return "";
     }
 
@@ -243,5 +259,12 @@ public class SwapViewModel extends BaseViewModel
         );
     }
 
-
+    @Override
+    protected void onCleared()
+    {
+        chainsDisposable.dispose();
+        connectionsDisposable.dispose();
+        quoteDisposable.dispose();
+        super.onCleared();
+    }
 }

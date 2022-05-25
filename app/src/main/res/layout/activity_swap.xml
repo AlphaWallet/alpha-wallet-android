@@ -55,13 +55,11 @@
             custom:tsLabelRes="@string/label_from"
             custom:tsShowLabel="true" />
 
-        <View
-            style="@style/Aw.Component.Separator"
-            android:layout_centerInParent="true" />
-
         <ImageView
+            android:layout_below="@id/from_input"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="-12dp"
             android:layout_centerInParent="true"
             android:src="@drawable/ic_swap_to" />
 
@@ -120,8 +118,6 @@
         android:layout_below="@id/layout_tokens"
         android:orientation="vertical"
         android:visibility="gone">
-
-        <View style="@style/Aw.Component.Separator" />
 
         <com.alphawallet.app.widget.TokenInfoView
             android:id="@+id/tiv_fees"

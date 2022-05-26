@@ -1,7 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
-import android.view.View;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -124,7 +123,11 @@ public class SwapViewModel extends BaseViewModel
     {
         return transactionFinalised;
     }
-    public LiveData<Throwable> transactionError() { return transactionError; }
+
+    public LiveData<Throwable> transactionError()
+    {
+        return transactionError;
+    }
 
     public Chain getChain()
     {
@@ -308,10 +311,22 @@ public class SwapViewModel extends BaseViewModel
     @Override
     protected void onCleared()
     {
-        chainsDisposable.dispose();
-        connectionsDisposable.dispose();
-        quoteDisposable.dispose();
-        transactionDisposable.dispose();
+        if (chainsDisposable != null && !chainsDisposable.isDisposed())
+        {
+            chainsDisposable.dispose();
+        }
+        if (connectionsDisposable != null && !connectionsDisposable.isDisposed())
+        {
+            connectionsDisposable.dispose();
+        }
+        if (quoteDisposable != null && !quoteDisposable.isDisposed())
+        {
+            quoteDisposable.dispose();
+        }
+        if (transactionDisposable != null && !transactionDisposable.isDisposed())
+        {
+            transactionDisposable.dispose();
+        }
         super.onCleared();
     }
 }

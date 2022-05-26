@@ -940,4 +940,7 @@
     <string name="label_balance">Balance: </string>
     <string name="action_node_status">Node Status</string>
     <string name="error_insufficient_balance">Insufficient %1$s balance</string>
+    <string name="title_select_token">Select Token</string>
+    <string name="no_results_found">No results found</string>
+    <string name="title_confirm_transaction">Confirm Transaction</string>
 </resources>

@@ -30,7 +30,7 @@
             android:layout_toStartOf="@id/logo"
             android:layout_toEndOf="@id/image_close"
             android:gravity="center_horizontal"
-            android:text="Confirm Transaction" />
+            android:text="@string/title_confirm_transaction" />
 
         <ImageView
             android:id="@+id/logo"

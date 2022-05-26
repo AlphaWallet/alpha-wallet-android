@@ -20,6 +20,7 @@ import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.ViewHolder>
 {
@@ -90,11 +91,11 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
         List<Connection.LToken> filteredList = new ArrayList<>();
         for (Connection.LToken data : tokens)
         {
-            if (data.name.toLowerCase().contains(searchFilter.toLowerCase()))
+            if (data.name.toLowerCase(Locale.ENGLISH).contains(searchFilter.toLowerCase(Locale.ENGLISH)))
             {
                 filteredList.add(data);
             }
-            else if (data.symbol.toLowerCase().contains(searchFilter.toLowerCase()))
+            else if (data.symbol.toLowerCase(Locale.ENGLISH).contains(searchFilter.toLowerCase(Locale.ENGLISH)))
             {
                 filteredList.add(data);
             }

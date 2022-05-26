@@ -30,7 +30,7 @@
             android:layout_toStartOf="@id/logo"
             android:layout_toEndOf="@id/image_close"
             android:gravity="center_horizontal"
-            android:text="Select Token" />
+            android:text="@string/title_select_token" />
 
         <ImageView
             android:id="@+id/logo"
@@ -87,13 +87,13 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="@dimen/base_24"
-            android:text="No results found." />
+            android:text="@string/no_results_found" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/token_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-    </FrameLayout>
 
+    </FrameLayout>
 
 </LinearLayout>

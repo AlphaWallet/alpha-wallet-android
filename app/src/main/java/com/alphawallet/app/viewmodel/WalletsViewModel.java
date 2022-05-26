@@ -113,7 +113,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
             TokenRepositoryType tokenRepository,
             TickerService tickerService,
             AssetDefinitionService assetService,
-            TokensService tokensService,
             @ApplicationContext Context context)
     {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
@@ -128,7 +127,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         this.tickerService = tickerService;
         this.assetService = assetService;
 
-        this.tokensService = tokensService;
+        this.tokensService = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null, null);
 
         ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
         syncCallback = null;

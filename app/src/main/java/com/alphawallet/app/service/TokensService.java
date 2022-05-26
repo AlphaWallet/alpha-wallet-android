@@ -318,6 +318,7 @@ public class TokensService
 
     private void checkRealmUpgradeRequired()
     {
+        if (realmManager == null) return;   // if TokensService from WalletsViewModel. No need to process here
         Timber.tag(TAG).d("checkRealmUpgradeRequired: doNormalize: %s", normaliseTokens);
         if (normaliseTokens)
         {

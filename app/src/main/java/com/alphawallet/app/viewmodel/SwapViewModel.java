@@ -282,7 +282,7 @@ public class SwapViewModel extends BaseViewModel
         sendTransaction(buildWeb3Transaction(quote), wallet, chainId);
     }
 
-    private void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId)
+    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId)
     {
         transactionDisposable = createTransactionInteract
                 .createWithSig(wallet, finalTx, chainId)

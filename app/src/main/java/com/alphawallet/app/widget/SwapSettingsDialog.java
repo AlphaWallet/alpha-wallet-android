@@ -62,6 +62,11 @@ public class SwapSettingsDialog extends BottomSheetDialog
         adapter.setSelectedChain(selectedChainId);
     }
 
+    public long getSelectedChainId()
+    {
+        return adapter.getSelectedChain();
+    }
+
     public String getSlippage()
     {
         return slippageWidget.getSlippage();

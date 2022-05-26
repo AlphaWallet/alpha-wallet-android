@@ -84,6 +84,11 @@ public class SelectChainAdapter extends RecyclerView.Adapter<SelectChainAdapter.
         notifyDataSetChanged();
     }
 
+    public long getSelectedChain()
+    {
+        return this.selectedChainId;
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder
     {
         MaterialRadioButton radio;

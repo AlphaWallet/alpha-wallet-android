@@ -1,15 +1,23 @@
 package com.alphawallet.app.viewmodel;
 
+import android.app.Activity;
+import android.view.View;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
 import com.alphawallet.app.entity.lifi.Quote;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.SwapService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.BalanceUtils;
@@ -40,25 +48,36 @@ public class SwapViewModel extends BaseViewModel
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final SwapService swapService;
+    private final CreateTransactionInteract createTransactionInteract;
+    private final KeyService keyService;
+
     private final MutableLiveData<List<Chain>> chains = new MutableLiveData<>();
     private final MutableLiveData<Chain> chain = new MutableLiveData<>();
     private final MutableLiveData<List<Connection>> connections = new MutableLiveData<>();
     private final MutableLiveData<Quote> quote = new MutableLiveData<>();
     private final MutableLiveData<Long> network = new MutableLiveData<>();
     private final MutableLiveData<String> progressInfo = new MutableLiveData<>();
+    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
+
     private Disposable chainsDisposable;
     private Disposable connectionsDisposable;
     private Disposable quoteDisposable;
+    private Disposable transactionDisposable;
 
     @Inject
     public SwapViewModel(
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
-            SwapService swapService)
+            SwapService swapService,
+            CreateTransactionInteract createTransactionInteract,
+            KeyService keyService)
     {
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.swapService = swapService;
+        this.createTransactionInteract = createTransactionInteract;
+        this.keyService = keyService;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -100,6 +119,12 @@ public class SwapViewModel extends BaseViewModel
     {
         return progressInfo;
     }
+
+    public LiveData<TransactionData> transactionFinalised()
+    {
+        return transactionFinalised;
+    }
+    public LiveData<Throwable> transactionError() { return transactionError; }
 
     public Chain getChain()
     {
@@ -247,10 +272,22 @@ public class SwapViewModel extends BaseViewModel
         else return "";
     }
 
-    public void sendTransaction(Quote quote)
+    public void getAuthentication(Activity activity, Wallet wallet, SignAuthenticationCallback callback)
     {
-        // TODO: send transaction
-        buildWeb3Transaction(quote);
+        keyService.getAuthenticationForSignature(wallet, activity, callback);
+    }
+
+    public void sendTransaction(Quote quote, Wallet wallet, long chainId)
+    {
+        sendTransaction(buildWeb3Transaction(quote), wallet, chainId);
+    }
+
+    private void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId)
+    {
+        transactionDisposable = createTransactionInteract
+                .createWithSig(wallet, finalTx, chainId)
+                .subscribe(transactionFinalised::postValue,
+                        transactionError::postValue);
     }
 
     private Web3Transaction buildWeb3Transaction(Quote quote)
@@ -274,6 +311,7 @@ public class SwapViewModel extends BaseViewModel
         chainsDisposable.dispose();
         connectionsDisposable.dispose();
         quoteDisposable.dispose();
+        transactionDisposable.dispose();
         super.onCleared();
     }
 }

@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -9,20 +10,25 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
 import com.alphawallet.app.entity.lifi.Quote;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.viewmodel.SwapViewModel;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ConfirmSwapDialog;
 import com.alphawallet.app.widget.SelectTokenDialog;
@@ -39,7 +45,7 @@ import java.util.List;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class SwapActivity extends BaseActivity implements StandardFunctionInterface
+public class SwapActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
 {
     SwapViewModel viewModel;
 
@@ -98,6 +104,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         viewModel.quote().observe(this, this::onQuote);
         viewModel.progress().observe(this, this::onProgress);
         viewModel.progressInfo().observe(this, this::onProgressInfo);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionError().observe(this, this::txError);
     }
 
     private void getIntentData()
@@ -226,7 +234,21 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     {
         confirmSwapDialog.dismiss();
         // TODO: Send Transaction?
-        viewModel.sendTransaction(quote);
+
+        viewModel.getAuthentication(this, wallet, new SignAuthenticationCallback()
+        {
+            @Override
+            public void gotAuthorisation(boolean gotAuth)
+            {
+                viewModel.sendTransaction(quote, wallet, settingsDialog.getSelectedChainId());
+            }
+
+            @Override
+            public void cancelAuthentication()
+            {
+
+            }
+        });
     }
 
     @Override
@@ -445,6 +467,22 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         }
     }
 
+    private void txWritten(TransactionData transactionData)
+    {
+        AWalletAlertDialog successDialog = new AWalletAlertDialog(this);
+        successDialog.setTitle(R.string.transaction_succeeded);
+        successDialog.setMessage(transactionData.txHash);
+        successDialog.show();
+    }
+
+    private void txError(Throwable throwable)
+    {
+        AWalletAlertDialog errorDialog = new AWalletAlertDialog(this);
+        errorDialog.setTitle(R.string.error_transaction_failed);
+        errorDialog.setMessage(throwable.getMessage());
+        errorDialog.show();
+    }
+
     private void onError(ErrorEnvelope errorEnvelope)
     {
         switch (errorEnvelope.code)
@@ -480,5 +518,35 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void getAuthorisation(SignAuthenticationCallback callback)
+    {
+        viewModel.getAuthentication(this, wallet, callback);
+    }
+
+    @Override
+    public void sendTransaction(Web3Transaction tx)
+    {
+        viewModel.sendTransaction(tx, wallet, settingsDialog.getSelectedChainId());
+    }
+
+    @Override
+    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
+    {
+
+    }
+
+    @Override
+    public void notifyConfirm(String mode)
+    {
+
+    }
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return null;
     }
 }

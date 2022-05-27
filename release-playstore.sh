@@ -13,5 +13,9 @@ then
   echo "The release created has notes in language en-US with length $chars, which is too long (max: 500)."
 else
   fastlane android beta
+  echo "New release candidate $tag published on internal testing track, visit link on your Android device to install:"
+  echo "https://play.google.com/apps/test/io.stormbird.wallet/$version_code"
+  echo "\nUpdates:"
+  cat $change_log_file
 fi
 

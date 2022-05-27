@@ -65,6 +65,27 @@ public class CreateTransactionInteract
         }
     }
 
+    /**
+     * Used for LiFi Swap.
+     * This uses the `contract` from Web3Transaction instead of `recipient`.
+     * TODO: Consolidate with createWithSig()
+     */
+    public Single<TransactionData> createWithSig2(Wallet from, Web3Transaction web3Tx, long chainId)
+    {
+        return transactionRepository.createTransactionWithSig(
+                from,
+                web3Tx.contract.toString(),
+                web3Tx.value,
+                web3Tx.gasPrice,
+                web3Tx.gasLimit,
+                web3Tx.nonce,
+                !TextUtils.isEmpty(web3Tx.payload) ? Numeric.hexStringToByteArray(web3Tx.payload) : new byte[0],
+                chainId
+        )
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public Single<TransactionData> create1559WithSig(Wallet from, Web3Transaction web3Tx, long chainId)
     {
         return transactionRepository.create1559TransactionWithSig(from, web3Tx.recipient.toString(), web3Tx.value, web3Tx.gasLimit,

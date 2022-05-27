@@ -16,6 +16,7 @@ gh release view $tag --json body -q .body > $temp_file
 
 sed -i '' -n '2,/^$/p' $temp_file
 sed -i '' 's/\ by\ @.*$//' $temp_file
+sed -i '' 's/*\ /-\ /' $temp_file
 gh release edit $tag -F $temp_file
 
 rm $dst_apk

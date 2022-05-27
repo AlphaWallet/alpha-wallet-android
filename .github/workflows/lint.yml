@@ -2,12 +2,6 @@ name: Android lint
 
 on: [push, pull_request]
 
-env:
-    RELEASE_STORE_FILE: ~/dev.keystore
-    RELEASE_STORE_PASSWORD: 123456
-    RELEASE_KEY_ALIAS: key
-    RELEASE_KEY_PASSWORD: 123456
-
 jobs:
   lint:
     name: Run Lint

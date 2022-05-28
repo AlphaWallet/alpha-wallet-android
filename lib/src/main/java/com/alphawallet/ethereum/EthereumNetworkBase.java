@@ -44,6 +44,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final long AURORA_TESTNET_ID = 1313161555;
     public static final long MILKOMEDA_C1_ID = 2001;
     public static final long MILKOMEDA_C1_TEST_ID = 200101;
+    public static final long PHI_MAIN_ID = 4181;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -80,6 +81,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String AURORA_TESTNET_RPC_URL = "https://testnet.aurora.dev";
     public static final String MILKOMEDA_C1_RPC = "https://rpc-mainnet-cardano-evm.c1.milkomeda.com";
     public static final String MILKOMEDA_C1_TEST_RPC = "https://rpc-devnet-cardano-evm.c1.milkomeda.com";
+    public static final String PHI_MAIN_RPC_URL = "https://rpc1.phi.network";
 
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>() {
         {
@@ -157,6 +159,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     MILKOMEDA_C1_ID, false));
             put(MILKOMEDA_C1_TEST_ID, new NetworkInfo("Milkomeda Cardano (Test)","milktADA", MILKOMEDA_C1_TEST_RPC, "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/",
                     MILKOMEDA_C1_TEST_ID, false));
+            put(PHI_MAIN_ID, new NetworkInfo("PHI (Φ)", "Φ", PHI_MAIN_RPC_URL, "https://explorer.phi.network",
+                    PHI_TEST_ID, false));
         }
     };
 

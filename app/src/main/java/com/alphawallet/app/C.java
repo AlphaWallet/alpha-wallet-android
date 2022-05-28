@@ -43,6 +43,7 @@ public abstract class C {
     public static final String MATIC_TEST_NETWORK = "Mumbai (Test)";
     public static final String OPTIMISTIC_NETWORK = "Optimistic";
     public static final String OPTIMISTIC_TEST_NETWORK = "Optimistic (Test)";
+    public static final String CRONOS_MAIN_NETWORK = "Cronos";
     public static final String CRONOS_TEST_NETWORK = "Cronos (Test)";
     public static final String ARBITRUM_TEST_NETWORK = "Arbitrum (Test)";
     public static final String ARBITRUM_ONE_NETWORK = "Arbitrum One";
@@ -80,7 +81,8 @@ public abstract class C {
     public static final String FANTOM_SYMBOL = "FTM";
     public static final String AVALANCHE_SYMBOL = "AVAX";
     public static final String MATIC_SYMBOL = "MATIC";
-    public static final String CRONOS_SYMBOL = "tCRO";
+    public static final String CRONOS_SYMBOL = "CRO";
+    public static final String CRONOS_TEST_SYMBOL = "tCRO";
     public static final String ARBITRUM_SYMBOL = "AETH";
     public static final String ARBITRUM_TEST_SYMBOL = "ARETH";
     public static final String PALM_SYMBOL = "PALM";

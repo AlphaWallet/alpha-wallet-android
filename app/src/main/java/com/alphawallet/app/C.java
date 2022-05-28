@@ -57,6 +57,7 @@ public abstract class C {
     public static final String AURORA_TESTNET_NAME = "Aurora (Test)";
     public static final String MILKOMEDA_NAME = "Milkomeda Cardano";
     public static final String MILKOMEDA_TESTNET_NAME = "Milkomeda Cardano (Test)";
+    public static final String PHI_NETWORK_NAME = "PHI";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -89,6 +90,7 @@ public abstract class C {
     public static final String IOTEX_SYMBOL = "IOTX";
     public static final String MILKOMEDA_SYMBOL = "milkADA";
     public static final String MILKOMEDA_TEST_SYMBOL = "milktADA";
+    public static final String PHI_NETWORK_SYMBOL = "\u03d5";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 

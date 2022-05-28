@@ -35,6 +35,7 @@
     <color name="fantom_test">#92A6B8</color>
     <color name="optimistic_main">#FF0420</color>
     <color name="optimistic_test">#B2C6D8</color>
+    <color name="cronos_main">#002D74</color>
     <color name="cronos_test">#002D74</color>
     <color name="arbitrum_main">#28A0F0</color>
     <color name="arbitrum_test">#40678c</color>

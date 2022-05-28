@@ -340,17 +340,26 @@ public class ERC721Token extends Token
         try
         {
             final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
-            Pair<Integer, HashSet<BigInteger>> evRead = eventSync.processTransferEvents(web3j,
+            Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> evRead = eventSync.processTransferEvents(web3j,
                     getTransferEvents(), startBlock, endBlock, realm);
 
             eventSync.updateEventReads(realm, sync, currentBlock, evRead.first); //means our event read was fine
 
-            HashSet<BigInteger> tokenIdsHeld = checkBalances(web3j, evRead.second);
+            HashSet<BigInteger> allMovingTokens = new HashSet<>(evRead.second.first);
+            allMovingTokens.addAll(evRead.second.second);
 
-            //should we check existing assets too?
-            //add to realm
-            updateRealmBalance(realm, tokenIdsHeld);
-            return new BigDecimal(tokenIdsHeld.size());
+            if (tokenInfo.address.equalsIgnoreCase("0xd915c8AD3241F459a45AdcBBF8af42caA561A154"))
+            {
+                System.out.println("YOLESS");
+            }
+
+            if (allMovingTokens.size() == 0 && balance.intValue() != tokenBalanceAssets.size()) //if there's a mismatch, check all current assets
+            {
+                allMovingTokens.addAll(tokenBalanceAssets.keySet());
+            }
+
+            HashSet<BigInteger> tokenIdsHeld = checkBalances(web3j, allMovingTokens);
+            updateRealmBalance(realm, tokenIdsHeld, allMovingTokens);
         }
         catch (LogOverflowException e)
         {
@@ -369,10 +378,11 @@ public class ERC721Token extends Token
         return balance;
     }
 
-    private void updateRealmBalance(Realm realm, Set<BigInteger> tokenIds)
+    private void updateRealmBalance(Realm realm, Set<BigInteger> tokenIds, Set<BigInteger> allMovingTokens)
     {
         boolean updated = false;
         //fill in balances
+        HashSet<BigInteger> removedTokens = new HashSet<>(allMovingTokens);
         if (tokenIds != null && tokenIds.size() > 0)
         {
             for (BigInteger tokenId : tokenIds)
@@ -383,6 +393,7 @@ public class ERC721Token extends Token
                     tokenBalanceAssets.put(tokenId, new NFTAsset(tokenId));
                     updated = true;
                 }
+                removedTokens.remove(tokenId);
             }
 
             if (updated)
@@ -390,6 +401,27 @@ public class ERC721Token extends Token
                 updateRealmBalances(realm, tokenIds);
             }
         }
+
+        removeRealmBalance(realm, removedTokens);
+    }
+
+    private void removeRealmBalance(Realm realm, HashSet<BigInteger> removedTokens)
+    {
+        if (removedTokens.size() == 0) return;
+        realm.executeTransaction(r -> {
+            for (BigInteger tokenId : removedTokens)
+            {
+                String key = RealmNFTAsset.databaseKey(this, tokenId);
+                RealmNFTAsset realmAsset = realm.where(RealmNFTAsset.class)
+                        .equalTo("tokenIdAddr", key)
+                        .findFirst();
+
+                if (realmAsset != null)
+                {
+                    realmAsset.deleteFromRealm();
+                }
+            }
+        });
     }
 
     private void updateRealmBalances(Realm realm, Set<BigInteger> tokenIds)

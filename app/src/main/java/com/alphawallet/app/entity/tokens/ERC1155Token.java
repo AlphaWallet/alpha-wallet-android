@@ -638,20 +638,20 @@ public class ERC1155Token extends Token
         {
             final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
 
-            Pair<Integer, HashSet<BigInteger>> evRead = eventSync.processTransferEvents(web3j,
+            Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> evRead = eventSync.processTransferEvents(web3j,
                     getBalanceUpdateEvents(), startBlock, endBlock, realm);
 
-            Pair<Integer, HashSet<BigInteger>> batchRead = eventSync.processTransferEvents(web3j,
+            Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> batchRead = eventSync.processTransferEvents(web3j,
                     getBatchBalanceUpdateEvents(), startBlock, endBlock, realm);
 
-            evRead.second.addAll(batchRead.second);
+            evRead.second.first.addAll(batchRead.second.first);
             //combine the tokenIds with existing assets
-            evRead.second.addAll(assets.keySet());
+            evRead.second.first.addAll(assets.keySet());
 
             //update balances of all
-            List<Uint256> balances = fetchBalances(evRead.second);
+            List<Uint256> balances = fetchBalances(evRead.second.first);
             //update realm
-            updateRealmBalance(realm, evRead.second, balances);
+            updateRealmBalance(realm, evRead.second.first, balances);
 
             //update read points
             eventSync.updateEventReads(realm, sync, currentBlock, evRead.first); //means our event read was fine

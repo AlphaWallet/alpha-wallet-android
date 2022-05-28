@@ -347,7 +347,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer-devnet-cardano-evm.c1.milkomeda.com/api?"));
             put(PHI_NETWORK_MAIN_ID, new NetworkInfo(C.PHI_NETWORK_NAME, C.PHI_NETWORK_SYMBOL,
                     PHI_NETWORK_RPC,
-                    "https://explorer.phi.network/tx/", PHI_NETWORK_MAIN_ID, "",
+                    "https://explorer.phi.network/tx/", PHI_NETWORK_MAIN_ID, "https://rpc2.phi.network",
                     ""));
         }
     };

@@ -711,6 +711,7 @@ public class TickerService
         put(IOTEX_MAINNET_ID, "iotex");
         put(AURORA_MAINNET_ID, "aurora");
         put(MILKOMEDA_C1_ID, "cardano");
+        put(CRONOS_MAIN_ID, "cronos");
     }};
 
     private static final Map<Long, String> dexGuruChainIdToAPISymbol = new HashMap<Long, String>(){{

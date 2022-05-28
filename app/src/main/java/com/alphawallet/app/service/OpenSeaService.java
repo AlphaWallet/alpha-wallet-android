@@ -239,9 +239,12 @@ public class OpenSeaService
                 type = checkToken.getInterfaceSpec();
                 lastCheckTime = checkToken.lastTxTime;
 
-                if (TextUtils.isEmpty(checkToken.tokenInfo.name) && !TextUtils.isEmpty(assetJSON.getString("name")))
+                String collectionName = assetJSON.getString("name");
+
+                //Update to collection name if the token name is blank, or if the collection name is not blank and current token name is different
+                if (!TextUtils.isEmpty(collectionName) && (TextUtils.isEmpty(checkToken.tokenInfo.name) || !collectionName.equals(checkToken.tokenInfo.name)))
                 {
-                    tInfo = new TokenInfo(assetContract.getAddress(), assetJSON.getString("name"), assetContract.getSymbol(), 0, tInfo.isEnabled, networkId);
+                    tInfo = new TokenInfo(assetContract.getAddress(), collectionName, assetContract.getSymbol(), 0, tInfo.isEnabled, networkId);
                 }
             }
             else //if we haven't seen the contract before, or it was previously logged as something other than a ERC721 variant then specify undetermined flag

@@ -607,8 +607,8 @@ public class TokensRealmSource implements TokenLocalSource {
                 writeAssetContract(realm, token);
             }
 
-            //check if name was updated
-            if (TextUtils.isEmpty(realmToken.getName()) && !TextUtils.isEmpty(token.tokenInfo.name))
+            //check if name needs to be updated
+            if (!TextUtils.isEmpty(token.tokenInfo.name) && (TextUtils.isEmpty(realmToken.getName()) || realmToken.getName().equals(token.tokenInfo.name)))
             {
                 realmToken.setName(token.tokenInfo.name);
             }

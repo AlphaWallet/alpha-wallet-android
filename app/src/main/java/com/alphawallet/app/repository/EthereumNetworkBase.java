@@ -43,6 +43,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_NETWORK_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
@@ -190,6 +191,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String IOTEX_TESTNET_RPC_URL = "https://babel-api.testnet.iotex.io";
     public static final String AURORA_MAINNET_RPC_URL = "https://mainnet.aurora.dev";
     public static final String AURORA_TESTNET_RPC_URL = "https://testnet.aurora.dev";
+    public static final String PHI_NETWORK_RPC = "https://rpc1.phi.network";
 
     //All chains that have fiat/real value (not testnet) must be put here
     //Note: This list also determines the order of display for main net chains in the wallet.
@@ -197,7 +199,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //Then xDai would appear as the first token at the top of the wallet
     private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
             MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
-            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID));
+            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID,
+            PHI_NETWORK_MAIN_ID));
 
     // for reset built-in network
     private static final LongSparseArray<NetworkInfo> builtinNetworkMap = new LongSparseArray<NetworkInfo>() {
@@ -349,6 +352,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     MILKOMEDA_C1_TEST_RPC,
                     "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/", MILKOMEDA_C1_TEST_ID, "",
                     "https://explorer-devnet-cardano-evm.c1.milkomeda.com/api?"));
+            put(PHI_NETWORK_MAIN_ID, new NetworkInfo(C.PHI_NETWORK_NAME, C.PHI_NETWORK_SYMBOL,
+                    PHI_NETWORK_RPC,
+                    "https://explorer.phi.network/tx/", PHI_NETWORK_MAIN_ID, "https://rpc2.phi.network",
+                    ""));
         }
     };
 
@@ -395,6 +402,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(AURORA_TESTNET_ID, R.drawable.ic_aurora_test);
             put(MILKOMEDA_C1_ID, R.drawable.ic_milkomeda);
             put(MILKOMEDA_C1_TEST_ID, R.drawable.ic_milkomeda_test);
+            put(PHI_NETWORK_MAIN_ID, R.drawable.ic_phi_network);
         }
     };
 
@@ -437,6 +445,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(AURORA_TESTNET_ID, R.drawable.ic_aurora_test);
             put(MILKOMEDA_C1_ID, R.drawable.ic_milkomeda);
             put(MILKOMEDA_C1_TEST_ID, R.drawable.ic_milkomeda_test);
+            put(PHI_NETWORK_MAIN_ID, R.drawable.ic_phi_network);
         }
     };
 
@@ -479,6 +488,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(AURORA_TESTNET_ID, R.color.aurora_testnet);
             put(MILKOMEDA_C1_ID, R.color.milkomeda);
             put(MILKOMEDA_C1_TEST_ID, R.color.milkomeda_test);
+            put(PHI_NETWORK_MAIN_ID, R.color.phi_network);
         }
     };
 

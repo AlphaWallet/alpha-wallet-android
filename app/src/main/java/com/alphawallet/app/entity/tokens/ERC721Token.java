@@ -348,11 +348,6 @@ public class ERC721Token extends Token
             HashSet<BigInteger> allMovingTokens = new HashSet<>(evRead.second.first);
             allMovingTokens.addAll(evRead.second.second);
 
-            if (tokenInfo.address.equalsIgnoreCase("0xd915c8AD3241F459a45AdcBBF8af42caA561A154"))
-            {
-                System.out.println("YOLESS");
-            }
-
             if (allMovingTokens.size() == 0 && balance.intValue() != tokenBalanceAssets.size()) //if there's a mismatch, check all current assets
             {
                 allMovingTokens.addAll(tokenBalanceAssets.keySet());

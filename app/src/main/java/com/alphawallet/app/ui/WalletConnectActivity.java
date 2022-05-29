@@ -98,7 +98,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> confirmationDialog.setCurrentGasIndex(result));
     private AddEthereumChainPrompt addEthereumChainPrompt;
-    private long switchChainDialogCallbackId = 1;
+    private final long switchChainDialogCallbackId = 1;
     // data for switch chain request
     private long switchChainRequestId;  // rpc request id
     private long switchChainId;         // new chain to switch to
@@ -122,6 +122,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private String qrCode;
     private SignAuthenticationCallback signCallback;
     private long lastId;
+    private String signData;
+    private WCEthereumSignMessage.WCSignType signType;
     private long chainIdOverride;
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -184,7 +186,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         super.onCreate(savedInstanceState);
 
-
         setContentView(R.layout.activity_wallet_connect);
 
         toolbar();
@@ -199,6 +200,58 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         retrieveQrCode();
         viewModel.prepare();
+
+        restoreState(savedInstanceState);
+    }
+
+    private void restoreState(Bundle savedInstance)
+    {
+        //Orientation change?
+
+        if (savedInstance.containsKey("ORIENTATION") && savedInstance.containsKey("SESSIONID"))
+        {
+            int oldOrientation = savedInstance.getInt("ORIENTATION");
+            int newOrientation = getResources().getConfiguration().orientation;
+
+            if (oldOrientation != newOrientation)
+            {
+                requestId = savedInstance.getLong("SESSIONID");
+                String sessionId = savedInstance.getString("SESSIONIDSTR");
+                session = viewModel.getSession(sessionId);
+
+                if (savedInstance.containsKey("TRANSACTION"))
+                {
+                    Web3Transaction w3Tx = savedInstance.getParcelable("TRANSACTION");
+                    chainIdOverride = savedInstance.getLong("CHAINID");
+
+                    //kick off transaction
+                    confirmationDialog = generateTransactionRequest(w3Tx, chainIdOverride);
+                    if (confirmationDialog != null) confirmationDialog.show();
+                }
+                else if (savedInstance.containsKey("SIGNDATA"))
+                {
+                    signData = savedInstance.getString("SIGNDATA");
+                    signType = WCEthereumSignMessage.WCSignType.values()[savedInstance.getInt("SIGNTYPE")];
+                    lastId = savedInstance.getLong("LASTID");
+                    String peerUrl = savedInstance.getString("PEERURL");
+                    Signable signable = null;
+
+                    //kick off sign
+                    switch (signType)
+                    {
+                        case MESSAGE:
+                        case PERSONAL_MESSAGE:
+                            signable = new EthereumMessage(signData, peerUrl, lastId, SignMessageType.SIGN_PERSONAL_MESSAGE);
+                            break;
+                        case TYPED_MESSAGE:
+                            signable = new EthereumTypedMessage(signData, peerUrl, lastId, new CryptoFunctions());
+                            break;
+                    }
+
+                    doSignMessage(signable);
+                }
+            }
+        }
     }
 
     @Override
@@ -618,16 +671,21 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         //need to preserve the orientation and current signing request
         state.putInt("ORIENTATION", getResources().getConfiguration().orientation);
         state.putLong("SESSIONID", requestId);
-        if (confirmationDialog != null) confirmationDialog.closingActionSheet();
-    }
+        state.putString("SESSIONIDSTR", getSessionId());
+        if (confirmationDialog != null && confirmationDialog.isShowing() && confirmationDialog.getTransaction() != null)
+        {
+             state.putParcelable("TRANSACTION", confirmationDialog.getTransaction());
+             state.putLong("CHAINID", chainIdOverride);
+        }
+        if (confirmationDialog != null && confirmationDialog.isShowing() && signData != null)
+        {
+            state.putString("SIGNDATA", signData);
+            state.putInt("SIGNTYPE", signType.ordinal());
+            state.putLong("LASTID", lastId);
+            state.putString("PEERURL", peerUrl.getText().toString());
+        }
 
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        //see if the session is active
-        setupClient(getSessionId());
-        startMessageCheck();
+        if (confirmationDialog != null) confirmationDialog.closingActionSheet();
     }
 
     private void setupClient(final String sessionId)
@@ -720,6 +778,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         Signable signable = null;
         lastId = id;
+        signData = message.getData();
+        signType = message.getType();
+
         switch (message.getType())
         {
             case MESSAGE:
@@ -779,6 +840,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 confirmationDialog.dismiss();
                 if (fromDappBrowser) switchToDappBrowser();
                 requestId = 0;
+                lastId = 0;
+                signData = null;
             }
 
             @Override
@@ -794,6 +857,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         switchToDappBrowser();
                     }
                     requestId = 0;
+                    lastId = 0;
+                    signData = null;
                 });
             }
         };
@@ -899,6 +964,15 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         super.onPause();
         unregisterReceiver(walletConnectActionReceiver);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        //see if the session is active
+        setupClient(getSessionId());
+        startMessageCheck();
     }
 
     @Override

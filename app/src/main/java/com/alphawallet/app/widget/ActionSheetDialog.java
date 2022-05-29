@@ -851,6 +851,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         walletConnectRequestWidget.updateChain(chainId);
     }
 
+    public Web3Transaction getTransaction() { return candidateTransaction; }
+
     private boolean has1559Gas()
     {
         try (Realm realm = tokensService.getTickerRealmInstance())

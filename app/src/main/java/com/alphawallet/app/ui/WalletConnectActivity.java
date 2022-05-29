@@ -201,7 +201,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         retrieveQrCode();
         viewModel.prepare();
 
-        restoreState(savedInstanceState);
+        if (savedInstanceState != null) restoreState(savedInstanceState);
     }
 
     private void restoreState(Bundle savedInstance)

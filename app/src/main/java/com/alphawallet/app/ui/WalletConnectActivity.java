@@ -97,7 +97,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private ActionSheetDialog confirmationDialog;
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> confirmationDialog.setCurrentGasIndex(result));
-    private ActionSheetDialog walletConnectDialog;
     private AddEthereumChainPrompt addEthereumChainPrompt;
     private long switchChainDialogCallbackId = 1;
     // data for switch chain request
@@ -129,7 +128,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 if (result.getData() == null) return;
                 chainIdOverride = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
                 Toast.makeText(this, getText(R.string.hint_network_name) + " " + EthereumNetworkBase.getShortChainName(chainIdOverride), Toast.LENGTH_LONG).show();
-                walletConnectDialog.updateChain(chainIdOverride);
+                confirmationDialog.updateChain(chainIdOverride);
             });
     private boolean waitForWalletConnectSession = false;
     private long requestId = 0;
@@ -687,11 +686,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         closeErrorDialog();
 
-        if (walletConnectDialog != null)
+        if (confirmationDialog != null)
         {
-            if (walletConnectDialog.isShowing())
+            if (confirmationDialog.isShowing())
             {      // if already opened
-                walletConnectDialog.forceDismiss();
+                confirmationDialog.forceDismiss();
             }
         }
 
@@ -712,9 +711,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         chainIcon.bindData(chainIdOverride);
         remotePeerMeta = peer;
 
-        walletConnectDialog = new ActionSheetDialog(this, peer, chainId, displayIcon, this);
-        walletConnectDialog.show();
-        walletConnectDialog.fullExpand();
+        confirmationDialog = new ActionSheetDialog(this, peer, chainId, displayIcon, this);
+        confirmationDialog.show();
+        confirmationDialog.fullExpand();
     }
 
     private void onEthSign(Long id, WCEthereumSignMessage message)
@@ -1157,6 +1156,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         if (fromDappBrowser) switchToDappBrowser();
         requestId = 0;
+        confirmationDialog = null;
     }
 
     @Override
@@ -1246,17 +1246,18 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             Token baseToken = viewModel.getTokenService().getTokenOrBase(switchChainId, viewModel.defaultWallet().getValue().address);
             NetworkInfo newNetwork = EthereumNetworkBase.getNetworkInfo(switchChainId);
             NetworkInfo activeNetwork = EthereumNetworkBase.getNetworkInfo(client.chainIdVal());
-            if (walletConnectDialog.isShowing())
+            if (confirmationDialog != null && confirmationDialog.isShowing())
                 return;
-            walletConnectDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, R.string.switch_and_reload,
+            confirmationDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, R.string.switch_and_reload,
                     switchChainDialogCallbackId, baseToken, activeNetwork, newNetwork);
-            walletConnectDialog.setOnDismissListener(dialog -> {
+            confirmationDialog.setOnDismissListener(dialog -> {
                 viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, false, chainAvailable);
-                walletConnectDialog.setOnDismissListener(null);         // remove from here as dialog is multi-purpose
+                confirmationDialog.setOnDismissListener(null);         // remove from here as dialog is multi-purpose
+                confirmationDialog = null;
             });
-            walletConnectDialog.setCanceledOnTouchOutside(false);
-            walletConnectDialog.show();
-            walletConnectDialog.fullExpand();
+            confirmationDialog.setCanceledOnTouchOutside(false);
+            confirmationDialog.show();
+            confirmationDialog.fullExpand();
         }
         catch (Exception e)
         {
@@ -1346,10 +1347,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void buttonClick(long callbackId, Token baseToken)
     {
-        if (callbackId == switchChainDialogCallbackId)
+        if (callbackId == switchChainDialogCallbackId && confirmationDialog != null)
         {
-            walletConnectDialog.setOnDismissListener(null);
-            walletConnectDialog.dismiss();
+            confirmationDialog.setOnDismissListener(null);
+            confirmationDialog.dismiss();
             viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, true, chainAvailable);
             viewModel.updateSession(currentSessionId, switchChainId);
             displaySessionStatus(session.getTopic());

@@ -239,11 +239,11 @@ public class OpenSeaService
                 type = checkToken.getInterfaceSpec();
                 lastCheckTime = checkToken.lastTxTime;
 
-                String collectionName = assetJSON.getString("name");
-
-                //Update to collection name if the token name is blank, or if the collection name is not blank and current token name is different
+                JSONObject collectionJSON = assetJSON.getJSONObject("collection");
+                String collectionName = collectionJSON.getString("name");
                 if (!TextUtils.isEmpty(collectionName) && (TextUtils.isEmpty(checkToken.tokenInfo.name) || !collectionName.equals(checkToken.tokenInfo.name)))
                 {
+                    //Update to collection name if the token name is blank, or if the collection name is not blank and current token name is different
                     tInfo = new TokenInfo(assetContract.getAddress(), collectionName, assetContract.getSymbol(), 0, tInfo.isEnabled, networkId);
                 }
             }

@@ -208,6 +208,7 @@ public class TransactionsService
     {
         //check if this route has combined NFT
         final NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (info == null) return;
         if (isNFT)
         {
             tokensService.checkingChain(chainId);

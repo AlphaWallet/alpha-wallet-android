@@ -43,6 +43,7 @@ public abstract class C {
     public static final String MATIC_TEST_NETWORK = "Mumbai (Test)";
     public static final String OPTIMISTIC_NETWORK = "Optimistic";
     public static final String OPTIMISTIC_TEST_NETWORK = "Optimistic (Test)";
+    public static final String CRONOS_MAIN_NETWORK = "Cronos";
     public static final String CRONOS_TEST_NETWORK = "Cronos (Test)";
     public static final String ARBITRUM_TEST_NETWORK = "Arbitrum (Test)";
     public static final String ARBITRUM_ONE_NETWORK = "Arbitrum One";
@@ -56,6 +57,7 @@ public abstract class C {
     public static final String AURORA_TESTNET_NAME = "Aurora (Test)";
     public static final String MILKOMEDA_NAME = "Milkomeda Cardano";
     public static final String MILKOMEDA_TESTNET_NAME = "Milkomeda Cardano (Test)";
+    public static final String PHI_NETWORK_NAME = "PHI";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -79,7 +81,8 @@ public abstract class C {
     public static final String FANTOM_SYMBOL = "FTM";
     public static final String AVALANCHE_SYMBOL = "AVAX";
     public static final String MATIC_SYMBOL = "MATIC";
-    public static final String CRONOS_SYMBOL = "tCRO";
+    public static final String CRONOS_SYMBOL = "CRO";
+    public static final String CRONOS_TEST_SYMBOL = "tCRO";
     public static final String ARBITRUM_SYMBOL = "AETH";
     public static final String ARBITRUM_TEST_SYMBOL = "ARETH";
     public static final String PALM_SYMBOL = "PALM";
@@ -87,6 +90,7 @@ public abstract class C {
     public static final String IOTEX_SYMBOL = "IOTX";
     public static final String MILKOMEDA_SYMBOL = "milkADA";
     public static final String MILKOMEDA_TEST_SYMBOL = "milktADA";
+    public static final String PHI_NETWORK_SYMBOL = "\u03d5";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 

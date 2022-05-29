@@ -27,6 +27,8 @@
   {"name": "Gravity", "description": "Create your gravatar.", "url": "https://gravity.cool/", "category": "Property"},
   {"name": "Mokens", "description": "Create your own collectibles", "url": "https://mokens.io/", "category": "Property"},
   {"name": "TENZ-ID", "description": "TENZ-ID is a Decentralized Blockchain naming system", "url": "https://tenzorum.org/tenz_id/", "category": "Property"},
+  {"name": "PHI Network", "description": "Decentralized Social Media, Earn, Entertain, Engage & Exchange", "url": "https://phi.network", "category": "Social Media"},
+  {"name": "Phiswap", "description": "Swap, earn, and build on PHI Networks leading decentralized crypto trading protocol.", "url": "https://app.phiswap.com", "category": "Exchange"},
   {"name": "MonitorChain", "description": "Real-time surveillance", "url": "https://secure.monitorchain.com/", "category": "Security"},
   {"name": "Cent", "description": "Earn cryptocurrency sharing your wisdom and creativity.", "url": "https://beta.cent.co/", "category": "Social Media"},
   {"name": "Indorse", "description": "Professional Network", "url": "https://indorse.io/", "category": "Social Media"},
@@ -78,6 +80,7 @@
   {"name": "DASLA", "description": "A DAS (Decentralized Account System) account registration tool.", "url": "https://das.la", "category": "Tool"},
   {"name": ".bit (Previously DAS)", "description": "Your decentralized identity for Web3.0 life", "url": "https://did.id/", "category": "Tool"},
   {"name": "NFTSCAN", "description": "NFT Explorer.", "url": "https://nftscan.com/", "category": "Tool"},
+  {"name": "AAG Staking", "description": "Stake your $1AAG or $1AAG-ONE LP Tokens on our staking website to earn huge rewards. Benefit from high APRs and Capital Boosts with our Genesis NFTs.", "url": "https://staking.aag.ventures/", "category": "Finance"},
   {"name": "MetaPath", "description": "Assets can be routed across different blockchains", "url": "https://dapp.path.finance?source=alpha", "category": "Exchange"},
   {"name": "SWFT", "description": "One Stop Cross-Chain swap, supporting 300+ tokens on 30+ chains", "url": "https://defi.swft.pro?sourceFlag=alpha", "category": "Exchange"},
   {"name": "Swapzone", "description": "Swapzone is a custody-free cryptocurrency exchange aggregator with no registration needed.", "url": "https://swapzone.io/", "category": "Exchange"}

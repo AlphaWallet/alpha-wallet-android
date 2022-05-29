@@ -387,13 +387,16 @@ public class ERC1155Token extends Token
                 BigDecimal newBalance = new BigDecimal(balances.get(index).getValue());
                 if (asset == null)
                 {
-                    assets.put(tokenId, new NFTAsset(tokenId));
+                    NFTAsset newAsset = new NFTAsset(tokenId);
+                    newAsset.setBalance(newBalance);
+                    assets.put(tokenId, newAsset);
                     updated = true;
                 }
-                if (assets.get(tokenId).setBalance(newBalance) && !updated) //set balance and check for change
+                else if (asset.setBalance(newBalance))
                 {
                     updated = true;
                 }
+
                 if (realm == null && newBalance.equals(BigDecimal.ZERO))
                 {
                     assets.remove(tokenId);
@@ -403,36 +406,40 @@ public class ERC1155Token extends Token
 
             if (updated)
             {
-                updateRealmBalances(realm, tokenIds);
+                updateRealmBalances(realm);
             }
         }
     }
 
-    private void updateRealmBalances(Realm realm, Set<BigInteger> tokenIds)
+    private void updateRealmBalances(Realm realm)
     {
         if (realm == null) return;
         realm.executeTransaction(r -> {
-            for (BigInteger tokenId : tokenIds)
+            for (Map.Entry<BigInteger, NFTAsset> entry : assets.entrySet())
             {
+                BigInteger tokenId = entry.getKey();
+                NFTAsset asset = entry.getValue();
                 String key = RealmNFTAsset.databaseKey(this, tokenId);
                 RealmNFTAsset realmAsset = realm.where(RealmNFTAsset.class)
                         .equalTo("tokenIdAddr", key)
                         .findFirst();
 
+                if (realmAsset == null && asset.getBalance().equals(BigDecimal.ZERO)) continue; // no recorded token, no balance, skip
+
                 if (realmAsset == null)
                 {
                     realmAsset = r.createObject(RealmNFTAsset.class, key); //create asset in realm
-                    realmAsset.setMetaData(assets.get(tokenId).jsonMetaData());
+                    realmAsset.setMetaData(asset.jsonMetaData());
                 }
 
-                if (assets.get(tokenId).getBalance().equals(BigDecimal.ZERO)) //remove asset no longer in balance
+                if (asset.getBalance().equals(BigDecimal.ZERO)) //remove asset no longer in balance
                 {
                     realmAsset.deleteFromRealm();
                     assets.remove(tokenId);
                 }
                 else
                 {
-                    realmAsset.setBalance(assets.get(tokenId).getBalance()); //update realm balance
+                    realmAsset.setBalance(entry.getValue().getBalance()); //update realm balance
                     r.insertOrUpdate(realmAsset);
                 }
             }
@@ -638,20 +645,24 @@ public class ERC1155Token extends Token
         {
             final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
 
-            Pair<Integer, HashSet<BigInteger>> evRead = eventSync.processTransferEvents(web3j,
+            Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> evRead = eventSync.processTransferEvents(web3j,
                     getBalanceUpdateEvents(), startBlock, endBlock, realm);
 
-            Pair<Integer, HashSet<BigInteger>> batchRead = eventSync.processTransferEvents(web3j,
+            Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> batchRead = eventSync.processTransferEvents(web3j,
                     getBatchBalanceUpdateEvents(), startBlock, endBlock, realm);
 
-            evRead.second.addAll(batchRead.second);
+            // All tokenIds which have passed through the owner address
+            evRead.second.first.addAll(evRead.second.second);
+            evRead.second.first.addAll(batchRead.second.first);
+            evRead.second.first.addAll(batchRead.second.second);
+
             //combine the tokenIds with existing assets
-            evRead.second.addAll(assets.keySet());
+            evRead.second.first.addAll(assets.keySet());
 
             //update balances of all
-            List<Uint256> balances = fetchBalances(evRead.second);
+            List<Uint256> balances = fetchBalances(evRead.second.first);
             //update realm
-            updateRealmBalance(realm, evRead.second, balances);
+            updateRealmBalance(realm, evRead.second.first, balances);
 
             //update read points
             eventSync.updateEventReads(realm, sync, currentBlock, evRead.first); //means our event read was fine

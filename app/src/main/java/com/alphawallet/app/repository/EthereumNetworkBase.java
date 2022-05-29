@@ -14,6 +14,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.CRONOS_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CRONOS_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_RPC_URL;
@@ -42,6 +43,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_NETWORK_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
@@ -122,6 +124,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String FREE_OPTIMISM_TESTRPC_URL = "https://kovan.optimism.io";
     public static final String FREE_PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/3a961d6501e54add9a41aa53f15de99b";
     public static final String FREE_PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/3a961d6501e54add9a41aa53f15de99b";
+    public static final String FREE_CRONOS_MAIN_BETA_RPC_URL = "https://evm.cronos.org";
 
     public static final String MAINNET_RPC_URL = usesProductionKey ? "https://mainnet.infura.io/v3/" + getInfuraKey()
             : FREE_MAINNET_RPC_URL;
@@ -147,6 +150,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             : FREE_PALM_RPC_URL;
     public static final String PALM_TEST_RPC_URL = usesProductionKey ? "https://palm-testnet.infura.io/v3/" + getInfuraKey()
             : FREE_PALM_TEST_RPC_URL;
+    public static final String CRONOS_MAIN_RPC_URL = "https://evm.cronos.org";
 
     // Use the "Free" routes as backup in order to diversify node usage; to avoid single point of failure
     public static final String MAINNET_FALLBACK_RPC_URL = usesProductionKey ? FREE_MAINNET_RPC_URL : "https://mainnet.infura.io/v3/" + getSecondaryInfuraKey();
@@ -187,6 +191,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String IOTEX_TESTNET_RPC_URL = "https://babel-api.testnet.iotex.io";
     public static final String AURORA_MAINNET_RPC_URL = "https://mainnet.aurora.dev";
     public static final String AURORA_TESTNET_RPC_URL = "https://testnet.aurora.dev";
+    public static final String PHI_NETWORK_RPC = "https://rpc1.phi.network";
 
     //All chains that have fiat/real value (not testnet) must be put here
     //Note: This list also determines the order of display for main net chains in the wallet.
@@ -194,7 +199,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //Then xDai would appear as the first token at the top of the wallet
     private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
             MAINNET_ID, CLASSIC_ID, XDAI_ID, POA_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
-            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID));
+            FANTOM_ID, MATIC_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID,
+            PHI_NETWORK_MAIN_ID));
 
     // for reset built-in network
     private static final LongSparseArray<NetworkInfo> builtinNetworkMap = new LongSparseArray<NetworkInfo>() {
@@ -290,7 +296,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     OPTIMISTIC_TEST_URL,
                     "https://kovan-optimistic.etherscan.io/tx/", OPTIMISTIC_TEST_ID, OPTIMISTIC_TEST_FALLBACK_URL,
                     "https://api-kovan-optimistic.etherscan.io/api?"));
-            put(CRONOS_TEST_ID, new NetworkInfo(C.CRONOS_TEST_NETWORK, C.CRONOS_SYMBOL,
+            put(CRONOS_MAIN_ID, new NetworkInfo(C.CRONOS_MAIN_NETWORK, C.CRONOS_SYMBOL,
+                    CRONOS_MAIN_RPC_URL,
+                    "https://cronoscan.com/tx/", CRONOS_MAIN_ID, CRONOS_MAIN_RPC_URL,
+                    "https://api.cronoscan.com/api?"));
+            put(CRONOS_TEST_ID, new NetworkInfo(C.CRONOS_TEST_NETWORK, C.CRONOS_TEST_SYMBOL,
                     CRONOS_TEST_URL,
                     "https://testnet.cronoscan.com/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
                     "https://testnet.cronoscan.com/api?"));
@@ -342,6 +352,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     MILKOMEDA_C1_TEST_RPC,
                     "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/", MILKOMEDA_C1_TEST_ID, "",
                     "https://explorer-devnet-cardano-evm.c1.milkomeda.com/api?"));
+            put(PHI_NETWORK_MAIN_ID, new NetworkInfo(C.PHI_NETWORK_NAME, C.PHI_NETWORK_SYMBOL,
+                    PHI_NETWORK_RPC,
+                    "https://explorer.phi.network/tx/", PHI_NETWORK_MAIN_ID, "https://rpc2.phi.network",
+                    ""));
         }
     };
 
@@ -374,6 +388,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(MATIC_TEST_ID, R.drawable.ic_icons_tokens_mumbai);
             put(OPTIMISTIC_MAIN_ID, R.drawable.ic_optimism_logo);
             put(OPTIMISTIC_TEST_ID, R.drawable.ic_optimism_testnet_logo);
+            put(CRONOS_MAIN_ID, R.drawable.ic_cronos_mainnet);
             put(CRONOS_TEST_ID, R.drawable.ic_cronos);
             put(ARBITRUM_MAIN_ID, R.drawable.ic_icons_arbitrum);
             put(ARBITRUM_TEST_ID, R.drawable.ic_icons_arbitrum_test);
@@ -387,6 +402,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(AURORA_TESTNET_ID, R.drawable.ic_aurora_test);
             put(MILKOMEDA_C1_ID, R.drawable.ic_milkomeda);
             put(MILKOMEDA_C1_TEST_ID, R.drawable.ic_milkomeda_test);
+            put(PHI_NETWORK_MAIN_ID, R.drawable.ic_phi_network);
         }
     };
 
@@ -415,6 +431,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(MATIC_TEST_ID, R.drawable.ic_icons_tokens_mumbai);
             put(OPTIMISTIC_MAIN_ID, R.drawable.ic_icons_network_optimism);
             put(OPTIMISTIC_TEST_ID, R.drawable.ic_optimism_testnet_logo);
+            put(CRONOS_MAIN_ID, R.drawable.ic_cronos_mainnet);
             put(CRONOS_TEST_ID, R.drawable.ic_cronos);
             put(ARBITRUM_MAIN_ID, R.drawable.ic_icons_network_arbitrum);
             put(ARBITRUM_TEST_ID, R.drawable.ic_icons_arbitrum_test);
@@ -428,6 +445,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(AURORA_TESTNET_ID, R.drawable.ic_aurora_test);
             put(MILKOMEDA_C1_ID, R.drawable.ic_milkomeda);
             put(MILKOMEDA_C1_TEST_ID, R.drawable.ic_milkomeda_test);
+            put(PHI_NETWORK_MAIN_ID, R.drawable.ic_phi_network);
         }
     };
 
@@ -456,6 +474,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(MATIC_TEST_ID, R.color.polygon_test);
             put(OPTIMISTIC_MAIN_ID, R.color.optimistic_main);
             put(OPTIMISTIC_TEST_ID, R.color.optimistic_test);
+            put(CRONOS_MAIN_ID, R.color.cronos_main);
             put(CRONOS_TEST_ID, R.color.cronos_test);
             put(ARBITRUM_MAIN_ID, R.color.arbitrum_main);
             put(ARBITRUM_TEST_ID, R.color.arbitrum_test);
@@ -469,6 +488,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(AURORA_TESTNET_ID, R.color.aurora_testnet);
             put(MILKOMEDA_C1_ID, R.color.milkomeda);
             put(MILKOMEDA_C1_TEST_ID, R.color.milkomeda_test);
+            put(PHI_NETWORK_MAIN_ID, R.color.phi_network);
         }
     };
 
@@ -742,7 +762,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
         for (Long networkId : storedIds)
         {
-            if (hasRealValue(networkId) == isMainNet) { selectedIds.add(networkId); }
+            if (hasRealValue(networkId) == isMainNet)
+            {
+                NetworkInfo check = networkMap.get(networkId);
+                if (check != null) selectedIds.add(networkId);
+            }
         }
 
         if (selectedIds.size() == 0)

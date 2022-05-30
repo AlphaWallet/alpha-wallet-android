@@ -225,8 +225,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     chainIdOverride = savedInstance.getLong("CHAINID");
 
                     //kick off transaction
-                    confirmationDialog = generateTransactionRequest(w3Tx, chainIdOverride);
-                    if (confirmationDialog != null) confirmationDialog.show();
+                    final ActionSheetDialog confDialog = generateTransactionRequest(w3Tx, chainIdOverride);
+                    if (confDialog != null)
+                    {
+                        confirmationDialog = confDialog;
+                        confirmationDialog.show();
+                    }
                 }
                 else if (savedInstance.containsKey("SIGNDATA"))
                 {
@@ -801,19 +805,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         doSignMessage(signable);
     }
 
-    private void onEthSignTransaction(Long id, WCEthereumTransaction transaction, long chainId)
-    {
-        lastId = id;
-        final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
-        final ActionSheetDialog confDialog = generateTransactionRequest(w3Tx, chainId);
-        if (confDialog != null)
-        {
-            confirmationDialog = confDialog;
-            confirmationDialog.setSignOnly(); //sign transaction only
-            confirmationDialog.show();
-        }
-    }
-
     private void onFailure(@NonNull Throwable throwable)
     {
         closeErrorDialog();
@@ -903,12 +894,29 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         confirmationDialog.show();
     }
 
+    private void onEthSignTransaction(Long id, WCEthereumTransaction transaction, long chainId)
+    {
+        lastId = id;
+        final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
+        final ActionSheetDialog confDialog = generateTransactionRequest(w3Tx, chainId);
+        if (confDialog != null)
+        {
+            confirmationDialog = confDialog;
+            confirmationDialog.setSignOnly(); //sign transaction only
+            confirmationDialog.show();
+        }
+    }
+
     private void onEthSendTransaction(Long id, WCEthereumTransaction transaction, long chainId)
     {
         lastId = id;
         final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
-        confirmationDialog = generateTransactionRequest(w3Tx, chainId);
-        if (confirmationDialog != null) confirmationDialog.show();
+        final ActionSheetDialog confDialog = generateTransactionRequest(w3Tx, chainId);
+        if (confDialog != null)
+        {
+            confirmationDialog = confDialog;
+            confirmationDialog.show();
+        }
     }
 
     private ActionSheetDialog generateTransactionRequest(Web3Transaction w3Tx, long chainId)

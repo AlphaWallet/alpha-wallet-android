@@ -679,7 +679,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         if (confirmationDialog != null && confirmationDialog.isShowing() && confirmationDialog.getTransaction() != null)
         {
              state.putParcelable("TRANSACTION", confirmationDialog.getTransaction());
-             state.putLong("CHAINID", chainIdOverride);
+             state.putLong("CHAINID", viewModel.getChainId(getSessionId()));
         }
         if (confirmationDialog != null && confirmationDialog.isShowing() && signData != null)
         {

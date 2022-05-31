@@ -54,7 +54,8 @@ public class WalletDataRealmSource {
                     composeWallet(wallet, data);
                 }
 
-                recoverLostWallets(realm, keystoreWallets, walletList, keyService);
+                //TODO: Make this a manual process.
+                //recoverLostWallets(realm, keystoreWallets, walletList, keyService);
             }
 
             migrateWalletTypeData(walletList);
@@ -524,8 +525,6 @@ public class WalletDataRealmSource {
                 Wallet w = composeKeyType(rk);
                 if (w != null) walletTypeData.put(w.address.toLowerCase(), w);
             }
-
-            realm.executeTransaction(r -> rr.deleteAllFromRealm()); //erase the database now we have extracted the data
         }
 
         //Copy results back
@@ -569,6 +568,20 @@ public class WalletDataRealmSource {
                     }
                 });
             }
+
+            deleteWalletTypeData();
+        }
+    }
+
+    private void deleteWalletTypeData()
+    {
+        //now that process has completed, delete the records
+        try (Realm realm = realmManager.getWalletTypeRealmInstance())
+        {
+            //already synced?
+            RealmResults<RealmKeyType> rr = realm.where(RealmKeyType.class)
+                    .findAll();
+            realm.executeTransaction(r -> rr.deleteAllFromRealm()); //erase the database now we have extracted the data
         }
     }
 }

@@ -18,6 +18,10 @@ public class RealmStaticToken extends RealmObject {
     private int interfaceSpec;
     private String auxData;
 
+    public String getPrimaryKey()
+    {
+        return address;
+    }
 
     public String getTokenAddress() {
         String tAddress = address;
@@ -33,6 +37,21 @@ public class RealmStaticToken extends RealmObject {
         {
             return address;
         }
+    }
+
+    public long getChainId()
+    {
+        String tAddress = address;
+        long chainId = 0;
+        if (tAddress.contains(".")) //base chain
+        {
+            chainId = Long.parseLong(tAddress.split(".")[1]);
+        }
+        else if (tAddress.contains("-"))
+        {
+            chainId = Long.parseLong(tAddress.split("-")[1]);
+        }
+        return chainId;
     }
 
     public String getName() {

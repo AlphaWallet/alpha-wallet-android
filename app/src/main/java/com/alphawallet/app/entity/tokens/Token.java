@@ -22,7 +22,9 @@ import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EventResult;
+import com.alphawallet.app.repository.entity.RealmStaticToken;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmWalletToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
@@ -161,6 +163,18 @@ public class Token
     }
 
     public void setRealmBalance(RealmToken realmToken)
+    {
+        if (balance != null)
+        {
+            realmToken.setBalance(balance.toString());
+        }
+        else
+        {
+            realmToken.setBalance("0");
+        }
+    }
+
+    public void setRealmBalance(RealmWalletToken realmToken)
     {
         if (balance != null)
         {
@@ -386,6 +400,15 @@ public class Token
         tokenInfo.isEnabled = realmToken.getEnabled();
     }
 
+    // new
+    public void setupRealmToken(RealmWalletToken realmToken)
+    {
+        lastBlockCheck = realmToken.getLastBlock();
+        lastTxCheck = realmToken.getLastTxTime();
+        lastTxTime = realmToken.getLastTxTime();
+        tokenInfo.isEnabled = realmToken.isEnabled();
+    }
+
     public String getPendingDiff()
     {
         if (!isEthereum() || pendingBalance == null || balance.equals(pendingBalance)) return null;
@@ -409,7 +432,22 @@ public class Token
         realmToken.setInterfaceSpec(contractType.ordinal());
     }
 
+    public void setRealmInterfaceSpec(RealmStaticToken realmStaticToken)
+    {
+        if (isEthereum() && realmStaticToken.getInterfaceSpec() != ContractType.ETHEREUM_INVISIBLE.ordinal())
+        {
+            contractType = ContractType.ETHEREUM;
+        }
+        realmStaticToken.setInterfaceSpec(contractType.ordinal());
+    }
+
     public void setRealmLastBlock(RealmToken realmToken)
+    {
+        realmToken.setLastBlock(lastBlockCheck);
+        realmToken.setLastTxTime(lastTxTime);
+    }
+
+    public void setRealmLastBlock(RealmWalletToken realmToken)
     {
         realmToken.setLastBlock(lastBlockCheck);
         realmToken.setLastTxTime(lastTxTime);

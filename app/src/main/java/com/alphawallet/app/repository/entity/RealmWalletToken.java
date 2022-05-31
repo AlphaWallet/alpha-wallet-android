@@ -1,7 +1,5 @@
 package com.alphawallet.app.repository.entity;
 
-import android.text.TextUtils;
-
 import com.alphawallet.app.entity.tokens.TokenInfo;
 
 import io.realm.RealmObject;
@@ -39,7 +37,7 @@ public class RealmWalletToken extends RealmObject {
 
     public long getChainId()
     {
-        long chainID = 1;
+        long chainID = 0;
         try
         {
             String tAddress = address;
@@ -59,11 +57,11 @@ public class RealmWalletToken extends RealmObject {
         return chainID;
     }
 
-    public long getAddedTime() {
+    public long getUpdateTime() {
         return addedTime;
     }
 
-    public void setAddedTime(long addedTime) {
+    public void setUpdateTime(long addedTime) {
         this.addedTime = addedTime;
     }
 
@@ -86,15 +84,19 @@ public class RealmWalletToken extends RealmObject {
         return isEnabled;
     }
 
+    public boolean getEnabled() {
+        return isEnabled;
+    }
+
     public void setEnabled(boolean enabled) {
         isEnabled = enabled;
     }
 
-    public long getLastBlockRead() {
+    public long getLastBlock() {
         return lastBlockRead;
     }
 
-    public void setLastBlockRead(long lastBlockRead) {
+    public void setLastBlock(long lastBlockRead) {
         this.lastBlockRead = lastBlockRead;
     }
 
@@ -123,13 +125,23 @@ public class RealmWalletToken extends RealmObject {
         }
     }
 
+    public long getLastTxTime()
+    {
+        return lastTxTime;
+    }
+
+    public void setLastTxTime(long lastTxTime)
+    {
+        this.lastTxTime = lastTxTime;
+    }
+
     public void populate(RealmToken realmToken)
     {
-        setAddedTime(realmToken.getUpdateTime());
+        setUpdateTime(realmToken.getUpdateTime());
         setAssetUpdateTime(realmToken.getAssetUpdateTime());
         setBalance(realmToken.getBalance());
         setEnabled(realmToken.getEnabled());
-        setLastBlockRead(realmToken.getLastBlock());
+        setLastBlock(realmToken.getLastBlock());
         setEarliestTxBlock(realmToken.getEarliestTransactionBlock());
         setVisibilityChanged(realmToken.isVisibilityChanged());
     }

@@ -135,6 +135,8 @@ public class TokensService
         transferCheckChain = 0;
         completionCallback = null;
         this.realmManager = realmManager;
+
+        Timber.tag(TAG).d("init: ");
     }
 
     private void stripTokensForWallet(String walletAddress)
@@ -164,7 +166,7 @@ public class TokensService
             return;
         }
         String primaryKey = TokensRealmSource.databaseKey(realmToken.getChainId(), realmToken.getTokenAddress());
-
+        Timber.tag(TAG).d("separateTokenData: primaryKey: %s", primaryKey);
         // get current static token
         RealmStaticToken staticToken = staticDataRealm.where(RealmStaticToken.class)
                 .equalTo("address", primaryKey)
@@ -174,16 +176,24 @@ public class TokensService
         // create static data if not exist
         if (staticToken == null)
         {
-            // create object
-            Timber.tag(TAG).d("separateTokenData: Creating static token");
-            staticDataRealm.executeTransaction( r -> {
-                RealmStaticToken st = r.createObject(RealmStaticToken.class, primaryKey);
-                st.populate(realmToken);
-            });
-            staticToken = staticDataRealm.where(RealmStaticToken.class)
-                    .equalTo("address", primaryKey)
-                    .findFirst();
-            Timber.tag(TAG).d("Created static token: %s", staticToken);
+            try
+            {
+                // create object
+                Timber.tag(TAG).d("separateTokenData: Creating static token");
+                staticDataRealm.executeTransaction( r -> {
+                    RealmStaticToken st = r.createObject(RealmStaticToken.class, primaryKey);
+                    st.populate(realmToken);
+                });
+                staticToken = staticDataRealm.where(RealmStaticToken.class)
+                        .equalTo("address", primaryKey)
+                        .findFirst();
+                Timber.tag(TAG).d("separateTokenData: Created static token: %s", staticToken);
+            }
+            catch (Exception e)
+            {
+                Timber.tag(TAG).e(e,"separateTokenData: exception while creating new static token");
+            }
+
         } else
         {
             Timber.tag(TAG).d("separateTokenData: Token already exist: %s", staticToken);
@@ -335,7 +345,8 @@ public class TokensService
                 }
                 walletDataRealm.close();
                 normaliseTokens = false;    // disable once done
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Timber.tag(TAG).e(e, "checkRealmUpgradeRequired: Error while normalising Tokens");
             }

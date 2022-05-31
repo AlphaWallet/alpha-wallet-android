@@ -33,6 +33,11 @@ public class RealmToken extends RealmObject {
     private boolean visibilityChanged;
     private String erc1155BlockRead;
 
+    public String getPrimaryKey()
+    {
+        return address;
+    }
+
     public int getDecimals() {
         return decimals;
     }

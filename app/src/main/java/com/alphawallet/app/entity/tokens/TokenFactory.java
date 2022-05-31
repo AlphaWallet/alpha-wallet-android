@@ -3,7 +3,9 @@ package com.alphawallet.app.entity.tokens;
 import android.text.TextUtils;
 
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.repository.entity.RealmStaticToken;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmWalletToken;
 import com.alphawallet.app.util.Utils;
 
 import java.math.BigDecimal;
@@ -141,6 +143,76 @@ public class TokenFactory
         return thisToken;
     }
 
+    // new
+    public Token createToken(TokenInfo tokenInfo, RealmWalletToken walletToken, RealmStaticToken staticToken, long updateBlancaTime, String networkName)
+    {
+        Token thisToken;
+        int typeOrdinal = (staticToken != null) ? staticToken.getInterfaceSpec() : ContractType.ETHEREUM.ordinal(); // if eth-xxx
+        if (typeOrdinal > ContractType.CREATION.ordinal()) typeOrdinal = ContractType.NOT_SET.ordinal();
+
+        ContractType type = ContractType.values()[typeOrdinal];
+        String realmBalance = walletToken.getBalance();
+        BigDecimal decimalBalance;
+        if (TextUtils.isEmpty(realmBalance)) realmBalance = "0";
+        if (Utils.isNumeric(realmBalance))
+        {
+            decimalBalance = new BigDecimal(realmBalance);
+        }
+        else
+        {
+            decimalBalance = BigDecimal.ZERO;
+        }
+
+        switch (type)
+        {
+            case ETHEREUM_INVISIBLE:
+                tokenInfo.isEnabled = false;
+                thisToken = new Token(tokenInfo, decimalBalance, updateBlancaTime, networkName, type);
+                thisToken.pendingBalance = decimalBalance;
+                break;
+            case ETHEREUM:
+                tokenInfo.isEnabled = true; //native eth always enabled
+            case ERC20:
+            case DYNAMIC_CONTRACT:
+                thisToken = new Token(tokenInfo, decimalBalance, updateBlancaTime, networkName, type);
+                thisToken.pendingBalance = decimalBalance;
+                break;
+            case ERC721_TICKET:
+                if (realmBalance.equals("0")) realmBalance = "";
+                thisToken = new ERC721Ticket(tokenInfo, realmBalance, updateBlancaTime, networkName, type);
+                break;
+            case ERC875:
+            case ERC875_LEGACY:
+                if (realmBalance.equals("0")) realmBalance = "";
+                thisToken = new Ticket(tokenInfo, realmBalance, updateBlancaTime, networkName, type);
+                break;
+
+            case CURRENCY:
+                thisToken = new Token(tokenInfo, decimalBalance, updateBlancaTime, networkName, ContractType.ETHEREUM);
+                thisToken.pendingBalance = decimalBalance;
+                break;
+
+            case ERC721:
+            case ERC721_LEGACY:
+                thisToken = new ERC721Token(tokenInfo, null, decimalBalance, updateBlancaTime, networkName, type);
+                break;
+
+            case ERC1155:
+                thisToken = new ERC1155Token(tokenInfo, null, updateBlancaTime, networkName);
+                break;
+
+            case OTHER:
+            default:
+                thisToken = new Token(tokenInfo, BigDecimal.ZERO, updateBlancaTime, networkName, type);
+                break;
+
+        }
+
+        thisToken.setupRealmToken(walletToken);
+
+        return thisToken;
+    }
+
     public Token createToken(TokenInfo tokenInfo, ContractType type, String networkName)
     {
         Token thisToken;
@@ -191,9 +263,23 @@ public class TokenFactory
         return thisToken;
     }
 
-    public TokenInfo createTokenInfo(RealmToken realmItem)
+    public TokenInfo createTokenInfo(RealmToken realmItem, RealmStaticToken realmStaticToken)
     {
-        return new TokenInfo(realmItem.getTokenAddress(), realmItem.getName(), realmItem.getSymbol(),
-                realmItem.getDecimals(), realmItem.isEnabled(), realmItem.getChainId());
+        if (realmItem.getTokenAddress().equals("eth"))
+        {
+            return new TokenInfo();
+        }
+        return new TokenInfo(realmStaticToken.getTokenAddress(), realmStaticToken.getName(), realmStaticToken.getSymbol(), realmStaticToken.getDecimals(),
+                realmItem.getEnabled(), realmStaticToken.getChainId());
+    }
+
+    public TokenInfo createTokenInfo(RealmWalletToken walletToken, RealmStaticToken realmStaticToken)
+    {
+        if (walletToken.getTokenAddress().equals("eth"))
+        {
+            return new TokenInfo();
+        }
+        return new TokenInfo(realmStaticToken.getTokenAddress(), realmStaticToken.getName(), realmStaticToken.getSymbol(), realmStaticToken.getDecimals(),
+                walletToken.isEnabled(), realmStaticToken.getChainId());
     }
 }

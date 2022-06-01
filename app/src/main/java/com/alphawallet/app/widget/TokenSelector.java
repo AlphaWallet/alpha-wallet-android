@@ -216,7 +216,7 @@ public class TokenSelector extends LinearLayout
     {
         StringBuilder balanceStr = new StringBuilder(getContext().getString(R.string.label_balance));
         balanceStr.append(" ");
-        if (!TextUtils.isEmpty(amount))
+        if (!TextUtils.isEmpty(amount) && !amount.equals("0"))
         {
             balanceStr.append(amount);
             setMaxButtonEnabled(true);

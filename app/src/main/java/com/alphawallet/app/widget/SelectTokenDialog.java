@@ -40,11 +40,13 @@ public class SelectTokenDialog extends BottomSheetDialog
         super(activity);
         View view = View.inflate(getContext(), R.layout.dialog_select_token, null);
         setContentView(view);
-        view.setMinimumHeight(Resources.getSystem().getDisplayMetrics().heightPixels);
 
-        BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
-        behavior.setState(STATE_EXPANDED);
-        behavior.setSkipCollapsed(true);
+        setOnShowListener(dialogInterface -> {
+            view.setMinimumHeight(Resources.getSystem().getDisplayMetrics().heightPixels);
+            BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
+            behavior.setState(STATE_EXPANDED);
+            behavior.setSkipCollapsed(true);
+        });
 
         tokenList = view.findViewById(R.id.token_list);
         search = view.findViewById(R.id.edit_search);

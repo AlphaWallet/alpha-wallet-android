@@ -1,6 +1,10 @@
 package com.alphawallet.app.widget;
 
+import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
+
 import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -12,6 +16,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.ui.widget.adapter.SelectChainAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.List;
@@ -22,7 +27,6 @@ public class SwapSettingsDialog extends BottomSheetDialog
     private SelectChainAdapter adapter;
     private List<Chain> chains;
     private SlippageWidget slippageWidget;
-    private long selectedChainId;
 
     public SwapSettingsDialog(@NonNull Activity activity)
     {
@@ -30,10 +34,12 @@ public class SwapSettingsDialog extends BottomSheetDialog
         View view = View.inflate(getContext(), R.layout.dialog_swap_settings, null);
         setContentView(view);
 
-//        view.setMinimumHeight(Resources.getSystem().getDisplayMetrics().heightPixels);
-//        BottomSheetBehavior<View>behavior = BottomSheetBehavior.from((View) view.getParent());
-//        behavior.setState(STATE_EXPANDED);
-//        behavior.setSkipCollapsed(true);
+        setOnShowListener(dialogInterface -> {
+            view.setMinimumHeight(Resources.getSystem().getDisplayMetrics().heightPixels);
+            BottomSheetBehavior<View>behavior = BottomSheetBehavior.from((View) view.getParent());
+            behavior.setState(STATE_EXPANDED);
+            behavior.setSkipCollapsed(true);
+        });
 
         chainList = view.findViewById(R.id.chain_list);
         slippageWidget = view.findViewById(R.id.slippage_widget);

@@ -450,8 +450,24 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         infoLayout.setVisibility(View.VISIBLE);
     }
 
-    private void onProgressInfo(String message)
+    private void onProgressInfo(int code)
     {
+        String message;
+        switch (code)
+        {
+            case C.ProgressInfo.FETCHING_CHAINS:
+                message = getString(R.string.message_fetching_chains);
+                break;
+            case C.ProgressInfo.FETCHING_CONNECTIONS:
+                message = getString(R.string.message_fetching_connections);
+                break;
+            case C.ProgressInfo.FETCHING_QUOTE:
+                message = getString(R.string.message_fetching_quote);
+                break;
+            default:
+                message = getString(R.string.title_dialog_handling);
+                break;
+        }
         progressDialog.setTitle(message);
     }
 

@@ -55,7 +55,7 @@ public class SwapViewModel extends BaseViewModel
     private final MutableLiveData<List<Connection>> connections = new MutableLiveData<>();
     private final MutableLiveData<Quote> quote = new MutableLiveData<>();
     private final MutableLiveData<Long> network = new MutableLiveData<>();
-    private final MutableLiveData<String> progressInfo = new MutableLiveData<>();
+    private final MutableLiveData<Integer> progressInfo = new MutableLiveData<>();
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
 
@@ -114,7 +114,7 @@ public class SwapViewModel extends BaseViewModel
         return network;
     }
 
-    public LiveData<String> progressInfo()
+    public LiveData<Integer> progressInfo()
     {
         return progressInfo;
     }
@@ -141,7 +141,7 @@ public class SwapViewModel extends BaseViewModel
 
     public void getChains()
     {
-        progressInfo.postValue("Fetching chains");
+        progressInfo.postValue(C.ProgressInfo.FETCHING_CHAINS);
         progress.postValue(true);
 
         chainsDisposable = swapService.getChains()
@@ -152,7 +152,7 @@ public class SwapViewModel extends BaseViewModel
 
     public void getConnections(long from, long to)
     {
-        progressInfo.postValue("Fetching connections");
+        progressInfo.postValue(C.ProgressInfo.FETCHING_CONNECTIONS);
         progress.postValue(true);
 
         connectionsDisposable = swapService.getConnections(from, to)
@@ -165,7 +165,7 @@ public class SwapViewModel extends BaseViewModel
     {
         if (hasEnoughBalance(address, source, amount))
         {
-            progressInfo.postValue("Fetching quote");
+            progressInfo.postValue(C.ProgressInfo.FETCHING_QUOTE);
             progress.postValue(true);
 
             quoteDisposable = swapService.getQuote(source, dest, address, amount, slippage)

@@ -943,4 +943,7 @@
     <string name="title_select_token">Select Token</string>
     <string name="no_results_found">No results found</string>
     <string name="title_confirm_transaction">Confirm Transaction</string>
+    <string name="message_fetching_chains">Fetching chains</string>
+    <string name="message_fetching_connections">Fetching connections</string>
+    <string name="message_fetching_quote">Fetching quote</string>
 </resources>

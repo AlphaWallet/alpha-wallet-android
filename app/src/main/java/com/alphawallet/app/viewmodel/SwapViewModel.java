@@ -271,7 +271,9 @@ public class SwapViewModel extends BaseViewModel
         }
         Token t = tokensService.getToken(token.chainId, address);
         if (t != null)
+        {
             return BalanceUtils.getShortFormat(t.balance.toString(), t.tokenInfo.decimals);
+        }
         else return "";
     }
 

@@ -314,8 +314,15 @@ public class BalanceUtils
 
     public static String getShortFormat(String amount, long decimals)
     {
-        BigDecimal a = new BigDecimal(amount);
-        return a.movePointLeft((int) decimals).toString();
+        if (amount.equals("0"))
+        {
+            return "0";
+        }
+        else
+        {
+            BigDecimal a = new BigDecimal(amount);
+            return a.movePointLeft((int) decimals).toString();
+        }
     }
 
     public static String getRawFormat(String amount, long decimals)

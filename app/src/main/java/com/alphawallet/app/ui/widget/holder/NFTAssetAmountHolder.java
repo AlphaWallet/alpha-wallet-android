@@ -12,6 +12,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.DrawableImageViewTarget;
 
 /**
  * Created by JB on 22/08/2021.
@@ -37,7 +38,7 @@ public class NFTAssetAmountHolder extends BinderViewHolder<NFTAsset>
         Glide.with(getContext())
                 .load(asset.getThumbnail())
                 .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
-                .into(icon);
+                .into(new DrawableImageViewTarget(icon));
 
         assetCount.setText(getString(R.string.asset_count_val, asset.getSelectedBalance().toString()));
     }

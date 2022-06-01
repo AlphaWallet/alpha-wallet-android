@@ -116,6 +116,7 @@ public class TokenIcon extends ConstraintLayout
         if (currentRq != null && currentRq.isRunning())
         {
             currentRq.clear();
+            handler.removeCallbacksAndMessages(null);
         }
     }
 
@@ -217,7 +218,7 @@ public class TokenIcon extends ConstraintLayout
         {
             final RequestOptions optionalCircleCrop = squareToken || iconItem.getUrl().startsWith(Utils.ALPHAWALLET_REPO_NAME) ? new RequestOptions() : new RequestOptions().circleCrop();
 
-            currentRq = Glide.with(getContext())
+            currentRq = Glide.with(this)
                     .load(iconItem.getUrl())
                     .placeholder(R.drawable.ic_token_eth)
                     .apply(optionalCircleCrop)
@@ -286,12 +287,12 @@ public class TokenIcon extends ConstraintLayout
 
         final RequestOptions optionalCircleCrop = squareToken ? new RequestOptions() : new RequestOptions().circleCrop();
 
-        handler.post(() -> currentRq = Glide.with(getContext())
+        currentRq = Glide.with(this)
                 .load(this.fallbackIconUrl)
                 .placeholder(R.drawable.ic_token_eth)
                 .apply(optionalCircleCrop)
                 .listener(requestListenerTW)
-                .into(new DrawableImageViewTarget(icon)).getRequest());
+                .into(new DrawableImageViewTarget(icon)).getRequest();
     }
 
     /**
@@ -334,8 +335,7 @@ public class TokenIcon extends ConstraintLayout
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             if (model == null || token == null || !model.toString().toLowerCase().contains(token.getAddress())) return false;
-
-            loadFromAltRepo();
+            handler.post(() -> loadFromAltRepo());
             return false;
         }
 
@@ -391,7 +391,7 @@ public class TokenIcon extends ConstraintLayout
         chainIcon.setVisibility(View.GONE);
 
         textIcon.setVisibility(View.GONE);
-        currentRq = Glide.with(getContext())
+        currentRq = Glide.with(this)
                 .load(resourceId)
                 .listener(requestListener)
                 .into(new DrawableImageViewTarget(icon)).getRequest();

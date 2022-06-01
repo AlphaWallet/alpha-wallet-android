@@ -1,6 +1,5 @@
 package com.alphawallet.app.ui;
 
-import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.content.BroadcastReceiver;
@@ -98,9 +97,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private ActionSheetDialog confirmationDialog;
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> confirmationDialog.setCurrentGasIndex(result));
-    private ActionSheetDialog walletConnectDialog;
     private AddEthereumChainPrompt addEthereumChainPrompt;
-    private long switchChainDialogCallbackId = 1;
+    private final long switchChainDialogCallbackId = 1;
     // data for switch chain request
     private long switchChainRequestId;  // rpc request id
     private long switchChainId;         // new chain to switch to
@@ -124,13 +122,15 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private String qrCode;
     private SignAuthenticationCallback signCallback;
     private long lastId;
+    private String signData;
+    private WCEthereumSignMessage.WCSignType signType;
     private long chainIdOverride;
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getData() == null) return;
                 chainIdOverride = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
                 Toast.makeText(this, getText(R.string.hint_network_name) + " " + EthereumNetworkBase.getShortChainName(chainIdOverride), Toast.LENGTH_LONG).show();
-                walletConnectDialog.updateChain(chainIdOverride);
+                confirmationDialog.updateChain(chainIdOverride);
             });
     private boolean waitForWalletConnectSession = false;
     private long requestId = 0;
@@ -186,7 +186,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         super.onCreate(savedInstanceState);
 
-
         setContentView(R.layout.activity_wallet_connect);
 
         toolbar();
@@ -201,6 +200,62 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         retrieveQrCode();
         viewModel.prepare();
+
+        if (savedInstanceState != null) restoreState(savedInstanceState);
+    }
+
+    private void restoreState(Bundle savedInstance)
+    {
+        //Orientation change?
+
+        if (savedInstance.containsKey("ORIENTATION") && savedInstance.containsKey("SESSIONID"))
+        {
+            int oldOrientation = savedInstance.getInt("ORIENTATION");
+            int newOrientation = getResources().getConfiguration().orientation;
+
+            if (oldOrientation != newOrientation)
+            {
+                requestId = savedInstance.getLong("SESSIONID");
+                String sessionId = savedInstance.getString("SESSIONIDSTR");
+                session = viewModel.getSession(sessionId);
+
+                if (savedInstance.containsKey("TRANSACTION"))
+                {
+                    Web3Transaction w3Tx = savedInstance.getParcelable("TRANSACTION");
+                    chainIdOverride = savedInstance.getLong("CHAINID");
+
+                    //kick off transaction
+                    final ActionSheetDialog confDialog = generateTransactionRequest(w3Tx, chainIdOverride);
+                    if (confDialog != null)
+                    {
+                        confirmationDialog = confDialog;
+                        confirmationDialog.show();
+                    }
+                }
+                else if (savedInstance.containsKey("SIGNDATA"))
+                {
+                    signData = savedInstance.getString("SIGNDATA");
+                    signType = WCEthereumSignMessage.WCSignType.values()[savedInstance.getInt("SIGNTYPE")];
+                    lastId = savedInstance.getLong("LASTID");
+                    String peerUrl = savedInstance.getString("PEERURL");
+                    Signable signable = null;
+
+                    //kick off sign
+                    switch (signType)
+                    {
+                        case MESSAGE:
+                        case PERSONAL_MESSAGE:
+                            signable = new EthereumMessage(signData, peerUrl, lastId, SignMessageType.SIGN_PERSONAL_MESSAGE);
+                            break;
+                        case TYPED_MESSAGE:
+                            signable = new EthereumTypedMessage(signData, peerUrl, lastId, new CryptoFunctions());
+                            break;
+                    }
+
+                    doSignMessage(signable);
+                }
+            }
+        }
     }
 
     @Override
@@ -620,16 +675,21 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         //need to preserve the orientation and current signing request
         state.putInt("ORIENTATION", getResources().getConfiguration().orientation);
         state.putLong("SESSIONID", requestId);
-        if (confirmationDialog != null) confirmationDialog.closingActionSheet();
-    }
+        state.putString("SESSIONIDSTR", getSessionId());
+        if (confirmationDialog != null && confirmationDialog.isShowing() && confirmationDialog.getTransaction() != null)
+        {
+             state.putParcelable("TRANSACTION", confirmationDialog.getTransaction());
+             state.putLong("CHAINID", viewModel.getChainId(getSessionId()));
+        }
+        if (confirmationDialog != null && confirmationDialog.isShowing() && signData != null)
+        {
+            state.putString("SIGNDATA", signData);
+            state.putInt("SIGNTYPE", signType.ordinal());
+            state.putLong("LASTID", lastId);
+            state.putString("PEERURL", peerUrl.getText().toString());
+        }
 
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        //see if the session is active
-        setupClient(getSessionId());
-        startMessageCheck();
+        if (confirmationDialog != null) confirmationDialog.closingActionSheet();
     }
 
     private void setupClient(final String sessionId)
@@ -688,11 +748,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         closeErrorDialog();
 
-        if (walletConnectDialog != null)
+        if (confirmationDialog != null)
         {
-            if (walletConnectDialog.isShowing())
+            if (confirmationDialog.isShowing())
             {      // if already opened
-                walletConnectDialog.forceDismiss();
+                confirmationDialog.forceDismiss();
             }
         }
 
@@ -713,15 +773,18 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         chainIcon.bindData(chainIdOverride);
         remotePeerMeta = peer;
 
-        walletConnectDialog = new ActionSheetDialog(this, peer, chainId, displayIcon, this);
-        walletConnectDialog.show();
-        walletConnectDialog.fullExpand();
+        confirmationDialog = new ActionSheetDialog(this, peer, chainId, displayIcon, this);
+        confirmationDialog.show();
+        confirmationDialog.fullExpand();
     }
 
     private void onEthSign(Long id, WCEthereumSignMessage message)
     {
         Signable signable = null;
         lastId = id;
+        signData = message.getData();
+        signType = message.getType();
+
         switch (message.getType())
         {
             case MESSAGE:
@@ -740,18 +803,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
 
         doSignMessage(signable);
-    }
-
-    private void onEthSignTransaction(Long id, WCEthereumTransaction transaction, long chainId)
-    {
-        lastId = id;
-        final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
-        confirmationDialog = generateTransactionRequest(w3Tx, chainId);
-        if (confirmationDialog != null)
-        {
-            confirmationDialog.setSignOnly(); //sign transaction only
-            confirmationDialog.show();
-        }
     }
 
     private void onFailure(@NonNull Throwable throwable)
@@ -780,6 +831,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 confirmationDialog.dismiss();
                 if (fromDappBrowser) switchToDappBrowser();
                 requestId = 0;
+                lastId = 0;
+                signData = null;
             }
 
             @Override
@@ -795,6 +848,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         switchToDappBrowser();
                     }
                     requestId = 0;
+                    lastId = 0;
+                    signData = null;
                 });
             }
         };
@@ -839,27 +894,42 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         confirmationDialog.show();
     }
 
+    private void onEthSignTransaction(Long id, WCEthereumTransaction transaction, long chainId)
+    {
+        lastId = id;
+        final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
+        final ActionSheetDialog confDialog = generateTransactionRequest(w3Tx, chainId);
+        if (confDialog != null)
+        {
+            confirmationDialog = confDialog;
+            confirmationDialog.setSignOnly(); //sign transaction only
+            confirmationDialog.show();
+        }
+    }
+
     private void onEthSendTransaction(Long id, WCEthereumTransaction transaction, long chainId)
     {
         lastId = id;
         final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
-        confirmationDialog = generateTransactionRequest(w3Tx, chainId);
-        if (confirmationDialog != null) confirmationDialog.show();
+        final ActionSheetDialog confDialog = generateTransactionRequest(w3Tx, chainId);
+        if (confDialog != null)
+        {
+            confirmationDialog = confDialog;
+            confirmationDialog.show();
+        }
     }
 
     private ActionSheetDialog generateTransactionRequest(Web3Transaction w3Tx, long chainId)
     {
-        ActionSheetDialog confDialog = null;
         try
         {
-            //minimum for transaction to be valid: recipient and value or payload
             if ((confirmationDialog == null || !confirmationDialog.isShowing()) &&
                     (w3Tx.recipient.equals(Address.EMPTY) && w3Tx.payload != null) // Constructor
                     || (!w3Tx.recipient.equals(Address.EMPTY) && (w3Tx.payload != null || w3Tx.value != null))) // Raw or Function TX
             {
                 WCPeerMeta remotePeerData = viewModel.getRemotePeer(getSessionId());
                 Token token = viewModel.getTokensService().getTokenOrBase(chainId, w3Tx.recipient.toString());
-                confDialog = new ActionSheetDialog(this, w3Tx, token, "",
+                final ActionSheetDialog confDialog = new ActionSheetDialog(this, w3Tx, token, "",
                         w3Tx.recipient.toString(), viewModel.getTokensService(), this);
                 confDialog.setURL(remotePeerData.getUrl());
                 confDialog.setCanceledOnTouchOutside(false);
@@ -869,18 +939,19 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         chainId, w3Tx.recipient.toString(), new BigDecimal(w3Tx.value), w3Tx.gasLimit)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(estimate -> confirmationDialog.setGasEstimate(estimate),
+                        .subscribe(confDialog::setGasEstimate,
                                 Throwable::printStackTrace)
                         .isDisposed();
+
+                return confDialog;
             }
         }
         catch (Exception e)
         {
-            confDialog = null;
             Timber.e(e);
         }
 
-        return confDialog;
+        return null;
     }
 
     private void killSession()
@@ -901,6 +972,15 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         super.onPause();
         unregisterReceiver(walletConnectActionReceiver);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        //see if the session is active
+        setupClient(getSessionId());
+        startMessageCheck();
     }
 
     @Override
@@ -1158,6 +1238,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         if (fromDappBrowser) switchToDappBrowser();
         requestId = 0;
+        confirmationDialog = null;
     }
 
     @Override
@@ -1247,17 +1328,18 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             Token baseToken = viewModel.getTokenService().getTokenOrBase(switchChainId, viewModel.defaultWallet().getValue().address);
             NetworkInfo newNetwork = EthereumNetworkBase.getNetworkInfo(switchChainId);
             NetworkInfo activeNetwork = EthereumNetworkBase.getNetworkInfo(client.chainIdVal());
-            if (walletConnectDialog.isShowing())
+            if (confirmationDialog != null && confirmationDialog.isShowing())
                 return;
-            walletConnectDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, R.string.switch_and_reload,
+            confirmationDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, R.string.switch_and_reload,
                     switchChainDialogCallbackId, baseToken, activeNetwork, newNetwork);
-            walletConnectDialog.setOnDismissListener(dialog -> {
+            confirmationDialog.setOnDismissListener(dialog -> {
                 viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, false, chainAvailable);
-                walletConnectDialog.setOnDismissListener(null);         // remove from here as dialog is multi-purpose
+                confirmationDialog.setOnDismissListener(null);         // remove from here as dialog is multi-purpose
+                confirmationDialog = null;
             });
-            walletConnectDialog.setCanceledOnTouchOutside(false);
-            walletConnectDialog.show();
-            walletConnectDialog.fullExpand();
+            confirmationDialog.setCanceledOnTouchOutside(false);
+            confirmationDialog.show();
+            confirmationDialog.fullExpand();
         }
         catch (Exception e)
         {
@@ -1347,10 +1429,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void buttonClick(long callbackId, Token baseToken)
     {
-        if (callbackId == switchChainDialogCallbackId)
+        if (callbackId == switchChainDialogCallbackId && confirmationDialog != null)
         {
-            walletConnectDialog.setOnDismissListener(null);
-            walletConnectDialog.dismiss();
+            confirmationDialog.setOnDismissListener(null);
+            confirmationDialog.dismiss();
             viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, true, chainAvailable);
             viewModel.updateSession(currentSessionId, switchChainId);
             displaySessionStatus(session.getTopic());

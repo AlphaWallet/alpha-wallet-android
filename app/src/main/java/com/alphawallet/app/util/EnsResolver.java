@@ -1,8 +1,11 @@
 package com.alphawallet.app.util;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.entity.EnsNodeNotSyncCallback;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.TokenRepository;
@@ -41,7 +44,8 @@ import timber.log.Timber;
 /**
  * EnsResolver from Web3j adapted for Android Java's BigInteger
  */
-public class EnsResolver {
+public class EnsResolver
+{
 
     public static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
     public static final String REVERSE_NAME_SUFFIX = ".addr.reverse";
@@ -52,43 +56,57 @@ public class EnsResolver {
     private final int addressLength;
     private long syncThreshold; // non-final in case this value needs to be tweaked
 
-    public EnsResolver(Web3j web3j, long syncThreshold, int addressLength) {
+    public EnsNodeNotSyncCallback nodeNotSyncCallback = null;
+
+    public EnsResolver(Web3j web3j, long syncThreshold, int addressLength)
+    {
         this.web3j = web3j;
         this.syncThreshold = syncThreshold;
         this.addressLength = addressLength;
     }
 
-    public EnsResolver(Web3j web3j, long syncThreshold) {
+    public EnsResolver(Web3j web3j, long syncThreshold)
+    {
         this(web3j, syncThreshold, Keys.ADDRESS_LENGTH_IN_HEX);
     }
 
-    public EnsResolver(Web3j web3j) {
+    public EnsResolver(Web3j web3j)
+    {
         this(web3j, DEFAULT_SYNC_THRESHOLD);
     }
 
-    public void setSyncThreshold(long syncThreshold) {
+    public void setSyncThreshold(long syncThreshold)
+    {
         this.syncThreshold = syncThreshold;
     }
 
-    public long getSyncThreshold() {
+    public long getSyncThreshold()
+    {
         return syncThreshold;
     }
 
     /**
      * This function takes ensName (eg 'scotty.eth') and returns the matching Ethereum Address.
      * NOTE: It is highly important to check the node is synced before resolving, as this could be an attack
+     *
      * @param ensName
      * @return
      */
-    public String resolve(String ensName)
+    public String resolve(String ensName, boolean performSync)
     {
+        Timber.d("resolve %s, %s", ensName, performSync);
         String contractAddress = ensName;
         if (isValidEnsName(ensName, addressLength))
         {
             try
-            {
-                if (!isSynced()) //ensure node is synced
+            {   // performSync used to skip syncing if required by user
+                if (performSync && !isSynced()) //ensure node is synced
                 {
+                    Timber.d("resolve: node not synced");
+                    if (nodeNotSyncCallback != null)
+                    {
+                        new Handler(Looper.getMainLooper()).post(() -> nodeNotSyncCallback.onNodeNotSynced());
+                    }
                     throw new EnsResolutionException("Node is not currently synced");
                 }
                 else if (ensName.endsWith(".crypto")) //check crypto namespace
@@ -232,17 +250,17 @@ public class EnsResolver {
     private Function getResolver(byte[] nameHash)
     {
         return new Function("resolver",
-                            Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                            Arrays.asList(new TypeReference<Address>()
-                            {
-                            }));
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                Arrays.asList(new TypeReference<Address>()
+                {
+                }));
     }
 
     private Function getAvatar(byte[] nameHash)
     {
         return new Function("text",
                 Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash),
-                                    new org.web3j.abi.datatypes.Utf8String("avatar")),
+                        new org.web3j.abi.datatypes.Utf8String("avatar")),
                 Arrays.asList(new TypeReference<org.web3j.abi.datatypes.Utf8String>()
                 {
                 }));
@@ -251,44 +269,48 @@ public class EnsResolver {
     private Function getResolverOf(BigInteger nameId)
     {
         return new Function("resolverOf",
-                            Arrays.asList(new org.web3j.abi.datatypes.Uint(nameId)),
-                            Arrays.asList(new TypeReference<Address>()
-                            {
-                            }));
+                Arrays.asList(new org.web3j.abi.datatypes.Uint(nameId)),
+                Arrays.asList(new TypeReference<Address>()
+                {
+                }));
     }
 
     private Function get(BigInteger nameId)
     {
         return new Function("get",
-                            Arrays.asList(new org.web3j.abi.datatypes.Utf8String(EnsResolver.CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
-                            Arrays.asList(new TypeReference<Utf8String>()
-                            {
-                            }));
+                Arrays.asList(new org.web3j.abi.datatypes.Utf8String(EnsResolver.CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
+                Arrays.asList(new TypeReference<Utf8String>()
+                {
+                }));
     }
 
     private Function getAddr(byte[] nameHash)
     {
         return new Function("addr",
-                            Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                            Arrays.asList(new TypeReference<Address>()
-                            {
-                            }));
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                Arrays.asList(new TypeReference<Address>()
+                {
+                }));
     }
 
     private Function getName(byte[] nameHash)
     {
         return new Function("name",
-                            Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                            Arrays.asList(new TypeReference<Utf8String>()
-                            {
-                            }));
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                Arrays.asList(new TypeReference<Utf8String>()
+                {
+                }));
     }
 
-    boolean isSynced() throws Exception {
+    boolean isSynced() throws Exception
+    {
         EthSyncing ethSyncing = web3j.ethSyncing().send();
-        if (ethSyncing.isSyncing()) {
+        if (ethSyncing.isSyncing())
+        {
             return false;
-        } else {
+        }
+        else
+        {
             EthBlock ethBlock =
                     web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send();
             long timestamp = ethBlock.getBlock().getTimestamp().longValue() * 1000;
@@ -327,7 +349,7 @@ public class EnsResolver {
         }
         else if (responseValue.equals("0x"))
         {
-            return (T)"";
+            return (T) "";
         }
 
         List<Type> response = FunctionReturnDecoder.decode(
@@ -338,15 +360,17 @@ public class EnsResolver {
         }
         else
         {
-            return (T)"";
+            return (T) "";
         }
     }
 
-    public static boolean isValidEnsName(String input) {
+    public static boolean isValidEnsName(String input)
+    {
         return isValidEnsName(input, Keys.ADDRESS_LENGTH_IN_HEX);
     }
 
-    public static boolean isValidEnsName(String input, int addressLength) {
+    public static boolean isValidEnsName(String input, int addressLength)
+    {
         return input != null && input.contains(".") && input.length() > 4;
     }
 }

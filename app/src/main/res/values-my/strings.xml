@@ -76,7 +76,6 @@
     <string name="action_share">မျှဝေမည်</string>
     <string name="action_more_details">ပို၍အသေးစိတ်ပြုလုပ်ရန်</string>
     <string name="action_add_wallet">ဝေါလက် ထည့်မည်</string>
-    <string name="action_add_token">တိုကင်ထည့်မည်</string>
     <string name="action_open_etherscan">Ethersacan တွင်ကြည့်မည်</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>
@@ -638,7 +637,7 @@
     <string name="title_no_need_to_watch">စောင့်ကြည့်နေပြီးဖြစ်သည်</string>
     <string name="error_while_signing_transaction">လုပ်ငန်းစဥ်လက်မှတ်ထိုးရာတွင် အမှားအယွင်းဖြစ်ပွားခဲ့ပါသည်။ ကျေးဇူးပြု၍ ယခု ဝေါလက်အတွက် Key များကို ပြန်လည်ထည့်သွင်းပါ။</string>
     <string name="error_not_whitelisted">စာမျက်နှာကို ခွင့်ပြုစာရင်းတွင်မထည့်ရသေးပါ။</string>
-    <string name="explain_not_whitelisted">TokenScript သည် ခွင့်ပြုစာရင်းတွင်မပါဝင်သောဝက်ဘ်စာမျက်နှာနှင့်ချိတ်ဆက်ရန်ပြုလုပ်နေပါသည်။ သင်သည်ဝက်ဘ်ဆိုဒ်ပိုင်ရှင်ဖြစ်လျှင်ခွင့်ပြုစာရင်းတင်ရန်အတွက် ကျေးဇူးပြု၍PRကို Alphawalletကိုတင်ပေးပါ။</string>
+    <string name="explain_not_whitelisted">TokenScript သည် ခွင့်ပြုစာရင်းတွင်မပါဝင်သောဝက်ဘ်စာမျက်နှာနှင့်ချိတ်ဆက်ရန်ပြုလုပ်နေပါသည်။ သင်သည်ဝက်ဘ်ဆိုဒ်ပိုင်ရှင်ဖြစ်လျှင်ခွင့်ပြုစာရင်းတင်ရန်အတွက် ကျေးဇူးပြု၍PRကို Alphawalletကိုတင်ပေးပါ။\n%1$s</string>
     <string name="token_spec">%1$s (%2$s)</string>
     <string name="check_function_availability">လုပ်ဆောင်နိုင်သောလုပ်ငန်းများ</string>
     <string name="invalid_parameters">Invalid parameter while calling TokenScript Transaction. Please check inputs.</string>
@@ -749,7 +748,7 @@
     <string name="transaction_progress_detail">လုပ်ငန်းစဥ်ကို Ethereum Blockchain ပေါ်သို့တင်ပြီးပြီပါပြီ။ အတည်ပြုသူများမှအတည်ပြုနေသည့်အတွက် မိနစ်အနည်းအငယ်ခန့်ကြာမြင့်နိုင်ပါသည်။</string>
     <string name="action_show_tx_details">လုပ်ငန်းစဥ်အသေးစိတ်ကိုဖော်ပြမည်</string>
     <string name="default_to">%1$s %2$s တို့သည် %3$sကိုပို့ပြီးပါပြီ</string>
-    <string name="default_from">%1$s နှင့် %2$s တို့သည် #3$sမှ လက်ခံရရှိပြီးပါပြီ</string>
+    <string name="default_from">%1$s နှင့် %2$s တို့သည် %3$sမှ လက်ခံရရှိပြီးပါပြီ</string>
     <string name="default_approved">%3$sမှ %1$s နှင့် %2$s သို့ရွှေ့ရန် သဘောတူလွှာကိုသင်လက်ခံရရှိပြီးပါပြီ</string>
     <string name="default_approve">%2$sကို %1$sသို့ပို့ရန်သဘောတူသည်</string>
     <string name="contract_call">စာချုပ်ချုပ်ဆိုခြင်း</string>
@@ -936,4 +935,12 @@
     <string name="unable_to_upgrade_key">Unable to upgrade key: %1$s</string>
     <string name="no_key_found">No Key found</string>
     <string name="unable_store_key">Unable to store key: %1$s</string>
+    <string name="title_ens_lookup_warning">ENS Lookup Warning</string>
+    <string name="message_ens_node_not_sync">AlphaWallet has detected a discrepancy between ethereum\'s timestamp and your device\'s current time, or possibly the blockchain connection is not synchronized, please check your phone\'s time is correct, or ignore this warning.</string>
+    <string name="zero">0</string>
+    <string name="decrease">ရုပ်ရည်</string>
+    <string name="increase">တိုးမြှင့်လာသည်</string>
+    <string name="message_transaction_timeout">The transaction has timed out. You can view the status in activity page.</string>
+    <string name="error_transaction_timeout">Transaction Timeout</string>
+    <string name="action_node_status">Node Status</string>
 </resources>

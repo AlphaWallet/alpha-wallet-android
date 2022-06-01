@@ -14,7 +14,6 @@ import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.interact.SignatureGenerateInteract;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.entity.RealmAuxData;
-import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.Signable;
 
@@ -22,7 +21,6 @@ import org.junit.Test;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
-import org.web3j.protocol.core.methods.response.EthTransaction;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -163,12 +161,6 @@ public class QRSelectionTest
 
             @Override
             public RealmAuxData fetchCachedEvent(String walletAddress, String eventKey)
-            {
-                return null;
-            }
-
-            @Override
-            public Single<Transaction> storeRawTx(Wallet wallet, EthTransaction rawTx, long timeStamp)
             {
                 return null;
             }

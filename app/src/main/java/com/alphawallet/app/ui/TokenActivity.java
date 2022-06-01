@@ -28,11 +28,14 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionType;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
@@ -54,6 +57,7 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.ActionSheetMode;
+import com.alphawallet.app.widget.AmountDisplayWidget;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.EventDetailWidget;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -115,6 +119,9 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     @Nullable
     private Disposable pendingTxUpdate = null;
+
+    @Nullable
+    private Disposable fetchMetadata = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -217,6 +224,15 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         stopPendingUpdate();
     }
 
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        if (pendingTxUpdate != null && !pendingTxUpdate.isDisposed()) pendingTxUpdate.dispose();
+        if (fetchMetadata != null && !fetchMetadata.isDisposed()) fetchMetadata.dispose();
+        if (eventDetail != null) eventDetail.onDestroy();
+    }
+
     private void txWritten(TransactionData transactionData)
     {
         confirmationDialog.transactionWritten(transactionData.txHash);
@@ -285,6 +301,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         TextView eventAmount = findViewById(R.id.event_amount);
         TextView eventAction = findViewById(R.id.event_action);
         TextView eventActionSymbol = findViewById(R.id.event_action_symbol);
+
         //date
         eventTime.setText(Utils.localiseUnixTime(getApplicationContext(), transaction.timeStamp));
         //icon
@@ -328,8 +345,50 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         {
             setupERC721TokenDetail(transaction);
         }
+        else if (token.getInterfaceSpec() == ContractType.ERC1155)
+        {
+            setupAmountDisplay(transaction);
+        }
 
         setChainName(transaction);
+    }
+
+    private void setupAmountDisplay(Transaction transaction)
+    {
+        if (transferData != null)
+        {
+            //Build a list of transfer assets
+            fetchMetadata = token.buildAssetList(transferData)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(nftList -> displayTransferTokens(nftList, transaction), throwable -> { });
+        }
+    }
+
+    private void displayTransferTokens(List<NFTAsset> nftAssets, Transaction transaction)
+    {
+        if (nftAssets.size() > 0)
+        {
+            AmountDisplayWidget amountDisplay = findViewById(R.id.amount_display);
+            amountDisplay.setVisibility(View.VISIBLE);
+            amountDisplay.setAmountFromAssetList(nftAssets);
+            TextView eventAmount = findViewById(R.id.event_amount);
+            TextView eventAction = findViewById(R.id.event_action);
+            int assetCount = 0;
+            for (NFTAsset asset : nftAssets)
+            {
+                assetCount += asset.getSelectedBalance().intValue();
+            }
+
+            String operationName = transferData.getOperationPrefix() + " " + assetCount + " " + token.getSymbol();
+
+            eventAmount.setText(operationName);
+
+            if (transaction.transactionInput == null || transaction.transactionInput.type == TransactionType.CONTRACT_CALL)
+            {
+                eventAction.setText(transferData.getTitle(transaction));
+            }
+        }
     }
 
     private void startPendingUpdate()
@@ -426,7 +485,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
                 return; //shouldn't get here.
             }
 
-            String sym = token != null ? token.tokenInfo.symbol : ETH_SYMBOL;
+            String sym = token.tokenInfo.symbol;
             icon.bindData(token, viewModel.getAssetDefinitionService());
             //status
             icon.setStatusIcon(item.getEventStatusType());

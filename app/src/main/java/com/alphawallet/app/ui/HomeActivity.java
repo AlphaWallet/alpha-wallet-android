@@ -1,5 +1,19 @@
 package com.alphawallet.app.ui;
 
+import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+import static com.alphawallet.app.C.ADDED_TOKEN;
+import static com.alphawallet.app.C.CHANGED_LOCALE;
+import static com.alphawallet.app.C.CHANGE_CURRENCY;
+import static com.alphawallet.app.C.RESET_TOOLBAR;
+import static com.alphawallet.app.C.RESET_WALLET;
+import static com.alphawallet.app.C.SETTINGS_INSTANTIATED;
+import static com.alphawallet.app.C.SHOW_BACKUP;
+import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
+import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
+import static com.alphawallet.app.entity.WalletPage.SETTINGS;
+import static com.alphawallet.app.entity.WalletPage.WALLET;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -18,6 +32,23 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -62,38 +93,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.OnLifecycleEvent;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
-import androidx.viewpager2.widget.ViewPager2;
 import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
-
-import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-import static com.alphawallet.app.C.ADDED_TOKEN;
-import static com.alphawallet.app.C.CHANGED_LOCALE;
-import static com.alphawallet.app.C.CHANGE_CURRENCY;
-import static com.alphawallet.app.C.RESET_TOOLBAR;
-import static com.alphawallet.app.C.RESET_WALLET;
-import static com.alphawallet.app.C.SETTINGS_INSTANTIATED;
-import static com.alphawallet.app.C.SHOW_BACKUP;
-import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
-import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
-import static com.alphawallet.app.entity.WalletPage.SETTINGS;
-import static com.alphawallet.app.entity.WalletPage.WALLET;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 @AndroidEntryPoint
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
@@ -194,8 +195,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
         }
     }
-
-    int fragCount = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -1339,7 +1338,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             else if (importPath != null)
             {
                 boolean useAppExternalDir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !viewModel.checkDebugDirectory();
-                viewModel.importScriptFile(this, importData, useAppExternalDir);
+                viewModel.importScriptFile(this, useAppExternalDir, startIntent);
             }
         }
         catch (SalesOrderMalformed s)

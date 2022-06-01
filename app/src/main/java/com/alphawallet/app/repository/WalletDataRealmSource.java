@@ -4,7 +4,6 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.entity.RealmKeyType;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.KeyService;
@@ -55,7 +54,8 @@ public class WalletDataRealmSource {
                     composeWallet(wallet, data);
                 }
 
-                recoverLostWallets(realm, keystoreWallets, walletList, keyService);
+                //TODO: Make this a manual process.
+                //recoverLostWallets(realm, keystoreWallets, walletList, keyService);
             }
 
             migrateWalletTypeData(walletList);
@@ -505,23 +505,6 @@ public class WalletDataRealmSource {
                     }
                 }
             }
-
-            //try to recover lost HD Wallets
-            for (String walletAddr : keyService.detectOrphanedWallets(walletList))
-            {
-                //create HD Wallet if required
-                RealmKeyType realmKey = r.where(RealmKeyType.class)
-                        .equalTo("address", walletAddr, Case.INSENSITIVE)
-                        .findFirst();
-
-                if (realmKey != null || walletAddr.equals(TokenscriptFunction.ZERO_ADDRESS)) continue;
-                Wallet w = new Wallet(walletAddr);
-                w.type = WalletType.HDKEY;
-                w.authLevel = KeyService.AuthenticationLevel.TEE_AUTHENTICATION;
-                w.lastBackupTime = System.currentTimeMillis();
-                storeKeyData(w, r);
-                walletList.put(w.address.toLowerCase(), w);
-            }
         });
     }
 
@@ -542,8 +525,6 @@ public class WalletDataRealmSource {
                 Wallet w = composeKeyType(rk);
                 if (w != null) walletTypeData.put(w.address.toLowerCase(), w);
             }
-
-            realm.executeTransaction(r -> rr.deleteAllFromRealm()); //erase the database now we have extracted the data
         }
 
         //Copy results back
@@ -587,6 +568,20 @@ public class WalletDataRealmSource {
                     }
                 });
             }
+
+            deleteWalletTypeData();
+        }
+    }
+
+    private void deleteWalletTypeData()
+    {
+        //now that process has completed, delete the records
+        try (Realm realm = realmManager.getWalletTypeRealmInstance())
+        {
+            //already synced?
+            RealmResults<RealmKeyType> rr = realm.where(RealmKeyType.class)
+                    .findAll();
+            realm.executeTransaction(r -> rr.deleteAllFromRealm()); //erase the database now we have extracted the data
         }
     }
 }

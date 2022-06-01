@@ -74,7 +74,7 @@ public class Utils {
     private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
     private static final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
     private static final String TOKEN_LOGO = "/logo.png";
-    public  static final String ALPHAWALLET_REPO_NAME = "https://raw.githubusercontent.com/alphawallet/iconassets/master/";
+    public  static final String ALPHAWALLET_REPO_NAME = "https://raw.githubusercontent.com/alphawallet/iconassets/lowercased/";
     private static final String TRUST_ICON_REPO_BASE = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/";
     private static final String TRUST_ICON_REPO = TRUST_ICON_REPO_BASE + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
     private static final String ALPHAWALLET_ICON_REPO = ALPHAWALLET_REPO_NAME + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
@@ -707,16 +707,16 @@ public class Utils {
 
     public static String localiseUnixTime(Context ctx, long timeStampInSec)
     {
-        Date date = new java.util.Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
-        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
+        Date date = new Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
+        DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
         return timeFormat.format(date);
     }
 
     public static String localiseUnixDate(Context ctx, long timeStampInSec)
     {
-        Date date = new java.util.Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
-        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
-        DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(ctx));
+        Date date = new Date(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
+        DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(ctx));
+        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(ctx));
         return timeFormat.format(date) + " | " + dateFormat.format(date);
     }
 
@@ -796,12 +796,7 @@ public class Utils {
     @NotNull
     public static String getTokenImageUrl(String address)
     {
-        return ALPHAWALLET_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, Keys.toChecksumAddress(address));
-    }
-
-    public static String getAWIconRepo(String address)
-    {
-        return ALPHAWALLET_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, Keys.toChecksumAddress(address));
+        return ALPHAWALLET_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, address.toLowerCase());
     }
 
     public static boolean isContractCall(Context context, String operationName)
@@ -818,11 +813,11 @@ public class Utils {
         int ipfsIndex = URL.lastIndexOf("/ipfs/");
         if (ipfsIndex >= 0)
         {
-            parsed = "https://ipfs.io" + URL.substring(ipfsIndex);
+            parsed = "https://gateway.ipfs.io" + URL.substring(ipfsIndex);
         }
         else if (URL.startsWith(IPFS_PREFIX))
         {
-            parsed = "https://ipfs.io/ipfs/" + URL.substring(IPFS_PREFIX.length());
+            parsed = "https://gateway.ipfs.io/ipfs/" + URL.substring(IPFS_PREFIX.length());
         }
 
         return parsed;

@@ -70,10 +70,13 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.ALTERNATIVE" />
+                <category android:name="android.intent.category.SELECTED_ALTERNATIVE" />
 
                 <data android:scheme="file" />
                 <data android:scheme="content" />
-                <data android:mimeType="*/*" />
+                <data android:mimeType="text/xml" />
+                <data android:mimeType="text/tsml" />
                 <data android:host="*" />
                 <data android:pathPattern=".*\\.tsml" />
                 <data android:pathPattern=".*\\..*\\.tsml" />
@@ -158,11 +161,6 @@
         <activity
             android:name=".ui.RedeemAssetSelectActivity"
             android:label="@string/title_redeem" />
-
-        <!--<activity
-            android:name=".ui.HomeActivity"
-            android:label="@string/toolbar_header_wallet"
-            android:windowSoftInputMode="adjustPan" />-->
 
         <activity
             android:name=".ui.ImportTokenActivity"
@@ -316,6 +314,10 @@
         <activity
             android:name=".ui.QRScanning.QRScanner"
             android:label="@string/qr_scanner" />
+
+        <activity
+            android:name=".ui.NodeStatusActivity"
+            android:label="@string/action_node_status" />
 
         <service
             android:name=".service.PriceAlertsService"

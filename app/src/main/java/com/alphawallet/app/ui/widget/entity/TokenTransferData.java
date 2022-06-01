@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui.widget.entity;
 
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -15,8 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 
 /**
  * Created by JB on 17/12/2020.
@@ -39,7 +39,6 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
 
     public int getTitle(Transaction tx)
     {
-        //TODO: pick up item-view
         //catch standard Token events
         switch (eventName)
         {
@@ -69,6 +68,19 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
                 return R.string.activity_approval_granted;
             default:
                 return 0;
+        }
+    }
+
+    public String getOperationPrefix()
+    {
+        switch (eventName)
+        {
+            case "sent":
+                return "-";
+            case "received":
+                return "+";
+            default:
+                return "";
         }
     }
 

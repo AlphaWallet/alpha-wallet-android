@@ -16,7 +16,6 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
-
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
@@ -50,7 +49,7 @@ public class Steps
 
     public static void visit(String urlString)
     {
-        SnapshotUtil.take("2");
+        Helper.wait(1);
         navigateToBrowser();
         SnapshotUtil.take("3");
         onView(withId(R.id.url_tv)).perform(replaceText(urlString), pressImeActionButton());

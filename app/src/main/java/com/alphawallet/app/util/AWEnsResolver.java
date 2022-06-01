@@ -78,7 +78,7 @@ public class AWEnsResolver extends EnsResolver
                 if (!TextUtils.isEmpty(ensName))
                 {
                     //check ENS name integrity - it must point to the wallet address
-                    String resolveAddress = resolve(ensName);
+                    String resolveAddress = resolve(ensName, true);
                     if (!resolveAddress.equalsIgnoreCase(address))
                     {
                         ensName = "";
@@ -243,7 +243,7 @@ public class AWEnsResolver extends EnsResolver
             {
                 String previouslyUsedDomain = history.get(address.toLowerCase());
                 //perform an additional check, to ensure this ENS name is still valid, try this ENS name to see if it resolves to the address
-                ensName = resolveENSAddress(previouslyUsedDomain)
+                ensName = resolveENSAddress(previouslyUsedDomain, true)
                         .map(resolvedAddress -> checkResolvedAddressMatches(resolvedAddress, address, previouslyUsedDomain))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
@@ -272,7 +272,7 @@ public class AWEnsResolver extends EnsResolver
      * @param ensName ensName to be resolved to address
      * @return Ethereum address or empty string
      */
-    public Single<String> resolveENSAddress(String ensName)
+    public Single<String> resolveENSAddress(String ensName, boolean performNodeSync)
     {
         return Single.fromCallable(() ->
         {
@@ -281,7 +281,7 @@ public class AWEnsResolver extends EnsResolver
             if (!isValidEnsName(ensName)) return "";
             try
             {
-                address = resolve(ensName);
+                address = resolve(ensName, performNodeSync);
             }
             catch (Exception e)
             {
@@ -293,7 +293,7 @@ public class AWEnsResolver extends EnsResolver
     }
 
     @Override
-    public String resolve(String ensName)
+    public String resolve(String ensName, boolean performSync)
     {
         if (!TextUtils.isEmpty(ensName) && ensName.endsWith(".bit"))
         {
@@ -301,7 +301,7 @@ public class AWEnsResolver extends EnsResolver
         }
         else
         {
-            return super.resolve(ensName);
+            return super.resolve(ensName, performSync);
         }
     }
 

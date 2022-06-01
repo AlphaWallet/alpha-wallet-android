@@ -679,6 +679,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             {
                 viewModel.startBalanceUpdate();
                 startBalanceListener();
+                viewModel.updateGasPrice(activeNetwork.chainId);
             }
         }
         if (urlTv != null)
@@ -1155,6 +1156,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             viewModel.setNetwork(newNetworkId);
             onNetworkChanged(viewModel.getNetworkInfo(newNetworkId));
             startBalanceListener();
+            viewModel.updateGasPrice(newNetworkId);
         }
         //refresh URL page
         reloadPage();
@@ -1364,8 +1366,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         try
         {
-            viewModel.updateGasPrice(activeNetwork.chainId); //start updating gas price right before we open
-            //TODO: Ensure we have received gas price before continuing
             //minimum for transaction to be valid: recipient and value or payload
             if ((confirmationDialog == null || !confirmationDialog.isShowing()) &&
                     (transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor

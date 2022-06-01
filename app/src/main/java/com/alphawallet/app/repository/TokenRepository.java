@@ -353,7 +353,7 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<String> resolveENS(long chainId, String ensName)
     {
         if (ensResolver == null) ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
-        return ensResolver.resolveENSAddress(ensName);
+        return ensResolver.resolveENSAddress(ensName, true);
     }
 
     @Override
@@ -455,6 +455,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private BigDecimal updateERC721Balance(Token token, Wallet wallet)
     {
+        token.setTokenWallet(wallet.address);
         try (Realm realm = getRealmInstance(wallet))
         {
             token.updateBalance(realm);
@@ -1185,7 +1186,7 @@ public class TokenRepository implements TokenRepositoryType {
         OkHttpClient okClient = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();
         AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId (chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);

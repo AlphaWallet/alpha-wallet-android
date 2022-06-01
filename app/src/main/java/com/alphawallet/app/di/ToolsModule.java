@@ -3,9 +3,9 @@ package com.alphawallet.app.di;
 import android.content.Context;
 
 import com.alphawallet.app.interact.WalletConnectInteract;
+import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.google.gson.Gson;
-import com.alphawallet.app.service.RealmManager;
 
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +34,7 @@ public class ToolsModule {
 		return new OkHttpClient.Builder()
                 //.addInterceptor(new LogInterceptor())
                 .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
 				.retryOnConnectionFailure(false)
                 .build();

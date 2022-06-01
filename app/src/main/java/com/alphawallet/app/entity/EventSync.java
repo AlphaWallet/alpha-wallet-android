@@ -362,7 +362,7 @@ public class EventSync
      * Event Handling
      */
 
-    public Pair<Integer, HashSet<BigInteger>> processTransferEvents(Web3j web3j, Event transferEvent, DefaultBlockParameter startBlock,
+    public Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> processTransferEvents(Web3j web3j, Event transferEvent, DefaultBlockParameter startBlock,
                                                                        DefaultBlockParameter endBlock, Realm realm)
             throws IOException, LogOverflowException
     {
@@ -378,7 +378,7 @@ public class EventSync
 
         int eventCount = receiveLogs.getLogs().size();
 
-        HashSet<BigInteger> tokenIds = new HashSet<>(token.processLogsAndStoreTransferEvents(receiveLogs, transferEvent, txHashes, realm));
+        HashSet<BigInteger> rcvTokenIds = new HashSet<>(token.processLogsAndStoreTransferEvents(receiveLogs, transferEvent, txHashes, realm));
 
         EthLog sentLogs = web3j.ethGetLogs(sendFilter).send();
 
@@ -389,7 +389,7 @@ public class EventSync
 
         if (sentLogs.getLogs().size() > eventCount) eventCount = sentLogs.getLogs().size();
 
-        token.processLogsAndStoreTransferEvents(sentLogs, transferEvent, txHashes, realm);
+        HashSet<BigInteger> sendTokenIds = token.processLogsAndStoreTransferEvents(sentLogs, transferEvent, txHashes, realm);
 
         //register Transaction fetches
         for (String txHash : txHashes)
@@ -397,7 +397,7 @@ public class EventSync
             TransactionsService.addTransactionHashFetch(txHash, token.tokenInfo.chainId, token.getWallet());
         }
 
-        return new Pair<>(eventCount, tokenIds);
+        return new Pair<>(eventCount, new Pair<>(rcvTokenIds, sendTokenIds));
     }
 
     public String getActivityName(String toAddress)

@@ -606,6 +606,12 @@ public class TokensRealmSource implements TokenLocalSource {
                 token.setRealmLastBlock(realmToken);
                 writeAssetContract(realm, token);
             }
+
+            //check if name needs to be updated
+            if (!TextUtils.isEmpty(token.tokenInfo.name) && (TextUtils.isEmpty(realmToken.getName()) || !realmToken.getName().equals(token.tokenInfo.name)))
+            {
+                realmToken.setName(token.tokenInfo.name);
+            }
         }
 
         //Final check to see if the token should be visible

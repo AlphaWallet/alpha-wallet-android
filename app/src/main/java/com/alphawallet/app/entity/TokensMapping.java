@@ -18,6 +18,10 @@ public class TokensMapping {
         this.contracts = contracts;
     }
 
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
     public TokenGroup getGroup() {
         if (group == null) return TokenGroup.ASSET;
 

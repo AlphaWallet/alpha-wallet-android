@@ -103,6 +103,11 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return tokensService.getRealmInstance(wallet);
     }
 
+    public Realm getTokenInfoInstance()
+    {
+        return tokensService.getTokenInfoInstance();
+    }
+
     public void checkTokenScriptValidity(Token token)
     {
         disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)

@@ -18,8 +18,8 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
-import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
+import com.alphawallet.app.repository.entity.RealmWalletToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
@@ -71,7 +71,7 @@ public class InputAmount extends LinearLayout
 
     //These need to be members because the listener is shut down if the object doesn't exist
     private RealmTokenTicker realmTickerUpdate;
-    private RealmToken realmTokenUpdate;
+    private RealmWalletToken realmTokenUpdate;
 
     private boolean showingCrypto;
 
@@ -214,7 +214,7 @@ public class InputAmount extends LinearLayout
     {
         if (realmTokenUpdate != null) realmTokenUpdate.removeAllChangeListeners();
 
-        realmTokenUpdate = realm.where(RealmToken.class)
+        realmTokenUpdate = realm.where(RealmWalletToken.class)
                 .equalTo("address", databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase()), Case.INSENSITIVE)
                 .findFirstAsync();
 
@@ -222,7 +222,7 @@ public class InputAmount extends LinearLayout
         tokensService.storeToken(token);
 
         realmTokenUpdate.addChangeListener(realmToken -> {
-            RealmToken rt = (RealmToken)realmToken;
+            RealmWalletToken rt = (RealmWalletToken) realmToken;
             if (rt.isValid() && exactAmount.compareTo(BigDecimal.ZERO) == 0)
             {
                 token = tokensService.getToken(rt.getChainId(), rt.getTokenAddress());

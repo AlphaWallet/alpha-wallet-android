@@ -251,6 +251,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Realm getTokenInfoInstance()
+    {
+        return localSource.getTokenInfoInstance();
+    }
+
+    @Override
     public Single<BigInteger> fetchLatestBlockNumber(long chainId)
     {
         return Single.fromCallable(() -> {

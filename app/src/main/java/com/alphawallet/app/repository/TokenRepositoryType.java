@@ -74,6 +74,7 @@ public interface TokenRepositoryType {
 
     Realm getRealmInstance(Wallet wallet);
     Realm getTickerRealmInstance();
+    Realm getTokenInfoInstance();
 
     Single<BigDecimal> fetchChainBalance(String walletAddress, long chainId);
     Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs);

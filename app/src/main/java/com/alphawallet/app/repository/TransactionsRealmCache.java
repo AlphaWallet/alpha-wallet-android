@@ -12,10 +12,10 @@ import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
-import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.repository.entity.RealmWalletData;
+import com.alphawallet.app.repository.entity.RealmWalletToken;
 import com.alphawallet.app.service.RealmManager;
 
 import java.io.File;
@@ -288,7 +288,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 databaseFile = new File(instance.getConfiguration().getPath());
                 instance.executeTransaction(r -> {
                     //delete all the data
-                    r.where(RealmToken.class).findAll().deleteAllFromRealm();
+                    r.where(RealmWalletToken.class).findAll().deleteAllFromRealm();
                     r.where(RealmTransaction.class).findAll().deleteAllFromRealm();
                     r.where(RealmAuxData.class).findAll().deleteAllFromRealm();
                     r.where(RealmNFTAsset.class).findAll().deleteAllFromRealm();

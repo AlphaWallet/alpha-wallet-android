@@ -19,6 +19,11 @@ public class RealmWalletToken extends RealmObject {
     private boolean visibilityChanged;
     private long lastTxTime;
 
+    public String getDbKey()
+    {
+        return address;
+    }
+
     public String getTokenAddress() {
         String tAddress = address;
         if (tAddress.contains(".")) //base chain
@@ -144,5 +149,6 @@ public class RealmWalletToken extends RealmObject {
         setLastBlock(realmToken.getLastBlock());
         setEarliestTxBlock(realmToken.getEarliestTransactionBlock());
         setVisibilityChanged(realmToken.isVisibilityChanged());
+        setLastTxTime(realmToken.getLastTxTime());
     }
 }

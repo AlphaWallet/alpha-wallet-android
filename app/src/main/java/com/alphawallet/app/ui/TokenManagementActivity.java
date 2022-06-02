@@ -28,7 +28,8 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmStaticToken;
+import com.alphawallet.app.repository.entity.RealmWalletToken;
 import com.alphawallet.app.ui.widget.adapter.TokenListAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.TokenManagementViewModel;
@@ -51,7 +52,8 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
 
     private Wallet wallet;
     private Realm realm;
-    private RealmResults<RealmToken> realmUpdates;
+    private Realm staticTokenRealm;
+    private RealmResults<RealmWalletToken> realmUpdates;
     private String realmId;
     private ArrayList<ContractLocator> tokenUpdates;
 
@@ -188,6 +190,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         {
             realmId = wallet.address;
             realm = viewModel.getRealmInstance(wallet);
+            staticTokenRealm = viewModel.getTokenInfoInstance();
             setRealmListener();
         }
     }
@@ -195,7 +198,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     private void setRealmListener()
     {
         if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
-        realmUpdates = realm.where(RealmToken.class)
+        realmUpdates = realm.where(RealmWalletToken.class)
                 .like("address", ADDRESS_FORMAT)
                 .findAllAsync();
         realmUpdates.addChangeListener(realmTokens -> {
@@ -203,15 +206,19 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
             if (realmTokens.size() == 0 || filterText.length() > 0) return;
 
             //Insert when discover
-            for (RealmToken token : realmTokens)
+            for (RealmWalletToken token : realmTokens)
             {
                 if (adapter.isTokenPresent(token.getTokenAddress())) continue;
 
-                String balance = TokensRealmSource.convertStringBalance(token.getBalance(), token.getContractType());
+                RealmStaticToken st = staticTokenRealm.where(RealmStaticToken.class)
+                        .equalTo("address", token.getDbKey())
+                        .findFirst();
+
+                String balance = TokensRealmSource.convertStringBalance(token.getBalance(), st.getContractType());
                 Token t = viewModel.getTokensService().getToken(token.getChainId(), token.getTokenAddress()); //may not be needed to group
 
                 TokenCardMeta meta = new TokenCardMeta(token.getChainId(), token.getTokenAddress(), balance,
-                        token.getUpdateTime(), viewModel.getAssetDefinitionService(), token.getName(), token.getSymbol(), token.getContractType(),
+                        token.getUpdateTime(), viewModel.getAssetDefinitionService(), st.getName(), st.getSymbol(), st.getContractType(),
                         viewModel.getTokensService().getTokenGroup(t));
                 meta.lastTxUpdate = token.getLastTxTime();
                 adapter.addToken(meta);

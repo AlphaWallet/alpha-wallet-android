@@ -160,14 +160,36 @@ public class TokensService
      */
     private void separateTokenData(RealmToken realmToken, Realm dynamicDataRealm, Realm staticDataRealm)
     {
-        // no need for base tokens
+        String primaryKey = TokensRealmSource.databaseKey(realmToken.getChainId(), realmToken.getTokenAddress());
+        Timber.tag(TAG).d("separateTokenData: primaryKey: %s", primaryKey);
+
+        // separate dynamic data for all tokens
+        RealmWalletToken walletToken = dynamicDataRealm.where(RealmWalletToken.class)
+                .equalTo("address", primaryKey)
+                .findFirst();
+        Timber.tag(TAG).d("separateTokenData: walletToken: %s", walletToken);
+        if (walletToken == null)
+        {
+            try
+            {
+                Timber.tag(TAG).d("separateTokenData: Creating walletToken: ");
+                dynamicDataRealm.executeTransaction( r -> {
+                    RealmWalletToken wt = r.createObject(RealmWalletToken.class, primaryKey);
+                    wt.populate(realmToken);
+                });
+            }
+            catch (Exception e)
+            {
+                Timber.tag(TAG).e(e, "separateTokenData: Failed to save walletToken: ");
+            }
+        }
+
+        // no need to separate Static data for base tokens
         if (realmToken.getTokenAddress().equalsIgnoreCase("eth"))
         {
             return;
         }
-        String primaryKey = TokensRealmSource.databaseKey(realmToken.getChainId(), realmToken.getTokenAddress());
-        Timber.tag(TAG).d("separateTokenData: primaryKey: %s", primaryKey);
-        // get current static token
+        // get current static token if exists. (maybe created by other wallet)
         RealmStaticToken staticToken = staticDataRealm.where(RealmStaticToken.class)
                 .equalTo("address", primaryKey)
                 .findFirst();
@@ -178,8 +200,7 @@ public class TokensService
         {
             try
             {
-                // create object
-                Timber.tag(TAG).d("separateTokenData: Creating static token");
+                Timber.tag(TAG).d("separateTokenData: Creating static token: ");
                 staticDataRealm.executeTransaction( r -> {
                     RealmStaticToken st = r.createObject(RealmStaticToken.class, primaryKey);
                     st.populate(realmToken);
@@ -198,8 +219,6 @@ public class TokensService
         {
             Timber.tag(TAG).d("separateTokenData: Token already exist: %s", staticToken);
         }
-
-        // TODO separate dynamic data
     }
 
     private void checkUnknownTokens()
@@ -847,6 +866,11 @@ public class TokensService
         {
             return null;
         }
+    }
+
+    public Realm getTokenInfoInstance()
+    {
+        return tokenRepository.getTokenInfoInstance();
     }
 
     /**

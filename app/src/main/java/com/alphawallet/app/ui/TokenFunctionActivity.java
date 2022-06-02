@@ -25,7 +25,7 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmWalletToken;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -72,7 +72,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private LinearLayout webWrapper;
     private ActivityHistoryList activityHistoryList = null;
     private Realm realm = null;
-    private RealmResults<RealmToken> realmTokenUpdates;
+    private RealmResults<RealmWalletToken> realmTokenUpdates;
     private ActionSheetDialog confirmationDialog;
 
     private void initViews(Token t) {
@@ -146,10 +146,10 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     {
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
         String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
-        realmTokenUpdates = realm.where(RealmToken.class).equalTo("address", dbKey).findAllAsync();
+        realmTokenUpdates = realm.where(RealmWalletToken.class).equalTo("address", dbKey).findAllAsync();
         realmTokenUpdates.addChangeListener(realmTokens -> {
             if (realmTokens.size() == 0) return;
-            RealmToken t = realmTokens.first();
+            RealmWalletToken t = realmTokens.first();
             Token update = viewModel.getToken(t.getChainId(), t.getTokenAddress());
             if (update != null) initViews(update);
         });

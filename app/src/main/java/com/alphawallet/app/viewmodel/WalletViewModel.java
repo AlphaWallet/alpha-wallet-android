@@ -265,6 +265,11 @@ public class WalletViewModel extends BaseViewModel
         return realmManager.getRealmInstance(getWallet());
     }
 
+    public Realm getTokenInfoInstance()
+    {
+        return realmManager.getTokenInfoInstance();
+    }
+
     public TokenGroup getTokenGroup(long chainId, String address)
     {
         return tokensService.getTokenGroup(tokensService.getToken(chainId, address));

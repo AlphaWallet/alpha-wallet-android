@@ -986,6 +986,14 @@ public class Token
         return realmToken.getDecimals() != tokenInfo.decimals;
     }
 
+    public boolean checkInfoRequiresUpdate(RealmStaticToken staticToken)
+    {
+        if (TextUtils.isEmpty(staticToken.getName()) || (!TextUtils.isEmpty(tokenInfo.name) && !tokenInfo.name.equals(staticToken.getName()))) { return true; }
+        if (TextUtils.isEmpty(staticToken.getSymbol()) || (!TextUtils.isEmpty(tokenInfo.symbol) && !tokenInfo.symbol.equals(staticToken.getSymbol()))) { return true; }
+        if (staticToken.getContractType() != contractType) { return true; }
+        return staticToken.getDecimals() != tokenInfo.decimals;
+    }
+
     public boolean isBatchTransferAvailable()
     {
         return false;

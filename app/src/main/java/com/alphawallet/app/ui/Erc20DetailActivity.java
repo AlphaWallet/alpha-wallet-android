@@ -36,7 +36,8 @@ import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmStaticToken;
+import com.alphawallet.app.repository.entity.RealmWalletToken;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
@@ -75,7 +76,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private TokensAdapter tokenViewAdapter;
     private ActivityHistoryList activityHistoryList = null;
     private Realm realm = null;
-    private RealmResults<RealmToken> realmTokenUpdates;
+    private Realm staticTokenRealm = null;
+    private RealmResults<RealmWalletToken> realmTokenUpdates;
 
     private ViewPager2 viewPager;
 
@@ -283,17 +285,22 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private void setTokenListener()
     {
         if (realm == null) realm = viewModel.getRealmInstance(wallet);
+        if (staticTokenRealm == null) staticTokenRealm = viewModel.getTokenInfoInstance();
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
         String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
         final TokenGroup group = viewModel.getTokensService().getTokenGroup(token);
-        realmTokenUpdates = realm.where(RealmToken.class).equalTo("address", dbKey)
+        realmTokenUpdates = realm.where(RealmWalletToken.class).equalTo("address", dbKey)
                 .greaterThan("addedTime", System.currentTimeMillis() - 5 * DateUtils.MINUTE_IN_MILLIS).findAllAsync();
         realmTokenUpdates.addChangeListener(realmTokens -> {
             if (realmTokens.size() == 0) return;
-            for (RealmToken t : realmTokens)
+            for (RealmWalletToken t : realmTokens)
             {
+                RealmStaticToken st = staticTokenRealm.where(RealmStaticToken.class)
+                        .equalTo("address", dbKey)
+                        .findFirst();
+
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), t.getBalance(),
-                        t.getUpdateTime(), t.getLastTxTime(), t.getContractType(), group);
+                        t.getUpdateTime(), t.getLastTxTime(), st.getContractType(), group);
                 meta.isEnabled = t.isEnabled();
 
                 if (tokenMeta == null)
@@ -353,6 +360,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
         if (tokenViewAdapter != null && tokenView != null) tokenViewAdapter.onDestroy(tokenView);
         if (realm != null) realm.close();
+        if (staticTokenRealm != null) staticTokenRealm.close();
     }
 
     @Override

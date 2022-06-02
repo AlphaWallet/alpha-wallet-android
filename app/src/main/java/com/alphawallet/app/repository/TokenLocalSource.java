@@ -50,6 +50,7 @@ public interface TokenLocalSource {
 
     Realm getRealmInstance(Wallet wallet);
     Realm getTickerRealmInstance();
+    Realm getTokenInfoInstance();
 
     TokenTicker getCurrentTicker(Token token);
     TokenTicker getCurrentTicker(String key);

@@ -52,7 +52,8 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmStaticToken;
+import com.alphawallet.app.repository.entity.RealmWalletToken;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
@@ -111,7 +112,8 @@ public class WalletFragment extends BaseFragment implements
     private boolean isVisible;
     private TokenFilter currentTabPos = TokenFilter.ALL;
     private Realm realm = null;
-    private RealmResults<RealmToken> realmUpdates;
+    private Realm staticTokenRealm = null;
+    private RealmResults<RealmWalletToken> realmUpdates;
     private LargeTitleView largeTitleView;
     private long realmUpdateTime;
 
@@ -239,13 +241,14 @@ public class WalletFragment extends BaseFragment implements
     private void setRealmListener(final long updateTime)
     {
         if (realm == null || realm.isClosed()) realm = viewModel.getRealmInstance();
+        if (staticTokenRealm == null || staticTokenRealm.isClosed()) staticTokenRealm = viewModel.getTokenInfoInstance();
         if (realmUpdates != null)
         {
             realmUpdates.removeAllChangeListeners();
             realm.removeAllChangeListeners();
         }
 
-        realmUpdates = realm.where(RealmToken.class).equalTo("isEnabled", true)
+        realmUpdates = realm.where(RealmWalletToken.class).equalTo("isEnabled", true)
                 .like("address", ADDRESS_FORMAT)
                 .greaterThan("addedTime", (updateTime + 1))
                 .findAllAsync();
@@ -254,17 +257,21 @@ public class WalletFragment extends BaseFragment implements
             long lastUpdateTime = updateTime;
             List<TokenCardMeta> metas = new ArrayList<>();
             //make list
-            for (RealmToken t : realmTokens)
+            for (RealmWalletToken t : realmTokens)
             {
                 if (t.getUpdateTime() > lastUpdateTime) lastUpdateTime = t.getUpdateTime();
                 if (!viewModel.getTokensService().getNetworkFilters().contains(t.getChainId()))
                     continue;
                 if (viewModel.isChainToken(t.getChainId(), t.getTokenAddress())) continue;
 
-                String balance = TokensRealmSource.convertStringBalance(t.getBalance(), t.getContractType());
+                RealmStaticToken st = staticTokenRealm.where(RealmStaticToken.class)
+                        .equalTo("address", t.getDbKey())
+                        .findFirst();
+
+                String balance = TokensRealmSource.convertStringBalance(t.getBalance(), st.getContractType());
 
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance,
-                        t.getUpdateTime(), viewModel.getAssetDefinitionService(), t.getName(), t.getSymbol(), t.getContractType(),
+                        t.getUpdateTime(), viewModel.getAssetDefinitionService(), st.getName(), st.getSymbol(), st.getContractType(),
                         viewModel.getTokenGroup(t.getChainId(), t.getTokenAddress()));
                 meta.lastTxUpdate = t.getLastTxTime();
                 meta.isEnabled = t.isEnabled();
@@ -370,6 +377,7 @@ public class WalletFragment extends BaseFragment implements
             realmUpdates = null;
         }
         if (realm != null && !realm.isClosed()) realm.close();
+        if (staticTokenRealm != null && !staticTokenRealm.isClosed()) staticTokenRealm.close();
         softKeyboardGone();
     }
 
@@ -616,6 +624,7 @@ public class WalletFragment extends BaseFragment implements
             realmUpdates.removeAllChangeListeners();
         }
         if (realm != null && !realm.isClosed()) realm.close();
+        if (staticTokenRealm != null && !staticTokenRealm.isClosed()) staticTokenRealm.close();
         if (adapter != null && recyclerView != null) adapter.onDestroy(recyclerView);
     }
 

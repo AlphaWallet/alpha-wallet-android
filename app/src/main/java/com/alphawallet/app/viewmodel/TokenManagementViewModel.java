@@ -76,4 +76,9 @@ public class TokenManagementViewModel extends BaseViewModel {
     {
         return tokensService.getRealmInstance(wallet);
     }
+
+    public Realm getTokenInfoInstance()
+    {
+        return tokensService.getTokenInfoInstance();
+    }
 }

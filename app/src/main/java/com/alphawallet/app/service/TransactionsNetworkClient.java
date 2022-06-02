@@ -29,9 +29,9 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
-import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
+import com.alphawallet.app.repository.entity.RealmWalletToken;
 import com.alphawallet.token.entity.ContractAddress;
 import com.google.gson.Gson;
 
@@ -863,13 +863,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         long txBlockRead = 0;
         try
         {
-            RealmToken realmToken = instance.where(RealmToken.class)
+            RealmWalletToken realmToken = instance.where(RealmWalletToken.class)
                     .equalTo("address", databaseKey(chainId, walletAddress))
                     .findFirst();
 
             if (realmToken != null)
             {
-                txBlockRead = realmToken.getEarliestTransactionBlock();
+                txBlockRead = realmToken.getEarliestTxBlock();
             }
         }
         catch (Exception e)
@@ -911,14 +911,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         try (Realm instance = realmManager.getRealmInstance(walletAddress))
         {
             instance.executeTransactionAsync(r -> {
-                RealmToken realmToken = r.where(RealmToken.class)
+                RealmWalletToken walletToken = r.where(RealmWalletToken.class)
                         .equalTo("address", databaseKey(chainId, tokenAddress))
                         .findFirst();
 
-                if (realmToken != null)
+                if (walletToken != null)
                 {
-                    realmToken.setLastBlock(Long.parseLong(lastBlockRead));
-                    realmToken.setLastTxTime(System.currentTimeMillis());
+                    walletToken.setLastBlock(Long.parseLong(lastBlockRead));
+                    walletToken.setLastTxTime(System.currentTimeMillis());
                 }
             });
         }
@@ -933,13 +933,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         try
         {
             instance.executeTransaction(r -> {
-                RealmToken realmToken = r.where(RealmToken.class)
+                RealmWalletToken walletToken = r.where(RealmWalletToken.class)
                         .equalTo("address", databaseKey(chainId, walletAddress))
                         .findFirst();
 
-                if (realmToken != null)
+                if (walletToken != null)
                 {
-                    realmToken.setEarliestTransactionBlock(earliestBlock);
+                    walletToken.setEarliestTxBlock(earliestBlock);
                 }
             });
         }
@@ -974,15 +974,15 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private void resetBlockRead(Realm r, long chainId, String walletAddress)
     {
-        RealmToken realmToken = r.where(RealmToken.class)
+        RealmWalletToken walletToken = r.where(RealmWalletToken.class)
                 .equalTo("address", databaseKey(chainId, walletAddress))
                 .findFirst();
 
-        if (realmToken != null)
+        if (walletToken != null)
         {
-            realmToken.setEarliestTransactionBlock(0);
-            realmToken.setLastBlock(0);
-            realmToken.setLastTxTime(0);
+            walletToken.setEarliestTxBlock(0);
+            walletToken.setLastBlock(0);
+            walletToken.setLastTxTime(0);
         }
     }
 

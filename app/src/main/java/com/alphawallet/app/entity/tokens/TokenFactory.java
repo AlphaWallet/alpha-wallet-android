@@ -3,6 +3,8 @@ package com.alphawallet.app.entity.tokens;
 import android.text.TextUtils;
 
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.entity.RealmStaticToken;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmWalletToken;
@@ -12,6 +14,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+
+import timber.log.Timber;
 
 /**
  * Created by James on 27/01/2018.
@@ -281,5 +285,27 @@ public class TokenFactory
         }
         return new TokenInfo(realmStaticToken.getTokenAddress(), realmStaticToken.getName(), realmStaticToken.getSymbol(), realmStaticToken.getDecimals(),
                 walletToken.isEnabled(), realmStaticToken.getChainId());
+    }
+
+    public TokenInfo createTokenInfo(EthereumNetworkRepositoryType networkRepository, RealmWalletToken walletToken, RealmStaticToken staticToken, String walletAddress)
+    {
+        Timber.d("createTokenInfo: walletToken: %s, staticToken: %s, walletAddress: %s", walletAddress, staticToken, walletAddress);
+        try
+        {
+            if (walletToken.getTokenAddress().equals("eth"))
+            {
+                NetworkInfo ni = networkRepository.getNetworkByChain(walletToken.getChainId());
+                TokenInfo info = new TokenInfo(walletAddress, ni.name, ni.symbol, 18, walletToken.isEnabled(), walletToken.getChainId());
+                info.isEnabled = walletToken.isEnabled();
+                return info;
+            }
+            return new TokenInfo(staticToken.getTokenAddress(), staticToken.getName(), staticToken.getSymbol(), staticToken.getDecimals(),
+                    walletToken.isEnabled(), staticToken.getChainId());
+        }
+        catch (Exception e)
+        {
+            Timber.d("createTokenInfo: cannot create Token: ");
+            return null;
+        }
     }
 }

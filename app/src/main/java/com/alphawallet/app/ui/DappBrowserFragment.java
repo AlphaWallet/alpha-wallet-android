@@ -85,7 +85,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmWalletToken;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
@@ -191,7 +191,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 }
             });
     private WebChromeClient.FileChooserParams fileChooserParams;
-    private RealmResults<RealmToken> realmUpdate;
+    private RealmResults<RealmWalletToken> realmUpdate;
     private Realm realm = null;
     private ActionSheetDialog confirmationDialog;
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -862,12 +862,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         if (realm == null || realm.isClosed()) realm = viewModel.getRealmInstance(wallet);
 
         if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
-        realmUpdate = realm.where(RealmToken.class)
+        realmUpdate = realm.where(RealmWalletToken.class)
                 .equalTo("address", TokensRealmSource.databaseKey(activeNetwork.chainId, "eth")).findAllAsync();
         realmUpdate.addChangeListener(realmTokens -> {
             //update balance
             if (realmTokens.size() == 0) return;
-            RealmToken realmToken = realmTokens.first();
+            RealmWalletToken realmToken = realmTokens.first();
             balance.setVisibility(View.VISIBLE);
             symbol.setVisibility(View.VISIBLE);
             String newBalanceStr = BalanceUtils.getScaledValueFixed(new BigDecimal(realmToken.getBalance()), ETHER_DECIMALS, TOKEN_BALANCE_PRECISION);

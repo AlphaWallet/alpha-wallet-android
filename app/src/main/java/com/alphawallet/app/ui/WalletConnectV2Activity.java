@@ -270,6 +270,9 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private void approve(Sign.Model.SessionProposal sessionProposal)
     {
+        List<String> accounts = getAccounts(null);
+        // get methods
+        // get events
         awWalletConnectClient.approve(sessionProposal, this);
     }
 

@@ -132,14 +132,15 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
     public void approve(Sign.Model.SessionProposal sessionProposal, WalletConnectV2Callback callback)
     {
         String proposerPublicKey = sessionProposal.getProposerPublicKey();
-        Sign.Params.Approve approve = new Sign.Params.Approve(proposerPublicKey, getNamespace(sessionProposal), sessionProposal.getRelayProtocol());
+        Sign.Params.Approve approve = new Sign.Params.Approve(proposerPublicKey, getNamespaces(sessionProposal), sessionProposal.getRelayProtocol());
         SignClient.INSTANCE.approveSession(approve, this::onSessionApproveError);
         callback.onSessionProposalApproved();
         updateNotification();
     }
 
-    private Map<String, Sign.Model.Namespace.Session> getNamespace(Sign.Model.SessionProposal sessionProposal)
+    private Map<String, Sign.Model.Namespace.Session> getNamespaces(Sign.Model.SessionProposal sessionProposal)
     {
+        
         return null;
     }
 
@@ -207,6 +208,7 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
         Sign.Params.Init init = new Sign.Params.Init(application,
                 String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, BuildConfig.WALLETCONNECT_PROJECT_ID),
                 appMetaData,
+                null,
                 Sign.ConnectionType.AUTOMATIC);
 
         SignClient.INSTANCE.initialize(init, e ->

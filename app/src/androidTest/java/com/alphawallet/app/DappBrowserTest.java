@@ -12,12 +12,14 @@ import static com.alphawallet.app.util.Helper.waitUntil;
 
 import com.alphawallet.app.util.Helper;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class DappBrowserTest extends BaseE2ETest
 {
 
     @Test
+    @Ignore
     public void should_switch_network()
     {
         String urlString = "https://opensea.io";

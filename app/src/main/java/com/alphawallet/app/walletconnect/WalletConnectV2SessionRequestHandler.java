@@ -11,16 +11,16 @@ import com.alphawallet.app.walletconnect.entity.BaseRequest;
 import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
 import com.alphawallet.app.walletconnect.entity.SignTypedDataRequest;
 import com.alphawallet.app.widget.SignMethodDialog;
-import com.walletconnect.walletconnectv2.client.WalletConnect;
+import com.walletconnect.walletconnectv2.client.Sign;
 
 public class WalletConnectV2SessionRequestHandler
 {
-    private final WalletConnect.Model.SessionRequest sessionRequest;
-    private final WalletConnect.Model.SettledSession settledSession;
+    private final Sign.Model.SessionRequest sessionRequest;
+    private final Sign.Model.Session settledSession;
     private final Activity activity;
     private final AWWalletConnectClient client;
 
-    public WalletConnectV2SessionRequestHandler(WalletConnect.Model.SessionRequest sessionRequest, WalletConnect.Model.SettledSession settledSession, Activity activity, AWWalletConnectClient client)
+    public WalletConnectV2SessionRequestHandler(Sign.Model.SessionRequest sessionRequest, Sign.Model.Session settledSession, Activity activity, AWWalletConnectClient client)
     {
         this.sessionRequest = sessionRequest;
         this.settledSession = settledSession;
@@ -68,21 +68,21 @@ public class WalletConnectV2SessionRequestHandler
     private Dialog ethSign()
     {
         BaseRequest request = new SignRequest(sessionRequest.getRequest().getParams());
-        return new SignMethodDialog(activity, settledSession, sessionRequest, request);
+        return new SignMethodDialog(activity, sessionRequest, request, settledSession.getMetaData());
     }
 
     @NonNull
     private SignMethodDialog ethSignTypedData()
     {
         BaseRequest request = new SignTypedDataRequest(sessionRequest.getRequest().getParams());
-        return new SignMethodDialog(activity, settledSession, sessionRequest, request);
+        return new SignMethodDialog(activity, sessionRequest, request, settledSession.getMetaData());
     }
 
     @NonNull
     private SignMethodDialog personalSign()
     {
         BaseRequest request = new SignPersonalMessageRequest(sessionRequest.getRequest().getParams());
-        return new SignMethodDialog(activity, settledSession, sessionRequest, request);
+        return new SignMethodDialog(activity, sessionRequest, request, settledSession.getMetaData());
     }
 
 }

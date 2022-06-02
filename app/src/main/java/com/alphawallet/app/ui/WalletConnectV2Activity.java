@@ -1,6 +1,5 @@
 package com.alphawallet.app.ui;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,20 +11,23 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
-import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
 import com.alphawallet.app.ui.widget.adapter.MethodAdapter;
 import com.alphawallet.app.ui.widget.adapter.WalletAdapter;
 import com.alphawallet.app.util.LayoutHelper;
 import com.alphawallet.app.viewmodel.WalletConnectV2ViewModel;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.bumptech.glide.Glide;
-import com.walletconnect.walletconnectv2.client.WalletConnect;
+import com.walletconnect.walletconnectv2.client.Sign;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,8 +39,6 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -263,15 +263,14 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         awWalletConnectClient.disconnect(sessionId, this);
     }
 
-    private void reject(WalletConnect.Model.SessionProposal sessionProposal)
+    private void reject(Sign.Model.SessionProposal sessionProposal)
     {
         awWalletConnectClient.reject(sessionProposal, this);
     }
 
-    private void approve(WalletConnect.Model.SessionProposal sessionProposal)
+    private void approve(Sign.Model.SessionProposal sessionProposal)
     {
-        List<String> accounts = getAccounts(sessionProposal.getChains());
-        awWalletConnectClient.approve(sessionProposal, accounts, this);
+        awWalletConnectClient.approve(sessionProposal, this);
     }
 
     private void showSessionsActivity()

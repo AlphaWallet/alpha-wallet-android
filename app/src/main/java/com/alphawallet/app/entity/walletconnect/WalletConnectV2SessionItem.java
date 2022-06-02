@@ -4,6 +4,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.walletconnect.walletconnectv2.client.Sign;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 
 import java.util.ArrayList;
@@ -64,13 +65,13 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static WalletConnectV2SessionItem from(WalletConnect.Model.SessionProposal sessionProposal)
+    public static WalletConnectV2SessionItem from(Sign.Model.SessionProposal sessionProposal)
     {
         WalletConnectV2SessionItem item = new WalletConnectV2SessionItem();
         item.name = sessionProposal.getName();
         item.url = sessionProposal.getUrl();
-        item.icon = sessionProposal.getIcon();
-        item.sessionId = sessionProposal.getTopic();
+        item.icon = sessionProposal.getIcons().isEmpty() ? null : sessionProposal.getIcons().get(0).getRawPath();
+        item.sessionId = sessionProposal.get();
         item.settled = false;
         item.wallets.addAll(sessionProposal.getAccounts());
         item.chains.addAll(sessionProposal.getChains());

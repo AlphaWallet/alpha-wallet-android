@@ -1,5 +1,7 @@
 package com.alphawallet.app.widget;
 
+import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.view.LayoutInflater;
@@ -8,13 +10,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.entity.BaseRequest;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.token.entity.SignMessageType;
@@ -22,20 +29,14 @@ import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.walletconnect.walletconnectv2.client.WalletConnect;
+import com.walletconnect.walletconnectv2.client.Sign;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
 
 public class SignMethodDialog extends BottomSheetDialog
 {
@@ -49,19 +50,19 @@ public class SignMethodDialog extends BottomSheetDialog
     private ChainName networkName;
     private final Activity activity;
     private ImageView closeButton;
-    private final WalletConnect.Model.SettledSession settledSession;
-    private final WalletConnect.Model.SessionRequest sessionRequest;
+    private final Sign.Model.SessionRequest sessionRequest;
     private final BaseRequest request;
     private String walletAddress;
     private SignMethodDialogViewModel viewModel;
     private final Signable signable;
     private SignDataWidget signDataWidget;
+    private final Sign.Model.AppMetaData metaData;
 
-    public SignMethodDialog(@NonNull Activity activity, WalletConnect.Model.SettledSession settledSession, WalletConnect.Model.SessionRequest sessionRequest, BaseRequest request)
+    public SignMethodDialog(@NonNull Activity activity, Sign.Model.SessionRequest sessionRequest, BaseRequest request, Sign.Model.AppMetaData metaData)
     {
         super(activity);
         this.activity = activity;
-        this.settledSession = settledSession;
+        this.metaData = metaData;
         this.sessionRequest = sessionRequest;
         this.request = request;
         this.signable = request.getSignable();
@@ -80,7 +81,7 @@ public class SignMethodDialog extends BottomSheetDialog
 
     private void bindData()
     {
-        List<String> icons = Objects.requireNonNull(settledSession.getPeerAppMetaData()).getIcons();
+        List<String> icons = Objects.requireNonNull(metaData).getIcons();
 
         if (icons.isEmpty())
         {
@@ -92,8 +93,8 @@ public class SignMethodDialog extends BottomSheetDialog
                     .circleCrop()
                     .into(logo);
         }
-        dAppName.setText(settledSession.getPeerAppMetaData().getName());
-        url.setText(settledSession.getPeerAppMetaData().getUrl());
+        dAppName.setText(metaData.getName());
+        url.setText(metaData.getUrl());
         walletAddress = request.getWalletAddress();
         walletTv.setText(walletAddress);
 

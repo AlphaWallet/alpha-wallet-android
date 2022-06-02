@@ -281,7 +281,7 @@ dependencies {
     //Timber
     implementation 'com.jakewharton.timber:timber:5.0.1'
 
-    implementation 'com.github.WalletConnect:WalletConnectKotlinV2:1.0.0-beta03'
+    implementation 'com.github.WalletConnect:WalletConnectKotlinV2:1.0.0-beta100'
     implementation 'androidx.work:work-runtime:2.7.1'
 
     //Analytics

@@ -30,6 +30,7 @@ import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.token.entity.Signable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.walletconnect.walletconnectv2.client.Sign;
 import com.walletconnect.walletconnectv2.client.WalletConnect;
 
 import org.web3j.utils.Numeric;
@@ -46,8 +47,8 @@ import io.reactivex.schedulers.Schedulers;
 public class TransactionDialogBuilder extends DialogFragment
 {
     private final Activity activity;
-    private final WalletConnect.Model.SessionRequest sessionRequest;
-    private final WalletConnect.Model.SettledSession settledSession;
+    private final Sign.Model.SessionRequest sessionRequest;
+    private final Sign.Model.Session settledSession;
     private final AWWalletConnectClient awWalletConnectClient;
     private final boolean signOnly;
     private WalletConnectViewModel viewModel;
@@ -55,7 +56,7 @@ public class TransactionDialogBuilder extends DialogFragment
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> actionSheetDialog.setCurrentGasIndex(result));
 
-    public TransactionDialogBuilder(Activity activity, WalletConnect.Model.SessionRequest sessionRequest, WalletConnect.Model.SettledSession settledSession, AWWalletConnectClient awWalletConnectClient, boolean signOnly)
+    public TransactionDialogBuilder(Activity activity, Sign.Model.SessionRequest sessionRequest, Sign.Model.Session settledSession, AWWalletConnectClient awWalletConnectClient, boolean signOnly)
     {
         this.activity = activity;
         this.sessionRequest = sessionRequest;
@@ -129,7 +130,7 @@ public class TransactionDialogBuilder extends DialogFragment
         {
             actionSheetDialog.setSignOnly();
         }
-        String url = Objects.requireNonNull(settledSession.getPeerAppMetaData()).getUrl();
+        String url = Objects.requireNonNull(settledSession.getMetaData()).getUrl();
         actionSheetDialog.setURL(url);
         actionSheetDialog.setCanceledOnTouchOutside(false);
         actionSheetDialog.waitForEstimate();

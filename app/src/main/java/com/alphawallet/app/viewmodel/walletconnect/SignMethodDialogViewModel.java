@@ -1,8 +1,13 @@
 package com.alphawallet.app.viewmodel.walletconnect;
 
+import static com.alphawallet.app.entity.cryptokeys.SignatureReturnType.SIGNATURE_GENERATED;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.widget.Toast;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Operation;
@@ -11,26 +16,22 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.repository.TransactionRepositoryType;
-import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
-import com.walletconnect.walletconnectv2.client.WalletConnect;
+import com.walletconnect.walletconnectv2.client.Sign;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import timber.log.Timber;
-
-import static com.alphawallet.app.entity.cryptokeys.SignatureReturnType.SIGNATURE_GENERATED;
 
 @HiltViewModel
 public class SignMethodDialogViewModel extends BaseViewModel
@@ -50,7 +51,7 @@ public class SignMethodDialogViewModel extends BaseViewModel
         this.keyService = keyService;
     }
 
-    public void sign(Activity activity, Wallet wallet, WalletConnect.Model.SessionRequest sessionRequest, final Signable signable)
+    public void sign(Activity activity, Wallet wallet, Sign.Model.SessionRequest sessionRequest, final Signable signable)
     {
         keyService.getAuthenticationForSignature(wallet, activity, new SignAuthenticationCallback()
         {
@@ -84,7 +85,7 @@ public class SignMethodDialogViewModel extends BaseViewModel
         Timber.e(throwable);
     }
 
-    private void onSuccess(SignatureFromKey signatureFromKey, WalletConnect.Model.SessionRequest sessionRequest)
+    private void onSuccess(SignatureFromKey signatureFromKey, Sign.Model.SessionRequest sessionRequest)
     {
         if (signatureFromKey.sigType == SIGNATURE_GENERATED)
         {
@@ -113,7 +114,7 @@ public class SignMethodDialogViewModel extends BaseViewModel
         return completed;
     }
 
-    public void reject(WalletConnect.Model.SessionRequest sessionRequest)
+    public void reject(Sign.Model.SessionRequest sessionRequest)
     {
         awWalletConnectClient.reject(sessionRequest);
     }

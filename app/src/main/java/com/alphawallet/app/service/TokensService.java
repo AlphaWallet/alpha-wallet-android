@@ -113,6 +113,7 @@ public class TokensService
     private static boolean done = false;
 
     public static boolean normaliseTokens = false;
+    public static boolean isDbMigrating = false;
 
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
                          TokenRepositoryType tokenRepository,
@@ -347,10 +348,12 @@ public class TokensService
 
     private void checkRealmUpgradeRequired()
     {
-        if (realmManager == null) return;   // if TokensService from WalletsViewModel. No need to process here
+        if (isDbMigrating) return;
+        if (realmManager == null) return;
         Timber.tag(TAG).d("checkRealmUpgradeRequired: doNormalize: %s", normaliseTokens);
         if (normaliseTokens)
         {
+            isDbMigrating = true;
             Timber.tag(TAG).d("Normalizing tokens");
             try
             {
@@ -368,6 +371,10 @@ public class TokensService
             catch (Exception e)
             {
                 Timber.tag(TAG).e(e, "checkRealmUpgradeRequired: Error while normalising Tokens");
+            }
+            finally
+            {
+                isDbMigrating = false;
             }
         }
     }

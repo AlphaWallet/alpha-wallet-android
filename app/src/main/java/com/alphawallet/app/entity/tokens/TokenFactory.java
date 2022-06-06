@@ -289,7 +289,7 @@ public class TokenFactory
 
     public TokenInfo createTokenInfo(EthereumNetworkRepositoryType networkRepository, RealmWalletToken walletToken, RealmStaticToken staticToken, String walletAddress)
     {
-        Timber.d("createTokenInfo: walletToken: %s, staticToken: %s, walletAddress: %s", walletAddress, staticToken, walletAddress);
+        Timber.d("createTokenInfo: walletToken: %s, staticToken: %s, walletAddress: %s", walletToken, staticToken, walletAddress);
         try
         {
             if (walletToken.getTokenAddress().equals("eth"))

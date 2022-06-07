@@ -54,6 +54,7 @@ import java.util.regex.Pattern;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
+import io.realm.RealmObject;
 import io.realm.RealmQuery;
 
 @AndroidEntryPoint
@@ -257,10 +258,16 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     public void onDestroy()
     {
         super.onDestroy();
-        if (realmGasSpread != null && realmGasSpread.isValid())
+        closeRealmSpread(realmGasSpread);
+        closeRealmSpread(realmLegacyGasSpread);
+    }
+
+    private void closeRealmSpread(RealmObject realmSpread)
+    {
+        if (realmSpread != null && realmSpread.isValid())
         {
-            realmGasSpread.removeAllChangeListeners();
-            if (!realmGasSpread.getRealm().isClosed()) realmGasSpread.getRealm().close();
+            realmSpread.removeAllChangeListeners();
+            if (!realmSpread.getRealm().isClosed()) realmSpread.getRealm().close();
         }
     }
 

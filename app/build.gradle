@@ -60,7 +60,7 @@ android {
         versionName "3.54.0"
 
         applicationId "io.stormbird.wallet"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 32
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         testInstrumentationRunnerArguments clearPackageData: 'true'
@@ -127,21 +127,12 @@ android {
         }
     }
     packagingOptions {
-        exclude 'META-INF/NOTICE' // will not include NOTICE file
-        exclude 'META-INF/LICENSE' // will not include LICENSE file
-        exclude 'META-INF/LICENSE.md'
-        exclude 'META-INF/NOTICE.md'
-        exclude 'META-INF/LICENSE-notice.md'
-        exclude 'solidity/ens/build/*.bin'
-        exclude 'solidity/ens/*.sol'
-        exclude 'solidity/ens/build/*.abi'
-        exclude 'en-mnemonic-word-list.txt'
-        exclude 'solidity/*'
-    }
-    lintOptions {
-        baseline file("./check/lint-baseline.xml")
-        lintConfig file('./check/lint-rules.xml')
-        abortOnError false
+        jniLibs {
+            excludes += ['solidity/*']
+        }
+        resources {
+            excludes += ['META-INF/NOTICE', 'META-INF/LICENSE', 'META-INF/LICENSE.md', 'META-INF/NOTICE.md', 'META-INF/LICENSE-notice.md', 'solidity/ens/build/*.bin', 'solidity/ens/*.sol', 'solidity/ens/build/*.abi', 'en-mnemonic-word-list.txt', 'solidity/*']
+        }
     }
     compileOptions {
         targetCompatibility JavaVersion.VERSION_11
@@ -166,6 +157,12 @@ android {
         }
         animationsDisabled = true
     }
+    lint {
+        abortOnError false
+        baseline file('./check/lint-baseline.xml')
+        lintConfig file('./check/lint-rules.xml')
+    }
+    namespace 'com.alphawallet.app'
 }
 
 dependencies {

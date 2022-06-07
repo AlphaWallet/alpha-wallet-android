@@ -304,7 +304,7 @@ public class TokenFactory
         }
         catch (Exception e)
         {
-            Timber.d("createTokenInfo: cannot create Token: ");
+            Timber.d("createTokenInfo: cannot create Token: walletToken: %s, staticToken: %s, walletAddress: %s", walletToken, staticToken, walletAddress);
             return null;
         }
     }

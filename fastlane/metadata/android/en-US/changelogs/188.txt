@@ -1,0 +1,15 @@
+* Update Token Management layout
+* Fixed missing +/- controls (Numeric Input Bottom Sheet)
+* Added Ens Node not synced action sheet in SendPayment
+* Extend NFT transfer
+* Update dapps_list.json
+* Add Network Display Widget for Action Sheet
+* Update Opensea API
+* Simplify display flow to improve NFT and Icon rendering
+* Improve gas estimate
+* Update HECO chain RPC
+* Milkomeda chain support
+* Added Node Status Activity
+* Improve NFT design and scan for assets
+
+

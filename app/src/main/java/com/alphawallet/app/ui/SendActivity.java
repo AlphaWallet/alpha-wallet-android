@@ -196,94 +196,98 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        Operation taskCode = null;
-        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
-            requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
-        }
-
-        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
-        {
-            if (confirmationDialog != null && confirmationDialog.isShowing())
-                confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
-        }
-        else if (requestCode == C.BARCODE_READER_REQUEST_CODE)
-        {
-            switch (resultCode)
+            Operation taskCode = null;
+            if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
             {
-                case Activity.RESULT_OK:
-                    if (data != null)
-                    {
-                        String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
+                taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
+                requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+            }
 
-                        //if barcode is still null, ensure we don't GPF
-                        if (qrCode == null)
+            if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+            {
+                if (confirmationDialog != null && confirmationDialog.isShowing())
+                    confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
+            }
+            else if (requestCode == C.BARCODE_READER_REQUEST_CODE)
+            {
+                switch (resultCode)
+                {
+                    case Activity.RESULT_OK:
+                        if (data != null)
                         {
-                            //Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
-                            displayScanError();
-                            return;
-                        } else {
-                            QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
-                            QRResult result = parser.parse(qrCode);
-                            String extracted_address = null;
-                            if (result != null)
+                            String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
+
+                            //if barcode is still null, ensure we don't GPF
+                            if (qrCode == null)
                             {
-                                extracted_address = result.getAddress();
-                                switch (result.getProtocol())
-                                {
-                                    case "address":
-                                        addressInput.setAddress(extracted_address);
-                                        break;
-                                    case "ethereum":
-                                        //EIP681 protocol
-                                        validateEIP681Request(result, false);
-                                        break;
-                                    default:
-                                        break;
-                                }
+                                //Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                                displayScanError();
+                                return;
                             }
-                            else //try magiclink
+                            else
                             {
-                                ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
-                                try
+                                QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
+                                QRResult result = parser.parse(qrCode);
+                                String extracted_address = null;
+                                if (result != null)
                                 {
-                                    if (magicParser.parseUniversalLink(qrCode).chainId > 0) //see if it's a valid link
+                                    extracted_address = result.getAddress();
+                                    switch (result.getProtocol())
                                     {
-                                        //let's try to import the link
-                                        viewModel.showImportLink(this, qrCode);
-                                        finish();
-                                        return;
+                                        case "address":
+                                            addressInput.setAddress(extracted_address);
+                                            break;
+                                        case "ethereum":
+                                            //EIP681 protocol
+                                            validateEIP681Request(result, false);
+                                            break;
+                                        default:
+                                            break;
                                     }
                                 }
-                                catch (SalesOrderMalformed e)
+                                else //try magiclink
                                 {
-                                    e.printStackTrace();
+                                    ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
+                                    try
+                                    {
+                                        if (magicParser.parseUniversalLink(qrCode).chainId > 0) //see if it's a valid link
+                                        {
+                                            //let's try to import the link
+                                            viewModel.showImportLink(this, qrCode);
+                                            finish();
+                                            return;
+                                        }
+                                    }
+                                    catch (SalesOrderMalformed e)
+                                    {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                if (extracted_address == null)
+                                {
+                                    displayScanError();
                                 }
                             }
-
-                            if (extracted_address == null)
-                            {
-                                displayScanError();
-                            }
                         }
-                    }
-                    break;
-                case QRScanner.DENY_PERMISSION:
-                    showCameraDenied();
-                    break;
-                default:
-                    Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
-                            "Code: " + resultCode
-                    ));
-                    break;
+                        break;
+                    case QRScanner.DENY_PERMISSION:
+                        showCameraDenied();
+                        break;
+                    default:
+                        Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
+                                "Code: " + resultCode
+                        ));
+                        break;
+                }
             }
-        }
-        else
-        {
-            super.onActivityResult(requestCode, resultCode, data);
+            else
+            {
+                super.onActivityResult(requestCode, resultCode, data);
+            }
         }
     }
 

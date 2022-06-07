@@ -5,7 +5,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.walletconnect.walletconnectv2.client.Sign;
-import com.walletconnect.walletconnectv2.client.WalletConnect;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,17 +20,17 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
     public final List<String> chains = new ArrayList<>();
     public final List<String> wallets = new ArrayList<>();
     public final List<String> methods = new ArrayList<>();
-    public WalletConnectV2SessionItem(WalletConnect.Model.SettledSession s)
+    public WalletConnectV2SessionItem(Sign.Model.Session s)
     {
         super();
-        name = Objects.requireNonNull(s.getPeerAppMetaData()).getName();
-        url = Objects.requireNonNull(s.getPeerAppMetaData()).getUrl();
-        icon = s.getPeerAppMetaData().getIcons().isEmpty() ? null : s.getPeerAppMetaData().getIcons().get(0);
+        name = Objects.requireNonNull(s.getMetaData()).getName();
+        url = Objects.requireNonNull(s.getMetaData()).getUrl();
+        icon = s.getMetaData().getIcons().isEmpty() ? null : s.getMetaData().getIcons().get(0);
         sessionId = s.getTopic();
         localSessionId = s.getTopic();
         settled = true;
-        extractChainsAndAddress(s.getAccounts());
-        methods.addAll(s.getPermissions().getJsonRpc().getMethods());
+//        extractChainsAndAddress(s.getAccounts());
+//        methods.addAll(s.getPermissions().getJsonRpc().getMethods());
     }
 
     private void extractChainsAndAddress(List<String> accounts)
@@ -71,11 +70,11 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         item.name = sessionProposal.getName();
         item.url = sessionProposal.getUrl();
         item.icon = sessionProposal.getIcons().isEmpty() ? null : sessionProposal.getIcons().get(0).getRawPath();
-        item.sessionId = sessionProposal.get();
+        item.sessionId = sessionProposal.getProposerPublicKey();
         item.settled = false;
-        item.wallets.addAll(sessionProposal.getAccounts());
-        item.chains.addAll(sessionProposal.getChains());
-        item.methods.addAll(sessionProposal.getMethods());
+//        item.wallets.addAll(sessionProposal.getAccounts());
+//        item.chains.addAll(sessionProposal.getChains());
+//        item.methods.addAll(sessionProposal.getMethods());
         return item;
     }
 

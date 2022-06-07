@@ -31,7 +31,6 @@ import com.alphawallet.token.entity.Signable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.walletconnect.walletconnectv2.client.Sign;
-import com.walletconnect.walletconnectv2.client.WalletConnect;
 
 import org.web3j.utils.Numeric;
 
@@ -162,7 +161,7 @@ public class TransactionDialogBuilder extends DialogFragment
                 approve(Numeric.toHexString(data), awWalletConnectClient);
                 actionSheetDialog.transactionWritten(".");
             }
-        }, Objects.requireNonNull(settledSession.getPeerAppMetaData()).getUrl(), WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), fromWallet);
+        }, Objects.requireNonNull(settledSession.getMetaData()).getUrl(), WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), fromWallet);
     }
 
     private void sendTransaction(Wallet wallet, Web3Transaction tx, AWWalletConnectClient awWalletConnectClient)

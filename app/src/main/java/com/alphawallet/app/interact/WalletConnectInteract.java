@@ -5,8 +5,8 @@ import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
-import com.walletconnect.walletconnectv2.client.WalletConnect;
-import com.walletconnect.walletconnectv2.client.WalletConnectClient;
+import com.walletconnect.walletconnectv2.client.Sign;
+import com.walletconnect.walletconnectv2.client.SignClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,9 +61,8 @@ public class WalletConnectInteract
     private List<WalletConnectSessionItem> getWalletConnectV2SessionItems()
     {
         List<WalletConnectSessionItem> result = new ArrayList<>();
-        List<WalletConnect.Model.SettledSession> listOfSettledSessions = WalletConnectClient.INSTANCE.getListOfSettledSessions();
-        for (WalletConnect.Model.SettledSession session : listOfSettledSessions)
-        {
+        List<Sign.Model.Session> listOfSettledSessions = SignClient.INSTANCE.getListOfSettledSessions();
+        for (Sign.Model.Session session : listOfSettledSessions) {
             result.add(new WalletConnectV2SessionItem(session));
         }
         return result;

@@ -26,7 +26,6 @@ import com.alphawallet.app.interact.ActivityDataInteract;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.ActivityViewModel;
@@ -35,8 +34,6 @@ import com.alphawallet.app.widget.SystemView;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
@@ -48,13 +45,12 @@ import io.realm.RealmResults;
 @AndroidEntryPoint
 public class ActivityFragment extends BaseFragment implements View.OnClickListener, ActivityDataInteract
 {
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private ActivityViewModel viewModel;
-
     private SystemView systemView;
     private ActivityAdapter adapter;
     private RecyclerView listView;
     private RealmResults<RealmTransaction> realmUpdates;
-    private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean checkTimer;
     private Realm realm;
     private long lastUpdateTime = 0;
@@ -62,7 +58,8 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    {
         LocaleUtils.setActiveLocale(getContext());
         View view = inflater.inflate(R.layout.fragment_transactions, container, false);
         toolbar(view);
@@ -92,7 +89,8 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
             for (ActivityMeta am : activityItems)
             {
-                if (am instanceof TransactionMeta && am.getTimeStampSeconds() > lastUpdateTime) lastUpdateTime = am.getTimeStampSeconds() - 60;
+                if (am instanceof TransactionMeta && am.getTimeStampSeconds() > lastUpdateTime)
+                    lastUpdateTime = am.getTimeStampSeconds() - 60;
             }
         }
 
@@ -143,8 +141,11 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         {
             if (am instanceof TransactionMeta)
             {
-                List<TokenTransferData> tokenTransfers = getTokenTransfersForHash(realm, (TransactionMeta)am);
-                if (tokenTransfers.size() != 1) { filteredList.add(am); } //only 1 token transfer ? No need to show the underlying transaction
+                List<TokenTransferData> tokenTransfers = getTokenTransfersForHash(realm, (TransactionMeta) am);
+                if (tokenTransfers.size() != 1)
+                {
+                    filteredList.add(am);
+                } //only 1 token transfer ? No need to show the underlying transaction
                 filteredList.addAll(tokenTransfers);
             }
         }
@@ -186,7 +187,6 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         listView = view.findViewById(R.id.list);
         listView.setLayoutManager(new LinearLayoutManager(getContext()));
         listView.setAdapter(adapter);
-        listView.addItemDecoration(new ListDivider(getContext()));
         listView.addRecyclerListener(holder -> adapter.onRViewRecycled(holder));
 
         systemView.attachRecyclerView(listView);
@@ -252,7 +252,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         super.onResume();
         if (viewModel == null)
         {
-            ((HomeActivity)getActivity()).resetFragment(WalletPage.ACTIVITY);
+            ((HomeActivity) getActivity()).resetFragment(WalletPage.ACTIVITY);
         }
         else
         {
@@ -271,7 +271,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
             checkTimer = false;
             handler.postDelayed(() -> {
                 checkTimer = true;
-            }, 5*DateUtils.SECOND_IN_MILLIS); //restrict checking for previous transactions every 5 seconds
+            }, 5 * DateUtils.SECOND_IN_MILLIS); //restrict checking for previous transactions every 5 seconds
         }
     }
 

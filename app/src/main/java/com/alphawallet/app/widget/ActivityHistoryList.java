@@ -21,7 +21,6 @@ import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 
 import java.util.ArrayList;
@@ -38,14 +37,14 @@ import io.realm.Sort;
  */
 public class ActivityHistoryList extends LinearLayout
 {
-    private ActivityAdapter activityAdapter;
-    private Realm realm;
-    private RealmResults<RealmTransaction> realmTransactionUpdates;
-    private RealmQuery<RealmTransaction> realmUpdateQuery;
     private final RecyclerView recentTransactionsView;
     private final LinearLayout noTxNotice;
     private final ProgressBar loadingTransactions;
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private ActivityAdapter activityAdapter;
+    private Realm realm;
+    private RealmResults<RealmTransaction> realmTransactionUpdates;
+    private RealmQuery<RealmTransaction> realmUpdateQuery;
 
     public ActivityHistoryList(Context context, @Nullable AttributeSet attrs)
     {
@@ -54,7 +53,6 @@ public class ActivityHistoryList extends LinearLayout
 
         recentTransactionsView = findViewById(R.id.list);
         recentTransactionsView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recentTransactionsView.addItemDecoration(new ListDivider(getContext()));
         loadingTransactions = findViewById(R.id.loading_transactions);
         noTxNotice = findViewById(R.id.layout_no_recent_transactions);
     }
@@ -210,7 +208,8 @@ public class ActivityHistoryList extends LinearLayout
         handler.removeCallbacksAndMessages(null);
         if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
         if (realm != null && !realm.isClosed()) realm.close();
-        if (activityAdapter != null && recentTransactionsView != null) activityAdapter.onDestroy(recentTransactionsView);
+        if (activityAdapter != null && recentTransactionsView != null)
+            activityAdapter.onDestroy(recentTransactionsView);
         realmUpdateQuery = null;
     }
 }

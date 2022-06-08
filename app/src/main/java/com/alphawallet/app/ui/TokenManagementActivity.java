@@ -30,7 +30,6 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.TokenListAdapter;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.TokenManagementViewModel;
 
 import java.util.ArrayList;
@@ -40,25 +39,49 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 @AndroidEntryPoint
-public class TokenManagementActivity extends BaseActivity implements TokenListAdapter.ItemClickListener {
-
+public class TokenManagementActivity extends BaseActivity implements TokenListAdapter.ItemClickListener
+{
+    private final Handler delayHandler = new Handler(Looper.getMainLooper());
     private TokenManagementViewModel viewModel;
-
     private RecyclerView tokenList;
     private Button saveButton;
     private TokenListAdapter adapter;
-    private EditText search;
+    private final TextWatcher textWatcher = new TextWatcher()
+    {
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count)
+        {
+        }
 
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after)
+        {
+        }
+
+        @Override
+        public void afterTextChanged(final Editable s)
+        {
+            delayHandler.removeCallbacksAndMessages(null);
+            delayHandler.postDelayed(() -> {
+                if (adapter != null) adapter.filter(s.toString());
+            }, 750);
+        }
+    };
+    private EditText search;
     private Wallet wallet;
     private Realm realm;
     private RealmResults<RealmToken> realmUpdates;
     private String realmId;
     private ArrayList<ContractLocator> tokenUpdates;
-
-    private final Handler delayHandler = new Handler(Looper.getMainLooper());
+    final ActivityResultLauncher<Intent> addTokenLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getData() == null) return;
+                tokenUpdates = result.getData().getParcelableArrayListExtra(ADDED_TOKEN);
+            });
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_token_management);
         toolbar();
@@ -67,7 +90,8 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         tokenUpdates = null;
     }
 
-    private void initViews() {
+    private void initViews()
+    {
         viewModel = new ViewModelProvider(this)
                 .get(TokenManagementViewModel.class);
         viewModel.tokens().observe(this, this::onTokens);
@@ -77,7 +101,6 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         saveButton = findViewById(R.id.btn_apply);
         search = findViewById(R.id.edit_search);
 
-        tokenList.addItemDecoration(new ListDivider(this));
         tokenList.setLayoutManager(new LinearLayoutManager(this));
 
         saveButton.setOnClickListener(v -> {
@@ -90,20 +113,8 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         search.addTextChangedListener(textWatcher);
     }
 
-    private final TextWatcher textWatcher = new TextWatcher() {
-        @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
-        @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-        @Override
-        public void afterTextChanged(final Editable s) {
-            delayHandler.removeCallbacksAndMessages(null);
-            delayHandler.postDelayed(() -> {
-                if (adapter != null) adapter.filter(s.toString());
-            }, 750);
-        }
-    };
-
-    private void onTokens(TokenCardMeta[] tokenArray) {
+    private void onTokens(TokenCardMeta[] tokenArray)
+    {
         if (tokenArray != null && tokenArray.length > 0)
         {
             adapter = new TokenListAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), tokenArray, this);
@@ -114,21 +125,17 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     }
 
     @Override
-    public void onItemClick(Token token, boolean enabled) {
+    public void onItemClick(Token token, boolean enabled)
+    {
         viewModel.setTokenEnabled(wallet, token, enabled);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu_add, menu);
         return super.onCreateOptionsMenu(menu);
     }
-
-    final ActivityResultLauncher<Intent> addTokenLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getData() == null) return;
-                tokenUpdates = result.getData().getParcelableArrayListExtra(ADDED_TOKEN);
-            });
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
@@ -146,7 +153,8 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
 
         /*
@@ -168,7 +176,8 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
         super.onBackPressed();
         if (search.getText().length() > 0)
         {

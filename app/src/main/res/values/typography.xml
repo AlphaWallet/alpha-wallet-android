@@ -115,8 +115,7 @@
     <style name="Aw.Typography.StandardHeader" parent="TextAppearance.AppCompat">
         <item name="android:fontFamily">@font/font_semibold</item>
         <item name="android:lines">1</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:textColor">?android:textColorSecondary</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
         <item name="android:textSize">@dimen/sp15</item>
     </style>
 </resources>

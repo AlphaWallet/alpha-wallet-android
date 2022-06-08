@@ -94,8 +94,6 @@
 
             </RelativeLayout>
 
-            <View style="@style/Aw.Component.Separator" />
-
             <RelativeLayout
                 android:id="@+id/layout_tokenscript_compatibility"
                 android:layout_width="match_parent"

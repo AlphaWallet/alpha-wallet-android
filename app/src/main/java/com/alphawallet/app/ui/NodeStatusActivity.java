@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.adapter.NodeStatusAdapter;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.NodeStatusViewModel;
 import com.alphawallet.app.widget.StandardHeader;
 import com.alphawallet.ethereum.NetworkInfo;
@@ -23,7 +22,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
 
 @AndroidEntryPoint
-public class NodeStatusActivity extends BaseActivity {
+public class NodeStatusActivity extends BaseActivity
+{
 
     RecyclerView mainnetRecyclerView;
     RecyclerView testnetRecyclerView;
@@ -36,7 +36,8 @@ public class NodeStatusActivity extends BaseActivity {
     NodeStatusViewModel viewModel;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_node_status);
         toolbar();
@@ -60,10 +61,8 @@ public class NodeStatusActivity extends BaseActivity {
         testnetRecyclerView = findViewById(R.id.test_list);
 
         mainnetRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mainnetRecyclerView.addItemDecoration(new ListDivider(this));
 
         testnetRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        testnetRecyclerView.addItemDecoration(new ListDivider(this));
     }
 
     private void setupList(List<NetworkInfo> networkInfoList)
@@ -99,7 +98,8 @@ public class NodeStatusActivity extends BaseActivity {
 
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy()
+    {
         try
         {
             if (mainnetAdapter != null)

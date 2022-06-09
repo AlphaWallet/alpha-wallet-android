@@ -6,6 +6,7 @@
     <color name="transparent">#00000000</color>
     <color name="translucent_light">#B3FFFFFF</color>
     <color name="translucent_dark">#80000000</color>
+    <color name="translucent_gray">#33000000</color>
     <color name="translucent_red">#19ff3b30</color>
     <color name="translucent_green">#1975b943</color>
     <color name="button_primary_disabled">@color/mike</color>

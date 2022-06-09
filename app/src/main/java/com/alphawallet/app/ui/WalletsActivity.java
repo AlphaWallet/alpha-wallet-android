@@ -314,14 +314,10 @@ public class WalletsActivity extends BaseActivity implements
         addWalletView.setOnNewWalletClickListener(this);
         addWalletView.setOnImportWalletClickListener(this);
         addWalletView.setOnWatchWalletClickListener(this);
-        addWalletView.setOnCloseActionListener(this);
         dialog = new BottomSheetDialog(this);
-//        dialog = new BottomSheetDialog(this, R.style.Aw_Component_BottomSheetDialog);
         dialog.setContentView(addWalletView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
-//        BottomSheetBehavior behavior = BottomSheetBehavior.from((View) addWalletView.getParent());
-//        dialog.setOnShowListener(dialog -> behavior.setPeekHeight(addWalletView.getHeight()));
         dialog.show();
     }
 

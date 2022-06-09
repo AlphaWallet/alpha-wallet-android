@@ -10,7 +10,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.VibrationEffect;
@@ -23,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -32,7 +30,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -47,7 +44,6 @@ import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -111,15 +107,16 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         bottomSheet = new BottomSheetDialog(getContext());
         bottomSheet.setCancelable(true);
         bottomSheet.setCanceledOnTouchOutside(true);
-        moreActionsListView = new ListView(getContext());
+
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.layout_more_actions, null);
+        moreActionsListView = view.findViewById(R.id.list_view);
         moreActionsList = new ArrayList<>();
         moreActionsAdapter = new FunctionItemAdapter(getContext(),
                 R.layout.item_action, moreActionsList);
         moreActionsListView.setAdapter(moreActionsAdapter);
-        bottomSheet.setContentView(moreActionsListView);
+        bottomSheet.setContentView(view);
         moreActionsListView.setOnItemClickListener(this);
-        moreActionsListView.setDivider(new ColorDrawable(Utils.getColorFromAttr(getContext(), R.attr.colorSurfaceQuaternary)));
-        moreActionsListView.setDividerHeight(Utils.dp2px(context, 1));
     }
 
     private void resetButtonCount()

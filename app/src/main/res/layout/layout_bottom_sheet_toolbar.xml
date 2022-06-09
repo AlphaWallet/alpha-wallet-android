@@ -41,13 +41,13 @@
 
         <ImageView
             android:id="@+id/logo"
-            android:layout_width="@dimen/token_icon"
-            android:layout_height="@dimen/token_icon"
+            android:layout_width="@dimen/token_icon_small"
+            android:layout_height="@dimen/token_icon_small"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="@dimen/mini_4"
+            android:layout_marginEnd="@dimen/standard_16"
             android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_launcher_foreground" />
+            android:src="@drawable/ic_logo" />
 
     </RelativeLayout>
 

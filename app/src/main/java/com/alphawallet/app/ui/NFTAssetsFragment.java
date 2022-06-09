@@ -38,7 +38,6 @@ import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NFTAssetsAdapter;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.divider.ItemOffsetDecoration;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.NFTAssetsViewModel;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
@@ -55,7 +54,6 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     private Wallet wallet;
     private RecyclerView recyclerView;
     private ItemOffsetDecoration gridItemDecoration;
-    private ListDivider listItemDecoration;
     private EditText search;
     private LinearLayout searchLayout;
     private RecyclerView.Adapter<?> adapter;
@@ -102,8 +100,6 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
             gridItemDecoration = new ItemOffsetDecoration(recyclerView.getContext(), R.dimen.grid_divider_offset);
 
-            listItemDecoration = new ListDivider(recyclerView.getContext());
-
             if (hasTokenScriptOverride(token))
             {
                 showListView();
@@ -148,7 +144,6 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     public void showGridView()
     {
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        recyclerView.removeItemDecoration(listItemDecoration);
         recyclerView.addItemDecoration(gridItemDecoration);
         recyclerView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.surface));
         initAndAttachAdapter(true);
@@ -158,7 +153,6 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.removeItemDecoration(gridItemDecoration);
-        recyclerView.addItemDecoration(listItemDecoration);
         recyclerView.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.background_bottom_border));
         recyclerView.setPadding(0, 0, 0, 0);
         initAndAttachAdapter(false);

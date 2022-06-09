@@ -50,6 +50,7 @@
         <item name="tabTextAppearance">@style/Aw.Typography.Tab</item>
         <item name="tabSelectedTextColor">?colorAccent</item>
         <item name="tabTextColor">?android:textColorSecondary</item>
+        <item name="tabIndicator">@drawable/tab_indicator</item>
         <item name="tabIndicatorFullWidth">true</item>
     </style>
 

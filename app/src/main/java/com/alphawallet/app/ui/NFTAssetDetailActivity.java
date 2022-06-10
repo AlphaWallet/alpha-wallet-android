@@ -286,7 +286,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         tokenImage.setupTokenImage(asset);
         triggeredReload = false;
 
-        if (TextUtils.isEmpty(asset.getImage()))
+        if (!tokenImage.isDisplayingImage() && TextUtils.isEmpty(asset.getImage()))
         {
             tokenImage.showFallbackLayout(token);
         }

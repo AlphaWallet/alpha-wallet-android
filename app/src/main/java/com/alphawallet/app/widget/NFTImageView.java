@@ -244,4 +244,9 @@ public class NFTImageView extends RelativeLayout
     {
         imageUrl = null;
     }
+
+    public boolean isDisplayingImage()
+    {
+        return !TextUtils.isEmpty(imageUrl);
+    }
 }

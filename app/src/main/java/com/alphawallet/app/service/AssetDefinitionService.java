@@ -19,6 +19,7 @@ import android.util.Pair;
 import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractLocator;
@@ -967,9 +968,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     //Call contract and check for script
-    public Single<File> fetchTokenScriptFromContract(Token token)
+    public Single<File> fetchTokenScriptFromContract(Token token, MutableLiveData<Boolean> updateFlag)
     {
         return token.getScriptURI()
+                .map(uri -> {
+                    if (!TextUtils.isEmpty(uri)) updateFlag.postValue(true);
+                    return uri; })
                 .map(uri -> downloadScript(uri, 0))
                 .map(xmlBody -> storeFile(token.tokenInfo.address, xmlBody));
     }
@@ -2483,13 +2487,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    public Single<TokenDefinition> checkServerForScript(Token token)
+    public Single<TokenDefinition> checkServerForScript(Token token, MutableLiveData<Boolean> updateFlag)
     {
         TokenScriptFile tf = getTokenScriptFile(token.tokenInfo.chainId, token.getAddress());
         if ((tf != null && !TextUtils.isEmpty(tf.getName())) && !isInSecureZone(tf)) return Single.fromCallable(TokenDefinition::new); //early return for debug script check
 
         //try the contractURI, then server
-        return fetchTokenScriptFromContract(token)
+        return fetchTokenScriptFromContract(token, updateFlag)
                 .flatMap(file -> tryServerIfRequired(file, token.getAddress().toLowerCase()))
                 .flatMap(this::cacheSignature)
                 .flatMap(this::handleNewTSFile)

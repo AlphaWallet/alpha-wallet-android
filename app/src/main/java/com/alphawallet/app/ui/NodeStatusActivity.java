@@ -1,6 +1,9 @@
 package com.alphawallet.app.ui;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -12,6 +15,8 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.adapter.NodeStatusAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.NodeStatusViewModel;
+import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.ActionSheetMode;
 import com.alphawallet.app.widget.StandardHeader;
 import com.alphawallet.ethereum.NetworkInfo;
 
@@ -34,6 +39,8 @@ public class NodeStatusActivity extends BaseActivity {
     NodeStatusAdapter testnetAdapter;
 
     NodeStatusViewModel viewModel;
+
+    ActionSheetDialog sheetDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,6 +104,31 @@ public class NodeStatusActivity extends BaseActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.menu_help, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        int id = item.getItemId();
+        if (id == R.id.action_help)
+        {
+            // show bottom sheet
+            showNodeStatusHelp();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showNodeStatusHelp()
+    {
+        sheetDialog = new ActionSheetDialog(this, ActionSheetMode.NODE_STATUS_INFO);
+        sheetDialog.show();
+    }
 
     @Override
     protected void onDestroy() {

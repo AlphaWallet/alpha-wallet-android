@@ -932,4 +932,11 @@
     <string name="message_transaction_timeout">The transaction has timed out. You can view the status in activity page.</string>
     <string name="error_transaction_timeout">Transaction Timeout</string>
     <string name="action_node_status">Node Status</string>
+    <string name="action_help">Help</string>
+    <string name="help_title_node_status">What is Node status?</string>
+    <string name="help_message_what_is_node_status">With Node Status you can measure how fast nodes respond to transactions</string>
+    <string name="node_status_label">- %s</string>
+    <string name="node_status_strong">under 1 second</string>
+    <string name="mode_status_medium">over 1 second</string>
+    <string name="node_status_not_responding">not responding</string>
 </resources>

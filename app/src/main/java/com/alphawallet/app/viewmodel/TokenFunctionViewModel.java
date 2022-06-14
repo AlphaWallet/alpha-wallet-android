@@ -113,6 +113,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
     private final MutableLiveData<NFTAsset> attrs = new MutableLiveData<>();
     private final MutableLiveData<AssetContract> assetContract = new MutableLiveData<>();
     private final MutableLiveData<NFTAsset> nftAsset = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> scriptUpdateInProgress = new MutableLiveData<>();
 
     private Wallet wallet;
 
@@ -124,6 +125,9 @@ public class TokenFunctionViewModel extends BaseViewModel {
 
     @Nullable
     private Disposable calcGasCost;
+
+    @Nullable
+    private Disposable scriptUpdate;
 
     @Inject
     TokenFunctionViewModel(
@@ -179,6 +183,8 @@ public class TokenFunctionViewModel extends BaseViewModel {
     {
         return newScriptFound;
     }
+
+    public LiveData<Boolean> scriptUpdateInProgress() { return scriptUpdateInProgress; }
 
     public MutableLiveData<TransactionData> transactionFinalised()
     {
@@ -553,6 +559,10 @@ public class TokenFunctionViewModel extends BaseViewModel {
         {
             metadataDisposable.dispose();
         }
+        if (scriptUpdate != null && !scriptUpdate.isDisposed())
+        {
+            scriptUpdate.dispose();
+        }
     }
 
     public OpenSeaService getOpenseaService()
@@ -567,17 +577,24 @@ public class TokenFunctionViewModel extends BaseViewModel {
 
     public void checkForNewScript(Token token)
     {
+        if (token == null) return;
         //check server for new tokenscript
-        assetDefinitionService.checkServerForScript(token)
+        scriptUpdate = assetDefinitionService.checkServerForScript(token, scriptUpdateInProgress)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.single())
-                .subscribe(this::handleDefinition, this::onError)
-                .isDisposed();
+                .subscribe(this::handleDefinition, e -> scriptUpdateInProgress.postValue(false));
     }
 
     private void handleDefinition(TokenDefinition td)
     {
-        if (!TextUtils.isEmpty(td.holdingToken)) newScriptFound.postValue(true);
+        if (!TextUtils.isEmpty(td.holdingToken))
+        {
+            newScriptFound.postValue(true);
+        }
+        else
+        {
+            scriptUpdateInProgress.postValue(false);
+        }
     }
 
     public boolean isAuthorizeToFunction()

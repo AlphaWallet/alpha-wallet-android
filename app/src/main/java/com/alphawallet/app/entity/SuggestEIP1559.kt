@@ -36,7 +36,7 @@ fun SuggestEIP1559(gasService: GasService, feeHistory: FeeHistory): Single<Mutab
 private fun calculateResult(priorityFee: BigInteger, feeHistory: FeeHistory): Single<MutableMap<Int, EIP1559FeeOracleResult>>
 {
     return Single.fromCallable{
-        val baseFee: Array<BigInteger> = feeHistory!!.baseFeePerGas.map {
+        val baseFee: Array<BigInteger> = feeHistory.baseFeePerGas.map {
             Numeric.toBigInt(it)
         }.toTypedArray()
 

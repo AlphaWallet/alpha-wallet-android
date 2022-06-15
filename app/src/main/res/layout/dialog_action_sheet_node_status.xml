@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="60dp"
+        android:layout_height="5dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/small_12"
+        android:background="@drawable/rectangle_pill" />
+
+    <TextView
+        style="@style/Aw.Typography.Title.Large.Bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/large_32"
+        android:gravity="center"
+        android:text="@string/help_title_node_status" />
+
+    <TextView
+        style="@style/Aw.Typography"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/cozy_20"
+        android:layout_marginTop="@dimen/standard_16"
+        android:layout_marginBottom="@dimen/standard_16"
+        android:gravity="center"
+        android:text="@string/help_message_what_is_node_status" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/giant_40">
+
+        <com.alphawallet.app.widget.NodeStatusInfo
+            android:id="@+id/node_status_strong"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:icon="@drawable/ic_node_strong"
+            android:text="@string/node_status_strong"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.alphawallet.app.widget.NodeStatusInfo
+            android:id="@+id/node_status_medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/dp5"
+            android:icon="@drawable/ic_node_medium"
+            android:text="@string/mode_status_medium"
+            app:layout_constraintStart_toStartOf="@id/node_status_strong"
+            app:layout_constraintTop_toBottomOf="@id/node_status_strong" />
+
+        <com.alphawallet.app.widget.NodeStatusInfo
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/dp5"
+            android:layout_marginBottom="@dimen/giant_40"
+            android:icon="@drawable/ic_node_not_responding"
+            android:text="@string/node_status_not_responding"
+            app:layout_constraintStart_toStartOf="@id/node_status_strong"
+            app:layout_constraintTop_toBottomOf="@id/node_status_medium" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

@@ -40,12 +40,14 @@ import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.NFTImageView;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.TSAction;
+import com.alphawallet.token.entity.XMLDsigDescriptor;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -202,6 +204,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
+        viewModel.checkForNewScript(token);
     }
 
     private void initViewModel()
@@ -212,6 +215,45 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel.nftAsset().observe(this, this::onNftAsset);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
+        viewModel.scriptUpdateInProgress().observe(this, this::startScriptDownload);
+        viewModel.sig().observe(this, this::onSignature);
+        viewModel.newScriptFound().observe(this, this::newScriptFound);
+    }
+
+    private void newScriptFound(Boolean status)
+    {
+        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
+        certificateToolbar.stopDownload();
+        //determinate signature
+        if (token != null)
+        {
+            certificateToolbar.setVisibility(View.VISIBLE);
+            viewModel.checkTokenScriptValidity(token);
+
+            //now re-load the verbs
+            setupFunctionBar();
+        }
+    }
+
+    private void onSignature(XMLDsigDescriptor descriptor)
+    {
+        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
+        certificateToolbar.onSigData(descriptor, this);
+    }
+
+    private void startScriptDownload(Boolean status)
+    {
+        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
+        if (status)
+        {
+            certificateToolbar.setVisibility(View.VISIBLE);
+            certificateToolbar.startDownload();
+        }
+        else
+        {
+            certificateToolbar.stopDownload();
+            certificateToolbar.setVisibility(View.GONE);
+        }
     }
 
     private void setupFunctionBar()
@@ -286,7 +328,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         tokenImage.setupTokenImage(asset);
         triggeredReload = false;
 
-        if (TextUtils.isEmpty(asset.getImage()))
+        if (!tokenImage.isDisplayingImage() && TextUtils.isEmpty(asset.getImage()))
         {
             tokenImage.showFallbackLayout(token);
         }

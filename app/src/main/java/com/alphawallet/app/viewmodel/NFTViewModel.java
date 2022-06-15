@@ -39,6 +39,7 @@ public class NFTViewModel extends BaseViewModel {
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
     private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
     private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> scriptUpdateInProgress = new MutableLiveData<>();
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
@@ -48,6 +49,8 @@ public class NFTViewModel extends BaseViewModel {
     private Disposable nftBalanceCheck;
     @Nullable
     private Disposable nftCheckCycle;
+    @Nullable
+    private Disposable scriptUpdate;
 
     @Inject
     public NFTViewModel(FetchTransactionsInteract fetchTransactionsInteract,
@@ -68,6 +71,8 @@ public class NFTViewModel extends BaseViewModel {
     {
         return newScriptFound;
     }
+
+    public LiveData<Boolean> scriptUpdateInProgress() { return scriptUpdateInProgress; }
 
     public LiveData<Token> tokenUpdate()
     {
@@ -126,16 +131,22 @@ public class NFTViewModel extends BaseViewModel {
     public void checkForNewScript(Token token)
     {
         //check server for new tokenscript
-        assetDefinitionService.checkServerForScript(token)
+        scriptUpdate = assetDefinitionService.checkServerForScript(token, scriptUpdateInProgress)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.single())
-                .subscribe(this::handleFilename, this::onError)
-                .isDisposed();
+                .subscribe(this::handleFilename, e -> scriptUpdateInProgress.postValue(false));
     }
 
     private void handleFilename(TokenDefinition td)
     {
-        if (!TextUtils.isEmpty(td.holdingToken)) newScriptFound.postValue(true);
+        if (!TextUtils.isEmpty(td.holdingToken))
+        {
+            newScriptFound.postValue(true);
+        }
+        else
+        {
+            scriptUpdateInProgress.postValue(false);
+        }
     }
 
     public void restartServices()
@@ -188,5 +199,6 @@ public class NFTViewModel extends BaseViewModel {
         if (nftCheckCycle != null && !nftCheckCycle.isDisposed()) nftCheckCycle.dispose();
         if (nftBalanceCheck != null && !nftBalanceCheck.isDisposed()) nftBalanceCheck.dispose();
         if (disposable != null && !disposable.isDisposed()) disposable.dispose();
+        if (scriptUpdate != null && !scriptUpdate.isDisposed()) scriptUpdate.dispose();
     }
 }

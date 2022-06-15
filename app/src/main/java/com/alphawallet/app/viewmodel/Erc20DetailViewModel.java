@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -26,6 +27,7 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
@@ -34,11 +36,16 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final MutableLiveData<ActivityMeta[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
     private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> scriptUpdateInProgress = new MutableLiveData<>();
+
     private final MyAddressRouter myAddressRouter;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final OnRampRepositoryType onRampRepository;
+
+    @Nullable
+    private Disposable scriptUpdate;
 
     @Inject
     public Erc20DetailViewModel(MyAddressRouter myAddressRouter,
@@ -63,6 +70,8 @@ public class Erc20DetailViewModel extends BaseViewModel {
     {
         return newScriptFound;
     }
+
+    public LiveData<Boolean> scriptUpdateInProgress() { return scriptUpdateInProgress; }
 
     public void showMyAddress(Context context, Wallet wallet, Token token)
     {
@@ -123,16 +132,22 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public void checkForNewScript(Token token)
     {
         //check server for new tokenscript
-        assetDefinitionService.checkServerForScript(token)
+        scriptUpdate = assetDefinitionService.checkServerForScript(token, scriptUpdateInProgress)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.single())
-                .subscribe(this::handleFilename, this::onError)
-                .isDisposed();
+                .subscribe(this::handleFilename, e -> scriptUpdateInProgress.postValue(false));
     }
 
     private void handleFilename(TokenDefinition td)
     {
-        if (!TextUtils.isEmpty(td.holdingToken)) newScriptFound.postValue(true);
+        if (!TextUtils.isEmpty(td.holdingToken))
+        {
+            newScriptFound.postValue(true);
+        }
+        else
+        {
+            scriptUpdateInProgress.postValue(false);
+        }
     }
 
     public void restartServices()
@@ -149,5 +164,15 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public OnRampRepositoryType getOnRampRepository() {
         return onRampRepository;
+    }
+
+    @Override
+    public void onCleared()
+    {
+        super.onCleared();
+        if (scriptUpdate != null && !scriptUpdate.isDisposed())
+        {
+            scriptUpdate.dispose();
+        }
     }
 }

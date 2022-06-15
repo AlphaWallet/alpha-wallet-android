@@ -36,6 +36,7 @@ public class AdvancedSettingsActivity extends BaseActivity
 {
     private AdvancedSettingsViewModel viewModel;
 
+    private SettingsItemView nodeStatus;
     private SettingsItemView console;
     private SettingsItemView clearBrowserCache;
     private SettingsItemView tokenScript;
@@ -77,6 +78,12 @@ public class AdvancedSettingsActivity extends BaseActivity
 
     private void initializeSettings()
     {
+        nodeStatus = new SettingsItemView.Builder(this)
+                .withIcon(R.drawable.ic_settings_node_status)
+                .withTitle(R.string.action_node_status)
+                .withListener(this::onNodeStatusClicked)
+                .build();
+
         console = new SettingsItemView.Builder(this)
                 .withIcon(R.drawable.ic_settings_console)
                 .withTitle(R.string.title_console)
@@ -140,6 +147,7 @@ public class AdvancedSettingsActivity extends BaseActivity
     private void addSettingsToLayout()
     {
         LinearLayout advancedSettingsLayout = findViewById(R.id.layout);
+        advancedSettingsLayout.addView(nodeStatus);
         advancedSettingsLayout.addView(console);
         advancedSettingsLayout.addView(clearBrowserCache);
 
@@ -150,6 +158,11 @@ public class AdvancedSettingsActivity extends BaseActivity
         advancedSettingsLayout.addView(fullScreenSettings);
         advancedSettingsLayout.addView(refreshTokenDatabase);
         advancedSettingsLayout.addView(eip1559Transactions);
+    }
+
+    private void onNodeStatusClicked()
+    {
+        startActivity(new Intent(this, NodeStatusActivity.class));
     }
 
     private void onConsoleClicked()

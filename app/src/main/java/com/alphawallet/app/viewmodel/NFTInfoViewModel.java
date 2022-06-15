@@ -94,7 +94,7 @@ public class NFTInfoViewModel extends BaseViewModel {
     public void checkForNewScript(Token token)
     {
         //check server for new tokenscript
-        assetDefinitionService.checkServerForScript(token)
+        assetDefinitionService.checkServerForScript(token, null) //TODO: Handle flag for new script
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.single())
                 .subscribe(this::handleFilename, this::onError)

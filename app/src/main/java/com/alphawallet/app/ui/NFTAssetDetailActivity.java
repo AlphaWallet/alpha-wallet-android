@@ -205,6 +205,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
         viewModel.checkForNewScript(token);
+        viewModel.checkTokenScriptValidity(token);
     }
 
     private void initViewModel()

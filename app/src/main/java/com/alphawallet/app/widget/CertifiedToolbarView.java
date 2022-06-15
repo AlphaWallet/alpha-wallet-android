@@ -18,7 +18,7 @@ public class CertifiedToolbarView extends MaterialToolbar
     private Activity activity;
     private AWalletAlertDialog dialog;
     private final ProgressBar downloadSpinner;
-    private int lockResource;
+    private int lockResource = 0;
 
     public CertifiedToolbarView(Context ctx, @Nullable AttributeSet attrs)
     {
@@ -107,7 +107,10 @@ public class CertifiedToolbarView extends MaterialToolbar
 
     public void startDownload()
     {
-        downloadSpinner.setVisibility(View.VISIBLE);
+        if (lockResource == 0)
+        {
+            downloadSpinner.setVisibility(View.VISIBLE);
+        }
     }
 
     public void stopDownload()

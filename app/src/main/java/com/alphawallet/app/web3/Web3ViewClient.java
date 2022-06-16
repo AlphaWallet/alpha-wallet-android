@@ -151,6 +151,7 @@ public class Web3ViewClient extends WebViewClient {
             myIntent.setPackage(appId);
             myIntent.setData(Uri.parse(msg));
             myIntent.putExtra(Intent.EXTRA_TEXT, msg);
+            myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(myIntent);
         }
         else

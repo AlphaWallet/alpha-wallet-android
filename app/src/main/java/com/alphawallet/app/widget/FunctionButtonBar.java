@@ -109,7 +109,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         bottomSheet.setCanceledOnTouchOutside(true);
 
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.layout_more_actions, null);
+        View view = inflater.inflate(R.layout.layout_more_actions, this, false);
         moreActionsListView = view.findViewById(R.id.list_view);
         moreActionsList = new ArrayList<>();
         moreActionsAdapter = new FunctionItemAdapter(getContext(),

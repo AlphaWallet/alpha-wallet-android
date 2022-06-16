@@ -65,7 +65,7 @@ public class Web3ViewClientTest
     ArgumentCaptor<Intent> intentCaptor;
 
     @Test
-    public void should_override_url_loading_and_start_telegram_if_installed()
+    public void should_start_trusted_app_if_installed()
     {
         assumeAppInstalled(context, PACKAGE_NAME_OF_TELEGRAM);
         boolean overrideUrlLoading = new Web3ViewClient(context).shouldOverrideUrlLoading(null, URL_TG_JOIN_INVITE);
@@ -81,13 +81,23 @@ public class Web3ViewClientTest
     }
 
     @Test
-    public void should_override_url_loading_and_notify_user_if_telegram_not_installed() throws PackageManager.NameNotFoundException
+    public void should_notify_user_if_trusted_app_not_installed() throws PackageManager.NameNotFoundException
     {
         assumeNotAppInstalled(context, PACKAGE_NAME_OF_TELEGRAM);
         boolean overrideUrlLoading = new Web3ViewClient(context).shouldOverrideUrlLoading(null, URL_TG_JOIN_INVITE);
         assertTrue(overrideUrlLoading);
 
         assertThat(ShadowToast.getTextOfLatestToast(), is("Required App not Installed"));
+    }
+
+    @Test
+    public void should_override_untrusted_app_request()
+    {
+        WebView webView = Mockito.mock(WebView.class);
+        String url= "discord://discordapp.com/channels/someId/someId2/someId3";
+        boolean overrideUrlLoading = new Web3ViewClient(context).shouldOverrideUrlLoading(webView, url);
+        assertTrue(overrideUrlLoading);
+        Mockito.verify(webView).loadUrl(url);
     }
 
     @Test

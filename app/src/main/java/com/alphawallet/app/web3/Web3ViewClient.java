@@ -61,16 +61,11 @@ public class Web3ViewClient extends WebViewClient {
 
         if (!url.startsWith("http"))
         {
-            result = true;
-        }
-        if (isMainFrame && isRedirect) {
-            result = true;
+            webView.loadUrl(url);
+            return true;
         }
 
-        if (result && !TextUtils.isEmpty(url)) {
-            webView.loadUrl(url);
-        }
-        return result;
+        return false;
     }
 
     @Override

@@ -5,7 +5,9 @@ import static android.content.Intent.EXTRA_TEXT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.never;
 
 import android.content.Context;
 import android.content.Intent;
@@ -101,7 +103,7 @@ public class Web3ViewClientTest
     }
 
     @Test
-    public void should_override_main_frame_redirect_request()
+    public void should_not_override_main_frame_redirect_request()
     {
         WebResourceRequest request = Mockito.mock(WebResourceRequest.class);
         String url = "https://alphawallet.com";
@@ -111,9 +113,9 @@ public class Web3ViewClientTest
 
         WebView webView = Mockito.mock(WebView.class);
         boolean overrideUrlLoading = new Web3ViewClient(context).shouldOverrideUrlLoading(webView, request);
-        assertTrue(overrideUrlLoading);
+        assertFalse(overrideUrlLoading);
 
-        Mockito.verify(webView).loadUrl(url);
+        Mockito.verify(webView, never()).loadUrl(url);
     }
 
     private void assumeNotAppInstalled(Context context, String packageName) throws PackageManager.NameNotFoundException

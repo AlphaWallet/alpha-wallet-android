@@ -107,30 +107,6 @@ public class Web3View extends WebView {
         }
     };
     @Nullable
-    private OnVerifyListener onVerifyListener;
-    private final OnVerifyListener innerOnVerifyListener = new OnVerifyListener() {
-        @Override
-        public void onVerify(String message, String signHex)
-        {
-            if (onVerifyListener != null)
-            {
-                onVerifyListener.onVerify(message, signHex);
-            }
-        }
-    };
-    @Nullable
-    private OnGetBalanceListener onGetBalanceListener;
-    private final OnGetBalanceListener innerOnGetBalanceListener = new OnGetBalanceListener() {
-        @Override
-        public void onGetBalance(String balance)
-        {
-            if (onGetBalanceListener != null)
-            {
-                onGetBalanceListener.onGetBalance(balance);
-            }
-        }
-    };
-    @Nullable
     private OnWalletActionListener onWalletActionListener;
     private final OnWalletActionListener innerOnWalletActionListener = new OnWalletActionListener() {
         @Override
@@ -267,25 +243,9 @@ public class Web3View extends WebView {
         loadInterface = iFace;
     }
 
-    @Nullable
-    public String getRpcUrl()
-    {
-        return webViewClient.getJsInjectorClient().getRpcUrl();
-    }
-
     public void setRpcUrl(@NonNull String rpcUrl)
     {
         webViewClient.getJsInjectorClient().setRpcUrl(rpcUrl);
-    }
-
-    public void addUrlHandler(@NonNull UrlHandler urlHandler)
-    {
-        webViewClient.addUrlHandler(urlHandler);
-    }
-
-    public void removeUrlHandler(@NonNull UrlHandler urlHandler)
-    {
-        webViewClient.removeUrlHandler(urlHandler);
     }
 
     public void setOnSignTransactionListener(@Nullable OnSignTransactionListener onSignTransactionListener)
@@ -323,16 +283,6 @@ public class Web3View extends WebView {
         this.onWalletActionListener = onWalletActionListener;
     }
 
-    public void setOnVerifyListener(@Nullable OnVerifyListener onVerifyListener)
-    {
-        this.onVerifyListener = onVerifyListener;
-    }
-
-    public void setOnGetBalanceListener(@Nullable OnGetBalanceListener onGetBalanceListener)
-    {
-        this.onGetBalanceListener = onGetBalanceListener;
-    }
-
     public void onSignTransactionSuccessful(Web3Transaction transaction, String signHex)
     {
         long callbackId = transaction.leafPosition;
@@ -355,18 +305,6 @@ public class Web3View extends WebView {
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, error);
     }
 
-    public void onSignError(Web3Transaction transaction, String error)
-    {
-        long callbackId = transaction.leafPosition;
-        callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, error);
-    }
-
-    public void onSignError(EthereumMessage message, String error)
-    {
-        long callbackId = message.leafPosition;
-        callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, error);
-    }
-
     public void onSignCancel(long callbackId)
     {
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
@@ -381,9 +319,7 @@ public class Web3View extends WebView {
     public void onWalletActionSuccessful(long callbackId, String expression)
     {
         String callback = String.format(JS_PROTOCOL_EXPR_ON_SUCCESSFUL, callbackId, expression);
-        post(() -> {
-            evaluateJavascript(callback, Timber::d);
-        });
+        post(() -> evaluateJavascript(callback, Timber::d));
     }
 
     public void resetView()

@@ -22,22 +22,12 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 public class Web3ViewClient extends WebViewClient {
 
     private final JsInjectorClient jsInjectorClient;
-    private final UrlHandlerManager urlHandlerManager;
 
     private final Context context;
 
     public Web3ViewClient(Context context) {
         this.jsInjectorClient = new JsInjectorClient(context);
-        this.urlHandlerManager = new UrlHandlerManager();
         this.context = context;
-    }
-
-    void addUrlHandler(UrlHandler urlHandler) {
-        urlHandlerManager.add(urlHandler);
-    }
-
-    void removeUrlHandler(UrlHandler urlHandler) {
-        urlHandlerManager.remove(urlHandler);
     }
 
     public JsInjectorClient getJsInjectorClient()
@@ -63,7 +53,6 @@ public class Web3ViewClient extends WebViewClient {
 
     private boolean shouldOverrideUrlLoading(WebView webView, String url, boolean isMainFrame, boolean isRedirect) {
         boolean result = false;
-        String urlToOpen = urlHandlerManager.handle(url);
         //manually handle trusted intents
         if (handleTrustedApps(url))
         {
@@ -75,12 +64,11 @@ public class Web3ViewClient extends WebViewClient {
             result = true;
         }
         if (isMainFrame && isRedirect) {
-            urlToOpen = url;
             result = true;
         }
 
-        if (result && !TextUtils.isEmpty(urlToOpen)) {
-            webView.loadUrl(urlToOpen);
+        if (result && !TextUtils.isEmpty(url)) {
+            webView.loadUrl(url);
         }
         return result;
     }

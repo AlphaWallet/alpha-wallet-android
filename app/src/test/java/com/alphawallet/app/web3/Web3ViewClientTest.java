@@ -12,6 +12,8 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebView;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -28,6 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.annotation.Config;
@@ -42,6 +45,9 @@ public class Web3ViewClientTest
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
+
+    @Spy
+    private Context context = ApplicationProvider.getApplicationContext();
 
     @Before
     public void setUpMockito()
@@ -61,7 +67,6 @@ public class Web3ViewClientTest
     @Test
     public void should_override_url_loading_and_start_telegram_if_installed()
     {
-        Context context = Mockito.spy(ApplicationProvider.getApplicationContext());
         assumeAppInstalled(context, PACKAGE_NAME_OF_TELEGRAM);
         boolean overrideUrlLoading = new Web3ViewClient(context).shouldOverrideUrlLoading(null, URL_TG_JOIN_INVITE);
         assertTrue(overrideUrlLoading);
@@ -78,12 +83,27 @@ public class Web3ViewClientTest
     @Test
     public void should_override_url_loading_and_notify_user_if_telegram_not_installed() throws PackageManager.NameNotFoundException
     {
-        Context context = Mockito.spy(ApplicationProvider.getApplicationContext());
         assumeNotAppInstalled(context, PACKAGE_NAME_OF_TELEGRAM);
         boolean overrideUrlLoading = new Web3ViewClient(context).shouldOverrideUrlLoading(null, URL_TG_JOIN_INVITE);
         assertTrue(overrideUrlLoading);
 
         assertThat(ShadowToast.getTextOfLatestToast(), is("Required App not Installed"));
+    }
+
+    @Test
+    public void should_override_main_frame_redirect_request()
+    {
+        WebResourceRequest request = Mockito.mock(WebResourceRequest.class);
+        String url = "https://alphawallet.com";
+        Mockito.doReturn(Uri.parse(url)).when(request).getUrl();
+        Mockito.doReturn(true).when(request).isRedirect();
+        Mockito.doReturn(true).when(request).isForMainFrame();
+
+        WebView webView = Mockito.mock(WebView.class);
+        boolean overrideUrlLoading = new Web3ViewClient(context).shouldOverrideUrlLoading(webView, request);
+        assertTrue(overrideUrlLoading);
+
+        Mockito.verify(webView).loadUrl(url);
     }
 
     private void assumeNotAppInstalled(Context context, String packageName) throws PackageManager.NameNotFoundException

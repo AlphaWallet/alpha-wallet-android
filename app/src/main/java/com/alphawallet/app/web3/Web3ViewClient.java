@@ -1,14 +1,10 @@
 package com.alphawallet.app.web3;
 
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.N;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.http.SslError;
-import android.text.TextUtils;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -37,7 +33,7 @@ public class Web3ViewClient extends WebViewClient {
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        return shouldOverrideUrlLoading(view, url, false, false);
+        return handleTrustedApps(url);
     }
 
     @Override
@@ -46,26 +42,7 @@ public class Web3ViewClient extends WebViewClient {
             return false;
         }
         String url = request.getUrl().toString();
-        boolean isMainFrame = request.isForMainFrame();
-        boolean isRedirect = SDK_INT >= N && request.isRedirect();
-        return shouldOverrideUrlLoading(view, url, isMainFrame, isRedirect);
-    }
-
-    private boolean shouldOverrideUrlLoading(WebView webView, String url, boolean isMainFrame, boolean isRedirect) {
-        boolean result = false;
-        //manually handle trusted intents
-        if (handleTrustedApps(url))
-        {
-            return true;
-        }
-
-        if (!url.startsWith("http"))
-        {
-            webView.loadUrl(url);
-            return true;
-        }
-
-        return false;
+        return handleTrustedApps(url);
     }
 
     @Override

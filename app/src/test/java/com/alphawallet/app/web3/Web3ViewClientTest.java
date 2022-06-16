@@ -93,13 +93,13 @@ public class Web3ViewClientTest
     }
 
     @Test
-    public void should_override_untrusted_app_request()
+    public void should_not_override_untrusted_app_request()
     {
         WebView webView = Mockito.mock(WebView.class);
         String url= "discord://discordapp.com/channels/someId/someId2/someId3";
         boolean overrideUrlLoading = new Web3ViewClient(context).shouldOverrideUrlLoading(webView, url);
-        assertTrue(overrideUrlLoading);
-        Mockito.verify(webView).loadUrl(url);
+        assertFalse(overrideUrlLoading);
+        Mockito.verify(webView, never()).loadUrl(url);
     }
 
     @Test

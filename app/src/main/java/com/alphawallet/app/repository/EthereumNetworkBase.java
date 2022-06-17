@@ -167,7 +167,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static final String ROPSTEN_FALLBACK_RPC_URL = "https://ropsten.infura.io/v3/" + getSecondaryInfuraKey();
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
-    public static final String XDAI_RPC_URL = "https://rpc.xdaichain.com/";
+    public static final String XDAI_RPC_URL = "https://rpc.ankr.com/gnosis/";
     public static final String POA_RPC_URL = "https://core.poa.network/";
     public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + getInfuraKey();
     public static final String SOKOL_RPC_URL = "https://sokol.poa.network";

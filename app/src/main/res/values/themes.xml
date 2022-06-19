@@ -68,6 +68,9 @@
         <!-- The color applied to chart tabs -->
         <item name="colorSurfaceDark">@color/surface_dark</item>
 
+        <item name="colorSurfaceVariant"></item>
+
+
         <!-- Default Component Styles -->
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textColorHint">@color/text_secondary</item>

@@ -13,6 +13,8 @@ import androidx.preference.PreferenceManager;
 import com.alphawallet.app.util.ReleaseTree;
 
 import dagger.hilt.android.HiltAndroidApp;
+import io.reactivex.functions.Consumer;
+import io.reactivex.plugins.RxJavaPlugins;
 import io.realm.Realm;
 import timber.log.Timber;
 
@@ -58,6 +60,8 @@ public class App extends Application
                 AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO);
             }
         }
+
+        RxJavaPlugins.setErrorHandler(Timber::e);
 
         // enable pin code for the application
 //		LockManager<CustomPinActivity> lockManager = LockManager.getInstance();

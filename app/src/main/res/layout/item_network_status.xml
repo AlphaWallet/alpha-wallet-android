@@ -53,7 +53,7 @@
         android:layout_height="@dimen/token_icon_small"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        tools:background="@drawable/ic_circle_green"
+        tools:background="@drawable/ic_node_strong"
         android:clickable="false"
         android:focusable="false"
         android:contentDescription="@string/status"

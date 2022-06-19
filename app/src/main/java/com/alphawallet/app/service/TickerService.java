@@ -757,11 +757,12 @@ public class TickerService
     {
         StringBuilder tokenList = new StringBuilder();
         boolean firstPair = true;
-        for (String cp : chainPairs.values())
+        for (long chainId : chainPairs.keySet())
         {
+            if (ethTickers.containsKey(chainId)) { continue; }
             if (!firstPair) tokenList.append(",");
             firstPair = false;
-            tokenList.append(cp);
+            tokenList.append(chainPairs.get(chainId));
         }
 
         return COINGECKO_CHAIN_CALL.replace(CHAIN_IDS, tokenList.toString()).replace(CURRENCY_TOKEN, currentCurrencySymbolTxt);

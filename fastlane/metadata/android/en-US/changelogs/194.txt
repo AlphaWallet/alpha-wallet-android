@@ -1,0 +1,8 @@
+- Add new networks: Cardano Milkomeda, Cronos mainnet, Phi.
+- Improve NFT balance update.
+- Fix token type mappings (eg DeFi, Governance).
+- Fix node connections (chain RPCs updates).
+- Improve numeric input.
+- Improve gas estimate.
+- Fix TokenScript operations.
+- Various fixes and improvements.

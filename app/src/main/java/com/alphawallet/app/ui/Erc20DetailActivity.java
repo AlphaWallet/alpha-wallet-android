@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
@@ -80,7 +81,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private ViewPager2 viewPager;
 
-    private class DetailPage {
+    private static class DetailPage {
         private final int tabNameResourceId;
         private final Fragment fragment;
 
@@ -203,7 +204,23 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                     .get(Erc20DetailViewModel.class);
             viewModel.newScriptFound().observe(this, this::onNewScript);
             viewModel.sig().observe(this, this::onSignature);
+            viewModel.scriptUpdateInProgress().observe(this, this::startScriptDownload);
 //            findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE); //Samoa TODO: restore certificate toolbar
+        }
+    }
+
+    private void startScriptDownload(Boolean status)
+    {
+        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
+        if (status)
+        {
+            certificateToolbar.setVisibility(View.VISIBLE);
+            certificateToolbar.startDownload();
+        }
+        else
+        {
+            certificateToolbar.stopDownload();
+            certificateToolbar.setVisibility(View.GONE);
         }
     }
 
@@ -215,6 +232,9 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         tokenViewAdapter.updateToken(new TokenCardMeta(token.tokenInfo.chainId, token.getAddress(), "force_update",
                 token.updateBlancaTime, token.lastTxCheck, token.getInterfaceSpec(), group), true);
         viewModel.checkTokenScriptValidity(token); //check script signature
+        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
+        certificateToolbar.stopDownload();
+        setupButtons();
     }
 
     private void onSignature(XMLDsigDescriptor descriptor)

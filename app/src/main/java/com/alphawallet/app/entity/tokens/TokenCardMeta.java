@@ -186,7 +186,8 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
         if (TextUtils.isEmpty(name))
         {
-            return hasPositiveBalance() ? Long.MAX_VALUE - Math.abs(tokenAddress.hashCode()) : Long.MAX_VALUE;
+            return hasPositiveBalance() ? Long.MAX_VALUE - Math.abs(tokenAddress.hashCode()) :
+                    Long.MAX_VALUE - Math.abs(tokenAddress.hashCode())/2;
         }
 
         int i = 4;
@@ -204,13 +205,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
             }
         }
 
-        String address = com.alphawallet.token.tools.Numeric.cleanHexPrefix(tokenAddress);
-        for (i = 0; i < address.length() && i < 2; i++)
-        {
-            char c = address.charAt(i);
-            int w = c - '0';
-            weight += w;
-        }
+        weight += tokenAddress.hashCode()%1753; //prime modulus factor for disambiguation
 
         if (weight < 2) weight = 2;
 

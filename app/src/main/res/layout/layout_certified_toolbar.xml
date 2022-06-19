@@ -5,6 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize">
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
     <ImageView
         android:id="@+id/image_lock"
         android:layout_width="30dp"
@@ -12,6 +16,16 @@
         android:src="@mipmap/ic_locked"
         android:visibility="gone"
         tools:visibility="visible" />
+
+    <ProgressBar
+        android:id="@+id/cert_progress_spinner"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:indeterminateDrawable="@drawable/progress_bar_spinner"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/toolbar_title"

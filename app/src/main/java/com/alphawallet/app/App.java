@@ -20,6 +20,7 @@ import java.util.Stack;
 import javax.inject.Inject;
 
 import dagger.hilt.android.HiltAndroidApp;
+import io.reactivex.plugins.RxJavaPlugins;
 import io.realm.Realm;
 import timber.log.Timber;
 
@@ -81,6 +82,8 @@ public class App extends Application
                 AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO);
             }
         }
+
+        RxJavaPlugins.setErrorHandler(Timber::e);
 
         try
         {

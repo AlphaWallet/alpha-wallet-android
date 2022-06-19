@@ -11,6 +11,7 @@ import org.junit.Test;
 public class ManageNetworkTest extends BaseE2ETest
 {
     @Test
+    @Ignore
     public void should_add_custom_network()
     {
         createNewWallet();

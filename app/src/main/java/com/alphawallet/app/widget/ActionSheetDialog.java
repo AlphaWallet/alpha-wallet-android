@@ -379,6 +379,35 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         isAttached = true;
     }
 
+    public ActionSheetDialog(Activity activity, ActionSheetMode mode)
+    {
+        super(activity);
+        this.activity = activity;
+        this.mode = mode;
+        if (mode == ActionSheetMode.NODE_STATUS_INFO)
+        {
+            setContentView(R.layout.dialog_action_sheet_node_status);
+        }
+        cancelButton = null;
+        gasWidget = null;
+        gasWidgetLegacy = null;
+        balanceDisplay = null;
+        networkDisplay = null;
+        confirmationWidget = null;
+        addressDetail = null;
+        amountDisplay = null;
+        assetDetailView = null;
+        functionBar = null;
+        detailWidget = null;
+        walletConnectRequestWidget = null;
+        gasWidgetInterface = null;
+        token = null;
+        tokensService = null;
+        candidateTransaction = null;
+        actionSheetCallback = null;
+        callbackId = 0;
+    }
+
     public void setSignOnly()
     {
         //sign only, and return signature to process

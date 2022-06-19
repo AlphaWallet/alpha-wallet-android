@@ -56,8 +56,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 186
-        versionName "3.54.0"
+        versionCode 197
+        versionName "3.57.0"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 24
@@ -113,7 +113,18 @@ android {
             dimension "targetting"
         }
     }
-
+    signingConfigs {
+        release {
+            // Add below 4 properties into ~/.gradle/gradle.properties
+            // Run ./gradlew assembleRelease to build production apk
+            if (project.hasProperty('RELEASE_STORE_FILE')) {
+                storeFile file(RELEASE_STORE_FILE)
+                storePassword RELEASE_STORE_PASSWORD
+                keyAlias RELEASE_KEY_ALIAS
+                keyPassword RELEASE_KEY_PASSWORD
+            }
+        }
+    }
     buildTypes {
         debug {
             minifyEnabled false
@@ -123,8 +134,11 @@ android {
         }
         release {
             minifyEnabled false
+            if (signingConfigs.release.storeFile) {
+                signingConfig signingConfigs.release
+            }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
+            }
     }
     packagingOptions {
         exclude 'META-INF/NOTICE' // will not include NOTICE file
@@ -165,6 +179,18 @@ android {
             includeAndroidResources = true
         }
         animationsDisabled = true
+    }
+}
+
+task printVersionName {
+    doLast {
+        println android.defaultConfig.versionName
+    }
+}
+
+task printVersionCode {
+    doLast {
+        println android.defaultConfig.versionCode
     }
 }
 

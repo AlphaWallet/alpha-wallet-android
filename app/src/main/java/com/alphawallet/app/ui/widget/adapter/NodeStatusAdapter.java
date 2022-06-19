@@ -65,15 +65,15 @@ public class NodeStatusAdapter extends RecyclerView.Adapter<NodeStatusAdapter.Vi
 
             if (nodeStatus == NodeStatus.STRONG)
             {
-                holder.status.setBackgroundResource(R.drawable.ic_circle_green);
+                holder.status.setBackgroundResource(R.drawable.ic_node_strong);
             }
             else if (nodeStatus == NodeStatus.MEDIUM)
             {
-                holder.status.setBackgroundResource(R.drawable.ic_circle_yellow);
+                holder.status.setBackgroundResource(R.drawable.ic_node_medium);
             }
             else
             {
-                holder.status.setBackgroundResource(R.drawable.ic_circle_red);
+                holder.status.setBackgroundResource(R.drawable.ic_node_not_responding);
             }
             holder.status.setVisibility(View.VISIBLE);
             holder.loader.setVisibility(View.GONE);

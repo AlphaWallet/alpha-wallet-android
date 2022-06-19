@@ -1,18 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_simple_toolbar" />
+    <com.google.android.material.appbar.CollapsingToolbarLayout
+        android:id="@+id/toolbar_block"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_scrollFlags="scroll|snap"
+        app:titleEnabled="false">
+
+        <com.alphawallet.app.widget.CertifiedToolbarView
+            android:id="@+id/certified_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/layoutButtons"
-        android:layout_below="@id/toolbar">
+        android:layout_below="@id/toolbar_block">
 
         <LinearLayout
             android:layout_width="match_parent"

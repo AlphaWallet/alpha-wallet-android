@@ -8,7 +8,7 @@ public class EthRPCNodes
 {
     private static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/" + getInfuraKey();
     private static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
-    private static final String XDAI_RPC_URL = "https://rpc.ankr.com/gnosis";
+    private static final String XDAI_RPC_URL = EthereumNetworkBase.XDAI_RPC_URL;
     private static final String POA_RPC_URL = "https://core.poa.network/";
     private static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + getInfuraKey();
     private static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/" + getInfuraKey();

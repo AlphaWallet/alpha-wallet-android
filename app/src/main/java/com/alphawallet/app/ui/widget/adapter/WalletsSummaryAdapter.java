@@ -94,6 +94,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
                     bundle.putDouble(WalletHolder.FIAT_CHANGE, valuePair.second);
                 }
 
+                bundle.putBoolean(WalletHolder.IS_MAINNET_ACTIVE, mainNetActivated);
                 holder.bind(wallet, bundle);
                 break;
             case TextHolder.VIEW_TYPE:

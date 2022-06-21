@@ -31,7 +31,7 @@
 
             <TextView
                 android:id="@+id/text_title"
-                style="@style/Aw.Typography.Title.Large"
+                style="@style/Aw.Typography.Title.Large.SemiBold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"

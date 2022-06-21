@@ -34,6 +34,7 @@ import io.realm.Realm;
 public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder> implements WalletClickCallback, Runnable
 {
     private final OnSetWalletDefaultListener onSetWalletDefaultListener;
+    private boolean mainNetActivated;
     private final ArrayList<Wallet> wallets;
     private final Map<String, Pair<Double, Double>> valueMap = new HashMap<>();
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -44,8 +45,9 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     private final GenericWalletInteract walletInteract;
 
     public WalletsSummaryAdapter(Context ctx,
-                                 OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract) {
+                                 OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract, boolean activeMainnet) {
         this.onSetWalletDefaultListener = onSetWalletDefaultListener;
+        this.mainNetActivated = activeMainnet;
         this.wallets = new ArrayList<>();
         this.context = ctx;
         this.realm = genericWalletInteract.getWalletRealm();
@@ -101,9 +103,13 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
             case WalletSummaryHeaderHolder.VIEW_TYPE:
                 wallet = summaryWallet;
                 bundle = new Bundle();
-                Pair<Double, Double> totalPair = getSummaryBalance();
-                bundle.putDouble(WalletHolder.FIAT_VALUE, totalPair.first);
-                bundle.putDouble(WalletHolder.FIAT_CHANGE, totalPair.second);
+                bundle.putBoolean(WalletHolder.IS_MAINNET_ACTIVE, mainNetActivated);
+                if (mainNetActivated)
+                {
+                    Pair<Double, Double> totalPair = getSummaryBalance();
+                    bundle.putDouble(WalletHolder.FIAT_VALUE, totalPair.first);
+                    bundle.putDouble(WalletHolder.FIAT_CHANGE, totalPair.second);
+                }
                 holder.bind(wallet, bundle);
                 break;
 

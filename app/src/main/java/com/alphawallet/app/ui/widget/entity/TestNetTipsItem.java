@@ -11,11 +11,11 @@ public class TestNetTipsItem extends SortedItem<Void> {
 
     @Override
     public boolean areContentsTheSame(SortedItem newItem) {
-        return false;
+        return true;
     }
 
     @Override
     public boolean areItemsTheSame(SortedItem other) {
-        return false;
+        return true;
     }
 }

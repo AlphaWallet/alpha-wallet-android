@@ -25,6 +25,7 @@ import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSearchItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
+import com.alphawallet.app.ui.widget.entity.TestNetTipsItem;
 import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
 import com.alphawallet.app.ui.widget.entity.TotalBalanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.WarningData;
@@ -35,6 +36,7 @@ import com.alphawallet.app.ui.widget.holder.ChainNameHeaderHolder;
 import com.alphawallet.app.ui.widget.holder.HeaderHolder;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.SearchTokensHolder;
+import com.alphawallet.app.ui.widget.holder.TestNetTipsHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
@@ -161,6 +163,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
             case HeaderHolder.VIEW_TYPE:
                 holder = new HeaderHolder(R.layout.layout_tokens_header, parent);
+                break;
+
+            case TestNetTipsHolder.VIEW_TYPE:
+                holder = new TestNetTipsHolder(R.layout.layout_testnet_header, parent);
                 break;
 
             case SearchTokensHolder.VIEW_TYPE:
@@ -402,6 +408,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
 
         addSearchTokensLayout();
+        addTestNetTips();
 
         if (managementLauncher != null) addManageTokensLayout();
 
@@ -413,6 +420,14 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         addManageTokensLayout();
 
         items.endBatchedUpdates();
+    }
+
+    private void addTestNetTips()
+    {
+        if (!tokensService.isMainNetActive())
+        {
+            items.add(new TestNetTipsItem(1));
+        }
     }
 
     public void setTotal(BigDecimal totalInCurrency) {

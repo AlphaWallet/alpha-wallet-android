@@ -945,4 +945,7 @@
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
     <string name="mode_test">Testnet မုဒ်</string>
+    <string name="title_dialog_where_are_tokens">ငါ့တိုကင်များ ဘယ်မှာလဲ</string>
+    <string name="content_dialog_where_are_tokens">စိတ်မပူပါနှင့်။ သင့်တိုကင်များသည် ဘေးကင်းပါသည်။ သင်သည် Testnet ကွန်ရက်များကို ကြည့်ရှုနေပါသည်။ ဒီဇိုင်းအသစ်များကို စမ်းသပ်ရန်အတွက် ၎င်းတို့ကို developer များက အသုံးပြုကြသည်။ သင်သည် အချိန်မရွေး Mainnet သို့ ပြောင်းနိုင်သည်။</string>
+    <string name="button_switch_to_mainnet">Mainnet သို့ပြောင်းပါ။</string>
 </resources>

@@ -903,4 +903,7 @@
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
     <string name="mode_test">Modo de red de prueba</string>
+    <string name="title_dialog_where_are_tokens">¿Dónde están mis tokens?</string>
+    <string name="content_dialog_where_are_tokens">No te preocupes. Tus tokens están a salvo. Estás viendo redes Testnet. Los desarrolladores los utilizan para probar nuevos diseños. Puede cambiar a Mainnet en cualquier momento.</string>
+    <string name="button_switch_to_mainnet">Cambiar a red principal</string>
 </resources>

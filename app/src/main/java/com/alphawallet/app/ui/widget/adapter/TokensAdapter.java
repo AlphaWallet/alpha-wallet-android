@@ -235,7 +235,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void addSearchTokensLayout() {
         if (walletAddress != null && !walletAddress.isEmpty()) {
-            items.add(new ManageTokensSearchItem(new ManageTokensData(walletAddress, managementLauncher), 0));
+            items.add(new ManageTokensSearchItem(new ManageTokensData(walletAddress, managementLauncher), -1));
         }
     }
 
@@ -427,7 +427,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         if (!tokensService.isMainNetActive())
         {
-            items.add(new TestNetTipsItem(1));
+            items.add(new TestNetTipsItem(0));
         }
     }
 

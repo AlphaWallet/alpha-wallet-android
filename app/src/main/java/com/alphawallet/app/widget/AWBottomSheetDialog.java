@@ -49,10 +49,9 @@ public class AWBottomSheetDialog extends BottomSheetDialog {
         contentTextView.setText(text);
     }
 
-    public void setConfirmButton(String text, View.OnClickListener onClickListener)
+    public void setConfirmButton(String text)
     {
         confirmButton.setText(text);
-        confirmButton.setOnClickListener(onClickListener);
     }
 
     @Override

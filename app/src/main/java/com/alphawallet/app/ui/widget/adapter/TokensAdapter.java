@@ -167,6 +167,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
             case TestNetTipsHolder.VIEW_TYPE:
                 holder = new TestNetTipsHolder(R.layout.layout_testnet_header, parent);
+                holder.setOnTokenClickListener(tokensAdapterCallback);
                 break;
 
             case SearchTokensHolder.VIEW_TYPE:

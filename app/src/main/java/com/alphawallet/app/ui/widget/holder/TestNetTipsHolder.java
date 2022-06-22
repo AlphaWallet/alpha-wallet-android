@@ -10,12 +10,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.widget.AWBottomSheetDialog;
 
 public class TestNetTipsHolder extends BinderViewHolder<Boolean>
 {
     public static final int VIEW_TYPE = 1001;
     private TextView whereAreTokens;
+    private TokensAdapterCallback tokenAdapterCallback;
 
     public TestNetTipsHolder(int resId, ViewGroup parent)
     {
@@ -43,7 +45,7 @@ public class TestNetTipsHolder extends BinderViewHolder<Boolean>
             @Override
             public void onConfirmed()
             {
-
+                tokenAdapterCallback.onSwitchClicked();
             }
 
             @Override
@@ -54,9 +56,13 @@ public class TestNetTipsHolder extends BinderViewHolder<Boolean>
         });
         dialog.setTitle(getString(R.string.title_dialog_where_are_tokens));
         dialog.setContent(getString(R.string.content_dialog_where_are_tokens));
-        dialog.setConfirmButton(getString(R.string.button_switch_to_mainnet), v -> {
-
-        });
+        dialog.setConfirmButton(getString(R.string.button_switch_to_mainnet));
         dialog.show();
+    }
+
+    @Override
+    public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback)
+    {
+        this.tokenAdapterCallback = tokensAdapterCallback;
     }
 }

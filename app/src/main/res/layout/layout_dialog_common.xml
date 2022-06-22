@@ -14,7 +14,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_close"
-            app:tint="?colorControlNormal" />
+            app:tint="?colorControlNormal"
+            android:contentDescription="@string/action_close"/>
 
         <TextView
             android:id="@+id/title"

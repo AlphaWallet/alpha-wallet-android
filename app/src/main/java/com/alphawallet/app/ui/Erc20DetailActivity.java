@@ -211,18 +211,17 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private void startScriptDownload(Boolean status)
     {
         CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
+        certificateToolbar.setVisibility(View.VISIBLE);
         if (status)
         {
-            certificateToolbar.setVisibility(View.VISIBLE);
             certificateToolbar.startDownload();
         }
         else
         {
             certificateToolbar.stopDownload();
-            certificateToolbar.setVisibility(View.GONE);
+            certificateToolbar.hideCertificateResource();
         }
     }
-
 
     private void onNewScript(Boolean hasNewScript)
     {

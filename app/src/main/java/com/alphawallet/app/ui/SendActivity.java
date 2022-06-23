@@ -249,6 +249,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                                         validateEIP681Request(result, false);
                                         break;
                                     default:
+                                        displayScanError();
                                         break;
                                 }
                             }

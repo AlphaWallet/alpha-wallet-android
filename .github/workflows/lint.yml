@@ -1,7 +1,11 @@
 name: Android lint
-
-on: [push, pull_request]
-
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 jobs:
   lint:
     name: Run Lint

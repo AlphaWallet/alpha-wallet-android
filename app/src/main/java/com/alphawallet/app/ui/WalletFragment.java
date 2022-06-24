@@ -665,7 +665,7 @@ public class WalletFragment extends BaseFragment implements
             });
 
     @Override
-    public void BackupClick(Wallet wallet)
+    public void backUpClick(Wallet wallet)
     {
         Intent intent = new Intent(getContext(), BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);

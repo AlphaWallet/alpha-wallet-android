@@ -45,7 +45,7 @@ public class WarningHolder extends BinderViewHolder<WarningData>
         layoutBackground.setCardBackgroundColor(ContextCompat.getColor(getContext(), data.colour));
         backupButton.setText(data.buttonText);
         backupButton.setBackgroundColor(data.buttonColour);
-        backupButton.setOnClickListener(v -> data.callback.BackupClick(data.wallet));
+        backupButton.setOnClickListener(v -> data.callback.backUpClick(data.wallet));
         closeButton.setOnClickListener(v -> data.callback.remindMeLater(data.wallet));
     }
 }

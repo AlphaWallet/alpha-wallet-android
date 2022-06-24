@@ -1,5 +1,5 @@
 name: Build
-on: pull_request
+on: [push, pull_request]
 jobs:
   test:
     runs-on: macos-latest

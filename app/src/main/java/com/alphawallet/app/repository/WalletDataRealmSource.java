@@ -483,31 +483,6 @@ public class WalletDataRealmSource {
         r.insertOrUpdate(item);
     }
 
-    //Check for lost keystore wallets and recover
-    private void recoverLostWallets(Realm realm, Wallet[] keystoreWallets, Map<String, Wallet> walletList, KeyService keyService)
-    {
-        realm.executeTransaction(r -> {
-            for (Wallet w : keystoreWallets)
-            {
-                //check for orphaned keystore wallets
-                Wallet testWallet = walletList.get(w.address.toLowerCase());
-                if (testWallet == null)
-                {
-                    //do we have this in keystore as a valid address?
-                    if (keyService.hasKeystore(w.address.toLowerCase()))
-                    {
-                        //create keystore wallet
-                        w.type = WalletType.KEYSTORE;
-                        w.authLevel = KeyService.AuthenticationLevel.TEE_AUTHENTICATION;
-                        w.lastBackupTime = System.currentTimeMillis();
-                        storeKeyData(w, r);
-                        walletList.put(w.address.toLowerCase(), w);
-                    }
-                }
-            }
-        });
-    }
-
     //One-time removal of the WalletTypeRealmInstance usage - this extra database was a
     // workaround for an issue that has since been fixed correctly.
     private void migrateWalletTypeData(Map<String, Wallet> walletList)

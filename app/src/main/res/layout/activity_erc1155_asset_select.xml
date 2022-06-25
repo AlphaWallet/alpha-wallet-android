@@ -16,8 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/layoutButtons"
-        android:layout_below="@id/separator"
-        android:background="@drawable/background_bottom_border" />
+        android:layout_below="@id/separator" />
 
     <com.alphawallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"

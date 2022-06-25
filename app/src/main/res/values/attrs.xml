@@ -95,6 +95,10 @@
         <attr name="text"/>
         <attr name="showActionText" format="boolean"/>
     </declare-styleable>
+    <declare-styleable name="BottomSheetToolbarView">
+        <attr name="title"/>
+        <attr name="text"/>
+    </declare-styleable>
     <attr name="seedWordStyle" format="reference" />
     <attr name="whatsNewEntryStyle" format="reference" />
     <attr name="colorSurfaceSecondary" format="reference" />

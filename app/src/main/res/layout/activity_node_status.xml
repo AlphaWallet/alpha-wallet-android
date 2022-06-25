@@ -36,8 +36,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/main_list"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/background_bottom_border" />
+                android:layout_height="wrap_content" />
 
             <com.alphawallet.app.widget.StandardHeader
                 android:id="@+id/testnet_header"
@@ -50,7 +49,6 @@
                 android:id="@+id/test_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/background_bottom_border"
                 android:visibility="visible" />
 
         </LinearLayout>

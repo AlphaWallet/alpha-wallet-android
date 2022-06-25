@@ -21,7 +21,6 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.OnAssetSelectListener;
 import com.alphawallet.app.ui.widget.adapter.Erc1155AssetSelectAdapter;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.QuantitySelectorDialogInterface;
 import com.alphawallet.app.viewmodel.Erc1155AssetSelectViewModel;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -84,7 +83,6 @@ public class Erc1155AssetSelectActivity extends BaseActivity
     {
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.addItemDecoration(new ListDivider(this));
         dialog = new QuantitySelectorDialog(this, this);
     }
 

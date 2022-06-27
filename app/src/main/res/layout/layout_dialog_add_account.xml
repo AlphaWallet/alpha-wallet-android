@@ -1,46 +1,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:paddingHorizontal="@dimen/standard_16">
-
-        <ImageView
-            android:id="@+id/close_action"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_close"
-            app:tint="?colorControlNormal" />
-
-        <TextView
-            style="@style/Aw.Typography.Title.SemiBold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="@string/title_dialog_add_account" />
-
-    </RelativeLayout>
-
-    <View style="@style/Aw.Component.Separator" />
+    <com.alphawallet.app.widget.BottomSheetHandleView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal" />
 
     <TextView
         android:id="@+id/new_account_action"
         style="@style/Aw.Component.ActionItem"
         android:text="@string/action_create_new_account" />
 
-    <View style="@style/Aw.Component.Separator" />
-
     <TextView
         android:id="@+id/import_account_action"
         style="@style/Aw.Component.ActionItem"
         android:text="@string/title_import" />
-
-    <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/watch_account_action"

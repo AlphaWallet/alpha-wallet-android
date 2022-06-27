@@ -2,7 +2,6 @@ package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.Key.WALLET;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +31,6 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.bumptech.glide.Glide;
@@ -46,18 +44,19 @@ import dagger.hilt.android.AndroidEntryPoint;
  * Created by JB on 9/09/2020.
  */
 @AndroidEntryPoint
-public class WalletConnectSessionActivity extends BaseActivity {
+public class WalletConnectSessionActivity extends BaseActivity
+{
     private final Handler handler = new Handler(Looper.getMainLooper());
     WalletConnectViewModel viewModel;
     private RecyclerView recyclerView;
     private Button btnConnectWallet;
-    private View bottomDivider;
     private LinearLayout layoutNoActiveSessions;
     private CustomAdapter adapter;
     private Wallet wallet;
     private List<WalletConnectSessionItem> wcSessions;
     private int connectionCount = -1;
-    private final BroadcastReceiver walletConnectChangeReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver walletConnectChangeReceiver = new BroadcastReceiver()
+    {
         @Override
         public void onReceive(Context context, Intent intent)
         {
@@ -82,7 +81,6 @@ public class WalletConnectSessionActivity extends BaseActivity {
         initViewModel();
 
         layoutNoActiveSessions = findViewById(R.id.layout_no_sessions);
-        bottomDivider = findViewById(R.id.bottom_divider);
         btnConnectWallet = findViewById(R.id.btn_connect_wallet);
         btnConnectWallet.setOnClickListener(v -> openQrScanner());
     }
@@ -126,17 +124,14 @@ public class WalletConnectSessionActivity extends BaseActivity {
             if (wcSessions.isEmpty())
             {
                 layoutNoActiveSessions.setVisibility(View.VISIBLE);
-                bottomDivider.setVisibility(View.GONE);
             }
             else
             {
                 layoutNoActiveSessions.setVisibility(View.GONE);
-                bottomDivider.setVisibility(View.VISIBLE);
                 recyclerView = findViewById(R.id.list);
                 recyclerView.setLayoutManager(new LinearLayoutManager(this));
                 adapter = new CustomAdapter();
                 recyclerView.setAdapter(adapter);
-                recyclerView.addItemDecoration(new ListDivider(this));
                 adapter.notifyDataSetChanged();
             }
         }
@@ -222,7 +217,8 @@ public class WalletConnectSessionActivity extends BaseActivity {
         unregisterReceiver(walletConnectChangeReceiver);
     }
 
-    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
+    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>
+    {
         @Override
         public CustomAdapter.CustomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
@@ -266,7 +262,8 @@ public class WalletConnectSessionActivity extends BaseActivity {
             return wcSessions.size();
         }
 
-        class CustomViewHolder extends RecyclerView.ViewHolder {
+        class CustomViewHolder extends RecyclerView.ViewHolder
+        {
             final ImageView icon;
             final ImageView statusIcon;
             final TextView peerName;

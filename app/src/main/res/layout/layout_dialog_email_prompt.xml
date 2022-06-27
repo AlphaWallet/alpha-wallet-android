@@ -4,6 +4,11 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <com.alphawallet.app.widget.BottomSheetHandleView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal" />
+
     <TextView
         style="@style/Aw.Typography.Title.Large.Bold"
         android:layout_width="match_parent"
@@ -19,6 +24,7 @@
         android:layout_marginStart="@dimen/cozy_20"
         android:layout_marginTop="@dimen/standard_16"
         android:layout_marginEnd="@dimen/cozy_20"
+        android:lineSpacingMultiplier="1.8"
         android:text="@string/email_prompt_hint" />
 
     <com.alphawallet.app.widget.InputView
@@ -32,6 +38,7 @@
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
 </LinearLayout>
 
 

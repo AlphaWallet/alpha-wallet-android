@@ -3,5 +3,5 @@
     <!-- Misc Palette -->
     <color name="button_primary_disabled">@color/mine</color>
     <color name="surface_faded">#B3424242</color>
-
+    <color name="translucent_gray">#33FFFFFF</color>
 </resources>

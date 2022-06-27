@@ -106,6 +106,10 @@
         <attr name="swValueRes" format="integer" />
         <attr name="swCaptionRes" format="integer" />
     </declare-styleable>
+    <declare-styleable name="BottomSheetToolbarView">
+        <attr name="title"/>
+        <attr name="text"/>
+    </declare-styleable>
     <attr name="seedWordStyle" format="reference" />
     <attr name="whatsNewEntryStyle" format="reference" />
     <attr name="colorSurfaceSecondary" format="reference" />

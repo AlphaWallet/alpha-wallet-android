@@ -345,10 +345,6 @@ public class BackupKeyActivity extends BaseActivity implements
                 WriteDownSeedPhrase();
                 break;
 
-            case SHOW_SEED_PHRASE_SINGLE:
-                finish();
-                break;
-
             case SEED_PHRASE_INVALID:
             case VERIFY_SEED_PHRASE:
                 state = BackupState.ENTER_BACKUP_STATE_HD; //reset view back to splash screen

@@ -14,7 +14,7 @@ import java.util.List;
 
 public class QRResult implements Parcelable
 {
-    private String protocol;
+    private String protocol = "";
     private String address; //becomes the token address for a transfer
     private String functionStr;
     public long chainId;

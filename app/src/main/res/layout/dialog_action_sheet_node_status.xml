@@ -5,12 +5,10 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <View
-        android:layout_width="60dp"
-        android:layout_height="5dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="@dimen/small_12"
-        android:background="@drawable/rectangle_pill" />
+    <com.alphawallet.app.widget.BottomSheetHandleView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal" />
 
     <TextView
         style="@style/Aw.Typography.Title.Large.Bold"

@@ -6,10 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/standard_16"
-    android:theme="@style/AppTheme.DarkOverlay"
     android:animateLayoutChanges="true"
     android:elevation="2dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:theme="@style/AppTheme.DarkOverlay">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_backup"
@@ -31,11 +31,15 @@
 
             <TextView
                 android:id="@+id/text_title"
-                style="@style/Aw.Typography.Title.Large"
+                style="@style/Aw.Typography.Title.Large.SemiBold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
+                android:layout_marginEnd="@dimen/tiny_8"
                 android:layout_marginBottom="@dimen/standard_16"
+                android:layout_toStartOf="@id/btn_close"
+                android:paddingTop="@dimen/mini_4"
                 android:text="@string/wallet_not_backed_up" />
 
             <TextView
@@ -43,34 +47,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/text_title"
-                android:layout_marginEnd="70dp"
-                android:layout_marginBottom="@dimen/base_24"
+                android:layout_marginEnd="@dimen/double_base_48"
+                android:layout_marginBottom="@dimen/standard_16"
+                android:lineSpacingMultiplier="1.5"
                 android:text="@string/not_backed_up_detail" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_backup"
-                style="@style/Aw.Component.Button.Secondary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/text_detail"
-                android:paddingHorizontal="@dimen/standard_16"
+                android:layout_marginBottom="@dimen/tiny_8"
+                android:paddingHorizontal="@dimen/base_24"
                 tools:text="Back up Wallet" />
 
             <ImageView
-                android:id="@+id/btn_menu"
+                android:id="@+id/btn_close"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
-                android:src="@drawable/ic_menu_white"
+                android:src="@drawable/ic_close"
                 app:tint="?android:textColorPrimary" />
 
-            <View
-                android:id="@+id/popup_anchor"
-                android:layout_width="1dp"
-                android:layout_height="10dp"
-                android:layout_centerHorizontal="true" />
-
         </RelativeLayout>
+
     </com.google.android.material.card.MaterialCardView>
+
 </LinearLayout>

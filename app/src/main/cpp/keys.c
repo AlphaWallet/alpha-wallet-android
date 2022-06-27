@@ -2,9 +2,9 @@
 #include <string.h>
 #include <alloca.h>
 #include <jni.h>
-#if __has_include ("..\..\..\..\..\keys.secret")
+#if __has_include ("../../../../../keys.secret")
 #   define HAS_KEYS 1
-#   include "..\..\..\..\..\keys.secret"
+#   include "../../../../../keys.secret"
 #else
 #   define HAS_KEYS 0
 #endif

@@ -69,6 +69,13 @@ public class CertifiedToolbarView extends MaterialToolbar
         if (lockResource != 0) lockStatus.setImageResource(lockResource);
     }
 
+    public void hideCertificateResource()
+    {
+        ImageView lockStatus = findViewById(R.id.image_lock);
+        lockStatus.setVisibility(View.GONE);
+        stopDownload();
+    }
+
     private void showCertificateDetails(final XMLDsigDescriptor sigData)
     {
         if (dialog != null && dialog.isShowing()) dialog.cancel();

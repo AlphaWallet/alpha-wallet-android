@@ -3,31 +3,31 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <com.alphawallet.app.widget.BottomSheetHandleView
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_height="wrap_content" />
+
     <TextView
         android:id="@+id/copy_wallet_address_action"
         style="@style/Aw.Component.ActionItem"
         android:text="@string/copy_wallet_address" />
-
-    <View style="@style/Aw.Component.Separator" />
 
     <TextView
         android:id="@+id/show_my_wallet_address_action"
         style="@style/Aw.Component.ActionItem"
         android:text="@string/title_show_wallet_address" />
 
-    <View style="@style/Aw.Component.Separator" />
-
     <TextView
         android:id="@+id/add_hide_tokens_action"
         style="@style/Aw.Component.ActionItem"
         android:text="@string/add_hide_tokens" />
 
-    <View style="@style/Aw.Component.Separator" />
-
     <TextView
         android:id="@+id/rename_this_wallet_action"
         style="@style/Aw.Component.ActionItem"
         android:text="@string/rename_this_wallet_action" />
+
 </LinearLayout>
 
 

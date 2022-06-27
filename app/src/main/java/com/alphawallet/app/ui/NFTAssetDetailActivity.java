@@ -245,15 +245,15 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private void startScriptDownload(Boolean status)
     {
         CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
+        certificateToolbar.setVisibility(View.VISIBLE);
         if (status)
         {
-            certificateToolbar.setVisibility(View.VISIBLE);
             certificateToolbar.startDownload();
         }
         else
         {
             certificateToolbar.stopDownload();
-            certificateToolbar.setVisibility(View.GONE);
+            certificateToolbar.hideCertificateResource();
         }
     }
 

@@ -1011,6 +1011,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 if (ticker != null && meta.hasPositiveBalance() && !meta.isNFT()) //Currently we don't add NFT value. TODO: potentially get value from OpenSea
                 {
                     Token t = fetchToken(chainId, wallet, meta.getAddress());
+                    if (t == null) continue;
                     BigDecimal correctedBalance = t.getCorrectedBalance(18);
                     BigDecimal fiatValue = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(18, RoundingMode.DOWN);
                     historicalBalance = historicalBalance.add(fiatValue.add(fiatValue.multiply((new BigDecimal(ticker.percentChange24h)
@@ -1214,6 +1215,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
                     TokenInfo info = tf.createTokenInfo(ethereumNetworkRepository, realmItem, staticToken, walletAddress);
 
+                    if (info == null) continue;
                     Timber.tag(TAG).d("fetchAllTokensWithNameIssue: StaticToken: %s", staticToken);
 
                     if (networkFilters.size() > 0 && !networkFilters.contains(realmItem.getChainId())) continue;

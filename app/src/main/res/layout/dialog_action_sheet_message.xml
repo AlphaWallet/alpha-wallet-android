@@ -6,48 +6,10 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <RelativeLayout
+    <com.alphawallet.app.widget.BottomSheetToolbarView
+        android:id="@+id/bottom_sheet_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="@dimen/action_sheet_header">
-
-        <ImageView
-            android:id="@+id/image_close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="@dimen/dp16"
-            android:background="@color/transparent"
-            android:contentDescription="@string/action_close"
-            android:padding="5dp"
-            android:src="@drawable/ic_close"
-            app:tint="?colorControlNormal" />
-
-        <TextView
-            android:id="@+id/text_sign_title"
-            style="@style/Aw.Typography.Title.SemiBold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginTop="@dimen/dp8"
-            android:layout_marginBottom="@dimen/dp8"
-            android:layout_toStartOf="@id/logo"
-            android:layout_toEndOf="@id/image_close"
-            android:gravity="center_horizontal"
-            android:text=""
-            tools:text="Switch Chain Request" />
-
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="10dp"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_launcher_foreground" />
-
-    </RelativeLayout>
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/text_message"

@@ -179,8 +179,4 @@
 
     </RelativeLayout>
 
-    <View
-        style="@style/Aw.Component.Separator"
-        android:layout_alignBottom="@id/wrapped_layout" />
-
 </RelativeLayout>

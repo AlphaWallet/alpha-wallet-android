@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.LocaleItem;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
@@ -47,7 +46,6 @@ public class SelectLocaleActivity extends BaseActivity
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             adapter = new CustomAdapter(localeItems, currentLocale);
             recyclerView.setAdapter(adapter);
-            recyclerView.addItemDecoration(new ListDivider(this));
         }
     }
 
@@ -88,40 +86,6 @@ public class SelectLocaleActivity extends BaseActivity
         private final ArrayList<LocaleItem> dataSet;
         private String selectedItemId;
 
-        private void setSelectedItemId(String selectedItemId)
-        {
-            this.selectedItemId = selectedItemId;
-        }
-
-        private String getSelectedItemId()
-        {
-            return this.selectedItemId;
-        }
-
-        @Override
-        public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
-        {
-            View itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_simple_radio, parent, false);
-
-            return new CustomViewHolder(itemView);
-        }
-
-        class CustomViewHolder extends RecyclerView.ViewHolder
-        {
-            MaterialRadioButton radio;
-            TextView name;
-            View itemLayout;
-
-            CustomViewHolder(View view)
-            {
-                super(view);
-                radio = view.findViewById(R.id.radio);
-                name = view.findViewById(R.id.name);
-                itemLayout = view.findViewById(R.id.layout_list_item);
-            }
-        }
-
         private CustomAdapter(ArrayList<LocaleItem> data, String selectedItemId)
         {
             this.dataSet = data;
@@ -134,6 +98,25 @@ public class SelectLocaleActivity extends BaseActivity
                     l.setSelected(true);
                 }
             }
+        }
+
+        private String getSelectedItemId()
+        {
+            return this.selectedItemId;
+        }
+
+        private void setSelectedItemId(String selectedItemId)
+        {
+            this.selectedItemId = selectedItemId;
+        }
+
+        @Override
+        public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
+        {
+            View itemView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_simple_radio, parent, false);
+
+            return new CustomViewHolder(itemView);
         }
 
         @Override
@@ -159,6 +142,21 @@ public class SelectLocaleActivity extends BaseActivity
         public int getItemCount()
         {
             return dataSet.size();
+        }
+
+        class CustomViewHolder extends RecyclerView.ViewHolder
+        {
+            MaterialRadioButton radio;
+            TextView name;
+            View itemLayout;
+
+            CustomViewHolder(View view)
+            {
+                super(view);
+                radio = view.findViewById(R.id.radio);
+                name = view.findViewById(R.id.name);
+                itemLayout = view.findViewById(R.id.layout_list_item);
+            }
         }
     }
 }

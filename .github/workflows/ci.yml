@@ -1,5 +1,11 @@
-name: E2E test
-on: pull_request
+name: Build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 jobs:
   test:
     runs-on: macos-latest

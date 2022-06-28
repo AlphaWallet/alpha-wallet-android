@@ -2,7 +2,6 @@ package com.alphawallet.app.ui;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +21,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -54,7 +54,6 @@ public class WalletConnectSessionActivity extends BaseActivity
     WalletConnectViewModel viewModel;
     private RecyclerView recyclerView;
     private Button btnConnectWallet;
-    private View bottomDivider;
     private LinearLayout layoutNoActiveSessions;
     private CustomAdapter adapter;
     private List<WalletConnectSessionItem> wcSessions;
@@ -89,7 +88,6 @@ public class WalletConnectSessionActivity extends BaseActivity
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.addItemDecoration(new ListDivider(this));
         layoutNoActiveSessions = findViewById(R.id.layout_no_sessions);
-        bottomDivider = findViewById(R.id.bottom_divider);
         btnConnectWallet = findViewById(R.id.btn_connect_wallet);
         btnConnectWallet.setOnClickListener(v -> openQrScanner());
     }
@@ -131,12 +129,15 @@ public class WalletConnectSessionActivity extends BaseActivity
         if (wcSessions.isEmpty())
         {
             layoutNoActiveSessions.setVisibility(View.VISIBLE);
-            bottomDivider.setVisibility(View.GONE);
         }
         else
         {
             layoutNoActiveSessions.setVisibility(View.GONE);
-            bottomDivider.setVisibility(View.VISIBLE);
+            recyclerView = findViewById(R.id.list);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            adapter = new CustomAdapter();
+            recyclerView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
         }
 
         adapter = new CustomAdapter();

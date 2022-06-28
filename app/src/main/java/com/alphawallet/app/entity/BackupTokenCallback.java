@@ -6,6 +6,6 @@ package com.alphawallet.app.entity;
  */
 public interface BackupTokenCallback
 {
-    void BackupClick(Wallet wallet);
+    void backUpClick(Wallet wallet);
     void remindMeLater(Wallet wallet);
 }

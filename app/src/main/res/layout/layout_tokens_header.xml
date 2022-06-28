@@ -15,7 +15,4 @@
         android:layout_marginBottom="@dimen/tiny_8"
         tools:text="Header Title" />
 
-    <View
-        style="@style/Aw.Component.Separator"
-        android:layout_gravity="bottom" />
 </FrameLayout>

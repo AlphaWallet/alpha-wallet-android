@@ -29,7 +29,7 @@
     </style>
 
     <style name="Aw.Component.BottomSheet" parent="">
-        <item name="android:background">?colorSurface</item>
+        <item name="android:background">@drawable/background_bottom_sheet</item>
     </style>
 
     <style name="Aw.Component.CheckBox" parent="Widget.AppCompat.CompoundButton.CheckBox">
@@ -50,6 +50,7 @@
         <item name="tabTextAppearance">@style/Aw.Typography.Tab</item>
         <item name="tabSelectedTextColor">?colorAccent</item>
         <item name="tabTextColor">?android:textColorSecondary</item>
+        <item name="tabIndicator">@drawable/tab_indicator</item>
         <item name="tabIndicatorFullWidth">true</item>
     </style>
 

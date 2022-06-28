@@ -77,7 +77,4 @@
             tools:visibility="visible" />
     </LinearLayout>
 
-    <View
-        style="@style/Aw.Component.Separator"
-        android:layout_alignParentBottom="true" />
 </RelativeLayout>

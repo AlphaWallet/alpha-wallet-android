@@ -37,7 +37,6 @@ import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.ui.widget.entity.GasSettingsCallback;
 import com.alphawallet.app.ui.widget.entity.GasSpeed2;
 import com.alphawallet.app.ui.widget.entity.GasWarningLayout;
@@ -133,7 +132,6 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         gasSliderView.initGasPrice(gasSpread.getSelectedGasFee(TXSpeed.CUSTOM));
         adapter = new CustomAdapter(this);
         recyclerView.setAdapter(adapter);
-        recyclerView.addItemDecoration(new ListDivider(this));
         gasSliderView.setCallback(this);
 
         // start listening for gas price updates

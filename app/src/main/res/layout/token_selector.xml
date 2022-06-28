@@ -50,7 +50,7 @@
             android:drawableEnd="@drawable/ic_expand_more"
             android:drawableTint="?colorSurface"
             android:paddingHorizontal="@dimen/base_24"
-            android:text="Select Token" />
+            android:text="@string/action_select_token" />
 
         <LinearLayout
             android:id="@+id/layout_token"

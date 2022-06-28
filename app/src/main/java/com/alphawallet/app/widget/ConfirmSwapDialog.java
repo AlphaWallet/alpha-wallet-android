@@ -27,12 +27,6 @@ public class ConfirmSwapDialog extends BottomSheetDialog
         super(activity);
         View view = View.inflate(getContext(), R.layout.dialog_confirm_swap, null);
         setContentView(view);
-
-//        view.setMinimumHeight(Resources.getSystem().getDisplayMetrics().heightPixels);
-//        BottomSheetBehavior<View>behavior = BottomSheetBehavior.from((View) view.getParent());
-//        behavior.setState(STATE_EXPANDED);
-//        behavior.setSkipCollapsed(true);
-
         infoLayout = view.findViewById(R.id.layout_info);
         btnConfirm = view.findViewById(R.id.btn_confirm);
     }
@@ -80,7 +74,7 @@ public class ConfirmSwapDialog extends BottomSheetDialog
     {
         Quote.TransactionRequest request = quote.transactionRequest;
         String gas = Hex.hexToBigInteger(request.gasPrice, BigInteger.ZERO).toString();
-        SimpleSheetWidget widget = new SimpleSheetWidget(getContext(), "Gas Fee");
+        SimpleSheetWidget widget = new SimpleSheetWidget(getContext(), R.string.label_gas_price);
         widget.setValue(gas);
         return widget;
     }
@@ -89,8 +83,8 @@ public class ConfirmSwapDialog extends BottomSheetDialog
     {
         String srcAmt = BalanceUtils.getScaledValueFixed(new BigDecimal(quote.action.fromAmount), quote.action.fromToken.decimals, 4);
         String srcTkn = quote.action.fromToken.symbol;
-        SimpleSheetWidget widget = new SimpleSheetWidget(getContext(), "From");
-        widget.setValue(srcAmt + " " + srcTkn);
+        SimpleSheetWidget widget = new SimpleSheetWidget(getContext(), R.string.label_from);
+        widget.setValue(getContext().getString(R.string.valueSymbol, srcAmt, srcTkn));
         return widget;
     }
 
@@ -98,8 +92,8 @@ public class ConfirmSwapDialog extends BottomSheetDialog
     {
         String destAmt = BalanceUtils.getScaledValueFixed(new BigDecimal(quote.estimate.toAmountMin), quote.action.toToken.decimals, 4);
         String destTkn = quote.action.toToken.symbol;
-        SimpleSheetWidget widget = new SimpleSheetWidget(getContext(), "To");
-        widget.setValue(destAmt + " " + destTkn);
+        SimpleSheetWidget widget = new SimpleSheetWidget(getContext(), R.string.label_to);
+        widget.setValue(getContext().getString(R.string.valueSymbol, destAmt, destTkn));
         return widget;
     }
 

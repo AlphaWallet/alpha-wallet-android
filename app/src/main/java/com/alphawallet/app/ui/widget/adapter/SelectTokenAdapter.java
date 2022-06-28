@@ -1,12 +1,10 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 
-import android.content.Context;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,8 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.lifi.Connection;
+import com.alphawallet.app.widget.AddressIcon;
 import com.alphawallet.app.widget.SelectTokenDialog;
-import com.bumptech.glide.Glide;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
@@ -26,19 +24,18 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
 {
     private final List<Connection.LToken> tokens;
     private final List<Connection.LToken> displayData;
-    private Context context;
-    private SelectTokenDialog.SelectTokenDialogEventListener callback;
+    private final SelectTokenDialog.SelectTokenDialogEventListener callback;
     private String selectedTokenAddress;
 
-    public SelectTokenAdapter(Context context, List<Connection.LToken> tokens, SelectTokenDialog.SelectTokenDialogEventListener callback)
+    public SelectTokenAdapter(List<Connection.LToken> tokens, SelectTokenDialog.SelectTokenDialogEventListener callback)
     {
-        this.context = context;
         this.tokens = tokens;
         this.callback = callback;
         displayData = new ArrayList<>();
         displayData.addAll(tokens);
     }
 
+    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
@@ -49,7 +46,7 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position)
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
         Connection.LToken item = displayData.get(position);
         if (item != null)
@@ -59,10 +56,7 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
             holder.name.append(item.symbol);
             holder.name.append(")");
 
-            Glide.with(context)
-                    .load(item.logoURI)
-                    .circleCrop()
-                    .into(holder.tokenIcon);
+            holder.tokenIcon.bindData(item.logoURI, item.chainId, selectedTokenAddress, item.symbol);
             
             String balance = item.balance;
             if (!TextUtils.isEmpty(balance))
@@ -75,11 +69,7 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
                 holder.balance.setText("0 ");
             }
 
-            if (item.address.equalsIgnoreCase(selectedTokenAddress))
-            {
-                holder.radio.setChecked(true);
-            }
-
+            holder.radio.setChecked(item.address.equalsIgnoreCase(selectedTokenAddress));
             holder.balance.append(item.symbol);
 
             holder.itemLayout.setOnClickListener(v -> callback.onChainSelected(item));
@@ -128,7 +118,7 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
         TextView name;
         TextView balance;
         View itemLayout;
-        ImageView tokenIcon;
+        AddressIcon tokenIcon;
 
         ViewHolder(View view)
         {

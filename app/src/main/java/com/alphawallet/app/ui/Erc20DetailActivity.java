@@ -48,6 +48,7 @@ import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
+import com.bumptech.glide.Glide;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -58,6 +59,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -467,8 +471,16 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
         else if (actionId == R.string.swap)
         {
+            Single.fromCallable(() -> {
+                Glide.get(this).clearDiskCache();
+                return true;
+            })
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(t -> { new SwapRouter().open(this, token, wallet); }).isDisposed();
+
 //            openDapp(formatOneInchCall(token));
-            new SwapRouter().open(this, token, wallet);
+            //new SwapRouter().open(this, token, wallet);
         }
     }
 

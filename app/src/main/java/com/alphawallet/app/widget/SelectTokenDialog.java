@@ -60,7 +60,7 @@ public class SelectTokenDialog extends BottomSheetDialog
         this(activity);
         this.tokenItems = tokenItems;
 
-        adapter = new SelectTokenAdapter(getContext(), tokenItems, callback);
+        adapter = new SelectTokenAdapter(tokenItems, callback);
 
         tokenList.setLayoutManager(new LinearLayoutManager(getContext()));
         tokenList.addItemDecoration(new ListDivider(getContext()));

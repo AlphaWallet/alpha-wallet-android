@@ -171,18 +171,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             @Override
             public void onSelectionChanged(Connection.LToken token)
             {
-                if (destSelector.getToken() == null)
-                {
-                    destSelector.setVisibility(View.VISIBLE);
-                }
-
-                sourceSelector.setBalance(viewModel.getBalance(wallet.address, token));
-
-                infoLayout.setVisibility(View.GONE);
-
-                sourceTokenDialog.setSelectedToken(token.address);
-
-                getQuote();
+                tokenSwapSelected(token);
             }
 
             @Override
@@ -230,6 +219,22 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         });
     }
 
+    protected void tokenSwapSelected(Connection.LToken token)
+    {
+        if (destSelector.getToken() == null)
+        {
+            destSelector.setVisibility(View.VISIBLE);
+        }
+
+        sourceSelector.setBalance(viewModel.getBalance(wallet.address, token));
+
+        infoLayout.setVisibility(View.GONE);
+
+        sourceTokenDialog.setSelectedToken(token.address); //TODO: determine index and update individually
+
+        getQuote();
+    }
+
     private void confirmSwap(Quote quote)
     {
         confirmSwapDialog.dismiss();
@@ -256,40 +261,6 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     {
         super.onResume();
         viewModel.getChains();
-    }
-
-    private void initSourceToken(List<Connection.LToken> fromTokens)
-    {
-        long networkId = fromTokens.get(0).chainId;
-
-        String symbol = "eth";
-
-        for (Chain c : chains)
-        {
-            if (c.id == networkId)
-            {
-                symbol = c.coin;
-            }
-        }
-
-        boolean matchFound = false;
-
-        for (Connection.LToken t : fromTokens)
-        {
-            if (t.symbol.equalsIgnoreCase(symbol))
-            {
-                sourceSelector.init(t);
-                matchFound = true;
-                break;
-            }
-        }
-
-        if (!matchFound)
-        {
-            sourceSelector.reset();
-
-            infoLayout.setVisibility(View.GONE);
-        }
     }
 
     private void initFromDialog(List<Connection.LToken> fromTokens)
@@ -325,19 +296,14 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         this.chains = chains;
 
         settingsDialog = new SwapSettingsDialog(this, chains,
-                new SwapSettingsDialog.SwapSettingsInterface()
-                {
-                    @Override
-                    public void onChainSelected(Chain chain)
-                    {
-                        chainName.setText(chain.name);
-                        viewModel.setChain(chain);
+                chain -> {
+                    chainName.setText(chain.name);
+                    viewModel.setChain(chain);
 
-                        sourceSelector.clear();
-                        destSelector.clear();
-                        viewModel.getConnections(chain.id, chain.id);
-                        settingsDialog.dismiss();
-                    }
+                    sourceSelector.clear();
+                    destSelector.clear();
+                    viewModel.getConnections(chain.id, chain.id);
+                    settingsDialog.dismiss();
                 });
 
         if (sourceSelector.getToken() == null)
@@ -371,6 +337,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         {
             List<Connection.LToken> fromTokens = new ArrayList<>();
             List<Connection.LToken> toTokens = new ArrayList<>();
+            Connection.LToken selectedToken = null;
 
             for (Connection c : connections)
             {
@@ -380,6 +347,11 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                     {
                         t.balance = viewModel.getBalance(wallet.address, t);
                         fromTokens.add(t);
+
+                        if (t.chainId == token.tokenInfo.chainId && t.address.equalsIgnoreCase(token.getAddress()))
+                        {
+                            selectedToken = t;
+                        }
                     }
                 }
 
@@ -397,7 +369,11 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
             initToDialog(toTokens);
 
-            initSourceToken(fromTokens);
+            if (selectedToken != null)
+            {
+                sourceSelector.init(selectedToken);
+                tokenSwapSelected(selectedToken);
+            }
 
             tokenLayout.setVisibility(View.VISIBLE);
             noConnectionsLayout.setVisibility(View.GONE);

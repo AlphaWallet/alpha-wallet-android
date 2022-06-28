@@ -26,8 +26,7 @@ import com.google.android.material.button.MaterialButton;
 public class TokenSelector extends LinearLayout
 {
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final Context context;
-    private final ImageView icon;
+    private final AddressIcon icon;
     private final TextView label;
     private final TextView address;
     private final TextView symbolText;
@@ -44,7 +43,6 @@ public class TokenSelector extends LinearLayout
     public TokenSelector(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        this.context = context;
         inflate(context, R.layout.token_selector, this);
 
         label = findViewById(R.id.label);
@@ -124,7 +122,7 @@ public class TokenSelector extends LinearLayout
     {
         this.tokenItem = null;
 
-        icon.setImageDrawable(null);
+        icon.blankIcon();
 
         btnSelectToken.setVisibility(View.VISIBLE);
 
@@ -152,10 +150,7 @@ public class TokenSelector extends LinearLayout
     {
         this.tokenItem = tokenItem;
 
-        Glide.with(getContext())
-                .load(tokenItem.logoURI)
-                .circleCrop()
-                .into(icon);
+        icon.bindData(tokenItem.logoURI, tokenItem.chainId, tokenItem.address, tokenItem.symbol);
 
         btnSelectToken.setVisibility(View.GONE);
 

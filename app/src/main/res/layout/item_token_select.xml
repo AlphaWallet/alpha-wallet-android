@@ -10,16 +10,7 @@
     android:paddingStart="@dimen/small_12"
     android:paddingEnd="@dimen/tiny_8">
 
-<!--    <com.alphawallet.app.widget.TokenIcon-->
-<!--        android:id="@+id/token_icon"-->
-<!--        android:layout_width="@dimen/token_icon"-->
-<!--        android:layout_height="@dimen/token_icon"-->
-<!--        android:layout_gravity="center_vertical"-->
-<!--        android:src="@drawable/ic_ethereum"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"/>-->
-
-    <ImageView
+    <com.alphawallet.app.widget.AddressIcon
         android:id="@+id/token_icon"
         android:layout_width="@dimen/token_icon"
         android:layout_height="@dimen/token_icon"
@@ -27,6 +18,15 @@
         android:src="@drawable/ic_ethereum"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
+
+<!--    <ImageView-->
+<!--        android:id="@+id/token_icon"-->
+<!--        android:layout_width="@dimen/token_icon"-->
+<!--        android:layout_height="@dimen/token_icon"-->
+<!--        android:layout_gravity="center_vertical"-->
+<!--        android:src="@drawable/ic_ethereum"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"/>-->
 
     <LinearLayout
         android:id="@+id/layout_text"

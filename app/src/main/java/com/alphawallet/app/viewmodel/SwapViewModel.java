@@ -274,7 +274,7 @@ public class SwapViewModel extends BaseViewModel
         {
             return BalanceUtils.getShortFormat(t.balance.toString(), t.tokenInfo.decimals);
         }
-        else return "";
+        else return "0";
     }
 
     public void getAuthentication(Activity activity, Wallet wallet, SignAuthenticationCallback callback)

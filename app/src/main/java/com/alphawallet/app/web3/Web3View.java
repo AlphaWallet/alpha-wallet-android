@@ -225,20 +225,22 @@ public class Web3View extends WebView {
                 innerOnEthCallListener,
                 innerAddChainListener,
                 innerOnWalletActionListener), "alpha");
-
-        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK))
-        {
-            switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
-            {
-                case Configuration.UI_MODE_NIGHT_YES:
-                    WebSettingsCompat.setForceDark(getSettings(), FORCE_DARK_ON);
-                    break;
-                case Configuration.UI_MODE_NIGHT_NO:
-                case Configuration.UI_MODE_NIGHT_UNDEFINED:
-                    WebSettingsCompat.setForceDark(getSettings(), FORCE_DARK_OFF);
-                    break;
-            }
-        }
+        
+//        Removing this block for now.
+//        TODO: Figure out if we should support dark mode for external websites
+//        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK))
+//        {
+//            switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
+//            {
+//                case Configuration.UI_MODE_NIGHT_YES:
+//                    WebSettingsCompat.setForceDark(getSettings(), FORCE_DARK_ON);
+//                    break;
+//                case Configuration.UI_MODE_NIGHT_NO:
+//                case Configuration.UI_MODE_NIGHT_UNDEFINED:
+//                    WebSettingsCompat.setForceDark(getSettings(), FORCE_DARK_OFF);
+//                    break;
+//            }
+//        }
     }
 
     @Nullable

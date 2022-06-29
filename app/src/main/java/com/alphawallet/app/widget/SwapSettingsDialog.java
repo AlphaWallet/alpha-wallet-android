@@ -54,7 +54,6 @@ public class SwapSettingsDialog extends BottomSheetDialog
 
         adapter = new SelectChainAdapter(activity, chains, swapSettingsInterface);
         chainList.setLayoutManager(new LinearLayoutManager(getContext()));
-        chainList.addItemDecoration(new ListDivider(getContext()));
         chainList.setAdapter(adapter);
     }
 

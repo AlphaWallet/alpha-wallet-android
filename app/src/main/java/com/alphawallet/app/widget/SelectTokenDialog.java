@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,6 +35,7 @@ public class SelectTokenDialog extends BottomSheetDialog
     private List<Connection.LToken> tokenItems;
     private LinearLayout searchLayout;
     private EditText search;
+    private TextView noResultsText;
 
     public SelectTokenDialog(@NonNull Activity activity)
     {
@@ -51,6 +53,7 @@ public class SelectTokenDialog extends BottomSheetDialog
         tokenList = view.findViewById(R.id.token_list);
         search = view.findViewById(R.id.edit_search);
         searchLayout = view.findViewById(R.id.layout_search_tokens);
+        noResultsText = view.findViewById(R.id.no_results);
         ImageView btnClose = view.findViewById(R.id.image_close);
         btnClose.setOnClickListener(v -> dismiss());
     }
@@ -60,10 +63,11 @@ public class SelectTokenDialog extends BottomSheetDialog
         this(activity);
         this.tokenItems = tokenItems;
 
+        noResultsText.setVisibility(tokenItems.size() > 0 ? View.GONE : View.VISIBLE);
+
         adapter = new SelectTokenAdapter(tokenItems, callback);
 
         tokenList.setLayoutManager(new LinearLayoutManager(getContext()));
-        tokenList.addItemDecoration(new ListDivider(getContext()));
         tokenList.setAdapter(adapter);
 
         searchLayout.setOnClickListener(v -> {

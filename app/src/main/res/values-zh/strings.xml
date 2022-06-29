@@ -916,4 +916,7 @@
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
     <string name="action_select_token">Select Token</string>
+    <string name="label_slippage_custom">Custom</string>
+    <string name="misc_percentage">%</string>
+    <string name="hint_custom_slippage">0.01</string>
 </resources>

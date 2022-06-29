@@ -17,6 +17,9 @@ import java.math.BigDecimal;
 
 public class SlippageWidget extends LinearLayout
 {
+    private static final String SLIPPAGE_VALUE_1 = "0.1%";
+    private static final String SLIPPAGE_VALUE_2 = "0.5%";
+    private static final String SLIPPAGE_VALUE_3 = "1%";
     private RadioGroup radioGroup;
     private MaterialRadioButton radio1;
     private MaterialRadioButton radio2;
@@ -31,8 +34,11 @@ public class SlippageWidget extends LinearLayout
 
         radioGroup = findViewById(R.id.radio_group);
         radio1 = findViewById(R.id.radio1);
+        radio1.setText(SLIPPAGE_VALUE_1);
         radio2 = findViewById(R.id.radio2);
+        radio2.setText(SLIPPAGE_VALUE_2);
         radio3 = findViewById(R.id.radio3);
+        radio3.setText(SLIPPAGE_VALUE_3);
         radio4 = findViewById(R.id.radio4);
         editText = findViewById(R.id.edit_text);
 

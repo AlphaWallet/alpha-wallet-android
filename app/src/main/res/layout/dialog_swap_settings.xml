@@ -5,53 +5,16 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <RelativeLayout
+    <com.alphawallet.app.widget.BottomSheetToolbarView
+        android:id="@+id/bottom_sheet_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="@dimen/action_sheet_header">
-
-        <ImageView
-            android:id="@+id/image_close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="@dimen/small_12"
-            android:contentDescription="@string/action_close"
-            android:src="@drawable/ic_close"
-            app:tint="?colorControlNormal" />
-
-        <TextView
-            style="@style/Aw.Typography.SemiBold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginTop="@dimen/dp8"
-            android:layout_marginBottom="@dimen/dp8"
-            android:layout_toStartOf="@id/logo"
-            android:layout_toEndOf="@id/image_close"
-            android:gravity="center_horizontal"
-            android:text="@string/settings_label" />
-
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_width="@dimen/token_icon"
-            android:layout_height="@dimen/token_icon"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="@dimen/mini_4"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_launcher_foreground" />
-
-    </RelativeLayout>
-
-    <View style="@style/Aw.Component.Separator" />
+        app:title="@string/settings_label" />
 
     <com.alphawallet.app.widget.SlippageWidget
         android:id="@+id/slippage_widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
-    <View style="@style/Aw.Component.Separator" />
 
     <com.alphawallet.app.widget.StandardHeader
         android:layout_width="match_parent"
@@ -61,7 +24,8 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chain_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:background="@color/transparent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_confirm"

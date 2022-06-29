@@ -307,7 +307,7 @@ dependencies {
     //Timber
     implementation 'com.jakewharton.timber:timber:5.0.1'
 
-    implementation 'com.github.WalletConnect:WalletConnectKotlinV2:1.0.0-beta100'
+    implementation 'com.github.WalletConnect:WalletConnectKotlinV2:1.0.0-beta101'
     implementation 'androidx.work:work-runtime:2.7.1'
 
     //Analytics
@@ -319,3 +319,4 @@ dependencies {
 
 // WARNING WARNING WARNING
 // don't add any additional things here without first search "China" in this file
+

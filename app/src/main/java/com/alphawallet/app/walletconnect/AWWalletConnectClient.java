@@ -25,6 +25,7 @@ import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
 import com.alphawallet.app.walletconnect.util.WCMethodChecker;
 import com.walletconnect.walletconnectv2.client.Sign;
 import com.walletconnect.walletconnectv2.client.SignClient;
+import com.walletconnect.walletconnectv2.client.SignInterface;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,14 +51,12 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
         this.walletConnectInteract = walletConnectInteract;
     }
 
-    @Override
     public void onSessionDelete(@NonNull Sign.Model.DeletedSession deletedSession)
     {
         updateNotification();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    @Override
     public void onSessionProposal(@NonNull Sign.Model.SessionProposal sessionProposal)
     {
         AWWalletConnectClient.sessionProposal = sessionProposal;
@@ -68,7 +67,6 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    @Override
     public void onSessionRequest(@NonNull Sign.Model.SessionRequest sessionRequest)
     {
         String method = sessionRequest.getRequest().getMethod();
@@ -178,7 +176,7 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
 
     public void disconnect(String sessionId, WalletConnectV2Callback callback)
     {
-        SignClient.INSTANCE.disconnect(new Sign.Params.Disconnect(sessionId, context.getString(R.string.wc_disconnect), 0), this::onDisconnectError);
+        SignClient.INSTANCE.disconnect(new Sign.Params.Disconnect(context.getString(R.string.wc_disconnect)), this::onDisconnectError);
         callback.onSessionDisconnected();
         updateNotification();
     }
@@ -217,7 +215,7 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
             return null;
         });
 
-        SignClient.INSTANCE.setWalletDelegate(this);
+        SignClient.INSTANCE.setWalletDelegate((SignInterface.WalletDelegate) this);
     }
 
     @NonNull
@@ -234,19 +232,16 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
     {
     }
 
-    @Override
     public void onConnectionStateChange(@NonNull Sign.Model.ConnectionState connectionState)
     {
 
     }
 
-    @Override
     public void onSessionSettleResponse(@NonNull Sign.Model.SettledSessionResponse settledSessionResponse)
     {
 
     }
 
-    @Override
     public void onSessionUpdateResponse(@NonNull Sign.Model.SessionUpdateResponse sessionUpdateResponse)
     {
 

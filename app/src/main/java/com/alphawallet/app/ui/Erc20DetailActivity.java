@@ -471,16 +471,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
         else if (actionId == R.string.swap)
         {
-            Single.fromCallable(() -> {
-                Glide.get(this).clearDiskCache();
-                return true;
-            })
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(t -> { new SwapRouter().open(this, token, wallet); }).isDisposed();
-
-//            openDapp(formatOneInchCall(token));
-            //new SwapRouter().open(this, token, wallet);
+            //openDapp(formatOneInchCall(token));
+            new SwapRouter().open(this, token, wallet);
         }
     }
 

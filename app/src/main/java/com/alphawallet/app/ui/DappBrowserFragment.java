@@ -248,7 +248,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         else if (heightDifference == 0 && layoutParams.bottomMargin != navBarHeight)
         {
             //go back into full screen mode, and expand URL bar out
-            layoutParams.bottomMargin = navBarHeight;
+            layoutParams.bottomMargin = 0;
             webFrame.setLayoutParams(layoutParams);
             shrinkSearchBar();
         }
@@ -2211,39 +2211,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
         return getGasSettings;
-    }
-
-    // Required for if we have status bar showing
-    public void softKeyboardVisible()
-    {
-        if (getActivity() == null)
-        {
-            return;
-        }
-
-        //boolean requiresDappBrowserResize = !viewModel.fullScreenSelected();
-
-        Rect r = new Rect();
-        webFrame.getWindowVisibleDisplayFrame(r);
-
-        int heightDifference = webFrame.getRootView().getHeight() - r.bottom;
-
-        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) webFrame.getLayoutParams();
-
-        layoutParams.bottomMargin = heightDifference;
-        webFrame.setLayoutParams(layoutParams);
-    }
-
-    public void softKeyboardGone()
-    {
-        if (getActivity() == null)
-        {
-            return;
-        }
-        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) webFrame.getLayoutParams();
-        layoutParams.bottomMargin = ((HomeActivity) getActivity()).getNavBarHeight();
-        webFrame.setLayoutParams(layoutParams);
-        shrinkSearchBar();
     }
 
     @NotNull

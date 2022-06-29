@@ -7,6 +7,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -17,6 +18,7 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AuthenticationCallback;
+import com.alphawallet.app.entity.walletconnect.NamespaceParser;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.WalletConnectInteract;
@@ -27,10 +29,13 @@ import com.walletconnect.walletconnectv2.client.Sign;
 import com.walletconnect.walletconnectv2.client.SignClient;
 import com.walletconnect.walletconnectv2.client.SignInterface;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import kotlin.Unit;
 import timber.log.Timber;
@@ -56,7 +61,6 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
         updateNotification();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void onSessionProposal(@NonNull Sign.Model.SessionProposal sessionProposal)
     {
         AWWalletConnectClient.sessionProposal = sessionProposal;
@@ -97,16 +101,14 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
         return null;
     }
 
-    public void pair(String url)
+    public void pair(String url, Consumer<String> callback)
     {
         Sign.Params.Pair pair = new Sign.Params.Pair(url);
-        SignClient.INSTANCE.pair(pair, this::onPairError);
-    }
-
-    private Unit onPairError(Sign.Model.Error error)
-    {
-        Timber.e(error.getThrowable());
-        return null;
+        SignClient.INSTANCE.pair(pair, error -> {
+            Timber.e(error.getThrowable());
+            callback.accept(error.getThrowable().getMessage());
+            return null;
+        });
     }
 
     public void approve(Sign.Model.SessionRequest sessionRequest, String result)
@@ -127,24 +129,46 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
         reject(sessionRequest, context.getString(R.string.message_reject_request));
     }
 
-    public void approve(Sign.Model.SessionProposal sessionProposal, WalletConnectV2Callback callback)
+    public void approve(Sign.Model.SessionProposal sessionProposal, List<String> selectedAccounts, WalletConnectV2Callback callback)
     {
         String proposerPublicKey = sessionProposal.getProposerPublicKey();
-        Sign.Params.Approve approve = new Sign.Params.Approve(proposerPublicKey, getNamespaces(sessionProposal), sessionProposal.getRelayProtocol());
+        Sign.Params.Approve approve = new Sign.Params.Approve(proposerPublicKey, buildNamespaces(sessionProposal, selectedAccounts), sessionProposal.getRelayProtocol());
         SignClient.INSTANCE.approveSession(approve, this::onSessionApproveError);
         callback.onSessionProposalApproved();
         updateNotification();
     }
 
-    private Map<String, Sign.Model.Namespace.Session> getNamespaces(Sign.Model.SessionProposal sessionProposal)
+    private Map<String, Sign.Model.Namespace.Session> buildNamespaces(Sign.Model.SessionProposal sessionProposal, List<String> selectedAccounts)
     {
-        
-        return null;
+        Map<String, Sign.Model.Namespace.Session> result = new HashMap<>();
+        Map<String, Sign.Model.Namespace.Proposal> namespaces = sessionProposal.getRequiredNamespaces();
+        NamespaceParser namespaceParser = new NamespaceParser(namespaces);
+        List<String> accounts = toCAIP10(namespaceParser.getChains(), selectedAccounts);
+        for (Map.Entry<String, Sign.Model.Namespace.Proposal> entry : namespaces.entrySet())
+        {
+            Sign.Model.Namespace.Session session = new Sign.Model.Namespace.Session(accounts, namespaceParser.getMethods(), namespaceParser.getEvents(), null);
+            result.put(entry.getKey(), session);
+        }
+        return result;
+    }
+
+    private List<String> toCAIP10(List<String> chains, List<String> selectedAccounts)
+    {
+        List<String> result = new ArrayList<>();
+        for (String chain : chains)
+        {
+            for (String account : selectedAccounts)
+            {
+                result.add(chain + ":" + account);
+            }
+        }
+        return result;
     }
 
     private Unit onSessionApproveError(Sign.Model.Error error)
     {
         Timber.e(error.getThrowable());
+        Toast.makeText(context, error.getThrowable().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
         return null;
     }
 

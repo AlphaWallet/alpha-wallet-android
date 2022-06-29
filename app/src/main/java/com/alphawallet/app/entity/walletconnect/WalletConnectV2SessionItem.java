@@ -9,10 +9,13 @@ import com.walletconnect.walletconnectv2.client.Sign;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 import androidx.annotation.RequiresApi;
+
+import timber.log.Timber;
 
 public class WalletConnectV2SessionItem extends WalletConnectSessionItem implements Parcelable
 {
@@ -30,19 +33,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         localSessionId = s.getTopic();
         settled = true;
 //        extractChainsAndAddress(s.getAccounts());
-//        methods.addAll(s.getPermissions().getJsonRpc().getMethods());
-    }
-
-    private void extractChainsAndAddress(List<String> accounts)
-    {
-        Set<String> networks = new HashSet<>();
-        for (String account : accounts)
-        {
-            int index = account.lastIndexOf(":");
-            wallets.add(account.substring(index + 1));
-            networks.add(account.substring(0, index));
-        }
-        chains.addAll(networks);
+//        methods.addAll(s.getNamespaces());
     }
 
     public WalletConnectV2SessionItem(Parcel in)
@@ -63,18 +54,17 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public static WalletConnectV2SessionItem from(Sign.Model.SessionProposal sessionProposal)
     {
         WalletConnectV2SessionItem item = new WalletConnectV2SessionItem();
         item.name = sessionProposal.getName();
         item.url = sessionProposal.getUrl();
-        item.icon = sessionProposal.getIcons().isEmpty() ? null : sessionProposal.getIcons().get(0).getRawPath();
+        item.icon = sessionProposal.getIcons().isEmpty() ? null : sessionProposal.getIcons().get(0).toString();
         item.sessionId = sessionProposal.getProposerPublicKey();
         item.settled = false;
-//        item.wallets.addAll(sessionProposal.getAccounts());
-//        item.chains.addAll(sessionProposal.getChains());
-//        item.methods.addAll(sessionProposal.getMethods());
+        NamespaceParser namespaceParser = new NamespaceParser(sessionProposal.getRequiredNamespaces());
+        item.chains.addAll(namespaceParser.getChains());
+        item.methods.addAll(namespaceParser.getMethods());
         return item;
     }
 
@@ -99,8 +89,10 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
     }
 
     public static final Parcelable.Creator<WalletConnectV2SessionItem> CREATOR
-            = new Parcelable.Creator<WalletConnectV2SessionItem>() {
-        public WalletConnectV2SessionItem createFromParcel(Parcel in) {
+            = new Parcelable.Creator<>()
+    {
+        public WalletConnectV2SessionItem createFromParcel(Parcel in)
+        {
             return new WalletConnectV2SessionItem(in);
         }
 

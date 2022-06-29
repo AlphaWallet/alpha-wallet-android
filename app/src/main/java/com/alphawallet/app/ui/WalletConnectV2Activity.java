@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import static java.util.stream.Collectors.toList;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -36,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -75,7 +79,13 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         if (!TextUtils.isEmpty(url))
         {
             progressBar.setVisibility(View.VISIBLE);
-            new Handler().postDelayed(() -> awWalletConnectClient.pair(url), 3000);
+            new Handler().postDelayed(() -> awWalletConnectClient.pair(url, (msg) -> {
+                if (!TextUtils.isEmpty(msg))
+                {
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }), 3000);
             return;
         }
 
@@ -270,10 +280,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private void approve(Sign.Model.SessionProposal sessionProposal)
     {
-        List<String> accounts = getAccounts(null);
-        // get methods
-        // get events
-        awWalletConnectClient.approve(sessionProposal, this);
+        awWalletConnectClient.approve(sessionProposal, getSelectedAccounts(), this);
     }
 
     private void showSessionsActivity()
@@ -282,18 +289,10 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         startActivity(intent);
     }
 
-    private List<String> getAccounts(List<String> chains)
+    private List<String> getSelectedAccounts()
     {
-        List<Wallet> wallets = walletAdapter.getSelectedWallets();
-        List<String> result = new ArrayList<>();
-        for (String chain : chains)
-        {
-            for (Wallet wallet : wallets)
-            {
-                result.add(chain + ":" + wallet.address);
-            }
-        }
-        return result;
+        return walletAdapter.getSelectedWallets().stream()
+                .map((wallet) -> wallet.address).collect(toList());
     }
 
     @Override

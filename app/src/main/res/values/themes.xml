@@ -68,6 +68,8 @@
         <!-- The color applied to chart tabs -->
         <item name="colorSurfaceDark">@color/surface_dark</item>
 
+        <item name="colorSurfaceSearch">@color/surface_search</item>
+
         <item name="colorSurfaceVariant"></item>
 
 

@@ -140,4 +140,26 @@
         tools:text="UEFA"
         tools:visibility="visible" />
 
+
+    <WebView
+        android:id="@+id/web_view_for_svg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"
+        app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
+        app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
+        app:layout_constraintTop_toTopOf="@id/guidelineTop"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/web_mask_circle"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"
+        app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
+        app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
+        app:layout_constraintTop_toTopOf="@id/guidelineTop"
+        android:src="@drawable/select_masking_circle"
+        android:visibility="gone" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

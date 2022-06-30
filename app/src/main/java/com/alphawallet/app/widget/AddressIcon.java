@@ -1,6 +1,7 @@
 package com.alphawallet.app.widget;
 
 import static androidx.core.content.ContextCompat.getColorStateList;
+import static com.alphawallet.app.util.Utils.loadFile;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -8,7 +9,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Base64;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,10 +29,14 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 
+import java.nio.charset.StandardCharsets;
+
 public class AddressIcon extends ConstraintLayout
 {
     private final ImageView icon;
     private final TextView textIcon;
+    private final WebView svgIcon;
+    private final ImageView svgMask;
 
     private String symbol;
     private String primaryURI;
@@ -46,6 +53,8 @@ public class AddressIcon extends ConstraintLayout
 
         icon = findViewById(R.id.icon);
         textIcon = findViewById(R.id.text_icon);
+        svgIcon = findViewById(R.id.web_view_for_svg);
+        svgMask = findViewById(R.id.web_mask_circle);
 
         findViewById(R.id.circle).setVisibility(View.GONE);
     }
@@ -69,6 +78,8 @@ public class AddressIcon extends ConstraintLayout
         this.address = tokenAddress;
 
         setupTextIcon();
+        svgIcon.setVisibility(View.GONE);
+        svgMask.setVisibility(View.GONE);
 
         if (TextUtils.isEmpty(tokenAddress))
         {
@@ -93,19 +104,26 @@ public class AddressIcon extends ConstraintLayout
                 .into(new DrawableImageViewTarget(icon)).getRequest();
     }
 
+    //Mixture of (mostly) SVG and some PNG. Webview is inefficient, but is simplest solution
     private void loadFromPrimaryURI()
     {
         if (!TextUtils.isEmpty(primaryURI))
         {
-            currentRq = Glide.with(this)
-                    .load(Utils.parseIPFS(primaryURI))
-                    .placeholder(R.drawable.ic_token_eth)
-                    .timeout(60000) //in case it's IPFS
-                    .onlyRetrieveFromCache(false)
-                    .circleCrop()
-                    .listener(requestListenerPrimary)
-                    .into(new DrawableImageViewTarget(icon)).getRequest();
+            setWebView(Utils.parseIPFS(primaryURI));
         }
+    }
+
+    //Use webview for SVG
+    private void setWebView(String imageUrl)
+    {
+        String loader = loadFile(getContext(), R.raw.token_graphic).replace("[URL]", imageUrl);
+        String base64 = android.util.Base64.encodeToString(loader.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+
+        textIcon.setVisibility(View.GONE);
+        icon.setVisibility(View.GONE);
+        svgIcon.setVisibility(View.VISIBLE);
+        svgMask.setVisibility(View.VISIBLE);
+        svgIcon.loadData(base64, "text/html; charset=utf-8", "base64");
     }
 
     private void setupTextIcon()
@@ -122,23 +140,6 @@ public class AddressIcon extends ConstraintLayout
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             handler.post(() -> loadFromPrimaryURI());
-            return false;
-        }
-
-        @Override
-        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-            textIcon.setVisibility(View.GONE);
-            icon.setVisibility(View.VISIBLE);
-            icon.setImageDrawable(resource);
-            findViewById(R.id.circle).setVisibility(View.VISIBLE);
-            return false;
-        }
-    };
-
-    private final RequestListener<Drawable> requestListenerPrimary = new RequestListener<Drawable>() {
-        @Override
-        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-            setupTextIcon();
             return false;
         }
 

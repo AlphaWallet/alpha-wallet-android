@@ -26,4 +26,5 @@
     <!-- Required for placing behind icons in dark mode, transparent in light mode as background is light -->
     <color name="dark_mode_icon_background_compensate">@color/mercury</color>
     <color name="dark_mode_token_icon_background_compensate">@color/mine</color>
+    <color name="surface_search">@color/mine</color>
 </resources>

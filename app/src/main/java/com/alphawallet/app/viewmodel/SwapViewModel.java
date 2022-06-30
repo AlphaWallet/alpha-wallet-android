@@ -265,7 +265,11 @@ public class SwapViewModel extends BaseViewModel
     public String getBalance(String walletAddress, Connection.LToken token)
     {
         String address = token.address;
-        if (address.equalsIgnoreCase("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")) // TODO:
+
+        // Note: In the LIFI API, the native token has either of these two addresses.
+        // In AlphaWallet, the wallet address is used.
+        if (address.equalsIgnoreCase("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") ||
+                address.equalsIgnoreCase("0x0000000000000000000000000000000000000000"))
         {
             address = walletAddress;
         }

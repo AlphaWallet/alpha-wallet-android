@@ -19,6 +19,8 @@ import com.alphawallet.app.ui.widget.OnTokenManageClickListener;
 import com.alphawallet.app.widget.TokenIcon;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
+import timber.log.Timber;
+
 public class TokenListHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, CompoundButton.OnCheckedChangeListener
 {
 
@@ -69,7 +71,15 @@ public class TokenListHolder extends BinderViewHolder<TokenCardMeta> implements 
         switchEnabled.setOnCheckedChangeListener(null);
         switchEnabled.setChecked(data.isEnabled);
         switchEnabled.setOnCheckedChangeListener(this);
-        tokenIcon.bindData(token, assetDefinition);
+        // to fix null pointer exception see issue #2643
+        try
+        {
+            tokenIcon.bindData(token, assetDefinition);
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
 
         if (data.isEnabled)
         {

@@ -268,9 +268,15 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         viewModel.getChains();
     }
 
-    private void initSourceToken(List<Connection.LToken> fromTokens)
+    private void initSourceToken(Connection.LToken selectedToken)
     {
-        long networkId = fromTokens.get(0).chainId;
+        if (selectedToken != null)
+        {
+            sourceSelector.init(selectedToken);
+            sourceTokenChanged(selectedToken);
+        }
+
+        /*long networkId = fromTokens.get(0).chainId;
 
         String symbol = "eth";
 
@@ -299,7 +305,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             sourceSelector.reset();
 
             infoLayout.setVisibility(View.GONE);
-        }
+        }*/
     }
 
     private void initFromDialog(List<Connection.LToken> fromTokens)
@@ -376,6 +382,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         {
             List<Connection.LToken> fromTokens = new ArrayList<>();
             List<Connection.LToken> toTokens = new ArrayList<>();
+            Connection.LToken selectedToken = null;
 
             for (Connection c : connections)
             {
@@ -385,6 +392,11 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                     {
                         t.balance = viewModel.getBalance(wallet.address, t);
                         fromTokens.add(t);
+
+                        if (t.chainId == token.tokenInfo.chainId && t.address.equalsIgnoreCase(token.getAddress()))
+                        {
+                            selectedToken = t;
+                        }
                     }
                 }
 
@@ -402,7 +414,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
             initToDialog(toTokens);
 
-            initSourceToken(fromTokens);
+            initSourceToken(selectedToken);
 
             tokenLayout.setVisibility(View.VISIBLE);
             noConnectionsLayout.setVisibility(View.GONE);

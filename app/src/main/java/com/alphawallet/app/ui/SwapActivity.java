@@ -30,15 +30,17 @@ import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.viewmodel.SwapViewModel;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
-import com.alphawallet.app.widget.ConfirmSwapDialog;
+import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.SelectTokenDialog;
 import com.alphawallet.app.widget.SwapSettingsDialog;
 import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.app.widget.TokenSelector;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.token.tools.Numeric;
 import com.google.android.material.button.MaterialButton;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +59,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private SelectTokenDialog sourceTokenDialog;
     private SelectTokenDialog destTokenDialog;
 
-    private ConfirmSwapDialog confirmSwapDialog;
+    //private ConfirmSwapDialog confirmSwapDialog;
+    private ActionSheetDialog confirmationDialog;
     private SwapSettingsDialog settingsDialog;
     private AWalletAlertDialog progressDialog;
 
@@ -72,6 +75,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private Token token;
     private Wallet wallet;
+    private Connection.LToken sourceToken;
 
     private List<Chain> chains;
 
@@ -141,10 +145,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         });
 
         continueBtn.setOnClickListener(v -> {
-            if (confirmSwapDialog != null)
-            {
-                confirmSwapDialog.show();
-            }
+            showConfirmDialog();
         });
 
         openSettingsBtn.setOnClickListener(v -> {
@@ -213,6 +214,36 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         });
     }
 
+    private void showConfirmDialog()
+    {
+        if (confirmationDialog != null && !confirmationDialog.isShowing())
+        {
+            confirmationDialog.show();
+            confirmationDialog.fullExpand();
+        }
+    }
+
+    private ActionSheetDialog createConfirmationAction(Quote quote)
+    {
+        ActionSheetDialog confDialog = null;
+        try
+        {
+            Token activeToken = viewModel.getTokensService().getTokenOrBase(sourceToken.chainId, sourceToken.address);
+            Web3Transaction w3Tx = viewModel.buildWeb3Transaction(quote);
+            confDialog = new ActionSheetDialog(this, w3Tx, activeToken,
+                    "", w3Tx.recipient.toString(), viewModel.getTokensService(), this);
+            confDialog.setURL("LI.FI Best Quote"); //TODO: Expand swap provider here
+            confDialog.setCanceledOnTouchOutside(false);
+            confDialog.setGasEstimate(Numeric.toBigInt(quote.transactionRequest.gasLimit));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return confDialog;
+    }
+
     private void destTokenChanged(Connection.LToken token)
     {
         destSelector.setBalance(viewModel.getBalance(wallet.address, token));
@@ -237,28 +268,9 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         sourceTokenDialog.setSelectedToken(token.address);
 
+        sourceToken = token;
+
         getQuote();
-    }
-
-    private void confirmSwap(Quote quote)
-    {
-        confirmSwapDialog.dismiss();
-        // TODO: Send Transaction?
-
-        viewModel.getAuthentication(this, wallet, new SignAuthenticationCallback()
-        {
-            @Override
-            public void gotAuthorisation(boolean gotAuth)
-            {
-                viewModel.sendTransaction(quote, wallet, settingsDialog.getSelectedChainId());
-            }
-
-            @Override
-            public void cancelAuthentication()
-            {
-
-            }
-        });
     }
 
     @Override
@@ -268,6 +280,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         viewModel.getChains();
     }
 
+    // The source token should default to the token selected in the main wallet dialog (ie the token from the intent).
     private void initSourceToken(Connection.LToken selectedToken)
     {
         if (selectedToken != null)
@@ -276,6 +289,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             sourceTokenChanged(selectedToken);
         }
 
+        //TODO: Add base 'ETH' to dest tokens in selector
         /*long networkId = fromTokens.get(0).chainId;
 
         String symbol = "eth";
@@ -434,7 +448,10 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         updateInfoSummary(quote);
 
-        confirmSwapDialog = new ConfirmSwapDialog(this, quote, () -> confirmSwap(quote));
+        if (confirmationDialog == null || !confirmationDialog.isShowing())
+        {
+            confirmationDialog = createConfirmationAction(quote);
+        }
 
         continueBtn.setEnabled(true);
     }
@@ -453,7 +470,16 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void updateInfoSummary(Quote quote)
     {
-        fees.setValue(quote.transactionRequest.gasPrice);
+        //convert gasQuote to Eth cost
+        BigInteger gasCost = Numeric.toBigInt(quote.transactionRequest.gasPrice);
+        BigInteger gasLimit = Numeric.toBigInt(quote.transactionRequest.gasLimit);
+
+        BigInteger networkFee = gasCost.multiply(gasLimit);
+
+        String ethCostStr = BalanceUtils.getScaledValueFixed(new BigDecimal(networkFee), 18, 4);
+
+        fees.setValue(ethCostStr); //TODO: Needs to say 'Eth' after the quote, also should get the Eth price to show the Tx cost in user's Fiat
+                                   //TODO: To see this done check GasWidget, see comment "Can we display value for gas?"
 
         BigDecimal s = new BigDecimal(quote.action.fromToken.priceUSD);
         BigDecimal d = new BigDecimal(quote.action.toToken.priceUSD);

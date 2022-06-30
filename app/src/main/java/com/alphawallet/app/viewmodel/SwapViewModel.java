@@ -299,7 +299,7 @@ public class SwapViewModel extends BaseViewModel
                         transactionError::postValue);
     }
 
-    private Web3Transaction buildWeb3Transaction(Quote quote)
+    public Web3Transaction buildWeb3Transaction(Quote quote)
     {
         Quote.TransactionRequest request = quote.transactionRequest;
 

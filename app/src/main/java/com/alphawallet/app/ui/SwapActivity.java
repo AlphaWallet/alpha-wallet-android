@@ -1,0 +1,611 @@
+package com.alphawallet.app.ui;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.lifi.Chain;
+import com.alphawallet.app.entity.lifi.Connection;
+import com.alphawallet.app.entity.lifi.Quote;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
+import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.viewmodel.SwapViewModel;
+import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.SelectTokenDialog;
+import com.alphawallet.app.widget.SwapSettingsDialog;
+import com.alphawallet.app.widget.TokenInfoView;
+import com.alphawallet.app.widget.TokenSelector;
+import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.token.tools.Numeric;
+import com.google.android.material.button.MaterialButton;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
+public class SwapActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
+{
+    SwapViewModel viewModel;
+
+    private TextView chainName;
+
+    private TokenSelector sourceSelector;
+    private TokenSelector destSelector;
+
+    private SelectTokenDialog sourceTokenDialog;
+    private SelectTokenDialog destTokenDialog;
+
+    //private ConfirmSwapDialog confirmSwapDialog;
+    private ActionSheetDialog confirmationDialog;
+    private SwapSettingsDialog settingsDialog;
+    private AWalletAlertDialog progressDialog;
+
+    private RelativeLayout tokenLayout;
+    private LinearLayout infoLayout;
+    private TokenInfoView fees;
+    private TokenInfoView currentPrice;
+    private TokenInfoView minReceived;
+    private LinearLayout noConnectionsLayout;
+    private MaterialButton continueBtn;
+    private MaterialButton openSettingsBtn;
+
+    private Token token;
+    private Wallet wallet;
+    private Connection.LToken sourceToken;
+
+    private List<Chain> chains;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_swap);
+
+        toolbar();
+
+        setTitle("Swap");
+
+        initViewModel();
+
+        getIntentData();
+
+        initViews();
+    }
+
+    private void initViewModel()
+    {
+        viewModel = new ViewModelProvider(this)
+                .get(SwapViewModel.class);
+        viewModel.error().observe(this, this::onError);
+        viewModel.chains().observe(this, this::onChains);
+        viewModel.chain().observe(this, this::onChain);
+        viewModel.connections().observe(this, this::onConnections);
+        viewModel.quote().observe(this, this::onQuote);
+        viewModel.progress().observe(this, this::onProgress);
+        viewModel.progressInfo().observe(this, this::onProgressInfo);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionError().observe(this, this::txError);
+    }
+
+    private void getIntentData()
+    {
+        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        wallet = getIntent().getParcelableExtra(C.Key.WALLET);
+    }
+
+    private void initViews()
+    {
+        chainName = findViewById(R.id.chain_name);
+        sourceSelector = findViewById(R.id.from_input);
+        destSelector = findViewById(R.id.to_input);
+        tokenLayout = findViewById(R.id.layout_tokens);
+        infoLayout = findViewById(R.id.layout_info);
+        fees = findViewById(R.id.tiv_fees);
+        currentPrice = findViewById(R.id.tiv_current_price);
+        minReceived = findViewById(R.id.tiv_min_received);
+        noConnectionsLayout = findViewById(R.id.layout_no_connections);
+        continueBtn = findViewById(R.id.btn_continue);
+        openSettingsBtn = findViewById(R.id.btn_open_settings);
+
+        progressDialog = new AWalletAlertDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setProgressMode();
+
+        chainName.setOnClickListener(v -> {
+            if (settingsDialog != null)
+            {
+                settingsDialog.show();
+            }
+        });
+
+        continueBtn.setOnClickListener(v -> {
+            showConfirmDialog();
+        });
+
+        openSettingsBtn.setOnClickListener(v -> {
+            if (settingsDialog != null)
+            {
+                settingsDialog.show();
+            }
+        });
+
+        sourceSelector.setEventListener(new TokenSelector.TokenSelectorEventListener()
+        {
+            @Override
+            public void onSelectorClicked()
+            {
+                sourceTokenDialog.show();
+            }
+
+            @Override
+            public void onAmountChanged(String amount)
+            {
+                getQuote();
+            }
+
+            @Override
+            public void onSelectionChanged(Connection.LToken token)
+            {
+                sourceTokenChanged(token);
+            }
+
+            @Override
+            public void onMaxClicked()
+            {
+                String max = viewModel.getBalance(wallet.address, sourceSelector.getToken());
+                if (!max.isEmpty())
+                {
+                    sourceSelector.setAmount(max);
+                }
+            }
+        });
+
+        destSelector.setEventListener(new TokenSelector.TokenSelectorEventListener()
+        {
+            @Override
+            public void onSelectorClicked()
+            {
+                destTokenDialog.show();
+            }
+
+            @Override
+            public void onAmountChanged(String amount)
+            {
+                // Do nothing; EditText is disabled for dest selector
+            }
+
+            @Override
+            public void onSelectionChanged(Connection.LToken token)
+            {
+                destTokenChanged(token);
+            }
+
+            @Override
+            public void onMaxClicked()
+            {
+                // Do nothing; Max Button is not visible for dest selector.
+            }
+        });
+    }
+
+    private void showConfirmDialog()
+    {
+        if (confirmationDialog != null && !confirmationDialog.isShowing())
+        {
+            confirmationDialog.show();
+            confirmationDialog.fullExpand();
+        }
+    }
+
+    private ActionSheetDialog createConfirmationAction(Quote quote)
+    {
+        ActionSheetDialog confDialog = null;
+        try
+        {
+            Token activeToken = viewModel.getTokensService().getTokenOrBase(sourceToken.chainId, sourceToken.address);
+            Web3Transaction w3Tx = viewModel.buildWeb3Transaction(quote);
+            confDialog = new ActionSheetDialog(this, w3Tx, activeToken,
+                    "", w3Tx.recipient.toString(), viewModel.getTokensService(), this);
+            confDialog.setURL("LI.FI Best Quote"); //TODO: Expand swap provider here
+            confDialog.setCanceledOnTouchOutside(false);
+            confDialog.setGasEstimate(Numeric.toBigInt(quote.transactionRequest.gasLimit));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return confDialog;
+    }
+
+    private void destTokenChanged(Connection.LToken token)
+    {
+        destSelector.setBalance(viewModel.getBalance(wallet.address, token));
+
+        infoLayout.setVisibility(View.GONE);
+
+        destTokenDialog.setSelectedToken(token.address);
+
+        getQuote();
+    }
+
+    private void sourceTokenChanged(Connection.LToken token)
+    {
+        if (destSelector.getToken() == null)
+        {
+            destSelector.setVisibility(View.VISIBLE);
+        }
+
+        sourceSelector.setBalance(viewModel.getBalance(wallet.address, token));
+
+        infoLayout.setVisibility(View.GONE);
+
+        sourceTokenDialog.setSelectedToken(token.address);
+
+        sourceToken = token;
+
+        getQuote();
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        viewModel.getChains();
+    }
+
+    // The source token should default to the token selected in the main wallet dialog (ie the token from the intent).
+    private void initSourceToken(Connection.LToken selectedToken)
+    {
+        if (selectedToken != null)
+        {
+            sourceSelector.init(selectedToken);
+            sourceTokenChanged(selectedToken);
+        }
+
+        //TODO: Add base 'ETH' to dest tokens in selector
+        /*long networkId = fromTokens.get(0).chainId;
+
+        String symbol = "eth";
+
+        for (Chain c : chains)
+        {
+            if (c.id == networkId)
+            {
+                symbol = c.coin;
+            }
+        }
+
+        boolean matchFound = false;
+
+        for (Connection.LToken t : fromTokens)
+        {
+            if (t.symbol.equalsIgnoreCase(symbol))
+            {
+                sourceSelector.init(t);
+                matchFound = true;
+                break;
+            }
+        }
+
+        if (!matchFound)
+        {
+            sourceSelector.reset();
+
+            infoLayout.setVisibility(View.GONE);
+        }*/
+    }
+
+    private void initFromDialog(List<Connection.LToken> fromTokens)
+    {
+        sourceTokenDialog = new SelectTokenDialog(fromTokens, this, tokenItem -> {
+            sourceSelector.init(tokenItem);
+            sourceTokenDialog.dismiss();
+        });
+    }
+
+    private void initToDialog(List<Connection.LToken> toTokens)
+    {
+        destTokenDialog = new SelectTokenDialog(toTokens, this, tokenItem -> {
+            destSelector.init(tokenItem);
+            destTokenDialog.dismiss();
+        });
+    }
+
+    private void getQuote()
+    {
+        continueBtn.setEnabled(false);
+
+        if (sourceSelector.getToken() != null
+                && destSelector.getToken() != null
+                && !TextUtils.isEmpty(sourceSelector.getAmount()))
+        {
+            viewModel.getQuote(sourceSelector.getToken(), destSelector.getToken(), wallet.address, sourceSelector.getAmount(), settingsDialog.getSlippage());
+        }
+    }
+
+    private void onChains(List<Chain> chains)
+    {
+        this.chains = chains;
+
+        settingsDialog = new SwapSettingsDialog(this, chains,
+                chain -> {
+                    chainName.setText(chain.name);
+                    viewModel.setChain(chain);
+
+                    sourceSelector.clear();
+                    destSelector.clear();
+                    viewModel.getConnections(chain.id, chain.id);
+                    settingsDialog.dismiss();
+                });
+
+        if (sourceSelector.getToken() == null)
+        {
+            long id = token.tokenInfo.chainId;
+            for (Chain c : chains)
+            {
+                if (id == c.id)
+                {
+                    viewModel.setChain(c);
+                }
+            }
+        }
+        else
+        {
+            long chainId = viewModel.getChain().id;
+            viewModel.getConnections(chainId, chainId);
+        }
+    }
+
+    private void onChain(Chain chain)
+    {
+        chainName.setText(chain.metamask.chainName);
+        viewModel.getConnections(chain.id, chain.id);
+        settingsDialog.setSelectedChain(chain.id);
+    }
+
+    private void onConnections(List<Connection> connections)
+    {
+        if (!connections.isEmpty())
+        {
+            List<Connection.LToken> fromTokens = new ArrayList<>();
+            List<Connection.LToken> toTokens = new ArrayList<>();
+            Connection.LToken selectedToken = null;
+
+            for (Connection c : connections)
+            {
+                for (Connection.LToken t : c.fromTokens)
+                {
+                    if (!fromTokens.contains(t))
+                    {
+                        t.balance = viewModel.getBalance(wallet.address, t);
+                        fromTokens.add(t);
+
+                        if (t.chainId == token.tokenInfo.chainId && t.address.equalsIgnoreCase(token.getAddress()))
+                        {
+                            selectedToken = t;
+                        }
+                    }
+                }
+
+                for (Connection.LToken t : c.toTokens)
+                {
+                    if (!toTokens.contains(t))
+                    {
+                        t.balance = viewModel.getBalance(wallet.address, t);
+                        toTokens.add(t);
+                    }
+                }
+            }
+
+            initFromDialog(fromTokens);
+
+            initToDialog(toTokens);
+
+            initSourceToken(selectedToken);
+
+            tokenLayout.setVisibility(View.VISIBLE);
+            noConnectionsLayout.setVisibility(View.GONE);
+        }
+        else
+        {
+            tokenLayout.setVisibility(View.GONE);
+            infoLayout.setVisibility(View.GONE);
+            noConnectionsLayout.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    private void onQuote(Quote quote)
+    {
+        updateDestAmount(quote);
+
+        updateInfoSummary(quote);
+
+        if (confirmationDialog == null || !confirmationDialog.isShowing())
+        {
+            confirmationDialog = createConfirmationAction(quote);
+        }
+
+        continueBtn.setEnabled(true);
+    }
+
+    private void updateDestAmount(Quote quote)
+    {
+        String amount = quote.estimate.toAmountMin;
+        long decimals = quote.action.toToken.decimals;
+
+        String destAmount = BalanceUtils.getScaledValue(
+                amount,
+                decimals);
+
+        destSelector.setAmount(destAmount);
+    }
+
+    private void updateInfoSummary(Quote quote)
+    {
+        //convert gasQuote to Eth cost
+        BigInteger gasCost = Numeric.toBigInt(quote.transactionRequest.gasPrice);
+        BigInteger gasLimit = Numeric.toBigInt(quote.transactionRequest.gasLimit);
+
+        BigInteger networkFee = gasCost.multiply(gasLimit);
+
+        String ethCostStr = BalanceUtils.getScaledValueFixed(new BigDecimal(networkFee), 18, 4);
+
+        fees.setValue(ethCostStr); //TODO: Needs to say 'Eth' after the quote, also should get the Eth price to show the Tx cost in user's Fiat
+                                   //TODO: To see this done check GasWidget, see comment "Can we display value for gas?"
+
+        BigDecimal s = new BigDecimal(quote.action.fromToken.priceUSD);
+        BigDecimal d = new BigDecimal(quote.action.toToken.priceUSD);
+        BigDecimal c = s.multiply(d);
+        String currentPriceTxt = "1 " + quote.action.fromToken.symbol + " ≈ " + c.toString() + " " + quote.action.toToken.symbol;
+        currentPrice.setValue(currentPriceTxt.trim());
+
+        String minReceivedVal = BalanceUtils.getShortFormat(quote.estimate.toAmountMin, quote.action.toToken.decimals) + " " + quote.action.toToken.symbol;
+        minReceived.setValue(minReceivedVal.trim());
+
+        infoLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void onProgressInfo(int code)
+    {
+        String message;
+        switch (code)
+        {
+            case C.ProgressInfo.FETCHING_CHAINS:
+                message = getString(R.string.message_fetching_chains);
+                break;
+            case C.ProgressInfo.FETCHING_CONNECTIONS:
+                message = getString(R.string.message_fetching_connections);
+                break;
+            case C.ProgressInfo.FETCHING_QUOTE:
+                message = getString(R.string.message_fetching_quote);
+                break;
+            default:
+                message = getString(R.string.title_dialog_handling);
+                break;
+        }
+        progressDialog.setTitle(message);
+    }
+
+    private void onProgress(Boolean shouldShowProgress)
+    {
+        if (shouldShowProgress)
+        {
+            progressDialog.show();
+        }
+        else if (progressDialog.isShowing())
+        {
+            progressDialog.dismiss();
+        }
+    }
+
+    private void txWritten(TransactionData transactionData)
+    {
+        AWalletAlertDialog successDialog = new AWalletAlertDialog(this);
+        successDialog.setTitle(R.string.transaction_succeeded);
+        successDialog.setMessage(transactionData.txHash);
+        successDialog.show();
+    }
+
+    private void txError(Throwable throwable)
+    {
+        AWalletAlertDialog errorDialog = new AWalletAlertDialog(this);
+        errorDialog.setTitle(R.string.error_transaction_failed);
+        errorDialog.setMessage(throwable.getMessage());
+        errorDialog.show();
+    }
+
+    private void onError(ErrorEnvelope errorEnvelope)
+    {
+        switch (errorEnvelope.code)
+        {
+            case C.ErrorCode.INSUFFICIENT_BALANCE:
+                sourceSelector.setError(getString(R.string.error_insufficient_balance, sourceSelector.getToken().symbol));
+                break;
+            default:
+                AWalletAlertDialog errorDialog = new AWalletAlertDialog(this);
+                errorDialog.setTitle(R.string.title_dialog_error);
+                errorDialog.setMessage(errorEnvelope.message);
+                errorDialog.setButton(R.string.action_cancel, v -> errorDialog.dismiss());
+                errorDialog.show();
+                break;
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == R.id.action_settings)
+        {
+            if (!chains.isEmpty())
+            {
+                settingsDialog.show();
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void getAuthorisation(SignAuthenticationCallback callback)
+    {
+        viewModel.getAuthentication(this, wallet, callback);
+    }
+
+    @Override
+    public void sendTransaction(Web3Transaction tx)
+    {
+        viewModel.sendTransaction(tx, wallet, settingsDialog.getSelectedChainId());
+    }
+
+    @Override
+    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
+    {
+
+    }
+
+    @Override
+    public void notifyConfirm(String mode)
+    {
+
+    }
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return null;
+    }
+}

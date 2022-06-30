@@ -209,7 +209,7 @@ public class WalletConnectService extends Service
 
     public void putClient(String sessionId, WCClient client)
     {
-        Timber.tag(TAG).d("Add session: " + sessionId);
+        Timber.tag(TAG).d("Add session: %s", sessionId);
         clientMap.put(sessionId, client);
         broadcastConnectionCount(clientMap.size());
         clientTimes.put(sessionId, System.currentTimeMillis());
@@ -388,7 +388,7 @@ public class WalletConnectService extends Service
                 c.updateSession(c.getAccounts(), c.chainIdVal(), true);
             }
 
-            long lastUsed = getLastUsed(c);
+            /*long lastUsed = getLastUsed(c);
             long timeUntilTerminate = CONNECTION_TIMEOUT - (System.currentTimeMillis() - lastUsed);
             Timber.tag(TAG).d("Time until terminate: %s (%s)", (timeUntilTerminate / DateUtils.SECOND_IN_MILLIS), sessionKey);
             if ((System.currentTimeMillis() - lastUsed) > CONNECTION_TIMEOUT)
@@ -404,14 +404,14 @@ public class WalletConnectService extends Service
                     c.disconnect();
                 }
                 removeKeyList.add(sessionKey);
-            }
+            }*/
         }
 
-        for (String removeKey : removeKeyList)
+        /*for (String removeKey : removeKeyList)
         {
             Timber.tag(TAG).d("Removing Key: %s", removeKey);
             terminateClient(removeKey);
-        }
+        }*/
     }
 
     private void terminateClient(String sessionKey)

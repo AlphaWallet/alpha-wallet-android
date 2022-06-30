@@ -162,6 +162,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 case C.WALLET_CONNECT_CLIENT_TERMINATE:
                     String sessionId = intent.getStringExtra("sessionid");
                     Timber.tag(TAG).d("MSG: TERMINATE: %s", sessionId);
+                    if (viewModel != null)
+                    {
+                        viewModel.endSession(sessionId);
+                    }
                     if (getSessionId() != null && getSessionId().equals(sessionId))
                     {
                         setupClient(sessionId);
@@ -373,7 +377,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
         this.qrCode = wcCode;
         session = WCSession.Companion.from(qrCode);
-        Timber.d("WCClient: " + qrCode);
+        Timber.d("WCClient: %s", qrCode);
     }
 
     private void initViewModel()
@@ -404,13 +408,37 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         functionBar = findViewById(R.id.layoutButtons);
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_end_session)));
+
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_cancel)));
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.payload)));
+
         functionBar.setVisibility(View.GONE);
     }
 
     @Override
     public void handleClick(String action, int id)
     {
-        endSessionDialog();
+        /*
+        R.string.action_end_session)));
+
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_cancel)));
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.payload)));
+         */
+        switch (id)
+        {
+            case R.string.action_end_session:
+                endSessionDialog();
+                break;
+            case R.string.action_cancel:
+                //kill connection object
+                sdfdsf
+                break;
+            case R.string.payload:
+                //restart connection object
+                sdffds
+                break;
+        }
+
     }
 
     //TODO: Refactor this into elements - this function is unmaintainable

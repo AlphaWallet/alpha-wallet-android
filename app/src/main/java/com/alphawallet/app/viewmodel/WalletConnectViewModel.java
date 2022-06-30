@@ -168,25 +168,6 @@ public class WalletConnectViewModel extends BaseViewModel
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    public void pruneSession(String sessionId)
-    {
-        realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
-            RealmWCSession item = r.where(RealmWCSession.class)
-                    .equalTo("sessionId", sessionId)
-                    .findFirst();
-
-            RealmResults<RealmWCSignElement> signItems = r.where(RealmWCSignElement.class)
-                    .equalTo("sessionId", sessionId)
-                    .findAll();
-
-            if (item != null && signItems.size() == 0)
-            {
-                Timber.tag(TAG).d("Delete from realm: %s", sessionId);
-                item.deleteFromRealm();
-            }
-        });
-    }
-
     public void startGasCycle(long chainId)
     {
         gasService.startGasPriceCycle(chainId);
@@ -692,5 +673,27 @@ public class WalletConnectViewModel extends BaseViewModel
 
     public TokensService getTokenService() {
         return tokensService;
+    }
+
+    //Implementing restore sessionID
+    //1. delete peerId for intentionally closed or remote closed sessions
+    //2. attempt to restore a connection using the sessionId (from walletconnectsessionactivity)
+
+    public void endSession(String sessionId)
+    {
+        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                RealmWCSession sessionAux = r.where(RealmWCSession.class)
+                        .equalTo("sessionId", sessionId)
+                        .findFirst();
+
+                if (sessionAux != null)
+                {
+                    sessionAux.setPeerId("");
+                    r.insertOrUpdate(sessionAux);
+                }
+            });
+        }
     }
 }

@@ -118,6 +118,8 @@
     <attr name="colorSurfaceQuinary" format="reference" />
     <attr name="colorSurfaceDark" format="reference" />
     <attr name="colorSurfaceSearch" format="reference" />
+    <attr name="colorIconBackgroundCompensate" format="reference" />
+
 
     <declare-styleable name="NodeStatusInfo">
         <attr name="android:icon"/>

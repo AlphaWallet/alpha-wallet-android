@@ -70,6 +70,8 @@
 
         <item name="colorSurfaceSearch">@color/surface_search</item>
 
+        <item name="colorIconBackgroundCompensate">@color/dark_mode_icon_background_compensate</item>
+
         <item name="colorSurfaceVariant"></item>
 
 

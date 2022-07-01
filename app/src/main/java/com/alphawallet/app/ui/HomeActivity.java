@@ -63,19 +63,16 @@ import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
-import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.PriceAlertsService;
-import com.alphawallet.app.service.WalletConnectV2Service;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
-import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
@@ -91,8 +88,6 @@ import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
 
@@ -100,9 +95,6 @@ import timber.log.Timber;
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
         FragmentMessenger, Runnable, SignAuthenticationCallback, LifecycleObserver, PagerCallback
 {
-    @Inject
-    AWWalletConnectClient awWalletConnectClient;
-
     private HomeViewModel viewModel;
 
     private Dialog dialog;
@@ -309,9 +301,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         Intent i = new Intent(this, PriceAlertsService.class);
         startService(i);
-
-        awWalletConnectClient.sessionItemMutableLiveData().observe(this, this::updateService);
-        awWalletConnectClient.updateNotification();
     }
 
     private void setupFragmentListeners()
@@ -516,19 +505,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 viewModel.showImportLink(this, magicLink);
             }
         });
-    }
-
-    private void updateService(List<WalletConnectSessionItem> walletConnectSessionItems)
-    {
-        Context context = getApplicationContext();
-        if (walletConnectSessionItems.isEmpty())
-        {
-            stopService(new Intent(context, WalletConnectV2Service.class));
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
-            Intent service = new Intent(context, WalletConnectV2Service.class);
-            context.startForegroundService(service);
-        }
     }
 
     @Override

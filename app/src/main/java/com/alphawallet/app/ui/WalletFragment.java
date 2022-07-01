@@ -6,6 +6,7 @@ import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
@@ -50,12 +51,14 @@ import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.WalletConnectV2Service;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
@@ -65,6 +68,7 @@ import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.widget.LargeTitleView;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.ProgressView;
@@ -75,6 +79,7 @@ import com.google.android.material.tabs.TabLayout;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -120,7 +125,9 @@ public class WalletFragment extends BaseFragment implements
 
     @Inject
     WalletConnectInteract walletConnectInteract;
-    private boolean paused;
+
+    @Inject
+    AWWalletConnectClient awWalletConnectClient;
 
     @Nullable
     @Override
@@ -199,7 +206,23 @@ public class WalletFragment extends BaseFragment implements
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
         viewModel.getTokensService().startWalletSync(this);
-        viewModel.activeWalletConnectSessions().observe(getViewLifecycleOwner(), walletConnectSessionItems -> adapter.showActiveWalletConnectSessions(walletConnectSessionItems));
+        viewModel.activeWalletConnectSessions().observe(getViewLifecycleOwner(), walletConnectSessionItems -> {
+            updateService(walletConnectSessionItems);
+            adapter.showActiveWalletConnectSessions(walletConnectSessionItems);
+        });
+    }
+
+    private void updateService(List<WalletConnectSessionItem> walletConnectSessionItems)
+    {
+        Context context = getContext();
+        if (walletConnectSessionItems.isEmpty())
+        {
+            context.stopService(new Intent(context, WalletConnectV2Service.class));
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            Intent service = new Intent(context, WalletConnectV2Service.class);
+            context.startForegroundService(service);
+        }
     }
 
     private void initViews(@NonNull View view)
@@ -355,6 +378,7 @@ public class WalletFragment extends BaseFragment implements
             adapter.clear();
             viewModel.prepare();
             viewModel.notifyRefresh();
+            awWalletConnectClient.updateNotification();
         });
     }
 
@@ -384,7 +408,6 @@ public class WalletFragment extends BaseFragment implements
     public void onPause()
     {
         super.onPause();
-        paused = true;
     }
 
     private void initTabLayout(View view)
@@ -511,11 +534,6 @@ public class WalletFragment extends BaseFragment implements
         {
             largeTitleView.setVisibility(viewModel.getTokensService().isMainNetActive() ? View.VISIBLE : View.GONE); //show or hide Fiat summary
         }
-
-        if (paused)
-        {
-            adapter.showActiveWalletConnectSessions(walletConnectInteract.getSessions());
-        }
     }
 
     private void onTokens(TokenCardMeta[] tokens)
@@ -541,7 +559,9 @@ public class WalletFragment extends BaseFragment implements
 
         if (currentTabPos.equals(TokenFilter.ALL))
         {
-            adapter.showActiveWalletConnectSessions(walletConnectInteract.getSessions());
+            awWalletConnectClient.updateNotification();
+        } else {
+            adapter.showActiveWalletConnectSessions(Collections.emptyList());
         }
     }
 

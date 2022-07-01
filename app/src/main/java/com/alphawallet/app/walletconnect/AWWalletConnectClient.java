@@ -7,6 +7,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -135,7 +136,7 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
         Sign.Params.Approve approve = new Sign.Params.Approve(proposerPublicKey, buildNamespaces(sessionProposal, selectedAccounts), sessionProposal.getRelayProtocol());
         SignClient.INSTANCE.approveSession(approve, this::onSessionApproveError);
         callback.onSessionProposalApproved();
-        updateNotification();
+        new Handler().postDelayed(this::updateNotification, 3000);
     }
 
     private Map<String, Sign.Model.Namespace.Session> buildNamespaces(Sign.Model.SessionProposal sessionProposal, List<String> selectedAccounts)

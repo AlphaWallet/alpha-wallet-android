@@ -81,7 +81,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     private boolean actionCompleted;
     private boolean use1559Transactions = false;
     private Transaction transaction;
-    private boolean isAttached;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
                              String destName, String destAddress, TokensService ts,
@@ -171,7 +170,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         }
 
         setupCancelListeners();
-        isAttached = true;
     }
 
     public ActionSheetDialog(@NonNull Activity activity, ActionSheetCallback aCallback, SignAuthenticationCallback sCallback, Signable message)
@@ -214,7 +212,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
         functionBar.revealButtons();
         setupCancelListeners();
-        isAttached = true;
     }
 
     public ActionSheetDialog(@NonNull Activity activity, ActionSheetCallback aCallback, int titleId, String message, int buttonTextId,
@@ -253,7 +250,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(buttonTextId)));
         functionBar.revealButtons();
         setupCancelListeners();
-        isAttached = true;
     }
 
     // wallet connect request
@@ -284,7 +280,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         tokensService = null;
         candidateTransaction = null;
         callbackId = 0;
-        isAttached = true;
         gasWidgetLegacy = null;
         gasWidgetInterface = null;
 
@@ -339,7 +334,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(buttonTextId)));
         functionBar.revealButtons();
         setupCancelListeners();
-        isAttached = true;
     }
 
     private GasWidgetInterface setupGasWidget()
@@ -638,7 +632,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
     private void tryDismiss()
     {
-        if (Utils.stillAvailable(activity) && isAttached && isShowing()) dismiss();
+        if (Utils.stillAvailable(activity) && isShowing()) dismiss();
     }
 
     private void updateRealmTransactionFinishEstimate(String txHash)
@@ -832,14 +826,9 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         balanceDisplay.setNewBalanceText(token, getTransactionAmount(), networkFee, balanceAfterTransaction);
     }
 
-    public void closingActionSheet()
-    {
-        isAttached = false;
-    }
-
     public void success()
     {
-        if (!activity.isFinishing() && !activity.isDestroyed() && isAttached)
+        if (!activity.isFinishing() && Utils.stillAvailable(activity) && isShowing())
         {
             confirmationWidget.completeProgressMessage(".", this::dismiss);
         }

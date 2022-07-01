@@ -688,8 +688,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             state.putLong("LASTID", lastId);
             state.putString("PEERURL", peerUrl.getText().toString());
         }
-
-        if (confirmationDialog != null) confirmationDialog.closingActionSheet();
     }
 
     private void setupClient(final String sessionId)

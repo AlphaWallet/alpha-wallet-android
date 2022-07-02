@@ -20,9 +20,9 @@ import timber.log.Timber;
 public class WalletConnectV2SessionItem extends WalletConnectSessionItem implements Parcelable
 {
     public boolean settled;
-    public final List<String> chains = new ArrayList<>();
-    public final List<String> wallets = new ArrayList<>();
-    public final List<String> methods = new ArrayList<>();
+    public List<String> chains = new ArrayList<>();
+    public List<String> wallets = new ArrayList<>();
+    public List<String> methods = new ArrayList<>();
     public WalletConnectV2SessionItem(Sign.Model.Session s)
     {
         super();
@@ -32,8 +32,11 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         sessionId = s.getTopic();
         localSessionId = s.getTopic();
         settled = true;
-//        extractChainsAndAddress(s.getAccounts());
-//        methods.addAll(s.getNamespaces());
+        NamespaceParser namespaceParser = new NamespaceParser();
+        namespaceParser.parseSession(s.getNamespaces());
+        chains = namespaceParser.getChains();
+        methods = namespaceParser.getMethods();
+        wallets = namespaceParser.getWallets();
     }
 
     public WalletConnectV2SessionItem(Parcel in)
@@ -62,7 +65,8 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         item.icon = sessionProposal.getIcons().isEmpty() ? null : sessionProposal.getIcons().get(0).toString();
         item.sessionId = sessionProposal.getProposerPublicKey();
         item.settled = false;
-        NamespaceParser namespaceParser = new NamespaceParser(sessionProposal.getRequiredNamespaces());
+        NamespaceParser namespaceParser = new NamespaceParser();
+        namespaceParser.parseProposal(sessionProposal.getRequiredNamespaces());
         item.chains.addAll(namespaceParser.getChains());
         item.methods.addAll(namespaceParser.getMethods());
         return item;

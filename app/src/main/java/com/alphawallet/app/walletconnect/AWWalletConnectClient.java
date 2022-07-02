@@ -143,7 +143,8 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
     {
         Map<String, Sign.Model.Namespace.Session> result = new HashMap<>();
         Map<String, Sign.Model.Namespace.Proposal> namespaces = sessionProposal.getRequiredNamespaces();
-        NamespaceParser namespaceParser = new NamespaceParser(namespaces);
+        NamespaceParser namespaceParser = new NamespaceParser();
+        namespaceParser.parseProposal(namespaces);
         List<String> accounts = toCAIP10(namespaceParser.getChains(), selectedAccounts);
         for (Map.Entry<String, Sign.Model.Namespace.Proposal> entry : namespaces.entrySet())
         {

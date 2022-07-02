@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.alphawallet.app.widget.BottomSheetToolbarView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="@string/title_confirm_transaction" />
+
+    <LinearLayout
+        android:id="@+id/layout_info"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <View style="@style/Aw.Component.Separator" />
+
+    <com.google.android.material.button.MaterialButton
+        style="@style/Aw.Component.Button.Primary"
+        android:id="@+id/btn_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/standard_16"
+        android:text="@string/action_confirm" />
+</LinearLayout>

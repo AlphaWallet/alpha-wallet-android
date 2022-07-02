@@ -13,10 +13,12 @@
         <item name="bottomSheetStyle">@style/Aw.Component.BottomSheet</item>
         <item name="colorSurface">@color/background_floating</item>
         <item name="colorSecondary">@color/dodge</item>
+        <item name="colorSurfaceTertiary">@color/venus</item>
         <item name="colorControlNormal">@color/surface_inverse</item>
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
         <item name="android:textColorSecondaryInverse">@color/text_secondary_inverse</item>
+        <item name="radioButtonStyle">@style/Aw.Component.RadioButton</item>
     </style>
 </resources>

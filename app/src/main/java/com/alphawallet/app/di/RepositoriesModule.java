@@ -30,6 +30,7 @@ import com.alphawallet.app.service.KeystoreAccountService;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.RealmManager;
+import com.alphawallet.app.service.SwapService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsNetworkClient;
@@ -184,6 +185,12 @@ public class RepositoriesModule {
 	@Provides
 	OpenSeaService provideOpenseaService() {
 		return new OpenSeaService();
+	}
+
+	@Singleton
+	@Provides
+	SwapService provideSwapService() {
+		return new SwapService();
 	}
 
 	@Singleton

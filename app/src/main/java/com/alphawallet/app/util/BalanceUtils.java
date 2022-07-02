@@ -311,4 +311,23 @@ public class BalanceUtils
             return "-" + currencySymbol + df.format(Math.abs(price));
         }
     }
+
+    public static String getShortFormat(String amount, long decimals)
+    {
+        if (amount.equals("0"))
+        {
+            return "0";
+        }
+        else
+        {
+            BigDecimal a = new BigDecimal(amount);
+            return a.movePointLeft((int) decimals).toString();
+        }
+    }
+
+    public static String getRawFormat(String amount, long decimals)
+    {
+        BigDecimal a = new BigDecimal(amount);
+        return a.movePointRight((int) decimals).toString();
+    }
 }

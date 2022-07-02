@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.alphawallet.app.widget.StandardHeader
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        custom:headerText="@string/label_slippage" />
+
+    <RadioGroup
+        android:id="@+id/radio_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header"
+        android:orientation="horizontal"
+        android:padding="@dimen/standard_16">
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/radio1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/small_12"
+            android:background="@drawable/selector_slippage"
+            android:button="@null"
+            android:gravity="center"
+            android:lines="1"
+            android:minWidth="60dp"
+            android:padding="@dimen/tiny_8"
+            android:textColor="@color/selector_slippage_text" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/radio2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/small_12"
+            android:background="@drawable/selector_slippage"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:lines="1"
+            android:minWidth="60dp"
+            android:padding="@dimen/tiny_8"
+            android:textColor="@color/selector_slippage_text" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/radio3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/small_12"
+            android:background="@drawable/selector_slippage"
+            android:button="@null"
+            android:gravity="center"
+            android:lines="1"
+            android:minWidth="60dp"
+            android:padding="@dimen/tiny_8"
+            android:textColor="@color/selector_slippage_text" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/radio4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/small_12"
+            android:background="@drawable/selector_slippage"
+            android:button="@null"
+            android:gravity="center"
+            android:lines="1"
+            android:minWidth="60dp"
+            android:padding="@dimen/tiny_8"
+            android:text="@string/label_slippage_custom"
+            android:textColor="@color/selector_slippage_text" />
+
+        <EditText
+            android:id="@+id/edit_text"
+            style="@style/Aw.Typography.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/mini_4"
+            android:hint="@string/hint_custom_slippage"
+            android:imeOptions="actionDone"
+            android:inputType="numberDecimal"
+            android:minWidth="40dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/misc_percentage" />
+
+    </RadioGroup>
+
+</RelativeLayout>

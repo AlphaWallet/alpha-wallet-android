@@ -20,7 +20,6 @@ public class TokenInfoView extends LinearLayout
     private TextView label;
     private TextView value;
     private TextView valueLongText;
-    private String valueStr;
     private boolean isLink;
     private boolean hasPrefix = false;
 
@@ -68,9 +67,8 @@ public class TokenInfoView extends LinearLayout
 
     public void setValue(String text)
     {
-        if (!TextUtils.isEmpty(text) && TextUtils.isEmpty(valueStr))
+        if (!TextUtils.isEmpty(text))
         {
-            valueStr = text;
             setVisibility(View.VISIBLE);
             if (text.startsWith("http"))
             {

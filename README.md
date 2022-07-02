@@ -62,7 +62,7 @@ We want to give businesses the whitelabel tools they need to develop their ether
 1. [Download](https://developer.android.com/studio/) Android Studio.
 2. Clone this repository
 3. Obtain a free Infura API key and replace the one in build.gradle
-4. Build the project in AndroidStudio or Run `./gradlew build` to install tools and dependencies.
+4. Build the project in AndroidStudio or Run `./gradlew build` to install tools and dependencies. See [BUILD.md](BUILD.md) for more details.
 
 You can also build it from the commandline just like other Android apps. Note that JDK 8 and 11 are the versions supported by Android.
 

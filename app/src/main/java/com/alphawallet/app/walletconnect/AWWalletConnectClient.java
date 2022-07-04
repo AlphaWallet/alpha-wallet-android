@@ -83,7 +83,7 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
         {
             try
             {
-                Long.parseLong(chainId);
+                Long.parseLong(chainId.split(":")[1]);
             }
             catch (Exception e)
             {

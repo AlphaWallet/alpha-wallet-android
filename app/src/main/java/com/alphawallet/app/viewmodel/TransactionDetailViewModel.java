@@ -233,7 +233,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
             return;
         }
 
-        org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction().get();
+        org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction();    // no Optional<> in API23
         disposable = EventUtils.getBlockDetails(ethTx.getBlockHash(), web3j)
                 .map(ethBlock -> new Transaction(ethTx, chainId, true, ethBlock.getBlock().getTimestamp().longValue()))
                 .map(tx -> writeTransaction(wallet, tx))

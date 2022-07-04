@@ -36,6 +36,9 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
+import io.reactivex.Completable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmQuery;
@@ -396,9 +399,23 @@ public class InputAmount extends LinearLayout
                 {
                     gasFetch.setVisibility(View.VISIBLE);
                     Web3j web3j = TokenRepository.getWeb3jService(token.tokenInfo.chainId);
-                    web3j.ethGasPrice().sendAsync()
-                            .thenAccept(ethGasPrice -> onLatestGasPrice(ethGasPrice.getGasPrice()))
-                            .exceptionally(this::onGasFetchError);
+                    Completable.fromRunnable( () ->
+                    {
+                        try
+                        {
+                            onLatestGasPrice(web3j.ethGasPrice().sendAsync().get().getGasPrice());
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                            onGasFetchError(e);
+                        }
+                    }
+                    )
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(() -> {}, this::onGasFetchError)
+                            .isDisposed();
                 }
             }
             else

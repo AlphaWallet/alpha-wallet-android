@@ -98,6 +98,8 @@ public abstract class C {
     public static final String DAI_TOKEN = "0x6b175474e89094c44da98b954eedeac495271d0f";
     public static final String SAI_TOKEN = "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359";
 
+    public static final String ALPHAWALLET_WEB = "https://www.alphawallet.com";
+
     public static final String XDAI_BRIDGE_DAPP = "https://bridge.xdaichain.com/";
 
     public static final String QUICKSWAP_EXCHANGE_DAPP = "https://quickswap.exchange/#/swap";

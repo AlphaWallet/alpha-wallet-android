@@ -3,7 +3,6 @@ package com.alphawallet.app.viewmodel;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +39,7 @@ import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.GetClientCallback;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
+import com.alphawallet.app.walletconnect.entity.WCUtils;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.EthereumMessage;
@@ -144,21 +144,7 @@ public class WalletConnectViewModel extends BaseViewModel
             }
         };
 
-        Intent i = new Intent(context, WalletConnectService.class);
-        i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
-        startServiceLocal(i, context, connection);
-    }
-
-    private void startServiceLocal(Intent i, Context context, ServiceConnection connection)
-    {
-        ActivityManager.RunningAppProcessInfo myProcess = new ActivityManager.RunningAppProcessInfo();
-        ActivityManager.getMyMemoryState(myProcess);
-        boolean isInBackground = myProcess.importance != ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
-        if (!isInBackground)
-        {
-            context.startService(i);
-            context.bindService(i, connection, Context.BIND_ABOVE_CLIENT);
-        }
+        WCUtils.startServiceLocal(context, connection, WalletConnectActions.CONNECT);
     }
 
     public void prepare()
@@ -166,25 +152,6 @@ public class WalletConnectViewModel extends BaseViewModel
         prepareDisposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
-    }
-
-    public void pruneSession(String sessionId)
-    {
-        realmManager.getRealmInstance(WC_SESSION_DB).executeTransactionAsync(r -> {
-            RealmWCSession item = r.where(RealmWCSession.class)
-                    .equalTo("sessionId", sessionId)
-                    .findFirst();
-
-            RealmResults<RealmWCSignElement> signItems = r.where(RealmWCSignElement.class)
-                    .equalTo("sessionId", sessionId)
-                    .findAll();
-
-            if (item != null && signItems.size() == 0)
-            {
-                Timber.tag(TAG).d("Delete from realm: %s", sessionId);
-                item.deleteFromRealm();
-            }
-        });
     }
 
     public void startGasCycle(long chainId)
@@ -538,9 +505,7 @@ public class WalletConnectViewModel extends BaseViewModel
             }
         };
 
-        Intent i = new Intent(activity, WalletConnectService.class);
-        i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
-        startServiceLocal(i, activity, connection);
+        WCUtils.startServiceLocal(activity, connection, WalletConnectActions.CONNECT);
     }
 
     public void getClient(Activity activity, String sessionId, GetClientCallback clientCb)
@@ -561,9 +526,7 @@ public class WalletConnectViewModel extends BaseViewModel
             }
         };
 
-        Intent i = new Intent(activity, WalletConnectService.class);
-        i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
-        startServiceLocal(i, activity, connection);
+        WCUtils.startServiceLocal(activity, connection, WalletConnectActions.CONNECT);
     }
 
     public void putClient(Activity activity, String sessionId, WCClient client)
@@ -584,9 +547,28 @@ public class WalletConnectViewModel extends BaseViewModel
             }
         };
 
-        Intent i = new Intent(activity, WalletConnectService.class);
-        i.setAction(String.valueOf(WalletConnectActions.CONNECT.ordinal()));
-        startServiceLocal(i, activity, connection);
+        WCUtils.startServiceLocal(activity, connection, WalletConnectActions.CONNECT);
+    }
+
+    public void disconnectSession(Activity activity, String sessionId)
+    {
+        ServiceConnection connection = new ServiceConnection()
+        {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service)
+            {
+                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
+                walletConnectService.terminateClient(sessionId);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name)
+            {
+                Timber.tag(TAG).d("Service disconnected");
+            }
+        };
+
+        WCUtils.startServiceLocal(activity, connection, WalletConnectActions.CONNECT);
     }
 
     public void rejectRequest(Context ctx, String sessionId, long id, String message)
@@ -692,5 +674,23 @@ public class WalletConnectViewModel extends BaseViewModel
 
     public TokensService getTokenService() {
         return tokensService;
+    }
+
+    public void endSession(String sessionId)
+    {
+        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                RealmWCSession sessionAux = r.where(RealmWCSession.class)
+                        .equalTo("sessionId", sessionId)
+                        .findFirst();
+
+                if (sessionAux != null)
+                {
+                    sessionAux.setPeerId("");
+                    r.insertOrUpdate(sessionAux);
+                }
+            });
+        }
     }
 }

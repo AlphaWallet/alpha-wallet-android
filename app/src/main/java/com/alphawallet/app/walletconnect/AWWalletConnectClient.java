@@ -202,7 +202,8 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
 
     public void disconnect(String sessionId, WalletConnectV2Callback callback)
     {
-        SignClient.INSTANCE.disconnect(new Sign.Params.Disconnect(context.getString(R.string.wc_disconnect)), this::onDisconnectError);
+//        String reason = context.getString(R.string.wc_disconnect);
+        SignClient.INSTANCE.disconnect(new Sign.Params.Disconnect(sessionId), this::onDisconnectError);
         callback.onSessionDisconnected();
         updateNotification();
     }

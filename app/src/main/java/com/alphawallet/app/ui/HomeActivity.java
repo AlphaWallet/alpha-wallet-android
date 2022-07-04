@@ -488,7 +488,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     protected void onResume()
     {
         super.onResume();
-        viewModel.prepare();
+        viewModel.prepare(this);
         viewModel.getWalletName(this);
         viewModel.setErrorCallback(this);
         if (homeReceiver == null)

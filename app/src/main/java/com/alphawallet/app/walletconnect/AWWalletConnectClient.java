@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -64,11 +65,33 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
 
     public void onSessionProposal(@NonNull Sign.Model.SessionProposal sessionProposal)
     {
+        WalletConnectV2SessionItem sessionItem = WalletConnectV2SessionItem.from(sessionProposal);
+        if (!validChainId(sessionItem.chains))
+        {
+            return;
+        }
         AWWalletConnectClient.sessionProposal = sessionProposal;
         Intent intent = new Intent(context, WalletConnectV2Activity.class);
-        intent.putExtra("session", WalletConnectV2SessionItem.from(sessionProposal));
+        intent.putExtra("session", sessionItem);
         intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+    }
+
+    private boolean validChainId(List<String> chains)
+    {
+        for (String chainId : chains)
+        {
+            try
+            {
+                Long.parseLong(chainId);
+            }
+            catch (Exception e)
+            {
+                new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, String.format(context.getString(R.string.chain_not_support), chainId), Toast.LENGTH_SHORT).show());
+                return false;
+            }
+        }
+        return true;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

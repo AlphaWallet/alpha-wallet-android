@@ -927,4 +927,5 @@
     <string name="node_status_strong">under 1 second</string>
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
+    <string name="chain_not_support">Chuỗi% s không được hỗ trợ.</string>
 </resources>

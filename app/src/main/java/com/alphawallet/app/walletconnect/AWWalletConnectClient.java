@@ -139,10 +139,10 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
     {
         Sign.Model.JsonRpcResponse jsonRpcResponse = new Sign.Model.JsonRpcResponse.JsonRpcResult(sessionRequest.getRequest().getId(), result);
         Sign.Params.Response response = new Sign.Params.Response(sessionRequest.getTopic(), jsonRpcResponse);
-        SignClient.INSTANCE.respond(response, this::onSessionRequestApproveeError);
+        SignClient.INSTANCE.respond(response, this::onSessionRequestApproveError);
     }
 
-    private Unit onSessionRequestApproveeError(Sign.Model.Error error)
+    private Unit onSessionRequestApproveError(Sign.Model.Error error)
     {
         Timber.e(error.getThrowable());
         return null;

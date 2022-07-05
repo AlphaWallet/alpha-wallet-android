@@ -909,4 +909,5 @@
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
     <string name="chain_not_support">No se admite la cadena %s.</string>
+    <string name="network_must_be_enabled">La red %s debe estar habilitada antes de conectarse.</string>
 </resources>

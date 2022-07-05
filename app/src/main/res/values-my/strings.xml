@@ -951,4 +951,5 @@
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
     <string name="chain_not_support">ကွင်းဆက် %s ကို မပံ့ပိုးပါ။</string>
+    <string name="network_must_be_enabled">မချိတ်ဆက်မီ ကွန်ရက် %s ကို ဖွင့်ထားရပါမည်။</string>
 </resources>

@@ -1,7 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
@@ -106,5 +105,10 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
 
     public TokensService getTokensService() {
         return tokensService;
+    }
+
+    public List<Long> getActiveNetworks()
+    {
+        return networkRepository.getFilterNetworkList();
     }
 }

@@ -14,17 +14,21 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.walletconnect.NamespaceParser;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
 import com.alphawallet.app.ui.widget.adapter.MethodAdapter;
 import com.alphawallet.app.ui.widget.adapter.WalletAdapter;
 import com.alphawallet.app.util.LayoutHelper;
+import com.alphawallet.app.viewmodel.SelectNetworkFilterViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectV2ViewModel;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -51,6 +55,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     @Inject
     AWWalletConnectClient awWalletConnectClient;
     private WalletConnectV2ViewModel viewModel;
+    private SelectNetworkFilterViewModel selectNetworkFilterViewModel;
 
     private ImageView icon;
     private TextView peerName;
@@ -118,6 +123,9 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
         viewModel.wallets().observe(this, this::onWalletsFetched);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        
+        selectNetworkFilterViewModel = new ViewModelProvider(this)
+                .get(SelectNetworkFilterViewModel.class);
     }
 
     private void onWalletsFetched(Wallet[] wallets)
@@ -280,7 +288,60 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private void approve(Sign.Model.SessionProposal sessionProposal)
     {
-        awWalletConnectClient.approve(sessionProposal, getSelectedAccounts(), this);
+        List<Long> disabledNetworks = disabledNetworks(sessionProposal.getRequiredNamespaces());
+        if (disabledNetworks.isEmpty())
+        {
+            awWalletConnectClient.approve(sessionProposal, getSelectedAccounts(), this);
+        } else {
+            showDialog(disabledNetworks);
+        }
+    }
+
+    private void showDialog(List<Long> disabledNetworks)
+    {
+        AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+        dialog.setMessage(String.format(getString(R.string.network_must_be_enabled), joinNames(disabledNetworks)));
+        dialog.setButton(R.string.select_active_networks, view -> {
+            Intent intent = new Intent(this, SelectNetworkFilterActivity.class);
+            startActivity(intent);
+            dialog.dismiss();
+        });
+        dialog.setSecondaryButton(R.string.action_cancel, (view) -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    @NonNull
+    private String joinNames(List<Long> disabledNetworks)
+    {
+        return disabledNetworks.stream()
+                .map((chainId) -> {
+                    NetworkInfo network = selectNetworkFilterViewModel.getNetworkByChain(chainId);
+                    if (network != null)
+                    {
+                        return network.name;
+                    }
+                    return String.valueOf(chainId);
+                })
+                .collect(Collectors.joining(", "));
+    }
+
+    private List<Long> disabledNetworks(Map<String, Sign.Model.Namespace.Proposal> requiredNamespaces)
+    {
+        NamespaceParser namespaceParser = new NamespaceParser();
+        namespaceParser.parseProposal(requiredNamespaces);
+        List<Long> enabledChainIds = selectNetworkFilterViewModel.getActiveNetworks();
+        List<Long> result = new ArrayList<>();
+        List<Long> chains = namespaceParser.getChains().stream().map((s) -> Long.parseLong(s.split(":")[1])).collect(toList());
+        for (Long chainId : chains)
+        {
+            if (!enabledChainIds.contains(chainId))
+            {
+                result.add(chainId);
+            }
+        }
+        return result;
     }
 
     private void showSessionsActivity()

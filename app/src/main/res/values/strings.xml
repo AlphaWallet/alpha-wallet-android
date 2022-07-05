@@ -947,4 +947,5 @@
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
     <string name="chain_not_support">Chain %s is not supported.</string>
+    <string name="network_must_be_enabled">Network %s must be enabled before connecting.</string>
 </resources>

@@ -13,6 +13,8 @@ import com.alphawallet.app.walletconnect.entity.SignTypedDataRequest;
 import com.alphawallet.app.widget.SignMethodDialog;
 import com.walletconnect.walletconnectv2.client.Sign;
 
+import timber.log.Timber;
+
 public class WalletConnectV2SessionRequestHandler
 {
     private final Sign.Model.SessionRequest sessionRequest;
@@ -62,7 +64,10 @@ public class WalletConnectV2SessionRequestHandler
         if ("eth_signTypedData".equals(method))
         {
             ethSignTypedData().show();
+            return;
         }
+
+        Timber.e("Method %s not support.", method);
     }
 
     private Dialog ethSign()

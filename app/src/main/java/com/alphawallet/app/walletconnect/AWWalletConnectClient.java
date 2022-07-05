@@ -225,7 +225,6 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
 
     public void disconnect(String sessionId, WalletConnectV2Callback callback)
     {
-//        String reason = context.getString(R.string.wc_disconnect);
         SignClient.INSTANCE.disconnect(new Sign.Params.Disconnect(sessionId), this::onDisconnectError);
         callback.onSessionDisconnected();
         updateNotification();
@@ -261,7 +260,7 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
 
         SignClient.INSTANCE.initialize(init, e ->
         {
-            Timber.i("Init failed: %s", e.getThrowable().getMessage());
+            Timber.e("Init failed: %s", e.getThrowable().getMessage());
             return null;
         });
 

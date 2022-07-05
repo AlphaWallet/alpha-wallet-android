@@ -869,7 +869,7 @@
     <string name="unknown_network_title">Unkown Network</string>
     <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
     <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
-    <string name="wc_no_active_sessions">No Active sessions</string>
+    <string name="wc_no_active_sessions">Không có phiên hoạt động nào</string>
     <string name="wc_connect_wallet">Connect Wallet</string>
     <string name="error_seed_phrase_must_words">Cụm từ hạt giống chỉ có thể chứa từ</string>
     <string name="label_token_id">Token #</string>

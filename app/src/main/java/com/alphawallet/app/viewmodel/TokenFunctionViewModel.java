@@ -646,7 +646,6 @@ public class TokenFunctionViewModel extends BaseViewModel {
     public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token)
     {
         boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
-        Timber.tag("seaborn").d("showErc20TokenDetail");
         Intent intent = new Intent(context, Erc20DetailActivity.class);
         intent.putExtra(C.EXTRA_SENDING_TOKENS, !token.isEthereum());
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);

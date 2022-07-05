@@ -223,8 +223,8 @@ public class Token
 
     public String getName()
     {
-        if (TextUtils.isEmpty(tokenInfo.name) || tokenInfo.name.length() < tokenInfo.symbol.length()) {
-            return sanitiseString(!TextUtils.isEmpty(tokenInfo.symbol) ? tokenInfo.symbol : "");
+        if (!TextUtils.isEmpty(tokenInfo.symbol) && (TextUtils.isEmpty(tokenInfo.name) || tokenInfo.name.length() < tokenInfo.symbol.length())) {
+            return sanitiseString(tokenInfo.symbol);
         } else {
             return sanitiseString(!TextUtils.isEmpty(tokenInfo.name) ? tokenInfo.name : "");
         }

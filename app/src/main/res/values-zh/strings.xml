@@ -900,7 +900,20 @@
     <string name="increase">增加</string>
     <string name="message_transaction_timeout">The transaction has timed out. You can view the status in activity page.</string>
     <string name="error_transaction_timeout">Transaction Timeout</string>
+    <string name="label_slippage">Slippage</string>
+    <string name="action_open_settings">Open Settings</string>
+    <string name="message_no_connections_found">No connections found for this chain.</string>
+    <string name="label_fees">Fees</string>
+    <string name="label_current_price">Current Price</string>
+    <string name="label_minimum_received">Minimum Received</string>
+    <string name="label_balance">Balance: </string>
     <string name="action_node_status">Node Status</string>
+    <string name="title_select_token">Select Token</string>
+    <string name="no_results_found">No results found</string>
+    <string name="title_confirm_transaction">Confirm Transaction</string>
+    <string name="message_fetching_chains">Fetching chains</string>
+    <string name="message_fetching_connections">Fetching connections</string>
+    <string name="message_fetching_quote">Fetching quote</string>
     <string name="action_help">Help</string>
     <string name="help_title_node_status">What is Node status?</string>
     <string name="help_message_what_is_node_status">With Node Status you can measure how fast nodes respond to transactions</string>
@@ -910,4 +923,8 @@
     <string name="node_status_not_responding">not responding</string>
     <string name="chain_not_support">暂不支持链 %s。</string>
     <string name="network_must_be_enabled">连接前必须启用网络 %s。</string>
+    <string name="action_select_token">Select Token</string>
+    <string name="label_slippage_custom">Custom</string>
+    <string name="misc_percentage">%</string>
+    <string name="hint_custom_slippage">0.01</string>
 </resources>

@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 
 import androidx.annotation.Nullable;
 
@@ -22,12 +21,8 @@ import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.walletconnect.WCClient;
-import com.alphawallet.app.walletconnect.WCSession;
-import com.alphawallet.app.walletconnect.entity.WCSessionRequest;
-import com.alphawallet.app.walletconnect.entity.WCSessionUpdate;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -45,11 +40,8 @@ import timber.log.Timber;
  */
 public class WalletConnectService extends Service
 {
-    private final long CONNECTION_TIMEOUT = 10 * DateUtils.MINUTE_IN_MILLIS;
     private final static ConcurrentHashMap<String, WCClient> clientMap = new ConcurrentHashMap<>();
     private final static ConcurrentLinkedQueue<WCRequest> signRequests = new ConcurrentLinkedQueue<>();
-    private final static ConcurrentHashMap<String, WCClient> clientMapByRequestId = new ConcurrentHashMap<>();
-
     private final static ConcurrentHashMap<String, Long> clientTimes = new ConcurrentHashMap<>();
     private WCRequest currentRequest = null;
 
@@ -94,7 +86,6 @@ public class WalletConnectService extends Service
                     Timber.tag(TAG).d("SERVICE MSG PUMP");
                     checkMessages();
                     break;
-
                 case SWITCH_CHAIN:
                     Timber.tag(TAG).d("SERVICE SWITCH CHAIN");
                     switchChain(intent);
@@ -209,12 +200,25 @@ public class WalletConnectService extends Service
 
     public void putClient(String sessionId, WCClient client)
     {
-        Timber.tag(TAG).d("Add session: " + sessionId);
+        Timber.tag(TAG).d("Add session: %s", sessionId);
         clientMap.put(sessionId, client);
         broadcastConnectionCount(clientMap.size());
         clientTimes.put(sessionId, System.currentTimeMillis());
         setupClient(client);
         startSessionPinger();
+    }
+
+    public void addClients(List<WCClient> clientList)
+    {
+        for (WCClient client : clientList)
+        {
+            String sessionId = client.sessionId();
+            if (sessionId != null && clientMap.get(sessionId) == null)
+            {
+                Timber.d("WC: Add client: %s", sessionId);
+                putClient(sessionId, client);
+            }
+        }
     }
 
     private void rejectRequest(Intent intent)
@@ -377,7 +381,6 @@ public class WalletConnectService extends Service
 
     private void ping()
     {
-        List<String> removeKeyList = new ArrayList<>();
         for (String sessionKey : clientMap.keySet())
         {
             WCClient c = clientMap.get(sessionKey);
@@ -387,34 +390,10 @@ public class WalletConnectService extends Service
                 Timber.tag(TAG).d("Ping Key: %s", sessionKey);
                 c.updateSession(c.getAccounts(), c.chainIdVal(), true);
             }
-
-            long lastUsed = getLastUsed(c);
-            long timeUntilTerminate = CONNECTION_TIMEOUT - (System.currentTimeMillis() - lastUsed);
-            Timber.tag(TAG).d("Time until terminate: %s (%s)", (timeUntilTerminate / DateUtils.SECOND_IN_MILLIS), sessionKey);
-            if ((System.currentTimeMillis() - lastUsed) > CONNECTION_TIMEOUT)
-            {
-                if (c.getSession() != null)
-                {
-                    Timber.tag(TAG).d("Terminate session: %s", sessionKey);
-                    c.killSession();
-                }
-                else
-                {
-                    Timber.tag(TAG).d("Disconnect session: %s", sessionKey);
-                    c.disconnect();
-                }
-                removeKeyList.add(sessionKey);
-            }
-        }
-
-        for (String removeKey : removeKeyList)
-        {
-            Timber.tag(TAG).d("Removing Key: %s", removeKey);
-            terminateClient(removeKey);
         }
     }
 
-    private void terminateClient(String sessionKey)
+    public void terminateClient(String sessionKey)
     {
         broadcastSessionEvent(WALLET_CONNECT_CLIENT_TERMINATE, sessionKey);
         clientMap.remove(sessionKey);
@@ -426,14 +405,6 @@ public class WalletConnectService extends Service
             pingTimer = null;
             stopSelf();
         }
-    }
-
-    private long getLastUsed(WCClient c)
-    {
-        String sessionId = c.sessionId();
-        if (sessionId != null && clientTimes.containsKey(sessionId))
-            return clientTimes.get(sessionId);
-        else return 0;
     }
 
     private void setLastUsed(WCClient c)

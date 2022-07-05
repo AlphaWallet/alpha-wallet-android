@@ -47,6 +47,7 @@
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
@@ -296,6 +297,11 @@
         <activity
             android:name=".ui.QRScanning.QRScanner"
             android:label="@string/qr_scanner" />
+
+        <activity
+            android:name=".ui.SwapActivity"
+            android:label="Native Swap"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ui.NodeStatusActivity"

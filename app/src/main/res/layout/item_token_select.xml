@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_list_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="@dimen/small_12"
+    android:paddingStart="@dimen/small_12"
+    android:paddingEnd="@dimen/tiny_8">
+
+    <com.alphawallet.app.widget.AddressIcon
+        android:id="@+id/token_icon"
+        android:layout_width="@dimen/token_icon"
+        android:layout_height="@dimen/token_icon"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_ethereum"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+<!--    <ImageView-->
+<!--        android:id="@+id/token_icon"-->
+<!--        android:layout_width="@dimen/token_icon"-->
+<!--        android:layout_height="@dimen/token_icon"-->
+<!--        android:layout_gravity="center_vertical"-->
+<!--        android:src="@drawable/ic_ethereum"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"/>-->
+
+    <LinearLayout
+        android:id="@+id/layout_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/small_12"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/token_icon"
+        app:layout_constraintEnd_toStartOf="@id/radio"
+        app:layout_constraintHorizontal_bias="0">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Aw.Typography.Title"
+            tools:text="Ethereum" />
+
+        <TextView
+            android:id="@+id/balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Aw.Typography.Sub"
+            tools:text="1.2345 ETH"/>
+
+    </LinearLayout>
+
+    <com.google.android.material.radiobutton.MaterialRadioButton
+        android:id="@+id/radio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:clickable="false"
+        android:focusable="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

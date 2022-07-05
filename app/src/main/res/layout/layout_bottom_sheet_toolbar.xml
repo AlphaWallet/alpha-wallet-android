@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.alphawallet.app.widget.BottomSheetHandleView
+        android:id="@+id/handle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/handle"
+        android:minHeight="@dimen/action_sheet_header">
+
+        <ImageView
+            android:id="@+id/image_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/small_12"
+            android:contentDescription="@string/action_close"
+            android:src="@drawable/ic_close"
+            app:tint="?colorControlNormal" />
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/Aw.Typography.SemiBold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="@dimen/dp8"
+            android:layout_marginBottom="@dimen/dp8"
+            android:layout_toStartOf="@id/logo"
+            android:layout_toEndOf="@id/image_close"
+            android:gravity="center_horizontal"
+            android:text="@string/confirm_transaction" />
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="@dimen/token_icon_small"
+            android:layout_height="@dimen/token_icon_small"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="@dimen/standard_16"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_logo" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -30,6 +30,11 @@
         <item name="android:textSize">@dimen/sp24</item>
     </style>
 
+    <style name="Aw.Typography.Title.Large.SemiBold">
+        <item name="fontFamily">@font/font_semibold</item>
+        <item name="android:textSize">@dimen/sp24</item>
+    </style>
+
     <style name="Aw.Typography.Title.Large.Bold">
         <item name="fontFamily">@font/font_bold</item>
     </style>
@@ -71,7 +76,7 @@
     </style>
 
     <style name="Aw.Typography.Control">
-        <item name="android:textColor">?colorAccent</item>
+        <item name="android:textColor">@color/selector_control_text</item>
         <item name="android:fontFamily">@font/font_semibold</item>
     </style>
 
@@ -115,8 +120,7 @@
     <style name="Aw.Typography.StandardHeader" parent="TextAppearance.AppCompat">
         <item name="android:fontFamily">@font/font_semibold</item>
         <item name="android:lines">1</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:textColor">?android:textColorSecondary</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
         <item name="android:textSize">@dimen/sp15</item>
     </style>
 </resources>

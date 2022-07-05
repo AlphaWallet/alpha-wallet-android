@@ -15,15 +15,15 @@ import okhttp3.*
 import okio.ByteString
 import timber.log.Timber
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 open class WCClient(
-    builder: GsonBuilder = GsonBuilder(),
-    private val httpClient: OkHttpClient
+
 ) : WebSocketListener() {
 
     private val TAG = WCClient::class.java.simpleName
 
-    private val gson = builder
+    private val gson = GsonBuilder()
         .serializeNulls()
         .registerTypeAdapter(ethTransactionSerializer)
         .create()
@@ -58,6 +58,14 @@ open class WCClient(
         private set
 
     private var chainId: String? = null
+
+    private val httpClient: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
+        .pingInterval(10000, TimeUnit.MILLISECONDS)
+        .retryOnConnectionFailure(true)
+        .build();
 
     fun chainIdVal(): Long {
         return chainId?.toLong() ?: 0
@@ -162,6 +170,11 @@ open class WCClient(
             .build()
 
         socket = httpClient.newWebSocket(request, this)
+    }
+
+    fun setupSession(accounts: List<String>, _chainId: Long) {
+        this.chainId = _chainId.toString();
+        this.accounts = accounts;
     }
 
     fun approveSession(accounts: List<String>, _chainId: Long): Boolean {

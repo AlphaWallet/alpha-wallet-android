@@ -98,6 +98,8 @@ public abstract class C {
     public static final String DAI_TOKEN = "0x6b175474e89094c44da98b954eedeac495271d0f";
     public static final String SAI_TOKEN = "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359";
 
+    public static final String ALPHAWALLET_WEB = "https://www.alphawallet.com";
+
     public static final String XDAI_BRIDGE_DAPP = "https://bridge.xdaichain.com/";
 
     public static final String QUICKSWAP_EXCHANGE_DAPP = "https://quickswap.exchange/#/swap";
@@ -240,6 +242,10 @@ public abstract class C {
         int CANT_GET_STORE_PASSWORD = 2;
         int ALREADY_ADDED = 3;
         int EMPTY_COLLECTION = 4;
+
+        // Swap Error Codes
+        int INSUFFICIENT_BALANCE = 5;
+        int SWAP_API_ERROR = 6;
     }
 
     public interface Key {
@@ -308,4 +314,10 @@ public abstract class C {
     public static final String OPENSEA_SINGLE_ASSET_API_RINKEBY = "https://testnets-api.opensea.io/api/v1/asset/";
     public static final String OPENSEA_SINGLE_ASSET_API_MATIC = "https://api.opensea.io/api/v2/metadata/matic/";
 
+    // Progress Info
+    public interface ProgressInfo {
+        int FETCHING_CHAINS = 1;
+        int FETCHING_CONNECTIONS = 2;
+        int FETCHING_QUOTE = 3;
+    }
 }

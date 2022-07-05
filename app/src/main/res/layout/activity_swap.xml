@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_simple_toolbar" />
+
+    <View
+        android:id="@+id/separator"
+        style="@style/Aw.Component.Separator"
+        android:layout_below="@id/toolbar" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/layout_chain_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/separator"
+        android:layout_alignParentStart="true"
+        android:layout_marginHorizontal="@dimen/standard_16"
+        android:layout_marginTop="@dimen/standard_16"
+        custom:cardBackgroundColor="?colorSurfaceTertiary"
+        custom:cardCornerRadius="@dimen/standard_16"
+        custom:contentPaddingBottom="@dimen/mini_4"
+        custom:contentPaddingLeft="@dimen/tiny_8"
+        custom:contentPaddingRight="@dimen/tiny_8"
+        custom:contentPaddingTop="@dimen/mini_4">
+
+        <TextView
+            android:id="@+id/chain_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:drawablePadding="@dimen/mini_4"
+            android:gravity="center_vertical"
+            custom:drawableLeftCompat="@drawable/ic_radio_on"
+            tools:text="Ethereum" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <RelativeLayout
+        android:id="@+id/layout_tokens"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_chain_name"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <com.alphawallet.app.widget.TokenSelector
+            android:id="@+id/from_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            custom:tsLabelRes="@string/label_from"
+            custom:tsShowLabel="true" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/from_input"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="-12dp"
+            android:contentDescription="@string/swap"
+            android:src="@drawable/ic_swap_to" />
+
+        <com.alphawallet.app.widget.TokenSelector
+            android:id="@+id/to_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/from_input"
+            android:visibility="invisible"
+            custom:tsEditable="false"
+            custom:tsLabelRes="@string/label_to"
+            custom:tsShowLabel="true"
+            custom:tsShowMaxButton="false"
+            tools:visibility="visible" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_no_connections"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_tokens"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/dp18"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:contentDescription="@string/message_no_connections_found"
+            android:src="@drawable/ic_icons_no_transactions" />
+
+        <TextView
+            android:id="@+id/no_active_sessions_subtext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/message_no_connections_found" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_open_settings"
+            style="@style/Aw.Component.Button.Primary"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp24"
+            android:text="@string/action_open_settings" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_tokens"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.alphawallet.app.widget.TokenInfoView
+            android:id="@+id/tiv_fees"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            custom:tokenInfoLabel="@string/label_fees" />
+
+        <com.alphawallet.app.widget.TokenInfoView
+            android:id="@+id/tiv_current_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            custom:tokenInfoLabel="@string/label_current_price" />
+
+        <com.alphawallet.app.widget.TokenInfoView
+            android:id="@+id/tiv_min_received"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            custom:tokenInfoLabel="@string/label_minimum_received" />
+
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_continue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/standard_16"
+        android:enabled="false"
+        android:text="@string/action_continue" />
+</RelativeLayout>

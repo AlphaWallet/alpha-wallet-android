@@ -24,7 +24,7 @@
         <attr name="settingType" format="string" />
     </declare-styleable>
     <declare-styleable name="NotificationView">
-        <attr name="backgroundColour" format="integer"/>
+        <attr name="backgroundColour" format="integer" />
         <attr name="textColor" format="integer" />
     </declare-styleable>
     <declare-styleable name="ChainName" />
@@ -32,18 +32,18 @@
     <declare-styleable name="InputAddress" />
     <declare-styleable name="InputFiatView" />
     <declare-styleable name="ERC721ImageView">
-        <attr name="webview_height" format="integer"/>
+        <attr name="webview_height" format="integer" />
     </declare-styleable>
     <declare-styleable name="StandardHeader">
-        <attr name="headerText" format="string"/>
-        <attr name="showSwitch" format="boolean"/>
-        <attr name="showChain" format="boolean"/>
+        <attr name="headerText" format="string" />
+        <attr name="showSwitch" format="boolean" />
+        <attr name="showChain" format="boolean" />
     </declare-styleable>
     <declare-styleable name="TokenInfoCategoryView">
-        <attr name="title" format="string"/>
+        <attr name="title" format="string" />
     </declare-styleable>
     <declare-styleable name="TokenInfoView">
-        <attr name="tokenInfoLabel" format="integer"/>
+        <attr name="tokenInfoLabel" format="integer" />
     </declare-styleable>
     <declare-styleable name="InputView">
         <attr name="label" format="integer" />
@@ -70,7 +70,7 @@
         <attr name="bold" format="boolean" />
         <attr name="removePadding" format="boolean" />
         <attr name="marginRight" format="dimension" />
-        <attr name="textColour" format="color"/>
+        <attr name="textColour" format="color" />
         <attr name="android:gravity" />
     </declare-styleable>
     <declare-styleable name="BarcodeScannerView">
@@ -91,9 +91,24 @@
         <attr name="square" format="boolean" />
     </declare-styleable>
     <declare-styleable name="DialogInfoItem">
+        <attr name="title" />
+        <attr name="text" />
+        <attr name="showActionText" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="TokenSelector">
+        <attr name="tsShowMaxButton" format="boolean" />
+        <attr name="tsShowLabel" format="boolean" />
+        <attr name="tsEditable" format="boolean" />
+        <attr name="tsLabelRes" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="SimpleSheetWidget">
+        <attr name="swLabelRes" format="integer" />
+        <attr name="swValueRes" format="integer" />
+        <attr name="swCaptionRes" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="BottomSheetToolbarView">
         <attr name="title"/>
         <attr name="text"/>
-        <attr name="showActionText" format="boolean"/>
     </declare-styleable>
     <attr name="seedWordStyle" format="reference" />
     <attr name="whatsNewEntryStyle" format="reference" />
@@ -102,6 +117,9 @@
     <attr name="colorSurfaceQuaternary" format="reference" />
     <attr name="colorSurfaceQuinary" format="reference" />
     <attr name="colorSurfaceDark" format="reference" />
+    <attr name="colorSurfaceSearch" format="reference" />
+    <attr name="colorIconBackgroundCompensate" format="reference" />
+
 
     <declare-styleable name="NodeStatusInfo">
         <attr name="android:icon"/>

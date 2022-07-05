@@ -29,12 +29,6 @@
 
             <include layout="@layout/item_update" />
 
-            <View
-                android:id="@+id/warning_separator"
-                style="@style/Aw.Component.Separator"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
             <com.alphawallet.app.widget.StandardHeader
                 android:id="@+id/layout_header"
                 android:layout_width="match_parent"
@@ -93,8 +87,6 @@
                     android:layout_centerVertical="true" />
 
             </RelativeLayout>
-
-            <View style="@style/Aw.Component.Separator" />
 
             <RelativeLayout
                 android:id="@+id/layout_tokenscript_compatibility"

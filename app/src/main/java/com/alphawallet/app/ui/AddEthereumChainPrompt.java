@@ -35,8 +35,6 @@ public class AddEthereumChainPrompt extends BottomSheetDialog implements Standar
         TextView message = findViewById(R.id.message);
         message.setText(context.getString(R.string.add_chain_dialog_message, chainObject.chainName, String.valueOf(chainObject.getChainId())));
 
-        findViewById(R.id.close_action).setOnClickListener(v -> dismiss());
-
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_enable_switch_reload)));
         functionBar.revealButtons();

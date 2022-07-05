@@ -32,13 +32,11 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.widget.adapter.WalletsSummaryAdapter;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletsViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AddWalletView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -56,26 +54,41 @@ public class WalletsActivity extends BaseActivity implements
         CreateWalletCallbackInterface,
         SyncCallback
 {
+    private final Handler handler = new Handler();
+    private final long balanceChain = EthereumNetworkRepository.getOverrideToken().chainId;
     WalletsViewModel viewModel;
-
     private RecyclerView list;
     private SwipeRefreshLayout refreshLayout;
     private SystemView systemView;
     private Dialog dialog;
     private AWalletAlertDialog aDialog;
     private WalletsSummaryAdapter adapter;
-    private final Handler handler = new Handler();
     private Wallet selectedWallet;
-
     private boolean requiresHomeRefresh;
     private String dialogError;
-    private final long balanceChain = EthereumNetworkRepository.getOverrideToken().chainId;
+    private final Runnable displayWalletError = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            aDialog = new AWalletAlertDialog(getThisActivity());
+            aDialog.setTitle(R.string.title_dialog_error);
+            aDialog.setIcon(AWalletAlertDialog.ERROR);
+            aDialog.setMessage(TextUtils.isEmpty(dialogError)
+                    ? getString(R.string.error_create_wallet)
+                    : dialogError);
+            aDialog.setButtonText(R.string.dialog_ok);
+            aDialog.setButtonListener(v -> aDialog.dismiss());
+            aDialog.show();
+        }
+    };
 
     @Inject
     PreferenceRepositoryType preferenceRepository;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wallets);
         toolbar();
@@ -84,7 +97,8 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         initViewModel();
         initViews();
@@ -121,21 +135,22 @@ public class WalletsActivity extends BaseActivity implements
         finish();
     }
 
-    private void initViews() {
+    private void initViews()
+    {
         refreshLayout = findViewById(R.id.refresh_layout);
         list = findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
 
         adapter = new WalletsSummaryAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract(), preferenceRepository.isActiveMainnet());
         list.setAdapter(adapter);
-        list.addItemDecoration(new ListDivider(this));
 
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
         refreshLayout.setOnRefreshListener(this::onSwipeRefresh);
     }
 
-    private void onSwipeRefresh() {
+    private void onSwipeRefresh()
+    {
         viewModel.swipeRefreshWallets(); //check all records
     }
 
@@ -169,63 +184,57 @@ public class WalletsActivity extends BaseActivity implements
         });
     }
 
-    private final Runnable displayWalletError = new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            aDialog = new AWalletAlertDialog(getThisActivity());
-            aDialog.setTitle(R.string.title_dialog_error);
-            aDialog.setIcon(AWalletAlertDialog.ERROR);
-            aDialog.setMessage(TextUtils.isEmpty(dialogError)
-                               ? getString(R.string.error_create_wallet)
-                               : dialogError);
-            aDialog.setButtonText(R.string.dialog_ok);
-            aDialog.setButtonListener(v -> aDialog.dismiss());
-            aDialog.show();
-        }
-    };
-
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         super.onPause();
         hideDialog();
         viewModel.onPause(); //no need to update balances if view isn't showing
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         super.onDestroy();
         if (adapter != null) adapter.onDestroy();
         if (viewModel != null) viewModel.onDestroy();
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
         // User can't start work without wallet.
-        if (adapter.getItemCount() > 0) {
+        if (adapter.getItemCount() > 0)
+        {
             finish();
-        } else {
+        }
+        else
+        {
             finish();
             System.exit(0);
         }
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         if (CustomViewSettings.canChangeWallets()) getMenuInflater().inflate(R.menu.menu_add, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         final int action_add = R.id.action_add;
-        switch (item.getItemId()) {
-            case action_add: {
+        switch (item.getItemId())
+        {
+            case action_add:
+            {
                 onAddWallet();
             }
             break;
-            case android.R.id.home: {
+            case android.R.id.home:
+            {
                 onBackPressed();
                 return true;
             }
@@ -234,7 +243,8 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
         super.onActivityResult(requestCode, resultCode, data);
         initViewModel();
 
@@ -253,12 +263,14 @@ public class WalletsActivity extends BaseActivity implements
         else if (requestCode == C.IMPORT_REQUEST_CODE)
         {
             showToolbar();
-            if (resultCode == RESULT_OK) {
+            if (resultCode == RESULT_OK)
+            {
                 Snackbar.make(systemView, getString(R.string.toast_message_wallet_imported), Snackbar.LENGTH_SHORT)
                         .show();
 
                 Wallet importedWallet = data.getParcelableExtra(C.Key.WALLET);
-                if (importedWallet != null) {
+                if (importedWallet != null)
+                {
                     requiresHomeRefresh = true;
                     viewModel.setDefaultWallet(importedWallet);
                 }
@@ -267,14 +279,17 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    public void onClick(View view) {
-        if (view.getId() == R.id.try_again) {
+    public void onClick(View view)
+    {
+        if (view.getId() == R.id.try_again)
+        {
             viewModel.fetchWallets();
         }
     }
 
     @Override
-    public void onNewWallet(View view) {
+    public void onNewWallet(View view)
+    {
         hideDialog();
         viewModel.newWallet(this, this);
     }
@@ -287,33 +302,33 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    public void onImportWallet(View view) {
+    public void onImportWallet(View view)
+    {
         hideDialog();
         viewModel.importWallet(this);
     }
 
     @Override
-    public void onClose(View view) {
+    public void onClose(View view)
+    {
         hideDialog();
     }
 
-    private void onAddWallet() {
+    private void onAddWallet()
+    {
         AddWalletView addWalletView = new AddWalletView(this);
         addWalletView.setOnNewWalletClickListener(this);
         addWalletView.setOnImportWalletClickListener(this);
         addWalletView.setOnWatchWalletClickListener(this);
-        addWalletView.setOnCloseActionListener(this);
         dialog = new BottomSheetDialog(this);
-//        dialog = new BottomSheetDialog(this, R.style.Aw_Component_BottomSheetDialog);
         dialog.setContentView(addWalletView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
-//        BottomSheetBehavior behavior = BottomSheetBehavior.from((View) addWalletView.getParent());
-//        dialog.setOnShowListener(dialog -> behavior.setPeekHeight(addWalletView.getHeight()));
         dialog.show();
     }
 
-    private void onChangeDefaultWallet(Wallet wallet) {
+    private void onChangeDefaultWallet(Wallet wallet)
+    {
         if (adapter == null) return;
 
         if (selectedWallet != null && !wallet.sameAddress(selectedWallet.address))
@@ -344,7 +359,8 @@ public class WalletsActivity extends BaseActivity implements
         invalidateOptionsMenu();
     }
 
-    private void onCreatedWallet(Wallet wallet) {
+    private void onCreatedWallet(Wallet wallet)
+    {
         hideToolbar();
         viewModel.setDefaultWallet(wallet);
         callNewWalletPage(wallet);
@@ -362,22 +378,27 @@ public class WalletsActivity extends BaseActivity implements
         startActivity(intent);
     }
 
-    private void onError(ErrorEnvelope errorEnvelope) {
+    private void onError(ErrorEnvelope errorEnvelope)
+    {
         systemView.showError(errorEnvelope.message, this);
     }
 
-    private void onSetWalletDefault(Wallet wallet) {
+    private void onSetWalletDefault(Wallet wallet)
+    {
         requiresHomeRefresh = true;
         viewModel.setDefaultWallet(wallet);
     }
 
-    private void hideDialog() {
-        if (dialog != null && dialog.isShowing()) {
+    private void hideDialog()
+    {
+        if (dialog != null && dialog.isShowing())
+        {
             dialog.dismiss();
             dialog = null;
         }
 
-        if (aDialog != null && aDialog.isShowing()) {
+        if (aDialog != null && aDialog.isShowing())
+        {
             aDialog.dismiss();
             aDialog = null;
         }

@@ -576,7 +576,7 @@ public class WalletFragment extends BaseFragment implements
                 wData = new WarningData(this);
                 wData.title = getString(R.string.time_to_backup_wallet);
                 wData.detail = getString(R.string.recommend_monthly_backup);
-                wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
+                wData.buttonText = getString(R.string.back_up_now);
                 wData.colour = R.color.text_secondary;
                 wData.wallet = viewModel.getWallet();
                 adapter.addWarning(wData);
@@ -585,7 +585,7 @@ public class WalletFragment extends BaseFragment implements
                 wData = new WarningData(this);
                 wData.title = getString(R.string.wallet_not_backed_up);
                 wData.detail = getString(R.string.not_backed_up_detail);
-                wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
+                wData.buttonText = getString(R.string.back_up_now);
                 wData.colour = R.color.error;
                 wData.wallet = viewModel.getWallet();
                 adapter.addWarning(wData);
@@ -673,7 +673,7 @@ public class WalletFragment extends BaseFragment implements
             });
 
     @Override
-    public void BackupClick(Wallet wallet)
+    public void backUpClick(Wallet wallet)
     {
         Intent intent = new Intent(getContext(), BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);

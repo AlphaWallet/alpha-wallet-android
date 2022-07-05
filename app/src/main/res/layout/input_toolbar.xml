@@ -68,6 +68,7 @@
                 android:layout_weight="1"
                 android:background="@color/transparent"
                 android:hint="@string/token_name_hint"
+                android:fontFamily="@font/font_regular"
                 android:imeOptions="flagNoExtractUi|actionSearch"
                 android:inputType="text"
                 android:maxLines="1"

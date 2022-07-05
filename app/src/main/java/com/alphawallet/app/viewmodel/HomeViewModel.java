@@ -1,21 +1,27 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.app.viewmodel.WalletConnectViewModel.WC_SESSION_DB;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.Toast;
 
@@ -33,6 +39,7 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
+import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -42,11 +49,13 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
@@ -59,6 +68,10 @@ import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.walletconnect.WCClient;
+import com.alphawallet.app.walletconnect.WCSession;
+import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
+import com.alphawallet.app.walletconnect.entity.WCUtils;
 import com.alphawallet.app.widget.EmailPromptView;
 import com.alphawallet.app.widget.QRCodeActionsView;
 import com.alphawallet.app.widget.WhatsNewView;
@@ -73,8 +86,13 @@ import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -83,6 +101,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
+import io.realm.RealmResults;
+import io.realm.Sort;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import timber.log.Timber;
@@ -111,6 +132,7 @@ public class HomeViewModel extends BaseViewModel {
     private final AnalyticsServiceType analyticsService;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final OkHttpClient httpClient;
+    private final RealmManager realmManager;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -136,7 +158,8 @@ public class HomeViewModel extends BaseViewModel {
             TickerService tickerService,
             AnalyticsServiceType analyticsService,
             ExternalBrowserRouter externalBrowserRouter,
-            OkHttpClient httpClient) {
+            OkHttpClient httpClient,
+            RealmManager realmManager) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.localeRepository = localeRepository;
@@ -151,6 +174,8 @@ public class HomeViewModel extends BaseViewModel {
         this.analyticsService = analyticsService;
         this.externalBrowserRouter = externalBrowserRouter;
         this.httpClient = httpClient;
+        this.realmManager = realmManager;
+
 
         this.preferenceRepository.incrementLaunchCount();
     }
@@ -176,11 +201,14 @@ public class HomeViewModel extends BaseViewModel {
         return splashActivity;
     }
 
-    public void prepare() {
+    public void prepare(Activity activity) {
         progress.postValue(false);
         disposable = genericWalletInteract
                 .find()
-                .subscribe(this::onDefaultWallet, this::onError);
+                .subscribe(w -> {
+                    onDefaultWallet(w);
+                    initWalletConnectSessions(activity, w);
+                    }, this::onError);
     }
 
     public void onClean()
@@ -718,9 +746,59 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     public void sendMsgPumpToWC(Context context) {
+
         Timber.d("Start WC service");
-        Intent si = new Intent(context, WalletConnectService.class);
-        si.setAction(String.valueOf(WalletConnectActions.MSG_PUMP.ordinal()));
-        context.startService(si);
+        WCUtils.startServiceLocal(context, null, WalletConnectActions.MSG_PUMP);
+    }
+
+    // Restart walletconnect sessions if required
+    private void initWalletConnectSessions(Activity activity, Wallet wallet)
+    {
+        List<WCClient> clientMap = new ArrayList<>();
+        long cutOffTime = System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS*2;
+        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        {
+            RealmResults<RealmWCSession> items = realm.where(RealmWCSession.class)
+                    .greaterThan("lastUsageTime", cutOffTime)
+                    .sort("lastUsageTime", Sort.DESCENDING)
+                    .findAll();
+
+            for (RealmWCSession r : items)
+            {
+                String peerId = r.getPeerId();
+                if (!TextUtils.isEmpty(peerId))
+                {
+                    // restart the session if it's not already known by the service
+                    clientMap.add(WCUtils.createWalletConnectSession(activity, wallet,
+                            r.getSession(), peerId, r.getRemotePeerId()));
+                }
+            }
+        }
+
+        if (clientMap.size() > 0)
+        {
+            connectServiceAddClients(activity, clientMap);
+        }
+    }
+
+    private void connectServiceAddClients(Activity activity, List<WCClient> clientMap)
+    {
+        ServiceConnection connection = new ServiceConnection()
+        {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service)
+            {
+                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
+                walletConnectService.addClients(clientMap);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name)
+            {
+                Timber.tag(TAG).d("Service disconnected");
+            }
+        };
+
+        WCUtils.startServiceLocal(activity, connection, WalletConnectActions.CONNECT);
     }
 }

@@ -475,7 +475,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             walletTitle = getString(R.string.toolbar_header_wallet);
         }
 
-        getFragment(WALLET).setToolbarTitle(walletTitle);
+        // putting in a try catch to avoid crashing the app
+        try
+        {
+            getFragment(WALLET).setToolbarTitle(walletTitle);
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -488,7 +496,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     protected void onResume()
     {
         super.onResume();
-        viewModel.prepare();
+        viewModel.prepare(this);
         viewModel.getWalletName(this);
         viewModel.setErrorCallback(this);
         if (homeReceiver == null)

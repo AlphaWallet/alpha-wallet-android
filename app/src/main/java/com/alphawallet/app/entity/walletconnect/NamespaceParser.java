@@ -1,12 +1,8 @@
 package com.alphawallet.app.entity.walletconnect;
 
-import androidx.collection.ArraySet;
-
 import com.walletconnect.walletconnectv2.client.Sign;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,18 +10,10 @@ import java.util.stream.Collectors;
 
 public class NamespaceParser
 {
-    private List<String> chains;
-    private List<String> methods;
-    private List<String> events;
-    private List<String> wallets;
-
-    public NamespaceParser()
-    {
-        chains = new ArrayList<>();
-        methods = new ArrayList<>();
-        events = new ArrayList<>();
-        wallets = new ArrayList<>();
-    }
+    private final List<String> chains = new ArrayList<>();
+    private final List<String> methods = new ArrayList<>();
+    private final List<String> events = new ArrayList<>();
+    private final List<String> wallets = new ArrayList<>();
 
     public void parseProposal(Map<String, Sign.Model.Namespace.Proposal> requiredNamespaces)
     {

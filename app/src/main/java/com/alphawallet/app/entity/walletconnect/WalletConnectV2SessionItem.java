@@ -52,10 +52,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         in.readStringList(methods);
     }
 
-    public WalletConnectV2SessionItem()
-    {
-
-    }
+    public WalletConnectV2SessionItem() {}
 
     public static WalletConnectV2SessionItem from(Sign.Model.SessionProposal sessionProposal)
     {

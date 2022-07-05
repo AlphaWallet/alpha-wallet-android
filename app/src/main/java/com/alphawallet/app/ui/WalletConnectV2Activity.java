@@ -306,9 +306,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
             startActivity(intent);
             dialog.dismiss();
         });
-        dialog.setSecondaryButton(R.string.action_cancel, (view) -> {
-            dialog.dismiss();
-        });
+        dialog.setSecondaryButton(R.string.action_cancel, (view) -> dialog.dismiss());
         dialog.show();
     }
 
@@ -342,12 +340,6 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
             }
         }
         return result;
-    }
-
-    private void showSessionsActivity()
-    {
-        Intent intent = new Intent(getApplication(), WalletConnectSessionActivity.class);
-        startActivity(intent);
     }
 
     private List<String> getSelectedAccounts()

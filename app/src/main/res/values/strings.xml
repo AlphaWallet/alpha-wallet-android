@@ -889,7 +889,7 @@
     <string name="unknown_network_title">Unknown Network</string>
     <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
     <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
-    <string name="wc_no_active_sessions">No Active sessions</string>
+    <string name="wc_no_active_sessions">No active sessions</string>
     <string name="wc_connect_wallet">Connect Wallet</string>
     <string name="error_seed_phrase_must_words">Seed phrase can only contain words</string>
     <string name="label_token_id">Token #</string>
@@ -966,4 +966,6 @@
     <string name="label_slippage_custom">Custom</string>
     <string name="misc_percentage">%</string>
     <string name="hint_custom_slippage">0.01</string>
+    <string name="notify_wallet_connect_title">WalletConnect is active</string>
+    <string name="notify_wallet_connect_content">Click to view active sessions</string>
 </resources>

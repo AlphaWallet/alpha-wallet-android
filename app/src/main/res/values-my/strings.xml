@@ -895,7 +895,7 @@
     <string name="governance_header">Governance</string>
     <string name="collectibles_header">Collectibles</string>
     <string name="wc_connect_wallet">Connect Wallet</string>
-    <string name="wc_no_active_sessions">No Active sessions</string>
+    <string name="wc_no_active_sessions">အသက်ဝင်သော ဆက်ရှင်များမရှိပါ။</string>
     <string name="send_multiple_tokens">Send Multiple Tokens</string>
     <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
     <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
@@ -969,4 +969,6 @@
     <string name="label_slippage_custom">Custom</string>
     <string name="misc_percentage">%</string>
     <string name="hint_custom_slippage">0.01</string>
+    <string name="notify_wallet_connect_title">WalletConnect သည် အသက်ဝင်ပါသည်။</string>
+    <string name="notify_wallet_connect_content">အသက်ဝင်သော ဆက်ရှင်များကို ကြည့်ရန် နှိပ်ပါ။</string>
 </resources>

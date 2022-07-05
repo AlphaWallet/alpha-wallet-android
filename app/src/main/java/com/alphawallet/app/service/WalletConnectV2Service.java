@@ -49,8 +49,8 @@ public class WalletConnectV2Service extends Service
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_logo)
-                .setContentTitle("WalletConnect is active")
-                .setContentText("Click to view active sessions")
+                .setContentTitle(getString(R.string.notify_wallet_connect_title))
+                .setContentText(getString(R.string.notify_wallet_connect_content))
                 .setContentIntent(pendingIntent)
                 .build();
 

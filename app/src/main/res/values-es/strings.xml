@@ -925,6 +925,5 @@
     <string name="action_connect">Connect</string>
     <string name="title_api_v1_connect_to">Connect to</string>
     <string name="action_sign">Sign</string>
-    <string name="label_api_v1_message">Message</string>
     <string name="message_api_v1_note">This will inform them your wallet address is %s</string>
 </resources>

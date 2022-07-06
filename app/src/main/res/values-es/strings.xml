@@ -919,4 +919,12 @@
     <string name="label_slippage_custom">Custom</string>
     <string name="misc_percentage">%</string>
     <string name="hint_custom_slippage">0.01</string>
+    <string name="label_api_v1_app_name">Name</string>
+    <string name="label_api_v1_note">Note</string>
+    <string name="label_api_v1_app_url">URL</string>
+    <string name="action_connect">Connect</string>
+    <string name="title_api_v1_connect_to">Connect to</string>
+    <string name="action_sign">Sign</string>
+    <string name="label_api_v1_message">Message</string>
+    <string name="message_api_v1_note">This will inform them your wallet address is %s</string>
 </resources>

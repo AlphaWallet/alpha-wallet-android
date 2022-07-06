@@ -53,6 +53,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
@@ -1279,6 +1280,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             else if (importData != null && importData.length() > 22 && importData.contains(AW_MAGICLINK))
             {
+                // Deeplink-based Wallet API
+                ApiV1Request request = new ApiV1Request(importData);
+                if (request.isValid())
+                {
+                    Intent intent = new Intent(this, ApiV1Activity.class);
+                    intent.putExtra(C.Key.API_V1_REQUEST_URL, importData);
+                    startActivity(intent);
+                    return;
+                }
+
                 int directLinkIndex = importData.indexOf(AW_MAGICLINK_DIRECT);
                 if (directLinkIndex > 0)
                 {

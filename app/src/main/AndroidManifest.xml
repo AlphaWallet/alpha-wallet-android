@@ -86,6 +86,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.ApiV1Activity"
+            android:exported="true"
+            android:label="API V1 Activity" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

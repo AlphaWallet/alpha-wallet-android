@@ -16,7 +16,7 @@ import com.alphawallet.app.widget.AWBottomSheetDialog;
 public class TestNetTipsHolder extends BinderViewHolder<Boolean>
 {
     public static final int VIEW_TYPE = 1001;
-    private TextView whereAreTokens;
+    private final TextView whereAreTokens;
     private TokensAdapterCallback tokenAdapterCallback;
 
     public TestNetTipsHolder(int resId, ViewGroup parent)
@@ -28,7 +28,6 @@ public class TestNetTipsHolder extends BinderViewHolder<Boolean>
     @Override
     public void bind(@Nullable Boolean isMainNetActive, @NonNull Bundle addition)
     {
-        whereAreTokens.setTextColor(Color.BLUE);
         whereAreTokens.setOnClickListener(this::showDialog);
     }
 

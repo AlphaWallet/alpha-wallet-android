@@ -44,18 +44,6 @@ public class QRParserTest
     }
 
     @Test
-    public void should_parse_ethereum_protocol()
-    {
-        QRParser parser = QRParser.getInstance(null);
-        String url = "ethereum:0xD0c424B3016E9451109ED97221304DeC639b3F84@42?value=1.5e18";
-        QRResult result = parser.parse(url);
-        assertThat(result.type, equalTo(EIP681Type.PAYMENT));
-        assertThat(result.getAddress(), equalTo("0xD0c424B3016E9451109ED97221304DeC639b3F84"));
-        assertThat(result.getProtocol(), equalTo("ethereum"));
-        assertThat(result.chainId, equalTo(42L));
-        assertThat(result.getValue(), equalTo(BigInteger.valueOf(1500000000000000000L)));
-    }
-    @Test
     public void should_parse_ethereum_payment_url()
     {
         QRParser parser = QRParser.getInstance(null);

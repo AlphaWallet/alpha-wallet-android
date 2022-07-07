@@ -1,13 +1,69 @@
 package com.alphawallet.app.util;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
+import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.QRResult;
 
+import org.junit.Ignore;
 import org.junit.Test;
+
+import java.math.BigInteger;
 
 public class QRParserTest
 {
+    @Test
+    public void should_return_null_when_url_is_null()
+    {
+        QRParser parser = QRParser.getInstance(null);
+        QRResult result = parser.parse(null);
+        assertNull(result);
+    }
+
+    @Test
+    public void should_parse_magic_link()
+    {
+        QRParser parser = QRParser.getInstance(null);
+        String url = "https://aw.app/";
+        QRResult result = parser.parse(url);
+        assertThat(result.type, equalTo(EIP681Type.MAGIC_LINK));
+        assertThat(result.getAddress(), equalTo(url));
+    }
+
+    @Test
+    public void should_parse_address()
+    {
+        QRParser parser = QRParser.getInstance(null);
+        String address = "0xD0c424B3016E9451109ED97221304DeC639b3F84";
+        QRResult result = parser.parse(address);
+        assertThat(result.type, equalTo(EIP681Type.ADDRESS));
+        assertThat(result.getAddress(), equalTo(address));
+    }
+
+    @Test
+    public void should_parse_ethereum_protocol()
+    {
+        QRParser parser = QRParser.getInstance(null);
+        String url = "ethereum:0xD0c424B3016E9451109ED97221304DeC639b3F84?value=2.014e18";
+        QRResult result = parser.parse(url);
+        assertThat(result.type, equalTo(EIP681Type.PAYMENT));
+        assertThat(result.getAddress(), equalTo("0xD0c424B3016E9451109ED97221304DeC639b3F84"));
+        assertThat(result.getProtocol(), equalTo("ethereum"));
+        assertThat(result.getValue(), equalTo(BigInteger.valueOf(2014000000000000000L)));
+    }
+
+    @Test
+    public void should_parse_url()
+    {
+        QRParser parser = QRParser.getInstance(null);
+        String url = "https://ethereum.org";
+        QRResult result = parser.parse(url);
+        assertThat(result.type, equalTo(EIP681Type.URL));
+        assertThat(result.getAddress(), equalTo(url));
+    }
 
     @Test
     public void should_protocol_not_be_null_given_normal_url()

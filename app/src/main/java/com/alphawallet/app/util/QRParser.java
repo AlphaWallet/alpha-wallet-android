@@ -103,7 +103,7 @@ public class QRParser {
                 result = new QRResult(address);
             }
         }
-        else if (parts.length == 2)
+        else if (parts.length == 2 && parts[0].equalsIgnoreCase("ethereum"))
         {
             EthereumProtocolParser parser = new EthereumProtocolParser();
             result = parser.readProtocol(parts[0], parts[1]);

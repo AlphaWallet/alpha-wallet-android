@@ -47,31 +47,36 @@ public class QRParserTest
     public void should_parse_ethereum_protocol()
     {
         QRParser parser = QRParser.getInstance(null);
-        String url = "ethereum:0xD0c424B3016E9451109ED97221304DeC639b3F84?value=2.014e18";
+        String url = "ethereum:0xD0c424B3016E9451109ED97221304DeC639b3F84@42?value=1.5e18";
         QRResult result = parser.parse(url);
         assertThat(result.type, equalTo(EIP681Type.PAYMENT));
         assertThat(result.getAddress(), equalTo("0xD0c424B3016E9451109ED97221304DeC639b3F84"));
         assertThat(result.getProtocol(), equalTo("ethereum"));
-        assertThat(result.getValue(), equalTo(BigInteger.valueOf(2014000000000000000L)));
+        assertThat(result.chainId, equalTo(42L));
+        assertThat(result.getValue(), equalTo(BigInteger.valueOf(1500000000000000000L)));
+    }
+    @Test
+    public void should_parse_ethereum_payment_url()
+    {
+        QRParser parser = QRParser.getInstance(null);
+        String url = "ethereum:0xD0c424B3016E9451109ED97221304DeC639b3F84@42?value=1.5e18";
+        QRResult result = parser.parse(url);
+        assertThat(result.type, equalTo(EIP681Type.PAYMENT));
+        assertThat(result.getAddress(), equalTo("0xD0c424B3016E9451109ED97221304DeC639b3F84"));
+        assertThat(result.getProtocol(), equalTo("ethereum"));
+        assertThat(result.chainId, equalTo(42L));
+        assertThat(result.getValue(), equalTo(BigInteger.valueOf(1500000000000000000L)));
     }
 
     @Test
-    public void should_parse_url()
+    public void should_parse_http_url()
     {
         QRParser parser = QRParser.getInstance(null);
         String url = "https://ethereum.org";
         QRResult result = parser.parse(url);
         assertThat(result.type, equalTo(EIP681Type.URL));
         assertThat(result.getAddress(), equalTo(url));
+        assertNotNull(result.getProtocol()); // null causes NPE when in switch case
     }
 
-    @Test
-    public void should_protocol_not_be_null_given_normal_url()
-    {
-        QRParser parser = QRParser.getInstance(null);
-        String url = "http://alphawallet.com";
-        QRResult result = parser.parse(url);
-        assertNotNull(result);
-        assertNotNull(result.getProtocol()); // it causes NPE when in switch case
-    }
 }

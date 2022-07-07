@@ -46,6 +46,7 @@ import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.WCEthereumSignMessage;
 import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
+import com.alphawallet.app.walletconnect.entity.WCUtils;
 import com.alphawallet.app.walletconnect.entity.WalletConnectCallback;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
@@ -162,6 +163,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 case C.WALLET_CONNECT_CLIENT_TERMINATE:
                     String sessionId = intent.getStringExtra("sessionid");
                     Timber.tag(TAG).d("MSG: TERMINATE: %s", sessionId);
+                    if (viewModel != null)
+                    {
+                        viewModel.endSession(sessionId);
+                    }
                     if (getSessionId() != null && getSessionId().equals(sessionId))
                     {
                         setupClient(sessionId);
@@ -373,7 +378,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
         this.qrCode = wcCode;
         session = WCSession.Companion.from(qrCode);
-        Timber.d("WCClient: " + qrCode);
+        Timber.d("WCClient: %s", qrCode);
     }
 
     private void initViewModel()
@@ -410,7 +415,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void handleClick(String action, int id)
     {
-        endSessionDialog();
+        if (id == R.string.action_end_session)
+        {
+            endSessionDialog();
+        }
     }
 
     //TODO: Refactor this into elements - this function is unmaintainable
@@ -433,9 +441,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             else //existing session, rebuild the session data
             {
                 //try to retrieve the session from database
-                final String thisConnectionId = connectionId;
                 session = viewModel.getSession(sessionId);
-                peerId = viewModel.getPeerId(sessionId);
                 displaySessionStatus(sessionId);
 
                 viewModel.getClient(this, sessionId, client -> {
@@ -456,9 +462,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                         else
                         {
                             //attempt to restart the session; this will allow session 'force' close
-                            initWalletConnectPeerMeta();
-                            startClient();
-                            initWalletConnectSession(peerId, thisConnectionId);
+                            restartSession(session);
                         }
                     }
                     else
@@ -478,6 +482,14 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             initWalletConnectClient();
             initWalletConnectSession(peerId, connectionId);
         }
+    }
+
+    private void restartSession(WCSession session)
+    {
+        String sessionId = session.getTopic();
+        client = WCUtils.createWalletConnectSession(this, viewModel.getWallet(),
+                session, viewModel.getPeerId(sessionId), viewModel.getRemotePeerId(sessionId));
+        viewModel.putClient(this, sessionId, client);
     }
 
     @SuppressWarnings("MethodOnlyUsedFromInnerClass")
@@ -632,40 +644,23 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void initWalletConnectPeerMeta()
     {
-        String name = getString(R.string.app_name);
-        String url = "https://www.alphawallet.com";
-        String description = viewModel.getWallet().address;
-        String[] icons = {C.ALPHAWALLET_LOGO_URI};
-
         peerMeta = new WCPeerMeta(
-                name,
-                url,
-                description,
-                Arrays.asList(icons)
+                getString(R.string.app_name),
+                C.ALPHAWALLET_WEB,
+                viewModel.getWallet().address,
+                new ArrayList<>(Collections.singleton(C.ALPHAWALLET_LOGO_URI))
         );
     }
 
     private void initWalletConnectClient()
     {
-        client = startClient();
+        client = new WCClient();
 
         client.setOnWCOpen(peerId -> {
             viewModel.putClient(this, getSessionId(), client);
             Timber.tag(TAG).d("On Open: %s", peerId);
             return Unit.INSTANCE;
         });
-    }
-
-    private WCClient startClient()
-    {
-        return new WCClient(new GsonBuilder(),
-                new OkHttpClient.Builder()
-                        .connectTimeout(10, TimeUnit.SECONDS)
-                        .readTimeout(10, TimeUnit.SECONDS)
-                        .writeTimeout(10, TimeUnit.SECONDS)
-                        .pingInterval(10000, TimeUnit.MILLISECONDS)
-                        .retryOnConnectionFailure(true)
-                        .build());
     }
 
     @Override
@@ -958,6 +953,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         if (client != null && session != null && client.isConnected())
         {
             client.killSession();
+            viewModel.disconnectSession(this, client.sessionId());
+            handler.postDelayed(this::finish, 5000);
         }
         else
         {

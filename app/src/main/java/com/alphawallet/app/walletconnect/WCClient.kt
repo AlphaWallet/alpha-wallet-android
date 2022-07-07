@@ -1,5 +1,6 @@
 package com.alphawallet.app.walletconnect
 
+import com.alphawallet.app.C
 import com.alphawallet.app.walletconnect.entity.*
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
@@ -15,15 +16,15 @@ import okhttp3.*
 import okio.ByteString
 import timber.log.Timber
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 open class WCClient(
-    builder: GsonBuilder = GsonBuilder(),
-    private val httpClient: OkHttpClient
+
 ) : WebSocketListener() {
 
     private val TAG = WCClient::class.java.simpleName
 
-    private val gson = builder
+    private val gson = GsonBuilder()
         .serializeNulls()
         .registerTypeAdapter(ethTransactionSerializer)
         .create()
@@ -58,6 +59,14 @@ open class WCClient(
         private set
 
     private var chainId: String? = null
+
+    private val httpClient: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
+        .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
+        .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
+        .pingInterval(C.PING_INTERVAL, TimeUnit.MILLISECONDS)
+        .retryOnConnectionFailure(true)
+        .build();
 
     fun chainIdVal(): Long {
         return chainId?.toLong() ?: 0
@@ -162,6 +171,11 @@ open class WCClient(
             .build()
 
         socket = httpClient.newWebSocket(request, this)
+    }
+
+    fun setupSession(accounts: List<String>, _chainId: Long) {
+        this.chainId = _chainId.toString();
+        this.accounts = accounts;
     }
 
     fun approveSession(accounts: List<String>, _chainId: Long): Boolean {

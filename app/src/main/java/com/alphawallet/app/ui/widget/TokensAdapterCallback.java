@@ -14,4 +14,5 @@ public interface TokensAdapterCallback
     default void reloadTokens() { };
     default void onBuyToken() { }
     default void onSearchClicked() { };
+    default void onSwitchClicked() {};
 }

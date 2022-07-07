@@ -915,6 +915,10 @@
     <string name="node_status_strong">under 1 second</string>
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
+    <string name="mode_test">测试网模式</string>
+    <string name="title_dialog_where_are_tokens">我的代币在哪里？</string>
+    <string name="content_dialog_where_are_tokens">不用担心，您的代币是安全的。您正在查看 Testnet 网络，开发人员使用它们来尝试新设计。您可以随时切换到主网。</string>
+    <string name="button_switch_to_mainnet">切换到主网</string>
     <string name="action_select_token">Select Token</string>
     <string name="label_slippage_custom">Custom</string>
     <string name="misc_percentage">%</string>

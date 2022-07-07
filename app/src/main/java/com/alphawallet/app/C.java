@@ -98,6 +98,8 @@ public abstract class C {
     public static final String DAI_TOKEN = "0x6b175474e89094c44da98b954eedeac495271d0f";
     public static final String SAI_TOKEN = "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359";
 
+    public static final String ALPHAWALLET_WEB = "https://www.alphawallet.com";
+
     public static final String XDAI_BRIDGE_DAPP = "https://bridge.xdaichain.com/";
 
     public static final String QUICKSWAP_EXCHANGE_DAPP = "https://quickswap.exchange/#/swap";
@@ -319,4 +321,11 @@ public abstract class C {
         int FETCHING_CONNECTIONS = 2;
         int FETCHING_QUOTE = 3;
     }
+
+    //Timing
+    public static long CONNECT_TIMEOUT = 10; //Seconds
+    public static long READ_TIMEOUT = 10;
+    public static long WRITE_TIMEOUT = 10;
+    public static long PING_INTERVAL = 10;
+    public static final long LONG_WRITE_TIMEOUT = 30;
 }

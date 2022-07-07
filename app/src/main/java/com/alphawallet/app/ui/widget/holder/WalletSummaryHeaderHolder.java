@@ -2,8 +2,10 @@ package com.alphawallet.app.ui.widget.holder;
 
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_CHANGE;
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_VALUE;
+import static com.alphawallet.app.ui.widget.holder.WalletHolder.IS_MAINNET_ACTIVE;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -65,8 +67,15 @@ public class WalletSummaryHeaderHolder extends BinderViewHolder<Wallet> implemen
 
 		String balanceTxt = TickerService.getCurrencyString(fiatValue);
 
-		summaryBalance.setText(balanceTxt);
-		setWalletChange(fiatValue, oldFiatValue);
+        if (addition.getBoolean(IS_MAINNET_ACTIVE))
+        {
+            summaryBalance.setText(balanceTxt);
+            setWalletChange(fiatValue, oldFiatValue);
+        } else
+        {
+            summaryBalance.setText(R.string.testnet);
+            summaryChange.setText(R.string.mode_test);
+        }
 	}
 
 	private void setWalletChange(double fiatValue, double oldFiatValue)

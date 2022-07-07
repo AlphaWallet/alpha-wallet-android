@@ -932,6 +932,10 @@
     <string name="node_status_strong">under 1 second</string>
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
+    <string name="mode_test">Mode Testnet</string>
+    <string name="title_dialog_where_are_tokens">Où sont mes jetons ?</string>
+    <string name="content_dialog_where_are_tokens">Ne t\'en fais pas. Vos jetons sont en sécurité. Vous visualisez les réseaux Testnet. Ils sont utilisés par les développeurs pour tester de nouveaux designs. Vous pouvez passer à Mainnet à tout moment.</string>
+    <string name="button_switch_to_mainnet">Passer au réseau principal</string>
     <string name="action_select_token">Select Token</string>
     <string name="label_slippage_custom">Custom</string>
     <string name="misc_percentage">%</string>

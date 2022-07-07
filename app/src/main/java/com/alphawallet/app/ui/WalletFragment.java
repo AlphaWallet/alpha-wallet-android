@@ -5,6 +5,7 @@ import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
+import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -114,6 +115,13 @@ public class WalletFragment extends BaseFragment implements
     private RealmResults<RealmToken> realmUpdates;
     private LargeTitleView largeTitleView;
     private long realmUpdateTime;
+
+    private ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result ->
+            {
+                //send instruction to restart tokenService
+                getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
+            });
 
     @Nullable
     @Override
@@ -880,5 +888,13 @@ public class WalletFragment extends BaseFragment implements
     {
         Intent intent = new Intent(getActivity(), SearchActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onSwitchClicked()
+    {
+        Intent intent = new Intent(getActivity(), SelectNetworkFilterActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
+        networkSettingsHandler.launch(intent);
     }
 }

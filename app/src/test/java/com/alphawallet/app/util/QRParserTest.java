@@ -8,7 +8,6 @@ import static org.junit.Assert.assertNull;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.QRResult;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;

@@ -1,5 +1,6 @@
 package com.alphawallet.app.di;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.service.RealmManager;
 import com.google.gson.Gson;
 
@@ -28,9 +29,9 @@ public class ToolsModule {
 	OkHttpClient okHttpClient() {
 		return new OkHttpClient.Builder()
                 //.addInterceptor(new LogInterceptor())
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(20, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
+                .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
 				.retryOnConnectionFailure(false)
                 .build();
 	}

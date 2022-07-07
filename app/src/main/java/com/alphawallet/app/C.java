@@ -320,4 +320,11 @@ public abstract class C {
         int FETCHING_CONNECTIONS = 2;
         int FETCHING_QUOTE = 3;
     }
+
+    //Timing
+    public static long CONNECT_TIMEOUT = 10; //Seconds
+    public static long READ_TIMEOUT = 10;
+    public static long WRITE_TIMEOUT = 10;
+    public static long PING_INTERVAL = 10;
+    public static final long LONG_WRITE_TIMEOUT = 30;
 }

@@ -4,6 +4,7 @@ import static com.alphawallet.app.repository.TokenRepository.callSmartContractFu
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.util.Utils;
@@ -111,9 +112,9 @@ public class ContractInteract
         if (client == null)
         {
             client = new OkHttpClient.Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(10, TimeUnit.SECONDS)
+                    .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                    .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
+                    .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
                     .retryOnConnectionFailure(true)
                     .build();
         }

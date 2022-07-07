@@ -1,6 +1,6 @@
 package com.alphawallet.app.ui.widget.holder;
 
-import android.graphics.Color;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +18,7 @@ public class TestNetTipsHolder extends BinderViewHolder<Boolean>
     public static final int VIEW_TYPE = 1001;
     private final TextView whereAreTokens;
     private TokensAdapterCallback tokenAdapterCallback;
+    private AWBottomSheetDialog dialog;
 
     public TestNetTipsHolder(int resId, ViewGroup parent)
     {
@@ -32,6 +33,19 @@ public class TestNetTipsHolder extends BinderViewHolder<Boolean>
     }
 
     private void showDialog(View view)
+    {
+        if (dialog == null)
+        {
+            dialog = createDialog();
+        }
+
+        if (!dialog.isShowing())
+        {
+            dialog.show();
+        }
+    }
+
+    private AWBottomSheetDialog createDialog()
     {
         AWBottomSheetDialog dialog = new AWBottomSheetDialog(getContext(), new AWBottomSheetDialog.Callback()
         {
@@ -56,7 +70,7 @@ public class TestNetTipsHolder extends BinderViewHolder<Boolean>
         dialog.setTitle(getString(R.string.title_dialog_where_are_tokens));
         dialog.setContent(getString(R.string.content_dialog_where_are_tokens));
         dialog.setConfirmButton(getString(R.string.button_switch_to_mainnet));
-        dialog.show();
+        return dialog;
     }
 
     @Override

@@ -79,4 +79,13 @@ public class QRParserTest
         assertNotNull(result.getProtocol()); // null causes NPE when in switch case
     }
 
+    @Test
+    public void should_parse_other_url()
+    {
+        QRParser parser = QRParser.getInstance(null);
+        String url = "safe-wc:13d2db50-8aa6-4444-1d-14af45c55588@1?bridge=https%3A%2F%2Fsafe-walletconnect.gnosis.io%2F&key=ae112";
+        QRResult result = parser.parse(url);
+        assertThat(result.type, equalTo(EIP681Type.OTHER));
+    }
+
 }

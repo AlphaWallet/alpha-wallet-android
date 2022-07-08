@@ -18,9 +18,7 @@ import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-open class WCClient(
-
-) : WebSocketListener() {
+open class WCClient : WebSocketListener() {
 
     private val TAG = WCClient::class.java.simpleName
 

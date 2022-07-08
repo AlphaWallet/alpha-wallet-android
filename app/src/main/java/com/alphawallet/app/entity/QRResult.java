@@ -47,6 +47,8 @@ public class QRResult implements Parcelable
         this.address = data;
     }
 
+
+
     private void defaultParams()
     {
         chainId = 1;
@@ -132,7 +134,7 @@ public class QRResult implements Parcelable
     public void createFunctionPrototype(List<EthTypeParam> params)
     {
         boolean override = false;
-        if (params.size() == 0)
+        if (params.size() == 0 && isEIP681())
         {
             if (weiValue.compareTo(BigInteger.ZERO) > 0) type = EIP681Type.PAYMENT;
         }
@@ -145,20 +147,25 @@ public class QRResult implements Parcelable
         else
         {
             //isn't a function
-            if (params.size() > 0)
+            if (params.size() > 0 && isEIP681())
             {
                 override = true;
                 //assume transfer request
                 type = EIP681Type.TRANSFER;
             }
+            else if (params.size() == 2)
+            {
+                type = EIP681Type.OTHER_PROTOCOL;
+            }
             else
             {
+                type = EIP681Type.OTHER;
                 return;
             }
         }
 
         sb.append("(");
-        fd.append(sb.toString());
+        fd.append(sb);
         boolean first = true;
         for (EthTypeParam param : params)
         {
@@ -167,6 +174,7 @@ public class QRResult implements Parcelable
                 sb.append(",");
                 fd.append(",");
             }
+
             sb.append(param.type);
             fd.append(param.type);
             fd.append("{");
@@ -196,13 +204,19 @@ public class QRResult implements Parcelable
                     break;
             }
         }
+
         sb.append(")");
         fd.append(")");
 
         functionStr = sb.toString();
         functionDetail = fd.toString();
 
-        if (!override)
+        if (!isEmpty(functionDetail) && functionDetail.equals("()"))
+        {
+            functionDetail = "";
+        }
+
+        if (!override && isEIP681())
         {
             if (functionStr.startsWith("transfer"))
             {
@@ -214,7 +228,7 @@ public class QRResult implements Parcelable
             }
         }
 
-        if (type == EIP681Type.FUNCTION_CALL && isEmpty(functionDetail))
+        if (!isEIP681() || type == EIP681Type.FUNCTION_CALL && isEmpty(functionDetail))
         {
             type = EIP681Type.OTHER;
         }
@@ -223,5 +237,10 @@ public class QRResult implements Parcelable
     private boolean isEmpty(String val)
     {
         return (val == null || val.length() == 0);
+    }
+
+    private boolean isEIP681()
+    {
+        return (!isEmpty(protocol) && protocol.equalsIgnoreCase("ethereum"));
     }
 }

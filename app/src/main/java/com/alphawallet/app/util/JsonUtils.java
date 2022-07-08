@@ -21,4 +21,11 @@ public class JsonUtils {
                 jsonData.length() > 15 &&
                 jsonData.contains("name");
     }
+
+    public static boolean isValidCollection(String jsonData)
+    {
+        return !jsonData.isEmpty() &&
+                jsonData.length() > 15 &&
+                jsonData.contains("collection");
+    }
 }

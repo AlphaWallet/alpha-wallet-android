@@ -88,6 +88,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private TokenInfoView tivNumOwners;
     private TokenInfoView tivOwner;
     private TokenInfoView tivLastSale;
+    private TokenInfoView tivAveragePrice;
+    private TokenInfoView tivFloorPrice;
     private Animation rotation;
     private ActivityResultLauncher<Intent> handleTransactionSuccess;
     private ActivityResultLauncher<Intent> getGasSettings;
@@ -192,6 +194,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         tivNumOwners = findViewById(R.id.num_owners);
         tivOwner = findViewById(R.id.owner);
         tivLastSale = findViewById(R.id.last_sale);
+        tivAveragePrice = findViewById(R.id.average_price);
+        tivFloorPrice = findViewById(R.id.floor_price);
 
         rotation = AnimationUtils.loadAnimation(this, R.anim.rotate_refresh);
         rotation.setRepeatCount(Animation.INFINITE);
@@ -410,6 +414,10 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
 
         tivLastSale.setValue(openSeaAsset.getLastSale());
+
+        tivAveragePrice.setValue(openSeaAsset.getAveragePrice());
+
+        tivFloorPrice.setValue(openSeaAsset.getFloorPrice());
 
         tivExternalLink.setValue(openSeaAsset.externalLink);
 

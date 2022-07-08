@@ -923,4 +923,6 @@
     <string name="label_slippage_custom">Custom</string>
     <string name="misc_percentage">%</string>
     <string name="hint_custom_slippage">0.01</string>
+    <string name="asset_floor_price">Floor Price</string>
+    <string name="asset_average_price">Average Price</string>
 </resources>

@@ -12,5 +12,6 @@ public enum EIP681Type
     FUNCTION_CALL,
     URL,
     MAGIC_LINK,
+    OTHER_PROTOCOL,
     OTHER
 }

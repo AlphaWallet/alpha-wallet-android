@@ -134,16 +134,15 @@ public class QRResult implements Parcelable
     public void createFunctionPrototype(List<EthTypeParam> params)
     {
         boolean override = false;
-        if (params.size() == 0 && isEIP681())
-        {
-            if (weiValue.compareTo(BigInteger.ZERO) > 0) type = EIP681Type.PAYMENT;
-        }
 
         //TODO: Build function bytes
         StringBuilder sb = new StringBuilder();
         StringBuilder fd = new StringBuilder();
 
-        if (functionStr != null && functionStr.length() > 0) sb.append(functionStr);
+        if (functionStr != null && functionStr.length() > 0)
+        {
+            sb.append(functionStr);
+        }
         else
         {
             //isn't a function
@@ -152,6 +151,11 @@ public class QRResult implements Parcelable
                 override = true;
                 //assume transfer request
                 type = EIP681Type.TRANSFER;
+            }
+            else if (params.size() == 0 && isEIP681() && weiValue.compareTo(BigInteger.ZERO) > 0)
+            {
+                type = EIP681Type.PAYMENT;
+                return;
             }
             else if (params.size() == 2)
             {

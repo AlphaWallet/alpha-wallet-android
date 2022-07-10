@@ -62,7 +62,7 @@ open class WCClient : WebSocketListener() {
         .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
         .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
         .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
-        .pingInterval(C.PING_INTERVAL, TimeUnit.MILLISECONDS)
+        .pingInterval(C.PING_INTERVAL, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
         .build();
 

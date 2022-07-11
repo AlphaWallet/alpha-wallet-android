@@ -1,23 +1,23 @@
 package com.alphawallet.app.entity;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.alphawallet.app.C;
 
 public class HomeReceiver extends BroadcastReceiver
 {
     private final HomeCommsInterface homeCommsInterface;
-    public HomeReceiver(Activity ctx, HomeCommsInterface homeCommsInterface)
+    private final LocalBroadcastManager broadcastManager;
+
+    public HomeReceiver(Context context, HomeCommsInterface homeCommsInterface)
     {
-        ctx.registerReceiver(this, new IntentFilter(C.DOWNLOAD_READY));
-        ctx.registerReceiver(this, new IntentFilter(C.REQUEST_NOTIFICATION_ACCESS));
-        ctx.registerReceiver(this, new IntentFilter(C.BACKUP_WALLET_SUCCESS));
-        ctx.registerReceiver(this, new IntentFilter(C.WALLET_CONNECT_REQUEST));
+        broadcastManager = LocalBroadcastManager.getInstance(context);
         this.homeCommsInterface = homeCommsInterface;
     }
 
@@ -44,5 +44,20 @@ public class HomeReceiver extends BroadcastReceiver
             default:
                 break;
         }
+    }
+
+    public void register()
+    {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(C.DOWNLOAD_READY);
+        filter.addAction(C.REQUEST_NOTIFICATION_ACCESS);
+        filter.addAction(C.BACKUP_WALLET_SUCCESS);
+        filter.addAction(C.WALLET_CONNECT_REQUEST);
+        broadcastManager.registerReceiver(this, filter);
+    }
+
+    public void unregister()
+    {
+        broadcastManager.unregisterReceiver(this);
     }
 }

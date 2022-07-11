@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -126,7 +127,7 @@ public class NotificationService
                         != PackageManager.PERMISSION_DENIED))
         {
             Intent intent = new Intent(C.REQUEST_NOTIFICATION_ACCESS);
-            context.sendBroadcast(intent);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }
     }
 }

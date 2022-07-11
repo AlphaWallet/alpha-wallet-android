@@ -15,6 +15,7 @@ import android.os.IBinder;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.WalletConnectActions;
@@ -364,7 +365,7 @@ public class WalletConnectService extends Service
             Intent intent = new Intent(WALLET_CONNECT_REQUEST);
             intent.putExtra("sessionid", sessionId);
             intent.putExtra("wcrequest", rq);
-            sendBroadcast(intent);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
             Timber.tag(TAG).d("Connected clients: %s", clientMap.size());
         }

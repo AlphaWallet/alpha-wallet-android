@@ -88,7 +88,7 @@
 
         <activity
             android:name=".ui.ApiV1Activity"
-            android:exported="true"
+            android:theme="@style/AppTheme.NoActionBar.Transparent"
             android:label="API V1 Activity" />
 
         <provider

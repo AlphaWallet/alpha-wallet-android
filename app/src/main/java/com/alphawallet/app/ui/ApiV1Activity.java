@@ -46,17 +46,11 @@ public class ApiV1Activity extends BaseActivity
 
         setContentView(R.layout.activity_api_v1);
 
-        toolbar();
-
-        setTitle("AlphaWallet Connect");
-
         initViewModel();
 
         String requestUrl = getIntent().getStringExtra(C.Key.API_V1_REQUEST_URL);
 
         request = new ApiV1Request(requestUrl);
-
-        confirmationWidget = new ConfirmationWidget(this, null);
     }
 
     @Override
@@ -130,6 +124,7 @@ public class ApiV1Activity extends BaseActivity
         SignDataWidget signDataWidget = new SignDataWidget(this, null);
         signDataWidget.setupSignData(req.getSignable());
         dialog.addWidget(signDataWidget);
+        confirmationWidget = new ConfirmationWidget(this, null);
         dialog.addWidget(confirmationWidget);
         dialog.setPrimaryButtonListener(v -> {
             dialog.hideFunctionBar();
@@ -139,7 +134,6 @@ public class ApiV1Activity extends BaseActivity
             cancelSignPersonalMessage();
             dialog.dismiss();
         });
-        dialog.show();
         return dialog;
     }
 

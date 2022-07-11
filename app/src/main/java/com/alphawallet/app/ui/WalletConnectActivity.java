@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -90,6 +91,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private static final String DEFAULT_IDON = "https://example.walletconnect.org/favicon.ico";
     private static final long CONNECT_TIMEOUT = 10 * DateUtils.SECOND_IN_MILLIS; // 10 Seconds timeout
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private final LocalBroadcastManager broadcastManager;
     WalletConnectViewModel viewModel;
     private WCClient client;
     private WCSession session;
@@ -185,6 +187,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         }
     };
+
+    public WalletConnectActivity()
+    {
+        broadcastManager = LocalBroadcastManager.getInstance(this);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -580,7 +587,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         filter.addAction(C.WALLET_CONNECT_CLIENT_TERMINATE);
         filter.addAction(C.WALLET_CONNECT_SWITCH_CHAIN);
         filter.addAction(C.WALLET_CONNECT_ADD_CHAIN);
-        registerReceiver(walletConnectActionReceiver, filter);
+        broadcastManager.registerReceiver(walletConnectActionReceiver, filter);
     }
 
     private String getSessionId()
@@ -966,7 +973,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     public void onPause()
     {
         super.onPause();
-        unregisterReceiver(walletConnectActionReceiver);
+        broadcastManager.unregisterReceiver(walletConnectActionReceiver);
     }
 
     @Override

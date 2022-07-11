@@ -402,7 +402,7 @@
     <string name="you_will_receive">bạn sẽ nhận</string>
     <string name="dust_value"><![CDATA[~0.00]]></string>
     <string name="action_scan_dapp">Quét mã QR</string>
-    <string name="toast_invalid_code">Invalid Scan Result</string>
+    <string name="toast_invalid_code">Kết quả quét không hợp lệ</string>
     <string name="address_found">Địa chỉ Ethereum</string>
     <string name="is_address">Just scanned an Ethereum address. Do you want to try to load this as a Token?</string>
     <string name="dialog_load_as_contract">Nạp Token</string>

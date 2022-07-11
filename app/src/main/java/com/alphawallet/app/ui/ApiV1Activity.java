@@ -191,7 +191,7 @@ public class ApiV1Activity extends BaseActivity
         alertDialog.setButtonText(R.string.dialog_ok);
         alertDialog.setButtonListener(v -> {
             alertDialog.dismiss();
-            finish();
+            cancelSignPersonalMessage();
         });
         alertDialog.show();
     }

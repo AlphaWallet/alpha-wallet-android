@@ -18,9 +18,7 @@ import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-open class WCClient(
-
-) : WebSocketListener() {
+open class WCClient : WebSocketListener() {
 
     private val TAG = WCClient::class.java.simpleName
 
@@ -64,7 +62,7 @@ open class WCClient(
         .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
         .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
         .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
-        .pingInterval(C.PING_INTERVAL, TimeUnit.MILLISECONDS)
+        .pingInterval(C.PING_INTERVAL, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
         .build();
 

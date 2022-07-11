@@ -76,7 +76,7 @@ public abstract class C {
     public static final String GOERLI_SYMBOL = "GÖETH";
     public static final String ARTIS_SIGMA1_SYMBOL = "ATS";
     public static final String ARTIS_TAU1_SYMBOL = "ATS";
-    public static final String BINANCE_SYMBOL = "BSC";
+    public static final String BINANCE_SYMBOL = "BNB";
     public static final String HECO_SYMBOL = "HT";
     public static final String FANTOM_SYMBOL = "FTM";
     public static final String AVALANCHE_SYMBOL = "AVAX";

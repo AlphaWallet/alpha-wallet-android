@@ -76,7 +76,7 @@ public abstract class C {
     public static final String GOERLI_SYMBOL = "GÖETH";
     public static final String ARTIS_SIGMA1_SYMBOL = "ATS";
     public static final String ARTIS_TAU1_SYMBOL = "ATS";
-    public static final String BINANCE_SYMBOL = "BSC";
+    public static final String BINANCE_SYMBOL = "BNB";
     public static final String HECO_SYMBOL = "HT";
     public static final String FANTOM_SYMBOL = "FTM";
     public static final String AVALANCHE_SYMBOL = "AVAX";
@@ -320,4 +320,11 @@ public abstract class C {
         int FETCHING_CONNECTIONS = 2;
         int FETCHING_QUOTE = 3;
     }
+
+    //Timing
+    public static long CONNECT_TIMEOUT = 10; //Seconds
+    public static long READ_TIMEOUT = 10;
+    public static long WRITE_TIMEOUT = 10;
+    public static long PING_INTERVAL = 10;
+    public static final long LONG_WRITE_TIMEOUT = 30;
 }

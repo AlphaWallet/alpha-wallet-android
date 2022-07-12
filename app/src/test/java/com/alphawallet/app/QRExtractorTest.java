@@ -145,22 +145,22 @@ public class QRExtractorTest {
             }
         };
 
-        result = parser.parse("protocol:0x0000000000000000000000000000000000000XyZ?k1=v1");
-        assertTrue("protocol".equals(result.getProtocol()));
+        result = parser.parse("ethereum:0x0000000000000000000000000000000000000XyZ?k1=v1");
+        assertTrue("ethereum".equals(result.getProtocol()));
         assertTrue("0x0000000000000000000000000000000000000XyZ".equals(result.getAddress()));
 
         assertTrue(result.getFunctionDetail().equals("(k1{v1})"));
 
         // No parameters
-        result = parser.parse("protocol:0x0000000000000000000000000000000000000XyZ");
-        assertTrue("protocol".equals(result.getProtocol()));
+        result = parser.parse("ethereum:0x0000000000000000000000000000000000000XyZ");
+        assertTrue("ethereum".equals(result.getProtocol()));
         assertTrue("0x0000000000000000000000000000000000000XyZ".equals(result.getAddress()));
 
         assertTrue(result.getFunction().length() == 0);
 
         // No parameters
-        result = parser.parse("protocol:0x0000000000000000000000000000000000000XyZ?");
-        assertTrue("protocol".equals(result.getProtocol()));
+        result = parser.parse("ethereum:0x0000000000000000000000000000000000000XyZ?");
+        assertTrue("ethereum".equals(result.getProtocol()));
         assertTrue("0x0000000000000000000000000000000000000XyZ".equals(result.getAddress()));
         assertTrue(result.getFunction().length() == 0);
 

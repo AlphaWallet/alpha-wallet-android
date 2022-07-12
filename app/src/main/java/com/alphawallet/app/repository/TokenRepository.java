@@ -11,6 +11,7 @@ import android.util.Pair;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -1184,9 +1185,9 @@ public class TokenRepository implements TokenRepositoryType {
     public static Web3j getWeb3jService(long chainId)
     {
         OkHttpClient okClient = new OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();
         AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId (chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);

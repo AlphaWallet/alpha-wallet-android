@@ -1,5 +1,6 @@
 package com.alphawallet.app.walletconnect
 
+import com.alphawallet.app.C
 import com.alphawallet.app.walletconnect.entity.*
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
@@ -17,9 +18,7 @@ import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-open class WCClient(
-
-) : WebSocketListener() {
+open class WCClient : WebSocketListener() {
 
     private val TAG = WCClient::class.java.simpleName
 
@@ -60,10 +59,10 @@ open class WCClient(
     private var chainId: String? = null
 
     private val httpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(10, TimeUnit.SECONDS)
-        .writeTimeout(10, TimeUnit.SECONDS)
-        .pingInterval(10000, TimeUnit.MILLISECONDS)
+        .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
+        .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
+        .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
+        .pingInterval(C.PING_INTERVAL, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
         .build();
 

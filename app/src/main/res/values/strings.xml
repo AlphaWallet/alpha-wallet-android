@@ -953,6 +953,10 @@
     <string name="node_status_strong">under 1 second</string>
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
+    <string name="mode_test">Testnet Mode</string>
+    <string name="title_dialog_where_are_tokens">Where are my Tokens?</string>
+    <string name="content_dialog_where_are_tokens">Don\'t worry. Your tokens are safe. You are viewing Testnet networks. They are used by developers to try out new designs. You can switch to Mainnet any time.</string>
+    <string name="button_switch_to_mainnet">Switch to Mainnet</string>
     <string name="action_select_token">Select Token</string>
     <string name="label_slippage_custom">Custom</string>
     <string name="misc_percentage">%</string>

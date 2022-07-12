@@ -402,7 +402,7 @@
     <string name="you_will_receive">bạn sẽ nhận</string>
     <string name="dust_value"><![CDATA[~0.00]]></string>
     <string name="action_scan_dapp">Quét mã QR</string>
-    <string name="toast_invalid_code">Invalid Scan Result</string>
+    <string name="toast_invalid_code">Kết quả quét không hợp lệ</string>
     <string name="address_found">Địa chỉ Ethereum</string>
     <string name="is_address">Just scanned an Ethereum address. Do you want to try to load this as a Token?</string>
     <string name="dialog_load_as_contract">Nạp Token</string>
@@ -934,6 +934,10 @@
     <string name="node_status_strong">under 1 second</string>
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
+    <string name="mode_test">Chế độ testnet</string>
+    <string name="title_dialog_where_are_tokens">Token của tôi ở đâu?</string>
+    <string name="content_dialog_where_are_tokens">Đừng lo. Các mã thông báo của bạn được an toàn. Bạn đang xem các mạng Testnet. Chúng được các nhà phát triển sử dụng để thử các thiết kế mới. Bạn có thể chuyển sang Mainnet bất kỳ lúc nào.</string>
+    <string name="button_switch_to_mainnet">Chuyển sang Mainnet</string>
     <string name="action_select_token">Select Token</string>
     <string name="label_slippage_custom">Custom</string>
     <string name="misc_percentage">%</string>

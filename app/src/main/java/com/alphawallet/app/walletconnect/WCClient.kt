@@ -1,9 +1,5 @@
 package com.alphawallet.app.walletconnect
 
-import com.alphawallet.app.walletconnect.Constants.CONNECT_TIMEOUT
-import com.alphawallet.app.walletconnect.Constants.PING_INTERVAL
-import com.alphawallet.app.walletconnect.Constants.READ_TIMEOUT
-import com.alphawallet.app.walletconnect.Constants.WRITE_TIMEOUT
 import com.alphawallet.app.walletconnect.entity.*
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
@@ -21,14 +17,9 @@ import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-object Constants {
-    const val CONNECT_TIMEOUT = 10L
-    const val READ_TIMEOUT = 10L
-    const val WRITE_TIMEOUT = 10L
-    const val PING_INTERVAL = 10L
-}
+open class WCClient(
 
-open class WCClient : WebSocketListener() {
+) : WebSocketListener() {
 
     private val TAG = WCClient::class.java.simpleName
 
@@ -69,10 +60,10 @@ open class WCClient : WebSocketListener() {
     private var chainId: String? = null
 
     private val httpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
-        .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
-        .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
-        .pingInterval(PING_INTERVAL, TimeUnit.SECONDS)
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
+        .pingInterval(10000, TimeUnit.MILLISECONDS)
         .retryOnConnectionFailure(true)
         .build();
 

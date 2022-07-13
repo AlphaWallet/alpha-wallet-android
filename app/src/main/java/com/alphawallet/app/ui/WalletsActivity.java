@@ -408,7 +408,7 @@ public class WalletsActivity extends BaseActivity implements
     public void HDKeyCreated(String address, Context ctx, KeyService.AuthenticationLevel level)
     {
         if (address == null) onCreateWalletError(new ErrorEnvelope(""));
-        else viewModel.StoreHDWallet(address, level);
+        else viewModel.storeHDWallet(address, level);
     }
 
     @Override

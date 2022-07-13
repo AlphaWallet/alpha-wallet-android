@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -303,11 +304,11 @@ public class HomeViewModel extends BaseViewModel {
         BroadcastReceiver onComplete = new BroadcastReceiver() {
             public void onReceive(Context ctxt, Intent intent) {
                 installIntent.postValue(testFile);
-                ctx.unregisterReceiver(this);
+                LocalBroadcastManager.getInstance(ctxt).unregisterReceiver(this);
             }
         };
 
-        ctx.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        LocalBroadcastManager.getInstance(ctx).registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
 
     public void getWalletName(Context context) {

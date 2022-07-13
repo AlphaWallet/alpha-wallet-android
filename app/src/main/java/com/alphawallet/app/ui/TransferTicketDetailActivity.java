@@ -34,6 +34,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -685,7 +686,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     ActivityResultLauncher<Intent> transferLinkFinalResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                sendBroadcast(new Intent(PRUNE_ACTIVITY)); //TODO: implement prune via result codes
+                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(PRUNE_ACTIVITY)); //TODO: implement prune via result codes
             });
 
     private void transferLinkFinal(String universalLink)

@@ -86,5 +86,6 @@
   {"name": "AAG Staking", "description": "Stake your $1AAG or $1AAG-ONE LP Tokens on our staking website to earn huge rewards. Benefit from high APRs and Capital Boosts with our Genesis NFTs.", "url": "https://staking.aag.ventures/", "category": "Finance"},
   {"name": "MetaPath", "description": "Assets can be routed across different blockchains", "url": "https://dapp.path.finance?source=alpha", "category": "Exchange"},
   {"name": "SWFT", "description": "One Stop Cross-Chain swap, supporting 300+ tokens on 30+ chains", "url": "https://defi.swft.pro?sourceFlag=alpha", "category": "Exchange"},
-  {"name": "Swapzone", "description": "Swapzone is a custody-free cryptocurrency exchange aggregator with no registration needed.", "url": "https://swapzone.io/", "category": "Exchange"}
+  {"name": "Swapzone", "description": "Swapzone is a custody-free cryptocurrency exchange aggregator with no registration needed.", "url": "https://swapzone.io/", "category": "Exchange"},
+  {"name": "mail³", "description": "Decentralized mail system for web3 natives.", "url": "https://app.mail3.me/", "category": "Social Media"}
 ]

@@ -953,7 +953,6 @@
     <string name="action_help">Help</string>
     <string name="help_title_node_status">What is Node status?</string>
     <string name="help_message_what_is_node_status">With Node Status you can measure how fast nodes respond to transactions</string>
-    <string name="node_status_label">- %s</string>
     <string name="node_status_strong">under 1 second</string>
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
@@ -963,13 +962,15 @@
     <string name="button_switch_to_mainnet">Mainnet သို့ပြောင်းပါ။</string>
     <string name="action_select_token">Select Token</string>
     <string name="label_slippage_custom">Custom</string>
-    <string name="misc_percentage">%</string>
-    <string name="hint_custom_slippage">0.01</string>
     <string name="label_api_v1_app_name">Name</string>
     <string name="label_api_v1_note">Note</string>
     <string name="label_api_v1_app_url">URL</string>
     <string name="action_connect">Connect</string>
     <string name="title_api_v1_connect_to">Connect to</string>
     <string name="action_sign">Sign</string>
-    <string name="message_api_v1_note">This will inform them your wallet address is %s</string>
+    <string name="message_api_v1_note">This will inform the remote site your wallet address is %s</string>
+=======
+    <string name="asset_floor_price">Floor Price</string>
+    <string name="asset_average_price">Average Price</string>
+>>>>>>> master
 </resources>

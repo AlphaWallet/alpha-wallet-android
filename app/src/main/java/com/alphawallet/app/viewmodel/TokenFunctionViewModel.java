@@ -801,6 +801,48 @@ public class TokenFunctionViewModel extends BaseViewModel {
                 .subscribe(result -> onAsset(result, token, tokenId), this::onAssetError);
     }
 
+    public void getCollection(Token token, BigInteger tokenId, NFTAsset asset, OpenSeaAsset osAsset)
+    {
+        openseaDisposable = openseaService.getCollection(token, osAsset.collection.slug)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> onCollection(token, tokenId, asset, osAsset, result), this::onAssetError);
+    }
+
+    private void onCollection(Token token, BigInteger tokenId, NFTAsset asset, OpenSeaAsset osAsset, String result)
+    {
+        NFTAsset oldAsset = token.getAssetForToken(tokenId);
+        if (JsonUtils.isValidCollection(result))
+        {
+            try
+            {
+                JSONObject assetJson = new JSONObject(result);
+                if (assetJson.has("collection"))
+                {
+                    String collectionData = assetJson.get("collection").toString();
+                    OpenSeaAsset.Collection data = new Gson().fromJson(collectionData, OpenSeaAsset.Collection.class);
+                    if (data != null)
+                    {
+                        osAsset.collection = data;
+                    }
+                }
+            }
+            catch (JSONException e)
+            {
+                Timber.w(e);
+                Timber.d("Error fetching from OpenSea: %s", result);
+            }
+            catch (Exception e)
+            {
+                Timber.w(e);
+            }
+        }
+
+        storeAsset(token, tokenId, asset, oldAsset);
+        asset.attachOpenSeaAssetData(osAsset);
+        nftAsset.postValue(asset);
+    }
+
     private void onAssetError(Throwable throwable)
     {
         Timber.d(throwable);
@@ -820,9 +862,18 @@ public class TokenFunctionViewModel extends BaseViewModel {
                 if (!TextUtils.isEmpty(asset.getImage()))
                 {
                     loadedFromApi = true;
-                    storeAsset(token, tokenId, new NFTAsset(result), oldAsset);
-                    asset.attachOpenSeaAssetData(osAsset);
-                    nftAsset.postValue(asset);
+
+                    // If slug is available, check for more collection data
+                    if (osAsset.collection != null && !TextUtils.isEmpty(osAsset.collection.slug))
+                    {
+                        getCollection(token, tokenId, asset, osAsset);
+                    }
+                    else
+                    {
+                        storeAsset(token, tokenId, new NFTAsset(result), oldAsset);
+                        asset.attachOpenSeaAssetData(osAsset);
+                        nftAsset.postValue(asset);
+                    }
                 }
             }
             catch (JSONException e)

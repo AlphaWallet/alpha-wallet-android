@@ -308,6 +308,7 @@ public abstract class C {
     public static final int THEME_AUTO = 2;
 
     // OpenSea APIs
+    public static final String OPENSEA_COLLECTION_API_MAINNET = "https://api.opensea.io/collection/";
     public static final String OPENSEA_ASSETS_API_MAINNET = "https://api.opensea.io/api/v1/assets";
     public static final String OPENSEA_ASSETS_API_RINKEBY = "https://testnets-api.opensea.io/api/v1/assets";
     public static final String OPENSEA_ASSETS_API_MATIC = "https://api.opensea.io/api/v2/assets/matic";

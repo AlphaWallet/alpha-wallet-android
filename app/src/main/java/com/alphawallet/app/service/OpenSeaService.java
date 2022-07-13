@@ -345,6 +345,12 @@ public class OpenSeaService
                 fetchAsset(token.tokenInfo.chainId, token.tokenInfo.address, tokenId.toString()));
     }
 
+    public Single<String> getCollection(Token token, String slug)
+    {
+        return Single.fromCallable(() ->
+                fetchCollection(token.tokenInfo.chainId, slug));
+    }
+
     public String fetchAssets(long networkId, String address, int offset)
     {
         String api = "";
@@ -388,6 +394,12 @@ public class OpenSeaService
             api = C.OPENSEA_SINGLE_ASSET_API_MATIC + contractAddress + "/" + tokenId;
         }
 
+        return executeRequest(networkId, api);
+    }
+
+    public String fetchCollection(long networkId, String slug)
+    {
+        String api = C.OPENSEA_COLLECTION_API_MAINNET + slug;
         return executeRequest(networkId, api);
     }
 }

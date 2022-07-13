@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,6 +20,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -52,7 +52,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.MissingFormatArgumentException;
 
-import javax.inject.Inject;
 import timber.log.Timber;
 
 import static com.alphawallet.app.C.EXTRA_PRICE;
@@ -170,7 +169,10 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
     protected void onDestroy()
     {
         super.onDestroy();
-        unregisterReceiver(finishReceiver);
+        if (finishReceiver != null)
+        {
+            finishReceiver.unregister();
+        }
     }
 
     private void setupPage(Wallet wallet)
@@ -497,7 +499,7 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
 
     ActivityResultLauncher<Intent> sellLinkFinalResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                sendBroadcast(new Intent(PRUNE_ACTIVITY)); //TODO: implement prune via result codes
+                sendBroadcastToPrune(); //TODO: implement prune via result codes
             });
 
     private void sellLinkFinal(String universalLink) {
@@ -554,7 +556,7 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
         switch (requestCode)
         {
             case SEND_INTENT_REQUEST_CODE:
-                sendBroadcast(new Intent(PRUNE_ACTIVITY));
+                sendBroadcastToPrune();
                 break;
 
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
@@ -564,6 +566,11 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void sendBroadcastToPrune()
+    {
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(PRUNE_ACTIVITY));
     }
 
     @Override

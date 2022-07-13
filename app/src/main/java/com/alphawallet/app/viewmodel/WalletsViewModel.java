@@ -419,7 +419,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         return currentNetwork;
     }
 
-    public void StoreHDWallet(String address, KeyService.AuthenticationLevel authLevel)
+    public void storeHDWallet(String address, KeyService.AuthenticationLevel authLevel)
     {
         if (!address.equals(ZERO_ADDRESS))
         {

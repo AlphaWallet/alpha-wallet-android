@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -126,7 +127,10 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
     protected void onDestroy()
     {
         super.onDestroy();
-        unregisterReceiver(finishReceiver);
+        if (finishReceiver != null)
+        {
+            finishReceiver.unregister();
+        }
     }
 
     @Override

@@ -21,6 +21,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
@@ -288,7 +289,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     private void backupSuccessful() {
         Intent intent = new Intent(BACKUP_WALLET_SUCCESS);
         intent.putExtra("Key", wallet.address);
-        sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private void hideDialog() {

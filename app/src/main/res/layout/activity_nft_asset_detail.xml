@@ -140,6 +140,20 @@
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/asset_last_sale" />
 
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/average_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/asset_average_price" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/floor_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/asset_floor_price" />
+
             <ProgressBar
                 android:id="@+id/progress"
                 android:layout_width="wrap_content"

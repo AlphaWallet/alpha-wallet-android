@@ -22,6 +22,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -47,6 +48,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class WalletConnectSessionActivity extends BaseActivity
 {
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private final LocalBroadcastManager broadcastManager;
     WalletConnectViewModel viewModel;
     private RecyclerView recyclerView;
     private Button btnConnectWallet;
@@ -68,6 +70,11 @@ public class WalletConnectSessionActivity extends BaseActivity
             }
         }
     };
+
+    public WalletConnectSessionActivity()
+    {
+        broadcastManager = LocalBroadcastManager.getInstance(this);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -209,12 +216,12 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     private void startConnectionCheck()
     {
-        registerReceiver(walletConnectChangeReceiver, new IntentFilter(C.WALLET_CONNECT_COUNT_CHANGE));
+        broadcastManager.registerReceiver(walletConnectChangeReceiver, new IntentFilter(C.WALLET_CONNECT_COUNT_CHANGE));
     }
 
     private void stopConnectionCheck()
     {
-        unregisterReceiver(walletConnectChangeReceiver);
+        broadcastManager.unregisterReceiver(walletConnectChangeReceiver);
     }
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>

@@ -288,6 +288,11 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             sourceSelector.init(selectedToken);
             sourceTokenChanged(selectedToken);
         }
+        else
+        {
+            sourceSelector.reset();
+            infoLayout.setVisibility(View.GONE);
+        }
 
         //TODO: Add base 'ETH' to dest tokens in selector
         /*long networkId = fromTokens.get(0).chainId;

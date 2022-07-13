@@ -255,6 +255,7 @@ public abstract class C {
         String MARKETPLACE_EVENT = "marketplace_event";
         String SHOULD_SHOW_SECURITY_WARNING = "should_show_security_warning";
         String FROM_SETTINGS = "from_settings";
+        String API_V1_REQUEST_URL = "api_v1_request_url";
     }
 
     public static final String DAPP_HOMEPAGE_KEY = "dappHomePage";

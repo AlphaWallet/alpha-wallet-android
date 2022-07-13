@@ -484,6 +484,11 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         primaryButton.setOnClickListener(listener);
     }
 
+    public void setSecondaryButtonClickListener(OnClickListener listener)
+    {
+        secondaryButton.setOnClickListener(listener);
+    }
+
     private void debounceButton(final View v)
     {
         if (v == null) return;

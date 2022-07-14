@@ -944,8 +944,6 @@
     <string name="title_api_v1_connect_to">Connect to</string>
     <string name="action_sign">Sign</string>
     <string name="message_api_v1_note">This will inform the remote site your wallet address is %s</string>
-=======
     <string name="asset_floor_price">Floor Price</string>
     <string name="asset_average_price">Average Price</string>
->>>>>>> master
 </resources>

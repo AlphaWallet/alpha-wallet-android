@@ -81,6 +81,18 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
         List<Connection.LToken> filteredList = new ArrayList<>();
         for (Connection.LToken data : tokens)
         {
+            if (data.name.toLowerCase(Locale.ENGLISH).startsWith(searchFilter.toLowerCase(Locale.ENGLISH)))
+            {
+                filteredList.add(data);
+            }
+            else if (data.symbol.toLowerCase(Locale.ENGLISH).startsWith(searchFilter.toLowerCase(Locale.ENGLISH)))
+            {
+                filteredList.add(data);
+            }
+        }
+
+        for (Connection.LToken data : tokens)
+        {
             if (data.name.toLowerCase(Locale.ENGLISH).contains(searchFilter.toLowerCase(Locale.ENGLISH)))
             {
                 filteredList.add(data);
@@ -90,6 +102,7 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
                 filteredList.add(data);
             }
         }
+
         updateList(filteredList);
     }
 

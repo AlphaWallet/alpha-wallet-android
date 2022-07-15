@@ -95,11 +95,11 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
         {
             if (data.name.toLowerCase(Locale.ENGLISH).contains(searchFilter.toLowerCase(Locale.ENGLISH)))
             {
-                filteredList.add(data);
+                if (!filteredList.contains(data)) filteredList.add(data);
             }
             else if (data.symbol.toLowerCase(Locale.ENGLISH).contains(searchFilter.toLowerCase(Locale.ENGLISH)))
             {
-                filteredList.add(data);
+                if (!filteredList.contains(data)) filteredList.add(data);
             }
         }
 

@@ -24,8 +24,6 @@ import com.alphawallet.app.ui.widget.adapter.SelectTokenAdapter;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
-import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 
 public class SelectTokenDialog extends BottomSheetDialog
@@ -65,13 +63,6 @@ public class SelectTokenDialog extends BottomSheetDialog
         this.tokenItems = tokenItems;
 
         noResultsText.setVisibility(tokenItems.size() > 0 ? View.GONE : View.VISIBLE);
-
-        Collections.sort(tokenItems, (l, r) -> l.name.compareToIgnoreCase(r.name));
-        Collections.sort(tokenItems, (l, r) -> {
-            BigDecimal lBal = new BigDecimal(l.balance);
-            BigDecimal rBal = new BigDecimal(r.balance);
-            return rBal.compareTo(lBal);
-        });
 
         adapter = new SelectTokenAdapter(tokenItems, callback);
 

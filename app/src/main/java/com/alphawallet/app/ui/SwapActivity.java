@@ -42,6 +42,7 @@ import com.google.android.material.button.MaterialButton;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -178,7 +179,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             @Override
             public void onMaxClicked()
             {
-                String max = viewModel.getBalance(wallet.address, sourceSelector.getToken());
+                String max = viewModel.getBalance(sourceSelector.getToken());
                 if (!max.isEmpty())
                 {
                     sourceSelector.setAmount(max);
@@ -246,7 +247,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void destTokenChanged(Connection.LToken token)
     {
-        destSelector.setBalance(viewModel.getBalance(wallet.address, token));
+        destSelector.setBalance(viewModel.getBalance(token));
 
         infoLayout.setVisibility(View.GONE);
 
@@ -262,7 +263,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             destSelector.setVisibility(View.VISIBLE);
         }
 
-        sourceSelector.setBalance(viewModel.getBalance(wallet.address, token));
+        sourceSelector.setBalance(viewModel.getBalance(token));
 
         infoLayout.setVisibility(View.GONE);
 
@@ -329,6 +330,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void initFromDialog(List<Connection.LToken> fromTokens)
     {
+        sortValue(fromTokens);
         sourceTokenDialog = new SelectTokenDialog(fromTokens, this, tokenItem -> {
             sourceSelector.init(tokenItem);
             sourceTokenDialog.dismiss();
@@ -337,9 +339,37 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void initToDialog(List<Connection.LToken> toTokens)
     {
+        sortName(toTokens);
         destTokenDialog = new SelectTokenDialog(toTokens, this, tokenItem -> {
             destSelector.init(tokenItem);
             destTokenDialog.dismiss();
+        });
+    }
+
+    public void sortValue(List<Connection.LToken> tokenItems)
+    {
+        Collections.sort(tokenItems, (l, r) -> {
+            BigDecimal lBal = new BigDecimal(l.fiatEquivalent);
+            BigDecimal rBal = new BigDecimal(r.fiatEquivalent);
+            return rBal.compareTo(lBal);
+        });
+    }
+
+    public void sortName(List<Connection.LToken> tokenItems)
+    {
+        Collections.sort(tokenItems, (l, r) -> {
+            if (l.isNativeToken())
+            {
+                return -1;
+            }
+            else if (r.isNativeToken())
+            {
+                return 1;
+            }
+            else
+            {
+                return l.name.compareToIgnoreCase(r.name);
+            }
         });
     }
 
@@ -409,12 +439,17 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 {
                     if (!fromTokens.contains(t))
                     {
-                        t.balance = viewModel.getBalance(wallet.address, t);
-                        fromTokens.add(t);
+                        t.balance = viewModel.getBalance(t);
+                        t.fiatEquivalent = viewModel.getFiatValue(t);
 
-                        if (t.chainId == token.tokenInfo.chainId && t.address.equalsIgnoreCase(token.getAddress()))
+                        if (t.fiatEquivalent > 0)
                         {
-                            selectedToken = t;
+                            fromTokens.add(t);
+
+                            if (t.chainId == token.tokenInfo.chainId && t.address.equalsIgnoreCase(token.getAddress()))
+                            {
+                                selectedToken = t;
+                            }
                         }
                     }
                 }
@@ -423,7 +458,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 {
                     if (!toTokens.contains(t))
                     {
-                        t.balance = viewModel.getBalance(wallet.address, t);
+                        t.balance = viewModel.getBalance(t);
                         toTokens.add(t);
                     }
                 }

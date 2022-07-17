@@ -66,7 +66,7 @@ public class SelectTokenDialog extends BottomSheetDialog
 
         noResultsText.setVisibility(tokenItems.size() > 0 ? View.GONE : View.VISIBLE);
 
-        Collections.sort(tokenItems, (l, r) -> l.name.compareTo(r.name));
+        Collections.sort(tokenItems, (l, r) -> l.name.compareToIgnoreCase(r.name));
         Collections.sort(tokenItems, (l, r) -> {
             BigDecimal lBal = new BigDecimal(l.balance);
             BigDecimal rBal = new BigDecimal(r.balance);

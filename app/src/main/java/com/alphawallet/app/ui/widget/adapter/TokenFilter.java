@@ -22,15 +22,30 @@ public class TokenFilter
         String lowerCaseKeyword = lowerCase(keyword);
 
         List<Connection.LToken> result = new ArrayList<>();
+        // First filter: Add all entries that start with the keyword on top of the list.
         for (Connection.LToken lToken : this.tokens)
         {
             String name = lowerCase(lToken.name);
             String symbol = lowerCase(lToken.symbol);
 
-            if (name.startsWith(lowerCaseKeyword) || name.contains(lowerCaseKeyword)
-                    || symbol.startsWith(lowerCaseKeyword) || symbol.contains(lowerCaseKeyword))
+            if (name.startsWith(lowerCaseKeyword) || symbol.startsWith(lowerCaseKeyword))
             {
                 result.add(lToken);
+            }
+        }
+
+        // Second filter: Add the rest of the entries that contain the keyword on top of the list.
+        for (Connection.LToken lToken : this.tokens)
+        {
+            String name = lowerCase(lToken.name);
+            String symbol = lowerCase(lToken.symbol);
+
+            if (name.contains(lowerCaseKeyword) || symbol.contains(lowerCaseKeyword))
+            {
+                if (!result.contains(lToken))
+                {
+                    result.add(lToken);
+                }
             }
         }
         return result;

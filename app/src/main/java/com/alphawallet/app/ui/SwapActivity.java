@@ -28,6 +28,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.viewmodel.SwapViewModel;
+import com.alphawallet.app.viewmodel.Tokens;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
@@ -178,7 +179,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             @Override
             public void onMaxClicked()
             {
-                String max = viewModel.getBalance(wallet.address, sourceSelector.getToken());
+                String max = viewModel.getBalance(sourceSelector.getToken());
                 if (!max.isEmpty())
                 {
                     sourceSelector.setAmount(max);
@@ -246,7 +247,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void destTokenChanged(Connection.LToken token)
     {
-        destSelector.setBalance(viewModel.getBalance(wallet.address, token));
+        destSelector.setBalance(viewModel.getBalance(token));
 
         infoLayout.setVisibility(View.GONE);
 
@@ -262,7 +263,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             destSelector.setVisibility(View.VISIBLE);
         }
 
-        sourceSelector.setBalance(viewModel.getBalance(wallet.address, token));
+        sourceSelector.setBalance(viewModel.getBalance(token));
 
         infoLayout.setVisibility(View.GONE);
 
@@ -293,42 +294,11 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             sourceSelector.reset();
             infoLayout.setVisibility(View.GONE);
         }
-
-        //TODO: Add base 'ETH' to dest tokens in selector
-        /*long networkId = fromTokens.get(0).chainId;
-
-        String symbol = "eth";
-
-        for (Chain c : chains)
-        {
-            if (c.id == networkId)
-            {
-                symbol = c.coin;
-            }
-        }
-
-        boolean matchFound = false;
-
-        for (Connection.LToken t : fromTokens)
-        {
-            if (t.symbol.equalsIgnoreCase(symbol))
-            {
-                sourceSelector.init(t);
-                matchFound = true;
-                break;
-            }
-        }
-
-        if (!matchFound)
-        {
-            sourceSelector.reset();
-
-            infoLayout.setVisibility(View.GONE);
-        }*/
     }
 
     private void initFromDialog(List<Connection.LToken> fromTokens)
     {
+        Tokens.sortValue(fromTokens);
         sourceTokenDialog = new SelectTokenDialog(fromTokens, this, tokenItem -> {
             sourceSelector.init(tokenItem);
             sourceTokenDialog.dismiss();
@@ -337,6 +307,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void initToDialog(List<Connection.LToken> toTokens)
     {
+        Tokens.sortName(toTokens);
+        Tokens.sortValue(toTokens);
         destTokenDialog = new SelectTokenDialog(toTokens, this, tokenItem -> {
             destSelector.init(tokenItem);
             destTokenDialog.dismiss();
@@ -409,12 +381,17 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 {
                     if (!fromTokens.contains(t))
                     {
-                        t.balance = viewModel.getBalance(wallet.address, t);
-                        fromTokens.add(t);
+                        t.balance = viewModel.getBalance(t);
+                        t.fiatEquivalent = viewModel.getFiatValue(t);
 
-                        if (t.chainId == token.tokenInfo.chainId && t.address.equalsIgnoreCase(token.getAddress()))
+                        if (t.fiatEquivalent > 0)
                         {
-                            selectedToken = t;
+                            fromTokens.add(t);
+
+                            if (t.chainId == token.tokenInfo.chainId && t.address.equalsIgnoreCase(token.getAddress()))
+                            {
+                                selectedToken = t;
+                            }
                         }
                     }
                 }
@@ -423,7 +400,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 {
                     if (!toTokens.contains(t))
                     {
-                        t.balance = viewModel.getBalance(wallet.address, t);
+                        t.balance = viewModel.getBalance(t);
+                        t.fiatEquivalent = viewModel.getFiatValue(t);
                         toTokens.add(t);
                     }
                 }

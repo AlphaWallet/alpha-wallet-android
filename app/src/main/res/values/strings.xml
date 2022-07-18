@@ -565,7 +565,7 @@
     <string name="fail_sign">Failed to sign redeem message</string>
     <string name="hint_contract_type">Token Type</string>
     <string name="reddit">Reddit</string>
-    <string name="tokenscript_compatibility">TokenScript Compatibiity</string>
+    <string name="tokenscript_compatibility">TokenScript Compatibility</string>
     <string name="version">Version</string>
     <string name="debug_script">TokenScript debug</string>
     <string name="unsigned_script">untrusted</string>

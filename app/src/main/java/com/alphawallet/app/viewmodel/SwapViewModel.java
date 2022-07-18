@@ -163,7 +163,7 @@ public class SwapViewModel extends BaseViewModel
 
     public void getQuote(Connection.LToken source, Connection.LToken dest, String address, String amount, String slippage)
     {
-        if (hasEnoughBalance(address, source, amount))
+        if (hasEnoughBalance(source, amount))
         {
             progressInfo.postValue(C.ProgressInfo.FETCHING_QUOTE);
             progress.postValue(true);
@@ -179,9 +179,9 @@ public class SwapViewModel extends BaseViewModel
         }
     }
 
-    public boolean hasEnoughBalance(String address, Connection.LToken source, String amount)
+    public boolean hasEnoughBalance(Connection.LToken source, String amount)
     {
-        BigDecimal bal = new BigDecimal(getBalance(address, source));
+        BigDecimal bal = new BigDecimal(getBalance(source));
         BigDecimal reqAmount = new BigDecimal(amount);
         return bal.compareTo(reqAmount) >= 0;
     }
@@ -262,23 +262,40 @@ public class SwapViewModel extends BaseViewModel
                 && result.contains("tool");
     }
 
-    public String getBalance(String walletAddress, Connection.LToken token)
+    public String getBalance(Connection.LToken token)
     {
-        String address = token.address;
+        Token t;
 
         // Note: In the LIFI API, the native token has either of these two addresses.
         // In AlphaWallet, the wallet address is used.
-        if (address.equalsIgnoreCase("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") ||
-                address.equalsIgnoreCase("0x0000000000000000000000000000000000000000"))
+        if (token.isNativeToken())
         {
-            address = walletAddress;
+            t = tokensService.getServiceToken(token.chainId);
         }
-        Token t = tokensService.getToken(token.chainId, address);
+        else
+        {
+            t = tokensService.getToken(token.chainId, token.address);
+        }
+
         if (t != null)
         {
             return BalanceUtils.getShortFormat(t.balance.toString(), t.tokenInfo.decimals);
         }
         else return "0";
+    }
+
+    public double getFiatValue(Connection.LToken t)
+    {
+        try
+        {
+            double value = Double.parseDouble(t.balance);
+            double priceUSD = Double.parseDouble(t.priceUSD);
+            return value * priceUSD;
+        }
+        catch (NumberFormatException|NullPointerException e)
+        {
+            return 0.0;
+        }
     }
 
     public void getAuthentication(Activity activity, Wallet wallet, SignAuthenticationCallback callback)

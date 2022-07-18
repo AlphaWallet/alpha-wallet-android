@@ -47,14 +47,13 @@ public class TokenSortHelperTest
     public void should_be_case_insensitive()
     {
         List<Connection.LToken> list = new ArrayList<>();
-        // TODO: Justin add two names here, which should fail the test when compareTo and pass when compareToIgnoreCase
-//        list.add(createToken("stETH", "ENS", "0x3", "0"));
-//        list.add(createToken("Ethereum", "ETH", "0x0", "0"));
+        list.add(createToken("Stox", "STX", "0x0", "0"));
+        list.add(createToken("stETH", "stETH", "0x3", "0"));
 
         TokenSortHelper.sort(list);
 
-//        assertThat(list.get(0).symbol, equalTo("ETH"));
-//        assertThat(list.get(1).symbol, equalTo("ENS"));
+        assertThat(list.get(0).symbol, equalTo("stETH"));
+        assertThat(list.get(1).symbol, equalTo("STX"));
     }
 
     private Connection.LToken createToken(String name, String symbol, String address, String balance)

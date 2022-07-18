@@ -10,7 +10,7 @@ public class TokenSortHelper
 {
     public static void sort(List<Connection.LToken> tokenItems)
     {
-        Collections.sort(tokenItems, (l, r) -> l.name.compareTo(r.name));
+        Collections.sort(tokenItems, (l, r) -> l.name.compareToIgnoreCase(r.name));
         Collections.sort(tokenItems, (l, r) -> {
             BigDecimal lBal = new BigDecimal(l.balance);
             BigDecimal rBal = new BigDecimal(r.balance);

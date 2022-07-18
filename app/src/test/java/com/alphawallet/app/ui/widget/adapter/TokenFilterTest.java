@@ -72,6 +72,21 @@ public class TokenFilterTest
         assertThat(result.get(0).name, equalTo("Binance"));
     }
 
+    @Test
+    public void should_sort_starts_with_in_front_of_contains()
+    {
+        List<Connection.LToken> list = new ArrayList<>();
+        list.add(createToken("Solana", "SOL", "2"));
+        list.add(createToken("WETH", "WETH", "2"));
+        list.add(createToken("Ethereum", "ETH", "1"));
+        tokenFilter = new TokenFilter(list);
+
+        List<Connection.LToken> result = tokenFilter.filterBy("eth");
+        assertThat(result.size(), equalTo(2));
+        assertThat(result.get(0).name, equalTo("Ethereum"));
+        assertThat(result.get(1).name, equalTo("WETH"));
+    }
+
     @NonNull
     private Connection.LToken createToken(String name, String symbol, String address)
     {

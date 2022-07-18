@@ -130,6 +130,10 @@ public class AppSiteController implements AttributeInterface
     )
             throws IOException, SAXException, NoHandlerFoundException
     {
+        if (universalLink.equals("wc"))
+        {
+            return "If you are using AlphaWallet with WalletConnect, please launch the AlphaWallet app";
+        }
         String domain = request.getServerName();
         ParseMagicLink parser = new ParseMagicLink(cryptoFunctions, null);
         MagicLinkData data;

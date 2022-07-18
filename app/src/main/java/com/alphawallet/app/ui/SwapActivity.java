@@ -67,6 +67,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private RelativeLayout tokenLayout;
     private LinearLayout infoLayout;
+    private TokenInfoView provider;
     private TokenInfoView fees;
     private TokenInfoView currentPrice;
     private TokenInfoView minReceived;
@@ -127,6 +128,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         destSelector = findViewById(R.id.to_input);
         tokenLayout = findViewById(R.id.layout_tokens);
         infoLayout = findViewById(R.id.layout_info);
+        provider = findViewById(R.id.tiv_provider);
         fees = findViewById(R.id.tiv_fees);
         currentPrice = findViewById(R.id.tiv_current_price);
         minReceived = findViewById(R.id.tiv_min_received);
@@ -460,6 +462,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         BigInteger networkFee = gasCost.multiply(gasLimit);
 
         String ethCostStr = BalanceUtils.getScaledValueFixed(new BigDecimal(networkFee), 18, 4);
+
+        provider.setValue(quote.toolDetails.name);
 
         fees.setValue(ethCostStr); //TODO: Needs to say 'Eth' after the quote, also should get the Eth price to show the Tx cost in user's Fiat
                                    //TODO: To see this done check GasWidget, see comment "Can we display value for gas?"

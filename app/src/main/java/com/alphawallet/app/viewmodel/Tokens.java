@@ -11,9 +11,20 @@ public class Tokens
     public static void sortValue(List<Connection.LToken> tokenItems)
     {
         Collections.sort(tokenItems, (l, r) -> {
-            BigDecimal lBal = new BigDecimal(l.fiatEquivalent);
-            BigDecimal rBal = new BigDecimal(r.fiatEquivalent);
-            return rBal.compareTo(lBal);
+            if (l.isNativeToken())
+            {
+                return -1;
+            }
+            else if (r.isNativeToken())
+            {
+                return 1;
+            }
+            else
+            {
+                BigDecimal lBal = new BigDecimal(l.fiatEquivalent);
+                BigDecimal rBal = new BigDecimal(r.fiatEquivalent);
+                return rBal.compareTo(lBal);
+            }
         });
     }
 

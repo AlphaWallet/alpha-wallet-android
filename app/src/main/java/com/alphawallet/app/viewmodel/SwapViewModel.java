@@ -286,9 +286,16 @@ public class SwapViewModel extends BaseViewModel
 
     public double getFiatValue(Connection.LToken t)
     {
-        double value = Double.parseDouble(t.balance);
-        double priceUSD = Double.parseDouble(t.priceUSD);
-        return value*priceUSD;
+        try
+        {
+            double value = Double.parseDouble(t.balance);
+            double priceUSD = Double.parseDouble(t.priceUSD);
+            return value * priceUSD;
+        }
+        catch (NumberFormatException|NullPointerException e)
+        {
+            return 0.0;
+        }
     }
 
     public void getAuthentication(Activity activity, Wallet wallet, SignAuthenticationCallback callback)

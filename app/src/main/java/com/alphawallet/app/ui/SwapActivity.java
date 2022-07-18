@@ -294,38 +294,6 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             sourceSelector.reset();
             infoLayout.setVisibility(View.GONE);
         }
-
-        //TODO: Add base 'ETH' to dest tokens in selector
-        /*long networkId = fromTokens.get(0).chainId;
-
-        String symbol = "eth";
-
-        for (Chain c : chains)
-        {
-            if (c.id == networkId)
-            {
-                symbol = c.coin;
-            }
-        }
-
-        boolean matchFound = false;
-
-        for (Connection.LToken t : fromTokens)
-        {
-            if (t.symbol.equalsIgnoreCase(symbol))
-            {
-                sourceSelector.init(t);
-                matchFound = true;
-                break;
-            }
-        }
-
-        if (!matchFound)
-        {
-            sourceSelector.reset();
-
-            infoLayout.setVisibility(View.GONE);
-        }*/
     }
 
     private void initFromDialog(List<Connection.LToken> fromTokens)
@@ -340,6 +308,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private void initToDialog(List<Connection.LToken> toTokens)
     {
         Tokens.sortName(toTokens);
+        Tokens.sortValue(toTokens);
         destTokenDialog = new SelectTokenDialog(toTokens, this, tokenItem -> {
             destSelector.init(tokenItem);
             destTokenDialog.dismiss();
@@ -432,6 +401,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                     if (!toTokens.contains(t))
                     {
                         t.balance = viewModel.getBalance(t);
+                        t.fiatEquivalent = viewModel.getFiatValue(t);
                         toTokens.add(t);
                     }
                 }

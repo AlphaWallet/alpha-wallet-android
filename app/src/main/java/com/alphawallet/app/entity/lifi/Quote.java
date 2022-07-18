@@ -20,6 +20,25 @@ public class Quote
     @Expose
     public String tool;
 
+    @SerializedName("toolDetails")
+    @Expose
+    public ToolDetails toolDetails;
+
+    public static class ToolDetails
+    {
+        @SerializedName("key")
+        @Expose
+        public String key;
+
+        @SerializedName("name")
+        @Expose
+        public String name;
+
+        @SerializedName("logoURI")
+        @Expose
+        public String logoURI;
+    }
+
     @SerializedName("action")
     @Expose
     public Action action;

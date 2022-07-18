@@ -233,7 +233,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             Web3Transaction w3Tx = viewModel.buildWeb3Transaction(quote);
             confDialog = new ActionSheetDialog(this, w3Tx, activeToken,
                     "", w3Tx.recipient.toString(), viewModel.getTokensService(), this);
-            confDialog.setURL("LI.FI Best Quote"); //TODO: Expand swap provider here
+            confDialog.setURL(quote.toolDetails.name);
             confDialog.setCanceledOnTouchOutside(false);
             confDialog.setGasEstimate(Numeric.toBigInt(quote.transactionRequest.gasLimit));
         }

@@ -28,6 +28,21 @@ public class TokensTest
     }
 
     @Test
+    public void sort_by_value_should_return_native_token_first()
+    {
+        List<Connection.LToken> list = new ArrayList<>();
+        list.add(createToken("Solana", "SOL", "0x0", 1));
+        list.add(createToken("Stox", "STX", "0x0000000000000000000000000000000000000000", 2));
+        list.add(createToken("stETH", "stETH", "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", 2));
+
+        Tokens.sortValue(list);
+
+        assertThat(list.get(0).symbol, equalTo("stETH"));
+        assertThat(list.get(1).symbol, equalTo("STX"));
+        assertThat(list.get(2).symbol, equalTo("SOL"));
+    }
+
+    @Test
     public void sort_tokens_by_name_alphabetically()
     {
         List<Connection.LToken> list = new ArrayList<>();

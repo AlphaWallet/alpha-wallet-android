@@ -28,6 +28,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.viewmodel.SwapViewModel;
+import com.alphawallet.app.viewmodel.Tokens;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
@@ -330,7 +331,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void initFromDialog(List<Connection.LToken> fromTokens)
     {
-        sortValue(fromTokens);
+        Tokens.sortValue(fromTokens);
         sourceTokenDialog = new SelectTokenDialog(fromTokens, this, tokenItem -> {
             sourceSelector.init(tokenItem);
             sourceTokenDialog.dismiss();
@@ -339,37 +340,10 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void initToDialog(List<Connection.LToken> toTokens)
     {
-        sortName(toTokens);
+        Tokens.sortName(toTokens);
         destTokenDialog = new SelectTokenDialog(toTokens, this, tokenItem -> {
             destSelector.init(tokenItem);
             destTokenDialog.dismiss();
-        });
-    }
-
-    public void sortValue(List<Connection.LToken> tokenItems)
-    {
-        Collections.sort(tokenItems, (l, r) -> {
-            BigDecimal lBal = new BigDecimal(l.fiatEquivalent);
-            BigDecimal rBal = new BigDecimal(r.fiatEquivalent);
-            return rBal.compareTo(lBal);
-        });
-    }
-
-    public void sortName(List<Connection.LToken> tokenItems)
-    {
-        Collections.sort(tokenItems, (l, r) -> {
-            if (l.isNativeToken())
-            {
-                return -1;
-            }
-            else if (r.isNativeToken())
-            {
-                return 1;
-            }
-            else
-            {
-                return l.name.compareToIgnoreCase(r.name);
-            }
         });
     }
 

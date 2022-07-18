@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.lifi.Connection;
+import com.alphawallet.app.helper.TokenSortHelper;
 import com.alphawallet.app.ui.widget.adapter.SelectTokenAdapter;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -31,7 +32,6 @@ public class SelectTokenDialog extends BottomSheetDialog
     private final Handler handler = new Handler(Looper.getMainLooper());
     private RecyclerView tokenList;
     private SelectTokenAdapter adapter;
-    private List<Connection.LToken> tokenItems;
     private LinearLayout searchLayout;
     private EditText search;
     private TextView noResultsText;
@@ -60,7 +60,6 @@ public class SelectTokenDialog extends BottomSheetDialog
     public SelectTokenDialog(List<Connection.LToken> tokenItems, Activity activity, SelectTokenDialogEventListener callback)
     {
         this(activity);
-        this.tokenItems = tokenItems;
 
         noResultsText.setVisibility(tokenItems.size() > 0 ? View.GONE : View.VISIBLE);
 

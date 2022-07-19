@@ -264,6 +264,10 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             destSelector.setVisibility(View.VISIBLE);
         }
 
+        sourceSelector.clearAmount();
+
+        destSelector.clearAmount();
+
         sourceSelector.setBalance(viewModel.getBalance(token));
 
         infoLayout.setVisibility(View.GONE);

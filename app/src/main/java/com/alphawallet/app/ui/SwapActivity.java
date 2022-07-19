@@ -41,7 +41,6 @@ import com.alphawallet.token.tools.Numeric;
 import com.google.android.material.button.MaterialButton;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -455,18 +454,17 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void updateInfoSummary(Quote quote)
     {
-        //convert gasQuote to Eth cost
-        BigInteger gasCost = Numeric.toBigInt(quote.transactionRequest.gasPrice);
-        BigInteger gasLimit = Numeric.toBigInt(quote.transactionRequest.gasLimit);
-
-        BigInteger networkFee = gasCost.multiply(gasLimit);
-
-        String ethCostStr = BalanceUtils.getScaledValueFixed(new BigDecimal(networkFee), 18, 4);
-
         provider.setValue(quote.toolDetails.name);
 
-        fees.setValue(ethCostStr); //TODO: Needs to say 'Eth' after the quote, also should get the Eth price to show the Tx cost in user's Fiat
-                                   //TODO: To see this done check GasWidget, see comment "Can we display value for gas?"
+        StringBuilder total = new StringBuilder();
+        for (Quote.Estimate.GasCost gc : quote.estimate.gasCosts)
+        {
+            BigDecimal amount = new BigDecimal(gc.amount);
+            long decimals = gc.token.decimals;
+            String fee = BalanceUtils.getScaledValueFixed(amount, decimals, 4);
+            total.append(fee).append(" ").append(gc.token.symbol).append("\n");
+        }
+        fees.setValue(total.toString().trim());
 
         BigDecimal s = new BigDecimal(quote.action.fromToken.priceUSD);
         BigDecimal d = new BigDecimal(quote.action.toToken.priceUSD);

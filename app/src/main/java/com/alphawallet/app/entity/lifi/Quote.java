@@ -3,8 +3,7 @@ package com.alphawallet.app.entity.lifi;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.ArrayList;
 
 public class Quote
 {
@@ -107,10 +106,36 @@ public class Quote
 //        @SerializedName("feeCosts")
 //        @Expose
 //        public JSONArray feeCosts;
-//
-//        @SerializedName("gasCosts")
-//        @Expose
-//        public JSONArray gasCosts;
+
+        @SerializedName("gasCosts")
+        @Expose
+        public ArrayList<GasCost> gasCosts;
+
+        public static class GasCost
+        {
+            @SerializedName("amount")
+            @Expose
+            public String amount;
+
+            @SerializedName("amountUSD")
+            @Expose
+            public String amountUSD;
+
+            @SerializedName("token")
+            @Expose
+            public Token token;
+
+            public static class Token
+            {
+                @SerializedName("symbol")
+                @Expose
+                public String symbol;
+
+                @SerializedName("decimals")
+                @Expose
+                public long decimals;
+            }
+        }
 
         @SerializedName("data")
         @Expose

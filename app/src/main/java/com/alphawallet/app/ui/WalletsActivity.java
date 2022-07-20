@@ -104,6 +104,15 @@ public class WalletsActivity extends BaseActivity implements
         initViews();
     }
 
+    private void scrollToDefaultWallet()
+    {
+        int position = adapter.getDefaultWalletIndex();
+        if (position != -1)
+        {
+            list.smoothScrollToPosition(position);
+        }
+    }
+
     private void initViewModel()
     {
         if (viewModel == null)
@@ -337,6 +346,7 @@ public class WalletsActivity extends BaseActivity implements
         }
 
         adapter.setDefaultWallet(wallet);
+        scrollToDefaultWallet();
         if (requiresHomeRefresh)
         {
             viewModel.stopUpdates();
@@ -355,7 +365,11 @@ public class WalletsActivity extends BaseActivity implements
     private void onFetchWallets(Wallet[] wallets)
     {
         enableDisplayHomeAsUp();
-        if (adapter != null) adapter.setWallets(wallets);
+        if (adapter != null){
+            adapter.setWallets(wallets);
+            scrollToDefaultWallet();
+        }
+
         invalidateOptionsMenu();
     }
 

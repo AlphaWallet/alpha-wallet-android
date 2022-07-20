@@ -50,7 +50,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class SwapActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
 {
-    private static final int GET_QUOTE_INTERVAL_MS = 30000;
+    private static final long GET_QUOTE_INTERVAL_MS = 30000;
     private SwapViewModel viewModel;
     private TokenSelector sourceSelector;
     private TokenSelector destSelector;
@@ -80,12 +80,19 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         @Override
         public void run()
         {
-            viewModel.getQuote(
-                    sourceSelector.getToken(),
-                    destSelector.getToken(),
-                    wallet.address,
-                    sourceSelector.getAmount(),
-                    settingsDialog.getSlippage());
+            if (confirmationDialog == null || !confirmationDialog.isShowing())
+            {
+                viewModel.getQuote(
+                        sourceSelector.getToken(),
+                        destSelector.getToken(),
+                        wallet.address,
+                        sourceSelector.getAmount(),
+                        settingsDialog.getSlippage());
+            }
+            else
+            {
+                startQuoteTask(GET_QUOTE_INTERVAL_MS);
+            }
         }
     };
 
@@ -179,7 +186,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             @Override
             public void onAmountChanged(String amount)
             {
-                startQuoteTask();
+                startQuoteTask(0);
             }
 
             @Override
@@ -265,7 +272,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         destTokenDialog.setSelectedToken(token.address);
 
-        startQuoteTask();
+        startQuoteTask(0);
     }
 
     private void sourceTokenChanged(Connection.LToken token)
@@ -287,7 +294,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         sourceToken = token;
 
-        startQuoteTask();
+        startQuoteTask(0);
     }
 
     @Override
@@ -330,7 +337,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         });
     }
 
-    private void startQuoteTask()
+    private void startQuoteTask(long delay)
     {
         stopQuoteTask();
 
@@ -340,7 +347,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 && destSelector.getToken() != null
                 && !TextUtils.isEmpty(sourceSelector.getAmount()))
         {
-            getQuoteHandler.post(getQuoteRunnable);
+            getQuoteHandler.postDelayed(getQuoteRunnable, delay);
         }
     }
 
@@ -558,7 +565,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 sourceSelector.setError(getString(R.string.error_insufficient_balance, sourceSelector.getToken().symbol));
                 break;
             case C.ErrorCode.SWAP_TIMEOUT_ERROR:
-                startQuoteTask();
+                startQuoteTask(0);
                 break;
             case C.ErrorCode.SWAP_CONNECTIONS_ERROR:
             case C.ErrorCode.SWAP_CHAIN_ERROR:
@@ -577,7 +584,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 errorDialog.setTitle(R.string.title_dialog_error);
                 errorDialog.setMessage(errorEnvelope.message);
                 errorDialog.setButton(R.string.try_again, v -> {
-                    startQuoteTask();
+                    startQuoteTask(0);
                     errorDialog.dismiss();
                 });
                 errorDialog.setSecondaryButton(R.string.action_cancel, v -> errorDialog.dismiss());

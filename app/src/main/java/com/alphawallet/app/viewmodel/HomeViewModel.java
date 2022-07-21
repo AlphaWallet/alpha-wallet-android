@@ -4,14 +4,10 @@ import static com.alphawallet.app.viewmodel.WalletConnectViewModel.WC_SESSION_DB
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -27,7 +23,6 @@ import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -40,7 +35,6 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
-import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -70,8 +64,6 @@ import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.walletconnect.WCClient;
-import com.alphawallet.app.walletconnect.WCSession;
-import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.walletconnect.entity.WCUtils;
 import com.alphawallet.app.widget.EmailPromptView;
 import com.alphawallet.app.widget.QRCodeActionsView;
@@ -88,12 +80,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -113,7 +101,6 @@ import timber.log.Timber;
 public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
     public static final String ALPHAWALLET_DIR = "AlphaWallet";
-    public static final String ALPHAWALLET_FILE_URL = "https://1x.alphawallet.com/dl/latest.apk";
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
@@ -265,50 +252,6 @@ public class HomeViewModel extends BaseViewModel {
         Intent intent = new Intent(context, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         context.startActivity(intent);
-    }
-
-    public void downloadAndInstall(String build, Context ctx) {
-        createDirectory();
-        downloadAPK(build, ctx);
-    }
-
-    private void createDirectory() {
-        //create XML repository directory
-        File directory = new File(
-                Environment.getExternalStorageDirectory()
-                        + File.separator + ALPHAWALLET_DIR);
-
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
-    }
-
-    private void downloadAPK(String version, Context ctx) {
-        String destination = Environment.getExternalStorageDirectory()
-                + File.separator + ALPHAWALLET_DIR;
-
-        File testFile = new File(destination, "AlphaWallet-" + version + ".apk");
-        if (testFile.exists()) {
-            testFile.delete();
-        }
-        final Uri uri = Uri.parse("file://" + testFile.getPath());
-
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(ALPHAWALLET_FILE_URL));
-        request.setDescription(ctx.getString(R.string.alphawallet_update) + " " + version);
-        request.setTitle(ctx.getString(R.string.app_name));
-        request.setDestinationUri(uri);
-        final DownloadManager manager = (DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
-        long downloadId = manager.enqueue(request);
-
-        //set BroadcastReceiver to install app when .apk is downloaded
-        BroadcastReceiver onComplete = new BroadcastReceiver() {
-            public void onReceive(Context ctxt, Intent intent) {
-                installIntent.postValue(testFile);
-                LocalBroadcastManager.getInstance(ctxt).unregisterReceiver(this);
-            }
-        };
-
-        LocalBroadcastManager.getInstance(ctx).registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
 
     public void getWalletName(Context context) {
@@ -577,14 +520,6 @@ public class HomeViewModel extends BaseViewModel {
 
     public void setUpdateWarningCount(int warns) {
         preferenceRepository.setUpdateWarningCount(warns);
-    }
-
-    public int getUpdateAsks() {
-        return preferenceRepository.getUpdateAsksCount();
-    }
-
-    public void setUpdateAsksCount(int asks) {
-        preferenceRepository.setUpdateAsksCount(asks);
     }
 
     public void setInstallTime(int time) {

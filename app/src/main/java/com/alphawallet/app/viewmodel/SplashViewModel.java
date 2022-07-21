@@ -81,21 +81,6 @@ public class SplashViewModel extends ViewModel
                 .isDisposed();
     }
 
-    private String stripFilename(String name)
-    {
-        int index = name.lastIndexOf(".apk");
-        if (index > 0)
-        {
-            name = name.substring(0, index);
-        }
-        index = name.lastIndexOf("-");
-        if (index > 0)
-        {
-            name = name.substring(index+1);
-        }
-        return name;
-    }
-
     public void StoreHDKey(String address, KeyService.AuthenticationLevel authLevel)
     {
         if (!address.equals(ZERO_ADDRESS))

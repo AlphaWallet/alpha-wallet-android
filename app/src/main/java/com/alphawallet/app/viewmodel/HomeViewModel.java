@@ -51,7 +51,6 @@ import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
-import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.service.WalletConnectService;
@@ -115,7 +114,6 @@ public class HomeViewModel extends BaseViewModel {
     private final CurrencyRepositoryType currencyRepository;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionsService transactionsService;
-    private final TickerService tickerService;
     private final MyAddressRouter myAddressRouter;
     private final AnalyticsServiceType analyticsService;
     private final ExternalBrowserRouter externalBrowserRouter;
@@ -143,7 +141,6 @@ public class HomeViewModel extends BaseViewModel {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             MyAddressRouter myAddressRouter,
             TransactionsService transactionsService,
-            TickerService tickerService,
             AnalyticsServiceType analyticsService,
             ExternalBrowserRouter externalBrowserRouter,
             OkHttpClient httpClient,
@@ -158,7 +155,6 @@ public class HomeViewModel extends BaseViewModel {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.myAddressRouter = myAddressRouter;
         this.transactionsService = transactionsService;
-        this.tickerService = tickerService;
         this.analyticsService = analyticsService;
         this.externalBrowserRouter = externalBrowserRouter;
         this.httpClient = httpClient;
@@ -215,7 +211,7 @@ public class HomeViewModel extends BaseViewModel {
                 .filter(wallet -> checkWalletNotEqual(wallet, importData))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(wallet -> importLink(wallet, activity, importData), this::onError);
+                .subscribe(wallet -> importLink(activity, importData), this::onError);
     }
 
     private boolean checkWalletNotEqual(Wallet wallet, String importData) {
@@ -242,7 +238,7 @@ public class HomeViewModel extends BaseViewModel {
         return filterPass;
     }
 
-    private void importLink(Wallet wallet, Activity activity, String importData) {
+    private void importLink(Activity activity, String importData) {
         importTokenRouter.open(activity, importData);
     }
 
@@ -314,15 +310,6 @@ public class HomeViewModel extends BaseViewModel {
         preferenceRepository.setFindWalletAddressDialogShown(isShown);
     }
 
-    public String getDefaultCurrency(){
-        return currencyRepository.getDefaultCurrency();
-    }
-
-    public void updateTickers()
-    {
-        tickerService.updateTickers();
-    }
-
     private void onENSError(Throwable throwable)
     {
         Timber.tag(TAG).e(throwable);
@@ -350,8 +337,6 @@ public class HomeViewModel extends BaseViewModel {
                     showActionSheet(activity, qrResult);
                     break;
                 case PAYMENT:
-                    showSend(activity, qrResult);
-                    break;
                 case TRANSFER:
                     showSend(activity, qrResult);
                     break;
@@ -436,7 +421,7 @@ public class HomeViewModel extends BaseViewModel {
         dialog.setContentView(contentView);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
-        BottomSheetBehavior behavior = BottomSheetBehavior.from((View) contentView.getParent());
+        BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) contentView.getParent());
         dialog.setOnShowListener(dialog -> behavior.setPeekHeight(contentView.getHeight()));
         dialog.show();
     }
@@ -468,7 +453,7 @@ public class HomeViewModel extends BaseViewModel {
      * This method will uniquely identify the device by creating an ID and store in preference.
      * This will be changed if user reinstall application or clear the storage explicitly.
      **/
-    public void identify(Context ctx)
+    public void identify()
     {
         String uuid = preferenceRepository.getUniqueId();
 
@@ -549,7 +534,7 @@ public class HomeViewModel extends BaseViewModel {
             emailPromptDialog.setCancelable(true);
             emailPromptDialog.setCanceledOnTouchOutside(true);
             emailPromptView.setParentDialog(emailPromptDialog);
-            BottomSheetBehavior behavior = BottomSheetBehavior.from((View) emailPromptView.getParent());
+            BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) emailPromptView.getParent());
             emailPromptDialog.setOnShowListener(dialog -> behavior.setPeekHeight(emailPromptView.getHeight()));
             emailPromptDialog.show();
         }
@@ -588,7 +573,7 @@ public class HomeViewModel extends BaseViewModel {
                     dialog.setContentView(view);
                     dialog.setCancelable(true);
                     dialog.setCanceledOnTouchOutside(true);
-                    BottomSheetBehavior behavior = BottomSheetBehavior.from((View) view.getParent());
+                    BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
                     dialog.setOnShowListener(d -> behavior.setPeekHeight(view.getHeight()));
                     dialog.show();
 

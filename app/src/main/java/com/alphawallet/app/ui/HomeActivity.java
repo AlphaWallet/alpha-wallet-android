@@ -199,7 +199,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         viewModel = new ViewModelProvider(this)
                 .get(HomeViewModel.class);
-        viewModel.identify(this);
+        viewModel.identify();
         viewModel.setWalletStartup();
         viewModel.setCurrencyAndLocale(this);
         viewModel.tryToShowWhatsNewDialog(this);

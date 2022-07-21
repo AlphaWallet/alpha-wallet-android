@@ -411,7 +411,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                     if (!fromTokens.contains(t))
                     {
                         t.balance = viewModel.getBalance(t);
-                        t.fiatEquivalent = viewModel.getFiatValue(t);
+                        t.fiatEquivalent = t.getFiatValue();
 
                         if (t.fiatEquivalent > 0)
                         {
@@ -430,7 +430,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                     if (!toTokens.contains(t))
                     {
                         t.balance = viewModel.getBalance(t);
-                        t.fiatEquivalent = viewModel.getFiatValue(t);
+                        t.fiatEquivalent = t.getFiatValue();
                         toTokens.add(t);
                     }
                 }

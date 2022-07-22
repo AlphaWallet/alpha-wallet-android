@@ -47,19 +47,6 @@ public class SwapUtilsTest
     }
 
     @Test
-    public void should_return_current_price()
-    {
-        Quote quote = new Quote();
-        quote.action = new Quote.Action();
-        quote.action.fromToken = new Connection.LToken();
-        quote.action.toToken = new Connection.LToken();
-        quote.action.fromToken.priceUSD = "5";
-        quote.action.toToken.priceUSD = "1000";
-
-        assertThat(SwapUtils.getCurrentPrice(quote), equalTo("5000"));
-    }
-
-    @Test
     public void should_return_formatted_minimum_received()
     {
         Quote quote = new Quote();

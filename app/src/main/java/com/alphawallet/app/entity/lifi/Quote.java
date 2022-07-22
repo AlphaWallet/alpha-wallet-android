@@ -3,6 +3,7 @@ package com.alphawallet.app.entity.lifi;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 public class Quote
@@ -234,5 +235,11 @@ public class Quote
         @SerializedName("gasPrice")
         @Expose
         public String gasPrice;
+    }
+
+    public String getCurrentPrice()
+    {
+        return new BigDecimal(action.fromToken.priceUSD)
+                .multiply(new BigDecimal(action.toToken.priceUSD)).toString();
     }
 }

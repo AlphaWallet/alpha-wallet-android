@@ -32,14 +32,8 @@ public class SwapUtils
     {
         return String.format(CURRENT_PRICE_FORMAT,
                 quote.action.fromToken.symbol,
-                getCurrentPrice(quote),
+                quote.getCurrentPrice(),
                 quote.action.toToken.symbol);
-    }
-
-    public static String getCurrentPrice(Quote quote)
-    {
-        return new BigDecimal(quote.action.fromToken.priceUSD)
-                .multiply(new BigDecimal(quote.action.toToken.priceUSD)).toString();
     }
 
     public static String getMinimumAmountReceived(Quote quote)

@@ -7,9 +7,9 @@ import java.util.ArrayList;
 
 public class SwapUtils
 {
-    public static final String GAS_PRICE_FORMAT = "%s %s";
-    public static final String MINIMUM_RECEIVED_FORMAT = "%s %s";
-    public static final String CURRENT_PRICE_FORMAT = "1 %s ≈ %s %s";
+    private static final String GAS_PRICE_FORMAT = "%s %s";
+    private static final String MINIMUM_RECEIVED_FORMAT = "%s %s";
+    private static final String CURRENT_PRICE_FORMAT = "1 %s ≈ %s %s";
 
     public static String getTotalGasFees(ArrayList<Quote.Estimate.GasCost> gasCosts)
     {

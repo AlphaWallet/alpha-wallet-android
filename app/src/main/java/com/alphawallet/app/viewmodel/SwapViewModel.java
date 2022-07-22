@@ -279,11 +279,9 @@ public class SwapViewModel extends BaseViewModel
         if (errorStr.toLowerCase(Locale.ENGLISH).contains("timeout"))
         {
             this.error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_TIMEOUT_ERROR, errorStr));
+            return;
         }
-        else
-        {
-            this.error.postValue(new ErrorEnvelope(errorCode, checkMessage(errorStr)));
-        }
+        this.error.postValue(new ErrorEnvelope(errorCode, checkMessage(errorStr)));
     }
 
     private String checkMessage(String errorStr)

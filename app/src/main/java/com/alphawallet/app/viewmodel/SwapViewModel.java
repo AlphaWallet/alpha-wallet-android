@@ -288,20 +288,19 @@ public class SwapViewModel extends BaseViewModel
 
     private String checkMessage(String errorStr)
     {
-        String message = errorStr;
         try
         {
             JSONObject json = new JSONObject(errorStr);
             if (json.has("message"))
             {
-                message = json.getString("message");
+                return json.getString("message");
             }
         }
         catch (JSONException e)
         {
             Timber.e(e);
         }
-        return message;
+        return errorStr;
     }
 
     private boolean isValidQuote(String result)

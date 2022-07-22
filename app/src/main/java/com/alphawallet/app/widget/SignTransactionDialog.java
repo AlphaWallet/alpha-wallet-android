@@ -174,8 +174,13 @@ public class SignTransactionDialog
         else if (km != null)
         {
             Intent intent = km.createConfirmDeviceCredentialIntent(activity.getString(R.string.unlock_private_key), "");
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            activity.startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + callBackId.ordinal());
+            if (intent == null)
+            {
+                authCallback.authenticateFail("Can not unlock", AuthenticationFailType.BIOMETRIC_AUTHENTICATION_NOT_AVAILABLE, callBackId);
+            } else {
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                activity.startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + callBackId.ordinal());
+            }
         }
         else
         {

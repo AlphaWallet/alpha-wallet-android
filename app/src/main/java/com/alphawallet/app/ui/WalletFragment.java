@@ -82,6 +82,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import timber.log.Timber;
 
 /**
  * Created by justindeguzman on 2/28/18.
@@ -621,7 +622,14 @@ public class WalletFragment extends BaseFragment implements
         handler.removeCallbacksAndMessages(null);
         if (realmUpdates != null)
         {
-            realmUpdates.removeAllChangeListeners();
+            try
+            {
+                realmUpdates.removeAllChangeListeners();
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
         }
         if (realm != null && !realm.isClosed()) realm.close();
         if (adapter != null && recyclerView != null) adapter.onDestroy(recyclerView);

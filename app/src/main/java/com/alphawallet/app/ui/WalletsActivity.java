@@ -365,7 +365,8 @@ public class WalletsActivity extends BaseActivity implements
     private void onFetchWallets(Wallet[] wallets)
     {
         enableDisplayHomeAsUp();
-        if (adapter != null){
+        if (adapter != null)
+        {
             adapter.setWallets(wallets);
             scrollToDefaultWallet();
         }

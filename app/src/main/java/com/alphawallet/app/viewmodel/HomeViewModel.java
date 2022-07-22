@@ -4,7 +4,6 @@ import static com.alphawallet.app.viewmodel.WalletConnectViewModel.WC_SESSION_DB
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -40,7 +39,6 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
-import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -70,8 +68,6 @@ import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.walletconnect.WCClient;
-import com.alphawallet.app.walletconnect.WCSession;
-import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.walletconnect.entity.WCUtils;
 import com.alphawallet.app.widget.EmailPromptView;
 import com.alphawallet.app.widget.QRCodeActionsView;
@@ -88,12 +84,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -662,7 +654,7 @@ public class HomeViewModel extends BaseViewModel {
                 }).isDisposed();
             }
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            Timber.e(e);
         }
 
     }

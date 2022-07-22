@@ -234,7 +234,7 @@ public class AlphaWalletService
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                Timber.e(e);
             }
 
             return result;
@@ -324,7 +324,7 @@ public class AlphaWalletService
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                Timber.e(e);
             }
 
             return result;

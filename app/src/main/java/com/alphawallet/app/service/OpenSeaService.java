@@ -94,7 +94,6 @@ public class OpenSeaService
             }
             else
             {
-                Timber.d(response.toString());
                 return JsonUtils.EMPTY_RESULT;
             }
         }

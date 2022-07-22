@@ -28,6 +28,7 @@ import com.alphawallet.app.entity.lifi.Quote;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.SwapUtils;
 import com.alphawallet.app.viewmodel.SwapViewModel;
 import com.alphawallet.app.viewmodel.Tokens;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -41,7 +42,6 @@ import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.tools.Numeric;
 import com.google.android.material.button.MaterialButton;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -485,26 +485,9 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private void updateInfoSummary(Quote quote)
     {
         provider.setValue(quote.toolDetails.name);
-
-        StringBuilder total = new StringBuilder();
-        for (Quote.Estimate.GasCost gc : quote.estimate.gasCosts)
-        {
-            BigDecimal amount = new BigDecimal(gc.amount);
-            long decimals = gc.token.decimals;
-            String fee = BalanceUtils.getScaledValueFixed(amount, decimals, 4);
-            total.append(fee).append(" ").append(gc.token.symbol).append("\n");
-        }
-        fees.setValue(total.toString().trim());
-
-        BigDecimal s = new BigDecimal(quote.action.fromToken.priceUSD);
-        BigDecimal d = new BigDecimal(quote.action.toToken.priceUSD);
-        BigDecimal c = s.multiply(d);
-        String currentPriceTxt = "1 " + quote.action.fromToken.symbol + " ≈ " + c.toString() + " " + quote.action.toToken.symbol;
-        currentPrice.setValue(currentPriceTxt.trim());
-
-        String minReceivedVal = BalanceUtils.getShortFormat(quote.estimate.toAmountMin, quote.action.toToken.decimals) + " " + quote.action.toToken.symbol;
-        minReceived.setValue(minReceivedVal.trim());
-
+        fees.setValue(SwapUtils.getTotalGasFees(quote.estimate.gasCosts));
+        currentPrice.setValue(SwapUtils.getFormattedCurrentPrice(quote).trim());
+        minReceived.setValue(SwapUtils.getMinimumAmountReceived(quote));
         infoLayout.setVisibility(View.VISIBLE);
     }
 

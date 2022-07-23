@@ -58,7 +58,6 @@ public class WalletConnectSessionActivity extends BaseActivity
     private CustomAdapter adapter;
     private Wallet wallet;
     private List<WalletConnectSessionItem> wcSessions;
-    private int connectionCount = -1;
     private final BroadcastReceiver walletConnectChangeReceiver = new BroadcastReceiver()
     {
         @Override
@@ -68,7 +67,6 @@ public class WalletConnectSessionActivity extends BaseActivity
             if (action.equals(C.WALLET_CONNECT_COUNT_CHANGE))
             {
                 handler.post(() -> adapter.notifyDataSetChanged());
-                connectionCount = intent.getIntExtra("count", 0);
             }
         }
     };
@@ -159,7 +157,6 @@ public class WalletConnectSessionActivity extends BaseActivity
     public void onResume()
     {
         super.onResume();
-        connectionCount = -1;
         initViewModel();
         setupList();
         startConnectionCheck();

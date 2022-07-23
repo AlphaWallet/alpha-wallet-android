@@ -15,6 +15,9 @@ public class BalanceUtils
 {
     private static final String weiInEth  = "1000000000000000000";
     private static final int showDecimalPlaces = 5;
+    private static final int slidingDecimalPlaces = 2;
+    private static final BigDecimal displayThresholdMillis = BigDecimal.ONE.divide(BigDecimal.valueOf(1000000), 18, RoundingMode.DOWN);
+    private static final BigDecimal oneGwei = BigDecimal.ONE.divide(Convert.Unit.GWEI.getWeiFactor(), 18, RoundingMode.DOWN); //BigDecimal.valueOf(0.000000001);
 
     public static final String MACRO_PATTERN = "###,###,###,###,##0";
     public static final String CURRENCY_PATTERN = MACRO_PATTERN + ".00";
@@ -192,6 +195,16 @@ public class BalanceUtils
         return returnValue;
     }
 
+    public static boolean requiresSmallValueSuffix(BigDecimal correctedValue)
+    {
+        return correctedValue.compareTo(displayThresholdMillis) < 0;
+    }
+
+    public static boolean requiresSmallGweiValueSuffix(BigDecimal ethAmount)
+    {
+        return ethAmount.compareTo(oneGwei) < 0;
+    }
+
     private static boolean requiresSuffix(BigDecimal correctedValue, int dPlaces)
     {
         final BigDecimal displayThreshold = BigDecimal.ONE.divide(BigDecimal.valueOf(Math.pow(10, dPlaces)), 18, RoundingMode.DOWN);
@@ -329,5 +342,61 @@ public class BalanceUtils
     {
         BigDecimal a = new BigDecimal(amount);
         return a.movePointRight((int) decimals).toString();
+    }
+
+    public static String getSlidingBaseValue(final BigDecimal value, int decimals, int dPlaces)
+    {
+        String returnValue;
+        BigDecimal correctedValue = value.divide(BigDecimal.valueOf(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
+
+        if (value.equals(BigDecimal.ZERO)) //zero balance
+        {
+            returnValue = "0";
+        }
+        else if (requiresSmallValueSuffix(correctedValue))
+        {
+            return smallSuffixValue(correctedValue);
+        }
+        else if (correctedValue.compareTo(displayThresholdMillis) < 0)
+        {
+            returnValue = correctedValue.divide(displayThresholdMillis, slidingDecimalPlaces, RoundingMode.DOWN) + " m";
+        }
+        else if (requiresSuffix(correctedValue, dPlaces))
+        {
+            returnValue = getSuffixedValue(correctedValue, dPlaces);
+        }
+        else //otherwise display in standard pattern to dPlaces dp
+        {
+            DecimalFormat df = getFormat(getDigitalPattern(dPlaces));
+            //DecimalFormat df = new DecimalFormat(getDigitalPattern(dPlaces));
+            df.setRoundingMode(RoundingMode.DOWN);
+            returnValue = convertToLocale(df.format(correctedValue));
+        }
+
+        return returnValue;
+    }
+
+    private static String smallSuffixValue(BigDecimal correctedValue)
+    {
+        final BigDecimal displayThresholdMicro = BigDecimal.ONE.divide(BigDecimal.valueOf(1000000000), 18, RoundingMode.DOWN);
+        final BigDecimal displayThresholdNano  = BigDecimal.ONE.divide(BigDecimal.valueOf(1000000000000L), 18, RoundingMode.DOWN);
+
+        BigDecimal weiAmount = Convert.toWei(correctedValue, Convert.Unit.ETHER);
+
+        DecimalFormat df = getFormat("###,###.##");
+        df.setRoundingMode(RoundingMode.DOWN);
+
+        if (correctedValue.compareTo(displayThresholdNano) < 0)
+        {
+            return weiAmount.longValue() + " wei";
+        }
+        else if (correctedValue.compareTo(displayThresholdMicro) < 0)
+        {
+            return df.format(weiAmount.divide(BigDecimal.valueOf(1000), 2, RoundingMode.DOWN)) + "K wei";
+        }
+        else
+        {
+            return df.format(weiAmount.divide(BigDecimal.valueOf(1000000), 2, RoundingMode.DOWN)) + "M wei";
+        }
     }
 }

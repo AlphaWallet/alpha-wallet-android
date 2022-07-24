@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -39,6 +40,7 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 
 /**
@@ -131,6 +133,15 @@ public class WalletConnectSessionActivity extends BaseActivity
             if (wcSessions.isEmpty())
             {
                 layoutNoActiveSessions.setVisibility(View.VISIBLE);
+                // remove ghosting when all items deleted
+                if (recyclerView != null)
+                {
+                    RecyclerView.Adapter adapter = recyclerView.getAdapter();
+                    if (adapter != null)
+                    {
+                        adapter.notifyDataSetChanged();
+                    }
+                }
             }
             else
             {
@@ -157,7 +168,7 @@ public class WalletConnectSessionActivity extends BaseActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.menu_scan_wc, menu);
+        getMenuInflater().inflate(R.menu.menu_wc_sessions, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -172,6 +183,11 @@ public class WalletConnectSessionActivity extends BaseActivity
         {
             openQrScanner();
         }
+        else if (item.getItemId() == R.id.action_delete)
+        {
+            View v = findViewById(R.id.action_delete);
+            openDeleteMenu(v);
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -182,6 +198,29 @@ public class WalletConnectSessionActivity extends BaseActivity
         intent.putExtra("wallet", wallet);
         intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
         startActivity(intent);
+    }
+
+    private void openDeleteMenu(View v)
+    {
+        Timber.d("openDeleteMenu: view: %s", v);
+        PopupMenu popupMenu = new PopupMenu(this, v);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_wc_sessions_delete, popupMenu.getMenu());
+        popupMenu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_delete_empty)
+            {
+                // delete empty
+                viewModel.removeEmptySessions(this, this::setupList);
+                return true;
+            }
+            else if (item.getItemId() == R.id.action_delete_all)
+            {
+                Timber.d("openDeleteMenu: deleteAll: ");
+                viewModel.removeAllSessions(this, this::setupList);
+                return true;
+            }
+            return false;
+        });
+        popupMenu.show();
     }
 
     private void setupClient(final String sessionId, final CustomAdapter.CustomViewHolder holder)

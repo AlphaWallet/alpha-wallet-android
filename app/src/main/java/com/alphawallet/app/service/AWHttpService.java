@@ -144,13 +144,12 @@ public class AWHttpService extends HttpService
             }
             else
             {
-                Timber.d("performIO: throw SocketTimeoutException");
                 throw new SocketTimeoutException();
             }
         }
         //TODO: Also check java.io.InterruptedIOException
 
-        if (response.code()/100 == 4) //rate limited
+        if (response.code() / 100 == 4) //rate limited
         {
             return trySecondaryNode(request);
         }

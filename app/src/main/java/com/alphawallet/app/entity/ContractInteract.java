@@ -23,6 +23,7 @@ import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import timber.log.Timber;
 
 /**
  * Created by JB on 7/05/2022.
@@ -65,7 +66,7 @@ public class ContractInteract
         }
         catch (Exception e)
         {
-            //
+            Timber.e(e);
         }
 
         return "";

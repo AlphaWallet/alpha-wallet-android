@@ -210,7 +210,7 @@ public class TickerService
                     }
                 }
             }
-            catch (IOException e)
+            catch (Exception e)
             {
                 Timber.e(e);
             }
@@ -548,7 +548,7 @@ public class TickerService
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                Timber.e(e);
                 rate = 0.0;
             }
 

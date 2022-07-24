@@ -4,6 +4,8 @@ import static com.alphawallet.app.viewmodel.WalletConnectViewModel.WC_SESSION_DB
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -582,7 +584,7 @@ public class HomeViewModel extends BaseViewModel {
                 }).isDisposed();
             }
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            Timber.e(e);
         }
 
     }

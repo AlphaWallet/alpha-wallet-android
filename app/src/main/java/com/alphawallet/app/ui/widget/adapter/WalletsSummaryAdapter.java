@@ -315,6 +315,15 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         realm.close();
     }
 
+    public int getDefaultWalletIndex()
+    {
+        if (defaultWallet != null)
+        {
+            return getWalletIndex(defaultWallet.address);
+        }
+        return -1;
+    }
+
     public interface OnSetWalletDefaultListener {
         void onSetDefault(Wallet wallet);
     }

@@ -8,6 +8,8 @@ import com.alphawallet.app.util.BalanceUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import timber.log.Timber;
+
 /**
  * Created by JB on 20/01/2022.
  */
@@ -19,8 +21,8 @@ public class EIP1559FeeOracleResult implements Parcelable
 
     public EIP1559FeeOracleResult(BigInteger maxFee, BigInteger maxPriority, BigInteger base)
     {
-        maxFeePerGas = minOneGwei(maxFee);
-        maxPriorityFeePerGas = minOneGwei(maxPriority);
+        maxFeePerGas = fixGasPriceReturn(maxFee);  // Some chains (eg Phi) have a gas price lower than 1Gwei.
+        maxPriorityFeePerGas = fixGasPriceReturn(maxPriority);
         baseFee = base;
     }
 
@@ -68,5 +70,23 @@ public class EIP1559FeeOracleResult implements Parcelable
     private BigInteger minOneGwei(BigInteger input)
     {
         return input.max(BalanceUtils.gweiToWei(BigDecimal.ONE));
+    }
+
+    //returns 1 gwei if null
+    private BigInteger fixGasPriceReturn(BigInteger input)
+    {
+        if (input == null)
+        {
+            return BalanceUtils.gweiToWei(BigDecimal.ONE);
+        }
+        else if (input.equals(BigInteger.ZERO))
+        {
+            Timber.w("Zero gas price detected");
+            return input;
+        }
+        else
+        {
+            return input;
+        }
     }
 }

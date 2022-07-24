@@ -45,7 +45,6 @@ public class SwapService
 
     private String executeRequest(String api)
     {
-        Timber.d(api);
         try (okhttp3.Response response = httpClient.newCall(buildRequest(api)).execute())
         {
             if (response.isSuccessful())

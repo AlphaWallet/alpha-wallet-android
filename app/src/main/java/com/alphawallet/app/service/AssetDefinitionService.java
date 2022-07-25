@@ -2042,9 +2042,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //now store into database
         //TODO: if erc20 refresh all values
-        TokenFactory tf = new TokenFactory();
 
-        Token newToken = tf.createToken(token.tokenInfo, BigDecimal.ZERO, null, 0, cType, token.getNetworkName(), 0);
+        Token newToken = TokenFactory.createToken(token.tokenInfo, BigDecimal.ZERO, null, 0, cType, token.getNetworkName(), 0);
         newToken.setTokenWallet(token.getWallet());
         newToken.walletUIUpdateRequired = true;
         newToken.updateBlancaTime = 0;

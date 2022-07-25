@@ -267,10 +267,9 @@ public class ImportTokenViewModel extends BaseViewModel
     private void onTokensSetup(TokenInfo tokenInfo, ContractType spec)
     {
         if (tokenInfo != null && tokenInfo.name != null)
-        {
-            TokenFactory tf = new TokenFactory();
+        {;
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-            importToken = tf.createToken(tokenInfo, spec, network.getShortName());
+            importToken = TokenFactory.createToken(tokenInfo, spec, network.getShortName());
             regularBalanceCheck();
         }
         else

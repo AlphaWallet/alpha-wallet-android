@@ -41,7 +41,6 @@ public class OpenSeaService
     private static OkHttpClient httpClient;
     private static final int PAGE_SIZE = 50;
     private final Map<String, String> imageUrls = new HashMap<>();
-    private static final TokenFactory tf = new TokenFactory();
     private final LongSparseArray<Long> networkCheckTimes = new LongSparseArray<>();
     private final LongSparseArray<Integer> pageOffsets = new LongSparseArray<>();
 
@@ -252,7 +251,7 @@ public class OpenSeaService
                 type = ContractType.ERC721_UNDETERMINED;
             }
 
-            token = tf.createToken(tInfo, type, networkName);
+            token = TokenFactory.createToken(tInfo, type, networkName);
             token.setTokenWallet(address);
             token.lastTxTime = lastCheckTime;
             foundTokens.put(assetContract.getAddress(), token);
@@ -300,7 +299,7 @@ public class OpenSeaService
                 type = ContractType.ERC1155;
             }
 
-            token = tf.createToken(tInfo, type, networkName);
+            token = TokenFactory.createToken(tInfo, type, networkName);
             token.setTokenWallet(address);
             token.lastTxTime = lastCheckTime;
             token.setAssetContract(assetContract);

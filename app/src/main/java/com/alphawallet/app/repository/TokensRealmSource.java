@@ -197,7 +197,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     .equalTo("address", databaseKey(chainId, address))
                     .findFirst();
 
-            Token t = convertSingle(realmItem, realm, null, wallet);
+            Token t = convertSingle(realmItem, realm, wallet);
             if (t == null && address.equalsIgnoreCase(wallet.address))
             {
                 NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
@@ -525,10 +525,9 @@ public class TokensRealmSource implements TokenLocalSource {
 
         if (realmToken == null)
         {
-            TokenFactory tf = new TokenFactory();
             TokenInfo tInfo = new TokenInfo("eth", token.tokenInfo.name, token.tokenInfo.symbol, token.tokenInfo.decimals,
                     true, token.tokenInfo.chainId);
-            saveToken(realm, tf.createToken(tInfo, new BigDecimal(newBalance), null, System.currentTimeMillis(), ContractType.ETHEREUM,
+            saveToken(realm, TokenFactory.createToken(tInfo, new BigDecimal(newBalance), null, System.currentTimeMillis(), ContractType.ETHEREUM,
                     token.getNetworkName(), System.currentTimeMillis()));
         }
         else if (!realmToken.getBalance().equals(newBalance))
@@ -596,7 +595,7 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             Timber.tag(TAG).d("Update Token: %s", token.getFullName());
             realmToken.updateTokenInfoIfRequired(token.tokenInfo);
-            Token oldToken = convertSingle(realmToken, realm, null, new Wallet(token.getWallet()));
+            Token oldToken = convertSingle(realmToken, realm, new Wallet(token.getWallet()));
 
             if (token.checkBalanceChange(oldToken))
             {
@@ -1059,14 +1058,13 @@ public class TokensRealmSource implements TokenLocalSource {
                 RealmResults<RealmToken> realmItems = realm.where(RealmToken.class) //TODO: Work out how to specify '?' in a Realm filter
                         .findAll();
 
-                TokenFactory tf = new TokenFactory();
                 for (RealmToken realmItem : realmItems)
                 {
                     if (networkFilters.size() > 0 && !networkFilters.contains(realmItem.getChainId())) continue;
                     if ((!TextUtils.isEmpty(realmItem.getName()) && realmItem.getName().contains("??"))
                         || (!TextUtils.isEmpty(realmItem.getSymbol()) && realmItem.getSymbol().contains("??")))
                     {
-                        tokens.add(convertSingle(realmItem, realm, tf, new Wallet(walletAddress)));
+                        tokens.add(convertSingle(realmItem, realm, new Wallet(walletAddress)));
                     }
                 }
             }
@@ -1393,11 +1391,10 @@ public class TokensRealmSource implements TokenLocalSource {
         return "0";
     }
 
-    private Token convertSingle(RealmToken realmItem, Realm realm, TokenFactory tf, Wallet wallet)
+    private Token convertSingle(RealmToken realmItem, Realm realm, Wallet wallet)
     {
         if (realmItem == null) return null;
-        if (tf == null) tf   = new TokenFactory();
-        TokenInfo    info    = tf.createTokenInfo(realmItem);
+        TokenInfo    info    = TokenFactory.createTokenInfo(realmItem);
         NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
         if (network == null) return null;
 
@@ -1406,7 +1403,7 @@ public class TokensRealmSource implements TokenLocalSource {
             info = new TokenInfo(wallet.address, info.name, info.symbol, info.decimals, info.isEnabled, info.chainId);
         }
 
-        Token result = tf.createToken(info, realmItem, realmItem.getUpdateTime(), network.getShortName());
+        Token result = TokenFactory.createToken(info, realmItem, realmItem.getUpdateTime(), network.getShortName());
         result.setTokenWallet(wallet.address);
 
         if (result.isNonFungible())

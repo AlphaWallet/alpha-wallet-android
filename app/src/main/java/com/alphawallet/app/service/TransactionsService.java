@@ -92,7 +92,7 @@ public class TransactionsService
 
     private void fetchTransactions()
     {
-        if (TextUtils.isEmpty(tokensService.getCurrentAddress())) return;
+        if (tokensService == null || TextUtils.isEmpty(tokensService.getCurrentAddress())) return;
 
         currentChainIndex = 0;
         nftCheck = true; //check nft first to filter out NFT tokens

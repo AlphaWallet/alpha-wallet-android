@@ -34,12 +34,20 @@ import timber.log.Timber;
 public class EventSync
 {
     public static final long BLOCK_SEARCH_INTERVAL = 100000L;
-
     private final Token token;
+    private EventSyncState syncState;
+    private BigInteger lastBlockRead;
+    private long readBlockSize;
+    private long syncStart;
 
     public EventSync(Token token)
     {
         this.token = token;
+
+        syncState = EventSyncState.DOWNWARD_SYNC_START;
+        lastBlockRead = BigInteger.ONE;
+        readBlockSize = BLOCK_SEARCH_INTERVAL;
+        syncStart = 0L;
     }
 
     //Log fetch strategy for NFT:
@@ -55,13 +63,27 @@ public class EventSync
     public SyncDef getSyncDef(Realm realm)
     {
         BigInteger currentBlock = TransactionsService.getCurrentBlock(token.tokenInfo.chainId);
+        if (realm == null) return getSyncDef(currentBlock);
+
         EventSyncState syncState = getCurrentTokenSyncState(realm);
         BigInteger lastBlockRead = BigInteger.valueOf(getLastEventRead(realm));
         long readBlockSize = getCurrentEventBlockSize(realm);
+
+        return createSyncDef(realm, currentBlock, syncState, lastBlockRead, readBlockSize);
+    }
+
+    private SyncDef getSyncDef(BigInteger currentBlock)
+    {
+        return createSyncDef(null, currentBlock, syncState, lastBlockRead, readBlockSize);
+    }
+
+    //Separated from getSyncDef to allow for unit testing
+    private SyncDef createSyncDef(Realm realm, BigInteger currentBlock, EventSyncState syncState, BigInteger lastBlockRead, long readBlockSize)
+    {
+        if (currentBlock.equals(BigInteger.ZERO)) return null;
+
         BigInteger eventReadStartBlock;
         BigInteger eventReadEndBlock;
-
-        if (currentBlock.equals(BigInteger.ZERO)) return null;
 
         boolean upwardSync = false;
 
@@ -254,6 +276,8 @@ public class EventSync
 
     private long getSyncStart(Realm instance)
     {
+        if (instance == null) return syncStart;
+
         RealmAuxData rd = instance.where(RealmAuxData.class)
                 .equalTo("instanceKey", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress()))
                 .findFirst();
@@ -270,7 +294,12 @@ public class EventSync
 
     protected void writeStartSyncBlock(Realm realm, long currentBlock)
     {
-        if (realm == null) return;
+        if (realm == null)
+        {
+            syncStart = currentBlock;
+            return;
+        }
+
         realm.executeTransaction(r -> {
             String key = TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress());
             RealmAuxData rd = r.where(RealmAuxData.class)
@@ -312,7 +341,14 @@ public class EventSync
 
     private void updateEventReads(Realm realm, long lastRead, long readInterval, EventSyncState state)
     {
-        if (realm == null) return;
+        if (realm == null)
+        {
+            lastBlockRead = BigInteger.valueOf(lastRead);
+            readBlockSize = readInterval;
+            syncState = state;
+            return;
+        }
+
         realm.executeTransaction(r -> {
             String key = TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress());
             RealmAuxData rd = r.where(RealmAuxData.class)
@@ -333,7 +369,7 @@ public class EventSync
     }
 
     // If we're syncing downwards, work out what event block size we should read next
-    private long calcNewIntervalSize(SyncDef sync, int evReads)
+    public long calcNewIntervalSize(SyncDef sync, int evReads)
     {
         if (sync.upwardSync) return BLOCK_SEARCH_INTERVAL;
         long endBlock = sync.eventReadEndBlock.longValue() == -1 ? TransactionsService.getCurrentBlock(token.tokenInfo.chainId).longValue()

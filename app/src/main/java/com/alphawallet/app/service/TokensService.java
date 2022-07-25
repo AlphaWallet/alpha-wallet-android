@@ -81,7 +81,6 @@ public class TokensService
     private boolean mainNetActive = true;
     private static boolean walletStartup = false;
     private long transferCheckChain;
-    private final TokenFactory tokenFactory = new TokenFactory();
     private long syncTimer;
     private long syncStart;
     private ServiceSyncCallback completionCallback;
@@ -138,7 +137,7 @@ public class TokensService
                         .filter(tokenInfo -> (!TextUtils.isEmpty(tokenInfo.name) || !TextUtils.isEmpty(tokenInfo.symbol)) && tokenInfo.chainId != 0)
                         .map(tokenInfo -> { tokenInfo.isEnabled = false; return tokenInfo; }) //set default visibility to false
                         .flatMap(tokenInfo -> tokenRepository.determineCommonType(tokenInfo).toObservable()
-                            .map(contractType -> tokenFactory.createToken(tokenInfo, contractType, ethereumNetworkRepository.getNetworkByChain(t.chainId).getShortName())))
+                            .map(contractType -> TokenFactory.createToken(tokenInfo, contractType, ethereumNetworkRepository.getNetworkByChain(t.chainId).getShortName())))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe(this::finishAddToken, err -> onCheckError(err, t), this::finishTokenCheck);
@@ -951,7 +950,7 @@ public class TokensService
     public Single<Token> addToken(final TokenInfo info, final String walletAddress)
     {
         return tokenRepository.determineCommonType(info)
-                .map(contractType -> tokenFactory.createToken(info, contractType, ethereumNetworkRepository.getNetworkByChain(info.chainId).getShortName()))
+                .map(contractType -> TokenFactory.createToken(info, contractType, ethereumNetworkRepository.getNetworkByChain(info.chainId).getShortName()))
                 .map(token -> { token.setTokenWallet(walletAddress); return token; })
                 .flatMap(token -> tokenRepository.updateTokenBalance(walletAddress, token).map(newBalance -> {
                     token.balance = newBalance;

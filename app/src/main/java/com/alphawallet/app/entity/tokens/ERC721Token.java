@@ -489,7 +489,7 @@ public class ERC721Token extends Token
                         .addSingleTopic(EventEncoder.encode(event));// transfer event format
 
         filter.addSingleTopic(null);
-        filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(getWallet()))); //listen for events 'to' our wallet, we can check balance at end
+        filter.addSingleTopic(getEncodedWallet()); //listen for events 'to' our wallet, we can check balance at end
         filter.addSingleTopic(null);
         return filter;
     }
@@ -504,10 +504,22 @@ public class ERC721Token extends Token
                         tokenInfo.address)  // contract address
                         .addSingleTopic(EventEncoder.encode(event));// transfer event format
 
-        filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(getWallet()))); //listen for events 'from' our wallet
+        filter.addSingleTopic(getEncodedWallet()); //listen for events 'from' our wallet
         filter.addSingleTopic(null);
         filter.addSingleTopic(null);
         return filter;
+    }
+
+    private String getEncodedWallet()
+    {
+        if (getWallet().equals("0"))
+        {
+            return null;
+        }
+        else
+        {
+            return "0x" + TypeEncoder.encode(new Address(getWallet()));
+        }
     }
 
     /**

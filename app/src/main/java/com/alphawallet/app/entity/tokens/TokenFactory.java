@@ -17,9 +17,9 @@ import java.util.List;
  * TODO: Convert to builder model
  */
 
-public class TokenFactory
+public abstract class TokenFactory
 {
-    public Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<BigInteger> balances, long updateBlancaTime, ContractType type, String networkName, long lastBlockCheck)
+    public static Token createToken(TokenInfo tokenInfo, BigDecimal balance, List<BigInteger> balances, long updateBlancaTime, ContractType type, String networkName, long lastBlockCheck)
     {
         Token thisToken;
         switch (type)
@@ -72,7 +72,7 @@ public class TokenFactory
         return thisToken;
     }
 
-    public Token createToken(TokenInfo tokenInfo, RealmToken realmItem, long updateBlancaTime, String networkName)
+    public static Token createToken(TokenInfo tokenInfo, RealmToken realmItem, long updateBlancaTime, String networkName)
     {
         Token thisToken;
         int typeOrdinal = realmItem.getInterfaceSpec();
@@ -141,7 +141,7 @@ public class TokenFactory
         return thisToken;
     }
 
-    public Token createToken(TokenInfo tokenInfo, ContractType type, String networkName)
+    public static Token createToken(TokenInfo tokenInfo, ContractType type, String networkName)
     {
         Token thisToken;
         long currentTime = System.currentTimeMillis();
@@ -191,7 +191,7 @@ public class TokenFactory
         return thisToken;
     }
 
-    public TokenInfo createTokenInfo(RealmToken realmItem)
+    public static TokenInfo createTokenInfo(RealmToken realmItem)
     {
         return new TokenInfo(realmItem.getTokenAddress(), realmItem.getName(), realmItem.getSymbol(),
                 realmItem.getDecimals(), realmItem.isEnabled(), realmItem.getChainId());

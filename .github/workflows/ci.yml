@@ -44,7 +44,7 @@ jobs:
 #          path: output/
 
       - name: Upload coverage reports to Codecov
-          run: |
-            curl -Os https://uploader.codecov.io/latest/macos/codecov
-            chmod +x codecov
-            ./codecov
+        run: |
+          curl -Os https://uploader.codecov.io/latest/macos/codecov
+          chmod +x codecov
+          ./codecov

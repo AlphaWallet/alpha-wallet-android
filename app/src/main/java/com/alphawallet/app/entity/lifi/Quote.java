@@ -3,8 +3,8 @@ package com.alphawallet.app.entity.lifi;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 
 public class Quote
 {
@@ -19,6 +19,25 @@ public class Quote
     @SerializedName("tool")
     @Expose
     public String tool;
+
+    @SerializedName("toolDetails")
+    @Expose
+    public ToolDetails toolDetails;
+
+    public static class ToolDetails
+    {
+        @SerializedName("key")
+        @Expose
+        public String key;
+
+        @SerializedName("name")
+        @Expose
+        public String name;
+
+        @SerializedName("logoURI")
+        @Expose
+        public String logoURI;
+    }
 
     @SerializedName("action")
     @Expose
@@ -88,10 +107,36 @@ public class Quote
 //        @SerializedName("feeCosts")
 //        @Expose
 //        public JSONArray feeCosts;
-//
-//        @SerializedName("gasCosts")
-//        @Expose
-//        public JSONArray gasCosts;
+
+        @SerializedName("gasCosts")
+        @Expose
+        public ArrayList<GasCost> gasCosts;
+
+        public static class GasCost
+        {
+            @SerializedName("amount")
+            @Expose
+            public String amount;
+
+            @SerializedName("amountUSD")
+            @Expose
+            public String amountUSD;
+
+            @SerializedName("token")
+            @Expose
+            public Token token;
+
+            public static class Token
+            {
+                @SerializedName("symbol")
+                @Expose
+                public String symbol;
+
+                @SerializedName("decimals")
+                @Expose
+                public long decimals;
+            }
+        }
 
         @SerializedName("data")
         @Expose
@@ -190,5 +235,11 @@ public class Quote
         @SerializedName("gasPrice")
         @Expose
         public String gasPrice;
+    }
+
+    public String getCurrentPrice()
+    {
+        return new BigDecimal(action.fromToken.priceUSD)
+                .multiply(new BigDecimal(action.toToken.priceUSD)).toString();
     }
 }

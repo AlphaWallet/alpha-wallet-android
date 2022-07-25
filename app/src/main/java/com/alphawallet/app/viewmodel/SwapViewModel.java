@@ -33,6 +33,8 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -40,6 +42,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 @HiltViewModel
 public class SwapViewModel extends BaseViewModel
@@ -147,7 +150,7 @@ public class SwapViewModel extends BaseViewModel
         chainsDisposable = swapService.getChains()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onChains, this::onError);
+                .subscribe(this::onChains, this::onChainsError);
     }
 
     public void getConnections(long from, long to)
@@ -158,7 +161,7 @@ public class SwapViewModel extends BaseViewModel
         connectionsDisposable = swapService.getConnections(from, to)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onConnections, this::onError);
+                .subscribe(this::onConnections, this::onConnectionsError);
     }
 
     public void getQuote(Connection.LToken source, Connection.LToken dest, String address, String amount, String slippage)
@@ -171,12 +174,27 @@ public class SwapViewModel extends BaseViewModel
             quoteDisposable = swapService.getQuote(source, dest, address, amount, slippage)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onQuote, this::onError);
+                    .subscribe(this::onQuote, this::onQuoteError);
         }
         else
         {
             error.postValue(new ErrorEnvelope(C.ErrorCode.INSUFFICIENT_BALANCE, ""));
         }
+    }
+
+    private void onChainsError(Throwable t)
+    {
+        postError(C.ErrorCode.SWAP_CHAIN_ERROR, Objects.requireNonNull(t.getMessage()));
+    }
+
+    private void onConnectionsError(Throwable t)
+    {
+        postError(C.ErrorCode.SWAP_CONNECTIONS_ERROR, Objects.requireNonNull(t.getMessage()));
+    }
+
+    private void onQuoteError(Throwable t)
+    {
+        postError(C.ErrorCode.SWAP_QUOTE_ERROR, Objects.requireNonNull(t.getMessage()));
     }
 
     public boolean hasEnoughBalance(Connection.LToken source, String amount)
@@ -203,12 +221,12 @@ public class SwapViewModel extends BaseViewModel
             }
             else
             {
-                error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, result));
+                postError(C.ErrorCode.SWAP_CHAIN_ERROR, result);
             }
         }
         catch (JSONException e)
         {
-            error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, e.getMessage()));
+            postError(C.ErrorCode.SWAP_CHAIN_ERROR, Objects.requireNonNull(e.getMessage()));
         }
     }
 
@@ -229,12 +247,12 @@ public class SwapViewModel extends BaseViewModel
             }
             else
             {
-                error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, result));
+                postError(C.ErrorCode.SWAP_CONNECTIONS_ERROR, result);
             }
         }
         catch (JSONException e)
         {
-            error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, e.getMessage()));
+            postError(C.ErrorCode.SWAP_CONNECTIONS_ERROR, Objects.requireNonNull(e.getMessage()));
         }
 
         progress.postValue(false);
@@ -244,7 +262,7 @@ public class SwapViewModel extends BaseViewModel
     {
         if (!isValidQuote(result))
         {
-            error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, result));
+            postError(C.ErrorCode.SWAP_QUOTE_ERROR, result);
         }
         else
         {
@@ -253,6 +271,34 @@ public class SwapViewModel extends BaseViewModel
         }
 
         progress.postValue(false);
+    }
+
+    private void postError(int errorCode, String errorStr)
+    {
+        Timber.e(errorStr);
+        if (errorStr.toLowerCase(Locale.ENGLISH).contains("timeout"))
+        {
+            this.error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_TIMEOUT_ERROR, errorStr));
+            return;
+        }
+        this.error.postValue(new ErrorEnvelope(errorCode, checkMessage(errorStr)));
+    }
+
+    private String checkMessage(String errorStr)
+    {
+        try
+        {
+            JSONObject json = new JSONObject(errorStr);
+            if (json.has("message"))
+            {
+                return json.getString("message");
+            }
+        }
+        catch (JSONException e)
+        {
+            Timber.e(e);
+        }
+        return errorStr;
     }
 
     private boolean isValidQuote(String result)
@@ -265,9 +311,6 @@ public class SwapViewModel extends BaseViewModel
     public String getBalance(Connection.LToken token)
     {
         Token t;
-
-        // Note: In the LIFI API, the native token has either of these two addresses.
-        // In AlphaWallet, the wallet address is used.
         if (token.isNativeToken())
         {
             t = tokensService.getServiceToken(token.chainId);

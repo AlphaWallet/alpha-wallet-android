@@ -245,7 +245,10 @@ public abstract class C {
 
         // Swap Error Codes
         int INSUFFICIENT_BALANCE = 5;
-        int SWAP_API_ERROR = 6;
+        int SWAP_CHAIN_ERROR = 6;
+        int SWAP_CONNECTIONS_ERROR = 7;
+        int SWAP_QUOTE_ERROR = 8;
+        int SWAP_TIMEOUT_ERROR = 9;
     }
 
     public interface Key {

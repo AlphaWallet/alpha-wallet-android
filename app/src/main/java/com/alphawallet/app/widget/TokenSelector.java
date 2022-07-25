@@ -202,6 +202,11 @@ public class TokenSelector extends LinearLayout
         return editText.getText().toString();
     }
 
+    public void clearAmount()
+    {
+        editText.getText().clear();
+    }
+
     public void setAmount(String amount)
     {
         editText.setText(amount);

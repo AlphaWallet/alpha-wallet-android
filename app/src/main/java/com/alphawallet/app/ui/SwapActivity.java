@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +28,7 @@ import com.alphawallet.app.entity.lifi.Quote;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.SwapUtils;
 import com.alphawallet.app.viewmodel.SwapViewModel;
 import com.alphawallet.app.viewmodel.Tokens;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -40,8 +42,6 @@ import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.tools.Numeric;
 import com.google.android.material.button.MaterialButton;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,35 +50,51 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class SwapActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
 {
-    SwapViewModel viewModel;
-
-    private TextView chainName;
-
+    private static final long GET_QUOTE_INTERVAL_MS = 30000;
+    private SwapViewModel viewModel;
     private TokenSelector sourceSelector;
     private TokenSelector destSelector;
-
     private SelectTokenDialog sourceTokenDialog;
     private SelectTokenDialog destTokenDialog;
-
-    //private ConfirmSwapDialog confirmSwapDialog;
     private ActionSheetDialog confirmationDialog;
     private SwapSettingsDialog settingsDialog;
     private AWalletAlertDialog progressDialog;
-
+    private AWalletAlertDialog errorDialog;
     private RelativeLayout tokenLayout;
     private LinearLayout infoLayout;
+    private TokenInfoView provider;
     private TokenInfoView fees;
     private TokenInfoView currentPrice;
     private TokenInfoView minReceived;
     private LinearLayout noConnectionsLayout;
     private MaterialButton continueBtn;
     private MaterialButton openSettingsBtn;
-
+    private TextView chainName;
     private Token token;
     private Wallet wallet;
     private Connection.LToken sourceToken;
-
     private List<Chain> chains;
+    private final Handler getQuoteHandler = new Handler();
+    private final Runnable getQuoteRunnable = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            if (confirmationDialog == null || !confirmationDialog.isShowing())
+            {
+                viewModel.getQuote(
+                        sourceSelector.getToken(),
+                        destSelector.getToken(),
+                        wallet.address,
+                        sourceSelector.getAmount(),
+                        settingsDialog.getSlippage());
+            }
+            else
+            {
+                startQuoteTask(GET_QUOTE_INTERVAL_MS);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -89,13 +105,15 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         toolbar();
 
-        setTitle("Swap");
+        setTitle(getString(R.string.swap));
 
         initViewModel();
 
         getIntentData();
 
         initViews();
+
+        viewModel.getChains();
     }
 
     private void initViewModel()
@@ -127,6 +145,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         destSelector = findViewById(R.id.to_input);
         tokenLayout = findViewById(R.id.layout_tokens);
         infoLayout = findViewById(R.id.layout_info);
+        provider = findViewById(R.id.tiv_provider);
         fees = findViewById(R.id.tiv_fees);
         currentPrice = findViewById(R.id.tiv_current_price);
         minReceived = findViewById(R.id.tiv_min_received);
@@ -167,7 +186,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             @Override
             public void onAmountChanged(String amount)
             {
-                getQuote();
+                startQuoteTask(0);
             }
 
             @Override
@@ -233,7 +252,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             Web3Transaction w3Tx = viewModel.buildWeb3Transaction(quote);
             confDialog = new ActionSheetDialog(this, w3Tx, activeToken,
                     "", w3Tx.recipient.toString(), viewModel.getTokensService(), this);
-            confDialog.setURL("LI.FI Best Quote"); //TODO: Expand swap provider here
+            confDialog.setURL(quote.toolDetails.name);
             confDialog.setCanceledOnTouchOutside(false);
             confDialog.setGasEstimate(Numeric.toBigInt(quote.transactionRequest.gasLimit));
         }
@@ -253,7 +272,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         destTokenDialog.setSelectedToken(token.address);
 
-        getQuote();
+        startQuoteTask(0);
     }
 
     private void sourceTokenChanged(Connection.LToken token)
@@ -263,6 +282,10 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             destSelector.setVisibility(View.VISIBLE);
         }
 
+        sourceSelector.clearAmount();
+
+        destSelector.clearAmount();
+
         sourceSelector.setBalance(viewModel.getBalance(token));
 
         infoLayout.setVisibility(View.GONE);
@@ -271,14 +294,13 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         sourceToken = token;
 
-        getQuote();
+        startQuoteTask(0);
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
-        viewModel.getChains();
     }
 
     // The source token should default to the token selected in the main wallet dialog (ie the token from the intent).
@@ -315,16 +337,23 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         });
     }
 
-    private void getQuote()
+    private void startQuoteTask(long delay)
     {
+        stopQuoteTask();
+
         continueBtn.setEnabled(false);
 
         if (sourceSelector.getToken() != null
                 && destSelector.getToken() != null
                 && !TextUtils.isEmpty(sourceSelector.getAmount()))
         {
-            viewModel.getQuote(sourceSelector.getToken(), destSelector.getToken(), wallet.address, sourceSelector.getAmount(), settingsDialog.getSlippage());
+            getQuoteHandler.postDelayed(getQuoteRunnable, delay);
         }
+    }
+
+    private void stopQuoteTask()
+    {
+        getQuoteHandler.removeCallbacks(getQuoteRunnable);
     }
 
     private void onChains(List<Chain> chains)
@@ -437,6 +466,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         }
 
         continueBtn.setEnabled(true);
+
+        getQuoteHandler.postDelayed(getQuoteRunnable, GET_QUOTE_INTERVAL_MS);
     }
 
     private void updateDestAmount(Quote quote)
@@ -453,26 +484,10 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void updateInfoSummary(Quote quote)
     {
-        //convert gasQuote to Eth cost
-        BigInteger gasCost = Numeric.toBigInt(quote.transactionRequest.gasPrice);
-        BigInteger gasLimit = Numeric.toBigInt(quote.transactionRequest.gasLimit);
-
-        BigInteger networkFee = gasCost.multiply(gasLimit);
-
-        String ethCostStr = BalanceUtils.getScaledValueFixed(new BigDecimal(networkFee), 18, 4);
-
-        fees.setValue(ethCostStr); //TODO: Needs to say 'Eth' after the quote, also should get the Eth price to show the Tx cost in user's Fiat
-                                   //TODO: To see this done check GasWidget, see comment "Can we display value for gas?"
-
-        BigDecimal s = new BigDecimal(quote.action.fromToken.priceUSD);
-        BigDecimal d = new BigDecimal(quote.action.toToken.priceUSD);
-        BigDecimal c = s.multiply(d);
-        String currentPriceTxt = "1 " + quote.action.fromToken.symbol + " ≈ " + c.toString() + " " + quote.action.toToken.symbol;
-        currentPrice.setValue(currentPriceTxt.trim());
-
-        String minReceivedVal = BalanceUtils.getShortFormat(quote.estimate.toAmountMin, quote.action.toToken.decimals) + " " + quote.action.toToken.symbol;
-        minReceived.setValue(minReceivedVal.trim());
-
+        provider.setValue(quote.toolDetails.name);
+        fees.setValue(SwapUtils.getTotalGasFees(quote.estimate.gasCosts));
+        currentPrice.setValue(SwapUtils.getFormattedCurrentPrice(quote).trim());
+        minReceived.setValue(SwapUtils.getMinimumAmountReceived(quote));
         infoLayout.setVisibility(View.VISIBLE);
     }
 
@@ -532,8 +547,34 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             case C.ErrorCode.INSUFFICIENT_BALANCE:
                 sourceSelector.setError(getString(R.string.error_insufficient_balance, sourceSelector.getToken().symbol));
                 break;
+            case C.ErrorCode.SWAP_TIMEOUT_ERROR:
+                startQuoteTask(0);
+                break;
+            case C.ErrorCode.SWAP_CONNECTIONS_ERROR:
+            case C.ErrorCode.SWAP_CHAIN_ERROR:
+                errorDialog = new AWalletAlertDialog(this);
+                errorDialog.setTitle(R.string.title_dialog_error);
+                errorDialog.setMessage(errorEnvelope.message);
+                errorDialog.setButton(R.string.try_again, v -> {
+                    viewModel.getChains();
+                    errorDialog.dismiss();
+                });
+                errorDialog.setSecondaryButton(R.string.action_cancel, v -> errorDialog.dismiss());
+                errorDialog.show();
+                break;
+            case C.ErrorCode.SWAP_QUOTE_ERROR:
+                errorDialog = new AWalletAlertDialog(this);
+                errorDialog.setTitle(R.string.title_dialog_error);
+                errorDialog.setMessage(errorEnvelope.message);
+                errorDialog.setButton(R.string.try_again, v -> {
+                    startQuoteTask(0);
+                    errorDialog.dismiss();
+                });
+                errorDialog.setSecondaryButton(R.string.action_cancel, v -> errorDialog.dismiss());
+                errorDialog.show();
+                break;
             default:
-                AWalletAlertDialog errorDialog = new AWalletAlertDialog(this);
+                errorDialog = new AWalletAlertDialog(this);
                 errorDialog.setTitle(R.string.title_dialog_error);
                 errorDialog.setMessage(errorEnvelope.message);
                 errorDialog.setButton(R.string.action_cancel, v -> errorDialog.dismiss());

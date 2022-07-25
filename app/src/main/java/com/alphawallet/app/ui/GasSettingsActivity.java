@@ -44,6 +44,7 @@ import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
 import com.alphawallet.app.widget.GasSliderView;
+import com.alphawallet.token.tools.Convert;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.math.BigDecimal;
@@ -59,7 +60,7 @@ import io.realm.RealmQuery;
 @AndroidEntryPoint
 public class GasSettingsActivity extends BaseActivity implements GasSettingsCallback
 {
-    private static final int GAS_PRECISION = 5; //5 dp for gas
+    public static final int GAS_PRECISION = 5; //5 dp for gas
 
     GasSettingsViewModel viewModel;
 
@@ -376,7 +377,15 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             BigDecimal maxGas = BalanceUtils.weiToGweiBI(gs.gasPrice.maxFeePerGas);
             String speedGwei;
 
-            if (maxGas.compareTo(BigDecimal.valueOf(2)) < 0)
+            BigDecimal ethAmount = Convert.fromWei(new BigDecimal(gs.gasPrice.maxFeePerGas), Convert.Unit.ETHER);
+
+            if (BalanceUtils.requiresSmallGweiValueSuffix(ethAmount))
+            {
+                speedGwei = context.getString(R.string.token_balance,
+                        BalanceUtils.getSlidingBaseValue(new BigDecimal(gs.gasPrice.maxFeePerGas), 18, GAS_PRECISION),
+                        baseCurrency.getSymbol());
+            }
+            else if (maxGas.compareTo(BigDecimal.valueOf(2)) < 0)
             {
                 speedGwei = BalanceUtils.weiToGwei(new BigDecimal(gs.gasPrice.maxFeePerGas), 2);
             }
@@ -426,7 +435,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
             BigDecimal gasFee = new BigDecimal(gs.gasPrice.maxFeePerGas).multiply(useGasLimit);
 
-            String gasAmountInBase = BalanceUtils.getScaledValueScientific(gasFee, baseCurrency.tokenInfo.decimals, GAS_PRECISION);
+            String gasAmountInBase = BalanceUtils.getSlidingBaseValue(gasFee, baseCurrency.tokenInfo.decimals, GAS_PRECISION);
             if (gasAmountInBase.equals("0"))
                 gasAmountInBase = "0.00001"; //NB no need to allow for zero gas chains; this activity wouldn't appear
             String displayStr = context.getString(R.string.gas_amount, gasAmountInBase, baseCurrency.getSymbol());

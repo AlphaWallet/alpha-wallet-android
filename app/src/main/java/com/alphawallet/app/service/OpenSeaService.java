@@ -56,9 +56,9 @@ public class OpenSeaService
     {
         pageOffsets.clear();
         httpClient = new OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
+                .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();
     }
@@ -94,7 +94,6 @@ public class OpenSeaService
             }
             else
             {
-                Timber.d(response.toString());
                 return JsonUtils.EMPTY_RESULT;
             }
         }
@@ -345,6 +344,12 @@ public class OpenSeaService
                 fetchAsset(token.tokenInfo.chainId, token.tokenInfo.address, tokenId.toString()));
     }
 
+    public Single<String> getCollection(Token token, String slug)
+    {
+        return Single.fromCallable(() ->
+                fetchCollection(token.tokenInfo.chainId, slug));
+    }
+
     public String fetchAssets(long networkId, String address, int offset)
     {
         String api = "";
@@ -388,6 +393,12 @@ public class OpenSeaService
             api = C.OPENSEA_SINGLE_ASSET_API_MATIC + contractAddress + "/" + tokenId;
         }
 
+        return executeRequest(networkId, api);
+    }
+
+    public String fetchCollection(long networkId, String slug)
+    {
+        String api = C.OPENSEA_COLLECTION_API_MAINNET + slug;
         return executeRequest(networkId, api);
     }
 }

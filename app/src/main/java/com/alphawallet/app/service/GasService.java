@@ -489,11 +489,11 @@ public class GasService implements ContractGasProvider
             }
             catch (org.json.JSONException j)
             {
-                Timber.d("Note: " + info.getShortName() + " does not appear to have EIP1559 support");
+                Timber.e("Note: " + info.getShortName() + " does not appear to have EIP1559 support");
             }
             catch (Exception e)
             {
-                Timber.w(e);
+                Timber.e(e);
             }
 
             return new FeeHistory();

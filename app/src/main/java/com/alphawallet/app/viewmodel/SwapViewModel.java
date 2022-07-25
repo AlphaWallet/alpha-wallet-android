@@ -33,6 +33,8 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -40,6 +42,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 @HiltViewModel
 public class SwapViewModel extends BaseViewModel
@@ -147,7 +150,7 @@ public class SwapViewModel extends BaseViewModel
         chainsDisposable = swapService.getChains()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onChains, this::onError);
+                .subscribe(this::onChains, this::onChainsError);
     }
 
     public void getConnections(long from, long to)
@@ -158,12 +161,12 @@ public class SwapViewModel extends BaseViewModel
         connectionsDisposable = swapService.getConnections(from, to)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onConnections, this::onError);
+                .subscribe(this::onConnections, this::onConnectionsError);
     }
 
     public void getQuote(Connection.LToken source, Connection.LToken dest, String address, String amount, String slippage)
     {
-        if (hasEnoughBalance(address, source, amount))
+        if (hasEnoughBalance(source, amount))
         {
             progressInfo.postValue(C.ProgressInfo.FETCHING_QUOTE);
             progress.postValue(true);
@@ -171,7 +174,7 @@ public class SwapViewModel extends BaseViewModel
             quoteDisposable = swapService.getQuote(source, dest, address, amount, slippage)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onQuote, this::onError);
+                    .subscribe(this::onQuote, this::onQuoteError);
         }
         else
         {
@@ -179,9 +182,24 @@ public class SwapViewModel extends BaseViewModel
         }
     }
 
-    public boolean hasEnoughBalance(String address, Connection.LToken source, String amount)
+    private void onChainsError(Throwable t)
     {
-        BigDecimal bal = new BigDecimal(getBalance(address, source));
+        postError(C.ErrorCode.SWAP_CHAIN_ERROR, Objects.requireNonNull(t.getMessage()));
+    }
+
+    private void onConnectionsError(Throwable t)
+    {
+        postError(C.ErrorCode.SWAP_CONNECTIONS_ERROR, Objects.requireNonNull(t.getMessage()));
+    }
+
+    private void onQuoteError(Throwable t)
+    {
+        postError(C.ErrorCode.SWAP_QUOTE_ERROR, Objects.requireNonNull(t.getMessage()));
+    }
+
+    public boolean hasEnoughBalance(Connection.LToken source, String amount)
+    {
+        BigDecimal bal = new BigDecimal(getBalance(source));
         BigDecimal reqAmount = new BigDecimal(amount);
         return bal.compareTo(reqAmount) >= 0;
     }
@@ -203,12 +221,12 @@ public class SwapViewModel extends BaseViewModel
             }
             else
             {
-                error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, result));
+                postError(C.ErrorCode.SWAP_CHAIN_ERROR, result);
             }
         }
         catch (JSONException e)
         {
-            error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, e.getMessage()));
+            postError(C.ErrorCode.SWAP_CHAIN_ERROR, Objects.requireNonNull(e.getMessage()));
         }
     }
 
@@ -229,12 +247,12 @@ public class SwapViewModel extends BaseViewModel
             }
             else
             {
-                error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, result));
+                postError(C.ErrorCode.SWAP_CONNECTIONS_ERROR, result);
             }
         }
         catch (JSONException e)
         {
-            error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, e.getMessage()));
+            postError(C.ErrorCode.SWAP_CONNECTIONS_ERROR, Objects.requireNonNull(e.getMessage()));
         }
 
         progress.postValue(false);
@@ -244,7 +262,7 @@ public class SwapViewModel extends BaseViewModel
     {
         if (!isValidQuote(result))
         {
-            error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_API_ERROR, result));
+            postError(C.ErrorCode.SWAP_QUOTE_ERROR, result);
         }
         else
         {
@@ -255,6 +273,34 @@ public class SwapViewModel extends BaseViewModel
         progress.postValue(false);
     }
 
+    private void postError(int errorCode, String errorStr)
+    {
+        Timber.e(errorStr);
+        if (errorStr.toLowerCase(Locale.ENGLISH).contains("timeout"))
+        {
+            this.error.postValue(new ErrorEnvelope(C.ErrorCode.SWAP_TIMEOUT_ERROR, errorStr));
+            return;
+        }
+        this.error.postValue(new ErrorEnvelope(errorCode, checkMessage(errorStr)));
+    }
+
+    private String checkMessage(String errorStr)
+    {
+        try
+        {
+            JSONObject json = new JSONObject(errorStr);
+            if (json.has("message"))
+            {
+                return json.getString("message");
+            }
+        }
+        catch (JSONException e)
+        {
+            Timber.e(e);
+        }
+        return errorStr;
+    }
+
     private boolean isValidQuote(String result)
     {
         return result.contains("id")
@@ -262,18 +308,18 @@ public class SwapViewModel extends BaseViewModel
                 && result.contains("tool");
     }
 
-    public String getBalance(String walletAddress, Connection.LToken token)
+    public String getBalance(Connection.LToken token)
     {
-        String address = token.address;
-
-        // Note: In the LIFI API, the native token has either of these two addresses.
-        // In AlphaWallet, the wallet address is used.
-        if (address.equalsIgnoreCase("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") ||
-                address.equalsIgnoreCase("0x0000000000000000000000000000000000000000"))
+        Token t;
+        if (token.isNativeToken())
         {
-            address = walletAddress;
+            t = tokensService.getServiceToken(token.chainId);
         }
-        Token t = tokensService.getToken(token.chainId, address);
+        else
+        {
+            t = tokensService.getToken(token.chainId, token.address);
+        }
+
         if (t != null)
         {
             return BalanceUtils.getShortFormat(t.balance.toString(), t.tokenInfo.decimals);

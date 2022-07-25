@@ -336,7 +336,7 @@ public class AWEnsResolver extends EnsResolver
         }
         catch (Exception e)
         {
-            Timber.tag("ENS").d(e.getMessage());
+            Timber.tag("ENS").e(e);
         }
 
         return "";

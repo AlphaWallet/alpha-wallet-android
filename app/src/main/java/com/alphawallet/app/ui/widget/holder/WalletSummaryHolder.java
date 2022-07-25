@@ -2,6 +2,7 @@ package com.alphawallet.app.ui.widget.holder;
 
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_CHANGE;
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_VALUE;
+import static com.alphawallet.app.ui.widget.holder.WalletHolder.IS_MAINNET_ACTIVE;
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.IS_SYNCED;
 
 import android.content.Intent;
@@ -134,7 +135,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
                 walletIcon.setWaiting();
             }
 
-            if (addition.getDouble(FIAT_VALUE, -1.00) != -1.00)
+            if (addition.getBoolean(IS_MAINNET_ACTIVE))
             {
                 double fiatValue = addition.getDouble(FIAT_VALUE, 0.00);
                 double oldFiatValue = addition.getDouble(FIAT_CHANGE, 0.00);
@@ -146,6 +147,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
             }
             else
             {
+                walletBalanceText.setText("-");
                 wallet24hChange.setVisibility(View.GONE);
             }
 

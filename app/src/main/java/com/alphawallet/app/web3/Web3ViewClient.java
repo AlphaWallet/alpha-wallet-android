@@ -1,17 +1,10 @@
 package com.alphawallet.app.web3;
 
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.N;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.net.http.SslError;
-import android.text.TextUtils;
-import android.util.Base64;
-import android.util.Log;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -19,39 +12,18 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 
-import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.Map;
-
-import okhttp3.HttpUrl;
-
 public class Web3ViewClient extends WebViewClient {
 
-    private final Object lock = new Object();
-
     private final JsInjectorClient jsInjectorClient;
-    private final UrlHandlerManager urlHandlerManager;
 
     private final Context context;
 
-    private boolean isInjected;
-
     public Web3ViewClient(Context context) {
         this.jsInjectorClient = new JsInjectorClient(context);
-        this.urlHandlerManager = new UrlHandlerManager();
         this.context = context;
-    }
-
-    void addUrlHandler(UrlHandler urlHandler) {
-        urlHandlerManager.add(urlHandler);
-    }
-
-    void removeUrlHandler(UrlHandler urlHandler) {
-        urlHandlerManager.remove(urlHandler);
     }
 
     public JsInjectorClient getJsInjectorClient()
@@ -61,7 +33,7 @@ public class Web3ViewClient extends WebViewClient {
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        return shouldOverrideUrlLoading(view, url, false, false);
+        return handleTrustedApps(url);
     }
 
     @Override
@@ -70,46 +42,7 @@ public class Web3ViewClient extends WebViewClient {
             return false;
         }
         String url = request.getUrl().toString();
-        boolean isMainFrame = request.isForMainFrame();
-        boolean isRedirect = SDK_INT >= N && request.isRedirect();
-        return shouldOverrideUrlLoading(view, url, isMainFrame, isRedirect);
-    }
-
-    public boolean didInjection()
-    {
-        return isInjected;
-    }
-
-    public void didInjection(boolean injection)
-    {
-        isInjected = injection;
-    }
-
-    private boolean shouldOverrideUrlLoading(WebView webView, String url, boolean isMainFrame, boolean isRedirect) {
-        boolean result = false;
-        synchronized (lock) {
-            isInjected = false;
-        }
-        String urlToOpen = urlHandlerManager.handle(url);
-        //manually handle trusted intents
-        if (handleTrustedApps(url))
-        {
-            return true;
-        }
-
-        if (!url.startsWith("http"))
-        {
-            result = true;
-        }
-        if (isMainFrame && isRedirect) {
-            urlToOpen = url;
-            result = true;
-        }
-
-        if (result && !TextUtils.isEmpty(urlToOpen)) {
-            webView.loadUrl(urlToOpen);
-        }
-        return result;
+        return handleTrustedApps(url);
     }
 
     @Override
@@ -151,12 +84,6 @@ public class Web3ViewClient extends WebViewClient {
         aDialog.show();
     }
 
-    public void onReload() {
-        synchronized (lock) {
-            isInjected = false;
-        }
-    }
-
     //Handling of trusted apps
     private boolean handleTrustedApps(String url)
     {
@@ -175,22 +102,6 @@ public class Web3ViewClient extends WebViewClient {
         return false;
     }
 
-    private boolean handleTrustedExtension(String url)
-    {
-        String[] strArray = context.getResources().getStringArray(R.array.TrustedExtensions);
-        for (String item : strArray)
-        {
-            String[] split = item.split(",");
-            if (url.endsWith(split[1]))
-            {
-                useKnownOpenIntent(split[0], url);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private void intentTryApp(String appId, String msg)
     {
         final boolean isAppInstalled = isAppAvailable(appId);
@@ -200,34 +111,13 @@ public class Web3ViewClient extends WebViewClient {
             myIntent.setPackage(appId);
             myIntent.setData(Uri.parse(msg));
             myIntent.putExtra(Intent.EXTRA_TEXT, msg);
+            myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(myIntent);
         }
         else
         {
             Toast.makeText(context, "Required App not Installed", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void useKnownOpenIntent(String type, String url)
-    {
-        Intent openIntent = new Intent(Intent.ACTION_VIEW);
-        openIntent.setDataAndType(Uri.parse(url), type);
-        Intent intent = Intent.createChooser(openIntent, "Open using");
-        if (isIntentAvailable(intent))
-        {
-            context.startActivity(intent);
-        }
-        else
-        {
-            Toast.makeText(context, "Required App not Installed", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private boolean isIntentAvailable(Intent intent)
-    {
-        final PackageManager packageManager = context.getPackageManager();
-        List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        return list.size() > 0;
     }
 
     private boolean isAppAvailable(String appName)
@@ -246,6 +136,5 @@ public class Web3ViewClient extends WebViewClient {
 
     public void resetInject()
     {
-        isInjected = false;
     }
 }

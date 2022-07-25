@@ -3,7 +3,6 @@ package com.alphawallet.app.widget;
 import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.view.View;
 import android.widget.ImageView;
@@ -14,8 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.lifi.Chain;
+import com.alphawallet.app.ui.widget.adapter.ChainFilter;
 import com.alphawallet.app.ui.widget.adapter.SelectChainAdapter;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
@@ -51,8 +50,8 @@ public class SwapSettingsDialog extends BottomSheetDialog
     public SwapSettingsDialog(Activity activity, List<Chain> chains, SwapSettingsInterface swapSettingsInterface)
     {
         this(activity);
-
-        adapter = new SelectChainAdapter(activity, chains, swapSettingsInterface);
+        ChainFilter filter = new ChainFilter(chains);
+        adapter = new SelectChainAdapter(activity, filter.getSupportedChains(), swapSettingsInterface);
         chainList.setLayoutManager(new LinearLayoutManager(getContext()));
         chainList.setAdapter(adapter);
     }

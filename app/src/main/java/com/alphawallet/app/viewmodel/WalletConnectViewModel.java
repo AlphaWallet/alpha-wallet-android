@@ -3,6 +3,7 @@ package com.alphawallet.app.viewmodel;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.app.Activity;
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.DAppFunction;
+import com.alphawallet.app.entity.GenericCallback;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -423,6 +425,7 @@ public class WalletConnectViewModel extends BaseViewModel
 
     private void deleteSessionV1(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
     {
+        Timber.d("deleteSession: %s", sessionId);
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
             realm.executeTransactionAsync(r -> {
@@ -707,6 +710,93 @@ public class WalletConnectViewModel extends BaseViewModel
                     r.insertOrUpdate(sessionAux);
                 }
             });
+        }
+    }
+
+    // remove wallet connect sessions with no transaction history
+    public void removeEmptySessions(Context context, Runnable onComplete)
+    {
+        // create list of sessions which are inactive and has zero txn/sign
+        // delete them from realm
+        getInactiveSessionIds(context, sessions -> {
+            ArrayList<String> sessionIdsToRemove = new ArrayList<>();
+            for (String sessionId : sessions)
+            {
+                // if no txn/sign history found
+                if (getSignRecords(sessionId).isEmpty())
+                {
+                    // add this sessionId to the list of removable
+                    sessionIdsToRemove.add(sessionId);
+                }
+            }
+            deleteSessionsFromRealm(sessionIdsToRemove, onComplete);
+        });
+    }
+
+    // remove all inactive wallet connect sessions
+    public void removeAllSessions(Context context, Runnable onSuccess)
+    {
+        getInactiveSessionIds(context, list -> {
+            Timber.d("removeAllSessions: sessionsToRemove: %d", list.size());
+            deleteSessionsFromRealm(list, onSuccess);
+        });
+    }
+
+    // connects to service to check session state and gives inactive sessions
+    private void getInactiveSessionIds(Context context, GenericCallback<List<String>> callback)
+    {
+        List<WalletConnectSessionItem> sessionItems = getSessions();        // all sessions in DB
+        ArrayList<String> inactiveSessions = new ArrayList<>();
+        ServiceConnection connection = new ServiceConnection()
+        {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service)
+            {
+                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
+                // loop & populate sessions which are inactive
+                for (WalletConnectSessionItem item : sessionItems)
+                {
+                    WCClient wcClient = walletConnectService.getClient(item.sessionId);
+                    // if client is not connected ie: session inactive
+                    if (wcClient == null || !wcClient.isConnected())
+                    {
+                        inactiveSessions.add(item.sessionId);
+                    }
+                }
+                callback.call(inactiveSessions);        // return inactive sessions to caller
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name)
+            {
+                //walletConnectService = null;
+                Timber.tag(TAG).d("Service disconnected");
+            }
+        };
+        Intent i = new Intent(context, WalletConnectService.class);     // not specifying action as no need. we just need to bind to service
+        context.startService(i);
+        context.bindService(i, connection, Service.BIND_ABOVE_CLIENT);
+    }
+
+    // deletes the RealmWCSession objects with the given sessionIds present in the list
+    private void deleteSessionsFromRealm(List<String> sessionIds, Runnable onSuccess)
+    {
+        Timber.d("deleteSessionsFromRealm: sessions: %s", sessionIds);
+        if (sessionIds.isEmpty())
+            return;
+        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        {
+            realm.executeTransactionAsync(r -> {
+                boolean isDeleted = r.where(RealmWCSession.class)
+                        .in("sessionId", sessionIds.toArray(new String[]{}))
+                        .findAll()
+                        .deleteAllFromRealm();
+                Timber.d("deleteSessions: Success: %s\nList: %s", isDeleted, sessionIds);
+            }, onSuccess::run);
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
         }
     }
 }

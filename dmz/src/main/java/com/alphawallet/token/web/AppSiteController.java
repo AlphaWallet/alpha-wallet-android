@@ -130,6 +130,10 @@ public class AppSiteController implements AttributeInterface
     )
             throws IOException, SAXException, NoHandlerFoundException
     {
+        if (universalLink.equals("wc"))
+        {
+            return "If you are using AlphaWallet with WalletConnect, please launch the AlphaWallet app";
+        }
         String domain = request.getServerName();
         ParseMagicLink parser = new ParseMagicLink(cryptoFunctions, null);
         MagicLinkData data;
@@ -546,55 +550,6 @@ public class AppSiteController implements AttributeInterface
             resultTime = time;
             result = r;
         }
-    }
-
-    /* usage: (Weiwu documented after Sangalli's implementation)
-
-    1) for a test file whose root certificate isn't in the trusted CA list:
-
-    $ curl -F 'file=@lib/src/test/ts/EntryToken.tsml' localhost:8080/api/v1/verifyXMLDSig
-    {"result":"fail","failureReason":"Path does not chain with any of the trust anchors"}
-
-    2) for a test file which has valid certificates:
-
-    $ curl -F 'file=@lib/src/test/ts/DAI.tsml' localhost:8080/api/v1/verifyXMLDSig
-    {"result":"pass","subject":"CN=*.aw.app","keyName":"","keyType":"SHA256withRSA","issuer":"CN=Let's Encrypt Authority X3,O=Let's Encrypt,C=US"}
-
-    Client be-aware! Please handle return code 404 gracefully. It's content look like this:
-
-    {
-    "timestamp": "2019-07-04T08:43:32.885+0000",
-    "status": 404,
-    "error": "Not Found",
-    "message": "API v1 is no longer supported. Upgrade your software.",
-    "path": "/api/v1/verifyXMLDSig"
-    }
-
-    This message likely signify that version 1 of the api is no longer supported, i.e. the client is too old.
-    You can simply display the message to the end user (despite it's not multi-lingual).
-     */
-    @PostMapping("/api/v1/verifyXMLDSig")
-    @ResponseBody
-    @SuppressWarnings("unchecked")
-    public ResponseEntity<String> validateSSLCertificate(@RequestParam("file") MultipartFile file) throws IOException {
-        HttpStatus status = HttpStatus.ACCEPTED;
-        JsonObject result = new JsonObject();
-        XMLDsigVerificationResult XMLDsigVerificationResult = new XMLDSigVerifier().VerifyXMLDSig(file.getInputStream());
-        if (XMLDsigVerificationResult.isValid)
-        {
-            result.put("result", "pass");
-            result.put("issuer", XMLDsigVerificationResult.issuerPrincipal);
-            result.put("subject", XMLDsigVerificationResult.subjectPrincipal);
-            result.put("keyName", XMLDsigVerificationResult.keyName);
-            result.put("keyType", XMLDsigVerificationResult.keyType);
-        }
-        else
-        {
-            result.put("result", "fail");
-            result.put("failureReason", XMLDsigVerificationResult.failureReason);
-            status = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<String>(result.toJson(), status);
     }
 
     private static void loadInfuraKey()

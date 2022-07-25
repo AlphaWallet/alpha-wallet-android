@@ -959,7 +959,6 @@
     <string name="action_help">Help</string>
     <string name="help_title_node_status">What is Node status?</string>
     <string name="help_message_what_is_node_status">With Node Status you can measure how fast nodes respond to transactions</string>
-    <string name="node_status_label">- %s</string>
     <string name="node_status_strong">under 1 second</string>
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
@@ -967,8 +966,22 @@
     <string name="network_must_be_enabled">မချိတ်ဆက်မီ ကွန်ရက် %s ကို ဖွင့်ထားရပါမည်။</string>
     <string name="action_select_token">Select Token</string>
     <string name="label_slippage_custom">Custom</string>
-    <string name="misc_percentage">%</string>
-    <string name="hint_custom_slippage">0.01</string>
     <string name="notify_wallet_connect_title">WalletConnect သည် အသက်ဝင်ပါသည်။</string>
     <string name="notify_wallet_connect_content">အသက်ဝင်သော ဆက်ရှင်များကို ကြည့်ရန် နှိပ်ပါ။</string>
+    <string name="mode_test">Testnet မုဒ်</string>
+    <string name="title_dialog_where_are_tokens">ငါ့တိုကင်များ ဘယ်မှာလဲ</string>
+    <string name="content_dialog_where_are_tokens">စိတ်မပူပါနှင့်။ သင့်တိုကင်များသည် ဘေးကင်းပါသည်။ သင်သည် Testnet ကွန်ရက်များကို ကြည့်ရှုနေပါသည်။ ဒီဇိုင်းအသစ်များကို စမ်းသပ်ရန်အတွက် ၎င်းတို့ကို developer များက အသုံးပြုကြသည်။ သင်သည် အချိန်မရွေး Mainnet သို့ ပြောင်းနိုင်သည်။</string>
+    <string name="button_switch_to_mainnet">Mainnet သို့ပြောင်းပါ။</string>
+    <string name="label_api_v1_app_name">Name</string>
+    <string name="label_api_v1_note">Note</string>
+    <string name="label_api_v1_app_url">URL</string>
+    <string name="action_connect">Connect</string>
+    <string name="title_api_v1_connect_to">Connect to</string>
+    <string name="action_sign">Sign</string>
+    <string name="message_api_v1_note">This will inform the remote site your wallet address is %s</string>
+    <string name="asset_floor_price">Floor Price</string>
+    <string name="asset_average_price">Average Price</string>
+    <string name="label_provider">Provider</string>
+    <string name="delete_empty">Delete Empty</string>
+    <string name="delete_all">Delete All</string>
 </resources>

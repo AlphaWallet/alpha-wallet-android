@@ -10,6 +10,8 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.ImageView;
@@ -153,7 +155,10 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     protected void onDestroy()
     {
         super.onDestroy();
-        unregisterReceiver(finishReceiver);
+        if (finishReceiver != null)
+        {
+            finishReceiver.unregister();
+        }
     }
 
     @Override
@@ -179,7 +184,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         dialog.setTitle(R.string.ticket_redeemed);
         dialog.setIcon(AWalletAlertDialog.SUCCESS);
         dialog.setOnDismissListener(v -> {
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(PRUNE_ACTIVITY));
         });
         dialog.show();
     }
@@ -259,7 +264,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         dialog.setIcon(AWalletAlertDialog.ERROR);
         dialog.setMessage(getString(R.string.fail_sign));
         dialog.setOnDismissListener(v -> {
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(PRUNE_ACTIVITY));
         });
         dialog.show();
     }

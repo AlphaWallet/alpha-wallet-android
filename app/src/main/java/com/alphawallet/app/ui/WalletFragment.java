@@ -5,6 +5,7 @@ import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
+import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 
 import android.content.Context;
 import android.content.Intent;
@@ -89,6 +90,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import timber.log.Timber;
 
 /**
  * Created by justindeguzman on 2/28/18.
@@ -123,11 +125,19 @@ public class WalletFragment extends BaseFragment implements
     private LargeTitleView largeTitleView;
     private long realmUpdateTime;
 
+
     @Inject
     WalletConnectInteract walletConnectInteract;
 
     @Inject
     AWWalletConnectClient awWalletConnectClient;
+
+    private ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result ->
+            {
+                //send instruction to restart tokenService
+                getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
+            });
 
     @Nullable
     @Override
@@ -218,7 +228,8 @@ public class WalletFragment extends BaseFragment implements
         if (walletConnectSessionItems.isEmpty())
         {
             context.stopService(new Intent(context, WalletConnectV2Service.class));
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        }
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
             Intent service = new Intent(context, WalletConnectV2Service.class);
             context.startForegroundService(service);
@@ -365,7 +376,8 @@ public class WalletFragment extends BaseFragment implements
             {
                 viewModel.checkBackup(fiatValues.first);
             }
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             // empty: expected if view has terminated before we can shut down the service return
         }
@@ -560,7 +572,9 @@ public class WalletFragment extends BaseFragment implements
         if (currentTabPos.equals(TokenFilter.ALL))
         {
             awWalletConnectClient.updateNotification();
-        } else {
+        }
+        else
+        {
             adapter.showActiveWalletConnectSessions(Collections.emptyList());
         }
     }
@@ -651,7 +665,14 @@ public class WalletFragment extends BaseFragment implements
         handler.removeCallbacksAndMessages(null);
         if (realmUpdates != null)
         {
-            realmUpdates.removeAllChangeListeners();
+            try
+            {
+                realmUpdates.removeAllChangeListeners();
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
         }
         if (realm != null && !realm.isClosed()) realm.close();
         if (adapter != null && recyclerView != null) adapter.onDestroy(recyclerView);
@@ -824,7 +845,8 @@ public class WalletFragment extends BaseFragment implements
             {
                 Token t = ((TokenHolder) viewHolder).token;
                 if (t != null && t.isEthereum()) return 0;
-            } else
+            }
+            else
             {
                 return 0;
             }
@@ -916,5 +938,13 @@ public class WalletFragment extends BaseFragment implements
     {
         Intent intent = new Intent(getActivity(), SearchActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onSwitchClicked()
+    {
+        Intent intent = new Intent(getActivity(), SelectNetworkFilterActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
+        networkSettingsHandler.launch(intent);
     }
 }

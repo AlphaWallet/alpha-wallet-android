@@ -18,18 +18,17 @@ import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.ViewHolder>
 {
-    private final List<Connection.LToken> tokens;
     private final List<Connection.LToken> displayData;
     private final SelectTokenDialog.SelectTokenDialogEventListener callback;
     private String selectedTokenAddress;
+    private final TokenFilter tokenFilter;
 
     public SelectTokenAdapter(List<Connection.LToken> tokens, SelectTokenDialog.SelectTokenDialogEventListener callback)
     {
-        this.tokens = tokens;
+        tokenFilter = new TokenFilter(tokens);
         this.callback = callback;
         displayData = new ArrayList<>();
         displayData.addAll(tokens);
@@ -76,21 +75,9 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
         }
     }
 
-    public void filter(String searchFilter)
+    public void filter(String keyword)
     {
-        List<Connection.LToken> filteredList = new ArrayList<>();
-        for (Connection.LToken data : tokens)
-        {
-            if (data.name.toLowerCase(Locale.ENGLISH).contains(searchFilter.toLowerCase(Locale.ENGLISH)))
-            {
-                filteredList.add(data);
-            }
-            else if (data.symbol.toLowerCase(Locale.ENGLISH).contains(searchFilter.toLowerCase(Locale.ENGLISH)))
-            {
-                filteredList.add(data);
-            }
-        }
-        updateList(filteredList);
+        updateList(tokenFilter.filterBy(keyword));
     }
 
     public void updateList(List<Connection.LToken> filteredList)

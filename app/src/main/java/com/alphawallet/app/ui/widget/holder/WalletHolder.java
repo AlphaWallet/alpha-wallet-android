@@ -38,8 +38,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
     public static final String IS_SYNCED = "is_syncing";
 	public static final String FIAT_VALUE = "fiat_value";
 	public static final String FIAT_CHANGE = "fiat_change";
-
-	private final LinearLayout manageWalletLayout;
+    public static final String IS_MAINNET_ACTIVE = "is_mainnet_active";
+    private final LinearLayout manageWalletLayout;
 	private final ImageView manageWalletBtn;
 	private final UserAvatar walletIcon;
 	private final LinearLayout walletClickLayout;

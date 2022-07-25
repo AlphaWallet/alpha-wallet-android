@@ -917,7 +917,6 @@
     <string name="action_help">Help</string>
     <string name="help_title_node_status">What is Node status?</string>
     <string name="help_message_what_is_node_status">With Node Status you can measure how fast nodes respond to transactions</string>
-    <string name="node_status_label">- %s</string>
     <string name="node_status_strong">under 1 second</string>
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
@@ -925,8 +924,22 @@
     <string name="network_must_be_enabled">连接前必须启用网络 %s。</string>
     <string name="action_select_token">Select Token</string>
     <string name="label_slippage_custom">Custom</string>
-    <string name="misc_percentage">%</string>
-    <string name="hint_custom_slippage">0.01</string>
     <string name="notify_wallet_connect_title">WalletConnect 处于活动状态</string>
     <string name="notify_wallet_connect_content">点击查看活跃会话</string>
+    <string name="mode_test">测试网模式</string>
+    <string name="title_dialog_where_are_tokens">我的代币在哪里？</string>
+    <string name="content_dialog_where_are_tokens">不用担心，您的代币是安全的。您正在查看 Testnet 网络，开发人员使用它们来尝试新设计。您可以随时切换到主网。</string>
+    <string name="button_switch_to_mainnet">切换到主网</string>
+    <string name="label_api_v1_app_name">Name</string>
+    <string name="label_api_v1_note">Note</string>
+    <string name="label_api_v1_app_url">URL</string>
+    <string name="action_connect">Connect</string>
+    <string name="title_api_v1_connect_to">Connect to</string>
+    <string name="action_sign">Sign</string>
+    <string name="message_api_v1_note">This will inform the remote site your wallet address is %s</string>
+    <string name="asset_floor_price">Floor Price</string>
+    <string name="asset_average_price">Average Price</string>
+    <string name="label_provider">Provider</string>
+    <string name="delete_empty">Delete Empty</string>
+    <string name="delete_all">Delete All</string>
 </resources>

@@ -7,7 +7,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -87,6 +86,11 @@
                 <data android:pathPattern=".*\\..*\\..*\\.xml" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.ApiV1Activity"
+            android:theme="@style/AppTheme.NoActionBar.Transparent"
+            android:label="API V1 Activity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

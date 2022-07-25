@@ -13,7 +13,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="@dimen/standard_16">
+        android:paddingStart="@dimen/standard_16"
+        android:paddingVertical="@dimen/standard_16"
+        android:paddingEnd="@dimen/mini_4">
 
         <TextView
             android:id="@+id/text_message_title"
@@ -21,7 +23,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/small_12"
-            android:layout_weight="0.8"
+            android:layout_weight="1"
             android:gravity="start"
             android:text="@string/message_to_sign" />
 
@@ -29,7 +31,7 @@
             android:id="@+id/scroll_view"
             android:layout_width="0dp"
             android:layout_height="300dp"
-            android:layout_weight="3.1"
+            android:layout_weight="3.5"
             android:fillViewport="true"
             android:visibility="gone"
             tools:visibility="visible">
@@ -49,7 +51,7 @@
             style="@style/Aw.Typography.Caption"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.1"
+            android:layout_weight="3.5"
             android:gravity="start"
             android:maxLines="4"
             android:visibility="visible"
@@ -62,7 +64,6 @@
             android:layout_gravity="start"
             android:layout_weight="0.6"
             android:background="@color/transparent"
-            android:padding="@dimen/mini_4"
             android:src="@drawable/ic_expand_more"
             app:tint="?colorControlNormal" />
 

@@ -4,6 +4,7 @@ import static com.alphawallet.app.repository.TokenRepository.callSmartContractFu
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.util.Utils;
@@ -22,6 +23,7 @@ import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import timber.log.Timber;
 
 /**
  * Created by JB on 7/05/2022.
@@ -64,7 +66,7 @@ public class ContractInteract
         }
         catch (Exception e)
         {
-            //
+            Timber.e(e);
         }
 
         return "";
@@ -111,9 +113,9 @@ public class ContractInteract
         if (client == null)
         {
             client = new OkHttpClient.Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(10, TimeUnit.SECONDS)
+                    .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                    .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
+                    .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
                     .retryOnConnectionFailure(true)
                     .build();
         }

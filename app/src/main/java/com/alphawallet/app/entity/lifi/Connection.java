@@ -59,6 +59,7 @@ public class Connection
         public String logoURI;
 
         public String balance;
+        public double fiatEquivalent;
 
         @Override
         public boolean equals(Object o)
@@ -73,6 +74,27 @@ public class Connection
         public int hashCode()
         {
             return Objects.hash(address, symbol);
+        }
+
+        // Note: In the LIFI API, the native token has either of these two addresses.
+        public boolean isNativeToken()
+        {
+            return address.equalsIgnoreCase("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") ||
+                address.equalsIgnoreCase("0x0000000000000000000000000000000000000000");
+        }
+
+        public double getFiatValue()
+        {
+            try
+            {
+                double value = Double.parseDouble(balance);
+                double priceUSD = Double.parseDouble(this.priceUSD);
+                return value * priceUSD;
+            }
+            catch (NumberFormatException | NullPointerException e)
+            {
+                return 0.0;
+            }
         }
     }
 }

@@ -28,6 +28,7 @@ import com.alphawallet.app.entity.SyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.widget.adapter.WalletsSummaryAdapter;
@@ -38,6 +39,8 @@ import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -80,6 +83,9 @@ public class WalletsActivity extends BaseActivity implements
         }
     };
 
+    @Inject
+    PreferenceRepositoryType preferenceRepository;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
@@ -96,6 +102,15 @@ public class WalletsActivity extends BaseActivity implements
         super.onResume();
         initViewModel();
         initViews();
+    }
+
+    private void scrollToDefaultWallet()
+    {
+        int position = adapter.getDefaultWalletIndex();
+        if (position != -1)
+        {
+            list.smoothScrollToPosition(position);
+        }
     }
 
     private void initViewModel()
@@ -135,7 +150,7 @@ public class WalletsActivity extends BaseActivity implements
         list = findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new WalletsSummaryAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract());
+        adapter = new WalletsSummaryAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract(), preferenceRepository.isActiveMainnet());
         list.setAdapter(adapter);
 
         systemView.attachRecyclerView(list);
@@ -331,6 +346,7 @@ public class WalletsActivity extends BaseActivity implements
         }
 
         adapter.setDefaultWallet(wallet);
+        scrollToDefaultWallet();
         if (requiresHomeRefresh)
         {
             viewModel.stopUpdates();
@@ -349,7 +365,12 @@ public class WalletsActivity extends BaseActivity implements
     private void onFetchWallets(Wallet[] wallets)
     {
         enableDisplayHomeAsUp();
-        if (adapter != null) adapter.setWallets(wallets);
+        if (adapter != null)
+        {
+            adapter.setWallets(wallets);
+            scrollToDefaultWallet();
+        }
+
         invalidateOptionsMenu();
     }
 
@@ -402,7 +423,7 @@ public class WalletsActivity extends BaseActivity implements
     public void HDKeyCreated(String address, Context ctx, KeyService.AuthenticationLevel level)
     {
         if (address == null) onCreateWalletError(new ErrorEnvelope(""));
-        else viewModel.StoreHDWallet(address, level);
+        else viewModel.storeHDWallet(address, level);
     }
 
     @Override

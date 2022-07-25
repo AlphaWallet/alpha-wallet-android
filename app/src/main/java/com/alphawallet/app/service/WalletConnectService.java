@@ -15,6 +15,7 @@ import android.os.IBinder;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.WalletConnectActions;
@@ -313,7 +314,7 @@ public class WalletConnectService extends Service
             i.putExtra(C.EXTRA_SESSION_ID, client.sessionId());
             i.putExtra(C.EXTRA_CHAIN_ID, chainId);
             i.putExtra(C.EXTRA_NAME, client.getPeerMeta().getName());
-            WalletConnectService.this.sendBroadcast(i);
+            sendWalletConnectBroadcast(i);
             return Unit.INSTANCE;
         });
 
@@ -323,9 +324,14 @@ public class WalletConnectService extends Service
             i.putExtra(C.EXTRA_WC_REQUEST_ID, requestId);
             i.putExtra(C.EXTRA_SESSION_ID, client.sessionId());
             i.putExtra(C.EXTRA_CHAIN_OBJ, chainObj);
-            WalletConnectService.this.sendBroadcast(i);
+            sendWalletConnectBroadcast(i);
             return Unit.INSTANCE;
         });
+    }
+
+    private void sendWalletConnectBroadcast(Intent i)
+    {
+        LocalBroadcastManager.getInstance(this).sendBroadcast(i);
     }
 
     //TODO: Can we determine if AlphaWallet is running? If it is, no need to add this to the queue,
@@ -345,14 +351,14 @@ public class WalletConnectService extends Service
         Intent intent = new Intent(command);
         intent.putExtra("sessionid", sessionId);
         intent.putExtra("wcrequest", getPendingRequest(sessionId));     // pass WCRequest as parcelable in the intent
-        sendBroadcast(intent);
+        sendWalletConnectBroadcast(intent);
     }
 
     private void broadcastConnectionCount(int count)
     {
         Intent intent = new Intent(WALLET_CONNECT_COUNT_CHANGE);
         intent.putExtra("count", count);
-        sendBroadcast(intent);
+        sendWalletConnectBroadcast(intent);
     }
 
     private void switchToWalletConnectApprove(String sessionId, WCRequest rq)
@@ -364,7 +370,7 @@ public class WalletConnectService extends Service
             Intent intent = new Intent(WALLET_CONNECT_REQUEST);
             intent.putExtra("sessionid", sessionId);
             intent.putExtra("wcrequest", rq);
-            sendBroadcast(intent);
+            sendWalletConnectBroadcast(intent);
 
             Timber.tag(TAG).d("Connected clients: %s", clientMap.size());
         }

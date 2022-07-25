@@ -21,6 +21,7 @@ import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSearchItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
+import com.alphawallet.app.ui.widget.entity.TestNetTipsItem;
 import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
 import com.alphawallet.app.ui.widget.entity.TotalBalanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.WalletConnectSessionSortedItem;
@@ -32,6 +33,7 @@ import com.alphawallet.app.ui.widget.holder.ChainNameHeaderHolder;
 import com.alphawallet.app.ui.widget.holder.HeaderHolder;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.SearchTokensHolder;
+import com.alphawallet.app.ui.widget.holder.TestNetTipsHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
@@ -166,6 +168,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 holder = new HeaderHolder(R.layout.layout_tokens_header, parent);
                 break;
 
+            case TestNetTipsHolder.VIEW_TYPE:
+                holder = new TestNetTipsHolder(R.layout.layout_testnet_header, parent);
+                holder.setOnTokenClickListener(tokensAdapterCallback);
+                break;
+
             case SearchTokensHolder.VIEW_TYPE:
                 holder = new SearchTokensHolder(R.layout.layout_manage_token_search, parent, tokensAdapterCallback::onSearchClicked);
                 break;
@@ -235,7 +242,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void addSearchTokensLayout() {
         if (walletAddress != null && !walletAddress.isEmpty()) {
-            items.add(new ManageTokensSearchItem(new ManageTokensData(walletAddress, managementLauncher), 0));
+            items.add(new ManageTokensSearchItem(new ManageTokensData(walletAddress, managementLauncher), -1));
         }
     }
 
@@ -396,6 +403,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
 
         addSearchTokensLayout();
+        addTestNetTips();
 
         if (managementLauncher != null) addManageTokensLayout();
 
@@ -407,6 +415,14 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         addManageTokensLayout();
 
         items.endBatchedUpdates();
+    }
+
+    private void addTestNetTips()
+    {
+        if (!tokensService.isMainNetActive())
+        {
+            items.add(new TestNetTipsItem(0));
+        }
     }
 
     public void setTotal(BigDecimal totalInCurrency) {

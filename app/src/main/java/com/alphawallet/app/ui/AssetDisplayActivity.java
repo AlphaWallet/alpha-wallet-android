@@ -246,7 +246,10 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     protected void onDestroy()
     {
         super.onDestroy();
-        unregisterReceiver(finishReceiver);
+        if (finishReceiver != null)
+        {
+            finishReceiver.unregister();
+        }
         viewModel.clearFocusToken();
         if (adapter != null) adapter.onDestroy(tokenView);
         viewModel.onDestroy();

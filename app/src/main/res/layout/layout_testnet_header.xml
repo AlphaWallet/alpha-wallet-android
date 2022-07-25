@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="@dimen/tiny_8"
+    android:paddingHorizontal="@dimen/standard_16">
+
+    <TextView
+        style="@style/Aw.Typography.Title.Large.Bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/where_are_tokens"
+        android:text="@string/testnet" />
+
+    <TextView
+        android:id="@+id/where_are_tokens"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:textColor="@color/control_highlight"
+        android:text="@string/title_dialog_where_are_tokens" />
+</RelativeLayout>

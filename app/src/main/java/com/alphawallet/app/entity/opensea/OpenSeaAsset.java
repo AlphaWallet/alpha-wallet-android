@@ -2,9 +2,12 @@ package com.alphawallet.app.entity.opensea;
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.C;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 public class OpenSeaAsset
@@ -91,6 +94,10 @@ public class OpenSeaAsset
         @Expose
         public String bannerImageUrl;
 
+        @SerializedName("slug")
+        @Expose
+        public String slug;
+
         public static class Stats
         {
             @SerializedName("total_supply")
@@ -104,6 +111,14 @@ public class OpenSeaAsset
             @SerializedName("num_owners")
             @Expose
             public long numOwners;
+
+            @SerializedName("average_price")
+            @Expose
+            public String averagePrice;
+
+            @SerializedName("floor_price")
+            @Expose
+            public String floorPrice;
         }
     }
 
@@ -212,6 +227,35 @@ public class OpenSeaAsset
             @Expose
             public int decimals;
         }
+    }
+
+    public String getAveragePrice()
+    {
+        if (collection != null && collection.stats != null)
+        {
+            String avgPrice = collection.stats.averagePrice;
+            if (!TextUtils.isEmpty(avgPrice))
+            {
+                BigDecimal p = new BigDecimal(collection.stats.averagePrice);
+                return p.setScale(3, RoundingMode.CEILING) + " " + C.ETH_SYMBOL;
+                // This method is only called for mainnet queries, hence the hardcoded ETH Symbol
+            }
+        }
+        return "";
+    }
+
+    public String getFloorPrice()
+    {
+        if (collection != null && collection.stats != null)
+        {
+            String floorPrice = collection.stats.floorPrice;
+            if (!TextUtils.isEmpty(floorPrice))
+            {
+                return floorPrice + " " + C.ETH_SYMBOL;
+                // This method is only called for mainnet queries, hence the hardcoded ETH Symbol
+            }
+        }
+        return "";
     }
 
     public String getLastSale()

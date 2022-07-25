@@ -22,7 +22,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -42,6 +44,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 
 /**
@@ -51,13 +54,13 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class WalletConnectSessionActivity extends BaseActivity
 {
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private final LocalBroadcastManager broadcastManager;
     WalletConnectViewModel viewModel;
     private RecyclerView recyclerView;
     private Button btnConnectWallet;
     private LinearLayout layoutNoActiveSessions;
     private CustomAdapter adapter;
     private List<WalletConnectSessionItem> wcSessions;
-    private int connectionCount = -1;
     private final BroadcastReceiver walletConnectChangeReceiver = new BroadcastReceiver()
     {
         @Override
@@ -67,13 +70,17 @@ public class WalletConnectSessionActivity extends BaseActivity
             if (action.equals(C.WALLET_CONNECT_COUNT_CHANGE))
             {
                 handler.post(() -> adapter.notifyDataSetChanged());
-                connectionCount = intent.getIntExtra("count", 0);
             }
         }
     };
 
     @Inject
     AWWalletConnectClient awWalletConnectClient;
+
+    public WalletConnectSessionActivity()
+    {
+        broadcastManager = LocalBroadcastManager.getInstance(this);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -126,9 +133,19 @@ public class WalletConnectSessionActivity extends BaseActivity
     {
         wcSessions = viewModel.getSessions();
 
+        layoutNoActiveSessions.setVisibility(View.VISIBLE);
         if (wcSessions.isEmpty())
         {
             layoutNoActiveSessions.setVisibility(View.VISIBLE);
+            // remove ghosting when all items deleted
+            if (recyclerView != null)
+            {
+                RecyclerView.Adapter adapter = recyclerView.getAdapter();
+                if (adapter != null)
+                {
+                    adapter.notifyDataSetChanged();
+                }
+            }
         }
         else
         {
@@ -148,7 +165,6 @@ public class WalletConnectSessionActivity extends BaseActivity
     public void onResume()
     {
         super.onResume();
-        connectionCount = -1;
         initViewModel();
         setupList();
         startConnectionCheck();
@@ -157,7 +173,7 @@ public class WalletConnectSessionActivity extends BaseActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.menu_scan_wc, menu);
+        getMenuInflater().inflate(R.menu.menu_wc_sessions, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -172,6 +188,11 @@ public class WalletConnectSessionActivity extends BaseActivity
         {
             openQrScanner();
         }
+        else if (item.getItemId() == R.id.action_delete)
+        {
+            View v = findViewById(R.id.action_delete);
+            openDeleteMenu(v);
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -181,6 +202,29 @@ public class WalletConnectSessionActivity extends BaseActivity
         Intent intent = new Intent(this, QRScanner.class);
         intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
         startActivity(intent);
+    }
+
+    private void openDeleteMenu(View v)
+    {
+        Timber.d("openDeleteMenu: view: %s", v);
+        PopupMenu popupMenu = new PopupMenu(this, v);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_wc_sessions_delete, popupMenu.getMenu());
+        popupMenu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_delete_empty)
+            {
+                // delete empty
+                viewModel.removeEmptySessions(this, this::setupList);
+                return true;
+            }
+            else if (item.getItemId() == R.id.action_delete_all)
+            {
+                Timber.d("openDeleteMenu: deleteAll: ");
+                viewModel.removeAllSessions(this, this::setupList);
+                return true;
+            }
+            return false;
+        });
+        popupMenu.show();
     }
 
     private void setupClient(final String sessionId, final CustomAdapter.CustomViewHolder holder)
@@ -226,12 +270,12 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     private void startConnectionCheck()
     {
-        registerReceiver(walletConnectChangeReceiver, new IntentFilter(C.WALLET_CONNECT_COUNT_CHANGE));
+        broadcastManager.registerReceiver(walletConnectChangeReceiver, new IntentFilter(C.WALLET_CONNECT_COUNT_CHANGE));
     }
 
     private void stopConnectionCheck()
     {
-        unregisterReceiver(walletConnectChangeReceiver);
+        broadcastManager.unregisterReceiver(walletConnectChangeReceiver);
     }
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>

@@ -27,10 +27,6 @@ public class HomeReceiver extends BroadcastReceiver
         Bundle bundle = intent.getExtras();
         switch (intent.getAction())
         {
-            case C.DOWNLOAD_READY:
-                String message = bundle.getString("Version");
-                homeCommsInterface.downloadReady(message);
-                break;
             case C.REQUEST_NOTIFICATION_ACCESS:
                 homeCommsInterface.requestNotificationPermission();
                 break;
@@ -49,7 +45,6 @@ public class HomeReceiver extends BroadcastReceiver
     public void register()
     {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(C.DOWNLOAD_READY);
         filter.addAction(C.REQUEST_NOTIFICATION_ACCESS);
         filter.addAction(C.BACKUP_WALLET_SUCCESS);
         filter.addAction(C.WALLET_CONNECT_REQUEST);

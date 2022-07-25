@@ -173,8 +173,6 @@ public abstract class C {
             "com.stormbird.wallet.ADDED";
     public static final String CHANGED_LOCALE =
             "com.stormbird.wallet.CHANGED_LOCALE";
-    public static final String DOWNLOAD_READY =
-            "com.stormbird.wallet.DOWNLOAD_READY";
     public static final String PAGE_LOADED =
             "com.stormbird.wallet.PAGE_LOADED";
     public static final String RESET_TOOLBAR =
@@ -245,7 +243,10 @@ public abstract class C {
 
         // Swap Error Codes
         int INSUFFICIENT_BALANCE = 5;
-        int SWAP_API_ERROR = 6;
+        int SWAP_CHAIN_ERROR = 6;
+        int SWAP_CONNECTIONS_ERROR = 7;
+        int SWAP_QUOTE_ERROR = 8;
+        int SWAP_TIMEOUT_ERROR = 9;
     }
 
     public interface Key {

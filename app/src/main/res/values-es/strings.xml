@@ -929,6 +929,7 @@
     <string name="message_api_v1_note">This will inform the remote site your wallet address is %s</string>
     <string name="asset_floor_price">Floor Price</string>
     <string name="asset_average_price">Average Price</string>
+    <string name="label_provider">Provider</string>
     <string name="delete_empty">Delete Empty</string>
     <string name="delete_all">Delete All</string>
 </resources>

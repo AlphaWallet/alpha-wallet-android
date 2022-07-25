@@ -225,11 +225,22 @@ public class WalletConnectViewModel extends BaseViewModel
         EthereumMessage etm = new EthereumMessage(w3tx.getFormattedTransaction(ctx, chainId, getNetworkSymbol(chainId)).toString(),
                 requesterURL, w3tx.leafPosition, SignMessageType.SIGN_MESSAGE);
 
-        disposable = createTransactionInteract.signTransaction(fromWallet, w3tx, chainId)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
-                        error -> dAppFunction.DAppError(error, etm));
+        if (w3tx.isConstructor())
+        {
+            disposable = createTransactionInteract.signTransaction(fromWallet, w3tx, chainId)
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
+                            error -> dAppFunction.DAppError(error, etm));
+        }
+        else
+        {
+            disposable = createTransactionInteract.signTransaction(fromWallet, w3tx, chainId)
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
+                            error -> dAppFunction.DAppError(error, etm));
+        }
     }
 
     public void sendTransaction(final Web3Transaction finalTx, Wallet wallet, long chainId, SendTransactionInterface callback)
@@ -425,7 +436,7 @@ public class WalletConnectViewModel extends BaseViewModel
 
     private void deleteSessionV1(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
     {
-        Timber.d("deleteSession: %s", sessionId);
+        Timber.d("deleteSession: %s", session.sessionId);
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
             realm.executeTransactionAsync(r -> {

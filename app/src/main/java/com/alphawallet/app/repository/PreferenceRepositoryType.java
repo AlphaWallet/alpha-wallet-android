@@ -76,9 +76,6 @@ public interface PreferenceRepositoryType {
     int getUpdateWarningCount();
     void setUpdateWarningCount(int count);
 
-    int getUpdateAsksCount();
-    void setUpdateAsksCount(int count);
-
     long getInstallTime();
     void setInstallTime(long time);
 

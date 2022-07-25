@@ -8,7 +8,6 @@ import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CurrencyItem;
-import com.alphawallet.app.entity.WalletPage;
 
 import java.util.Locale;
 
@@ -35,7 +34,6 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String SET_NETWORK_FILTERS = "set_filters";
     private static final String SHOULD_SHOW_ROOT_WARNING = "should_show_root_warning";
     private static final String UPDATE_WARNINGS = "update_warns";
-    private static final String UPDATE_ASKS = "update_asks";
     private static final String INSTALL_TIME = "install_time";
     public static final String DEVICE_LOCALE = "device_locale";
     public static final String DEVICE_COUNTRY = "device_country";
@@ -295,16 +293,6 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setUpdateWarningCount(int count) {
         pref.edit().putInt(UPDATE_WARNINGS, count).apply();
-    }
-
-    @Override
-    public int getUpdateAsksCount() {
-        return pref.getInt(UPDATE_ASKS, 0);
-    }
-
-    @Override
-    public void setUpdateAsksCount(int count) {
-        pref.edit().putInt(UPDATE_ASKS, count).apply();
     }
 
     @Override

@@ -106,7 +106,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private ImageView successImage;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private HomeReceiver homeReceiver;
-    private String buildVersion;
     private Fragment settingsFragment;
     private Fragment dappBrowserFragment;
     private Fragment walletFragment;
@@ -117,14 +116,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private boolean isForeground;
     private volatile boolean tokenClicked = false;
     private String openLink;
-    private boolean inWalletConnect;
 
-    public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
     public static final int RC_ASSET_NOTIFICATION_PERM = 224;
 
     public static final int DAPP_BARCODE_READER_REQUEST_CODE = 1;
-    public static final int DAPP_TRANSACTION_SEND_REQUEST = 2;
     public static final String STORED_PAGE = "currentPage";
     public static final String RESET_TOKEN_SERVICE = "HOME_reset_ts";
     public static final String AW_MAGICLINK = "aw.app/";
@@ -203,7 +199,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         viewModel = new ViewModelProvider(this)
                 .get(HomeViewModel.class);
-        viewModel.identify(this);
+        viewModel.identify();
         viewModel.setWalletStartup();
         viewModel.setCurrencyAndLocale(this);
         viewModel.tryToShowWhatsNewDialog(this);
@@ -894,46 +890,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public void downloadReady(String build)
-    {
-        hideDialog();
-        buildVersion = build;
-        //display download ready popup
-        //Possibly only show this once per day otherwise too annoying!
-        int asks = viewModel.getUpdateAsks() + 1;
-        AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
-        dialog.setTitle(R.string.new_version_title);
-        dialog.setSmallText(R.string.new_version);
-        String newBuild = "New version: " + build;
-        dialog.setMediumText(newBuild);
-        dialog.setPrimaryButtonText(R.string.confirm_update);
-        dialog.setPrimaryButtonListener(v ->
-        {
-            if (checkWritePermission(RC_DOWNLOAD_EXTERNAL_WRITE_PERM))
-            {
-                viewModel.downloadAndInstall(build, this);
-            }
-            dialog.dismiss();
-        });
-        if (asks > 1)
-        {
-            dialog.setSecondaryButtonText(R.string.dialog_not_again);
-        }
-        else
-        {
-            dialog.setSecondaryButtonText(R.string.dialog_later);
-        }
-        dialog.setSecondaryButtonListener(v ->
-        {
-            //only dismiss twice before we stop warning.
-            viewModel.setUpdateAsksCount(asks);
-            dialog.dismiss();
-        });
-        this.dialog = dialog;
-        dialog.show();
-    }
-
-    @Override
     public void requestNotificationPermission()
     {
         checkNotificationPermission(RC_ASSET_NOTIFICATION_PERM);
@@ -978,30 +934,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private boolean checkWritePermission(int permissionTag)
-    {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED)
-        {
-            return true;
-        }
-        else
-        {
-            final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE))
-            {
-                Timber.tag("HomeActivity").w("Folder write permission is not granted. Requesting permission");
-                ActivityCompat.requestPermissions(this, permissions, permissionTag);
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-    }
-
     private boolean checkNotificationPermission(int permissionTag)
     {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NOTIFICATION_POLICY)
@@ -1041,49 +973,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case DappBrowserFragment.REQUEST_FINE_LOCATION:
                 ((DappBrowserFragment) getFragment(DAPP_BROWSER)).gotGeoAccess(permissions, grantResults);
                 break;
-            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
-                if (hasPermission(permissions, grantResults))
-                {
-                    viewModel.downloadAndInstall(buildVersion, this);
-                }
-                else
-                {
-                    showRequirePermissionError();
-                }
-                break;
             case RC_ASSET_EXTERNAL_WRITE_PERM:
                 //Can't get here
                 break;
         }
-    }
-
-    private boolean hasPermission(String[] permissions, int[] grantResults)
-    {
-        boolean hasPermission = true;
-        for (int i = 0; i < permissions.length; i++)
-        {
-            if (grantResults[i] == -1)
-            {
-                hasPermission = false;
-                break;
-            }
-        }
-
-        return hasPermission;
-    }
-
-    private void showRequirePermissionError()
-    {
-        AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
-        aDialog.setIcon(AWalletAlertDialog.ERROR);
-        aDialog.setTitle(R.string.install_error);
-        aDialog.setMessage(R.string.require_write_permission);
-        aDialog.setButtonText(R.string.action_cancel);
-        aDialog.setButtonListener(v ->
-        {
-            aDialog.dismiss();
-        });
-        aDialog.show();
     }
 
     private void onInstallIntent(File installFile)

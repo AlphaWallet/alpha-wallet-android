@@ -58,7 +58,6 @@ public class TransactionsService
 
     private final LongSparseArray<Long> chainTransferCheckTimes = new LongSparseArray<>(); //TODO: Use this to coordinate token checks on chains
     private final LongSparseArray<Long> chainTransactionCheckTimes = new LongSparseArray<>();
-    private static final LongSparseArray<BigInteger> currentBlocks = new LongSparseArray<>();
     private static final ConcurrentLinkedQueue<String> requiredTransactions = new ConcurrentLinkedQueue<>();
 
     private final static int TRANSACTION_DROPPED = -1;
@@ -163,7 +162,7 @@ public class TransactionsService
         Pair<Integer, Boolean> pendingChainData = getNextChainIndex(currentChainIndex, nftCheck, filters);
         if (pendingChainData.first != currentChainIndex)
         {
-            updateCurrentBlock(filters.get(currentChainIndex));
+            NodeService.updateCurrentBlock(filters.get(currentChainIndex));
         }
         currentChainIndex = pendingChainData.first;
         nftCheck = pendingChainData.second;
@@ -287,26 +286,6 @@ public class TransactionsService
         {
             return null;
         }
-    }
-
-    private void updateCurrentBlock(final long chainId)
-    {
-        fetchCurrentBlock(chainId).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(blockValue -> currentBlocks.put(chainId, blockValue), onError -> currentBlocks.put(chainId, BigInteger.ZERO)).isDisposed();
-    }
-
-    private static Single<BigInteger> fetchCurrentBlock(final long chainId)
-    {
-        return Single.fromCallable(() -> {
-            Web3j web3j = TokenRepository.getWeb3jService(chainId);
-            EthBlock ethBlock =
-                    web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send();
-            String blockValStr = ethBlock.getBlock().getNumberRaw();
-            if (!TextUtils.isEmpty(blockValStr) && blockValStr.length() > 2)
-                return Numeric.toBigInt(blockValStr);
-            else return currentBlocks.get(chainId, BigInteger.ZERO);
-        });
     }
 
     public Single<TransactionMeta[]> fetchAndStoreTransactions(long chainId, long lastTxTime)
@@ -537,14 +516,7 @@ public class TransactionsService
 
     public static BigInteger getCurrentBlock(long chainId)
     {
-        BigInteger currentBlock = currentBlocks.get(chainId, BigInteger.ZERO);
-        if (currentBlock.equals(BigInteger.ZERO))
-        {
-            currentBlock = fetchCurrentBlock(chainId).blockingGet();
-            currentBlocks.put(chainId, currentBlock);
-        }
-
-        return currentBlock;
+        return NodeService.getCurrentBlock(chainId);
     }
 
     private void checkPendingTransactions()

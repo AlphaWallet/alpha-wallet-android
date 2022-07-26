@@ -24,9 +24,6 @@ public class EventSyncTest
 
         eventSync = new EventSync(token);
 
-        //TODO: Issues:
-        // - TransactionsService can't fetch latest (mock?)
-        // - Web3j needs to be created separately 
         token.updateBalance(null);
     }
 

@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import timber.log.Timber;
 
 public class WalletConnectInteract
 {
@@ -61,9 +62,17 @@ public class WalletConnectInteract
     private List<WalletConnectSessionItem> getWalletConnectV2SessionItems()
     {
         List<WalletConnectSessionItem> result = new ArrayList<>();
-        List<Sign.Model.Session> listOfSettledSessions = SignClient.INSTANCE.getListOfSettledSessions();
-        for (Sign.Model.Session session : listOfSettledSessions) {
-            result.add(new WalletConnectV2SessionItem(session));
+        try
+        {
+            List<Sign.Model.Session> listOfSettledSessions = SignClient.INSTANCE.getListOfSettledSessions();
+            for (Sign.Model.Session session : listOfSettledSessions)
+            {
+                result.add(new WalletConnectV2SessionItem(session));
+            }
+        }
+        catch (IllegalStateException e)
+        {
+            Timber.e(e);
         }
         return result;
     }

@@ -115,7 +115,19 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
 
     private Sign.Model.Session getSession(String topic)
     {
-        List<Sign.Model.Session> listOfSettledSessions = SignClient.INSTANCE.getListOfSettledSessions();
+        List<Sign.Model.Session> listOfSettledSessions;
+
+        try
+        {
+            listOfSettledSessions = SignClient.INSTANCE.getListOfSettledSessions();
+        }
+        catch (IllegalStateException e)
+        {
+            listOfSettledSessions = Collections.emptyList();
+            Timber.tag(TAG).e(e);
+        }
+
+
         for (Sign.Model.Session session : listOfSettledSessions)
         {
             if (session.getTopic().equals(topic))
@@ -261,11 +273,16 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
 
         SignClient.INSTANCE.initialize(init, e ->
         {
-            Timber.e("Init failed: %s", e.getThrowable().getMessage());
+            Timber.tag(TAG).e("Init failed: %s", e.getThrowable().getMessage());
             return null;
         });
 
-        SignClient.INSTANCE.setWalletDelegate((SignInterface.WalletDelegate) this);
+        try {
+            SignClient.INSTANCE.setWalletDelegate((SignInterface.WalletDelegate) this);
+        } catch(Exception e)
+        {
+            Timber.tag(TAG).e(e);
+        }
     }
 
     @NonNull

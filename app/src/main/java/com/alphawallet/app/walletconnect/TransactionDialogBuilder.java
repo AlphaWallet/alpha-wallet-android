@@ -30,7 +30,7 @@ import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.token.entity.Signable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.walletconnect.walletconnectv2.client.Sign;
+import com.walletconnect.sign.client.Sign;
 
 import org.web3j.utils.Numeric;
 

@@ -1,21 +1,13 @@
 package com.alphawallet.app.entity.walletconnect;
 
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.walletconnect.walletconnectv2.client.Sign;
+import com.walletconnect.sign.client.Sign;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-
-import androidx.annotation.RequiresApi;
-
-import timber.log.Timber;
 
 public class WalletConnectV2SessionItem extends WalletConnectSessionItem implements Parcelable
 {

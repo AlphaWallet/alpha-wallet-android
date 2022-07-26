@@ -1,6 +1,6 @@
 package com.alphawallet.app.entity.walletconnect;
 
-import com.walletconnect.walletconnectv2.client.Sign;
+import com.walletconnect.sign.client.Sign;
 
 import java.util.ArrayList;
 import java.util.HashSet;

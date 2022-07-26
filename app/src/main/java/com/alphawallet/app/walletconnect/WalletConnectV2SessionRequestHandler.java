@@ -11,7 +11,7 @@ import com.alphawallet.app.walletconnect.entity.BaseRequest;
 import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
 import com.alphawallet.app.walletconnect.entity.SignTypedDataRequest;
 import com.alphawallet.app.widget.SignMethodDialog;
-import com.walletconnect.walletconnectv2.client.Sign;
+import com.walletconnect.sign.client.Sign;
 
 import timber.log.Timber;
 

@@ -27,9 +27,9 @@ import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
 import com.alphawallet.app.walletconnect.util.WCMethodChecker;
-import com.walletconnect.walletconnectv2.client.Sign;
-import com.walletconnect.walletconnectv2.client.SignClient;
-import com.walletconnect.walletconnectv2.client.SignInterface;
+import com.walletconnect.sign.client.Sign;
+import com.walletconnect.sign.client.SignClient;
+import com.walletconnect.sign.client.SignInterface;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +44,7 @@ import timber.log.Timber;
 
 public class AWWalletConnectClient implements SignClient.WalletDelegate
 {
+    private static final String TAG = AWWalletConnectClient.class.getName();
     public static AuthenticationCallback authCallback;
     private final WalletConnectInteract walletConnectInteract;
     public static Sign.Model.SessionProposal sessionProposal;
@@ -279,21 +280,27 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
 
     public void shutdown()
     {
+        Timber.tag(TAG).i("shutdown");
     }
 
     public void onConnectionStateChange(@NonNull Sign.Model.ConnectionState connectionState)
     {
-
+        Timber.tag(TAG).i("onConnectionStateChange");
     }
 
     public void onSessionSettleResponse(@NonNull Sign.Model.SettledSessionResponse settledSessionResponse)
     {
-
+        Timber.tag(TAG).i("onSessionSettleResponse");
     }
 
     public void onSessionUpdateResponse(@NonNull Sign.Model.SessionUpdateResponse sessionUpdateResponse)
     {
+        Timber.tag(TAG).i("onSessionUpdateResponse");
+    }
 
+    public void onError(Sign.Model.Error error)
+    {
+        Timber.e(error.getThrowable());
     }
 
     public interface WalletConnectV2Callback {

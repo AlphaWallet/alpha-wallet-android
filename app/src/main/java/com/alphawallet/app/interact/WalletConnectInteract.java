@@ -5,8 +5,8 @@ import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
-import com.walletconnect.walletconnectv2.client.Sign;
-import com.walletconnect.walletconnectv2.client.SignClient;
+import com.walletconnect.sign.client.Sign;
+import com.walletconnect.sign.client.SignClient;
 
 import java.util.ArrayList;
 import java.util.List;

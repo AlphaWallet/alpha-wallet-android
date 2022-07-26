@@ -29,7 +29,7 @@ import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.walletconnect.walletconnectv2.client.Sign;
+import com.walletconnect.sign.client.Sign;
 
 import java.util.Collections;
 import java.util.List;

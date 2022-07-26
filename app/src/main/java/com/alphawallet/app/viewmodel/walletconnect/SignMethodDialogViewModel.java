@@ -22,7 +22,7 @@ import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
-import com.walletconnect.walletconnectv2.client.Sign;
+import com.walletconnect.sign.client.Sign;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;

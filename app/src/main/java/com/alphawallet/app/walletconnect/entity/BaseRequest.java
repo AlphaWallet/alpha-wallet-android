@@ -1,10 +1,11 @@
 package com.alphawallet.app.walletconnect.entity;
 
 import com.alphawallet.token.entity.Signable;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.List;
-
-import static java.util.Arrays.asList;
 
 public abstract class BaseRequest
 {
@@ -16,17 +17,8 @@ public abstract class BaseRequest
     {
         this.rawParams = rawParams;
         this.type = type;
-//        Type listType = new TypeToken<List<String>>(){}.getType();
-//        params = new Gson().fromJson(rawParams, listType); // Once WC team fixed the params format, can use this
-        String unwrapped = unwrap();
-        int index = unwrapped.indexOf(", ");
-        params = asList(unwrapped.substring(0, index), unwrapped.substring(index + 2));
-    }
-
-    protected String unwrap()
-    {
-        StringBuilder stringBuilder = new StringBuilder(rawParams);
-        return stringBuilder.substring(1, stringBuilder.length() - 1);
+        Type listType = new TypeToken<List<String>>(){}.getType();
+        params = new Gson().fromJson(rawParams, listType); // Once WC team fixed the params format, can use this
     }
 
     protected String getMessage()

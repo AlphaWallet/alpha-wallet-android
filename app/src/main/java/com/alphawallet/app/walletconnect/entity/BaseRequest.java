@@ -1,5 +1,7 @@
 package com.alphawallet.app.walletconnect.entity;
 
+import static java.util.Arrays.asList;
+
 import com.alphawallet.token.entity.Signable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -19,18 +21,28 @@ public abstract class BaseRequest
 
     public BaseRequest(String rawParams, WCEthereumSignMessage.WCSignType type)
     {
+        Timber.tag(TAG).i(rawParams);
+
         this.rawParams = rawParams;
         this.type = type;
-        Type listType = new TypeToken<List<String>>(){}.getType();
         try
         {
-            params = new Gson().fromJson(rawParams, listType);
+            params = new Gson().fromJson(rawParams, new TypeToken<List<String>>()
+            {
+            }.getType());
         }
         catch (Exception e)
         {
-            params = Collections.emptyList();
-            Timber.tag(TAG).i(rawParams);
+            String unwrapped = unwrap();
+            int index = unwrapped.indexOf(", ");
+            params = asList(unwrapped.substring(0, index), unwrapped.substring(index + 2));
         }
+    }
+
+    protected String unwrap()
+    {
+        StringBuilder stringBuilder = new StringBuilder(rawParams);
+        return stringBuilder.substring(1, stringBuilder.length() - 1);
     }
 
     protected String getMessage()

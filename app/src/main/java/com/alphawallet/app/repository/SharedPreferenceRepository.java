@@ -43,6 +43,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
 
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
+    private static final String NEW_WALLET = "new_wallet_";
 
     private final SharedPreferences pref;
 
@@ -363,5 +364,19 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public void setTheme(int state)
     {
         pref.edit().putInt(THEME_KEY, state).apply();
+    }
+
+    @Override
+    public boolean isNewWallet(String address)
+    {
+        String key = NEW_WALLET + address;
+        return pref.getBoolean(key, false);
+    }
+
+    @Override
+    public void setNewWallet(String address, boolean isNewWallet)
+    {
+        String key = NEW_WALLET + address;
+        pref.edit().putBoolean(key, isNewWallet).apply();
     }
 }

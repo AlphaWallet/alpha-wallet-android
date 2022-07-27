@@ -241,6 +241,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.walletName().observe(this, this::onWalletName);
         viewModel.backUpMessage().observe(this, this::onBackup);
         viewModel.splashReset().observe(this, this::onRequireInit);
+        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
         if (CustomViewSettings.hideDappBrowser())
         {
@@ -299,6 +300,17 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         Intent i = new Intent(this, PriceAlertsService.class);
         startService(i);
+    }
+
+    private void onDefaultWallet(Wallet wallet)
+    {
+        if (viewModel.checkNewWallet(wallet.address))
+        {
+            viewModel.setNewWallet(wallet.address, false);
+            Intent selectNetworkIntent = new Intent(this, SelectNetworkFilterActivity.class);
+            selectNetworkIntent.putExtra(C.EXTRA_SINGLE_ITEM, false);
+            startActivity(selectNetworkIntent);
+        }
     }
 
     private void setupFragmentListeners()

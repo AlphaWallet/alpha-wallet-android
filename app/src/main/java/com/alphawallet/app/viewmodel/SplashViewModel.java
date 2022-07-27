@@ -98,6 +98,8 @@ public class SplashViewModel extends ViewModel
         {
             wallets.postValue(new Wallet[0]);
         }
+
+        preferenceRepository.setNewWallet(address, true);
     }
 
     public void completeAuthentication(Operation taskCode)

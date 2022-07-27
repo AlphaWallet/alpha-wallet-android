@@ -17,6 +17,7 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.Signable;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
@@ -56,6 +57,7 @@ public class QRSelectionTest
     }
 
     @Test
+    @Ignore
     public void QRSelectionTest()
     {
         //Use a different key each time

@@ -190,6 +190,37 @@
 
             <View style="@style/Aw.Component.Separator" />
 
+            <LinearLayout
+                android:id="@+id/layout_tx_count"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/standard_16"
+                android:paddingEnd="@dimen/standard_16">
+
+                <TextView
+                    style="@style/Aw.Typography.Sub"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:text="@string/signed_transactions" />
+
+                <TextView
+                    android:id="@+id/tx_count"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/tiny_8"
+                    android:layout_weight="0.7"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    android:maxLines="1"
+                    tools:text="0" />
+
+            </LinearLayout>
+
+            <View style="@style/Aw.Component.Separator" />
+
         </LinearLayout>
 
     </ScrollView>

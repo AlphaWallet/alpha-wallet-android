@@ -846,7 +846,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 viewModel.recordSign(signable, getSessionId(), () -> {
                     viewModel.approveRequest(getApplication(), getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
                     confirmationDialog.success();
-                    updateSignCount();
                     if (fromDappBrowser)
                     {
                         confirmationDialog.forceDismiss();
@@ -855,6 +854,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     requestId = 0;
                     lastId = 0;
                     signData = null;
+                    updateSignCount();
                 });
             }
         };
@@ -1198,12 +1198,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             public void transactionSuccess(Web3Transaction web3Tx, String hashData)
             {
                 viewModel.recordSignTransaction(getApplicationContext(), web3Tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
-                updateSignCount();
                 viewModel.approveRequest(getApplication(), getSessionId(), web3Tx.leafPosition, hashData);
                 confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
                 if (fromDappBrowser) switchToDappBrowser();
                 confirmationDialog.transactionWritten(hashData);
                 requestId = 0;
+                updateSignCount();
             }
 
             @Override
@@ -1281,11 +1281,11 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             public void DAppReturn(byte[] data, Signable message)
             {
                 viewModel.recordSignTransaction(getApplicationContext(), tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
-                updateSignCount();
                 viewModel.approveRequest(getApplication(), getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
                 confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
                 if (fromDappBrowser) switchToDappBrowser();
                 requestId = 0;
+                updateSignCount();
             }
         };
 

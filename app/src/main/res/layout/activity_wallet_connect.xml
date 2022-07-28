@@ -215,7 +215,7 @@
                     android:ellipsize="end"
                     android:lines="1"
                     android:maxLines="1"
-                    tools:text="0" />
+                    android:text="@string/zero" />
 
             </LinearLayout>
 

@@ -1,13 +1,27 @@
 package com.alphawallet.app.entity;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
 
+import io.realm.Realm;
+import io.realm.RealmQuery;
+
+@RunWith(MockitoJUnitRunner.class)
 public class EventSyncTest
 {
     private EventSync eventSync;
@@ -16,15 +30,22 @@ public class EventSyncTest
     @Test
     public void getUSDCTransferEvents()
     {
-
-        TokenInfo tInfo = new TokenInfo("0x495f947276749Ce646f68AC8c248420045cb7b5e", "OpenSea Shared Storefront", "OPENSTORE", 0, true, 1);
+        TokenInfo tInfo = new TokenInfo("0x495f947276749Ce646f68AC8c248420045cb7b5e", "OpenSea Shared Storefront", "OPENSTORE", 0, true, MAINNET_ID);
         //createToken(TokenInfo tokenInfo, BigDecimal balance, List<BigInteger> balances, long updateBlancaTime, ContractType type, String networkName, long lastBlockCheck)
-        Token token = TokenFactory.createToken(tInfo, BigDecimal.ZERO, null ,0, ContractType.ERC721, "Ethereum", 0);
+        Token token = TokenFactory.createToken(tInfo, BigDecimal.ZERO, null, 0, ContractType.ERC721, "Ethereum", 0);
         token.setTokenWallet("0"); // Fetch all events
 
-        eventSync = new EventSync(token);
+        //TODO: Issues:
+        // - TransactionsService can't fetch latest (mock?)
+        // - Web3j needs to be created separately 
+        Realm realm = mock(Realm.class);
+        RealmQuery realmQuery = mock(RealmQuery.class);
+        doReturn(realmQuery).when(realmQuery).equalTo(anyString(), anyString());
+        doReturn(realmQuery).when(realm).where(RealmAuxData.class);
 
-        token.updateBalance(null);
+        token.updateBalance(realm);
+
+        assertThat(token.getFullBalance(), equalTo("0"));
     }
 
     /*private void fetchEvents()

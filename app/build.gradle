@@ -13,6 +13,7 @@ buildscript {
     dependencies {
         classpath "gradle.plugin.com.worker8.android_lint_reporter:android_lint_reporter:2.1.0"
         classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.20.0-RC1"
+        classpath 'com.github.bjoernq:unmockplugin:0.7.9'
     }
 }
 
@@ -25,6 +26,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'dagger.hilt.android.plugin'
 apply plugin: 'com.worker8.android_lint_reporter'
 apply plugin: 'io.gitlab.arturbosch.detekt'
+apply plugin: 'de.mobilej.unmock'
 
 detekt {
     toolVersion = "1.20.0-RC1"
@@ -185,6 +187,34 @@ task printVersionCode {
     }
 }
 
+unMock {
+    keep "android.widget.BaseAdapter"
+    keep "android.widget.ArrayAdapter"
+    keep "android.os.Bundle"
+    keepStartingWith "android.database.MatrixCursor"
+    keep "android.database.AbstractCursor"
+    keep "android.database.CrossProcessCursor"
+    keepStartingWith "android.text.TextUtils"
+    keepStartingWith "android.util."
+    keepStartingWith "android.text."
+    keepStartingWith "android.content.ContentValues"
+    keepStartingWith "android.content.ComponentName"
+    keepStartingWith "android.content.ContentUris"
+    keepStartingWith "android.content.ContentProviderOperation"
+    keepStartingWith "android.content.ContentProviderResult"
+    keepStartingWith "android.content.UriMatcher"
+    keepStartingWith "android.content.Intent"
+    keep "android.location.Location"
+    keepStartingWith "android.content.res.Configuration"
+    keepStartingWith "org."
+    keepStartingWith "libcore."
+    keepStartingWith "com.android.internal.R"
+    keepStartingWith "com.android.internal.util."
+    keep "android.net.Uri"
+
+    keepAndRename "java.nio.charset.Charsets" to "xjava.nio.charset.Charsets"
+}
+
 dependencies {
     implementation project(":lib")
 
@@ -262,6 +292,7 @@ dependencies {
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
+    unmock 'org.robolectric:android-all:4.3_r2-robolectric-0'
 
     // Component tests
     testImplementation 'org.robolectric:robolectric:4.8'

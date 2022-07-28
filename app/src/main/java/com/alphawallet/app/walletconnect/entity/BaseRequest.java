@@ -6,8 +6,6 @@ import com.alphawallet.token.entity.Signable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.List;
 
 import timber.log.Timber;
@@ -33,15 +31,15 @@ public abstract class BaseRequest
         }
         catch (Exception e)
         {
-            String unwrapped = unwrap();
-            int index = unwrapped.indexOf(", ");
-            params = asList(unwrapped.substring(0, index), unwrapped.substring(index + 2));
+            String unwrapped = unwrap(rawParams);
+            int index = unwrapped.indexOf(",");
+            params = asList(unwrap(unwrapped.substring(0, index)), unwrapped.substring(index + 1));
         }
     }
 
-    protected String unwrap()
+    protected String unwrap(String src)
     {
-        StringBuilder stringBuilder = new StringBuilder(rawParams);
+        StringBuilder stringBuilder = new StringBuilder(src);
         return stringBuilder.substring(1, stringBuilder.length() - 1);
     }
 

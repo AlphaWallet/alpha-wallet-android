@@ -116,6 +116,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private TokenIcon chainIcon;
     private ProgressBar progressBar;
     private LinearLayout infoLayout;
+    private LinearLayout txCountLayout;
     private FunctionButtonBar functionBar;
     private boolean fromDappBrowser = false;  //if using this from dappBrowser (which is a bit strange but could happen) then return back to browser once signed
     private boolean fromPhoneBrowser = false; //if from phone browser, clicking 'back' should take user back to dapp running on the phone's browser,
@@ -408,6 +409,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         peerUrl = findViewById(R.id.peer_url);
         statusText = findViewById(R.id.connection_status);
         textName = findViewById(R.id.text_name);
+        txCountLayout = findViewById(R.id.layout_tx_count);
         txCount = findViewById(R.id.tx_count);
         chainName = findViewById(R.id.chain_name);
         chainIcon = findViewById(R.id.chain_icon);
@@ -1455,12 +1457,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         ArrayList<SignRecord> recordList = viewModel.getSignRecords(getSessionId());
         txCount.setText(String.valueOf(recordList.size()));
-
         if (recordList.size() > 0)
         {
-            LinearLayout signLayout = findViewById(R.id.layout_tx_count);
-            signLayout.setOnClickListener(v -> {
-                //switch to view of signs
+            txCountLayout.setOnClickListener(v -> {
                 Intent intent = new Intent(getApplication(), SignDetailActivity.class);
                 intent.putParcelableArrayListExtra(C.EXTRA_STATE, recordList);
                 intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);

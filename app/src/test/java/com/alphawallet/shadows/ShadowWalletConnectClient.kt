@@ -1,22 +1,22 @@
 package com.alphawallet.shadows
 
-import com.walletconnect.walletconnectv2.client.WalletConnect
-import com.walletconnect.walletconnectv2.client.WalletConnectClient
-import com.walletconnect.walletconnectv2.core.exceptions.WalletConnectException
+import com.walletconnect.sign.client.Sign
+import com.walletconnect.sign.client.SignClient
+import com.walletconnect.sign.core.exceptions.client.WalletConnectException
 import org.robolectric.annotation.Implementation
 import org.robolectric.annotation.Implements
 
-@Implements(WalletConnectClient::class)
+@Implements(SignClient::class)
 class ShadowWalletConnectClient {
     constructor() {}
 
     @Implementation
     @Throws(IllegalStateException::class)
-    fun setWalletDelegate(delegate: WalletConnectClient.WalletDelegate) {}
+    fun setWalletDelegate(delegate: SignClient.WalletDelegate) {}
 
     @Implementation
     fun initialize(
-        initial: WalletConnect.Params.Init,
+        initial: Sign.Params.Init,
         onError: (WalletConnectException) -> Unit = {}
     ) = with(initial) {
 

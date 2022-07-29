@@ -30,6 +30,7 @@ public class TransferTest extends BaseE2ETest {
     }};
 
     @Test
+    @Ignore
     public void should_transfer_from_an_account_to_another() {
         int apiLevel = Build.VERSION.SDK_INT;
         String[] array = WALLETS.get(String.valueOf(apiLevel));

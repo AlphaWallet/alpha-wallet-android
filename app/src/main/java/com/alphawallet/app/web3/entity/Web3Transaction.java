@@ -245,35 +245,35 @@ public class Web3Transaction implements Parcelable {
     public CharSequence getFormattedTransaction(Context ctx, long chainId, String symbol)
     {
         StyledStringBuilder sb = new StyledStringBuilder();
-        sb.startStyleGroup().append(ctx.getString(R.string.to)).append(":\n ");
+        sb.startStyleGroup().append(ctx.getString(R.string.recipient)).append(": \n");
         sb.setStyle(new StyleSpan(Typeface.BOLD));
-        sb.append(recipient.toString());
+        sb.append(recipient.toString()).append("\n");
 
-        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.value)).append(":\n ");
+        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.value)).append(": \n");
         sb.setStyle(new StyleSpan(Typeface.BOLD));
         sb.append(BalanceUtils.getScaledValueWithLimit(new BigDecimal(value), 18));
-        sb.append(" ").append(symbol);
+        sb.append(" ").append(symbol).append("\n");
 
-        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_price)).append(":\n ");
+        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_price)).append(": \n");
         sb.setStyle(new StyleSpan(Typeface.BOLD));
-        sb.append(BalanceUtils.weiToGwei(gasPrice));
+        sb.append(BalanceUtils.weiToGwei(gasPrice)).append("\n");
 
-        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_limit)).append(":\n ");
+        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_limit)).append(": \n");
         sb.setStyle(new StyleSpan(Typeface.BOLD));
-        sb.append(gasLimit.toString());
+        sb.append(gasLimit.toString()).append("\n");
 
-        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_nonce)).append(":\n ");
+        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_nonce)).append(": \n");
         sb.setStyle(new StyleSpan(Typeface.BOLD));
-        sb.append(String.valueOf(nonce));
+        sb.append(String.valueOf(nonce)).append("\n");
 
         if (!TextUtils.isEmpty(payload))
         {
-            sb.startStyleGroup().append("\n").append(ctx.getString(R.string.payload)).append(":\n ");
+            sb.startStyleGroup().append("\n").append(ctx.getString(R.string.payload)).append(": \n");
             sb.setStyle(new StyleSpan(Typeface.BOLD));
-            sb.append(payload);
+            sb.append(payload).append("\n");
         }
 
-        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.subtitle_network)).append(":\n ");
+        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.subtitle_network)).append(": \n");
         sb.setStyle(new StyleSpan(Typeface.BOLD));
         sb.append(MagicLinkInfo.getNetworkNameById(chainId));
 

@@ -13,6 +13,7 @@ buildscript {
     dependencies {
         classpath "gradle.plugin.com.worker8.android_lint_reporter:android_lint_reporter:2.1.0"
         classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.20.0-RC1"
+        classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
     }
 }
 
@@ -25,6 +26,21 @@ apply plugin: 'kotlin-android'
 apply plugin: 'dagger.hilt.android.plugin'
 apply plugin: 'com.worker8.android_lint_reporter'
 apply plugin: 'io.gitlab.arturbosch.detekt'
+apply plugin: 'com.dicedmelon.gradle.jacoco-android'
+
+jacocoAndroidUnitTestReport {
+    csv.enabled false
+    html.enabled true
+    xml.enabled true
+}
+
+jacocoAndroidUnitTestReport {
+    excludes += [
+            '**/*Realm*.*',
+            '**/Generated*.*',
+            '**/*_*.*'
+    ]
+}
 
 detekt {
     toolVersion = "1.20.0-RC1"

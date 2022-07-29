@@ -40,6 +40,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.WCClient;
@@ -64,27 +65,24 @@ import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import org.jetbrains.annotations.NotNull;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import kotlin.Unit;
-import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
 @AndroidEntryPoint
-public class WalletConnectActivity extends BaseActivity implements ActionSheetCallback, StandardFunctionInterface, WalletConnectCallback {
+public class WalletConnectActivity extends BaseActivity implements ActionSheetCallback, StandardFunctionInterface, WalletConnectCallback
+{
     public static final String WC_LOCAL_PREFIX = "wclocal:";
     public static final String WC_INTENT = "wcintent:";
     private static final String TAG = "WCClient";
@@ -92,6 +90,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private static final long CONNECT_TIMEOUT = 10 * DateUtils.SECOND_IN_MILLIS; // 10 Seconds timeout
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final LocalBroadcastManager broadcastManager;
+    private final long switchChainDialogCallbackId = 1;
     WalletConnectViewModel viewModel;
     private WCClient client;
     private WCSession session;
@@ -101,7 +100,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> confirmationDialog.setCurrentGasIndex(result));
     private AddEthereumChainPrompt addEthereumChainPrompt;
-    private final long switchChainDialogCallbackId = 1;
     // data for switch chain request
     private long switchChainRequestId;  // rpc request id
     private long switchChainId;         // new chain to switch to
@@ -113,10 +111,12 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private TextView peerUrl;
     private TextView statusText;
     private TextView textName;
+    private TextView txCount;
     private ChainName chainName;
     private TokenIcon chainIcon;
     private ProgressBar progressBar;
     private LinearLayout infoLayout;
+    private LinearLayout txCountLayout;
     private FunctionButtonBar functionBar;
     private boolean fromDappBrowser = false;  //if using this from dappBrowser (which is a bit strange but could happen) then return back to browser once signed
     private boolean fromPhoneBrowser = false; //if from phone browser, clicking 'back' should take user back to dapp running on the phone's browser,
@@ -138,7 +138,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private boolean waitForWalletConnectSession = false;
     private long requestId = 0;
     private AWalletAlertDialog dialog = null;
-    private final BroadcastReceiver walletConnectActionReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver walletConnectActionReceiver = new BroadcastReceiver()
+    {
         @Override
         public void onReceive(Context context, Intent intent)
         {
@@ -408,6 +409,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         peerUrl = findViewById(R.id.peer_url);
         statusText = findViewById(R.id.connection_status);
         textName = findViewById(R.id.text_name);
+        txCountLayout = findViewById(R.id.layout_tx_count);
+        txCount = findViewById(R.id.tx_count);
         chainName = findViewById(R.id.chain_name);
         chainIcon = findViewById(R.id.chain_icon);
 
@@ -680,8 +683,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         state.putString("SESSIONIDSTR", getSessionId());
         if (confirmationDialog != null && confirmationDialog.isShowing() && confirmationDialog.getTransaction() != null)
         {
-             state.putParcelable("TRANSACTION", confirmationDialog.getTransaction());
-             state.putLong("CHAINID", viewModel.getChainId(getSessionId()));
+            state.putParcelable("TRANSACTION", confirmationDialog.getTransaction());
+            state.putLong("CHAINID", viewModel.getChainId(getSessionId()));
         }
         if (confirmationDialog != null && confirmationDialog.isShowing() && signData != null)
         {
@@ -736,6 +739,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             chainIcon.setVisibility(View.VISIBLE);
             chainIcon.bindData(viewModel.getChainId(sessionId));
             viewModel.startGasCycle(viewModel.getChainId(sessionId));
+            updateSignCount();
         }
     }
 
@@ -768,6 +772,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         peerName.setText(peer.getName());
         textName.setText(peer.getName());
         peerUrl.setText(peer.getUrl());
+        txCount.setText(R.string.empty);
         chainName.setChainID(chainIdOverride);
         chainIcon.setVisibility(View.VISIBLE);
         chainIcon.bindData(chainIdOverride);
@@ -823,7 +828,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void doSignMessage(final Signable signable)
     {
-        final DAppFunction dappFunction = new DAppFunction() {
+        final DAppFunction dappFunction = new DAppFunction()
+        {
             @Override
             public void DAppError(Throwable error, Signable message)
             {
@@ -850,11 +856,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     requestId = 0;
                     lastId = 0;
                     signData = null;
+                    updateSignCount();
                 });
             }
         };
 
-        signCallback = new SignAuthenticationCallback() {
+        signCallback = new SignAuthenticationCallback()
+        {
             @Override
             public void gotAuthorisation(boolean gotAuth)
             {
@@ -1186,7 +1194,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        final SendTransactionInterface callback = new SendTransactionInterface() {
+        final SendTransactionInterface callback = new SendTransactionInterface()
+        {
             @Override
             public void transactionSuccess(Web3Transaction web3Tx, String hashData)
             {
@@ -1196,6 +1205,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 if (fromDappBrowser) switchToDappBrowser();
                 confirmationDialog.transactionWritten(hashData);
                 requestId = 0;
+                updateSignCount();
             }
 
             @Override
@@ -1258,7 +1268,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void signTransaction(Web3Transaction tx)
     {
-        DAppFunction dappFunction = new DAppFunction() {
+        DAppFunction dappFunction = new DAppFunction()
+        {
             @Override
             public void DAppError(Throwable error, Signable message)
             {
@@ -1276,6 +1287,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
                 if (fromDappBrowser) switchToDappBrowser();
                 requestId = 0;
+                updateSignCount();
             }
         };
 
@@ -1438,6 +1450,21 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             viewModel.approveSwitchEthChain(WalletConnectActivity.this, switchChainRequestId, currentSessionId, switchChainId, true, chainAvailable);
             viewModel.updateSession(currentSessionId, switchChainId);
             displaySessionStatus(session.getTopic());
+        }
+    }
+
+    private void updateSignCount()
+    {
+        ArrayList<SignRecord> recordList = viewModel.getSignRecords(getSessionId());
+        txCount.setText(String.valueOf(recordList.size()));
+        if (recordList.size() > 0)
+        {
+            txCountLayout.setOnClickListener(v -> {
+                Intent intent = new Intent(getApplication(), SignDetailActivity.class);
+                intent.putParcelableArrayListExtra(C.EXTRA_STATE, recordList);
+                intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                startActivity(intent);
+            });
         }
     }
 }

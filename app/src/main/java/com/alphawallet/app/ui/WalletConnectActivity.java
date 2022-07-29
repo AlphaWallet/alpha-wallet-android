@@ -42,6 +42,7 @@ import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.WCEthereumSignMessage;
@@ -75,6 +76,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -128,6 +131,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private String signData;
     private WCEthereumSignMessage.WCSignType signType;
     private long chainIdOverride;
+
+    @Inject
+    AWWalletConnectClient awWalletConnectClient;
+
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getData() == null) return;
@@ -961,6 +968,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         {
             client.killSession();
             viewModel.disconnectSession(this, client.sessionId());
+            awWalletConnectClient.updateNotification();
             handler.postDelayed(this::finish, 5000);
         }
         else

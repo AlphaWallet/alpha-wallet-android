@@ -562,6 +562,7 @@ public class WalletConnectViewModel extends BaseViewModel
             {
                 WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
                 walletConnectService.putClient(sessionId, client);
+                awWalletConnectClient.updateNotification();
             }
 
             @Override

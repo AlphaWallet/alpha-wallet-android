@@ -217,7 +217,7 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
 
     public void updateNotification()
     {
-        sessionItemMutableLiveData.postValue(walletConnectInteract.getSessions());
+        walletConnectInteract.fetchSessions(context, sessionItemMutableLiveData::postValue);
     }
 
     public void reject(Sign.Model.SessionProposal sessionProposal, WalletConnectV2Callback callback)
@@ -277,9 +277,11 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
             return null;
         });
 
-        try {
+        try
+        {
             SignClient.INSTANCE.setWalletDelegate((SignInterface.WalletDelegate) this);
-        } catch(Exception e)
+        }
+        catch (Exception e)
         {
             Timber.tag(TAG).e(e);
         }
@@ -320,10 +322,25 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
         Timber.e(error.getThrowable());
     }
 
-    public interface WalletConnectV2Callback {
-        default void onSessionProposalApproved() {};
-        default void onSessionProposalRejected() {};
-        default void onSessionDisconnected() {};
+    public interface WalletConnectV2Callback
+    {
+        default void onSessionProposalApproved()
+        {
+        }
+
+        ;
+
+        default void onSessionProposalRejected()
+        {
+        }
+
+        ;
+
+        default void onSessionDisconnected()
+        {
+        }
+
+        ;
     }
 }
 

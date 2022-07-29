@@ -369,14 +369,14 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public boolean isNewWallet(String address)
     {
-        String key = NEW_WALLET + address;
+        String key = NEW_WALLET + address.toLowerCase(Locale.ENGLISH);
         return pref.getBoolean(key, false);
     }
 
     @Override
     public void setNewWallet(String address, boolean isNewWallet)
     {
-        String key = NEW_WALLET + address;
+        String key = NEW_WALLET + address.toLowerCase(Locale.ENGLISH);
         pref.edit().putBoolean(key, isNewWallet).apply();
     }
 }

@@ -1,4 +1,4 @@
-name: Test
+name: Unit test
 on:
   push:
     branches:
@@ -9,35 +9,20 @@ on:
 jobs:
   test:
     runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        api-level: [29, 30, 31]
-        target: [default]
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
           java-version: 11
 
-      - name: Run e2e tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          arch: x86_64
-          profile: Nexus 6
-          force-avd-creation: false
-          emulator-options: -no-window -accel on -noaudio -no-boot-anim -camera-back none -wipe-data
-          disable-animations: true
-          script: ./e2e.sh --CI
+      - name: Build the app
+        run: sh ./build.sh
 
-      - name: Collect E2E tests results
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: e2e-tests-result-${{matrix.api-level}}
-          path: output/
+      - name: Upload coverage reports to Codecov
+        run: |
+          curl -Os https://uploader.codecov.io/latest/macos/codecov
+          chmod +x codecov
+          ./codecov

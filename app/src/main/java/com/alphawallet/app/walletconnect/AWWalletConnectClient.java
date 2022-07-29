@@ -24,6 +24,7 @@ import com.alphawallet.app.entity.walletconnect.NamespaceParser;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.WalletConnectInteract;
+import com.alphawallet.app.service.WalletConnectV2Service;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
 import com.alphawallet.app.walletconnect.util.WCMethodChecker;
@@ -217,8 +218,25 @@ public class AWWalletConnectClient implements SignClient.WalletDelegate
 
     public void updateNotification()
     {
-        walletConnectInteract.fetchSessions(context, sessionItemMutableLiveData::postValue);
+        walletConnectInteract.fetchSessions(context, items -> {
+            sessionItemMutableLiveData.postValue(items);
+            updateService(context, items);
+        });
     }
+
+    private void updateService(Context context, List<WalletConnectSessionItem> walletConnectSessionItems)
+    {
+        if (walletConnectSessionItems.isEmpty())
+        {
+            context.stopService(new Intent(context, WalletConnectV2Service.class));
+        }
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            Intent service = new Intent(context, WalletConnectV2Service.class);
+            context.startForegroundService(service);
+        }
+    }
+
 
     public void reject(Sign.Model.SessionProposal sessionProposal, WalletConnectV2Callback callback)
     {

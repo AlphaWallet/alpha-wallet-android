@@ -212,23 +212,8 @@ public class WalletFragment extends BaseFragment implements
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
         viewModel.getTokensService().startWalletSync(this);
         viewModel.activeWalletConnectSessions().observe(getViewLifecycleOwner(), walletConnectSessionItems -> {
-            updateService(walletConnectSessionItems);
             adapter.showActiveWalletConnectSessions(walletConnectSessionItems);
         });
-    }
-
-    private void updateService(List<WalletConnectSessionItem> walletConnectSessionItems)
-    {
-        Context context = getContext();
-        if (walletConnectSessionItems.isEmpty())
-        {
-            context.stopService(new Intent(context, WalletConnectV2Service.class));
-        }
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
-            Intent service = new Intent(context, WalletConnectV2Service.class);
-            context.startForegroundService(service);
-        }
     }
 
     private void initViews(@NonNull View view)

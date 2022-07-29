@@ -54,7 +54,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TickerService;
@@ -124,10 +123,6 @@ public class WalletFragment extends BaseFragment implements
     private RealmResults<RealmToken> realmUpdates;
     private LargeTitleView largeTitleView;
     private long realmUpdateTime;
-
-
-    @Inject
-    WalletConnectInteract walletConnectInteract;
 
     @Inject
     AWWalletConnectClient awWalletConnectClient;

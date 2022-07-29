@@ -10,22 +10,17 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 
-import com.alphawallet.app.R;
-import com.alphawallet.app.interact.WalletConnectInteract;
-import com.alphawallet.app.ui.WalletConnectNotificationActivity;
-
-import javax.inject.Inject;
-
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+
+import com.alphawallet.app.R;
+import com.alphawallet.app.ui.WalletConnectNotificationActivity;
+
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class WalletConnectV2Service extends Service
 {
-    @Inject
-    WalletConnectInteract walletConnectInteract;
-
     @Override
     public IBinder onBind(Intent intent)
     {

@@ -83,6 +83,7 @@ import java.util.Map;
 import java.util.Set;
 
 import io.reactivex.Single;
+import okhttp3.Credentials;
 
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
@@ -104,12 +105,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
      */
 
     static {
+
         System.loadLibrary("keys");
     }
 
     public static native String getAmberDataKey();
     public static native String getInfuraKey();
     public static native String getSecondaryInfuraKey();
+    public static native String getKlaytnKey();
     private static final boolean usesProductionKey = !getInfuraKey().equals(DEFAULT_INFURA_KEY);
 
     public static final String FREE_MAINNET_RPC_URL = "https://main-rpc.linkpool.io";
@@ -150,6 +153,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             : FREE_PALM_RPC_URL;
     public static final String PALM_TEST_RPC_URL = usesProductionKey ? "https://palm-testnet.infura.io/v3/" + getInfuraKey()
             : FREE_PALM_TEST_RPC_URL;
+    public static final String USE_KLAYTN_RPC = usesProductionKey ? "https://node-api.klaytnapi.com/v1/klaytn"
+            : KLAYTN_RPC;
+    public static final String USE_KLAYTN_BAOBAB_RPC = usesProductionKey ? "https://node-api.klaytnapi.com/v1/klaytn"
+            : KLAYTN_BAOBAB_RPC;
     public static final String CRONOS_MAIN_RPC_URL = "https://evm.cronos.org";
 
     // Use the "Free" routes as backup in order to diversify node usage; to avoid single point of failure
@@ -322,11 +329,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer.palm-uat.xyz/api?"));
 
             put(KLAYTN_ID, new NetworkInfo(C.KLAYTN_NAME, C.KLAYTN_SYMBOL,
-                    KLAYTN_RPC,
+                    USE_KLAYTN_RPC,
                     "https://scope.klaytn.com/tx/", KLAYTN_ID, "",
                     "https://api.covalenthq.com/v1/" + COVALENT));
             put(KLAYTN_BOABAB_ID, new NetworkInfo(C.KLAYTN_BAOBAB_NAME, C.KLAYTN_SYMBOL,
-                    KLAYTN_BAOBAB_RPC,
+                    USE_KLAYTN_BAOBAB_RPC,
                     "https://baobab.scope.klaytn.com/tx/", KLAYTN_BOABAB_ID, "",
                     ""));
             put(IOTEX_MAINNET_ID, new NetworkInfo(C.IOTEX_NAME, C.IOTEX_SYMBOL,
@@ -955,7 +962,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static void addRequiredCredentials(long chainId, HttpService publicNodeService)
     {
-
+        if ((chainId == KLAYTN_BOABAB_ID || chainId == KLAYTN_ID) && usesProductionKey)
+        {
+            publicNodeService.addHeader("x-chain-id", Long.toString(chainId));
+            publicNodeService.addHeader("Authorization", "Basic " + getKlaytnKey());
+        }
     }
 
     public static List<Long> addDefaultNetworks()

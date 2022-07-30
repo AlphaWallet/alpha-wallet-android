@@ -126,6 +126,19 @@ Java_com_alphawallet_app_repository_EthereumNetworkBase_getSecondaryInfuraKey( J
 }
 
 JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_EthereumNetworkBase_getKlaytnKey( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, klaytnKey);
+#elif (HAS_INFURA == 1)
+    return (*env)->NewStringUTF(env, IFKEY);
+#else
+    const jstring key = "da3717f25f824cc1baa32d812386d93f";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_service_TransactionsNetworkClient_getBSCExplorerKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)

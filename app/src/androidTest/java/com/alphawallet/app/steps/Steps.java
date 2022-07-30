@@ -41,8 +41,8 @@ public class Steps
             click(withText(R.string.ok));
         }
         click(withId(R.id.button_create));
-        Helper.wait(10);
-        click(withText(R.string.action_close)); // works well locally but NOT work with GitHub actions
+//        Helper.wait(10);
+//        click(withText(R.string.action_close)); // works well locally but NOT work with GitHub actions
     }
 
     public static void visit(String urlString)
@@ -129,7 +129,7 @@ public class Steps
         click(withId(R.id.nav_settings_text));
     }
 
-    private static void toggleSwitch(int id) {
+    public static void toggleSwitch(int id) {
         onView(allOf(withId(R.id.switch_material), isDescendantOfA(withId(id)))).perform(ViewActions.click());
     }
 

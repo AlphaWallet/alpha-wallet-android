@@ -104,7 +104,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
      */
 
     static {
-
         System.loadLibrary("keys");
     }
 

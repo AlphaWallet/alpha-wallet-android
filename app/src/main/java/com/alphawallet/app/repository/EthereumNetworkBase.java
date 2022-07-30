@@ -83,7 +83,6 @@ import java.util.Map;
 import java.util.Set;
 
 import io.reactivex.Single;
-import okhttp3.Credentials;
 
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {

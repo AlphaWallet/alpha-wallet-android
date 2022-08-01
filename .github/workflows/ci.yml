@@ -21,6 +21,10 @@ jobs:
       - name: Build the app
         run: sh ./build.sh
 
+      - name: Android Test Report
+        uses: asadmansr/android-test-report-action@v1.2.0
+        if: ${{ always() }}
+
       - name: Upload coverage reports to Codecov
         run: |
           curl -Os https://uploader.codecov.io/latest/macos/codecov

@@ -21,9 +21,12 @@ jobs:
       - name: Build the app
         run: sh ./build.sh
 
-      - name: Android Test Report
-        uses: asadmansr/android-test-report-action@v1.2.0
-        if: ${{ always() }}
+      - name: Upload Test Reports Folder
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }} # IMPORTANT: Upload reports regardless of status
+        with:
+          name: ut-reports
+          path: app/build/reports/tests
 
       - name: Upload coverage reports to Codecov
         run: |

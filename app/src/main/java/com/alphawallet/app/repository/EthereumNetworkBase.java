@@ -111,7 +111,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static native String getInfuraKey();
     public static native String getSecondaryInfuraKey();
     public static native String getKlaytnKey();
-    private static final boolean usesProductionKey = !getInfuraKey().equals(DEFAULT_INFURA_KEY);
+    public static final boolean usesProductionKey = !getInfuraKey().equals(DEFAULT_INFURA_KEY);
 
     public static final String FREE_MAINNET_RPC_URL = "https://main-rpc.linkpool.io";
     public static final String FREE_POLYGON_RPC_URL = "https://polygon-rpc.com";
@@ -956,15 +956,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static List<ChainSpec> extraChains()
     {
         return null;
-    }
-
-    public static void addRequiredCredentials(long chainId, HttpService publicNodeService)
-    {
-        if ((chainId == KLAYTN_BOABAB_ID || chainId == KLAYTN_ID) && usesProductionKey)
-        {
-            publicNodeService.addHeader("x-chain-id", Long.toString(chainId));
-            publicNodeService.addHeader("Authorization", "Basic " + getKlaytnKey());
-        }
     }
 
     public static List<Long> addDefaultNetworks()

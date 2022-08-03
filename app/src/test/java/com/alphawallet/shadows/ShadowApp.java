@@ -1,5 +1,7 @@
 package com.alphawallet.shadows;
 
+import android.app.Application;
+
 import com.alphawallet.app.App;
 
 import org.robolectric.annotation.Implementation;

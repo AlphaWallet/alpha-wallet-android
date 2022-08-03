@@ -3,15 +3,23 @@ package com.alphawallet.app.repository;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import com.alphawallet.shadows.ShadowApp;
+import com.alphawallet.shadows.ShadowSystem;
 import com.alphawallet.utils.ReflectionUtil;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.annotation.Config;
 import org.web3j.protocol.http.HttpService;
 
 import java.util.HashMap;
 
+@RunWith(AndroidJUnit4.class)
+@Config(shadows = {ShadowApp.class, ShadowSystem.class})
 public class HttpServiceHelperTest
 {
     private HttpService httpService;

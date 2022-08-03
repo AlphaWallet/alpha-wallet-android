@@ -10,5 +10,7 @@ import org.robolectric.shadows.ShadowApplication;
 public class ShadowApp extends ShadowApplication
 {
     @Implementation
-    public void onCreate() {}
+    public void onCreate()
+    {
+    }
 }

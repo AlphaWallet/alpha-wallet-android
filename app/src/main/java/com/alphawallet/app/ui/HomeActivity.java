@@ -33,6 +33,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -97,39 +99,46 @@ import timber.log.Timber;
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
         FragmentMessenger, Runnable, SignAuthenticationCallback, LifecycleObserver, PagerCallback
 {
-    private HomeViewModel viewModel;
+    public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
+    public static final int RC_ASSET_NOTIFICATION_PERM = 224;
+    public static final int DAPP_BARCODE_READER_REQUEST_CODE = 1;
+    public static final String STORED_PAGE = "currentPage";
+    public static final String RESET_TOKEN_SERVICE = "HOME_reset_ts";
+    public static final String AW_MAGICLINK = "aw.app/";
+    public static final String AW_MAGICLINK_DIRECT = "openurl?url=";
+    private static boolean updatePrompt = false;
+    private final FragmentStateAdapter pager2Adapter;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> getSupportFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle()));
 
+    private HomeViewModel viewModel;
     private Dialog dialog;
     private ViewPager2 viewPager;
-    private final FragmentStateAdapter pager2Adapter;
     private LinearLayout successOverlay;
     private ImageView successImage;
-    private final Handler handler = new Handler(Looper.getMainLooper());
     private HomeReceiver homeReceiver;
     private Fragment settingsFragment;
     private Fragment dappBrowserFragment;
     private Fragment walletFragment;
     private Fragment activityFragment;
     private String walletTitle;
-    private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
     private boolean isForeground;
     private volatile boolean tokenClicked = false;
     private String openLink;
 
-    public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
-    public static final int RC_ASSET_NOTIFICATION_PERM = 224;
-
-    public static final int DAPP_BARCODE_READER_REQUEST_CODE = 1;
-    public static final String STORED_PAGE = "currentPage";
-    public static final String RESET_TOKEN_SERVICE = "HOME_reset_ts";
-    public static final String AW_MAGICLINK = "aw.app/";
-    public static final String AW_MAGICLINK_DIRECT = "openurl?url=";
-
     public HomeActivity()
     {
         // fragment creation is shifted to adapter
         pager2Adapter = new ScreenSlidePagerAdapter(this);
+    }
+
+    public static void setUpdatePrompt()
+    {
+        //TODO: periodically check this value (eg during page flipping)
+        //Set alert to user to update their app
+        updatePrompt = true;
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -309,7 +318,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             viewModel.setNewWallet(wallet.address, false);
             Intent selectNetworkIntent = new Intent(this, SelectNetworkFilterActivity.class);
             selectNetworkIntent.putExtra(C.EXTRA_SINGLE_ITEM, false);
-            startActivity(selectNetworkIntent);
+            networkSettingsHandler.launch(selectNetworkIntent);
         }
     }
 
@@ -842,44 +851,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private class ScreenSlidePagerAdapter extends FragmentStateAdapter
-    {
-        public ScreenSlidePagerAdapter(@NonNull FragmentActivity fragmentActivity)
-        {
-            super(fragmentActivity);
-        }
-
-        @NonNull
-        @Override
-        public Fragment createFragment(int position)
-        {
-            switch (WalletPage.values()[position])
-            {
-                case WALLET:
-                default:
-                    walletFragment = new WalletFragment();
-                    return walletFragment;
-                case ACTIVITY:
-                    activityFragment = new ActivityFragment();
-                    return activityFragment;
-                case DAPP_BROWSER:
-                    if (CustomViewSettings.hideDappBrowser()) dappBrowserFragment = new Fragment();
-                    else dappBrowserFragment = new DappBrowserFragment();
-                    return dappBrowserFragment;
-                case SETTINGS:
-                    settingsFragment = new NewSettingsFragment();
-                    return settingsFragment;
-            }
-        }
-
-        @Override
-        public int getItemCount()
-        {
-            return WalletPage.values().length;
-        }
-
-    }
-
     private BaseFragment getFragment(WalletPage page)
     {
         //build map, return correct fragment.
@@ -1124,13 +1095,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         return super.onPrepareOptionsPanel(view, menu);
     }
 
-    public static void setUpdatePrompt()
-    {
-        //TODO: periodically check this value (eg during page flipping)
-        //Set alert to user to update their app
-        updatePrompt = true;
-    }
-
     void postponeWalletBackupWarning(String walletAddress)
     {
         removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
@@ -1252,5 +1216,43 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             Timber.tag("Intent").w(e);
         }
+    }
+
+    private class ScreenSlidePagerAdapter extends FragmentStateAdapter
+    {
+        public ScreenSlidePagerAdapter(@NonNull FragmentActivity fragmentActivity)
+        {
+            super(fragmentActivity);
+        }
+
+        @NonNull
+        @Override
+        public Fragment createFragment(int position)
+        {
+            switch (WalletPage.values()[position])
+            {
+                case WALLET:
+                default:
+                    walletFragment = new WalletFragment();
+                    return walletFragment;
+                case ACTIVITY:
+                    activityFragment = new ActivityFragment();
+                    return activityFragment;
+                case DAPP_BROWSER:
+                    if (CustomViewSettings.hideDappBrowser()) dappBrowserFragment = new Fragment();
+                    else dappBrowserFragment = new DappBrowserFragment();
+                    return dappBrowserFragment;
+                case SETTINGS:
+                    settingsFragment = new NewSettingsFragment();
+                    return settingsFragment;
+            }
+        }
+
+        @Override
+        public int getItemCount()
+        {
+            return WalletPage.values().length;
+        }
+
     }
 }

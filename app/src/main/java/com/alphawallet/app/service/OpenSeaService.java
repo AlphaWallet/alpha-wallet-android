@@ -13,6 +13,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.util.JsonUtils;
+import com.alphawallet.app.util.SystemWrapper;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.gson.Gson;
 
@@ -47,7 +48,7 @@ public class OpenSeaService
 
     static
     {
-        System.loadLibrary("keys");
+        SystemWrapper.loadKeysLibrary();
     }
 
     public static native String getOpenSeaKey();

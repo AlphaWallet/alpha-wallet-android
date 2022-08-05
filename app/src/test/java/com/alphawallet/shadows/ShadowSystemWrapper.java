@@ -9,7 +9,7 @@ import org.robolectric.annotation.Implements;
 public class ShadowSystemWrapper
 {
     @Implementation
-    public static void loadLibrary(String name)
+    public static void loadKeysLibrary()
     {
     }
 }

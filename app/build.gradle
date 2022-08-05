@@ -28,6 +28,15 @@ apply plugin: 'com.worker8.android_lint_reporter'
 apply plugin: 'io.gitlab.arturbosch.detekt'
 apply plugin: 'com.dicedmelon.gradle.jacoco-android'
 
+jacoco {
+    toolVersion = "0.8.8"
+}
+
+tasks.withType(Test) {
+    jacoco.includeNoLocationClasses = true
+    jacoco.excludes = ['jdk.internal.*']
+}
+
 jacocoAndroidUnitTestReport {
     csv.enabled false
     html.enabled true

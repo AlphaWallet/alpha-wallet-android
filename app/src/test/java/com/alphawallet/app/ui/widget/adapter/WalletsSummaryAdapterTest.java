@@ -45,7 +45,7 @@ public class WalletsSummaryAdapterTest
     public void setUp() throws Exception
     {
         doReturn("Summary").when(context).getString(anyInt());
-        WalletsSummaryAdapter raw = new WalletsSummaryAdapter(context, null, genericWalletInteract, false);
+        WalletsSummaryAdapter raw = new WalletsSummaryAdapter(context, null, genericWalletInteract, false, viewModel.tokensService, viewModel.assetService, viewModel.tokenRepository);
         adapter = PowerMockito.spy(raw);
         doNothing().when(adapter).notifyDataSetChanged();
     }

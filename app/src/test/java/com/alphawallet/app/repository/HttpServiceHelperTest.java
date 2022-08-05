@@ -48,4 +48,13 @@ public class HttpServiceHelperTest
         assertFalse(headers.containsKey("x-chain-id"));
         assertFalse(headers.containsKey("Authorization"));
     }
+
+    @Test
+    public void should_not_addRequiredCredentials_for_non_KLAYTN_chain() throws Exception
+    {
+        HttpServiceHelper.addRequiredCredentials(1, httpService, "klaytn-key", false);
+        HashMap<String, String> headers = httpService.getHeaders();
+        assertFalse(headers.containsKey("x-chain-id"));
+        assertFalse(headers.containsKey("Authorization"));
+    }
 }

@@ -13,6 +13,7 @@ import com.alphawallet.shadows.ShadowApp;
 import com.alphawallet.shadows.ShadowEthereumNetworkBase;
 import com.alphawallet.shadows.ShadowKeyService;
 import com.alphawallet.shadows.ShadowRealmManager;
+import com.alphawallet.shadows.ShadowSystemWrapper;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +22,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowPackageManager;
 
 @RunWith(AndroidJUnit4.class)
-@Config(shadows = {ShadowApp.class, ShadowEthereumNetworkBase.class, ShadowRealmManager.class, ShadowKeyService.class, ShadowAnalyticsService.class, ShadowPackageManager.class})
+@Config(shadows = {ShadowApp.class, ShadowSystemWrapper.class, ShadowEthereumNetworkBase.class, ShadowRealmManager.class, ShadowKeyService.class, ShadowAnalyticsService.class, ShadowPackageManager.class})
 public class HomeActivityTest
 {
     @Test

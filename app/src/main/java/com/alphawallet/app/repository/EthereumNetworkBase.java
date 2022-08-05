@@ -28,7 +28,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BAOBAB_RPC;
-import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BOABAB_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BAOBAB_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
@@ -62,6 +62,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.util.SystemWrapper;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ChainSpec;
 import com.google.gson.Gson;
@@ -70,7 +71,6 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.http.HttpService;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -104,13 +104,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
      */
 
     static {
-        System.loadLibrary("keys");
+        SystemWrapper.loadLibrary("keys");
     }
 
     public static native String getAmberDataKey();
     public static native String getInfuraKey();
     public static native String getSecondaryInfuraKey();
-    private static final boolean usesProductionKey = !getInfuraKey().equals(DEFAULT_INFURA_KEY);
+    public static native String getKlaytnKey();
+    public static final boolean usesProductionKey = !getInfuraKey().equals(DEFAULT_INFURA_KEY);
 
     public static final String FREE_MAINNET_RPC_URL = "https://main-rpc.linkpool.io";
     public static final String FREE_POLYGON_RPC_URL = "https://polygon-rpc.com";
@@ -150,6 +151,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             : FREE_PALM_RPC_URL;
     public static final String PALM_TEST_RPC_URL = usesProductionKey ? "https://palm-testnet.infura.io/v3/" + getInfuraKey()
             : FREE_PALM_TEST_RPC_URL;
+    public static final String USE_KLAYTN_RPC = usesProductionKey ? "https://node-api.klaytnapi.com/v1/klaytn"
+            : KLAYTN_RPC;
+    public static final String USE_KLAYTN_BAOBAB_RPC = usesProductionKey ? "https://node-api.klaytnapi.com/v1/klaytn"
+            : KLAYTN_BAOBAB_RPC;
     public static final String CRONOS_MAIN_RPC_URL = "https://evm.cronos.org";
 
     // Use the "Free" routes as backup in order to diversify node usage; to avoid single point of failure
@@ -322,12 +327,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer.palm-uat.xyz/api?"));
 
             put(KLAYTN_ID, new NetworkInfo(C.KLAYTN_NAME, C.KLAYTN_SYMBOL,
-                    KLAYTN_RPC,
+                    USE_KLAYTN_RPC,
                     "https://scope.klaytn.com/tx/", KLAYTN_ID, "",
                     "https://api.covalenthq.com/v1/" + COVALENT));
-            put(KLAYTN_BOABAB_ID, new NetworkInfo(C.KLAYTN_BAOBAB_NAME, C.KLAYTN_SYMBOL,
-                    KLAYTN_BAOBAB_RPC,
-                    "https://baobab.scope.klaytn.com/tx/", KLAYTN_BOABAB_ID, "",
+            put(KLAYTN_BAOBAB_ID, new NetworkInfo(C.KLAYTN_BAOBAB_NAME, C.KLAYTN_SYMBOL,
+                    USE_KLAYTN_BAOBAB_RPC,
+                    "https://baobab.scope.klaytn.com/tx/", KLAYTN_BAOBAB_ID, "",
                     ""));
             put(IOTEX_MAINNET_ID, new NetworkInfo(C.IOTEX_NAME, C.IOTEX_SYMBOL,
                     IOTEX_MAINNET_RPC_URL,
@@ -395,7 +400,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(PALM_ID, R.drawable.ic_icons_network_palm);
             put(PALM_TEST_ID, R.drawable.palm_logo_test);
             put(KLAYTN_ID, R.drawable.ic_klaytn_network_logo);
-            put(KLAYTN_BOABAB_ID, R.drawable.ic_klaytn_test);
+            put(KLAYTN_BAOBAB_ID, R.drawable.ic_klaytn_test);
             put(IOTEX_MAINNET_ID, R.drawable.ic_iotex);
             put(IOTEX_TESTNET_ID, R.drawable.ic_iotex_test);
             put(AURORA_MAINNET_ID, R.drawable.ic_aurora);
@@ -438,7 +443,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(PALM_ID, R.drawable.ic_icons_network_palm);
             put(PALM_TEST_ID, R.drawable.palm_logo_test);
             put(KLAYTN_ID, R.drawable.ic_klaytn_network_logo);
-            put(KLAYTN_BOABAB_ID, R.drawable.ic_klaytn_test);
+            put(KLAYTN_BAOBAB_ID, R.drawable.ic_klaytn_test);
             put(IOTEX_MAINNET_ID, R.drawable.ic_iotex);
             put(IOTEX_TESTNET_ID, R.drawable.ic_iotex_test);
             put(AURORA_MAINNET_ID, R.drawable.ic_aurora);
@@ -481,7 +486,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(PALM_ID, R.color.palm_main);
             put(PALM_TEST_ID, R.color.palm_test);
             put(KLAYTN_ID, R.color.klaytn_main);
-            put(KLAYTN_BOABAB_ID, R.color.klaytn_test);
+            put(KLAYTN_BAOBAB_ID, R.color.klaytn_test);
             put(IOTEX_MAINNET_ID, R.color.iotex_mainnet);
             put(IOTEX_TESTNET_ID, R.color.iotex_mainnet);
             put(AURORA_MAINNET_ID, R.color.aurora_mainnet);
@@ -499,7 +504,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     private static final List<Long> hasGasOracleAPI = Arrays.asList(MAINNET_ID, HECO_ID, BINANCE_MAIN_ID, MATIC_ID);
 
     //These chains don't allow custom gas
-    private static final List<Long> hasLockedGas = Arrays.asList(OPTIMISTIC_MAIN_ID, OPTIMISTIC_TEST_ID, ARBITRUM_MAIN_ID, ARBITRUM_TEST_ID, KLAYTN_ID, KLAYTN_BOABAB_ID);
+    private static final List<Long> hasLockedGas = Arrays.asList(OPTIMISTIC_MAIN_ID, OPTIMISTIC_TEST_ID, ARBITRUM_MAIN_ID, ARBITRUM_TEST_ID, KLAYTN_ID, KLAYTN_BAOBAB_ID);
 
     private static final List<Long> hasOpenSeaAPI = Arrays.asList(MAINNET_ID, MATIC_ID, RINKEBY_ID);
 
@@ -951,11 +956,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static List<ChainSpec> extraChains()
     {
         return null;
-    }
-
-    public static void addRequiredCredentials(long chainId, HttpService publicNodeService)
-    {
-
     }
 
     public static List<Long> addDefaultNetworks()

@@ -118,7 +118,7 @@ public class TokenRepository implements TokenRepositoryType {
     private void buildWeb3jClient(NetworkInfo networkInfo)
     {
         AWHttpService publicNodeService = new AWHttpService(networkInfo.rpcServerUrl, networkInfo.backupNodeUrl, okClient, false);
-        EthereumNetworkRepository.addRequiredCredentials(networkInfo.chainId, publicNodeService);
+        HttpServiceHelper.addRequiredCredentials(networkInfo.chainId, publicNodeService, EthereumNetworkBase.getKlaytnKey(), EthereumNetworkBase.usesProductionKey);
         web3jNodeServers.put(networkInfo.chainId, Web3j.build(publicNodeService));
     }
 
@@ -1191,7 +1191,7 @@ public class TokenRepository implements TokenRepositoryType {
                 .retryOnConnectionFailure(true)
                 .build();
         AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId (chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);
-        EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
+        HttpServiceHelper.addRequiredCredentials(chainId, publicNodeService, EthereumNetworkBase.getKlaytnKey(), EthereumNetworkBase.usesProductionKey);
         return Web3j.build(publicNodeService);
     }
 

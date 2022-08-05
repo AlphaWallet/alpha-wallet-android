@@ -45,7 +45,7 @@ Java_com_alphawallet_app_repository_EthereumNetworkBase_getAmberDataKey( JNIEnv*
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_EthereumNetworkBase_getInfuraKey( JNIEnv* env, jobject thiz )
+Java_com_alphawallet_app_repository_EthereumNetworkBase_getInfuraKeyNative( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, infuraKey);
@@ -126,7 +126,7 @@ Java_com_alphawallet_app_repository_EthereumNetworkBase_getSecondaryInfuraKey( J
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_EthereumNetworkBase_getKlaytnKey( JNIEnv* env, jobject thiz )
+Java_com_alphawallet_app_repository_EthereumNetworkBase_getKlaytnKeyNative( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, klaytnKey);

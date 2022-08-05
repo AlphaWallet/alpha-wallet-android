@@ -15,7 +15,10 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.WalletItem;
+import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.TextHolder;
@@ -43,15 +46,22 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     private final Context context;
     private final Realm realm;
     private final GenericWalletInteract walletInteract;
+    private final TokensService tokensService;
+    private final AssetDefinitionService assetDefinitionService;
+    private final TokenRepositoryType tokenRepositoryType;
+
 
     public WalletsSummaryAdapter(Context ctx,
-                                 OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract, boolean activeMainnet) {
+                                 OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract, boolean activeMainnet, TokensService tokensService, AssetDefinitionService assetService, TokenRepositoryType tokenRepository) {
         this.onSetWalletDefaultListener = onSetWalletDefaultListener;
         this.mainNetActivated = activeMainnet;
         this.wallets = new ArrayList<>();
         this.context = ctx;
         this.realm = genericWalletInteract.getWalletRealm();
         this.walletInteract = genericWalletInteract;
+        this.tokensService = tokensService;
+        this.assetDefinitionService = assetService;
+        this.tokenRepositoryType = tokenRepository;
     }
 
     @NotNull
@@ -60,7 +70,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         BinderViewHolder binderViewHolder = null;
         switch (viewType) {
             case WalletHolder.VIEW_TYPE:
-                binderViewHolder = new WalletSummaryHolder(R.layout.item_wallet_summary_manage, parent, this, realm);
+                binderViewHolder = new WalletSummaryHolder(R.layout.item_wallet_summary_manage, parent, this, realm, tokensService, context, assetDefinitionService, tokenRepositoryType, mainNetActivated);
             break;
             case TextHolder.VIEW_TYPE:
                 binderViewHolder = new TextHolder(R.layout.item_standard_header, parent);

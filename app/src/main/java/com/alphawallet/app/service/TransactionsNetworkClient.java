@@ -32,6 +32,7 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
+import com.alphawallet.app.util.SystemWrapper;
 import com.alphawallet.token.entity.ContractAddress;
 import com.google.gson.Gson;
 
@@ -79,7 +80,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final RealmManager realmManager;
 
     static {
-        System.loadLibrary("keys");
+        SystemWrapper.loadKeysLibrary();
     }
 
     public static native String getEtherscanKey();

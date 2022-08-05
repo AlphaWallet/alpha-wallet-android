@@ -8,6 +8,7 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AnalyticsServiceType;
+import com.alphawallet.app.util.SystemWrapper;
 import com.alphawallet.app.util.Utils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -21,7 +22,7 @@ public class OnRampRepository implements OnRampRepositoryType {
 
     static
     {
-        System.loadLibrary("keys");
+        SystemWrapper.loadKeysLibrary();
     }
 
     private final Context context;

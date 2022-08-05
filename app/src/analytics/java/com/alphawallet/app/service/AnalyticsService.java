@@ -8,6 +8,7 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ServiceErrorException;
+import com.alphawallet.app.util.SystemWrapper;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -26,7 +27,7 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
     public static native String getAnalyticsKey();
 
     static {
-        System.loadLibrary("keys");
+        SystemWrapper.loadKeysLibrary();
     }
 
     public AnalyticsService(Context context)

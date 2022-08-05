@@ -108,9 +108,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     public static native String getAmberDataKey();
-    public static native String getInfuraKey();
+    private static native String getInfuraKeyNative();
     public static native String getSecondaryInfuraKey();
-    public static native String getKlaytnKey();
+    private static native String getKlaytnKeyNative();
     public static final boolean usesProductionKey = !getInfuraKey().equals(DEFAULT_INFURA_KEY);
 
     public static final String FREE_MAINNET_RPC_URL = "https://main-rpc.linkpool.io";
@@ -1137,5 +1137,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public NetworkInfo getBuiltInNetwork(long chainId)
     {
         return builtinNetworkMap.get(chainId);
+    }
+
+    public static String getInfuraKey() {
+        return getInfuraKeyNative();
+    }
+
+    public static String getKlaytnKey() {
+        return getKlaytnKeyNative();
     }
 }

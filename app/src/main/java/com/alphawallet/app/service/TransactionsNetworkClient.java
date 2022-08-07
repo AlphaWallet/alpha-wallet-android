@@ -27,12 +27,12 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
-import com.alphawallet.app.util.SystemWrapper;
 import com.alphawallet.token.entity.ContractAddress;
 import com.google.gson.Gson;
 
@@ -79,12 +79,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final Gson gson;
     private final RealmManager realmManager;
 
-    static {
-        SystemWrapper.loadKeysLibrary();
-    }
-
     public static native String getEtherscanKey();
-    public static native String getBSCExplorerKey();
     public static native String getCovalentKey();
     public static native String getPolygonScanKey();
     public static native String getAuroraScanKey();
@@ -92,13 +87,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     public TransactionsNetworkClient(
             OkHttpClient httpClient,
             Gson gson,
-            RealmManager realmManager
-            ) {
+            RealmManager realmManager,
+            KeyProvider keyProvider) {
         this.httpClient = httpClient;
         this.gson = gson;
         this.realmManager = realmManager;
 
-        BSC_EXPLORER_API_KEY = getBSCExplorerKey().length() > 0 ? "&apikey=" + getBSCExplorerKey() : "";
+        BSC_EXPLORER_API_KEY = keyProvider.getBSCExplorerKey().length() > 0 ? "&apikey=" + keyProvider.getBSCExplorerKey() : "";
         ETHERSCAN_API_KEY = "&apikey=" + getEtherscanKey();
         POLYGONSCAN_API_KEY = getPolygonScanKey().length() > 3 ? "&apikey=" + getPolygonScanKey() : "";
         AURORASCAN_API_KEY = getAuroraScanKey().length() > 3 ? "&apikey=" + getAuroraScanKey() : "";

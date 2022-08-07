@@ -1,9 +1,12 @@
 package com.alphawallet.app.di;
 
+import static com.alphawallet.app.service.KeystoreAccountService.KEYSTORE_FOLDER;
+
 import android.content.Context;
 
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.OnRampRepository;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
@@ -48,8 +51,6 @@ import dagger.hilt.InstallIn;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import okhttp3.OkHttpClient;
-
-import static com.alphawallet.app.service.KeystoreAccountService.KEYSTORE_FOLDER;
 
 @Module
 @InstallIn(SingletonComponent.class)
@@ -119,14 +120,16 @@ public class RepositoriesModule {
         return new TransactionsRealmCache(realmManager);
     }
 
-	@Singleton
-	@Provides
+    @Singleton
+    @Provides
     TransactionsNetworkClientType provideBlockExplorerClient(
-			OkHttpClient httpClient,
-			Gson gson,
-			RealmManager realmManager) {
-		return new TransactionsNetworkClient(httpClient, gson, realmManager);
-	}
+            OkHttpClient httpClient,
+            Gson gson,
+            RealmManager realmManager,
+            KeyProvider keyProvider)
+    {
+        return new TransactionsNetworkClient(httpClient, gson, realmManager, keyProvider);
+    }
 
 	@Singleton
     @Provides

@@ -136,7 +136,7 @@ Java_com_alphawallet_app_repository_EthereumNetworkBase_getKlaytnKeyNative( JNIE
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_service_TransactionsNetworkClient_getBSCExplorerKey( JNIEnv* env, jobject thiz )
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBSCExplorerKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getBSCExplorerKey(env);

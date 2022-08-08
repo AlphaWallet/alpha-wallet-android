@@ -287,8 +287,8 @@ dependencies {
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
-    testImplementation 'com.google.dagger:hilt-android-testing:2.43.2'
-    testAnnotationProcessor 'com.google.dagger:hilt-android-compiler:2.43.2'
+//    testImplementation 'com.google.dagger:hilt-android-testing:2.43.2'
+//    testAnnotationProcessor 'com.google.dagger:hilt-android-compiler:2.43.2'
 
     // Component tests
     testImplementation 'org.robolectric:robolectric:4.8.1'

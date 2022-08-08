@@ -29,6 +29,7 @@ import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.util.EnsResolver;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.MagicLinkData;
@@ -77,6 +78,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private static final String TAG = "TRT";
     private final TokenLocalSource localSource;
+    private final KeyProvider keyProvider = KeyProviderFactory.get();
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final OkHttpClient okClient;
     private final Context context;
@@ -118,7 +120,7 @@ public class TokenRepository implements TokenRepositoryType {
     private void buildWeb3jClient(NetworkInfo networkInfo)
     {
         AWHttpService publicNodeService = new AWHttpService(networkInfo.rpcServerUrl, networkInfo.backupNodeUrl, okClient, false);
-        HttpServiceHelper.addRequiredCredentials(networkInfo.chainId, publicNodeService, EthereumNetworkBase.getKlaytnKey(), EthereumNetworkBase.usesProductionKey);
+        HttpServiceHelper.addRequiredCredentials(networkInfo.chainId, publicNodeService, keyProvider.getKlaytnKey(), EthereumNetworkBase.usesProductionKey);
         web3jNodeServers.put(networkInfo.chainId, Web3j.build(publicNodeService));
     }
 
@@ -1190,7 +1192,7 @@ public class TokenRepository implements TokenRepositoryType {
                 .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();
-        AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId (chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);
+        AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId(chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);
         HttpServiceHelper.addRequiredCredentials(chainId, publicNodeService, EthereumNetworkBase.getKlaytnKey(), EthereumNetworkBase.usesProductionKey);
         return Web3j.build(publicNodeService);
     }

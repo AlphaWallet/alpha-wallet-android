@@ -46,13 +46,6 @@ public class AWEnsResolver extends EnsResolver
     private final Context context;
     private final OkHttpClient client;
 
-    static
-    {
-        SystemWrapper.loadKeysLibrary();
-    }
-
-    public static native String getOpenSeaKey();
-
     public AWEnsResolver(Web3j web3j, Context context)
     {
         super(web3j, DEFAULT_SYNC_THRESHOLD);

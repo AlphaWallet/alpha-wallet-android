@@ -12,8 +12,9 @@ import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.repository.KeyProviderFactory;
+import com.alphawallet.app.repository.KeyProviderJNIImpl;
 import com.alphawallet.app.util.JsonUtils;
-import com.alphawallet.app.util.SystemWrapper;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.gson.Gson;
 
@@ -46,13 +47,6 @@ public class OpenSeaService
     private final LongSparseArray<Long> networkCheckTimes = new LongSparseArray<>();
     private final LongSparseArray<Integer> pageOffsets = new LongSparseArray<>();
 
-    static
-    {
-        SystemWrapper.loadKeysLibrary();
-    }
-
-    public static native String getOpenSeaKey();
-
     public OpenSeaService()
     {
         pageOffsets.clear();
@@ -72,7 +66,7 @@ public class OpenSeaService
                 .method("GET", null)
                 .addHeader("Content-Type", "application/json");
 
-        String apiKey = getOpenSeaKey();
+        String apiKey = KeyProviderFactory.get().getOpenSeaKey();
         if (networkId != EthereumNetworkBase.RINKEBY_ID && !TextUtils.isEmpty(apiKey) && !apiKey.equals("..."))
         {
             requestB.addHeader("X-API-KEY", apiKey);

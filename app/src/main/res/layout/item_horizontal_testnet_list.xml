@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:id="@+id/chainLayout"
+    tools:ignore="MissingDefaultResource">
+
+   <!-- <com.google.android.material.card.MaterialCardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:paddingEnd="@dimen/dp5"
+        android:elevation="@dimen/dp18">
+         app:cardCornerRadius="@dimen/dp8">
+         app:cardUseCompatPadding="true"
+         app:strokeColor="@color/mercury"
+         app:strokeWidth="0.5dp"-->
+
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:visibility="visible"
+        android:paddingEnd="@dimen/dp7">
+
+        <com.alphawallet.app.widget.TokenIcon
+            android:id="@+id/token_icon"
+            android:layout_width="@dimen/dp25"
+            android:layout_height="@dimen/dp25"
+            android:layout_gravity="center" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_asset_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/eth"
+            android:textSize="@dimen/dp14"
+            android:visibility="gone" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/title_set_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/dp5"
+            android:textSize="@dimen/dp12" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+    <!--</com.google.android.material.card.MaterialCardView>-->
+
+
+</RelativeLayout>

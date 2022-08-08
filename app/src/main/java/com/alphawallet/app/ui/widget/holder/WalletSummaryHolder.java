@@ -5,6 +5,7 @@ import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_VALUE;
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.IS_MAINNET_ACTIVE;
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.IS_SYNCED;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -17,22 +18,40 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.MutableLiveData;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.ServiceException;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.interact.FetchTokensInteract;
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.entity.RealmWalletData;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.WalletActionsActivity;
+import com.alphawallet.app.ui.widget.adapter.TestNetHorizontalListAdapter;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.app.widget.UserAvatar;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import javax.inject.Inject;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import timber.log.Timber;
 
 public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements View.OnClickListener, AvatarWriteCallback
 {
@@ -51,15 +70,26 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     private final TextView walletAddressSeparator;
     private final TextView walletAddressText;
     private final TextView wallet24hChange;
+    private RecyclerView recyclerView;
+    private TestNetHorizontalListAdapter testNetHorizontalListAdapter;
     private final Realm realm;
     private RealmResults<RealmWalletData> realmUpdate;
 
     private final WalletClickCallback clickCallback;
     private Wallet wallet = null;
+    private MutableLiveData<TokenCardMeta[]> tokens = new MutableLiveData<>();
+    TokensService tokensServices;
+    protected final MutableLiveData<ErrorEnvelope> error = new MutableLiveData<>();
+    protected Disposable disposable;
+    private Context context;
+    AssetDefinitionService assetDefinitionService;
+    TokenRepositoryType tokenRepositoryType;
+    private Boolean isMainNetActive = false;
 
-    public WalletSummaryHolder(int resId, ViewGroup parent, WalletClickCallback callback, Realm realm)
+    public WalletSummaryHolder(int resId, ViewGroup parent, WalletClickCallback callback, Realm realm, TokensService tokensService, Context context, AssetDefinitionService assetDefinitionService, TokenRepositoryType tokenRepositoryType, boolean mainNetActivated)
     {
         super(resId, parent);
+
         defaultWalletIndicator = findViewById(R.id.image_default_indicator);
         manageWalletBtn = findViewById(R.id.manage_wallet_btn);
         walletIcon = findViewById(R.id.wallet_icon);
@@ -69,19 +99,60 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         walletAddressText = findViewById(R.id.wallet_address);
         walletClickLayout = findViewById(R.id.wallet_click_layer);
         wallet24hChange = findViewById(R.id.wallet_24h_change);
+        recyclerView = findViewById(R.id.horizontal_list);
+        isMainNetActive = mainNetActivated;
+        tokensServices = tokensService;
         clickCallback = callback;
+        this.context = context;
+        this.assetDefinitionService = assetDefinitionService;
+        this.tokenRepositoryType = tokenRepositoryType;
+
+
         manageWalletLayout = findViewById(R.id.layout_manage_wallet);
         this.realm = realm;
+    }
+
+    private void onTokenMetas(TokenCardMeta[] metaTokens)
+    {
+        tokens.postValue(metaTokens);
+        testNetHorizontalListAdapter = new TestNetHorizontalListAdapter(metaTokens, tokensServices, context, assetDefinitionService, isMainNetActive);
+        recyclerView.setAdapter(testNetHorizontalListAdapter);
+        testNetHorizontalListAdapter.notifyDataSetChanged();
+    }
+
+    protected void onError(Throwable throwable)
+    {
+        if (throwable instanceof ServiceException)
+        {
+            error.postValue(((ServiceException) throwable).error);
+        }
+        else
+        {
+            String message = throwable.getMessage();
+            if (TextUtils.isEmpty(message))
+            {
+                error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null, throwable));
+            }
+            else
+            {
+                error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, message, throwable));
+            }
+        }
     }
 
     @Override
     public void bind(@Nullable Wallet data, @NonNull Bundle addition)
     {
+
+
         walletAddressText.setText(null);
+
+
         if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
 
         if (data != null)
         {
+
             wallet = fetchWallet(data);
             walletClickLayout.setOnClickListener(this);
             manageWalletLayout.setOnClickListener(this);
@@ -211,13 +282,21 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         RealmWalletData realmWallet = realm.where(RealmWalletData.class)
                 .equalTo("address", w.address)
                 .findFirst();
-
         if (realmWallet != null)
         {
             w.balance = realmWallet.getBalance();
             w.ENSname = realmWallet.getENSName();
             w.name = realmWallet.getName();
             w.ENSAvatar = realmWallet.getENSAvatar();
+        }
+
+        if (!isMainNetActive)
+        {
+            tokenRepositoryType.fetchTokenMetas(w, tokensServices.getNetworkFilters(), assetDefinitionService)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onTokenMetas, this::onError);
+
         }
 
         return w;

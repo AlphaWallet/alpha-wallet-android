@@ -112,6 +112,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         this.realm = realm;
     }
 
+
     private void onTokenMetas(TokenCardMeta[] metaTokens)
     {
         tokens.postValue(metaTokens);
@@ -292,6 +293,13 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 
         if (!isMainNetActive)
         {
+            //TODO - JB: populate the token list using this method:
+            // - from tokensService get the tokenFilter with getNetworkFilters()
+            // - loop through this list and check for non-zero balance testnet (using getTokenOrBase(chainId, w.address) )
+            // - send list of tokens below but use Token[] instead of TokenCardMeta[]. Now you won't need TokensService or AssetDefinitionService
+            // You can directly create the Token array and send to the bind method. And removing passing in the services
+
+
             tokenRepositoryType.fetchTokenMetas(w, tokensServices.getNetworkFilters(), assetDefinitionService)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

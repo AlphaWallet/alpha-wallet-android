@@ -28,9 +28,14 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
 {
     private final TokenCardMeta[] tokens;
     protected final TokensService tokensService;
-    private Context context;
+    private Context context; //TODO - JB: should be final
     protected final AssetDefinitionService assetDefinitionService;
-    private Boolean isMainNetActive = false;
+    private Boolean isMainNetActive = false; //TODO - JB: Do we need this?
+
+    //TODO - JB: populate the token list using this method:
+    // - from tokensService get the tokenFilter with getNetworkFilters()
+    // - loop through this list and check for non-zero balance testnet (using getTokenOrBase(chainId, tokensService.getCurrentAddress()) )
+    // - send list of tokens below but use Token[] instead of TokenCardMeta[]. Now you won't need TokensService or AssetDefinitionService
 
     public TestNetHorizontalListAdapter(TokenCardMeta[] tokens, TokensService tokensService, Context context, AssetDefinitionService assetDefinitionService, Boolean isMainNetActive)
     {
@@ -38,7 +43,7 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
         this.tokensService = tokensService;
         this.context = context;
         this.assetDefinitionService = assetDefinitionService;
-        this.isMainNetActive = isMainNetActive;
+        this.isMainNetActive = isMainNetActive; //TODO - JB: Do we need this?
     }
 
     @NonNull
@@ -50,9 +55,12 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
         return new TestNetHorizontalListAdapter.ViewHolder(view);
     }
 
+    //TODO - JB: Fix formatting (no whitespace at top of function, fix tabbing)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
+
+
 
 
                 Token token;
@@ -64,7 +72,7 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
                     if (token == null)
                     {
                         holder.price.setText("");
-                        ;
+                        ; //TODO - JB: delete this
                         return;
                     }
                     else if (tokens[position].getNameWeight() < 1000L && !token.isEthereum())
@@ -84,6 +92,7 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
                         holder.price.setText(context.getString(R.string.valueSymbol, coinBalance, symbol));
                     }
 
+                    // TODO - JB: use bindData(token.tokenInfo.chainId), remove import of assetDefinitionService
                     holder.tokenIcon.bindData(token, assetDefinitionService);
                     if (!token.isEthereum())
                         holder.tokenIcon.setChainIcon(token.tokenInfo.chainId); //Add in when we upgrade the design

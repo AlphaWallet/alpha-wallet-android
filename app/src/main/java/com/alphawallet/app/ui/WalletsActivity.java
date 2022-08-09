@@ -56,7 +56,7 @@ public class WalletsActivity extends BaseActivity implements
 {
     private final Handler handler = new Handler();
     private final long balanceChain = EthereumNetworkRepository.getOverrideToken().chainId;
-    WalletsViewModel viewModel;
+    private WalletsViewModel viewModel;
     private RecyclerView list;
     private SwipeRefreshLayout refreshLayout;
     private SystemView systemView;

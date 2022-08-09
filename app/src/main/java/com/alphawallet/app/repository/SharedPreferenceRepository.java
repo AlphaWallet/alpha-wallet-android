@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
@@ -369,14 +370,18 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public boolean isNewWallet(String address)
     {
-        String key = NEW_WALLET + address.toLowerCase(Locale.ENGLISH);
-        return pref.getBoolean(key, false);
+        return pref.getBoolean(keyOf(address), false);
     }
 
     @Override
     public void setNewWallet(String address, boolean isNewWallet)
     {
-        String key = NEW_WALLET + address.toLowerCase(Locale.ENGLISH);
-        pref.edit().putBoolean(key, isNewWallet).apply();
+        pref.edit().putBoolean(keyOf(address), isNewWallet).apply();
+    }
+
+    @NonNull
+    private String keyOf(String address)
+    {
+        return NEW_WALLET + address.toLowerCase(Locale.ENGLISH);
     }
 }

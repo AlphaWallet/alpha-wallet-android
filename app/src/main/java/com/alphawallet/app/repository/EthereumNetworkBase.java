@@ -87,10 +87,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 {
     public static final String COVALENT = "[COVALENT]";
 
-    private static final String DEFAULT_HOMEPAGE = "https://alphawallet.com/browser/";
-
-    private static final String POLYGON_HOMEPAGE = "https://alphawallet.com/browser-item-category/polygon/";
-
     private static final String GAS_API = "module=gastracker&action=gasoracle";
 
     public static final String DEFAULT_INFURA_KEY = "da3717f25f824cc1baa32d812386d93f";
@@ -980,24 +976,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static int decimalOverride(String address, long chainId)
     {
         return 0;
-    }
-
-    public static String defaultDapp(long chainId)
-    {
-        String dapp = (chainId == MATIC_ID || chainId == MATIC_TEST_ID) ? POLYGON_HOMEPAGE : DEFAULT_HOMEPAGE;
-        return dapp;
-    }
-
-    public static boolean isWithinHomePage(String url)
-    {
-        String homePageRoot = DEFAULT_HOMEPAGE.substring(0, DEFAULT_HOMEPAGE.length() - 1); //remove final slash
-        return (url != null && url.startsWith(homePageRoot));
-    }
-
-    public static boolean isDefaultDapp(String url)
-    {
-        return url != null && (url.equals(DEFAULT_HOMEPAGE)
-                || url.equals(POLYGON_HOMEPAGE));
     }
 
     public Token getBlankOverrideToken(NetworkInfo networkInfo)

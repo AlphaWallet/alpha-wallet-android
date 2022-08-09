@@ -1680,7 +1680,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         if (web3 != null)
         {
             String url = web3.getUrl();
-            return EthereumNetworkRepository.isDefaultDapp(url);
+            return DappBrowserUtils.isDefaultDapp(url);
         }
         else
         {
@@ -2277,7 +2277,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private String getDefaultDappUrl()
     {
         String customHome = viewModel.getHomePage(getContext());
-        return customHome != null ? customHome : EthereumNetworkRepository.defaultDapp(activeNetwork != null ? activeNetwork.chainId : 0);
+        return customHome != null ? customHome : DappBrowserUtils.defaultDapp(activeNetwork != null ? activeNetwork.chainId : 0);
     }
 
     @Override

@@ -93,7 +93,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     private static final String GAS_API = "module=gastracker&action=gasoracle";
 
-    private static final String DEFAULT_INFURA_KEY = "da3717f25f824cc1baa32d812386d93f";
+    public static final String DEFAULT_INFURA_KEY = "da3717f25f824cc1baa32d812386d93f";
     /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
        These hardcoded keys are fallbacks used by AlphaWallet forks.
 

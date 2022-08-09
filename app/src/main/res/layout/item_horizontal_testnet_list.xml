@@ -8,17 +8,6 @@
     android:id="@+id/chainLayout"
     tools:ignore="MissingDefaultResource">
 
-   <!-- <com.google.android.material.card.MaterialCardView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:paddingEnd="@dimen/dp5"
-        android:elevation="@dimen/dp18">
-         app:cardCornerRadius="@dimen/dp8">
-         app:cardUseCompatPadding="true"
-         app:strokeColor="@color/mercury"
-         app:strokeWidth="0.5dp"-->
-
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="wrap_content"
@@ -40,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/eth"
-            android:textSize="@dimen/dp14"
+            android:textSize="@dimen/sp14"
             android:visibility="gone" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -48,9 +37,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="@dimen/dp5"
-            android:textSize="@dimen/dp12" />
+            android:paddingEnd="@dimen/dp5"
+            android:textSize="@dimen/sp12" />
     </androidx.appcompat.widget.LinearLayoutCompat>
-    <!--</com.google.android.material.card.MaterialCardView>-->
 
 
 </RelativeLayout>

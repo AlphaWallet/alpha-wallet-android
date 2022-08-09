@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -102,7 +101,6 @@ public class WalletsActivity extends BaseActivity implements
     {
         super.onResume();
         initViewModel();
-        initViews();
     }
 
     private void scrollToDefaultWallet()
@@ -129,8 +127,8 @@ public class WalletsActivity extends BaseActivity implements
             viewModel.createWalletError().observe(this, this::onCreateWalletError);
             viewModel.noWalletsError().observe(this, this::noWallets);
         }
-        Log.e("mainNet:::" , String.valueOf(preferenceRepository.isActiveMainnet()));
-        viewModel.onPrepare(balanceChain, this); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
+        viewModel.onPrepare(balanceChain, this);
+        initViews(); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
     }
 
     protected Activity getThisActivity()

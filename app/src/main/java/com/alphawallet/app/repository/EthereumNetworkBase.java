@@ -1131,7 +1131,4 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return builtinNetworkMap.get(chainId);
     }
 
-    public static String getKlaytnKey() {
-        return keyProvider.getKlaytnKey();
-    }
 }

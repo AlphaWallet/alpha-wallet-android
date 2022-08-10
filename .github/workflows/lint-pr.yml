@@ -6,7 +6,7 @@ on:
 jobs:
   lint:
     name: Run Lint
-    runs-on: ubuntu-18.04
+    runs-on: self-hosted
 
     steps:
       - uses: actions/checkout@v3

@@ -1,0 +1,100 @@
+name: CI pipeline
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  setup:
+    name: Setup
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+          architecture: arm64
+          cache: gradle
+
+  lint:
+    name: Run Lint
+    needs: [setup]
+    runs-on: self-hosted
+
+    steps:
+      - name: Run Kotlin lint
+        run: ./gradlew :app:detekt
+      - name: Run Android Lint
+        run: ./gradlew :app:lintAnalyticsDebug
+  lintPR:
+    name: Run Lint
+    needs: [setup]
+    runs-on: self-hosted
+
+    steps:
+      - name: Run detekt
+        run: ./gradlew :app:detekt
+        continue-on-error: true
+      - name: Run Android Lint
+        run: ./gradlew :app:lintAnalyticsDebug
+      - name: Run Android Lint Reporter to report Lint and Detekt result to PR
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ./gradlew report -PgithubPullRequestId=$PR_NUMBER -PgithubToken=$GITHUB_TOKEN
+  ut:
+    name: Unit test
+    needs: [setup]
+    runs-on: self-hosted
+    steps:
+      - name: Build the app
+        run: sh ./build.sh
+
+      - name: Upload Test Reports Folder
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }} # IMPORTANT: Upload reports regardless of status
+        with:
+          name: ut-reports
+          path: app/build/reports/tests
+
+      - name: Upload coverage reports to Codecov
+        run: |
+          curl -Os https://uploader.codecov.io/latest/macos/codecov
+          chmod +x codecov
+          ./codecov
+  e2e:
+    name: End to end test
+    needs: [setup]
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        api-level: [30]
+        target: [default]
+    steps:
+      - name: Run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: arm64-v8a
+          profile: Nexus 6
+          channel: canary
+          disable-animations: true
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: ./e2e.sh --CI
+
+      - name: Collect tests results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: e2e-tests-results
+          path: output/

@@ -8,7 +8,7 @@ on:
       - master
 jobs:
   test:
-    runs-on: self-hosted
+    runs-on: macos-latest
     strategy:
       matrix:
         api-level: [30]

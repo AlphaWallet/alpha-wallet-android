@@ -26,10 +26,4 @@ public class Should
     {
         onView(isRoot()).perform(waitUntil(withId(id), 10 * 60));
     }
-
-    public static void shouldSeeTitle(String title)
-    {
-        onView(allOf(instanceOf(TextView.class), withParent(withId(R.id.toolbar))))
-                .check(matches(withText(title)));
-    }
 }

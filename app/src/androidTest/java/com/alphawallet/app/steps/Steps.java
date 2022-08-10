@@ -13,6 +13,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
@@ -41,8 +42,9 @@ public class Steps
             click(withText(R.string.ok));
         }
         click(withId(R.id.button_create));
-//        Helper.wait(10);
-//        click(withText(R.string.action_close)); // works well locally but NOT work with GitHub actions
+        shouldSee("Select Active Networks");
+        pressBack();
+        click(withText(R.string.action_close)); // works well locally but NOT work with GitHub actions
     }
 
     public static void visit(String urlString)
@@ -143,6 +145,7 @@ public class Steps
         input(R.id.input_network_symbol, "MTNSYM");
         input(R.id.input_network_explorer_api, "http://xxx.yyy.zzz");
         input(R.id.input_network_block_explorer_url, "http://xxx.yyy.zzz");
+        click(withId(R.id.checkbox_testnet));
         click(withId(R.string.action_add_network));
     }
 

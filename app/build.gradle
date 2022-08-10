@@ -75,6 +75,7 @@ repositories {
 android {
     compileSdkVersion 32
     buildToolsVersion '32.0.0'
+    ndkVersion "25.0.8775105"
     sourceSets {
         main {
 

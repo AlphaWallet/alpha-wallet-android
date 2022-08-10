@@ -15,6 +15,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
+  lint:
+    name: Run Lint
+    needs: [setup]
+    runs-on: self-hosted
+
+    steps:
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
@@ -22,13 +28,6 @@ jobs:
           java-version: 11
           architecture: arm64
           cache: gradle
-
-  lint:
-    name: Run Lint
-    needs: [setup]
-    runs-on: self-hosted
-
-    steps:
       - name: Run Kotlin lint
         run: ./gradlew :app:detekt
       - name: Run Android Lint
@@ -39,6 +38,13 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+          architecture: arm64
+          cache: gradle
       - name: Run detekt
         run: ./gradlew :app:detekt
         continue-on-error: true
@@ -55,6 +61,13 @@ jobs:
     needs: [setup]
     runs-on: self-hosted
     steps:
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+          architecture: arm64
+          cache: gradle
       - name: Build the app
         run: sh ./build.sh
 
@@ -79,6 +92,13 @@ jobs:
         api-level: [30]
         target: [default]
     steps:
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+          architecture: arm64
+          cache: gradle
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:

@@ -89,7 +89,6 @@ public class Steps
 
     public static void sendBalanceTo(String receiverAddress, String amountStr) {
         click(withId(R.id.nav_wallet_text));
-        onView(isRoot()).perform(waitUntil(R.id.balance_coin, withText(not(startsWith("0 ETH")))));
         click(withId(R.id.eth_data));
         click(withText("Send"));
         onView(withHint("0")).perform(replaceText(amountStr));

@@ -872,7 +872,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             symbol.setVisibility(View.VISIBLE);
             String newBalanceStr = BalanceUtils.getScaledValueFixed(new BigDecimal(realmToken.getBalance()), ETHER_DECIMALS, TOKEN_BALANCE_PRECISION);
             balance.setText(newBalanceStr);
-            symbol.setText(activeNetwork.getShortName());
+            symbol.setText(activeNetwork != null ? activeNetwork.getShortName() : "");
         });
     }
 

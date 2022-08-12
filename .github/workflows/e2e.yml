@@ -20,7 +20,7 @@ jobs:
           distribution: zulu
           java-version: 15
           architecture: arm64
-          cache: gradle
+#          cache: gradle
 
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2

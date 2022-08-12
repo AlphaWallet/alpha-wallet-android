@@ -29,6 +29,6 @@ public class DappBrowserTest extends BaseE2ETest
         navigateToBrowser();
         Helper.wait(3);
         pressBack();
-        shouldSee("Kovan");
+        shouldSee("Rinkeby");
     }
 }

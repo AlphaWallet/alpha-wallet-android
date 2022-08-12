@@ -89,7 +89,7 @@ public class Steps
 
     public static void sendBalanceTo(String receiverAddress, String amountStr) {
         click(withId(R.id.nav_wallet_text));
-        click(withId(R.id.eth_data));
+        click(withText("Rinkeby (Test)"));
         click(withText("Send"));
         onView(withHint("0")).perform(replaceText(amountStr));
         onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));

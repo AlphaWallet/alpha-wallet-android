@@ -4,8 +4,6 @@ on:
     branches:
       - master
   pull_request:
-    branches:
-      - master
 jobs:
   test:
     runs-on: self-hosted
@@ -34,7 +32,7 @@ jobs:
           channel: canary
           disable-animations: true
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -dns-server 8.8.8.8
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: ./e2e.sh --CI
 
       - name: Collect tests results

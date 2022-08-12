@@ -9,7 +9,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        api-level: [28, 31, 33]
+        api-level: [28, 31, 32]
         target: [default]
     steps:
       - uses: actions/checkout@v3

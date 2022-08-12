@@ -5,8 +5,8 @@ adb shell settings put global window_animation_scale 0.0
 adb shell settings put global transition_animation_scale 0.0
 adb shell settings put global animator_duration_scale 0.0
 echo "-------------debug------------"
-adb shell setprop net.dns1 207.254.72.253
-adb shell setprop net.dns2 8.8.8.8
+#adb shell setprop net.dns1 207.254.72.253
+#adb shell setprop net.dns2 8.8.8.8
 adb shell getprop | grep dns
 adb shell ip addr show wlan0
 echo "-------------debug------------"

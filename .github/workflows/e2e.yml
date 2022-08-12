@@ -32,7 +32,7 @@ jobs:
           channel: canary
           disable-animations: true
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -dns-server 207.254.72.253
           script: ./e2e.sh --CI
 
       - name: Collect tests results

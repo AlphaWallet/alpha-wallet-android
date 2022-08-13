@@ -53,7 +53,6 @@ public class TransferTest extends BaseE2ETest {
         assertThat(getWalletAddress(), equalTo(existedWalletAddress));
 
         selectTestNet();
-        shouldHaveBalance();
         sendBalanceTo(newWalletAddress, "0.001");
         ensureTransactionConfirmed();
         switchToWallet(newWalletAddress);

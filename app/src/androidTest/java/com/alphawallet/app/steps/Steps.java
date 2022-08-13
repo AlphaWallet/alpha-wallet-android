@@ -65,8 +65,10 @@ public class Steps
         selectMenu("Select Active Networks");
         toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
-        onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(1, ViewActions.click())); // Rinkeby
-        onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(3, ViewActions.click())); // Kovan
+        click(withSubstring("Rinkeby")); // Deselect
+        click(withSubstring("Rinkeby")); // Select
+//        onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(1, ViewActions.click())); // Rinkeby
+//        onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(3, ViewActions.click())); // Kovan
         pressBack();
     }
 
@@ -89,12 +91,12 @@ public class Steps
 
     public static void sendBalanceTo(String receiverAddress, String amountStr) {
         click(withId(R.id.nav_wallet_text));
-        click(withId(R.id.eth_data));
+        click(withSubstring(" ETH"));
         click(withText("Send"));
         onView(withHint("0")).perform(replaceText(amountStr));
         onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));
         click(withId(R.string.action_next));
-        Helper.wait(5);
+        Helper.wait(2);
         click(withId(R.string.action_confirm));
     }
 
@@ -116,15 +118,14 @@ public class Steps
     public static void importWalletFromSettingsPage(String seedPhrase) {
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
-//        Helper.wait(10);
         click(withId(R.id.action_add));
 //        SnapshotUtil.take("after-add");
         click(withId(R.id.import_account_action));
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_seed)))))).perform(replaceText(seedPhrase));
         Helper.wait(2); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis
         click(withId(R.id.import_action));
+        shouldSee("Select Active Networks");
         pressBack();
-//        Helper.wait(10);
     }
 
     public static void gotoSettingsPage() {

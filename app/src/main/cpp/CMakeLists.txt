@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.18.1)
-
-project("keys")
+cmake_minimum_required(VERSION 3.4.1)
 
 add_library(keys SHARED
             keys.c)

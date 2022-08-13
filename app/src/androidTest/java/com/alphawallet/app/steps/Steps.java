@@ -13,6 +13,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static com.alphawallet.app.assertions.Should.shouldNotSee;
 import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.waitUntil;
@@ -91,13 +92,20 @@ public class Steps
 
     public static void sendBalanceTo(String receiverAddress, String amountStr) {
         click(withId(R.id.nav_wallet_text));
+        ensureBalanceFetched();
         click(withSubstring(" ETH"));
         click(withText("Send"));
         onView(withHint("0")).perform(replaceText(amountStr));
         onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));
         click(withId(R.string.action_next));
-        Helper.wait(2);
+        Helper.wait(5);
         click(withId(R.string.action_confirm));
+    }
+
+    private static void ensureBalanceFetched()
+    {
+        shouldSee("Rinkeby (Test)");
+        shouldNotSee("0 ETH");
     }
 
     public static void switchToWallet(String address) {

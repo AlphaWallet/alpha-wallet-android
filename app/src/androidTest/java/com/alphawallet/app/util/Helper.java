@@ -96,7 +96,7 @@ public class Helper {
     }
 
     public static void click(Matcher<View> matcher) {
-        Helper.wait(1); //slight pause
+//        Helper.wait(1); //slight pause
         onView(isRoot()).perform(Helper.waitUntil(Matchers.allOf(matcher, isDisplayed())));
         onView(matcher).perform(ViewActions.click(doNothing())); // if click executed as long press, do nothing and retry clicking
     }

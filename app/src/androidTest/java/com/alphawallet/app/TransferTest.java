@@ -1,9 +1,5 @@
 package com.alphawallet.app;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.steps.Steps.assertBalanceIs;
 import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.steps.Steps.ensureTransactionConfirmed;
@@ -12,10 +8,7 @@ import static com.alphawallet.app.steps.Steps.importWalletFromSettingsPage;
 import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.steps.Steps.sendBalanceTo;
 import static com.alphawallet.app.steps.Steps.switchToWallet;
-import static com.alphawallet.app.util.Helper.click;
-import static com.alphawallet.app.util.Helper.waitUntil;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -58,11 +51,4 @@ public class TransferTest extends BaseE2ETest {
         switchToWallet(newWalletAddress);
         assertBalanceIs("0.001");
     }
-
-    private void shouldHaveBalance()
-    {
-        click(withId(R.id.nav_wallet_text));
-        onView(isRoot()).perform(waitUntil(R.id.balance_coin, withText(not(equalTo("0 ETH")))));
-    }
-
 }

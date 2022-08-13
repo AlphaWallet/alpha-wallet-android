@@ -18,9 +18,8 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: zulu
-          java-version: 15
+          java-version: 11
           architecture: arm64
-#          cache: gradle
 
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -32,7 +31,7 @@ jobs:
           channel: canary
           disable-animations: true
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -dns-server 207.254.72.253
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: ./e2e.sh --CI
 
       - name: Collect tests results

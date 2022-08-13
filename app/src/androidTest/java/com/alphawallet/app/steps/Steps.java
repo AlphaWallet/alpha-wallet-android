@@ -67,7 +67,7 @@ public class Steps
         toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
         click(withSubstring("Rinkeby")); // Deselect
-        click(withSubstring("Rinkeby")); // Select
+        click(withSubstring("Görli")); // Select
 //        onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(1, ViewActions.click())); // Rinkeby
 //        onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(3, ViewActions.click())); // Kovan
         pressBack();
@@ -86,14 +86,14 @@ public class Steps
     public static void ensureTransactionConfirmed() {
 //        onView(withText(R.string.rate_no_thanks)).perform(click());
         click(withId(R.string.action_show_tx_details));
-        onView(isRoot()).perform(waitUntil(withSubstring("Sent ETH"), 30 * 60));
+        onView(isRoot()).perform(waitUntil(withSubstring("Sent"), 30 * 60));
         pressBack();
     }
 
     public static void sendBalanceTo(String receiverAddress, String amountStr) {
         click(withId(R.id.nav_wallet_text));
         ensureBalanceFetched();
-        click(withSubstring(" ETH"));
+        click(withSubstring("ETH"));
         click(withText("Send"));
         onView(withHint("0")).perform(replaceText(amountStr));
         onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));
@@ -104,8 +104,8 @@ public class Steps
 
     private static void ensureBalanceFetched()
     {
-        shouldSee("Rinkeby (Test)");
-        shouldNotSee("0 ETH");
+        shouldSee("Görli (Test)");
+        shouldNotSee("0 GöETH");
     }
 
     public static void switchToWallet(String address) {

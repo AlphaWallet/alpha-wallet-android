@@ -1,0 +1,17 @@
+<html>
+<head>
+    <template>My template</template>
+</head>
+<body>
+<input type = "button" onclick = "onRampURL()" value = "Display">
+<script src="cbpay.js">
+const onRampURL = generateOnRampURL({
+  appId: "1dbd2a0b94",
+  destinationWallets: [
+    { address: "0xabcdef", blockchains: ["solana"] }
+    { address: "0x123456", assets: ["ETH", "USDC"] }
+  ]
+});
+</script>
+</body>
+</html>

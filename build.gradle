@@ -2,7 +2,6 @@ buildscript {
     repositories {
         // don't add anything here until you read to the bottom of this bracket
         google()
-        jcenter()
         mavenCentral()
         maven { url 'https://jitpack.io' }
         // WARNING WARNING WARNING
@@ -27,7 +26,6 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
         maven { url 'https://jitpack.io' }
         // WARNING WARNING WARNING

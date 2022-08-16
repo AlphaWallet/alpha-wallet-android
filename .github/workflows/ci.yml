@@ -19,6 +19,9 @@ jobs:
           java-version: 11
 
       - name: Build the app
+        env:
+          USERNAME: ${{ env.GITHUB_ACTOR }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: sh ./build.sh
 
       - name: Upload coverage reports to Codecov

@@ -10,6 +10,7 @@ import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.util.das.DASBody;
 import com.alphawallet.app.util.das.DASRecord;
+import com.alphawallet.app.web3j.ens.EnsResolver;
 import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -42,7 +43,7 @@ import timber.log.Timber;
  * Created by James on 29/05/2019.
  * Stormbird in Sydney
  */
-public class AWEnsResolver extends com.alphawallet.app.web3j.ens.EnsResolver
+public class AWEnsResolver extends EnsResolver
 {
     private static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
     private static final String DAS_LOOKUP = "https://indexer.da.systems/";

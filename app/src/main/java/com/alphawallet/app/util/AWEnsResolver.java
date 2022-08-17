@@ -1,7 +1,5 @@
 package com.alphawallet.app.util;
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-
 import android.content.Context;
 import android.text.TextUtils;
 
@@ -12,7 +10,6 @@ import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.util.das.DASBody;
 import com.alphawallet.app.util.das.DASRecord;
-import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -60,8 +57,15 @@ public class AWEnsResolver extends com.alphawallet.app.web3j.ens.EnsResolver
     
     public AWEnsResolver(Web3j web3j, Context context)
     {
-        super(web3j, DEFAULT_SYNC_THRESHOLD);
+        super(web3j);
         this.context = context;
+        this.client = setupClient();
+    }
+
+    public AWEnsResolver(Web3j web3j)
+    {
+        super(web3j);
+        this.context = null;
         this.client = setupClient();
     }
 
@@ -218,6 +222,7 @@ public class AWEnsResolver extends com.alphawallet.app.web3j.ens.EnsResolver
     public String checkENSHistoryForAddress(String address)
     {
         String ensName = "";
+        if (context == null) return ensName;
         //try previously resolved names
         String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.ENS_HISTORY_PAIR, "");
         if (historyJson.length() > 0)
@@ -237,6 +242,7 @@ public class AWEnsResolver extends com.alphawallet.app.web3j.ens.EnsResolver
     private String fetchPreviouslyUsedENS(String address)
     {
         String ensName = "";
+        if (context == null) return ensName;
         //try previously resolved names
         String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.ENS_HISTORY_PAIR, "");
         if (historyJson.length() > 0)
@@ -312,10 +318,10 @@ public class AWEnsResolver extends com.alphawallet.app.web3j.ens.EnsResolver
         {
             byte[] nameHash = NameHash.nameHashAsBytes(ensName);
             BigInteger nameId = new BigInteger(nameHash);
-            String resolverAddress = getContractData(MAINNET_ID, CRYPTO_RESOLVER, getResolverOf(nameId), "");
+            String resolverAddress = getContractData(CRYPTO_RESOLVER, getResolverOf(nameId), "");
             if (!TextUtils.isEmpty(resolverAddress))
             {
-                return getContractData(MAINNET_ID, resolverAddress, get(nameId), "");
+                return getContractData(resolverAddress, get(nameId), "");
             }
             else
             {
@@ -396,7 +402,7 @@ public class AWEnsResolver extends com.alphawallet.app.web3j.ens.EnsResolver
     private Function get(BigInteger nameId)
     {
         return new Function("get",
-                Arrays.asList(new org.web3j.abi.datatypes.Utf8String(EnsResolver.CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
+                Arrays.asList(new org.web3j.abi.datatypes.Utf8String(CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
                 Arrays.asList(new TypeReference<Utf8String>()
                 {
                 }));
@@ -408,12 +414,12 @@ public class AWEnsResolver extends com.alphawallet.app.web3j.ens.EnsResolver
         {
             try
             {
-                String resolverAddress = lookupResolver(ensName);
+                String resolverAddress = getResolverAddress(ensName);
                 if (!TextUtils.isEmpty(resolverAddress))
                 {
                     byte[] nameHash = NameHash.nameHashAsBytes(ensName);
                     //now attempt to get the address of this ENS
-                    return getContractData(MAINNET_ID, resolverAddress, getAvatar(nameHash), "");
+                    return getContractData(resolverAddress, getAvatar(nameHash), "");
                 }
             }
             catch (Exception e)
@@ -430,30 +436,32 @@ public class AWEnsResolver extends com.alphawallet.app.web3j.ens.EnsResolver
     {
         if (Utils.isAddressValid(address))
         {
-            String reverseName = org.web3j.utils.Numeric.cleanHexPrefix(address.toLowerCase()) + REVERSE_NAME_SUFFIX;
             try
             {
-                String resolverAddress = lookupResolver(reverseName);
+                String ensName = reverseResolve(address);
+                return resolveAvatar(ensName);
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
+
+            /*String reverseName = org.web3j.utils.Numeric.cleanHexPrefix(address.toLowerCase()) + REVERSE_NAME_SUFFIX;
+            try
+            {
+                String resolverAddress = getResolverAddress(reverseName);
                 byte[] nameHash = NameHash.nameHashAsBytes(reverseName);
-                String avatar = getContractData(MAINNET_ID, resolverAddress, getAvatar(nameHash), "");
+                String avatar = getContractData(resolverAddress, getAvatar(nameHash), "");
                 return avatar != null ? avatar : "";
             }
             catch (Exception e)
             {
                 Timber.e(e);
                 //throw new RuntimeException("Unable to execute Ethereum request", e);
-            }
+            }*/
         }
 
         return "";
-    }
-
-    private String lookupResolver(String ensName) throws Exception
-    {
-        ContractAddress resolverAddress = obtainOffchainResolverAddr(ensName);
-        byte[] nameHash = org.web3j.ens.NameHash.nameHashAsBytes(ensName);
-        Function resolver = getResolver(nameHash);
-        return getContractData(chainId, resolverAddress.address, resolver, "");
     }
 
     private OkHttpClient setupClient()

@@ -481,8 +481,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         if (handler != null) handler.removeCallbacksAndMessages(null);
         if (amountInput != null) amountInput.onDestroy();
         if (confirmationDialog != null) confirmationDialog.onDestroy();
-        if (addressInput != null)
-            addressInput.setEnsNodeNotSyncCallback(null); // prevent leak by removing reference to activity method
+        //if (addressInput != null)
+        //    addressInput.setEnsNodeNotSyncCallback(null); // prevent leak by removing reference to activity method
     }
 
     private void setupTokenContent()
@@ -492,8 +492,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         addressInput = findViewById(R.id.input_address);
         addressInput.setAddressCallback(this);
         addressInput.setChainOverrideForWalletConnect(token.tokenInfo.chainId);
-        addressInput.setEnsHandlerNodeSyncFlag(true);   // allow node sync
-        addressInput.setEnsNodeNotSyncCallback(this::showNodeNotSyncSheet);  // callback to invoke if node not synced
+        //addressInput.setEnsHandlerNodeSyncFlag(true);   // allow node sync
+        //addressInput.setEnsNodeNotSyncCallback(this::showNodeNotSyncSheet);  // callback to invoke if node not synced
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
         functionBar.revealButtons();
         List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_next));
@@ -712,7 +712,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             alertDialog.setButtonListener(v -> alertDialog.dismiss());
             alertDialog.setSecondaryButtonText(R.string.ignore);
             alertDialog.setSecondaryButtonListener(v -> {
-                addressInput.setEnsHandlerNodeSyncFlag(false);  // skip node sync check
+                //addressInput.setEnsHandlerNodeSyncFlag(false);  // skip node sync check
                 // re enter current input to resolve again
                 String currentInput = addressInput.getEditText().getText().toString();
                 addressInput.getEditText().setText("");

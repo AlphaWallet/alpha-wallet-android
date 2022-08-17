@@ -17,7 +17,7 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 import android.text.TextUtils;
 
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
-import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,17 +37,13 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
-import org.web3j.ens.contracts.generated.ENS;
-import org.web3j.ens.contracts.generated.PublicResolver;
 import org.web3j.protocol.ObjectMapperFactory;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.EthSyncing;
+import org.web3j.protocol.core.methods.response.NetVersion;
 import org.web3j.tx.ClientTransactionManager;
 import org.web3j.tx.TransactionManager;
-import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Numeric;
 
 import java.io.BufferedReader;
@@ -84,115 +80,39 @@ public class EnsResolver {
     protected final long chainId;
 
     private OkHttpClient client = new OkHttpClient();
-    private long syncThreshold; // non-final in case this value needs to be tweaked
 
     private static DefaultFunctionReturnDecoder decoder;
 
-    public EnsResolver(Web3j web3j, long syncThreshold, int addressLength)
+    public EnsResolver(Web3j web3j, int addressLength)
     {
         this.web3j = web3j;
-        this.chainId = web3j.ethChainId().getId();
         transactionManager = new ClientTransactionManager(web3j, null); // don't use empty string
-        this.syncThreshold = syncThreshold;
         this.addressLength = addressLength;
-    }
 
-    public EnsResolver(Web3j web3j, long syncThreshold) {
-        this(web3j, syncThreshold, Keys.ADDRESS_LENGTH_IN_HEX);
+        long chainId = 1;
+
+        try
+        {
+            NetVersion v = web3j.netVersion().send();
+            String ver = v.getNetVersion();
+            chainId = Long.parseLong(ver);
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        this.chainId = chainId;
     }
 
     public EnsResolver(Web3j web3j) {
-        this(web3j, DEFAULT_SYNC_THRESHOLD);
-    }
-
-    public void setSyncThreshold(long syncThreshold) {
-        this.syncThreshold = syncThreshold;
-    }
-
-    public long getSyncThreshold() {
-        return syncThreshold;
-    }
-
-    /**
-     * Provides an access to a valid public resolver in order to access other API methods.
-     *
-     * @deprecated
-     * @param ensName our user input ENS name
-     * @return PublicResolver
-     */
-    @Deprecated
-    protected PublicResolver obtainPublicResolver(String ensName) {
-        if (isValidEnsName(ensName, addressLength)) {
-            try {
-                if (!isSynced()) {
-                    throw new EnsResolutionException("Node is not currently synced");
-                } else {
-                    return lookupResolver(ensName);
-                }
-            } catch (Exception e) {
-                throw new EnsResolutionException("Unable to determine sync status of node", e);
-            }
-        } else {
-            throw new EnsResolutionException("EnsName is invalid: " + ensName);
-        }
+        this(web3j, Keys.ADDRESS_LENGTH_IN_HEX);
     }
 
     protected ContractAddress obtainOffchainResolverAddr(String ensName) throws Exception
     {
         return new ContractAddress(chainId, getResolverAddress(ensName));
     }
-
-
-
-    /*public String resolveOld(String ensName) {
-        if (TextUtils.isEmpty(ensName) || (ensName.trim().length() == 1 && ensName.contains("."))) {
-            return null;
-        }
-
-        try {
-            if (isValidEnsName(ensName, addressLength))
-            {
-                ContractAddress resolverAddress = obtainOffchainResolverAddr(ensName);
-                OffchainResolverContract resolver = obtainOffchainResolver(ensName);
-
-                boolean supportWildcard =
-                        supportsInterface(EnsUtils.ENSIP_10_INTERFACE_ID, resolverAddress.address);
-                byte[] nameHash = NameHash.nameHashAsBytes(ensName);
-
-                String resolvedName;
-                if (supportWildcard) {
-                    String dnsEncoded = NameHash.dnsEncode(ensName);
-                    String addrFunction = resolver.addr(nameHash).encodeFunctionCall();
-
-                    String lookupDataHex =
-                            resolver.resolve(
-                                            Numeric.hexStringToByteArray(dnsEncoded),
-                                            Numeric.hexStringToByteArray(addrFunction))
-                                    .send();
-
-                    resolvedName = resolveOffchain(lookupDataHex, resolver, LOOKUP_LIMIT);
-                } else {
-                    try {
-                        resolvedName = resolver.addr(nameHash).send();
-                    } catch (Exception e) {
-                        throw new RuntimeException("Unable to execute Ethereum request: ", e);
-                    }
-                }
-
-                if (!WalletUtils.isValidAddress(resolvedName)) {
-                    throw new EnsResolutionException(
-                            "Unable to resolve address for name: " + ensName);
-                } else {
-                    return resolvedName;
-                }
-
-            } else {
-                return ensName;
-            }
-        } catch (Exception e) {
-            throw new EnsResolutionException(e);
-        }
-    }*/
 
     /**
      * Returns the address of the resolver for the specified node.
@@ -210,7 +130,6 @@ public class EnsResolver {
             if (isValidEnsName(ensName, addressLength))
             {
                 ContractAddress resolverAddress = obtainOffchainResolverAddr(ensName);
-                //OffchainResolverContract resolver = obtainOffchainResolver(ensName);  //contract interface
 
                 boolean supportWildcard =
                         supportsInterface(EnsUtils.ENSIP_10_INTERFACE_ID, resolverAddress.address);
@@ -219,22 +138,19 @@ public class EnsResolver {
                 String resolvedName;
                 if (supportWildcard) {
                     String dnsEncoded = NameHash.dnsEncode(ensName);
-                    //String addrFunction = resolver.addr(nameHash).encodeFunctionCall();
-
                     String addrFunction = encodeResolverAddr(nameHash);
 
-                    String lookupDataHex =
+                    EthCall result =
                             resolve(
                                             Numeric.hexStringToByteArray(dnsEncoded),
                                             Numeric.hexStringToByteArray(addrFunction),
                                             resolverAddress.address);
 
+                    String lookupDataHex = result.isReverted() ? Utils.removeDoubleQuotes(result.getError().getData()) : result.getValue();// .toString();
                     resolvedName = resolveOffchain(lookupDataHex, resolverAddress, LOOKUP_LIMIT);
-                    //resolvedName =
                 } else {
                     try {
                         resolvedName = resolverAddr(nameHash, resolverAddress.address);
-                        //resolvedName = resolver.addr(nameHash).send();
                     } catch (Exception e) {
                         throw new RuntimeException("Unable to execute Ethereum request: ", e);
                     }
@@ -285,10 +201,12 @@ public class EnsResolver {
             EnsGatewayResponseDTO gatewayResponseDTO =
                     objectMapper.readValue(gatewayResult, EnsGatewayResponseDTO.class);
 
-            String resolvedNameHex =
+            EthCall result =
                     resolveWithProof(
                                     Numeric.hexStringToByteArray(gatewayResponseDTO.getData()),
                                     offchainLookup.getExtraData(), resolverAddress.address);
+
+            String resolvedNameHex = result.isReverted() ? Utils.removeDoubleQuotes(result.getError().getData()) : result.getValue();// .toString();
 
             // This protocol can result in multiple lookups being requested by the same contract.
             if (EnsUtils.isEIP3668(resolvedNameHex))
@@ -333,58 +251,6 @@ public class EnsResolver {
 
         return typeList.isEmpty() ? null : ((Address) typeList.get(0)).getValue();
     }
-
-    /*protected String resolveOffchainOrig(
-            String lookupData, OffchainResolverContract resolver, int lookupCounter)
-            throws Exception {
-        if (EnsUtils.isEIP3668(lookupData)) {
-
-            OffchainLookup offchainLookup =
-                    OffchainLookup.build(Numeric.hexStringToByteArray(lookupData.substring(10)));
-
-            if (!resolver.getContractAddress().equals(offchainLookup.getSender())) {
-                throw new EnsResolutionException(
-                        "Cannot handle OffchainLookup raised inside nested call");
-            }
-
-            String gatewayResult =
-                    ccipReadFetch(
-                            offchainLookup.getUrls(),
-                            offchainLookup.getSender(),
-                            Numeric.toHexString(offchainLookup.getCallData()));
-
-            if (gatewayResult == null) {
-                throw new EnsResolutionException("CCIP Read disabled or provided no URLs.");
-            }
-
-            ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-            EnsGatewayResponseDTO gatewayResponseDTO =
-                    objectMapper.readValue(gatewayResult, EnsGatewayResponseDTO.class);
-
-            String resolvedNameHex =
-                    resolver.resolveWithProof(
-                                    Numeric.hexStringToByteArray(gatewayResponseDTO.getData()),
-                                    offchainLookup.getExtraData())
-                            .send();
-
-            // This protocol can result in multiple lookups being requested by the same contract.
-            if (EnsUtils.isEIP3668(resolvedNameHex)) {
-                if (lookupCounter <= 0) {
-                    throw new EnsResolutionException("Lookup calls is out of limit.");
-                }
-
-                return resolveOffchain(lookupData, resolver, --lookupCounter);
-            } else {
-                byte[] resolvedNameBytes =
-                        DefaultFunctionReturnDecoder.decodeDynamicBytes(resolvedNameHex);
-
-                return DefaultFunctionReturnDecoder.decodeAddress(
-                        Numeric.toHexString(resolvedNameBytes));
-            }
-        }
-
-        return lookupData;
-    }*/
 
     protected String ccipReadFetch(List<String> urls, String sender, String data) {
         List<String> errorMessages = new ArrayList<>();
@@ -490,12 +356,10 @@ public class EnsResolver {
         {
             String reverseName = Numeric.cleanHexPrefix(address) + REVERSE_NAME_SUFFIX;
             ContractAddress resolverAddress = obtainOffchainResolverAddr(reverseName);
-            //PublicResolver resolver = obtainOffchainResolver(reverseName);
 
             byte[] nameHash = NameHash.nameHashAsBytes(reverseName);
             String name;
             try {
-                //name = resolver.name(nameHash).send();
                 name = resolveName(nameHash, resolverAddress.address);
             } catch (Exception e) {
                 throw new RuntimeException("Unable to execute Ethereum request", e);
@@ -511,38 +375,27 @@ public class EnsResolver {
         }
     }
 
-    private PublicResolver lookupResolver(String ensName) throws Exception {
-        return PublicResolver.load(
-                getResolverAddress(ensName), web3j, transactionManager, new DefaultGasProvider());
+    private Function getResolver(byte[] nameHash)
+    {
+        return new Function("resolver",
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                Arrays.asList(new TypeReference<Address>()
+                {
+                }));
     }
 
-    private String getResolverAddress(String ensName) throws Exception {
+    protected String getResolverAddress(String ensName) throws Exception
+    {
         String registryContract = Contracts.resolveRegistryContract(chainId);
-
-        ENS ensRegistry =
-                ENS.load(registryContract, web3j, transactionManager, new DefaultGasProvider());
-
         byte[] nameHash = NameHash.nameHashAsBytes(ensName);
-        String address = ensRegistry.resolver(nameHash).send();
+        Function resolver = getResolver(nameHash);
+        String address = getContractData(registryContract, resolver, "");
 
         if (EnsUtils.isAddressEmpty(address)) {
             address = getResolverAddress(EnsUtils.getParent(ensName));
         }
 
         return address;
-    }
-
-    boolean isSynced() throws Exception {
-        EthSyncing ethSyncing = web3j.ethSyncing().send();
-        if (ethSyncing.isSyncing()) {
-            return false;
-        } else {
-            EthBlock ethBlock =
-                    web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send();
-            long timestamp = ethBlock.getBlock().getTimestamp().longValue() * 1000;
-
-            return System.currentTimeMillis() - syncThreshold < timestamp;
-        }
     }
 
     public static boolean isValidEnsName(String input) {
@@ -572,7 +425,7 @@ public class EnsResolver {
                 {
                 }));
 
-        return getContractData(chainId, address, function, true);
+        return getContractData(address, function, true);
     }
 
     public String resolverAddr(byte[] node, String address) throws Exception
@@ -581,7 +434,7 @@ public class EnsResolver {
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(node)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
 
-        return getContractData(chainId, address, function, "");
+        return getContractData(address, function, "");
     }
 
     public String encodeResolverAddr(byte[] node)
@@ -593,25 +446,32 @@ public class EnsResolver {
         return FunctionEncoder.encode(function);
     }
 
-    public String resolve(byte[] name, byte[] data, String address) throws Exception
+    public EthCall resolve(byte[] name, byte[] data, String address) throws Exception
     {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_RESOLVE,
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicBytes(name),
                         new org.web3j.abi.datatypes.DynamicBytes(data)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<DynamicBytes>() {}));
 
-        return getContractData(chainId, address, function, ""); //TODO: check result
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        org.web3j.protocol.core.methods.request.Transaction transaction
+                = createEthCallTransaction(TokenscriptFunction.ZERO_ADDRESS, address, encodedFunction);
+        return web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
     }
 
-    public String resolveWithProof(byte[] response, byte[] extraData, String address) throws Exception
+    public EthCall resolveWithProof(byte[] response, byte[] extraData, String address) throws Exception
     {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_RESOLVEWITHPROOF,
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicBytes(response),
                         new org.web3j.abi.datatypes.DynamicBytes(extraData)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<DynamicBytes>() {}));
 
-        return getContractData(chainId, address, function, ""); //TODO: check result
-        //return  new RemoteFunctionCall<>(function, () -> Numeric.removeDoubleQuotes(executeCallWithoutDecoding(function)));
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        org.web3j.protocol.core.methods.request.Transaction transaction
+                = createEthCallTransaction(TokenscriptFunction.ZERO_ADDRESS, address, encodedFunction);
+        return web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
     }
 
     private String resolveName(byte[] node, String address) throws Exception
@@ -620,12 +480,12 @@ public class EnsResolver {
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(node)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
 
-        return getContractData(chainId, address, function, "");
+        return getContractData(address, function, "");
     }
 
-    protected <T> T getContractData(long chainId, String address, Function function, T type) throws Exception
+    protected <T> T getContractData(String address, Function function, T type) throws Exception
     {
-        String responseValue = callSmartContractFunction(function, address, chainId);
+        String responseValue = callSmartContractFunction(function, address);
 
         if (TextUtils.isEmpty(responseValue))
         {
@@ -663,7 +523,7 @@ public class EnsResolver {
     }
 
     private String callSmartContractFunction(
-            Function function, String contractAddress, long chainId) throws Exception
+            Function function, String contractAddress) throws Exception
     {
         try
         {
@@ -671,7 +531,7 @@ public class EnsResolver {
 
             org.web3j.protocol.core.methods.request.Transaction transaction
                     = createEthCallTransaction(TokenscriptFunction.ZERO_ADDRESS, contractAddress, encodedFunction);
-            EthCall response = TokenRepository.getWeb3jService(chainId).ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+            EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
 
             return response.getValue();
         }

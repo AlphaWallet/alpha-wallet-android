@@ -5,31 +5,23 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 import com.alphawallet.app.service.AWHttpService;
+import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.web3j.ens.Contracts;
-import com.alphawallet.app.web3j.ens.EnsResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.web3j.abi.TypeEncoder;
-import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.protocol.ObjectMapperFactory;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.Request;
-import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.NetVersion;
-import org.web3j.tx.ChainIdLong;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
+
+//Note that these tests may go 'stale' if ownership of the ENS domains changes or avatars change. This is not expected to happen frequently.
 
 public class ENSTest
 {
@@ -40,9 +32,9 @@ public class ENSTest
             assertEquals(Contracts.resolveRegistryContract(RINKEBY_ID), (Contracts.RINKEBY));
     }
 
-    private AWHttpService web3jService = getWeb3jService();
-    private Web3j web3j = getWeb3j(web3jService);
-    private EnsResolver ensResolver;
+    private final AWHttpService web3jService;
+    private final Web3j web3j;
+    private final AWEnsResolver ensResolver;
 
     private ObjectMapper om = ObjectMapperFactory.getObjectMapper();
 
@@ -58,10 +50,11 @@ public class ENSTest
     public static String RESOLVED_NAME_HEX =
             "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000041563129cdbbd0c5d3e1c86cf9563926b243834d";
 
-    @Before
-    public void setUp()
+    public ENSTest()
     {
-        ensResolver = new EnsResolver(web3j);
+        web3jService = getWeb3jService();
+        web3j = getWeb3j(web3jService);
+        ensResolver = new AWEnsResolver(web3j);
         urls.add("https://example-1.com/gateway/{sender}/{data}.json");
         urls.add("https://example-2.com/gateway/{sender}/{data}.json");
     }
@@ -74,7 +67,7 @@ public class ENSTest
                 .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();
-        return new AWHttpService("https://main-rpc.linkpool.io", "https://main-rpc.linkpool.io", okClient, false);
+        return new AWHttpService("https://mainnet.infura.io/v3/c7df4c29472d4d54a39f7aa78f146853", "https://main-rpc.linkpool.io", okClient, false);
     }
 
     public static Web3j getWeb3j(AWHttpService service)
@@ -84,57 +77,47 @@ public class ENSTest
 
     @Test
     public void testResolve() throws Exception {
-        NetVersion netVersion = new NetVersion();
-        netVersion.setResult(Long.toString(ChainIdLong.MAINNET));
-
-        String resolverAddress =
-                "0x0000000000000000000000004c641fb9bad9b60ef180c31f56051ce826d21a9a";
-        String contractAddress =
-                "0x00000000000000000000000019e03255f667bdfd50a32722df860b1eeaf4d635";
-
-        EthCall resolverAddressResponse = new EthCall();
-        resolverAddressResponse.setResult(resolverAddress);
-
-        EthCall contractAddressResponse = new EthCall();
-        contractAddressResponse.setResult(contractAddress);
-
-        when(web3jService.send(any(Request.class), eq(NetVersion.class))).thenReturn(netVersion);
-        when(web3jService.send(any(Request.class), eq(EthCall.class)))
-                .thenReturn(resolverAddressResponse);
-        when(web3jService.send(any(Request.class), eq(EthCall.class)))
-                .thenReturn(contractAddressResponse);
 
         assertEquals(
-                ensResolver.resolve("web3j.eth"), ("0x19e03255f667bdfd50a32722df860b1eeaf4d635"));
+                ensResolver.resolve("web3j.eth"), ("0x7bfd522dea355ddee2be3c01dfa4419451759310").toLowerCase());
+
+        assertEquals(
+                ensResolver.resolve("1.offchainexample.eth"), ("0x41563129cdbbd0c5d3e1c86cf9563926b243834d").toLowerCase());
+
+        assertEquals(
+                ensResolver.resolve("2.offchainexample.eth"), ("0x41563129cdbbd0c5d3e1c86cf9563926b243834d").toLowerCase());
+
+        assertEquals(
+                ensResolver.resolve("offchainexample.eth"), ("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045").toLowerCase());
+    }
+
+    @Test
+    public void testDASResolve() throws Exception {
+        assertEquals(
+                ensResolver.resolve("satoshi.bit"), ("0xee8738e3d3e80482526b33c91dd343caef68e41a").toLowerCase());
+
+        assertEquals(
+                ensResolver.resolve("ponzi.bit"), ("0x04e294283fb6c2974b59d15a0bc347f8d4d4bdcd").toLowerCase());
+    }
+
+    @Test
+    public void testAvatarResolve() throws Exception {
+        assertEquals(
+                ensResolver.resolveAvatar("alphaid.eth"), ("https://drive.google.com/a/alphawallet.com/file/d/129glXWa1Y2nOZQNwvx8sA5fR1KuGAW4m/view?usp=drivesdk"));
+    }
+
+    @Test
+    public void testAvatarAddressResolve() throws Exception {
+        assertEquals(
+                ensResolver.resolveAvatarFromAddress("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"), ("eip155:1/erc721:0x222222222291749DE47895C0c0A9B17e4fcA8268/29"));
     }
 
     @Test
     public void testReverseResolve() throws Exception {
 
-        NetVersion netVersion = new NetVersion();
-        netVersion.setResult(Long.toString(ChainIdLong.MAINNET));
-
-        String resolverAddress =
-                "0x0000000000000000000000004c641fb9bad9b60ef180c31f56051ce826d21a9a";
-        String contractName =
-                "0x0000000000000000000000000000000000000000000000000000000000000020"
-                        + TypeEncoder.encode(new Utf8String("web3j.eth"));
-
-        EthCall resolverAddressResponse = new EthCall();
-        resolverAddressResponse.setResult(resolverAddress);
-
-        EthCall contractNameResponse = new EthCall();
-        contractNameResponse.setResult(contractName);
-
-        when(web3jService.send(any(Request.class), eq(NetVersion.class))).thenReturn(netVersion);
-        when(web3jService.send(any(Request.class), eq(EthCall.class)))
-                .thenReturn(resolverAddressResponse);
-        when(web3jService.send(any(Request.class), eq(EthCall.class)))
-                .thenReturn(contractNameResponse);
-
         assertEquals(
-                ensResolver.reverseResolve("0x19e03255f667bdfd50a32722df860b1eeaf4d635"),
-                ("web3j.eth"));
+                ensResolver.reverseResolve("0xd8da6bf26964af9d7eed9e03e53415d37aa96045"),
+                ("vitalik.eth"));
     }
 
     @Test
@@ -151,6 +134,4 @@ public class ENSTest
                 nameHash("foo.eth"),
                 ("0xde9b09fd7c5f901e23a3f19fecc54828e9c848539801e86591bd9801b019f84f"));
     }
-
-    //TODO: Test offchain resolve
 }

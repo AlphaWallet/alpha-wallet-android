@@ -962,4 +962,8 @@ public class Utils {
             return false;
         }
     }
+
+    public static String removeDoubleQuotes(String string) {
+        return string != null ? string.replace("\"", "") : null;
+    }
 }

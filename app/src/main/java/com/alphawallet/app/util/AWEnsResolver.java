@@ -445,20 +445,6 @@ public class AWEnsResolver extends com.alphawallet.app.web3j.ens.EnsResolver
             {
                 Timber.e(e);
             }
-
-            /*String reverseName = org.web3j.utils.Numeric.cleanHexPrefix(address.toLowerCase()) + REVERSE_NAME_SUFFIX;
-            try
-            {
-                String resolverAddress = getResolverAddress(reverseName);
-                byte[] nameHash = NameHash.nameHashAsBytes(reverseName);
-                String avatar = getContractData(resolverAddress, getAvatar(nameHash), "");
-                return avatar != null ? avatar : "";
-            }
-            catch (Exception e)
-            {
-                Timber.e(e);
-                //throw new RuntimeException("Unable to execute Ethereum request", e);
-            }*/
         }
 
         return "";

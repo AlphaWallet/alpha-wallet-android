@@ -41,6 +41,7 @@ public class ENSTest
     private static List<String> urls = new ArrayList<>();
 
     private String sender = "0x226159d592E2b063810a10Ebf6dcbADA94Ed68b8";
+    private static String Inf = "p8qs5p30583q5q65n40s8nn89s257964";
 
     private String data = "0x00112233";
 
@@ -67,7 +68,7 @@ public class ENSTest
                 .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();
-        return new AWHttpService("https://mainnet.infura.io/v3/c7df4c29472d4d54a39f7aa78f146853", "https://main-rpc.linkpool.io", okClient, false);
+        return new AWHttpService("https://mainnet.infura.io/v3/" + TextUtils.rot(Inf), "https://main-rpc.linkpool.io", okClient, false);
     }
 
     public static Web3j getWeb3j(AWHttpService service)
@@ -134,4 +135,6 @@ public class ENSTest
                 nameHash("foo.eth"),
                 ("0xde9b09fd7c5f901e23a3f19fecc54828e9c848539801e86591bd9801b019f84f"));
     }
+
+
 }

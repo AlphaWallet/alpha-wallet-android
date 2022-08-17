@@ -3,6 +3,8 @@ package com.alphawallet.app.widget;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -66,6 +68,22 @@ public class InputAddressTest
         pasteButton.performClick();
         assertThat(getAddress(), equalTo(""));
         assertThat(pasteButton.getText(), equalTo("Paste"));
+    }
+
+    @Test
+    public void should_trigger_callback_after_text_changed()
+    {
+        AddressReadyCallback mock = mock(AddressReadyCallback.class);
+        inputAddress.setAddressCallback(mock);
+
+        setClipboardText("not_an_address");
+        pasteButton.performClick();
+        verify(mock).addressValid(false);
+
+        pasteButton.performClick(); // Clear
+        setClipboardText("0xD8790c1eA5D15F8149C97F80524AC87f56301204");
+        pasteButton.performClick();
+        verify(mock).addressValid(true);
     }
 
     @NonNull

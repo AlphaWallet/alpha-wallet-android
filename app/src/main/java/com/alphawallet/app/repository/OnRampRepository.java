@@ -19,21 +19,15 @@ public class OnRampRepository implements OnRampRepositoryType {
     private static final String RAMP = "ramp";
     private static final String ONRAMP_CONTRACTS_FILE_NAME = "onramp_contracts.json";
 
-    static
-    {
-        System.loadLibrary("keys");
-    }
-
     private final Context context;
     private final AnalyticsServiceType analyticsService;
+    private final KeyProvider keyProvider = KeyProviderFactory.get();
 
     public OnRampRepository(Context context, AnalyticsServiceType analyticsService)
     {
         this.context = context;
         this.analyticsService = analyticsService;
     }
-
-    public static native String getRampKey();
 
     @Override
     public String getUri(String address, Token token)
@@ -80,7 +74,7 @@ public class OnRampRepository implements OnRampRepositoryType {
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
                 .authority("buy.ramp.network")
-                .appendQueryParameter("hostApiKey", getRampKey())
+                .appendQueryParameter("hostApiKey", keyProvider.getRampKey())
                 .appendQueryParameter("hostLogoUrl", C.ALPHAWALLET_LOGO_URI)
                 .appendQueryParameter("hostAppName", "AlphaWallet")
                 .appendQueryParameter("userAddress", address);

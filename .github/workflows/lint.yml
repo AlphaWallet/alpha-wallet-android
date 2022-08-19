@@ -4,18 +4,14 @@ on:
     branches:
       - master
   pull_request:
-    branches:
-      - master
 jobs:
   lint:
     name: Run Lint
-    runs-on: ubuntu-18.04
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-      - name: set up JDK
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           distribution: zulu

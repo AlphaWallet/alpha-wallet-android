@@ -392,11 +392,6 @@ public class AppSiteController implements AttributeInterface
         }
     }
 
-    @Value("${repository.dir}")
-    public void setRepoDir(String value) {
-        repoDir = Paths.get(value);
-    }
-
     public static void main(String[] args) throws IOException { // TODO: should run System.exit() if IOException
         addresses = new HashMap<Long, Map<String, File>>();
         SpringApplication.run(AppSiteController.class, args);

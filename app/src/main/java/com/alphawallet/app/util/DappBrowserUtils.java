@@ -1,7 +1,8 @@
 package com.alphawallet.app.util;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.isWithinHomePage;
 import static com.alphawallet.app.util.Utils.isValidUrl;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -31,6 +32,8 @@ public class DappBrowserUtils {
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
     private static final String MY_DAPPS_FILE = "mydapps";
     private static final String DAPPS_HISTORY_FILE = "dappshistory";
+    private static final String DEFAULT_HOMEPAGE = "https://alphawallet.com/browser/";
+    private static final String POLYGON_HOMEPAGE = "https://alphawallet.com/browser-item-category/polygon/";
 
     //TODO: Move to database
     public static void saveToPrefs(Context context, List<DApp> myDapps) {
@@ -252,5 +255,22 @@ public class DappBrowserUtils {
                 .edit()
                 .putString(key, "")
                 .apply();
+    }
+
+    public static String defaultDapp(long chainId)
+    {
+        return (chainId == MATIC_ID || chainId == MATIC_TEST_ID) ? POLYGON_HOMEPAGE : DEFAULT_HOMEPAGE;
+    }
+
+    public static boolean isWithinHomePage(String url)
+    {
+        String homePageRoot = DEFAULT_HOMEPAGE.substring(0, DEFAULT_HOMEPAGE.length() - 1); //remove final slash
+        return (url != null && url.startsWith(homePageRoot));
+    }
+
+    public static boolean isDefaultDapp(String url)
+    {
+        return (DEFAULT_HOMEPAGE.equals(url)
+                || POLYGON_HOMEPAGE.equals(url));
     }
 }

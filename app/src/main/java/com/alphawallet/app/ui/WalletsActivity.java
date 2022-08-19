@@ -281,7 +281,7 @@ public class WalletsActivity extends BaseActivity implements
                 if (importedWallet != null)
                 {
                     requiresHomeRefresh = true;
-                    viewModel.setDefaultWallet(importedWallet);
+                    viewModel.setDefaultWallet(importedWallet, true);
                 }
             }
         }
@@ -377,7 +377,7 @@ public class WalletsActivity extends BaseActivity implements
     private void onCreatedWallet(Wallet wallet)
     {
         hideToolbar();
-        viewModel.setDefaultWallet(wallet);
+        viewModel.setDefaultWallet(wallet, true);
         callNewWalletPage(wallet);
         finish();
     }
@@ -401,7 +401,7 @@ public class WalletsActivity extends BaseActivity implements
     private void onSetWalletDefault(Wallet wallet)
     {
         requiresHomeRefresh = true;
-        viewModel.setDefaultWallet(wallet);
+        viewModel.setDefaultWallet(wallet, false);
     }
 
     private void hideDialog()

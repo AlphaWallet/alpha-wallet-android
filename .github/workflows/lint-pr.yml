@@ -1,17 +1,12 @@
 name: Comments Android lint warnings on pull request
-on:
-  pull_request:
-    branches:
-      - master
+on: pull_request
 jobs:
   lint:
-    name: Run Lint
-    runs-on: ubuntu-18.04
+    name: Comments lint result on PR
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
       - name: set up JDK
         uses: actions/setup-java@v3
         with:

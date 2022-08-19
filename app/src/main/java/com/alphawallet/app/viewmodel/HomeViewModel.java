@@ -187,6 +187,10 @@ public class HomeViewModel extends BaseViewModel {
         return splashActivity;
     }
 
+    public LiveData<Wallet> defaultWallet() {
+        return defaultWallet;
+    }
+
     public void prepare(Activity activity) {
         progress.postValue(false);
         disposable = genericWalletInteract
@@ -723,5 +727,15 @@ public class HomeViewModel extends BaseViewModel {
         };
 
         WCUtils.startServiceLocal(activity, connection, WalletConnectActions.CONNECT);
+    }
+
+    public boolean checkNewWallet(String address)
+    {
+        return preferenceRepository.isNewWallet(address);
+    }
+
+    public void setNewWallet(String address, boolean isNewWallet)
+    {
+        preferenceRepository.setNewWallet(address, isNewWallet);
     }
 }

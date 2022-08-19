@@ -93,4 +93,7 @@ public interface PreferenceRepositoryType {
 
     int getTheme();
     void setTheme(int state);
+
+    boolean isNewWallet(String address);
+    void setNewWallet(String address, boolean isNewWallet);
 }

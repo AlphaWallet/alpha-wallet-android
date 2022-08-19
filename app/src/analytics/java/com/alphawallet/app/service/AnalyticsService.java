@@ -8,6 +8,8 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ServiceErrorException;
+import com.alphawallet.app.repository.KeyProvider;
+import com.alphawallet.app.repository.KeyProviderFactory;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -23,15 +25,9 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
     private final MixpanelAPI mixpanelAPI;
     private final FirebaseAnalytics firebaseAnalytics;
 
-    public static native String getAnalyticsKey();
-
-    static {
-        System.loadLibrary("keys");
-    }
-
     public AnalyticsService(Context context)
     {
-        mixpanelAPI = MixpanelAPI.getInstance(context, getAnalyticsKey());
+        mixpanelAPI = MixpanelAPI.getInstance(context, KeyProviderFactory.get().getAnalyticsKey());
         firebaseAnalytics = FirebaseAnalytics.getInstance(context);
     }
 

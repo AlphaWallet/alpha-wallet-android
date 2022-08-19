@@ -7,7 +7,6 @@ import static org.junit.Assert.assertFalse;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.alphawallet.shadows.ShadowApp;
-import com.alphawallet.shadows.ShadowSystemWrapper;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +16,7 @@ import org.web3j.protocol.http.HttpService;
 import java.util.HashMap;
 
 @RunWith(AndroidJUnit4.class)
-@Config(shadows = {ShadowSystemWrapper.class, ShadowApp.class})
+@Config(shadows = {ShadowApp.class})
 public class HttpServiceHelperTest
 {
     private final HttpService httpService = new HttpService();

@@ -149,7 +149,7 @@ public class WalletsActivity extends BaseActivity implements
         list = findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new WalletsSummaryAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract(), preferenceRepository.isActiveMainnet(), viewModel.tokensService, viewModel.assetService, viewModel.tokenRepository);
+        adapter = new WalletsSummaryAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract(), preferenceRepository.isActiveMainnet(), viewModel.tokensService, viewModel.tokenRepository);
         list.setAdapter(adapter);
 
         systemView.attachRecyclerView(list);

@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.JsonReader;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -26,6 +28,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceException;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
@@ -40,9 +43,13 @@ import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.app.widget.UserAvatar;
+import com.google.gson.Gson;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -77,16 +84,14 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 
     private final WalletClickCallback clickCallback;
     private Wallet wallet = null;
-    private MutableLiveData<TokenCardMeta[]> tokens = new MutableLiveData<>();
     TokensService tokensServices;
     protected final MutableLiveData<ErrorEnvelope> error = new MutableLiveData<>();
     protected Disposable disposable;
     private Context context;
-    AssetDefinitionService assetDefinitionService;
     TokenRepositoryType tokenRepositoryType;
     private Boolean isMainNetActive = false;
 
-    public WalletSummaryHolder(int resId, ViewGroup parent, WalletClickCallback callback, Realm realm, TokensService tokensService, Context context, AssetDefinitionService assetDefinitionService, TokenRepositoryType tokenRepositoryType, boolean mainNetActivated)
+    public WalletSummaryHolder(int resId, ViewGroup parent, WalletClickCallback callback, Realm realm, TokensService tokensService, Context context, TokenRepositoryType tokenRepositoryType, boolean mainNetActivated)
     {
         super(resId, parent);
 
@@ -104,7 +109,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         tokensServices = tokensService;
         clickCallback = callback;
         this.context = context;
-        this.assetDefinitionService = assetDefinitionService;
         this.tokenRepositoryType = tokenRepositoryType;
 
 
@@ -113,10 +117,10 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     }
 
 
-    private void onTokenMetas(TokenCardMeta[] metaTokens)
+    private void onTokenMetas(Token[] metaTokens)
     {
-        tokens.postValue(metaTokens);
-        testNetHorizontalListAdapter = new TestNetHorizontalListAdapter(metaTokens, tokensServices, context, assetDefinitionService, isMainNetActive);
+       // tokens.postValue(metaTokens);
+        testNetHorizontalListAdapter = new TestNetHorizontalListAdapter(metaTokens, tokensServices, context);
         recyclerView.setAdapter(testNetHorizontalListAdapter);
         testNetHorizontalListAdapter.notifyDataSetChanged();
     }
@@ -298,15 +302,18 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
             // - loop through this list and check for non-zero balance testnet (using getTokenOrBase(chainId, w.address) )
             // - send list of tokens below but use Token[] instead of TokenCardMeta[]. Now you won't need TokensService or AssetDefinitionService
             // You can directly create the Token array and send to the bind method. And removing passing in the services
+            List<Long> filters = tokensServices.getNetworkFilters();
+            Token[] tokens = new Token[filters.size()];
 
+            for(int i=0; i < filters.size(); i++){
+                try{
+                    tokens[i] = (tokensServices.getTokenOrBase(filters.get(i), w.address));
+                }catch (Exception e){
 
-            tokenRepositoryType.fetchTokenMetas(w, tokensServices.getNetworkFilters(), assetDefinitionService)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onTokenMetas, this::onError);
-
+                }
+            }
+            onTokenMetas(tokens);
         }
-
         return w;
     }
 

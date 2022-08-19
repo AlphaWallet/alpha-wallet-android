@@ -26,24 +26,20 @@ import java.math.BigInteger;
 
 public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHorizontalListAdapter.ViewHolder>
 {
-    private final TokenCardMeta[] tokens;
+    private final Token[] tokens;
     protected final TokensService tokensService;
-    private Context context; //TODO - JB: should be final
-    protected final AssetDefinitionService assetDefinitionService;
-    private Boolean isMainNetActive = false; //TODO - JB: Do we need this?
+    private final Context context; //TODO - JB: should be final
 
     //TODO - JB: populate the token list using this method:
     // - from tokensService get the tokenFilter with getNetworkFilters()
     // - loop through this list and check for non-zero balance testnet (using getTokenOrBase(chainId, tokensService.getCurrentAddress()) )
     // - send list of tokens below but use Token[] instead of TokenCardMeta[]. Now you won't need TokensService or AssetDefinitionService
 
-    public TestNetHorizontalListAdapter(TokenCardMeta[] tokens, TokensService tokensService, Context context, AssetDefinitionService assetDefinitionService, Boolean isMainNetActive)
+    public TestNetHorizontalListAdapter(Token[] tokens, TokensService tokensService, Context context)
     {
         this.tokens = tokens;
         this.tokensService = tokensService;
         this.context = context;
-        this.assetDefinitionService = assetDefinitionService;
-        this.isMainNetActive = isMainNetActive; //TODO - JB: Do we need this?
     }
 
     @NonNull
@@ -54,54 +50,41 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
                 .inflate(R.layout.item_horizontal_testnet_list, parent, false);
         return new TestNetHorizontalListAdapter.ViewHolder(view);
     }
-
     //TODO - JB: Fix formatting (no whitespace at top of function, fix tabbing)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
+        Token token;
+        holder.tokenIcon.clearLoad();
+        try
+        {
+            token = tokensService.getToken(tokens[position].tokenInfo.chainId, tokens[position].getAddress());
+            if (token == null)
+            {
+                holder.price.setText("");
+                //TODO - JB: delete this
+                return;
+            }
+            String coinBalance = token.getStringBalanceForUI(4);
+            if (!TextUtils.isEmpty(coinBalance))
+            {
 
+                String symbol = token.getSymbol().substring(0, Math.min(token.getSymbol().length(), 5))
+                        .toUpperCase();
 
+                holder.price.setText(context.getString(R.string.valueSymbol, coinBalance, symbol));
+            }
 
+            // TODO - JB: use bindData(token.tokenInfo.chainId), remove import of assetDefinitionService
+            holder.tokenIcon.bindData(token.tokenInfo.chainId);
+            if (!token.isEthereum())
+                holder.tokenIcon.setChainIcon(token.tokenInfo.chainId); //Add in when we upgrade the design
 
-                Token token;
+        }
+        catch (Exception ex)
+        {
 
-                holder.tokenIcon.clearLoad();
-                try
-                {
-                    token = tokensService.getToken(tokens[position].getChain(), tokens[position].getAddress());
-                    if (token == null)
-                    {
-                        holder.price.setText("");
-                        ; //TODO - JB: delete this
-                        return;
-                    }
-                    else if (tokens[position].getNameWeight() < 1000L && !token.isEthereum())
-                    {
-                        //edge condition - looking at a contract as an account
-                        Token backupChain = tokensService.getToken(tokens[position].getChain(), "eth");
-                        if (backupChain != null) token = backupChain;
-                    }
-
-                    String coinBalance = token.getStringBalanceForUI(4);
-                    if (!TextUtils.isEmpty(coinBalance))
-                    {
-
-                        String symbol = token.getSymbol().substring(0, Math.min(token.getSymbol().length(), 5))
-                                .toUpperCase();
-
-                        holder.price.setText(context.getString(R.string.valueSymbol, coinBalance, symbol));
-                    }
-
-                    // TODO - JB: use bindData(token.tokenInfo.chainId), remove import of assetDefinitionService
-                    holder.tokenIcon.bindData(token, assetDefinitionService);
-                    if (!token.isEthereum())
-                        holder.tokenIcon.setChainIcon(token.tokenInfo.chainId); //Add in when we upgrade the design
-
-                }
-                catch (Exception ex)
-                {
-
-                }
+        }
 
     }
 

@@ -4,20 +4,18 @@ package com.alphawallet.app.ui.widget.entity;
  * Created by JB on 28/10/2020.
  */
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.util.TypedValue;
 
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.EnsNodeNotSyncCallback;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.util.AWEnsResolver;
@@ -34,9 +32,6 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by James on 4/12/2018.
@@ -335,9 +330,9 @@ public class ENSHandler implements Runnable
         PreferenceManager.getDefaultSharedPreferences(host.getContext()).edit().putString(C.ENS_HISTORY_PAIR, historyJson).apply();
     }
 
-    public void setEnsNodeNotSyncCallback(EnsNodeNotSyncCallback callback)
+    /*public void setEnsNodeNotSyncCallback(EnsNodeNotSyncCallback callback)
     {
         Timber.d("setEnsNodeNotSyncCallback: ");
         ensResolver.nodeNotSyncCallback = callback;
-    }
+    }*/
 }

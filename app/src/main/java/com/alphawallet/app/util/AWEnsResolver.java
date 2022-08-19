@@ -10,14 +10,22 @@ import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.util.das.DASBody;
 import com.alphawallet.app.util.das.DASRecord;
+import com.alphawallet.app.web3j.ens.EnsResolver;
 import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.ens.NameHash;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 
+import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -43,13 +51,22 @@ public class AWEnsResolver extends EnsResolver
     private static final String DAS_PAYLOAD = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"das_searchAccount\",\"params\":[\"" + DAS_NAME + "\"]}";
     private static final String OPENSEA_IMAGE_PREVIEW = "image_preview_url";
     private static final String OPENSEA_IMAGE_ORIGINAL = "image_original_url"; //in case of SVG; Opensea breaks SVG compression
+    public static final String CRYPTO_RESOLVER = "0xD1E5b0FF1287aA9f9A268759062E4Ab08b9Dacbe";
+    public static final String CRYPTO_ETH_KEY = "crypto.ETH.address";
     private final Context context;
     private final OkHttpClient client;
-
+    
     public AWEnsResolver(Web3j web3j, Context context)
     {
-        super(web3j, DEFAULT_SYNC_THRESHOLD);
+        super(web3j);
         this.context = context;
+        this.client = setupClient();
+    }
+
+    public AWEnsResolver(Web3j web3j)
+    {
+        super(web3j);
+        this.context = null;
         this.client = setupClient();
     }
 
@@ -71,7 +88,7 @@ public class AWEnsResolver extends EnsResolver
                 if (!TextUtils.isEmpty(ensName))
                 {
                     //check ENS name integrity - it must point to the wallet address
-                    String resolveAddress = resolve(ensName, true);
+                    String resolveAddress = resolve(ensName);
                     if (!resolveAddress.equalsIgnoreCase(address))
                     {
                         ensName = "";
@@ -206,6 +223,7 @@ public class AWEnsResolver extends EnsResolver
     public String checkENSHistoryForAddress(String address)
     {
         String ensName = "";
+        if (context == null) return ensName;
         //try previously resolved names
         String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.ENS_HISTORY_PAIR, "");
         if (historyJson.length() > 0)
@@ -225,6 +243,7 @@ public class AWEnsResolver extends EnsResolver
     private String fetchPreviouslyUsedENS(String address)
     {
         String ensName = "";
+        if (context == null) return ensName;
         //try previously resolved names
         String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.ENS_HISTORY_PAIR, "");
         if (historyJson.length() > 0)
@@ -269,16 +288,16 @@ public class AWEnsResolver extends EnsResolver
     {
         return Single.fromCallable(() ->
         {
-            Timber.d("Verify: " + ensName);
+            Timber.d("Verify: %s", ensName);
             String address = "";
             if (!isValidEnsName(ensName)) return "";
             try
             {
-                address = resolve(ensName, performNodeSync);
+                address = resolve(ensName);
             }
             catch (Exception e)
             {
-                Timber.d("Verify: error: " + e.getMessage());
+                Timber.d("Verify: error: %s", e.getMessage());
                 // no action
             }
             return address;
@@ -286,15 +305,33 @@ public class AWEnsResolver extends EnsResolver
     }
 
     @Override
-    public String resolve(String ensName, boolean performSync)
+    public String resolve(String ensName) throws Exception
     {
-        if (!TextUtils.isEmpty(ensName) && ensName.endsWith(".bit"))
+        if (TextUtils.isEmpty(ensName))
+        {
+            return "";
+        }
+        if (ensName.endsWith(".bit"))
         {
             return resolveDAS(ensName);
         }
+        else if (ensName.endsWith(".crypto")) //check crypto namespace
+        {
+            byte[] nameHash = NameHash.nameHashAsBytes(ensName);
+            BigInteger nameId = new BigInteger(nameHash);
+            String resolverAddress = getContractData(CRYPTO_RESOLVER, getResolverOf(nameId), "");
+            if (!TextUtils.isEmpty(resolverAddress))
+            {
+                return getContractData(resolverAddress, get(nameId), "");
+            }
+            else
+            {
+                return "";
+            }
+        }
         else
         {
-            return super.resolve(ensName, performSync);
+            return super.resolve(ensName);
         }
     }
 
@@ -330,6 +367,85 @@ public class AWEnsResolver extends EnsResolver
         catch (Exception e)
         {
             Timber.tag("ENS").e(e);
+        }
+
+        return "";
+    }
+
+    private Function getResolverOf(BigInteger nameId)
+    {
+        return new Function("resolverOf",
+                Arrays.asList(new org.web3j.abi.datatypes.Uint(nameId)),
+                Arrays.asList(new TypeReference<Address>()
+                {
+                }));
+    }
+
+    private Function getAvatar(byte[] nameHash)
+    {
+        return new Function("text",
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash),
+                        new org.web3j.abi.datatypes.Utf8String("avatar")),
+                Arrays.asList(new TypeReference<org.web3j.abi.datatypes.Utf8String>()
+                {
+                }));
+    }
+
+    private Function getResolver(byte[] nameHash)
+    {
+        return new Function("resolver",
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
+                Arrays.asList(new TypeReference<Address>()
+                {
+                }));
+    }
+
+    private Function get(BigInteger nameId)
+    {
+        return new Function("get",
+                Arrays.asList(new org.web3j.abi.datatypes.Utf8String(CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
+                Arrays.asList(new TypeReference<Utf8String>()
+                {
+                }));
+    }
+
+    public String resolveAvatar(String ensName)
+    {
+        if (isValidEnsName(ensName, addressLength))
+        {
+            try
+            {
+                String resolverAddress = getResolverAddress(ensName);
+                if (!TextUtils.isEmpty(resolverAddress))
+                {
+                    byte[] nameHash = NameHash.nameHashAsBytes(ensName);
+                    //now attempt to get the address of this ENS
+                    return getContractData(resolverAddress, getAvatar(nameHash), "");
+                }
+            }
+            catch (Exception e)
+            {
+                //
+                Timber.e(e);
+            }
+        }
+
+        return "";
+    }
+
+    public String resolveAvatarFromAddress(String address)
+    {
+        if (Utils.isAddressValid(address))
+        {
+            try
+            {
+                String ensName = reverseResolve(address);
+                return resolveAvatar(ensName);
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
         }
 
         return "";

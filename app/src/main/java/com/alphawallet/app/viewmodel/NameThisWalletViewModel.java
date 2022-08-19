@@ -1,6 +1,8 @@
 package com.alphawallet.app.viewmodel;
 
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.content.Context;
 import android.text.TextUtils;
 
@@ -12,20 +14,16 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.util.AWEnsResolver;
-import com.alphawallet.app.util.EnsResolver;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import dagger.hilt.android.qualifiers.ApplicationContext;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 @HiltViewModel
 public class NameThisWalletViewModel extends BaseViewModel
@@ -104,7 +102,7 @@ public class NameThisWalletViewModel extends BaseViewModel
 
     public boolean checkEnsName(String newName, Realm.Transaction.OnSuccess onSuccess)
     {
-        if (!TextUtils.isEmpty(newName) && EnsResolver.isValidEnsName(newName))
+        if (!TextUtils.isEmpty(newName) && AWEnsResolver.isValidEnsName(newName))
         {
             //does this new name correspond to ENS?
             ensResolver.resolveENSAddress(newName, true)

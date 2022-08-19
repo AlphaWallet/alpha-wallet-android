@@ -25,6 +25,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetDefaultWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.HomeRouter;
@@ -70,6 +71,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final TokensService tokensService;
     private final AWEnsResolver ensResolver;
     private final AssetDefinitionService assetService;
+    private final PreferenceRepositoryType preferenceRepository;
 
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokenRepositoryType tokenRepository;
@@ -113,6 +115,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
             TokenRepositoryType tokenRepository,
             TickerService tickerService,
             AssetDefinitionService assetService,
+            PreferenceRepositoryType preferenceRepository,
             @ApplicationContext Context context)
     {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
@@ -126,7 +129,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         this.tokenRepository = tokenRepository;
         this.tickerService = tickerService;
         this.assetService = assetService;
-
+        this.preferenceRepository = preferenceRepository;
         this.tokensService = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null);
 
         ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
@@ -154,8 +157,9 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     }
     public LiveData<Boolean> noWalletsError() { return noWalletsError; }
 
-    public void setDefaultWallet(Wallet wallet)
+    public void setDefaultWallet(Wallet wallet, boolean isNewWallet)
     {
+        preferenceRepository.setNewWallet(wallet.address, isNewWallet);
         disposable = setDefaultWalletInteract
                 .set(wallet)
                 .subscribe(() -> onDefaultWallet(wallet), this::onError);

@@ -1,5 +1,7 @@
 package com.alphawallet.app.di;
 
+import static com.alphawallet.app.service.KeystoreAccountService.KEYSTORE_FOLDER;
+
 import android.content.Context;
 
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -49,8 +51,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import okhttp3.OkHttpClient;
 
-import static com.alphawallet.app.service.KeystoreAccountService.KEYSTORE_FOLDER;
-
 @Module
 @InstallIn(SingletonComponent.class)
 public class RepositoriesModule {
@@ -77,9 +77,11 @@ public class RepositoriesModule {
 	@Provides
 	EthereumNetworkRepositoryType provideEthereumNetworkRepository(
             PreferenceRepositoryType preferenceRepository,
-			@ApplicationContext Context context) {
-		return new EthereumNetworkRepository(preferenceRepository, context);
-	}
+			@ApplicationContext Context context
+            )
+    {
+        return new EthereumNetworkRepository(preferenceRepository, context);
+    }
 
 	@Singleton
 	@Provides
@@ -119,14 +121,15 @@ public class RepositoriesModule {
         return new TransactionsRealmCache(realmManager);
     }
 
-	@Singleton
-	@Provides
+    @Singleton
+    @Provides
     TransactionsNetworkClientType provideBlockExplorerClient(
-			OkHttpClient httpClient,
-			Gson gson,
-			RealmManager realmManager) {
-		return new TransactionsNetworkClient(httpClient, gson, realmManager);
-	}
+            OkHttpClient httpClient,
+            Gson gson,
+            RealmManager realmManager)
+    {
+        return new TransactionsNetworkClient(httpClient, gson, realmManager);
+    }
 
 	@Singleton
     @Provides
@@ -175,11 +178,14 @@ public class RepositoriesModule {
 		return new TransactionsService(tokensService, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource);
 	}
 
-	@Singleton
-	@Provides
-    GasService provideGasService(EthereumNetworkRepositoryType ethereumNetworkRepository, OkHttpClient client, RealmManager realmManager) {
-		return new GasService(ethereumNetworkRepository, client, realmManager);
-	}
+    @Singleton
+    @Provides
+    GasService provideGasService(EthereumNetworkRepositoryType ethereumNetworkRepository,
+                                 OkHttpClient client,
+                                 RealmManager realmManager)
+    {
+        return new GasService(ethereumNetworkRepository, client, realmManager);
+    }
 
 	@Singleton
 	@Provides

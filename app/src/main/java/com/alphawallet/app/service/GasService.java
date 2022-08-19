@@ -26,6 +26,8 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.KeyProvider;
+import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -85,13 +87,6 @@ public class GasService implements ContractGasProvider
     @Nullable
     private Disposable gasFetchDisposable;
 
-    static {
-        System.loadLibrary("keys");
-    }
-
-    public static native String getEtherscanKey();
-    public static native String getPolygonScanKey();
-
     public GasService(EthereumNetworkRepositoryType networkRepository, OkHttpClient httpClient, RealmManager realm)
     {
         this.networkRepository = networkRepository;
@@ -101,8 +96,9 @@ public class GasService implements ContractGasProvider
         this.currentChainId = MAINNET_ID;
 
         web3j = null;
-        ETHERSCAN_API_KEY = "&apikey=" + getEtherscanKey();
-        POLYGONSCAN_API_KEY = "&apikey=" + getPolygonScanKey();
+        KeyProvider keyProvider = KeyProviderFactory.get();
+        ETHERSCAN_API_KEY = "&apikey=" + keyProvider.getEtherscanKey();
+        POLYGONSCAN_API_KEY = "&apikey=" + keyProvider.getPolygonScanKey();
         keyFail = false;
     }
 

@@ -68,11 +68,7 @@ android_lint_reporter {
 
 repositories {
     maven {
-        url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
-        credentials {
-            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-            password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
-        }
+        url 'https://maven.google.com'
     }
 }
 
@@ -291,8 +287,6 @@ dependencies {
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
-//    testImplementation 'com.google.dagger:hilt-android-testing:2.43.2'
-//    testAnnotationProcessor 'com.google.dagger:hilt-android-compiler:2.43.2'
 
     // Component tests
     testImplementation 'org.robolectric:robolectric:4.8.1'
@@ -314,12 +308,13 @@ dependencies {
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.4.0'
 
-    implementation 'com.trustwallet:wallet-core:2.6.4'
+    implementation group: 'com.trustwallet', name: 'wallet-core', version: '2.6.3'
+    //implementation "com.trustwallet:wallet-core:0.12.31"
 
-    implementation 'com.github.florent37:TutoShowcase:d8b91be8a2'
+    implementation 'com.github.florent37:tutoshowcase:1.0.1'
 
     // Do not upgrade unless we have migrated to AndroidX
-    implementation 'com.github.google:flexbox-layout:2.0.1'
+    implementation 'com.google.android:flexbox:2.0.1'
 
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 

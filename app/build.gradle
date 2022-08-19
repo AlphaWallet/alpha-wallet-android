@@ -74,7 +74,12 @@ repositories {
 
 android {
     compileSdkVersion 32
-    buildToolsVersion '32.0.0'
+    buildToolsVersion '33.0.0'
+    sourceSets {
+        main {
+
+        }
+    }
     defaultConfig {
         versionCode 201
         versionName "3.58.2"

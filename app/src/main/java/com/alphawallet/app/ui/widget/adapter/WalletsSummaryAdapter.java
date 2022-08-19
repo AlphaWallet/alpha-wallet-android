@@ -47,12 +47,11 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     private final Realm realm;
     private final GenericWalletInteract walletInteract;
     private final TokensService tokensService;
-    private final AssetDefinitionService assetDefinitionService;
     private final TokenRepositoryType tokenRepositoryType;
 
 
     public WalletsSummaryAdapter(Context ctx,
-                                 OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract, boolean activeMainnet, TokensService tokensService, AssetDefinitionService assetService, TokenRepositoryType tokenRepository) {
+                                 OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract, boolean activeMainnet, TokensService tokensService, TokenRepositoryType tokenRepository) {
         this.onSetWalletDefaultListener = onSetWalletDefaultListener;
         this.mainNetActivated = activeMainnet;
         this.wallets = new ArrayList<>();
@@ -60,7 +59,6 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         this.realm = genericWalletInteract.getWalletRealm();
         this.walletInteract = genericWalletInteract;
         this.tokensService = tokensService;
-        this.assetDefinitionService = assetService;
         this.tokenRepositoryType = tokenRepository;
     }
 
@@ -70,7 +68,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         BinderViewHolder binderViewHolder = null;
         switch (viewType) {
             case WalletHolder.VIEW_TYPE:
-                binderViewHolder = new WalletSummaryHolder(R.layout.item_wallet_summary_manage, parent, this, realm, tokensService, context, assetDefinitionService, tokenRepositoryType, mainNetActivated);
+                binderViewHolder = new WalletSummaryHolder(R.layout.item_wallet_summary_manage, parent, this, realm, tokensService, context, tokenRepositoryType, mainNetActivated);
             break;
             case TextHolder.VIEW_TYPE:
                 binderViewHolder = new TextHolder(R.layout.item_standard_header, parent);

@@ -18,6 +18,12 @@ jobs:
           java-version: 11
           cache: gradle
       - name: Run Kotlin lint
+        env:
+          USERNAME: ${{ env.GITHUB_ACTOR }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :app:detekt
       - name: Run Android Lint
+        env:
+          USERNAME: ${{ env.GITHUB_ACTOR }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :app:lintAnalyticsDebug

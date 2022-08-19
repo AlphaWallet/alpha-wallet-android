@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.IDN;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Locale;
 
 import org.web3j.crypto.Hash;
 import org.web3j.utils.Numeric;
@@ -66,7 +67,7 @@ public class NameHash {
      */
     public static String normalise(String ensName) {
         try {
-            return IDN.toASCII(ensName, IDN.USE_STD3_ASCII_RULES).toLowerCase();
+            return IDN.toASCII(ensName, IDN.USE_STD3_ASCII_RULES).toLowerCase(Locale.ROOT);
         } catch (IllegalArgumentException e) {
             throw new EnsResolutionException("Invalid ENS name provided: " + ensName);
         }

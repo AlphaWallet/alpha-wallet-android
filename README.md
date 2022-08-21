@@ -66,7 +66,7 @@ We want to give businesses the whitelabel tools they need to develop their ether
 5. Edit `~/.gradle/gradle.properties` add blow properties:
 ```properties
 gpr.user=Your GitHub Email
-gpr.token=The GitHub Personal Access Token you created in previous step
+gpr.key=The GitHub Personal Access Token you created in previous step
 ```
 6. Build the project in AndroidStudio or Run `./gradlew build` to install tools and dependencies. See [BUILD.md](BUILD.md) for more details.
 

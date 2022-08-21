@@ -68,7 +68,11 @@ android_lint_reporter {
 
 repositories {
     maven {
-        url 'https://maven.google.com'
+        url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+        }
     }
 }
 
@@ -308,13 +312,12 @@ dependencies {
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.4.0'
 
-    implementation group: 'com.trustwallet', name: 'wallet-core', version: '2.6.3'
-    //implementation "com.trustwallet:wallet-core:0.12.31"
+    implementation 'com.trustwallet:wallet-core:2.6.4'
 
-    implementation 'com.github.florent37:tutoshowcase:1.0.1'
+    implementation 'com.github.florent37:TutoShowcase:d8b91be8a2'
 
     // Do not upgrade unless we have migrated to AndroidX
-    implementation 'com.google.android:flexbox:2.0.1'
+    implementation 'com.github.google:flexbox-layout:2.0.1'
 
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 

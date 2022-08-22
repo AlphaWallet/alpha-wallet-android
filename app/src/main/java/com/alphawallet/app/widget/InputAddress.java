@@ -1,7 +1,6 @@
 package com.alphawallet.app.widget;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
-
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 
 import android.app.Activity;
@@ -14,20 +13,17 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ENSCallback;
-import com.alphawallet.app.entity.EnsNodeNotSyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
@@ -57,6 +53,34 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private final RelativeLayout boxLayout;
     private final TextView errorText;
     private final Context context;
+    private final ENSHandler ensHandler;
+    private final Pattern findAddress = Pattern.compile("^(\\s?)+(0x)([0-9a-fA-F]{40})(\\s?)+\\z");
+    private final float standardTextSize;
+    private final View.OnClickListener pasteListener = new OnClickListener()
+    {
+        @Override
+        public void onClick(View view)
+        {
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
+            try
+            {
+                CharSequence textToPaste = clipboard.getPrimaryClip().getItemAt(0).getText();
+                editText.append(textToPaste);
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
+        }
+    };
+    private final View.OnClickListener clearListener = new OnClickListener()
+    {
+        @Override
+        public void onClick(View view)
+        {
+            editText.getText().clear();
+        }
+    };
     private int labelResId;
     private int hintRedId;
     private boolean noCam;
@@ -64,12 +88,9 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     private String fullAddress;
     private String ensName;
     private boolean handleENS = false;
-    private final ENSHandler ensHandler;
     private AWalletAlertDialog dialog;
     private AddressReadyCallback addressReadyCallback = null;
     private long chainOverride;
-    private final Pattern findAddress = Pattern.compile("^(\\s?)+(0x)([0-9a-fA-F]{40})(\\s?)+\\z");
-    private final float standardTextSize;
 
     public InputAddress(Context context, AttributeSet attrs)
     {
@@ -158,20 +179,7 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
 
         editText.setHint(hintRedId);
 
-        //Paste
-        pasteItem.setOnClickListener(v -> {
-            //from clipboard
-            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
-            try
-            {
-                CharSequence textToPaste = clipboard.getPrimaryClip().getItemAt(0).getText();
-                editText.append(textToPaste);
-            }
-            catch (Exception e)
-            {
-                Timber.e(e, e.getMessage());
-            }
-        });
+        pasteItem.setOnClickListener(pasteListener);
 
         if (noCam)
         {
@@ -522,9 +530,20 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         {
             ensHandler.checkAddress();
         }
+
+        if (TextUtils.isEmpty(s))
+        {
+            pasteItem.setText(R.string.paste);
+            pasteItem.setOnClickListener(pasteListener);
+        }
+        else
+        {
+            pasteItem.setText(R.string.action_clear);
+            pasteItem.setOnClickListener(clearListener);
+        }
     }
 
-    public void setEnsNodeNotSyncCallback(EnsNodeNotSyncCallback callback)
+    /*public void setEnsNodeNotSyncCallback(EnsNodeNotSyncCallback callback)
     {
         Timber.d("setEnsNodeNotSyncCallback: ");
         ensHandler.setEnsNodeNotSyncCallback(callback);
@@ -533,6 +552,6 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     public void setEnsHandlerNodeSyncFlag(boolean performSync)
     {
         ensHandler.performEnsSync = performSync;
-    }
+    }*/
 
 }

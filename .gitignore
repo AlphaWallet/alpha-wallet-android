@@ -18,6 +18,7 @@ app/full-r8-config.txt
 app/awallet
 app/analytics
 app/noAnalytics
+app/CMakeCache.txt
 
 # Files for the Dalvik VM
 *.dex
@@ -71,3 +72,4 @@ gen-external-apklibs
 fastlane/.google-play-key.json
 DCIM/
 vendor/
+.project

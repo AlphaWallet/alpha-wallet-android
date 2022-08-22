@@ -27,8 +27,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_TESTNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BAOBAB_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BAOBAB_RPC;
-import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BOABAB_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
@@ -70,7 +70,6 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.http.HttpService;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -88,13 +87,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 {
     public static final String COVALENT = "[COVALENT]";
 
-    private static final String DEFAULT_HOMEPAGE = "https://alphawallet.com/browser/";
-
-    private static final String POLYGON_HOMEPAGE = "https://alphawallet.com/browser-item-category/polygon/";
-
     private static final String GAS_API = "module=gastracker&action=gasoracle";
 
-    private static final String DEFAULT_INFURA_KEY = "da3717f25f824cc1baa32d812386d93f";
+    public static final String DEFAULT_INFURA_KEY = "da3717f25f824cc1baa32d812386d93f";
     /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
        These hardcoded keys are fallbacks used by AlphaWallet forks.
 
@@ -103,20 +98,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
        If you wish your node to be the fallback, tried in case the primary times out then add/replace in ..._FALLBACK_RPC_URL list
      */
 
-    static {
-        System.loadLibrary("keys");
-    }
+    private static final KeyProvider keyProvider = KeyProviderFactory.get();
+    public static final boolean usesProductionKey = !keyProvider.getInfuraKey().equals(DEFAULT_INFURA_KEY);
 
-    public static native String getAmberDataKey();
-    public static native String getInfuraKey();
-    public static native String getSecondaryInfuraKey();
-    private static final boolean usesProductionKey = !getInfuraKey().equals(DEFAULT_INFURA_KEY);
-
-    public static final String FREE_MAINNET_RPC_URL = "https://main-rpc.linkpool.io";
+    public static final String FREE_MAINNET_RPC_URL = "https://rpc.ankr.com/eth";
     public static final String FREE_POLYGON_RPC_URL = "https://polygon-rpc.com";
     public static final String FREE_ARBITRUM_RPC_URL = "https://arbitrum.public-rpc.com";
-    public static final String FREE_RINKEBY_RPC_URL = "https://rinkeby-light.eth.linkpool.io";
-    public static final String FREE_GOERLI_RPC_URL = "https://goerli-light.eth.linkpool.io";
+    public static final String FREE_RINKEBY_RPC_URL = "https://rpc.ankr.com/eth_rinkeby";
+    public static final String FREE_GOERLI_RPC_URL = "https://rpc.ankr.com/eth_goerli";
     public static final String FREE_MUMBAI_RPC_URL = "https://rpc-mumbai.maticvigil.com";
     public static final String FREE_OPTIMISM_RPC_URL = "https://mainnet.optimism.io";
     public static final String FREE_ARBITRUM_TEST_RPC_URL = "https://rinkeby.arbitrum.io/rpc";
@@ -126,50 +115,54 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String FREE_PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/3a961d6501e54add9a41aa53f15de99b";
     public static final String FREE_CRONOS_MAIN_BETA_RPC_URL = "https://evm.cronos.org";
 
-    public static final String MAINNET_RPC_URL = usesProductionKey ? "https://mainnet.infura.io/v3/" + getInfuraKey()
+    public static final String MAINNET_RPC_URL = usesProductionKey ? "https://mainnet.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_MAINNET_RPC_URL;
-    public static final String RINKEBY_RPC_URL = usesProductionKey ? "https://rinkeby.infura.io/v3/" + getInfuraKey()
+    public static final String RINKEBY_RPC_URL = usesProductionKey ? "https://rinkeby.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_RINKEBY_RPC_URL;
-    public static final String KOVAN_RPC_URL = usesProductionKey ? "https://kovan.infura.io/v3/" + getInfuraKey()
+    public static final String KOVAN_RPC_URL = usesProductionKey ? "https://kovan.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_KOVAN_RPC_URL;
-    public static final String GOERLI_RPC_URL  = usesProductionKey ? "https://goerli.infura.io/v3/" + getInfuraKey()
+    public static final String GOERLI_RPC_URL  = usesProductionKey ? "https://goerli.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_GOERLI_RPC_URL;
-    public static final String MATIC_RPC_URL   = usesProductionKey ? "https://polygon-mainnet.infura.io/v3/" + getInfuraKey()
+    public static final String MATIC_RPC_URL   = usesProductionKey ? "https://polygon-mainnet.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_POLYGON_RPC_URL;
-    public static final String ARBITRUM_MAINNET_RPC = usesProductionKey ? "https://arbitrum-mainnet.infura.io/v3/" + getInfuraKey()
+    public static final String ARBITRUM_MAINNET_RPC = usesProductionKey ? "https://arbitrum-mainnet.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_ARBITRUM_RPC_URL;
-    public static final String MUMBAI_TEST_RPC_URL = usesProductionKey ? "https://polygon-mumbai.infura.io/v3/" + getInfuraKey()
+    public static final String MUMBAI_TEST_RPC_URL = usesProductionKey ? "https://polygon-mumbai.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_MUMBAI_RPC_URL;
-    public static final String OPTIMISTIC_MAIN_URL = usesProductionKey ? "https://optimism-mainnet.infura.io/v3/" + getInfuraKey()
+    public static final String OPTIMISTIC_MAIN_URL = usesProductionKey ? "https://optimism-mainnet.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_OPTIMISM_RPC_URL;
-    public static final String OPTIMISTIC_TEST_URL = usesProductionKey ? "https://optimism-kovan.infura.io/v3/" + getInfuraKey()
+    public static final String OPTIMISTIC_TEST_URL = usesProductionKey ? "https://optimism-kovan.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_OPTIMISM_TESTRPC_URL;
-    public static final String ARBITRUM_TESTNET_RPC = usesProductionKey ? "https://arbitrum-rinkeby.infura.io/v3/" + getInfuraKey()
+    public static final String ARBITRUM_TESTNET_RPC = usesProductionKey ? "https://arbitrum-rinkeby.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_ARBITRUM_TEST_RPC_URL;
-    public static final String PALM_RPC_URL = usesProductionKey ? "https://palm-mainnet.infura.io/v3/" + getInfuraKey()
+    public static final String PALM_RPC_URL = usesProductionKey ? "https://palm-mainnet.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_PALM_RPC_URL;
-    public static final String PALM_TEST_RPC_URL = usesProductionKey ? "https://palm-testnet.infura.io/v3/" + getInfuraKey()
+    public static final String PALM_TEST_RPC_URL = usesProductionKey ? "https://palm-testnet.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_PALM_TEST_RPC_URL;
+    public static final String USE_KLAYTN_RPC = usesProductionKey ? "https://node-api.klaytnapi.com/v1/klaytn"
+            : KLAYTN_RPC;
+    public static final String USE_KLAYTN_BAOBAB_RPC = usesProductionKey ? "https://node-api.klaytnapi.com/v1/klaytn"
+            : KLAYTN_BAOBAB_RPC;
     public static final String CRONOS_MAIN_RPC_URL = "https://evm.cronos.org";
 
     // Use the "Free" routes as backup in order to diversify node usage; to avoid single point of failure
-    public static final String MAINNET_FALLBACK_RPC_URL = usesProductionKey ? FREE_MAINNET_RPC_URL : "https://mainnet.infura.io/v3/" + getSecondaryInfuraKey();
-    public static final String RINKEBY_FALLBACK_RPC_URL = usesProductionKey ? FREE_RINKEBY_RPC_URL : "https://rinkeby.infura.io/v3/" + getSecondaryInfuraKey();
-    public static final String KOVAN_FALLBACK_RPC_URL = usesProductionKey ? FREE_KOVAN_RPC_URL : "https://kovan.infura.io/v3/" + getSecondaryInfuraKey();
-    public static final String GOERLI_FALLBACK_RPC_URL = usesProductionKey ? FREE_GOERLI_RPC_URL : "https://goerli.infura.io/v3/" + getSecondaryInfuraKey();
-    public static final String ARBITRUM_FALLBACK_MAINNET_RPC = usesProductionKey ? FREE_ARBITRUM_RPC_URL : "https://arbitrum-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
-    public static final String PALM_RPC_FALLBACK_URL = usesProductionKey ? FREE_PALM_RPC_URL : "https://palm-mainnet.infura.io/v3/" + getSecondaryInfuraKey();
-    public static final String PALM_TEST_RPC_FALLBACK_URL = usesProductionKey ? FREE_PALM_RPC_URL : "https://palm-testnet.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String MAINNET_FALLBACK_RPC_URL = usesProductionKey ? FREE_MAINNET_RPC_URL : "https://mainnet.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
+    public static final String RINKEBY_FALLBACK_RPC_URL = usesProductionKey ? FREE_RINKEBY_RPC_URL : "https://rinkeby.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
+    public static final String KOVAN_FALLBACK_RPC_URL = usesProductionKey ? FREE_KOVAN_RPC_URL : "https://kovan.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
+    public static final String GOERLI_FALLBACK_RPC_URL = usesProductionKey ? FREE_GOERLI_RPC_URL : "https://goerli.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
+    public static final String ARBITRUM_FALLBACK_MAINNET_RPC = usesProductionKey ? FREE_ARBITRUM_RPC_URL : "https://arbitrum-mainnet.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
+    public static final String PALM_RPC_FALLBACK_URL = usesProductionKey ? FREE_PALM_RPC_URL : "https://palm-mainnet.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
+    public static final String PALM_TEST_RPC_FALLBACK_URL = usesProductionKey ? FREE_PALM_RPC_URL : "https://palm-testnet.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
 
     //Note that AlphaWallet now uses a double node configuration. See class AWHttpService comment 'try primary node'.
     //If you supply a main RPC and secondary it will try the secondary if the primary node times out after 10 seconds.
     //See the declaration of NetworkInfo - it has a member backupNodeUrl. Put your secondary node here.
 
-    public static final String ROPSTEN_FALLBACK_RPC_URL = "https://ropsten.infura.io/v3/" + getSecondaryInfuraKey();
+    public static final String ROPSTEN_FALLBACK_RPC_URL = "https://ropsten.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
     public static final String XDAI_RPC_URL = com.alphawallet.ethereum.EthereumNetworkBase.XDAI_RPC_URL;
     public static final String POA_RPC_URL = "https://core.poa.network/";
-    public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + getInfuraKey();
+    public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + keyProvider.getInfuraKey();
     public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
     public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
@@ -322,12 +315,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer.palm-uat.xyz/api?"));
 
             put(KLAYTN_ID, new NetworkInfo(C.KLAYTN_NAME, C.KLAYTN_SYMBOL,
-                    KLAYTN_RPC,
+                    USE_KLAYTN_RPC,
                     "https://scope.klaytn.com/tx/", KLAYTN_ID, "",
                     "https://api.covalenthq.com/v1/" + COVALENT));
-            put(KLAYTN_BOABAB_ID, new NetworkInfo(C.KLAYTN_BAOBAB_NAME, C.KLAYTN_SYMBOL,
-                    KLAYTN_BAOBAB_RPC,
-                    "https://baobab.scope.klaytn.com/tx/", KLAYTN_BOABAB_ID, "",
+            put(KLAYTN_BAOBAB_ID, new NetworkInfo(C.KLAYTN_BAOBAB_NAME, C.KLAYTN_SYMBOL,
+                    USE_KLAYTN_BAOBAB_RPC,
+                    "https://baobab.scope.klaytn.com/tx/", KLAYTN_BAOBAB_ID, "",
                     ""));
             put(IOTEX_MAINNET_ID, new NetworkInfo(C.IOTEX_NAME, C.IOTEX_SYMBOL,
                     IOTEX_MAINNET_RPC_URL,
@@ -395,7 +388,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(PALM_ID, R.drawable.ic_icons_network_palm);
             put(PALM_TEST_ID, R.drawable.palm_logo_test);
             put(KLAYTN_ID, R.drawable.ic_klaytn_network_logo);
-            put(KLAYTN_BOABAB_ID, R.drawable.ic_klaytn_test);
+            put(KLAYTN_BAOBAB_ID, R.drawable.ic_klaytn_test);
             put(IOTEX_MAINNET_ID, R.drawable.ic_iotex);
             put(IOTEX_TESTNET_ID, R.drawable.ic_iotex_test);
             put(AURORA_MAINNET_ID, R.drawable.ic_aurora);
@@ -438,7 +431,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(PALM_ID, R.drawable.ic_icons_network_palm);
             put(PALM_TEST_ID, R.drawable.palm_logo_test);
             put(KLAYTN_ID, R.drawable.ic_klaytn_network_logo);
-            put(KLAYTN_BOABAB_ID, R.drawable.ic_klaytn_test);
+            put(KLAYTN_BAOBAB_ID, R.drawable.ic_klaytn_test);
             put(IOTEX_MAINNET_ID, R.drawable.ic_iotex);
             put(IOTEX_TESTNET_ID, R.drawable.ic_iotex_test);
             put(AURORA_MAINNET_ID, R.drawable.ic_aurora);
@@ -481,7 +474,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(PALM_ID, R.color.palm_main);
             put(PALM_TEST_ID, R.color.palm_test);
             put(KLAYTN_ID, R.color.klaytn_main);
-            put(KLAYTN_BOABAB_ID, R.color.klaytn_test);
+            put(KLAYTN_BAOBAB_ID, R.color.klaytn_test);
             put(IOTEX_MAINNET_ID, R.color.iotex_mainnet);
             put(IOTEX_TESTNET_ID, R.color.iotex_mainnet);
             put(AURORA_MAINNET_ID, R.color.aurora_mainnet);
@@ -499,7 +492,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     private static final List<Long> hasGasOracleAPI = Arrays.asList(MAINNET_ID, HECO_ID, BINANCE_MAIN_ID, MATIC_ID);
 
     //These chains don't allow custom gas
-    private static final List<Long> hasLockedGas = Arrays.asList(OPTIMISTIC_MAIN_ID, OPTIMISTIC_TEST_ID, ARBITRUM_MAIN_ID, ARBITRUM_TEST_ID, KLAYTN_ID, KLAYTN_BOABAB_ID);
+    private static final List<Long> hasLockedGas = Arrays.asList(OPTIMISTIC_MAIN_ID, OPTIMISTIC_TEST_ID, ARBITRUM_MAIN_ID, ARBITRUM_TEST_ID, KLAYTN_ID, KLAYTN_BAOBAB_ID);
 
     private static final List<Long> hasOpenSeaAPI = Arrays.asList(MAINNET_ID, MATIC_ID, RINKEBY_ID);
 
@@ -953,11 +946,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return null;
     }
 
-    public static void addRequiredCredentials(long chainId, HttpService publicNodeService)
-    {
-
-    }
-
     public static List<Long> addDefaultNetworks()
     {
         return CustomViewSettings.alwaysVisibleChains;
@@ -988,24 +976,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static int decimalOverride(String address, long chainId)
     {
         return 0;
-    }
-
-    public static String defaultDapp(long chainId)
-    {
-        String dapp = (chainId == MATIC_ID || chainId == MATIC_TEST_ID) ? POLYGON_HOMEPAGE : DEFAULT_HOMEPAGE;
-        return dapp;
-    }
-
-    public static boolean isWithinHomePage(String url)
-    {
-        String homePageRoot = DEFAULT_HOMEPAGE.substring(0, DEFAULT_HOMEPAGE.length() - 1); //remove final slash
-        return (url != null && url.startsWith(homePageRoot));
-    }
-
-    public static boolean isDefaultDapp(String url)
-    {
-        return url != null && (url.equals(DEFAULT_HOMEPAGE)
-                || url.equals(POLYGON_HOMEPAGE));
     }
 
     public Token getBlankOverrideToken(NetworkInfo networkInfo)
@@ -1138,4 +1108,5 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         return builtinNetworkMap.get(chainId);
     }
+
 }

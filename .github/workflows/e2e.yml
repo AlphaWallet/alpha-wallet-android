@@ -1,0 +1,45 @@
+name: E2e Test
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  test:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        api-level: [30]
+        target: [default]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+          architecture: arm64
+
+      - name: Run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          USERNAME: ${{ env.GITHUB_ACTOR }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: arm64-v8a
+          profile: Nexus 6
+          channel: canary
+          disable-animations: true
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: ./e2e.sh --CI
+
+      - name: Collect tests results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: e2e-tests-results
+          path: output/

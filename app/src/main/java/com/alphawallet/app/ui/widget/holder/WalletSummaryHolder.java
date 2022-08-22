@@ -9,8 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.JsonReader;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -29,11 +27,8 @@ import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceException;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.entity.RealmWalletData;
-import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.WalletActionsActivity;
@@ -41,24 +36,15 @@ import com.alphawallet.app.ui.widget.adapter.TestNetHorizontalListAdapter;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.app.widget.UserAvatar;
-import com.google.gson.Gson;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import timber.log.Timber;
 
 public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements View.OnClickListener, AvatarWriteCallback
 {
@@ -305,10 +291,14 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
             List<Long> filters = tokensServices.getNetworkFilters();
             Token[] tokens = new Token[filters.size()];
 
-            for(int i=0; i < filters.size(); i++){
-                try{
+            for (int i = 0; i < filters.size(); i++)
+            {
+                try
+                {
                     tokens[i] = (tokensServices.getTokenOrBase(filters.get(i), w.address));
-                }catch (Exception e){
+                }
+                catch (Exception e)
+                {
 
                 }
             }

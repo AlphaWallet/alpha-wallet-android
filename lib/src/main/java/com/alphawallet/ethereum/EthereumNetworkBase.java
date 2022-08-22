@@ -38,7 +38,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final long PALM_ID = 0x2a15c308dL; //11297108109
     public static final long PALM_TEST_ID = 0x2a15c3083L; //11297108099
     public static final long KLAYTN_ID = 8217;
-    public static final long KLAYTN_BOABAB_ID = 1001;
+    public static final long KLAYTN_BAOBAB_ID = 1001;
     public static final long IOTEX_MAINNET_ID = 4689;
     public static final long IOTEX_TESTNET_ID = 4690;
     public static final long AURORA_MAINNET_ID = 1313161554;
@@ -152,8 +152,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
 
             put(KLAYTN_ID, new NetworkInfo("Klaytn Cypress","KLAY", KLAYTN_RPC, "https://scope.klaytn.com/tx/",
                     KLAYTN_ID, false));
-            put(KLAYTN_BOABAB_ID, new NetworkInfo("Klaytn Boabab (Test)","KLAY", KLAYTN_BAOBAB_RPC, "https://baobab.scope.klaytn.com/tx/",
-                    KLAYTN_BOABAB_ID, false));
+            put(KLAYTN_BAOBAB_ID, new NetworkInfo("Klaytn Baobab (Test)","KLAY", KLAYTN_BAOBAB_RPC, "https://baobab.scope.klaytn.com/tx/",
+                    KLAYTN_BAOBAB_ID, false));
             put(AURORA_MAINNET_ID, new NetworkInfo("Aurora","ETH", AURORA_MAINNET_RPC_URL, "https://aurorascan.dev/tx/",
                     AURORA_MAINNET_ID, false));
             put(AURORA_TESTNET_ID, new NetworkInfo("Aurora (Test)","ETH", AURORA_TESTNET_RPC_URL, "https://testnet.aurorascan.dev/tx/",

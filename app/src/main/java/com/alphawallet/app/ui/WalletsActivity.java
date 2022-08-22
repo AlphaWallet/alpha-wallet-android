@@ -27,6 +27,7 @@ import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.KeyService;
@@ -126,9 +127,27 @@ public class WalletsActivity extends BaseActivity implements
             viewModel.createdWallet().observe(this, this::onCreatedWallet);
             viewModel.createWalletError().observe(this, this::onCreateWalletError);
             viewModel.noWalletsError().observe(this, this::noWallets);
+            viewModel.baseTokens().observe(this, this::updateBaseTokens);
         }
         viewModel.onPrepare(balanceChain, this);
         initViews(); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
+    }
+
+    private void updateBaseTokens(Token[] tokens)
+    {
+        //TODO - JB: Deleteme: here's a dump to help see the tokens
+        if (tokens.length > 0)
+        {
+            System.out.println("YO: Wallet: " + tokens[0].getWallet()); // here's the wallet this corresponds to
+        }
+        int id = 1;
+        for (Token t : tokens)
+        {
+            System.out.println("YO: " + id++ + " : " + t.getFullName() + " : " + t.getStringBalanceForUI(3));
+        }
+
+        //TODO - JB: Pass base tokens on to the token holder, send these to WalletSummaryAdapter, which should then pass them on to the relevant holder
+        //           Then delete the above help dump.
     }
 
     protected Activity getThisActivity()
@@ -280,7 +299,7 @@ public class WalletsActivity extends BaseActivity implements
                 if (importedWallet != null)
                 {
                     requiresHomeRefresh = true;
-                    viewModel.setDefaultWallet(importedWallet);
+                    viewModel.setDefaultWallet(importedWallet, true);
                 }
             }
         }
@@ -376,7 +395,7 @@ public class WalletsActivity extends BaseActivity implements
     private void onCreatedWallet(Wallet wallet)
     {
         hideToolbar();
-        viewModel.setDefaultWallet(wallet);
+        viewModel.setDefaultWallet(wallet, true);
         callNewWalletPage(wallet);
         finish();
     }
@@ -400,7 +419,7 @@ public class WalletsActivity extends BaseActivity implements
     private void onSetWalletDefault(Wallet wallet)
     {
         requiresHomeRefresh = true;
-        viewModel.setDefaultWallet(wallet);
+        viewModel.setDefaultWallet(wallet, false);
     }
 
     private void hideDialog()

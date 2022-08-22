@@ -1,17 +1,12 @@
 name: Comments Android lint warnings on pull request
-on:
-  pull_request:
-    branches:
-      - master
+on: pull_request
 jobs:
   lint:
-    name: Run Lint
-    runs-on: ubuntu-18.04
+    name: Comments lint result on PR
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
       - name: set up JDK
         uses: actions/setup-java@v3
         with:
@@ -19,12 +14,20 @@ jobs:
           java-version: 11
           cache: gradle
       - name: Run detekt
+        env:
+          USERNAME: ${{ env.GITHUB_ACTOR }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :app:detekt
         continue-on-error: true
       - name: Run Android Lint
+        env:
+          USERNAME: ${{ env.GITHUB_ACTOR }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :app:lintAnalyticsDebug
       - name: Run Android Lint Reporter to report Lint and Detekt result to PR
         env:
+          USERNAME: ${{ env.GITHUB_ACTOR }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

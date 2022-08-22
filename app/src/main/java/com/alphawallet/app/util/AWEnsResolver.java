@@ -15,13 +15,10 @@ import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
 import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.ens.NameHash;
 import org.web3j.protocol.Web3j;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
@@ -43,8 +40,6 @@ public class AWEnsResolver extends EnsResolver
     private static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
     private static final String OPENSEA_IMAGE_PREVIEW = "image_preview_url";
     private static final String OPENSEA_IMAGE_ORIGINAL = "image_original_url"; //in case of SVG; Opensea breaks SVG compression
-    public static final String CRYPTO_RESOLVER = "0xD1E5b0FF1287aA9f9A268759062E4Ab08b9Dacbe";
-    public static final String CRYPTO_ETH_KEY = "crypto.ETH.address";
     private final Context context;
     private final OkHttpClient client;
     
@@ -309,36 +304,12 @@ public class AWEnsResolver extends EnsResolver
         }
         else if (ensName.endsWith(".crypto")) //check crypto namespace
         {
-            return resolveCrypto(ensName);
+            return new CryptoResolver(this).resolve(ensName);
         }
         else
         {
             return super.resolve(ensName);
         }
-    }
-
-    private String resolveCrypto(String ensName) throws Exception
-    {
-        byte[] nameHash = NameHash.nameHashAsBytes(ensName);
-        BigInteger nameId = new BigInteger(nameHash);
-        String resolverAddress = getContractData(CRYPTO_RESOLVER, getResolverOf(nameId), "");
-        if (!TextUtils.isEmpty(resolverAddress))
-        {
-            return getContractData(resolverAddress, get(nameId), "");
-        }
-        else
-        {
-            return "";
-        }
-    }
-
-    private Function getResolverOf(BigInteger nameId)
-    {
-        return new Function("resolverOf",
-                Arrays.asList(new org.web3j.abi.datatypes.Uint(nameId)),
-                Arrays.asList(new TypeReference<Address>()
-                {
-                }));
     }
 
     private Function getAvatar(byte[] nameHash)
@@ -347,24 +318,6 @@ public class AWEnsResolver extends EnsResolver
                 Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash),
                         new org.web3j.abi.datatypes.Utf8String("avatar")),
                 Arrays.asList(new TypeReference<org.web3j.abi.datatypes.Utf8String>()
-                {
-                }));
-    }
-
-    private Function getResolver(byte[] nameHash)
-    {
-        return new Function("resolver",
-                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                Arrays.asList(new TypeReference<Address>()
-                {
-                }));
-    }
-
-    private Function get(BigInteger nameId)
-    {
-        return new Function("get",
-                Arrays.asList(new org.web3j.abi.datatypes.Utf8String(CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
-                Arrays.asList(new TypeReference<Utf8String>()
                 {
                 }));
     }

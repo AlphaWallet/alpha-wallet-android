@@ -483,7 +483,7 @@ public class EnsResolver {
         return getContractData(address, function, "");
     }
 
-    protected <T> T getContractData(String address, Function function, T type) throws Exception
+    public <T> T getContractData(String address, Function function, T type) throws Exception
     {
         String responseValue = callSmartContractFunction(function, address);
 

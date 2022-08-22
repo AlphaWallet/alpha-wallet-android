@@ -8,8 +8,6 @@ import androidx.preference.PreferenceManager;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.service.OpenSeaService;
-import com.alphawallet.app.util.das.DASBody;
-import com.alphawallet.app.util.das.DASRecord;
 import com.alphawallet.app.web3j.ens.EnsResolver;
 import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
@@ -22,7 +20,6 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.ens.NameHash;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.http.HttpService;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -35,8 +32,6 @@ import java.util.regex.Pattern;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import timber.log.Timber;
 
 /**
@@ -46,9 +41,6 @@ import timber.log.Timber;
 public class AWEnsResolver extends EnsResolver
 {
     private static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
-    private static final String DAS_LOOKUP = "https://indexer.da.systems/";
-    private static final String DAS_NAME = "[DAS_NAME]";
-    private static final String DAS_PAYLOAD = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"das_searchAccount\",\"params\":[\"" + DAS_NAME + "\"]}";
     private static final String OPENSEA_IMAGE_PREVIEW = "image_preview_url";
     private static final String OPENSEA_IMAGE_ORIGINAL = "image_original_url"; //in case of SVG; Opensea breaks SVG compression
     public static final String CRYPTO_RESOLVER = "0xD1E5b0FF1287aA9f9A268759062E4Ab08b9Dacbe";
@@ -313,21 +305,11 @@ public class AWEnsResolver extends EnsResolver
         }
         if (ensName.endsWith(".bit"))
         {
-            return resolveDAS(ensName);
+            return new DASResolver(client).resolve(ensName);
         }
         else if (ensName.endsWith(".crypto")) //check crypto namespace
         {
-            byte[] nameHash = NameHash.nameHashAsBytes(ensName);
-            BigInteger nameId = new BigInteger(nameHash);
-            String resolverAddress = getContractData(CRYPTO_RESOLVER, getResolverOf(nameId), "");
-            if (!TextUtils.isEmpty(resolverAddress))
-            {
-                return getContractData(resolverAddress, get(nameId), "");
-            }
-            else
-            {
-                return "";
-            }
+            return resolveCrypto(ensName);
         }
         else
         {
@@ -335,41 +317,19 @@ public class AWEnsResolver extends EnsResolver
         }
     }
 
-    private String resolveDAS(String ensName)
+    private String resolveCrypto(String ensName) throws Exception
     {
-        String payload = DAS_PAYLOAD.replace(DAS_NAME, ensName);
-
-        RequestBody requestBody = RequestBody.create(payload, HttpService.JSON_MEDIA_TYPE);
-        Request request = new Request.Builder()
-                .url(DAS_LOOKUP)
-                .post(requestBody)
-                .build();
-
-        try (okhttp3.Response response = client.newCall(request).execute())
+        byte[] nameHash = NameHash.nameHashAsBytes(ensName);
+        BigInteger nameId = new BigInteger(nameHash);
+        String resolverAddress = getContractData(CRYPTO_RESOLVER, getResolverOf(nameId), "");
+        if (!TextUtils.isEmpty(resolverAddress))
         {
-            //get result
-            String result = response.body() != null ? response.body().string() : "";
-
-            DASBody dasResult = new Gson().fromJson(result, DASBody.class);
-            dasResult.buildMap();
-
-            //find ethereum entry
-            DASRecord ethLookup = dasResult.records.get("address.eth");
-            if (ethLookup != null)
-            {
-                return ethLookup.getAddress();
-            }
-            else
-            {
-                return dasResult.getEthOwner();
-            }
+            return getContractData(resolverAddress, get(nameId), "");
         }
-        catch (Exception e)
+        else
         {
-            Timber.tag("ENS").e(e);
+            return "";
         }
-
-        return "";
     }
 
     private Function getResolverOf(BigInteger nameId)

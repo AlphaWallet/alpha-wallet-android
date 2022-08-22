@@ -240,7 +240,7 @@ public class AWEnsResolver
             {
                 String previouslyUsedDomain = history.get(address.toLowerCase());
                 //perform an additional check, to ensure this ENS name is still valid, try this ENS name to see if it resolves to the address
-                ensName = resolveENSAddress(previouslyUsedDomain, true)
+                ensName = resolveENSAddress(previouslyUsedDomain)
                         .map(resolvedAddress -> checkResolvedAddressMatches(resolvedAddress, address, previouslyUsedDomain))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
@@ -269,7 +269,7 @@ public class AWEnsResolver
      * @param ensName ensName to be resolved to address
      * @return Ethereum address or empty string
      */
-    public Single<String> resolveENSAddress(String ensName, boolean performNodeSync)
+    public Single<String> resolveENSAddress(String ensName)
     {
         return Single.fromCallable(() ->
         {
@@ -299,7 +299,7 @@ public class AWEnsResolver
         Resolvable resolvable = resolvables.get(suffixOf(ensName));
         if (resolvable == null)
         {
-            return ensResolver.resolve(ensName);
+            resolvable = ensResolver;
         }
         return resolvable.resolve(ensName);
     }

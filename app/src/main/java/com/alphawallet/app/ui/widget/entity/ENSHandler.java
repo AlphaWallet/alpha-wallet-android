@@ -225,7 +225,7 @@ public class ENSHandler implements Runnable
             host.setWaitingSpinner(true);
             host.ENSName(to);
 
-            disposable = ensResolver.resolveENSAddress(to, performEnsSync)
+            disposable = ensResolver.resolveENSAddress(to)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(resolvedAddress -> onENSSuccess(resolvedAddress, to), this::onENSError);

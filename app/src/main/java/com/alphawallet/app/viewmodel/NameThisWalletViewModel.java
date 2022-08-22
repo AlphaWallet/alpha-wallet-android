@@ -106,7 +106,7 @@ public class NameThisWalletViewModel extends BaseViewModel
         if (!TextUtils.isEmpty(newName) && EnsResolver.isValidEnsName(newName))
         {
             //does this new name correspond to ENS?
-            ensResolver.resolveENSAddress(newName, true)
+            ensResolver.resolveENSAddress(newName)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(addr -> checkAddress(addr, newName, onSuccess))

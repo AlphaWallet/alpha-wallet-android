@@ -9,14 +9,11 @@ import static org.junit.Assert.assertEquals;
 import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.web3j.ens.Contracts;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.web3j.protocol.ObjectMapperFactory;
 import org.web3j.protocol.Web3j;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -25,39 +22,16 @@ import okhttp3.OkHttpClient;
 
 public class ENSTest
 {
-    @Test
-    public void testResolveRegistryContract() {
-            assertEquals(Contracts.resolveRegistryContract(MAINNET_ID), (Contracts.MAINNET));
-            assertEquals(Contracts.resolveRegistryContract(ROPSTEN_ID), (Contracts.ROPSTEN));
-            assertEquals(Contracts.resolveRegistryContract(RINKEBY_ID), (Contracts.RINKEBY));
-    }
+    private AWEnsResolver ensResolver;
 
-    private final AWHttpService web3jService;
-    private final Web3j web3j;
-    private final AWEnsResolver ensResolver;
+    private static final String Inf = "p8qs5p30583q5q65n40s8nn89s257964";
 
-    private ObjectMapper om = ObjectMapperFactory.getObjectMapper();
-
-    private static List<String> urls = new ArrayList<>();
-
-    private String sender = "0x226159d592E2b063810a10Ebf6dcbADA94Ed68b8";
-    private static String Inf = "p8qs5p30583q5q65n40s8nn89s257964";
-
-    private String data = "0x00112233";
-
-    public static String LOOKUP_HEX =
-            "0x556f1830000000000000000000000000c1735677a60884abbcf72295e88d47764beda28200000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000160f4d4d2f800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000028000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000004768747470733a2f2f6f6666636861696e2d7265736f6c7665722d6578616d706c652e75632e722e61707073706f742e636f6d2f7b73656e6465727d2f7b646174617d2e6a736f6e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e49061b92300000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000001701310f6f6666636861696e6578616d706c65036574680000000000000000000000000000000000000000000000000000000000000000000000000000000000243b3b57de1c9fb8c1fe76f464ccec6d2c003169598fdfcbcb6bbddf6af9c097a39fa0048c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e49061b92300000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000001701310f6f6666636861696e6578616d706c65036574680000000000000000000000000000000000000000000000000000000000000000000000000000000000243b3b57de1c9fb8c1fe76f464ccec6d2c003169598fdfcbcb6bbddf6af9c097a39fa0048c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-
-    public static String RESOLVED_NAME_HEX =
-            "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000041563129cdbbd0c5d3e1c86cf9563926b243834d";
-
-    public ENSTest()
+    @Before
+    public void setUp()
     {
-        web3jService = getWeb3jService();
-        web3j = getWeb3j(web3jService);
+        AWHttpService web3jService = getWeb3jService();
+        Web3j web3j = getWeb3j(web3jService);
         ensResolver = new AWEnsResolver(web3j, null);
-        urls.add("https://example-1.com/gateway/{sender}/{data}.json");
-        urls.add("https://example-2.com/gateway/{sender}/{data}.json");
     }
 
     public static AWHttpService getWeb3jService()
@@ -74,6 +48,13 @@ public class ENSTest
     public static Web3j getWeb3j(AWHttpService service)
     {
         return Web3j.build(service);
+    }
+
+    @Test
+    public void testResolveRegistryContract() {
+        assertEquals(Contracts.resolveRegistryContract(MAINNET_ID), (Contracts.MAINNET));
+        assertEquals(Contracts.resolveRegistryContract(ROPSTEN_ID), (Contracts.ROPSTEN));
+        assertEquals(Contracts.resolveRegistryContract(RINKEBY_ID), (Contracts.RINKEBY));
     }
 
     @Test

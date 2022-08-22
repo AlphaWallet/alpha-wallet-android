@@ -355,7 +355,7 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<String> resolveENS(long chainId, String ensName)
     {
         if (ensResolver == null) ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
-        return ensResolver.resolveENSAddress(ensName, true);
+        return ensResolver.resolveENSAddress(ensName);
     }
 
     @Override

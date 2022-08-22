@@ -14,6 +14,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.web3j.ens.EnsResolver;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -102,7 +103,7 @@ public class NameThisWalletViewModel extends BaseViewModel
 
     public boolean checkEnsName(String newName, Realm.Transaction.OnSuccess onSuccess)
     {
-        if (!TextUtils.isEmpty(newName) && AWEnsResolver.isValidEnsName(newName))
+        if (!TextUtils.isEmpty(newName) && EnsResolver.isValidEnsName(newName))
         {
             //does this new name correspond to ENS?
             ensResolver.resolveENSAddress(newName, true)

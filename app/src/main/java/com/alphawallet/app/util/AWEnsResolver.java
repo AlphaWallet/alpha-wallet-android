@@ -32,24 +32,25 @@ import timber.log.Timber;
  * Created by James on 29/05/2019.
  * Stormbird in Sydney
  */
-public class AWEnsResolver extends EnsResolver
+public class AWEnsResolver
 {
     private static final String OPENSEA_IMAGE_PREVIEW = "image_preview_url";
     private static final String OPENSEA_IMAGE_ORIGINAL = "image_original_url"; //in case of SVG; Opensea breaks SVG compression
     private final Context context;
     private final OkHttpClient client;
     private HashMap<String, Resolvable> resolvables;
+    private final EnsResolver ensResolver;
 
     public AWEnsResolver(Web3j web3j, Context context)
     {
-        super(web3j);
+        this.ensResolver = new EnsResolver(web3j);
         this.context = context;
         this.client = setupClient();
-        
+
         resolvables = new HashMap<String, Resolvable>() {
             {
                 put(".bit", new DASResolver(client));
-                put(".crypto", new CryptoResolver(AWEnsResolver.this));
+                put(".crypto", new CryptoResolver(ensResolver));
             }
         };
     }
@@ -68,7 +69,7 @@ public class AWEnsResolver extends EnsResolver
 
             try
             {
-                ensName = reverseResolve(address); //no known ENS for this address, resolve from reverse resolver
+                ensName = ensResolver.reverseResolve(address); //no known ENS for this address, resolve from reverse resolver
                 if (!TextUtils.isEmpty(ensName))
                 {
                     //check ENS name integrity - it must point to the wallet address
@@ -274,7 +275,7 @@ public class AWEnsResolver extends EnsResolver
         {
             Timber.d("Verify: %s", ensName);
             String address = "";
-            if (!isValidEnsName(ensName)) return "";
+            if (!EnsResolver.isValidEnsName(ensName)) return "";
             try
             {
                 address = resolve(ensName);
@@ -288,7 +289,6 @@ public class AWEnsResolver extends EnsResolver
         }).onErrorReturnItem("");
     }
 
-    @Override
     public String resolve(String ensName) throws Exception
     {
         if (TextUtils.isEmpty(ensName))
@@ -299,7 +299,7 @@ public class AWEnsResolver extends EnsResolver
         Resolvable resolvable = resolvables.get(suffixOf(ensName));
         if (resolvable == null)
         {
-            return super.resolve(ensName);
+            return ensResolver.resolve(ensName);
         }
         return resolvable.resolve(ensName);
     }
@@ -311,7 +311,7 @@ public class AWEnsResolver extends EnsResolver
 
     public String resolveAvatar(String ensName)
     {
-        return new AvatarResolver(this).resolve(ensName);
+        return new AvatarResolver(ensResolver).resolve(ensName);
     }
 
     public String resolveAvatarFromAddress(String address)
@@ -320,7 +320,7 @@ public class AWEnsResolver extends EnsResolver
         {
             try
             {
-                String ensName = reverseResolve(address);
+                String ensName = ensResolver.reverseResolve(address);
                 return resolveAvatar(ensName);
             }
             catch (Exception e)

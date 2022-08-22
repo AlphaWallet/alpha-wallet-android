@@ -115,9 +115,8 @@ public class ENSTest
 
     @Test
     public void testReverseResolve() throws Exception {
-
         assertEquals(
-                ensResolver.reverseResolve("0xd8da6bf26964af9d7eed9e03e53415d37aa96045"),
+                ensResolver.reverseResolveEns("0xd8da6bf26964af9d7eed9e03e53415d37aa96045").blockingGet(),
                 ("vitalik.eth"));
     }
 
@@ -135,6 +134,4 @@ public class ENSTest
                 nameHash("foo.eth"),
                 ("0xde9b09fd7c5f901e23a3f19fecc54828e9c848539801e86591bd9801b019f84f"));
     }
-
-
 }

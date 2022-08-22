@@ -25,7 +25,7 @@ public class DappBrowserTest extends BaseE2ETest
         shouldSee("Ethereum");
         Helper.wait(5);
         SnapshotUtil.take("1");
-        selectTestNet();
+        selectTestNet("Görli");
         navigateToBrowser();
         Helper.wait(3);
         pressBack();

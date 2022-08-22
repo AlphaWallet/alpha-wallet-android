@@ -7,7 +7,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
 import static org.junit.Assert.assertEquals;
 
 import com.alphawallet.app.service.AWHttpService;
-import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.web3j.ens.Contracts;
 
 import org.junit.Before;

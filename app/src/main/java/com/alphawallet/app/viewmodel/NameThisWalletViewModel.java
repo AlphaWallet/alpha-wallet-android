@@ -13,8 +13,8 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.WalletItem;
-import com.alphawallet.app.util.AWEnsResolver;
-import com.alphawallet.app.web3j.ens.EnsResolver;
+import com.alphawallet.app.util.ens.AWEnsResolver;
+import com.alphawallet.app.util.ens.EnsResolver;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;

@@ -1,9 +1,6 @@
-package com.alphawallet.app.util;
+package com.alphawallet.app.util.ens;
 
 import android.text.TextUtils;
-
-import com.alphawallet.app.web3j.ens.EnsResolver;
-import com.alphawallet.app.web3j.ens.Resolvable;
 
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;

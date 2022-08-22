@@ -18,12 +18,11 @@ import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
-import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.util.Blockies;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;

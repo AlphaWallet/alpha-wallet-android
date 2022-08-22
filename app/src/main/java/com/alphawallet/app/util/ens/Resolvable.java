@@ -1,4 +1,4 @@
-package com.alphawallet.app.web3j.ens;
+package com.alphawallet.app.util.ens;
 
 public interface Resolvable
 {

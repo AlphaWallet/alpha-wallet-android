@@ -1,4 +1,4 @@
-package com.alphawallet.app.util;
+package com.alphawallet.app.util.ens;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -8,8 +8,7 @@ import androidx.preference.PreferenceManager;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.service.OpenSeaService;
-import com.alphawallet.app.web3j.ens.EnsResolver;
-import com.alphawallet.app.web3j.ens.Resolvable;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

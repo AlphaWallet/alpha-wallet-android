@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package com.alphawallet.app.web3j.ens;
+package com.alphawallet.app.util.ens;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
@@ -18,6 +18,13 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.web3j.ens.Contracts;
+import com.alphawallet.app.web3j.ens.EnsGatewayRequestDTO;
+import com.alphawallet.app.web3j.ens.EnsGatewayResponseDTO;
+import com.alphawallet.app.web3j.ens.EnsResolutionException;
+import com.alphawallet.app.web3j.ens.EnsUtils;
+import com.alphawallet.app.web3j.ens.NameHash;
+import com.alphawallet.app.web3j.ens.OffchainLookup;
 import com.alphawallet.token.entity.ContractAddress;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -1,8 +1,7 @@
-package com.alphawallet.app.util;
+package com.alphawallet.app.util.ens;
 
 import com.alphawallet.app.util.das.DASBody;
 import com.alphawallet.app.util.das.DASRecord;
-import com.alphawallet.app.web3j.ens.Resolvable;
 import com.google.gson.Gson;
 
 import org.web3j.protocol.http.HttpService;

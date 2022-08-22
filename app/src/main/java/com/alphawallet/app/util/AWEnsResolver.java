@@ -9,6 +9,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.web3j.ens.EnsResolver;
+import com.alphawallet.app.web3j.ens.Resolvable;
 import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -37,19 +38,20 @@ public class AWEnsResolver extends EnsResolver
     private static final String OPENSEA_IMAGE_ORIGINAL = "image_original_url"; //in case of SVG; Opensea breaks SVG compression
     private final Context context;
     private final OkHttpClient client;
-    
+    private HashMap<String, Resolvable> resolvables;
+
     public AWEnsResolver(Web3j web3j, Context context)
     {
         super(web3j);
         this.context = context;
         this.client = setupClient();
-    }
-
-    public AWEnsResolver(Web3j web3j)
-    {
-        super(web3j);
-        this.context = null;
-        this.client = setupClient();
+        
+        resolvables = new HashMap<String, Resolvable>() {
+            {
+                put(".bit", new DASResolver(client));
+                put(".crypto", new CryptoResolver(AWEnsResolver.this));
+            }
+        };
     }
 
     /**
@@ -293,18 +295,18 @@ public class AWEnsResolver extends EnsResolver
         {
             return "";
         }
-        if (ensName.endsWith(".bit"))
-        {
-            return new DASResolver(client).resolve(ensName);
-        }
-        else if (ensName.endsWith(".crypto")) //check crypto namespace
-        {
-            return new CryptoResolver(this).resolve(ensName);
-        }
-        else
+
+        Resolvable resolvable = resolvables.get(suffixOf(ensName));
+        if (resolvable == null)
         {
             return super.resolve(ensName);
         }
+        return resolvable.resolve(ensName);
+    }
+
+    private String suffixOf(String ensName)
+    {
+        return ensName.substring(ensName.lastIndexOf("."));
     }
 
     public String resolveAvatar(String ensName)

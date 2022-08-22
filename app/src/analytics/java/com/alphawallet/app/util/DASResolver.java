@@ -2,6 +2,7 @@ package com.alphawallet.app.util;
 
 import com.alphawallet.app.util.das.DASBody;
 import com.alphawallet.app.util.das.DASRecord;
+import com.alphawallet.app.web3j.ens.Resolvable;
 import com.google.gson.Gson;
 
 import org.web3j.protocol.http.HttpService;
@@ -11,7 +12,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import timber.log.Timber;
 
-public class DASResolver
+public class DASResolver implements Resolvable
 {
     private static final String DAS_LOOKUP = "https://indexer.da.systems/";
     private static final String DAS_NAME = "[DAS_NAME]";

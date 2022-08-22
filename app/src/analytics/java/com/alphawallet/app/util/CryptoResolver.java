@@ -3,6 +3,7 @@ package com.alphawallet.app.util;
 import android.text.TextUtils;
 
 import com.alphawallet.app.web3j.ens.EnsResolver;
+import com.alphawallet.app.web3j.ens.Resolvable;
 
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
@@ -13,7 +14,7 @@ import org.web3j.ens.NameHash;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-public class CryptoResolver
+public class CryptoResolver implements Resolvable
 {
     private static final String CRYPTO_RESOLVER = "0xD1E5b0FF1287aA9f9A268759062E4Ab08b9Dacbe";
     private static final String CRYPTO_ETH_KEY = "crypto.ETH.address";

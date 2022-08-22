@@ -55,7 +55,7 @@ public class ENSTest
     {
         web3jService = getWeb3jService();
         web3j = getWeb3j(web3jService);
-        ensResolver = new AWEnsResolver(web3j);
+        ensResolver = new AWEnsResolver(web3j, null);
         urls.add("https://example-1.com/gateway/{sender}/{data}.json");
         urls.add("https://example-2.com/gateway/{sender}/{data}.json");
     }

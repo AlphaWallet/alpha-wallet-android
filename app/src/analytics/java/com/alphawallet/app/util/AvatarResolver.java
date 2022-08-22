@@ -3,6 +3,7 @@ package com.alphawallet.app.util;
 import android.text.TextUtils;
 
 import com.alphawallet.app.web3j.ens.EnsResolver;
+import com.alphawallet.app.web3j.ens.Resolvable;
 
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Function;
@@ -13,7 +14,7 @@ import java.util.Arrays;
 
 import timber.log.Timber;
 
-public class AvatarResolver
+public class AvatarResolver implements Resolvable
 {
     private final EnsResolver ensResolver;
 

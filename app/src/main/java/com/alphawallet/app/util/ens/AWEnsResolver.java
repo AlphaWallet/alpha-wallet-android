@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import org.web3j.protocol.Web3j;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -237,7 +238,7 @@ public class AWEnsResolver
             }.getType());
             if (history.containsKey(address.toLowerCase()))
             {
-                String previouslyUsedDomain = history.get(address.toLowerCase());
+                String previouslyUsedDomain = history.get(address.toLowerCase(Locale.ENGLISH));
                 //perform an additional check, to ensure this ENS name is still valid, try this ENS name to see if it resolves to the address
                 ensName = resolveENSAddress(previouslyUsedDomain)
                         .map(resolvedAddress -> checkResolvedAddressMatches(resolvedAddress, address, previouslyUsedDomain))

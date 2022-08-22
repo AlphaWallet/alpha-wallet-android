@@ -3,7 +3,7 @@
 # AlphaWallet - Advanced, Open Source Ethereum Mobile Wallet & dApp Browser for Android
 
 [![Lint](https://github.com/AlphaWallet/alpha-wallet-android/actions/workflows/lint.yml/badge.svg?branch=master)](https://github.com/AlphaWallet/alpha-wallet-android/actions/workflows/lint.yml)
-[![Unit Test](https://api.travis-ci.com/AlphaWallet/alpha-wallet-android.svg?branch=master)](https://api.travis-ci.com/AlphaWallet/alpha-wallet-android.svg?branch=master)
+[![Unit test](https://github.com/AlphaWallet/alpha-wallet-android/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/AlphaWallet/alpha-wallet-android/actions/workflows/ci.yml)
 [![E2E Test](https://github.com/AlphaWallet/alpha-wallet-android/actions/workflows/e2e.yml/badge.svg?branch=master)](https://github.com/AlphaWallet/alpha-wallet-android/actions/workflows/e2e.yml)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg )](https://github.com/AlphaWallet/alpha-wallet-android/graphs/commit-activity)
 ![GitHub contributors](https://img.shields.io/github/contributors/AlphaWallet/alpha-wallet-android.svg)

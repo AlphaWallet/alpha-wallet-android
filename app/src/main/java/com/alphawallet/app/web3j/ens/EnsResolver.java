@@ -384,7 +384,7 @@ public class EnsResolver {
                 }));
     }
 
-    protected String getResolverAddress(String ensName) throws Exception
+    public String getResolverAddress(String ensName) throws Exception
     {
         String registryContract = Contracts.resolveRegistryContract(chainId);
         byte[] nameHash = NameHash.nameHashAsBytes(ensName);
@@ -396,6 +396,10 @@ public class EnsResolver {
         }
 
         return address;
+    }
+
+    public boolean validate(String input) {
+        return isValidEnsName(input, addressLength);
     }
 
     public static boolean isValidEnsName(String input) {

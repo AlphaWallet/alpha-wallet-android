@@ -14,12 +14,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.ens.NameHash;
 import org.web3j.protocol.Web3j;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +33,6 @@ import timber.log.Timber;
  */
 public class AWEnsResolver extends EnsResolver
 {
-    private static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
     private static final String OPENSEA_IMAGE_PREVIEW = "image_preview_url";
     private static final String OPENSEA_IMAGE_ORIGINAL = "image_original_url"; //in case of SVG; Opensea breaks SVG compression
     private final Context context;
@@ -312,38 +307,9 @@ public class AWEnsResolver extends EnsResolver
         }
     }
 
-    private Function getAvatar(byte[] nameHash)
-    {
-        return new Function("text",
-                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash),
-                        new org.web3j.abi.datatypes.Utf8String("avatar")),
-                Arrays.asList(new TypeReference<org.web3j.abi.datatypes.Utf8String>()
-                {
-                }));
-    }
-
     public String resolveAvatar(String ensName)
     {
-        if (isValidEnsName(ensName, addressLength))
-        {
-            try
-            {
-                String resolverAddress = getResolverAddress(ensName);
-                if (!TextUtils.isEmpty(resolverAddress))
-                {
-                    byte[] nameHash = NameHash.nameHashAsBytes(ensName);
-                    //now attempt to get the address of this ENS
-                    return getContractData(resolverAddress, getAvatar(nameHash), "");
-                }
-            }
-            catch (Exception e)
-            {
-                //
-                Timber.e(e);
-            }
-        }
-
-        return "";
+        return new AvatarResolver(this).resolve(ensName);
     }
 
     public String resolveAvatarFromAddress(String address)

@@ -216,9 +216,9 @@ public class AWEnsResolver
             HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>()
             {
             }.getType());
-            if (history.containsKey(address.toLowerCase()))
+            if (history.containsKey(address.toLowerCase(Locale.ENGLISH)))
             {
-                ensName = history.get(address.toLowerCase());
+                ensName = history.get(address.toLowerCase(Locale.ENGLISH));
             }
         }
 
@@ -236,7 +236,7 @@ public class AWEnsResolver
             HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>()
             {
             }.getType());
-            if (history.containsKey(address.toLowerCase()))
+            if (history.containsKey(address.toLowerCase(Locale.ENGLISH)))
             {
                 String previouslyUsedDomain = history.get(address.toLowerCase(Locale.ENGLISH));
                 //perform an additional check, to ensure this ENS name is still valid, try this ENS name to see if it resolves to the address

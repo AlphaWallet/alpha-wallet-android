@@ -23,6 +23,7 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.StrongBoxUnavailableException;
 import android.security.keystore.UserNotAuthenticatedException;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -39,6 +40,7 @@ import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.ServiceErrorException;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.cryptokeys.KeyEncodingType;
 import com.alphawallet.app.entity.cryptokeys.KeyServiceException;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
@@ -48,6 +50,7 @@ import com.alphawallet.app.widget.SignTransactionDialog;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayOutputStream;
@@ -66,7 +69,10 @@ import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -1387,5 +1393,109 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 vb.vibrate(200);
             }
         }
+    }
+
+    public boolean hasKeystore(String walletAddress)
+    {
+        try
+        {
+            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore.load(null);
+            String matchingAddr = findMatchingAddrInKeyStore(walletAddress);
+            return matchingAddr.equalsIgnoreCase(walletAddress);
+        }
+        catch (KeyStoreException|NoSuchAlgorithmException|CertificateException|IOException e)
+        {
+            Timber.e(e);
+        }
+
+        return false;
+    }
+
+    public List<String> detectOrphanedWallets(Map<String, Wallet> walletList)
+    {
+        List<String> orphanedWallets = new ArrayList<>();
+        try
+        {
+            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore.load(null);
+            Enumeration<String> keys = keyStore.aliases();
+
+            while (keys.hasMoreElements())
+            {
+                String thisKey = keys.nextElement();
+                if (!TextUtils.isEmpty(thisKey) && WalletUtils.isValidAddress(thisKey) && walletList.get(thisKey.toLowerCase()) == null)
+                {
+                    orphanedWallets.add(thisKey);
+                }
+            }
+        }
+        catch (KeyStoreException|NoSuchAlgorithmException|CertificateException|IOException e)
+        {
+            Timber.e(e);
+        }
+
+        return orphanedWallets;
+    }
+
+    public boolean detectWalletIssues(List<Wallet> walletList)
+    {
+        boolean hasChanges = false;
+        //double check for consistency
+        List<Wallet> removalList = new ArrayList<>();
+        for (Wallet w : walletList)
+        {
+            //Test legacy key
+            if (w.type == WalletType.KEYSTORE_LEGACY)
+            {
+                try
+                {
+                    currentWallet = new Wallet(w.address);
+                    getLegacyPassword(context, currentWallet.address);
+                }
+                catch (ServiceErrorException ke)
+                {
+                    switch (ke.code)
+                    {
+                        case UNKNOWN_ERROR:
+                        case KEY_STORE_ERROR:
+                        case FAIL_TO_SAVE_IV_FILE:
+                        case KEY_STORE_SECRET:
+                            break;
+                        case USER_NOT_AUTHENTICATED:
+                        case INVALID_KEY:
+                            //key is authenticated, must be new style
+                            w.type = WalletType.KEYSTORE;
+                            w.lastBackupTime = System.currentTimeMillis();
+                            if (hasStrongbox()) w.authLevel = AuthenticationLevel.STRONGBOX_AUTHENTICATION;
+                            else w.authLevel = AuthenticationLevel.TEE_AUTHENTICATION;
+                            hasChanges = true;
+                            break;
+                        case KEY_IS_GONE:
+                        case INVALID_DATA:
+                        case IV_OR_ALIAS_NO_ON_DISK:
+                            //need to delete this data
+                            deleteKey(w.address);
+                            removalList.add(w);
+                            hasChanges = true;
+                            break;
+                    }
+                    ke.printStackTrace();
+                    Timber.d("KSE: %s", ke.code);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        for (Wallet w : removalList) walletList.remove(w);
+        return hasChanges;
+    }
+
+    static boolean hasStrongbox()
+    {
+        return securityStatus == SecurityStatus.HAS_STRONGBOX;
     }
 }

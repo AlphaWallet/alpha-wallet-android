@@ -43,7 +43,7 @@ public class WalletDataRealmSource {
             Map<String, Wallet> walletList;
             try (Realm realm = realmManager.getWalletDataRealmInstance())
             {
-                walletList = loadOrCreateKeyRealmDB(realm, keystoreWallets); //call has action on upgrade to new UX
+                walletList = loadOrCreateKeyRealmDB(realm, keystoreWallets, keyService); //call has action on upgrade to new UX
                 //Add additional - non critical wallet data. This database can be voided for upgrade if required
                 for (Wallet wallet : walletList.values())
                 {
@@ -56,16 +56,35 @@ public class WalletDataRealmSource {
 
                 //TODO: Make this a manual process.
                 //recoverLostWallets(realm, keystoreWallets, walletList, keyService);
+
+
+                //try to recover lost HD Wallets
+                /*for (String walletAddr : keyService.detectOrphanedWallets(walletList))
+                {
+                    //create HD Wallet if required
+                    RealmKeyType realmKey = realm.where(RealmKeyType.class)
+                            .equalTo("address", walletAddr, Case.INSENSITIVE)
+                            .findFirst();
+
+                    if (realmKey != null || walletAddr.equals(TokenscriptFunction.ZERO_ADDRESS)) continue;
+                    Wallet w = new Wallet(walletAddr);
+                    w.type = WalletType.HDKEY;
+                    w.authLevel = KeyService.AuthenticationLevel.TEE_AUTHENTICATION;
+                    w.lastBackupTime = System.currentTimeMillis();
+                    storeKeyData(w, realm);
+                    walletList.put(w.address.toLowerCase(), w);
+                }*/
             }
 
-            migrateWalletTypeData(walletList);
+
+            migrateWalletTypeData(walletList, keyService);
 
             Timber.tag("RealmDebug").d("populate %s", walletList.size());
             return walletList.values().toArray(new Wallet[0]);
         });
     }
 
-    private Map<String, Wallet> loadOrCreateKeyRealmDB(Realm realm, Wallet[] wallets)
+    private Map<String, Wallet> loadOrCreateKeyRealmDB(Realm realm, Wallet[] wallets, KeyService keyService)
     {
         Map<String, Wallet> walletList = new HashMap<>();
         List<String> keyStoreList = walletArrayToAddressList(wallets);
@@ -80,7 +99,12 @@ public class WalletDataRealmSource {
             //Load fixed wallet data: wallet type, creation and backup times
             for (RealmKeyType walletTypeData : realmKeyTypes)
             {
-                Wallet w = composeKeyType(walletTypeData);
+                Wallet w = composeKeyType(walletTypeData, keyService);
+                if (w != null && w.type == WalletType.KEYSTORE_LEGACY && keyService.hasKeystore(w.address))
+                {
+                    w.type = WalletType.KEYSTORE;
+                    storeKeyData(w, realm);
+                }
                 if (w == null || (w.type == WalletType.KEYSTORE || w.type == WalletType.KEYSTORE_LEGACY) &&
                         !keyStoreList.contains(walletTypeData.getAddress().toLowerCase()))
                 {
@@ -96,14 +120,21 @@ public class WalletDataRealmSource {
                 for (Wallet wallet : wallets)
                 {
                     wallet.authLevel = KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
-                    wallet.type = WalletType.KEYSTORE_LEGACY;
+                    if (keyService.hasKeystore(wallet.address))
+                    {
+                        wallet.type = WalletType.KEYSTORE;
+                    }
+                    else
+                    {
+                        wallet.type = WalletType.KEYSTORE_LEGACY;
+                    }
                     storeKeyData(wallet, r);
                     walletList.put(wallet.address.toLowerCase(), wallet);
                 }
             });
         }
 
-        Timber.tag("RealmDebug").d("loadorcreate " + walletList.size());
+        Timber.tag("RealmDebug").d("loadorcreate %s", walletList.size());
         return walletList;
     }
 
@@ -125,13 +156,17 @@ public class WalletDataRealmSource {
         }
     }
 
-    private Wallet composeKeyType(RealmKeyType keyType)
+    private Wallet composeKeyType(RealmKeyType keyType, KeyService keyService)
     {
         Wallet wallet = null;
         if (keyType != null && !TextUtils.isEmpty(keyType.getAddress()) && WalletUtils.isValidAddress(keyType.getAddress()))
         {
             wallet = new Wallet(keyType.getAddress());
             wallet.type = keyType.getType();
+            if (wallet.type == WalletType.KEYSTORE_LEGACY && keyService.hasKeystore(wallet.address))
+            {
+                wallet.type = WalletType.KEYSTORE;
+            }
             wallet.walletCreationTime = keyType.getDateAdded();
             wallet.lastBackupTime = keyType.getLastBackup();
             wallet.authLevel = keyType.getAuthLevel();
@@ -180,7 +215,7 @@ public class WalletDataRealmSource {
             realm.executeTransactionAsync(r -> {
                 storeKeyData(wallet, r);
                 storeWalletData(wallet, r);
-                Timber.tag("RealmDebug").d("storedKeydata " + wallet.address);
+                Timber.tag("RealmDebug").d("storedKeydata %s", wallet.address);
             }, onSuccess);
         }
         catch (Exception e)
@@ -485,7 +520,7 @@ public class WalletDataRealmSource {
 
     //One-time removal of the WalletTypeRealmInstance usage - this extra database was a
     // workaround for an issue that has since been fixed correctly.
-    private void migrateWalletTypeData(Map<String, Wallet> walletList)
+    private void migrateWalletTypeData(Map<String, Wallet> walletList, KeyService keyService)
     {
         Map<String, Wallet> walletTypeData = new HashMap<>();
 
@@ -497,7 +532,7 @@ public class WalletDataRealmSource {
 
             for (RealmKeyType rk : rr)
             {
-                Wallet w = composeKeyType(rk);
+                Wallet w = composeKeyType(rk, keyService);
                 if (w != null) walletTypeData.put(w.address.toLowerCase(), w);
             }
         }
@@ -558,5 +593,30 @@ public class WalletDataRealmSource {
                     .findAll();
             realm.executeTransaction(r -> rr.deleteAllFromRealm()); //erase the database now we have extracted the data
         }
+    }
+
+    //Check for lost keystore wallets and recover
+    private void recoverLostWallets(Realm realm, Wallet[] keystoreWallets, Map<String, Wallet> walletList, KeyService keyService)
+    {
+        realm.executeTransaction(r -> {
+            for (Wallet w : keystoreWallets)
+            {
+                //check for orphaned keystore wallets
+                Wallet testWallet = walletList.get(w.address.toLowerCase());
+                if (testWallet == null)
+                {
+                    //do we have this in keystore as a valid address?
+                    if (keyService.hasKeystore(w.address.toLowerCase()))
+                    {
+                        //create keystore wallet
+                        w.type = WalletType.KEYSTORE;
+                        w.authLevel = KeyService.AuthenticationLevel.TEE_AUTHENTICATION;
+                        w.lastBackupTime = System.currentTimeMillis();
+                        storeKeyData(w, r);
+                        walletList.put(w.address.toLowerCase(), w);
+                    }
+                }
+            }
+        });
     }
 }

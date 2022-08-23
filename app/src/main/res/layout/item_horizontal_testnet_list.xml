@@ -5,7 +5,9 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:layout_gravity="center"
     android:id="@+id/chainLayout"
+    android:nestedScrollingEnabled="true"
     tools:ignore="MissingDefaultResource">
 
 
@@ -19,8 +21,8 @@
 
         <com.alphawallet.app.widget.TokenIcon
             android:id="@+id/token_icon"
-            android:layout_width="@dimen/dp25"
-            android:layout_height="@dimen/dp25"
+            android:layout_width="@dimen/dp22"
+            android:layout_height="@dimen/dp22"
             android:layout_gravity="center" />
 
 
@@ -29,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/eth"
-            android:textSize="@dimen/sp14"
+            android:textSize="@dimen/sp12"
             android:visibility="gone" />
 
         <androidx.appcompat.widget.AppCompatTextView

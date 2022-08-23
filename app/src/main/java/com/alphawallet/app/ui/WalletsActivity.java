@@ -27,6 +27,7 @@ import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.KeyService;
@@ -126,9 +127,15 @@ public class WalletsActivity extends BaseActivity implements
             viewModel.createdWallet().observe(this, this::onCreatedWallet);
             viewModel.createWalletError().observe(this, this::onCreateWalletError);
             viewModel.noWalletsError().observe(this, this::noWallets);
+            viewModel.baseTokens().observe(this, this::updateBaseTokens);
         }
         viewModel.onPrepare(balanceChain, this);
         initViews(); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
+    }
+
+    private void updateBaseTokens(Token[] tokens)
+    {
+        adapter.setTokens(tokens);
     }
 
     protected Activity getThisActivity()
@@ -149,7 +156,7 @@ public class WalletsActivity extends BaseActivity implements
         list = findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new WalletsSummaryAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract(), preferenceRepository.isActiveMainnet(), viewModel.tokensService, viewModel.tokenRepository);
+        adapter = new WalletsSummaryAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract(), preferenceRepository.isActiveMainnet());
         list.setAdapter(adapter);
 
         systemView.attachRecyclerView(list);

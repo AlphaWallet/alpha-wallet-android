@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.WalletItem;
@@ -30,9 +31,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import io.realm.Realm;
+import timber.log.Timber;
 
 public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder> implements WalletClickCallback, Runnable
 {
@@ -46,35 +50,34 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     private final Context context;
     private final Realm realm;
     private final GenericWalletInteract walletInteract;
-    private final TokensService tokensService;
-    private final TokenRepositoryType tokenRepositoryType;
 
 
     public WalletsSummaryAdapter(Context ctx,
-                                 OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract, boolean activeMainnet, TokensService tokensService, TokenRepositoryType tokenRepository) {
+                                 OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract, boolean activeMainnet)
+    {
         this.onSetWalletDefaultListener = onSetWalletDefaultListener;
         this.mainNetActivated = activeMainnet;
         this.wallets = new ArrayList<>();
         this.context = ctx;
         this.realm = genericWalletInteract.getWalletRealm();
         this.walletInteract = genericWalletInteract;
-        this.tokensService = tokensService;
-        this.tokenRepositoryType = tokenRepository;
     }
 
     @NotNull
     @Override
-    public BinderViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
+    public BinderViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType)
+    {
         BinderViewHolder binderViewHolder = null;
-        switch (viewType) {
+        switch (viewType)
+        {
             case WalletHolder.VIEW_TYPE:
-                binderViewHolder = new WalletSummaryHolder(R.layout.item_wallet_summary_manage, parent, this, realm, tokensService, context, tokenRepositoryType, mainNetActivated);
-            break;
+                binderViewHolder = new WalletSummaryHolder(R.layout.item_wallet_summary_manage, parent, this, realm, context);
+                break;
             case TextHolder.VIEW_TYPE:
                 binderViewHolder = new TextHolder(R.layout.item_standard_header, parent);
                 break;
             case WalletSummaryHeaderHolder.VIEW_TYPE:
-                binderViewHolder = new WalletSummaryHeaderHolder(R.layout.item_wallet_summary_large_title, parent,this, realm);
+                binderViewHolder = new WalletSummaryHeaderHolder(R.layout.item_wallet_summary_large_title, parent, this, realm);
                 break;
             default:
                 break;
@@ -83,9 +86,11 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NotNull BinderViewHolder holder, int position) {
+    public void onBindViewHolder(@NotNull BinderViewHolder holder, int position)
+    {
         Bundle bundle;
-        switch (getItemViewType(position)) {
+        switch (getItemViewType(position))
+        {
             case WalletHolder.VIEW_TYPE:
                 Wallet wallet = wallets.get(position);
                 bundle = new Bundle();
@@ -128,12 +133,14 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     }
 
     @Override
-    public int getItemCount() {
+    public int getItemCount()
+    {
         return wallets.size();
     }
 
     @Override
-    public int getItemViewType(int position) {
+    public int getItemViewType(int position)
+    {
         switch (wallets.get(position).type)
         {
             default:
@@ -149,7 +156,8 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         }
     }
 
-    public void setDefaultWallet(Wallet wallet) {
+    public void setDefaultWallet(Wallet wallet)
+    {
         this.defaultWallet = wallet;
         notifyDataSetChanged();
     }
@@ -315,7 +323,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     public void ensAvatar(Wallet wallet)
     {
         //update the ENS avatar in the database
-        walletInteract.updateWalletItem(wallet, WalletItem.ENS_AVATAR, () -> { });
+        walletInteract.updateWalletItem(wallet, WalletItem.ENS_AVATAR, () -> {});
     }
 
     public void onDestroy()
@@ -332,7 +340,17 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         return -1;
     }
 
-    public interface OnSetWalletDefaultListener {
+    public interface OnSetWalletDefaultListener
+    {
         void onSetDefault(Wallet wallet);
+    }
+
+    public void setTokens(Token[] walletToken)
+    {
+        for(Wallet w : this.wallets)
+        {
+            w.tokens = walletToken;
+        }
+        notifyDataSetChanged();
     }
 }

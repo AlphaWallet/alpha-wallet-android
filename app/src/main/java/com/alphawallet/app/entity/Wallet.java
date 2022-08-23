@@ -22,6 +22,7 @@ public class Wallet implements Parcelable {
     public String balanceSymbol;
     public String ENSAvatar;
     public boolean isSynced;
+    public Token[] tokens;
 
 	public Wallet(String address) {
 		this.address = address;

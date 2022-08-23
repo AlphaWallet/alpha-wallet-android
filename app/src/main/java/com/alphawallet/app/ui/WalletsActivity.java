@@ -135,19 +135,7 @@ public class WalletsActivity extends BaseActivity implements
 
     private void updateBaseTokens(Token[] tokens)
     {
-        //TODO - JB: Deleteme: here's a dump to help see the tokens
-        if (tokens.length > 0)
-        {
-            System.out.println("YO: Wallet: " + tokens[0].getWallet()); // here's the wallet this corresponds to
-        }
-        int id = 1;
-        for (Token t : tokens)
-        {
-            System.out.println("YO: " + id++ + " : " + t.getFullName() + " : " + t.getStringBalanceForUI(3));
-        }
-
-        //TODO - JB: Pass base tokens on to the token holder, send these to WalletSummaryAdapter, which should then pass them on to the relevant holder
-        //           Then delete the above help dump.
+        adapter.setTokens(tokens);
     }
 
     protected Activity getThisActivity()
@@ -168,7 +156,7 @@ public class WalletsActivity extends BaseActivity implements
         list = findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new WalletsSummaryAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract(), preferenceRepository.isActiveMainnet(), viewModel.tokensService, viewModel.tokenRepository);
+        adapter = new WalletsSummaryAdapter(this, this::onSetWalletDefault, viewModel.getWalletInteract(), preferenceRepository.isActiveMainnet());
         list.setAdapter(adapter);
 
         systemView.attachRecyclerView(list);

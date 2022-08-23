@@ -100,10 +100,12 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/horizontal_list"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:orientation="horizontal"
                 android:visibility="visible"
+                android:nestedScrollingEnabled="true"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/item_horizontal_testnet_list" />
 
@@ -154,15 +156,4 @@
         android:src="@drawable/ic_arrow_right"
         app:tint="?colorControlNormal" />
 
-    <LinearLayout
-        android:id="@+id/wallet_click_layer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@id/wallet_info_layout"
-        android:layout_alignTop="@id/layout_manage_wallet"
-        android:layout_alignBottom="@id/layout_manage_wallet"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="@dimen/small_12"
-        android:layout_marginBottom="-17dp"
-        android:orientation="vertical" />
 </RelativeLayout>

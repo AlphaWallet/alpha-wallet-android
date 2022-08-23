@@ -27,7 +27,6 @@ import java.math.BigInteger;
 public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHorizontalListAdapter.ViewHolder>
 {
     private final Token[] tokens;
-    protected final TokensService tokensService;
     private final Context context; //TODO - JB: should be final
 
     //TODO - JB: populate the token list using this method:
@@ -35,10 +34,9 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
     // - loop through this list and check for non-zero balance testnet (using getTokenOrBase(chainId, tokensService.getCurrentAddress()) )
     // - send list of tokens below but use Token[] instead of TokenCardMeta[]. Now you won't need TokensService or AssetDefinitionService
 
-    public TestNetHorizontalListAdapter(Token[] tokens, TokensService tokensService, Context context)
+    public TestNetHorizontalListAdapter(Token[] tokens, Context context)
     {
         this.tokens = tokens;
-        this.tokensService = tokensService;
         this.context = context;
     }
 
@@ -54,17 +52,10 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        Token token;
+        Token token = tokens[position];
         holder.tokenIcon.clearLoad();
         try
         {
-            token = tokensService.getToken(tokens[position].tokenInfo.chainId, tokens[position].getAddress());
-            if (token == null)
-            {
-                holder.price.setText("");
-                //TODO - JB: delete this
-                return;
-            }
             String coinBalance = token.getStringBalanceForUI(4);
             if (!TextUtils.isEmpty(coinBalance))
             {

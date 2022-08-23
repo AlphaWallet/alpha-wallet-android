@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -57,7 +58,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     private final ImageView defaultWalletIndicator;
     private final ImageView manageWalletBtn;
     private final UserAvatar walletIcon;
-    private final LinearLayout walletClickLayout;
+    private final RelativeLayout arrow_right;
     private final TextView walletBalanceText;
     private final TextView walletNameText;
     private final TextView walletAddressSeparator;
@@ -70,14 +71,12 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 
     private final WalletClickCallback clickCallback;
     private Wallet wallet = null;
-    TokensService tokensServices;
     protected final MutableLiveData<ErrorEnvelope> error = new MutableLiveData<>();
     protected Disposable disposable;
     private Context context;
-    TokenRepositoryType tokenRepositoryType;
     private Boolean isMainNetActive = false;
 
-    public WalletSummaryHolder(int resId, ViewGroup parent, WalletClickCallback callback, Realm realm, TokensService tokensService, Context context, TokenRepositoryType tokenRepositoryType, boolean mainNetActivated)
+    public WalletSummaryHolder(int resId, ViewGroup parent, WalletClickCallback callback, Realm realm, Context context)
     {
         super(resId, parent);
 
@@ -88,27 +87,14 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         walletNameText = findViewById(R.id.wallet_name);
         walletAddressSeparator = findViewById(R.id.wallet_address_separator);
         walletAddressText = findViewById(R.id.wallet_address);
-        walletClickLayout = findViewById(R.id.wallet_click_layer);
+        arrow_right = findViewById(R.id.container);
         wallet24hChange = findViewById(R.id.wallet_24h_change);
         recyclerView = findViewById(R.id.horizontal_list);
-        isMainNetActive = mainNetActivated;
-        tokensServices = tokensService;
         clickCallback = callback;
         this.context = context;
-        this.tokenRepositoryType = tokenRepositoryType;
-
 
         manageWalletLayout = findViewById(R.id.layout_manage_wallet);
         this.realm = realm;
-    }
-
-
-    private void onTokenMetas(Token[] metaTokens)
-    {
-       // tokens.postValue(metaTokens);
-        testNetHorizontalListAdapter = new TestNetHorizontalListAdapter(metaTokens, tokensServices, context);
-        recyclerView.setAdapter(testNetHorizontalListAdapter);
-        testNetHorizontalListAdapter.notifyDataSetChanged();
     }
 
     protected void onError(Throwable throwable)
@@ -134,18 +120,14 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     @Override
     public void bind(@Nullable Wallet data, @NonNull Bundle addition)
     {
-
-
         walletAddressText.setText(null);
-
-
         if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
 
         if (data != null)
         {
 
             wallet = fetchWallet(data);
-            walletClickLayout.setOnClickListener(this);
+            arrow_right.setOnClickListener(this);
             manageWalletLayout.setOnClickListener(this);
 
             if (addition.getBoolean(IS_DEFAULT_ADDITION, false))
@@ -279,30 +261,18 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
             w.ENSname = realmWallet.getENSName();
             w.name = realmWallet.getName();
             w.ENSAvatar = realmWallet.getENSAvatar();
-        }
-
-        if (!isMainNetActive)
-        {
-            //TODO - JB: populate the token list using this method:
-            // - from tokensService get the tokenFilter with getNetworkFilters()
-            // - loop through this list and check for non-zero balance testnet (using getTokenOrBase(chainId, w.address) )
-            // - send list of tokens below but use Token[] instead of TokenCardMeta[]. Now you won't need TokensService or AssetDefinitionService
-            // You can directly create the Token array and send to the bind method. And removing passing in the services
-            List<Long> filters = tokensServices.getNetworkFilters();
-            Token[] tokens = new Token[filters.size()];
-
-            for (int i = 0; i < filters.size(); i++)
+            if (w.tokens != null)
             {
-                try
+            for(Token t : w.tokens)
+            {
+                if(t.getWallet().equals(w.address))
                 {
-                    tokens[i] = (tokensServices.getTokenOrBase(filters.get(i), w.address));
-                }
-                catch (Exception e)
-                {
-
+                        testNetHorizontalListAdapter = new TestNetHorizontalListAdapter(w.tokens, context);
+                        recyclerView.setAdapter(testNetHorizontalListAdapter);
+                    }
                 }
             }
-            onTokenMetas(tokens);
+
         }
         return w;
     }
@@ -348,7 +318,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         //if (wallet == null) { return; } //protect against click between constructor and bind
         switch (view.getId())
         {
-            case R.id.wallet_click_layer:
+            case R.id.container:
                 clickCallback.onWalletClicked(wallet);
                 break;
 

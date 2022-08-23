@@ -26,7 +26,7 @@ touch output/emulator.log                    # create log file
 chmod 666 output/emulator.log                # allow writing to log file
 adb logcat >> output/emulator.log &
 
-startGanache &
+#startGanache & # Manually start on CI server
 
 ./gradlew :app:uninstallAll :app:connectedNoAnalyticsDebugAndroidTest -x lint -PdisablePreDex
 

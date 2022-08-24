@@ -16,10 +16,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.WalletItem;
-import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.TextHolder;
@@ -31,12 +28,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import io.realm.Realm;
-import timber.log.Timber;
 
 public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder> implements WalletClickCallback, Runnable
 {
@@ -347,6 +341,15 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
 
     public void setTokens(Token[] walletToken)
     {
+        // This wont work.
+        // You have a list of wallets (this.wallets), each of which has a collection of different tokens (walletToken from the args)
+        // When you receive each walletToken array (ie this function is called), you must first determine the wallet address, eg 0xd8f8..... This you can get the same way as the system.print I showed:
+        // First check there's more than 1 walletToken. Then do Token t = walletToken[0]; The wallet address is t.getWallet()
+        // Then use this function int index = getWalletIndex(t.getWallet())
+        // Then pull the wallet from the this.wallets list (you have the index)
+        // Then set the tokens
+        // Then update that specific entry with notifyItemChanged(index);
+
         for(Wallet w : this.wallets)
         {
             w.tokens = walletToken;

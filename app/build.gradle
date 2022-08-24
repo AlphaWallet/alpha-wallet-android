@@ -70,8 +70,8 @@ repositories {
     maven {
         url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
         credentials {
-            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-            password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            username = getUsername()
+            password = getPAT()
         }
     }
 }
@@ -212,6 +212,23 @@ task printVersionCode {
     doLast {
         println android.defaultConfig.versionCode
     }
+}
+
+gradle.projectsEvaluated({
+    def username = getUsername()
+    def password = getPAT()
+
+    if (!username || !password) {
+        throw new GradleException('Please provide GitHub username and Personal Access Token. Find more here https://github.com/alphaWallet/alpha-wallet-android#getting-started')
+    }
+})
+
+private String getPAT() {
+    project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+}
+
+private String getUsername() {
+    project.findProperty("gpr.user") ?: System.getenv("USERNAME")
 }
 
 dependencies {

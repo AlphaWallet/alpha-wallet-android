@@ -227,7 +227,8 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     {
         realmUpdate = realm.where(RealmWalletData.class)
                 .equalTo("address", wallet.address).findAllAsync();
-        realmUpdate.addChangeListener(realmWallets -> {
+        realmUpdate.addChangeListener(realmWallets ->
+        {
             //update balance
             if (realmWallets.size() == 0) return;
             RealmWalletData realmWallet = realmWallets.first();

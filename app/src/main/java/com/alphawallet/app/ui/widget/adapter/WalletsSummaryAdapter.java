@@ -350,10 +350,16 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         // Then set the tokens
         // Then update that specific entry with notifyItemChanged(index);
 
-        for(Wallet w : this.wallets)
+        if(walletToken != null && walletToken.length > 0)
         {
-            w.tokens = walletToken;
+            Token t = walletToken[0];
+            String walletAddress = t.getWallet();
+            int walletIndex = getWalletIndex(walletAddress);
+            if(walletIndex != -1)
+            {
+                this.wallets.get(walletIndex).tokens = walletToken;
+                notifyItemChanged(walletIndex);
+            }
         }
-        notifyDataSetChanged();
     }
 }

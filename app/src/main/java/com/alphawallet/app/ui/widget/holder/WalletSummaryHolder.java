@@ -185,7 +185,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
                 double oldFiatValue = addition.getDouble(FIAT_CHANGE, 0.00);
 
                 String balanceTxt = TickerService.getCurrencyString(fiatValue);
-
+                walletBalanceText.setVisibility(View.VISIBLE);
                 walletBalanceText.setText(balanceTxt);
                 setWalletChange(fiatValue != 0 ? ((fiatValue - oldFiatValue) / oldFiatValue) * 100.0 : 0.0);
             }
@@ -263,10 +263,10 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
             w.ENSAvatar = realmWallet.getENSAvatar();
             if (w.tokens != null)
             {
-            for(Token t : w.tokens)
-            {
-                if(t.getWallet().equals(w.address))
+                for (Token t : w.tokens)
                 {
+                    if (t.getWallet().equals(w.address))
+                    {
                         testNetHorizontalListAdapter = new TestNetHorizontalListAdapter(w.tokens, context);
                         recyclerView.setAdapter(testNetHorizontalListAdapter);
                     }

@@ -61,13 +61,9 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <!-- <com.alphawallet.app.widget.TokenIcon
-                 android:id="@+id/token_icon"
-                 android:layout_width="@dimen/dp25"
-                 android:layout_height="@dimen/dp25"/>-->
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/wallet_balance"
@@ -97,18 +93,22 @@
                 app:autoSizeTextType="uniform"
                 tools:text="+123.45%" />
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/horizontal_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:nestedScrollingEnabled="true"
                 android:orientation="horizontal"
                 android:visibility="visible"
-                android:nestedScrollingEnabled="true"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/item_horizontal_testnet_list" />
-
 
         </LinearLayout>
 

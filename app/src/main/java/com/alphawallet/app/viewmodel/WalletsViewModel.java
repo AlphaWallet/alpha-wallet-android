@@ -70,11 +70,11 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final HomeRouter homeRouter;
     public final TokensService tokensService;
     private final AWEnsResolver ensResolver;
-    public final AssetDefinitionService assetService;
+    private final AssetDefinitionService assetService;
     private final PreferenceRepositoryType preferenceRepository;
 
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    public final TokenRepositoryType tokenRepository;
+    private final TokenRepositoryType tokenRepository;
     private final TickerService tickerService;
 
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();

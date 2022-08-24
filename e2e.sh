@@ -1,6 +1,7 @@
 #!/bin/sh
 
 function startGanache() {
+  source ~/.zprofile
   ganache --chain.chainId 2 -h 0.0.0.0 -m "horse light surface bamboo combine item lumber tunnel choose acid mail feature"
 }
 

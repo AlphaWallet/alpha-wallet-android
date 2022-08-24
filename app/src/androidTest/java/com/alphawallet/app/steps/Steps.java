@@ -164,7 +164,7 @@ public class Steps
         selectMenu("Select Active Networks");
         click(withId(R.id.action_add));
         input(R.id.input_network_name, name);
-        String url = "http://192.168.1.3:8545";
+        String url = "http://10.0.2.2:8545";
         input(R.id.input_network_rpc_url, url);
         input(R.id.input_network_chain_id, "2");
         input(R.id.input_network_symbol, "ETH");

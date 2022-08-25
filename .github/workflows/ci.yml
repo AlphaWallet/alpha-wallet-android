@@ -19,7 +19,7 @@ jobs:
 
       - name: Run unit tests
         env:
-          USERNAME: ${{ GITHUB_ACTOR }}
+          USERNAME: ${{ github.actor }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: sh ./build.sh
 

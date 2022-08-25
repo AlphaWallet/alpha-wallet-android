@@ -6,21 +6,16 @@ on:
   pull_request:
 jobs:
   test:
-    runs-on: macos-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
-
-      - name: Set Swap Space
-        uses: pierotofy/set-swap-space@master
-        with:
-          swap-size-gb: 4
 
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           distribution: zulu
           java-version: 11
-          cache: gradle
+          architecture: arm64
 
       - name: Run unit tests
         run: sh ./build.sh

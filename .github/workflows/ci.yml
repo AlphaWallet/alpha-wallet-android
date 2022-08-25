@@ -4,12 +4,12 @@ on:
     branches:
       - master
   pull_request:
+env:
+  USERNAME: ${{ env.GITHUB_ACTOR }}
+  TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   test:
     runs-on: macos-latest
-    env:
-      USERNAME: ${{ env.GITHUB_ACTOR }}
-      TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
         

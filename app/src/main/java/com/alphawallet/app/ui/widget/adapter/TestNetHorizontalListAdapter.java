@@ -2,12 +2,9 @@ package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -16,14 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.widget.TokenIcon;
 
-import java.math.BigInteger;
-import java.util.Locale;
+import timber.log.Timber;
 
 public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHorizontalListAdapter.ViewHolder>
 {
@@ -61,10 +53,7 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
             String coinBalance = token.getStringBalanceForUI(4);
             if (!TextUtils.isEmpty(coinBalance))
             {
-                String symbol = token.getSymbol().substring(0, Math.min(token.getSymbol().length(), 5))
-                        .toUpperCase(Locale.ROOT);
-
-                holder.price.setText(context.getString(R.string.valueSymbol, coinBalance, symbol));
+                holder.price.setText(context.getString(R.string.valueSymbol, coinBalance, token.getTokenSymbol(token)));
             }
             // TODO - JB: use bindData(token.tokenInfo.chainId), remove import of assetDefinitionService
             holder.tokenIcon.bindData(token.tokenInfo.chainId);
@@ -73,9 +62,9 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
                 holder.tokenIcon.setChainIcon(token.tokenInfo.chainId); //Add in when we upgrade the design
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            System.out.println("Error" + ex);
+            Timber.e(e);
         }
     }
 

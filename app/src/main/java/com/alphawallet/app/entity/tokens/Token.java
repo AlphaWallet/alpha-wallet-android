@@ -49,6 +49,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -200,6 +201,12 @@ public class Token
         } else {
             return sanitiseString(getFullName());
         }
+    }
+
+    public String getTokenSymbol(Token token){
+        String symbol = token.getSymbol().substring(0, Math.min(token.getSymbol().length(), 5))
+                .toUpperCase(Locale.ROOT);
+        return symbol;
     }
 
     public String getTSName(AssetDefinitionService assetDefinition, int count) {

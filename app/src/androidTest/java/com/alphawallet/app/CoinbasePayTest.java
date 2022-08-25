@@ -28,7 +28,7 @@ import java.util.Map;
 
 public class CoinbasePayTest extends BaseE2ETest {
     @Test
-    public void should_add_custom_network()
+    public void should_see_coinbase_pay_window()
     {
         createNewWallet();
         click(withId(R.id.primary_button));

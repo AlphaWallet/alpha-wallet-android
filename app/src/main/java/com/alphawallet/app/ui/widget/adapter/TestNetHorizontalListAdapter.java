@@ -23,6 +23,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.widget.TokenIcon;
 
 import java.math.BigInteger;
+import java.util.Locale;
 
 public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHorizontalListAdapter.ViewHolder>
 {
@@ -48,6 +49,7 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
                 .inflate(R.layout.item_horizontal_testnet_list, parent, false);
         return new TestNetHorizontalListAdapter.ViewHolder(view);
     }
+
     //TODO - JB: Fix formatting (no whitespace at top of function, fix tabbing)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
@@ -59,24 +61,22 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
             String coinBalance = token.getStringBalanceForUI(4);
             if (!TextUtils.isEmpty(coinBalance))
             {
-
                 String symbol = token.getSymbol().substring(0, Math.min(token.getSymbol().length(), 5))
-                        .toUpperCase();
+                        .toUpperCase(Locale.ROOT);
 
                 holder.price.setText(context.getString(R.string.valueSymbol, coinBalance, symbol));
             }
-
             // TODO - JB: use bindData(token.tokenInfo.chainId), remove import of assetDefinitionService
             holder.tokenIcon.bindData(token.tokenInfo.chainId);
             if (!token.isEthereum())
+            {
                 holder.tokenIcon.setChainIcon(token.tokenInfo.chainId); //Add in when we upgrade the design
-
+            }
         }
         catch (Exception ex)
         {
-
+            System.out.println("Error" + ex);
         }
-
     }
 
     @Override

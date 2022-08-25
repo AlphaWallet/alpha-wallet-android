@@ -218,21 +218,22 @@ gradle.projectsEvaluated({
     def username = getGitHubUsername()
     def password = getPAT()
 
+    def isOnCI = System.getenv("GITHUB_TOKEN")
     println "----------------"
     println "username: " + username
     println "password: " + password
-    if (!username || !password) {
+    if (!isOnCI && (!username || !password)) {
         throw new GradleException('Please provide GitHub username and Personal Access Token. Find more here https://github.com/alphaWallet/alpha-wallet-android#getting-started')
     }
 })
 
 // GitHub Personal Access Token
 private String getPAT() {
-    project.findProperty("gpr.token") ?: System.getenv("TOKEN")
+    project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
 }
 
 private String getGitHubUsername() {
-    project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+    project.findProperty("gpr.user")
 }
 
 dependencies {

@@ -101,11 +101,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     private static final KeyProvider keyProvider = KeyProviderFactory.get();
     public static final boolean usesProductionKey = !keyProvider.getInfuraKey().equals(DEFAULT_INFURA_KEY);
 
-    public static final String FREE_MAINNET_RPC_URL = "https://main-rpc.linkpool.io";
+    public static final String FREE_MAINNET_RPC_URL = "https://rpc.ankr.com/eth";
     public static final String FREE_POLYGON_RPC_URL = "https://polygon-rpc.com";
     public static final String FREE_ARBITRUM_RPC_URL = "https://arbitrum.public-rpc.com";
-    public static final String FREE_RINKEBY_RPC_URL = "https://rinkeby-light.eth.linkpool.io";
-    public static final String FREE_GOERLI_RPC_URL = "https://goerli-light.eth.linkpool.io";
+    public static final String FREE_RINKEBY_RPC_URL = "https://rpc.ankr.com/eth_rinkeby";
+    public static final String FREE_GOERLI_RPC_URL = "https://rpc.ankr.com/eth_goerli";
     public static final String FREE_MUMBAI_RPC_URL = "https://rpc-mumbai.maticvigil.com";
     public static final String FREE_OPTIMISM_RPC_URL = "https://mainnet.optimism.io";
     public static final String FREE_ARBITRUM_TEST_RPC_URL = "https://rinkeby.arbitrum.io/rpc";

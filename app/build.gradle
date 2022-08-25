@@ -218,6 +218,8 @@ gradle.projectsEvaluated({
     def username = getGitHubUsername()
     def password = getPAT()
 
+    println "username: " + username
+    println "password: " + password
     if (!username || !password) {
         throw new GradleException('Please provide GitHub username and Personal Access Token. Find more here https://github.com/alphaWallet/alpha-wallet-android#getting-started')
     }

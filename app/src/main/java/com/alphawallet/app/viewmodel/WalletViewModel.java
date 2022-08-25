@@ -42,7 +42,6 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.NameThisWalletActivity;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.TokenManagementActivity;
-import com.alphawallet.app.util.CoinbasePayUtils;
 import com.alphawallet.app.widget.WalletFragmentActionsView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;

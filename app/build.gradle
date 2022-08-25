@@ -227,10 +227,16 @@ gradle.projectsEvaluated({
 
 // GitHub Personal Access Token
 private String getPAT() {
+    println "--------------"
+    println project.findProperty("gpr.key")
+    println System.getenv("TOKEN")
     return project.findProperty("gpr.key") ?: System.getenv("TOKEN")
 }
 
 private String getGitHubUsername() {
+    println "--------------"
+    println project.findProperty("gpr.user")
+    println System.getenv("USERNAME")
     return project.findProperty("gpr.user") ?: System.getenv("USERNAME")
 }
 

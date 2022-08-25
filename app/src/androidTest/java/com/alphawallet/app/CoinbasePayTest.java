@@ -31,7 +31,7 @@ public class CoinbasePayTest extends BaseE2ETest {
     public void should_see_coinbase_pay_window()
     {
         createNewWallet();
-        click(withId(R.id.primary_button));
+        click(withText("Buy ETH"));
         shouldSee("Buy with Coinbase Pay");
         click(withId(R.id.buy_with_coinbase_pay));
         shouldSee("Buy with Coinbase Pay");

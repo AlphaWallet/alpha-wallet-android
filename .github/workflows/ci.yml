@@ -4,9 +4,6 @@ on:
     branches:
       - master
   pull_request:
-env:
-  USERNAME: ${{ env.GITHUB_ACTOR }}
-  TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   test:
     runs-on: macos-latest
@@ -21,7 +18,7 @@ jobs:
           cache: gradle
 
       - name: Run unit tests
-        run: sh ./build.sh
+        run: USERNAME=${{ env.GITHUB_ACTOR }} TOKEN=${{ secrets.GITHUB_TOKEN }} ./build.sh
 
       - name: Upload Test Reports Folder
         uses: actions/upload-artifact@v2

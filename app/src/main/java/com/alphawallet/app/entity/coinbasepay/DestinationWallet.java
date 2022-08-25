@@ -13,7 +13,7 @@ public class DestinationWallet
     {
         this.type = type;
         this.address = address;
-        if (type == Type.ASSETS)
+        if (type.equals(Type.ASSETS))
         {
             this.assets = list;
         }

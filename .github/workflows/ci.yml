@@ -18,7 +18,7 @@ jobs:
           cache: gradle
 
       - name: Run unit tests
-        run: USERNAME=${{ env.GITHUB_ACTOR }} TOKEN=${{ secrets.GITHUB_TOKEN }} ./build.sh
+        run: USERNAME=${{ env.GITHUB_ACTOR }} TOKEN=${{ secrets.GITHUB_TOKEN }} sh ./build.sh
 
       - name: Upload Test Reports Folder
         uses: actions/upload-artifact@v2

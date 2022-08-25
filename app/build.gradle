@@ -70,7 +70,7 @@ repositories {
     maven {
         url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
         credentials {
-            username = getUsername()
+            username = getGitHubUsername()
             password = getPAT()
         }
     }
@@ -215,7 +215,7 @@ task printVersionCode {
 }
 
 gradle.projectsEvaluated({
-    def username = getUsername()
+    def username = getGitHubUsername()
     def password = getPAT()
 
     if (!username || !password) {
@@ -223,11 +223,12 @@ gradle.projectsEvaluated({
     }
 })
 
+// GitHub Personal Access Token
 private String getPAT() {
     return project.findProperty("gpr.key") ?: System.getenv("TOKEN")
 }
 
-private String getUsername() {
+private String getGitHubUsername() {
     return project.findProperty("gpr.user") ?: System.getenv("USERNAME")
 }
 

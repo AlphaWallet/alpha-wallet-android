@@ -28,9 +28,11 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.CoinbasePayRepository;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.WalletItem;
+import com.alphawallet.app.router.CoinbasePayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
@@ -40,6 +42,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.NameThisWalletActivity;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.TokenManagementActivity;
+import com.alphawallet.app.util.CoinbasePayUtils;
 import com.alphawallet.app.widget.WalletFragmentActionsView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -48,6 +51,7 @@ import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -75,6 +79,7 @@ public class WalletViewModel extends BaseViewModel
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final MyAddressRouter myAddressRouter;
+    private final CoinbasePayRouter coinbasePayRouter;
     private final ManageWalletsRouter manageWalletsRouter;
     private final RealmManager realmManager;
     private long lastBackupCheck = 0;
@@ -90,6 +95,7 @@ public class WalletViewModel extends BaseViewModel
             TokensService tokensService,
             ChangeTokenEnableInteract changeTokenEnableInteract,
             MyAddressRouter myAddressRouter,
+            CoinbasePayRouter coinbasePayRouter,
             ManageWalletsRouter manageWalletsRouter,
             PreferenceRepositoryType preferenceRepository,
             RealmManager realmManager,
@@ -102,6 +108,7 @@ public class WalletViewModel extends BaseViewModel
         this.tokensService = tokensService;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.myAddressRouter = myAddressRouter;
+        this.coinbasePayRouter = coinbasePayRouter;
         this.manageWalletsRouter = manageWalletsRouter;
         this.preferenceRepository = preferenceRepository;
         this.realmManager = realmManager;
@@ -213,6 +220,11 @@ public class WalletViewModel extends BaseViewModel
     public void setTokenEnabled(Token token, boolean enabled) {
         changeTokenEnableInteract.setEnable(defaultWallet.getValue(), token, enabled);
         token.tokenInfo.isEnabled = enabled;
+    }
+
+    public void showBuyEthOptions(Activity activity)
+    {
+        coinbasePayRouter.buyFromSelectedChain(activity, CoinbasePayRepository.Blockchains.ETHEREUM);
     }
 
     public void showMyAddress(Context context)

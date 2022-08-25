@@ -4,6 +4,8 @@ import static com.alphawallet.app.service.KeystoreAccountService.KEYSTORE_FOLDER
 
 import android.content.Context;
 
+import com.alphawallet.app.repository.CoinbasePayRepository;
+import com.alphawallet.app.repository.CoinbasePayRepositoryType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.OnRampRepository;
@@ -114,6 +116,12 @@ public class RepositoriesModule {
 	OnRampRepositoryType provideOnRampRepository(@ApplicationContext Context context, AnalyticsServiceType analyticsServiceType) {
 		return new OnRampRepository(context, analyticsServiceType);
 	}
+
+    @Singleton
+    @Provides
+    CoinbasePayRepositoryType provideCoinbasePayRepository() {
+        return new CoinbasePayRepository();
+    }
 
 	@Singleton
     @Provides

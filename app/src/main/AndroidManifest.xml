@@ -311,6 +311,10 @@
             android:name=".ui.NodeStatusActivity"
             android:label="@string/action_node_status" />
 
+        <activity
+            android:name=".ui.CoinbasePayActivity"
+            android:label="@string/title_buy_with_coinbase_pay" />
+
         <service
             android:name=".service.PriceAlertsService"
             android:enabled="true"

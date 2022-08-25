@@ -949,4 +949,7 @@
     <string name="label_provider">Provider</string>
     <string name="delete_empty">Delete Empty</string>
     <string name="delete_all">Delete All</string>
+    <string name="buy_with_coinbase_pay">Buy with Coinbase Pay</string>
+    <string name="buy_with_ramp">Buy with Ramp</string>
+    <string name="title_buy_with_coinbase_pay">Buy with Coinbase Pay</string>
 </resources>

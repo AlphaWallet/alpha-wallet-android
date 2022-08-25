@@ -52,6 +52,7 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.CoinbasePayRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TickerService;
@@ -65,11 +66,13 @@ import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
+import com.alphawallet.app.widget.BuyEthOptionsView;
 import com.alphawallet.app.widget.LargeTitleView;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.app.widget.UserAvatar;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
@@ -96,17 +99,40 @@ public class WalletFragment extends BaseFragment implements
         AvatarWriteCallback,
         ServiceSyncCallback
 {
-    private static final String TAG = "WFRAG";
-
     public static final String SEARCH_FRAGMENT = "w_search";
-
+    private static final String TAG = "WFRAG";
+    final ActivityResultLauncher<Intent> tokenManagementLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result ->
+            {
+                if (result.getData() == null) return;
+                ArrayList<ContractLocator> tokenData = result.getData().getParcelableArrayListExtra(ADDED_TOKEN);
+                Bundle b = new Bundle();
+                b.putParcelableArrayList(C.ADDED_TOKEN, tokenData);
+                getParentFragmentManager().setFragmentResult(C.ADDED_TOKEN, b);
+            });
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private WalletViewModel viewModel;
-
     private SystemView systemView;
     private TokensAdapter adapter;
+    ActivityResultLauncher<Intent> handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result ->
+            {
+                String keyBackup = null;
+                boolean noLockScreen = false;
+                Intent data = result.getData();
+                if (data != null) keyBackup = data.getStringExtra("Key");
+                if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
+                if (result.getResultCode() == RESULT_OK)
+                {
+                    ((HomeActivity) getActivity()).backupWalletSuccess(keyBackup);
+                }
+                else
+                {
+                    ((HomeActivity) getActivity()).backupWalletFail(keyBackup, noLockScreen);
+                }
+            });
     private UserAvatar addressAvatar;
     private View selectedToken;
-    private final Handler handler = new Handler(Looper.getMainLooper());
     private String importFileName;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout refreshLayout;
@@ -116,7 +142,6 @@ public class WalletFragment extends BaseFragment implements
     private RealmResults<RealmToken> realmUpdates;
     private LargeTitleView largeTitleView;
     private long realmUpdateTime;
-
     private ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result ->
             {
@@ -494,8 +519,25 @@ public class WalletFragment extends BaseFragment implements
     @Override
     public void onBuyToken()
     {
-        Intent intent = viewModel.getBuyIntent(getCurrentWallet().address);
-        ((HomeActivity) getActivity()).onActivityResult(C.TOKEN_SEND_ACTIVITY, RESULT_OK, intent);
+        BottomSheetDialog buyEthDialog = new BottomSheetDialog(getActivity());
+        BuyEthOptionsView buyEthOptionsView = new BuyEthOptionsView(getActivity());
+        buyEthOptionsView.setOnBuyWithRampListener(v -> {
+            Intent intent = viewModel.getBuyIntent(getCurrentWallet().address);
+            ((HomeActivity) getActivity()).onActivityResult(C.TOKEN_SEND_ACTIVITY, RESULT_OK, intent);
+            buyEthDialog.dismiss();
+        });
+        buyEthOptionsView.setOnBuyWithCoinbasePayListener(v -> {
+            if (CoinbasePayRepository.APP_ID.isEmpty())
+            {
+                Toast.makeText(getActivity(), "Missing Coinbase Pay App ID.", Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                viewModel.showBuyEthOptions(getActivity());
+            }
+        });
+        buyEthDialog.setContentView(buyEthOptionsView);
+        buyEthDialog.show();
     }
 
     @Override
@@ -662,24 +704,6 @@ public class WalletFragment extends BaseFragment implements
         selectedToken = null;
     }
 
-    ActivityResultLauncher<Intent> handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                String keyBackup = null;
-                boolean noLockScreen = false;
-                Intent data = result.getData();
-                if (data != null) keyBackup = data.getStringExtra("Key");
-                if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
-                if (result.getResultCode() == RESULT_OK)
-                {
-                    ((HomeActivity) getActivity()).backupWalletSuccess(keyBackup);
-                }
-                else
-                {
-                    ((HomeActivity) getActivity()).backupWalletFail(keyBackup, noLockScreen);
-                }
-            });
-
     @Override
     public void backUpClick(Wallet wallet)
     {
@@ -710,16 +734,6 @@ public class WalletFragment extends BaseFragment implements
         });
     }
 
-    final ActivityResultLauncher<Intent> tokenManagementLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                if (result.getData() == null) return;
-                ArrayList<ContractLocator> tokenData = result.getData().getParcelableArrayListExtra(ADDED_TOKEN);
-                Bundle b = new Bundle();
-                b.putParcelableArrayList(C.ADDED_TOKEN, tokenData);
-                getParentFragmentManager().setFragmentResult(C.ADDED_TOKEN, b);
-            });
-
     public void storeWalletBackupTime(String backedUpKey)
     {
         handler.post(() ->
@@ -739,6 +753,62 @@ public class WalletFragment extends BaseFragment implements
     {
         //write to database
         viewModel.saveAvatar(wallet);
+    }
+
+    public Wallet getCurrentWallet()
+    {
+        return viewModel.getWallet();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem)
+    {
+        if (menuItem.getItemId() == R.id.action_my_wallet)
+        {
+            viewModel.showMyAddress(getContext());
+        }
+        if (menuItem.getItemId() == R.id.action_scan)
+        {
+            viewModel.showQRCodeScanning(getActivity());
+        }
+        return super.onMenuItemClick(menuItem);
+    }
+
+    private void initNotificationView(View view)
+    {
+        NotificationView notificationView = view.findViewById(R.id.notification);
+        boolean hasShownWarning = viewModel.isMarshMallowWarningShown();
+
+        if (!hasShownWarning && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M)
+        {
+            notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
+            notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
+            notificationView.setPrimaryButtonText(getContext().getString(R.string.hide_notification));
+            notificationView.setPrimaryButtonListener(() ->
+            {
+                notificationView.setVisibility(View.GONE);
+                viewModel.setMarshMallowWarning(true);
+            });
+        }
+        else
+        {
+            notificationView.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onSearchClicked()
+    {
+        Intent intent = new Intent(getActivity(), SearchActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onSwitchClicked()
+    {
+        Intent intent = new Intent(getActivity(), SelectNetworkFilterActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
+        networkSettingsHandler.launch(intent);
     }
 
     public class SwipeCallback extends ItemTouchHelper.SimpleCallback
@@ -848,61 +918,5 @@ public class WalletFragment extends BaseFragment implements
             background.draw(c);
             icon.draw(c);
         }
-    }
-
-    public Wallet getCurrentWallet()
-    {
-        return viewModel.getWallet();
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem menuItem)
-    {
-        if (menuItem.getItemId() == R.id.action_my_wallet)
-        {
-            viewModel.showMyAddress(getContext());
-        }
-        if (menuItem.getItemId() == R.id.action_scan)
-        {
-            viewModel.showQRCodeScanning(getActivity());
-        }
-        return super.onMenuItemClick(menuItem);
-    }
-
-    private void initNotificationView(View view)
-    {
-        NotificationView notificationView = view.findViewById(R.id.notification);
-        boolean hasShownWarning = viewModel.isMarshMallowWarningShown();
-
-        if (!hasShownWarning && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M)
-        {
-            notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
-            notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
-            notificationView.setPrimaryButtonText(getContext().getString(R.string.hide_notification));
-            notificationView.setPrimaryButtonListener(() ->
-            {
-                notificationView.setVisibility(View.GONE);
-                viewModel.setMarshMallowWarning(true);
-            });
-        }
-        else
-        {
-            notificationView.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void onSearchClicked()
-    {
-        Intent intent = new Intent(getActivity(), SearchActivity.class);
-        startActivity(intent);
-    }
-
-    @Override
-    public void onSwitchClicked()
-    {
-        Intent intent = new Intent(getActivity(), SelectNetworkFilterActivity.class);
-        intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
-        networkSettingsHandler.launch(intent);
     }
 }

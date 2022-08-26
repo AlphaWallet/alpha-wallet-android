@@ -1,4 +1,4 @@
-package com.alphawallet.app.util;
+package com.alphawallet.app.util.ens;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -8,25 +8,16 @@ import androidx.preference.PreferenceManager;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.service.OpenSeaService;
-import com.alphawallet.app.util.das.DASBody;
-import com.alphawallet.app.util.das.DASRecord;
-import com.alphawallet.app.web3j.ens.EnsResolver;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.ens.NameHash;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.http.HttpService;
 
-import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -35,39 +26,33 @@ import java.util.regex.Pattern;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import timber.log.Timber;
 
 /**
  * Created by James on 29/05/2019.
  * Stormbird in Sydney
  */
-public class AWEnsResolver extends EnsResolver
+public class AWEnsResolver
 {
-    private static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
-    private static final String DAS_LOOKUP = "https://indexer.da.systems/";
-    private static final String DAS_NAME = "[DAS_NAME]";
-    private static final String DAS_PAYLOAD = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"das_searchAccount\",\"params\":[\"" + DAS_NAME + "\"]}";
     private static final String OPENSEA_IMAGE_PREVIEW = "image_preview_url";
     private static final String OPENSEA_IMAGE_ORIGINAL = "image_original_url"; //in case of SVG; Opensea breaks SVG compression
-    public static final String CRYPTO_RESOLVER = "0xD1E5b0FF1287aA9f9A268759062E4Ab08b9Dacbe";
-    public static final String CRYPTO_ETH_KEY = "crypto.ETH.address";
     private final Context context;
     private final OkHttpClient client;
-    
+    private HashMap<String, Resolvable> resolvables;
+    private final EnsResolver ensResolver;
+
     public AWEnsResolver(Web3j web3j, Context context)
     {
-        super(web3j);
+        this.ensResolver = new EnsResolver(web3j);
         this.context = context;
         this.client = setupClient();
-    }
 
-    public AWEnsResolver(Web3j web3j)
-    {
-        super(web3j);
-        this.context = null;
-        this.client = setupClient();
+        resolvables = new HashMap<String, Resolvable>() {
+            {
+                put(".bit", new DASResolver(client));
+                put(".crypto", new CryptoResolver(ensResolver));
+            }
+        };
     }
 
     /**
@@ -84,7 +69,7 @@ public class AWEnsResolver extends EnsResolver
 
             try
             {
-                ensName = reverseResolve(address); //no known ENS for this address, resolve from reverse resolver
+                ensName = ensResolver.reverseResolve(address); //no known ENS for this address, resolve from reverse resolver
                 if (!TextUtils.isEmpty(ensName))
                 {
                     //check ENS name integrity - it must point to the wallet address
@@ -231,9 +216,9 @@ public class AWEnsResolver extends EnsResolver
             HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>()
             {
             }.getType());
-            if (history.containsKey(address.toLowerCase()))
+            if (history.containsKey(address.toLowerCase(Locale.ENGLISH)))
             {
-                ensName = history.get(address.toLowerCase());
+                ensName = history.get(address.toLowerCase(Locale.ENGLISH));
             }
         }
 
@@ -251,11 +236,11 @@ public class AWEnsResolver extends EnsResolver
             HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>()
             {
             }.getType());
-            if (history.containsKey(address.toLowerCase()))
+            if (history.containsKey(address.toLowerCase(Locale.ENGLISH)))
             {
-                String previouslyUsedDomain = history.get(address.toLowerCase());
+                String previouslyUsedDomain = history.get(address.toLowerCase(Locale.ENGLISH));
                 //perform an additional check, to ensure this ENS name is still valid, try this ENS name to see if it resolves to the address
-                ensName = resolveENSAddress(previouslyUsedDomain, true)
+                ensName = resolveENSAddress(previouslyUsedDomain)
                         .map(resolvedAddress -> checkResolvedAddressMatches(resolvedAddress, address, previouslyUsedDomain))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
@@ -284,13 +269,13 @@ public class AWEnsResolver extends EnsResolver
      * @param ensName ensName to be resolved to address
      * @return Ethereum address or empty string
      */
-    public Single<String> resolveENSAddress(String ensName, boolean performNodeSync)
+    public Single<String> resolveENSAddress(String ensName)
     {
         return Single.fromCallable(() ->
         {
             Timber.d("Verify: %s", ensName);
             String address = "";
-            if (!isValidEnsName(ensName)) return "";
+            if (!EnsResolver.isValidEnsName(ensName)) return "";
             try
             {
                 address = resolve(ensName);
@@ -304,133 +289,29 @@ public class AWEnsResolver extends EnsResolver
         }).onErrorReturnItem("");
     }
 
-    @Override
     public String resolve(String ensName) throws Exception
     {
         if (TextUtils.isEmpty(ensName))
         {
             return "";
         }
-        if (ensName.endsWith(".bit"))
+
+        Resolvable resolvable = resolvables.get(suffixOf(ensName));
+        if (resolvable == null)
         {
-            return resolveDAS(ensName);
+            resolvable = ensResolver;
         }
-        else if (ensName.endsWith(".crypto")) //check crypto namespace
-        {
-            byte[] nameHash = NameHash.nameHashAsBytes(ensName);
-            BigInteger nameId = new BigInteger(nameHash);
-            String resolverAddress = getContractData(CRYPTO_RESOLVER, getResolverOf(nameId), "");
-            if (!TextUtils.isEmpty(resolverAddress))
-            {
-                return getContractData(resolverAddress, get(nameId), "");
-            }
-            else
-            {
-                return "";
-            }
-        }
-        else
-        {
-            return super.resolve(ensName);
-        }
+        return resolvable.resolve(ensName);
     }
 
-    private String resolveDAS(String ensName)
+    private String suffixOf(String ensName)
     {
-        String payload = DAS_PAYLOAD.replace(DAS_NAME, ensName);
-
-        RequestBody requestBody = RequestBody.create(payload, HttpService.JSON_MEDIA_TYPE);
-        Request request = new Request.Builder()
-                .url(DAS_LOOKUP)
-                .post(requestBody)
-                .build();
-
-        try (okhttp3.Response response = client.newCall(request).execute())
-        {
-            //get result
-            String result = response.body() != null ? response.body().string() : "";
-
-            DASBody dasResult = new Gson().fromJson(result, DASBody.class);
-            dasResult.buildMap();
-
-            //find ethereum entry
-            DASRecord ethLookup = dasResult.records.get("address.eth");
-            if (ethLookup != null)
-            {
-                return ethLookup.getAddress();
-            }
-            else
-            {
-                return dasResult.getEthOwner();
-            }
-        }
-        catch (Exception e)
-        {
-            Timber.tag("ENS").e(e);
-        }
-
-        return "";
-    }
-
-    private Function getResolverOf(BigInteger nameId)
-    {
-        return new Function("resolverOf",
-                Arrays.asList(new org.web3j.abi.datatypes.Uint(nameId)),
-                Arrays.asList(new TypeReference<Address>()
-                {
-                }));
-    }
-
-    private Function getAvatar(byte[] nameHash)
-    {
-        return new Function("text",
-                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash),
-                        new org.web3j.abi.datatypes.Utf8String("avatar")),
-                Arrays.asList(new TypeReference<org.web3j.abi.datatypes.Utf8String>()
-                {
-                }));
-    }
-
-    private Function getResolver(byte[] nameHash)
-    {
-        return new Function("resolver",
-                Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
-                Arrays.asList(new TypeReference<Address>()
-                {
-                }));
-    }
-
-    private Function get(BigInteger nameId)
-    {
-        return new Function("get",
-                Arrays.asList(new org.web3j.abi.datatypes.Utf8String(CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
-                Arrays.asList(new TypeReference<Utf8String>()
-                {
-                }));
+        return ensName.substring(ensName.lastIndexOf("."));
     }
 
     public String resolveAvatar(String ensName)
     {
-        if (isValidEnsName(ensName, addressLength))
-        {
-            try
-            {
-                String resolverAddress = getResolverAddress(ensName);
-                if (!TextUtils.isEmpty(resolverAddress))
-                {
-                    byte[] nameHash = NameHash.nameHashAsBytes(ensName);
-                    //now attempt to get the address of this ENS
-                    return getContractData(resolverAddress, getAvatar(nameHash), "");
-                }
-            }
-            catch (Exception e)
-            {
-                //
-                Timber.e(e);
-            }
-        }
-
-        return "";
+        return new AvatarResolver(ensResolver).resolve(ensName);
     }
 
     public String resolveAvatarFromAddress(String address)
@@ -439,7 +320,7 @@ public class AWEnsResolver extends EnsResolver
         {
             try
             {
-                String ensName = reverseResolve(address);
+                String ensName = ensResolver.reverseResolve(address);
                 return resolveAvatar(ensName);
             }
             catch (Exception e)

@@ -28,7 +28,7 @@ import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.MagicLinkData;
@@ -355,7 +355,7 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<String> resolveENS(long chainId, String ensName)
     {
         if (ensResolver == null) ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
-        return ensResolver.resolveENSAddress(ensName, true);
+        return ensResolver.resolveENSAddress(ensName);
     }
 
     @Override

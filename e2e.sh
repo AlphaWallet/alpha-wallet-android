@@ -1,5 +1,14 @@
 #!/bin/sh
 
+function startGanache() {
+  source ~/.zprofile
+  ganache --chain.chainId 2 -h 0.0.0.0 -m "horse light surface bamboo combine item lumber tunnel choose acid mail feature"
+}
+
+function stopGanache() {
+  kill -9 $(lsof -t -i:8545)
+}
+
 # disable animations or test may not stable
 adb shell settings put global window_animation_scale 0.0
 adb shell settings put global transition_animation_scale 0.0
@@ -18,7 +27,10 @@ touch output/emulator.log                    # create log file
 chmod 666 output/emulator.log                # allow writing to log file
 adb logcat >> output/emulator.log &
 
+startGanache &
+
 ./gradlew :app:uninstallAll :app:connectedNoAnalyticsDebugAndroidTest -x lint -PdisablePreDex
+
 if [ "$?" != "0" ]; then
   adb pull /storage/emulated/0/DCIM/ output
   if [ "$1" != "--CI" ]; then
@@ -27,3 +39,5 @@ if [ "$?" != "0" ]; then
 
   exit 1
 fi
+
+stopGanache

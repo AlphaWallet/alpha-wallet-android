@@ -18,7 +18,7 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.ui.widget.OnSetWatchWalletListener;
-import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.web3j.crypto.ECKeyPair;

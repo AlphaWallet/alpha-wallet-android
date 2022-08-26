@@ -10,14 +10,12 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AddressMode;
@@ -29,7 +27,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
-import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRUtils;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
@@ -40,8 +38,6 @@ import com.alphawallet.ethereum.EthereumNetworkBase;
 import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;

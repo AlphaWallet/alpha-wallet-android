@@ -53,29 +53,7 @@ public class WalletDataRealmSource {
 
                     composeWallet(wallet, data);
                 }
-
-                //TODO: Make this a manual process.
-                //recoverLostWallets(realm, keystoreWallets, walletList, keyService);
-
-
-                //try to recover lost HD Wallets
-                /*for (String walletAddr : keyService.detectOrphanedWallets(walletList))
-                {
-                    //create HD Wallet if required
-                    RealmKeyType realmKey = realm.where(RealmKeyType.class)
-                            .equalTo("address", walletAddr, Case.INSENSITIVE)
-                            .findFirst();
-
-                    if (realmKey != null || walletAddr.equals(TokenscriptFunction.ZERO_ADDRESS)) continue;
-                    Wallet w = new Wallet(walletAddr);
-                    w.type = WalletType.HDKEY;
-                    w.authLevel = KeyService.AuthenticationLevel.TEE_AUTHENTICATION;
-                    w.lastBackupTime = System.currentTimeMillis();
-                    storeKeyData(w, realm);
-                    walletList.put(w.address.toLowerCase(), w);
-                }*/
             }
-
 
             migrateWalletTypeData(walletList, keyService);
 
@@ -593,30 +571,5 @@ public class WalletDataRealmSource {
                     .findAll();
             realm.executeTransaction(r -> rr.deleteAllFromRealm()); //erase the database now we have extracted the data
         }
-    }
-
-    //Check for lost keystore wallets and recover
-    private void recoverLostWallets(Realm realm, Wallet[] keystoreWallets, Map<String, Wallet> walletList, KeyService keyService)
-    {
-        realm.executeTransaction(r -> {
-            for (Wallet w : keystoreWallets)
-            {
-                //check for orphaned keystore wallets
-                Wallet testWallet = walletList.get(w.address.toLowerCase());
-                if (testWallet == null)
-                {
-                    //do we have this in keystore as a valid address?
-                    if (keyService.hasKeystore(w.address.toLowerCase()))
-                    {
-                        //create keystore wallet
-                        w.type = WalletType.KEYSTORE;
-                        w.authLevel = KeyService.AuthenticationLevel.TEE_AUTHENTICATION;
-                        w.lastBackupTime = System.currentTimeMillis();
-                        storeKeyData(w, r);
-                        walletList.put(w.address.toLowerCase(), w);
-                    }
-                }
-            }
-        });
     }
 }

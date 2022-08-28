@@ -37,10 +37,31 @@
                     android:layout_margin="@dimen/standard_16"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Key Entry in Secure Enclave" />
+                    android:text="@string/key_entry_in_secure_enclave" />
 
                 <TextView
                     android:id="@+id/key_in_enclave"
+                    android:layout_margin="@dimen/standard_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <View style="@style/Aw.Component.Separator" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_margin="@dimen/standard_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enclave_locked" />
+
+                <TextView
+                    android:id="@+id/key_is_locked"
                     android:layout_margin="@dimen/standard_16"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
@@ -55,14 +76,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <View style="@style/Aw.Component.Separator" />
 
                 <TextView
                     android:id="@+id/database_txt"
                     android:layout_margin="@dimen/standard_16"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Key type in Database" />
+                    android:text="@string/key_type_in_database" />
 
                 <TextView
                     android:id="@+id/key_type"
@@ -70,44 +90,28 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
-                <Spinner
-                    android:id="@+id/key_spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/standard_16"
-                    android:background="@android:drawable/btn_dropdown"
-                    android:spinnerMode="dropdown"/>
-
             </LinearLayout>
 
-            <com.alphawallet.app.widget.SettingsItemView
-                android:id="@+id/delete"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:settingIcon="-1"
-                app:settingTitle="@string/lose_this_wallet"
-                app:settingType="default" />
+                android:orientation="vertical">
 
-            <TextView
-                style="@style/Aw.Typography.Sub"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/standard_16"
-                android:text="@string/delete_lose_funds_warning" />
+                <View style="@style/Aw.Component.Separator" />
 
-            <View
-                style="@style/Aw.Component.Separator"
-                android:layout_marginTop="@dimen/dp20" />
+                <TextView
+                    android:layout_margin="@dimen/standard_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/status" />
 
-            <com.alphawallet.app.widget.InputAddress
-                android:id="@+id/input_ens"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/standard_16"
-                custom:ens="true"
-                custom:hint="@string/enter_ens"
-                custom:label="@string/ens_name"
-                custom:nocam="true" />
+                <TextView
+                    android:id="@+id/status_txt"
+                    android:layout_margin="@dimen/standard_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
 
             <View style="@style/Aw.Component.Separator" />
 
@@ -131,5 +135,12 @@
             android:foregroundGravity="center" />
 
     </LinearLayout>
+
+
+    <com.alphawallet.app.widget.FunctionButtonBar
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" />
 
 </RelativeLayout>

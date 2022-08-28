@@ -176,5 +176,10 @@ public class BackupKeyViewModel extends BaseViewModel {
     {
         return keyService.hasKeystore(address);
     }
+
+    public Single<Wallet> storeWallet(Wallet wallet)
+    {
+        return fetchWalletsInteract.storeWallet(wallet);
+    }
 }
 

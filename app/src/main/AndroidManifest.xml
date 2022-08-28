@@ -311,6 +311,10 @@
             android:name=".ui.NodeStatusActivity"
             android:label="@string/action_node_status" />
 
+        <activity
+            android:name=".ui.WalletDiagnosticActivity"
+            android:label="Wallet Diagnostic" />
+
         <service
             android:name=".service.PriceAlertsService"
             android:enabled="true"

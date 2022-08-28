@@ -1,46 +1,85 @@
 package com.alphawallet.app.ui;
 
-import android.content.Context;
+import static com.alphawallet.app.service.KeystoreAccountService.KEYSTORE_FOLDER;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.security.keystore.UserNotAuthenticatedException;
+import android.util.Pair;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AuthenticationCallback;
+import com.alphawallet.app.entity.AuthenticationFailType;
+import com.alphawallet.app.entity.Operation;
+import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.KeystoreAccountService;
 import com.alphawallet.app.viewmodel.BackupKeyViewModel;
+import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.tools.Numeric;
 
-import java.io.ByteArrayOutputStream;
+import org.web3j.crypto.Credentials;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.security.InvalidKeyException;
 import java.security.KeyStore;
+import java.security.spec.AlgorithmParameterSpec;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import wallet.core.jni.CoinType;
+import wallet.core.jni.HDWallet;
+import wallet.core.jni.PrivateKey;
 
 /**
  * Created by JB on 24/08/2022.
+ *
+ * NB: do not use any of this code anywhere else in the wallet! This is purely for key diagnostics to help support diagnose issues with keys
  */
 @AndroidEntryPoint
-public class WalletDiagnosticActivity extends BaseActivity
+public class WalletDiagnosticActivity extends BaseActivity implements StandardFunctionInterface
 {
     private static final String LEGACY_CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
     private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
 
     private BackupKeyViewModel viewModel;
+    private AWalletAlertDialog dialog;
 
     private Wallet wallet;
+
+    private boolean isLegacyKeystore = false;
+    private boolean isKeyStore = false;
+    private boolean isSeedPhrase = false;
+    private boolean isLocked = false;
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -48,7 +87,11 @@ public class WalletDiagnosticActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wallet_diagnostic);
         toolbar();
-        setTitle("Wallet Diagnostic");
+        setTitle(getString(R.string.key_diagnostic));
+
+        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.run_key_diagnostic)));
+        functionBar.revealButtons();
 
         if (getIntent() != null)
         {
@@ -60,9 +103,61 @@ public class WalletDiagnosticActivity extends BaseActivity
         }
 
         initViewModel();
+        startKeyDiagnostic();
+    }
 
-        scanForKey();
+    @Override
+    public void handleClick(String action, int actionId)
+    {
+        //test cipher
+        doUnlock(new UnlockCallback()
+        {
+            @Override
+            public void carryOn(boolean passed)
+            {
+                Pair<KeyExceptionType, String> res = testCipher(LEGACY_CIPHER_ALGORITHM);
+                switch (res.first)
+                {
+                    case UNKNOWN:
+                    case REQUIRES_AUTH:
+                        showError("Unknown Failure");
+                        break;
+                    case INVALID_CIPHER:
+                        isLegacyKeystore = false;
+                        break;
+                    case SUCCESSFUL_DECODE:
+                        isLegacyKeystore = true;
+                        evaluateKey();
+                        break;
+                    case IV_NOT_FOUND:
+                        showError("IV File not found");
+                        return;
+                    case ENCRYPTED_FILE_NOT_FOUND:
+                        showError("Encrypted Data File not found");
+                        return;
+                }
+
+                testKeyStore();
+            }
+        });
+    }
+
+    private void startKeyDiagnostic()
+    {
+        LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
+        if (successOverlay != null) successOverlay.setVisibility(View.GONE);
+
         setCurrentKeyType();
+        boolean hasKey = scanForKey();
+
+        if (hasKey)
+        {
+            unlockKeyIfRequired();
+        }
+        else
+        {
+            showError("Unable to find enclave key for this wallet. Is it a watch wallet?");
+        }
     }
 
     @Override
@@ -83,18 +178,20 @@ public class WalletDiagnosticActivity extends BaseActivity
                 .get(BackupKeyViewModel.class);
     }
 
-    private void scanForKey()
+    private boolean scanForKey()
     {
         TextView status = findViewById(R.id.key_in_enclave);
         if (viewModel.hasKey(wallet.address))
         {
-            status.setText("Key found");
+            status.setText(R.string.key_found);
             status.setTextColor(getColor(R.color.green));
+            return true;
         }
         else
         {
-            status.setText("No key");
+            status.setText(R.string.key_not_found);
             status.setTextColor(getColor(R.color.danger));
+            return false;
         }
     }
 
@@ -103,104 +200,327 @@ public class WalletDiagnosticActivity extends BaseActivity
         TextView status = findViewById(R.id.key_type);
         String walletType = wallet.type.toString();
         status.setText(walletType);
+    }
 
-        if (wallet.type == WalletType.KEYSTORE || wallet.type == WalletType.KEYSTORE_LEGACY)
+    private void unlockKeyIfRequired()
+    {
+        TextView lockedState = findViewById(R.id.key_is_locked);
+        //first test key to see if it's unlocked
+        if (!isLocked)
         {
-            //test cipher
-            testCipher();
+            Pair<KeyExceptionType, String> res = testCipher(LEGACY_CIPHER_ALGORITHM);
+
+            isLocked = (res.first == KeyExceptionType.REQUIRES_AUTH);
+            lockedState.setText(isLocked ? "Locked" : "Unlocked");
+            lockedState.setTextColor(isLocked ? getColor(R.color.green) : getColor(R.color.danger));
         }
     }
 
-    private void testCipher()
+    // Finally, test if key matches up with what's stored in the database
+    private void evaluateKey()
     {
-        try
+        WalletType actualType = getActualKeyType();
+        if (actualType == WalletType.NOT_DEFINED) return;
+
+        switch (wallet.type)
         {
-            wallet.type = WalletType.KEYSTORE_LEGACY;
-            //attempt to unlock the key like this
-            viewModel.getAuthentication();
-
-            KeyStore keyStore;
-            String encryptedDataFilePath = getFilePath(this, wallet.address);
-            String keyIv = getFilePath(this, wallet.address + "iv");
-            boolean ivExists = new File(keyIv).exists();
-            boolean aliasExists = new File(encryptedDataFilePath).exists();
-
-            if (!ivExists) throw new Exception("iv file doesn't exist");
-            if (!aliasExists) throw new Exception("Key file doesn't exist");
-
-            //test legacy key
-            byte[] iv = readBytesFromFile(keyIv);
-
-            keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
-            keyStore.load(null);
-            SecretKey secretKey = (SecretKey) keyStore.getKey(wallet.address, null);
-
-            Cipher outCipher = Cipher.getInstance(LEGACY_CIPHER_ALGORITHM);
-            outCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
-            CipherInputStream cipherInputStream = new CipherInputStream(new FileInputStream(encryptedDataFilePath), outCipher);
-            byte[] pw = readBytesFromStream(cipherInputStream);
-
-            System.out.println("YOLESS: " + Numeric.toHexString(pw));
-        }
-        catch (Exception e)
-        {
-            //TODO: Popup
-            System.out.println("ERROR: " + e.getMessage());
+            case WATCH:
+            case NOT_DEFINED:
+            case TEXT_MARKER:
+            case LARGE_TITLE:
+                break;
+            case KEYSTORE:
+                if (!isKeyStore)
+                {
+                    suggestCorrectWallet("Database says Keystore but tests show: " + actualType.toString(), actualType);
+                }
+                else
+                {
+                    showSuccess();
+                }
+                break;
+            case HDKEY:
+                if (!isSeedPhrase)
+                {
+                    suggestCorrectWallet("Database says Seed Phrase but tests show: " + actualType.toString(), actualType);
+                }
+                else
+                {
+                    showSuccess();
+                }
+                break;
+            case KEYSTORE_LEGACY:
+                if (!isLegacyKeystore)
+                {
+                    suggestCorrectWallet("Database says Keystore Legacy but tests show: " + actualType.toString(), actualType);
+                }
+                else
+                {
+                    showSuccess();
+                }
+                break;
         }
     }
 
-    synchronized static String getFilePath(Context context, String fileName)
+    private WalletType getActualKeyType()
     {
-        //check for matching file
-        File check = new File(context.getFilesDir(), fileName);
-        if (check.exists())
+        if (isLegacyKeystore)
         {
-            return check.getAbsolutePath(); //quick return
+            return WalletType.KEYSTORE_LEGACY;
+        }
+        else if (isSeedPhrase)
+        {
+            return WalletType.HDKEY;
+        }
+        else if (isKeyStore)
+        {
+            return WalletType.KEYSTORE;
         }
         else
         {
-            //find matching file, ignoring case
-            File[] files = context.getFilesDir().listFiles();
-            for (File checkFile : files)
+            return WalletType.NOT_DEFINED;
+        }
+    }
+
+    private void suggestCorrectWallet(String suggest, WalletType type)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.key_status);
+        dialog.setMessage("Database keytype mismatch. " + suggest);
+        dialog.setIcon(WARNING);
+        dialog.setButtonText(R.string.fix_key_state);
+        dialog.setButtonListener(v -> {
+            updateKeyState(type);
+        });
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    private void updateKeyState(WalletType type)
+    {
+        wallet.type = type;
+        viewModel.storeWallet(wallet)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::completeUpdate, error -> showError(error.getMessage()))
+                .isDisposed();
+    }
+
+    private void completeUpdate(Wallet wallet)
+    {
+        LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
+        if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
+        //restart key scan
+        handler.postDelayed(this::startKeyDiagnostic, 1000);
+    }
+
+    private void showSuccess()
+    {
+        final LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
+        if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
+        //restart key scan
+        handler.postDelayed(() -> {
+            if (successOverlay != null) successOverlay.setVisibility(View.GONE);
+        }, 1000);
+    }
+
+    //Now test if this is a v2 keystore
+    private void testKeyStore()
+    {
+        Pair<KeyExceptionType, String> res = testCipher(CIPHER_ALGORITHM);
+        switch (res.first)
+        {
+            case UNKNOWN:
+            case REQUIRES_AUTH:
+                showError("Unknown Failure");
+                break;
+            case INVALID_CIPHER:
+                isKeyStore = false;
+                showError("Key Failure: Invalid Cipher");
+                break;
+            case SUCCESSFUL_DECODE:
+                //may or may not be a keystore, could be a seed phrase
+                boolean testKey = testKeyType(res.second);
+                if (testKey) evaluateKey();
+                break;
+            case IV_NOT_FOUND:
+                showError("IV File not found");
+                return;
+            case ENCRYPTED_FILE_NOT_FOUND:
+                showError("Encrypted Data File not found");
+                return;
+        }
+    }
+
+    private boolean testKeyType(String keyData)
+    {
+        //could either be a seed phrase or a keystore
+        Pattern pattern = Pattern.compile(ImportSeedFragment.validator, Pattern.MULTILINE);
+        TextView status = findViewById(R.id.status_txt);
+
+        //first check for seed phrase
+        final Matcher matcher = pattern.matcher(keyData);
+        if (!matcher.find())
+        {
+            int wordCount = wordCount(keyData);
+
+            if (wordCount == 12 || wordCount == 18 || wordCount == 24)
             {
-                if (checkFile.getName().equalsIgnoreCase(fileName))
-                {
-                    return checkFile.getAbsolutePath();
-                }
+                //is valid seed phrase
+                HDWallet newWallet = new HDWallet(keyData, "");
+                PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
+
+                status.setText(getString(R.string.seed_phrase_public_key, Numeric.toHexString(pk.getPublicKeySecp256k1(false).data())));
+                status.setTextColor(getColor(R.color.green));
+                isSeedPhrase = true;
+                return true;
             }
         }
 
-        return check.getAbsolutePath(); //Should never get here
+        if (!isSeedPhrase)
+        {
+            //attempt to recover the key
+            File keyFolder = new File(getFilesDir(), KEYSTORE_FOLDER);
+            try
+            {
+                Credentials credentials = KeystoreAccountService.getCredentialsWithThrow(keyFolder, wallet.address, keyData);
+
+                if (credentials == null)
+                {
+                    showError("Unable to find Keystore File");
+                }
+                else
+                {
+                    status.setText(getString(R.string.keystore_public_key, credentials.getEcKeyPair().getPublicKey().toString(16)));
+                    isKeyStore = true;
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                showError("Keystore decode error: " + e.getMessage());
+            }
+        }
+
+        return false;
     }
 
-    static byte[] readBytesFromFile(String path)
+    private int wordCount(String value)
     {
-        byte[] bytes = null;
-        File file = new File(path);
-        try (FileInputStream fin = new FileInputStream(file))
-        {
-            bytes = readBytesFromStream(fin);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        return bytes;
+        if (value == null || value.length() == 0) return 0;
+        String[] split = value.split("\\s+");
+        return split.length;
     }
 
-    static byte[] readBytesFromStream(InputStream in) throws IOException
+    // DO NOT use this style of key authentication in any other code. It's here like this only for key diagnostics
+    // Always use the ActionSheet + implement ActionSheetCallback as per SendActivity, NFTAssetDetailActivity etc
+    private void doUnlock(UnlockCallback cb)
     {
-        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-        int bufferSize = 2048;
-        byte[] buffer = new byte[bufferSize];
-
-        int len;
-        while ((len = in.read(buffer)) != -1)
+        SignTransactionDialog unlockTx = new SignTransactionDialog(this);
+        unlockTx.getAuthentication(new AuthenticationCallback()
         {
-            byteBuffer.write(buffer, 0, len);
+            @Override
+            public void authenticatePass(Operation callbackId)
+            {
+                cb.carryOn(true);
+            }
+
+            @Override
+            public void authenticateFail(String fail, AuthenticationFailType failType, Operation callbackId)
+            {
+                cb.carryOn(false);
+            }
+
+            @Override
+            public void legacyAuthRequired(Operation callbackId, String dialogTitle, String desc)
+            {
+                // not interested
+            }
+        }, this, Operation.FETCH_MNEMONIC);
+    }
+
+    private Pair<KeyExceptionType, String> testCipher(String cipherAlgorithm)
+    {
+        KeyExceptionType retVal = KeyExceptionType.UNKNOWN;
+        String keyData = null;
+        try
+        {
+            String encryptedDataFilePath = KeyService.getFilePath(this, wallet.address);
+            String keyIv = KeyService.getFilePath(this, wallet.address + "iv");
+            boolean ivExists = new File(keyIv).exists();
+            boolean aliasExists = new File(encryptedDataFilePath).exists();
+
+            if (!ivExists)
+            {
+                retVal = KeyExceptionType.IV_NOT_FOUND;
+                throw new Exception("iv file doesn't exist");
+            }
+            if (!aliasExists)
+            {
+                retVal = KeyExceptionType.ENCRYPTED_FILE_NOT_FOUND;
+                throw new Exception("Key file doesn't exist");
+            }
+
+            //test legacy key
+            byte[] iv = KeyService.readBytesFromFile(keyIv);
+
+            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore.load(null);
+            SecretKey secretKey = (SecretKey) keyStore.getKey(wallet.address, null);
+
+            Cipher outCipher = Cipher.getInstance(cipherAlgorithm);
+            final AlgorithmParameterSpec spec = cipherAlgorithm.equals(CIPHER_ALGORITHM) ? new GCMParameterSpec(128, iv) : new IvParameterSpec(iv);
+            outCipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
+            CipherInputStream cipherInputStream = new CipherInputStream(new FileInputStream(encryptedDataFilePath), outCipher);
+            byte[] keyBytes = KeyService.readBytesFromStream(cipherInputStream);
+            keyData = new String(keyBytes);
+            retVal = KeyExceptionType.SUCCESSFUL_DECODE;
+        }
+        catch (UserNotAuthenticatedException e)
+        {
+            retVal = KeyExceptionType.REQUIRES_AUTH;
+        }
+        catch (InvalidKeyException e)
+        {
+            //Wrong spec
+            retVal = KeyExceptionType.INVALID_CIPHER;
+        }
+        catch (Exception e)
+        {
+            // Other
         }
 
-        byteBuffer.close();
-        return byteBuffer.toByteArray();
+        return new Pair<>(retVal, keyData);
+    }
+
+    private void showError(String error)
+    {
+        TextView statusTxt = findViewById(R.id.status_txt);
+        statusTxt.setText(error);
+        statusTxt.setTextColor(getColor(R.color.danger));
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.title_dialog_error);
+        dialog.setMessage(error);
+        dialog.setIcon(ERROR);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    private interface UnlockCallback
+    {
+        default void carryOn(boolean passed) { };
+    }
+
+    private enum KeyExceptionType
+    {
+        UNKNOWN, REQUIRES_AUTH, INVALID_CIPHER, SUCCESSFUL_DECODE, IV_NOT_FOUND, ENCRYPTED_FILE_NOT_FOUND
     }
 }

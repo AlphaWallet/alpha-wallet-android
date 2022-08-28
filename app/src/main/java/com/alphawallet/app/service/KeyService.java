@@ -23,7 +23,6 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.StrongBoxUnavailableException;
 import android.security.keystore.UserNotAuthenticatedException;
-import android.text.TextUtils;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -40,7 +39,6 @@ import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.ServiceErrorException;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.cryptokeys.KeyEncodingType;
 import com.alphawallet.app.entity.cryptokeys.KeyServiceException;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
@@ -50,13 +48,11 @@ import com.alphawallet.app.widget.SignTransactionDialog;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,10 +65,7 @@ import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -1106,14 +1099,12 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             Utility methods
      */
 
-    static byte[] readBytesFromFile(String path)
+    public static byte[] readBytesFromFile(String path)
     {
         byte[] bytes = null;
-        FileInputStream fin;
-        try
+        File file = new File(path);
+        try (FileInputStream fin = new FileInputStream(file))
         {
-            File file = new File(path);
-            fin = new FileInputStream(file);
             bytes = readBytesFromStream(fin);
         }
         catch (IOException e)
@@ -1121,6 +1112,22 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             e.printStackTrace();
         }
         return bytes;
+    }
+
+    public static byte[] readBytesFromStream(InputStream in) throws IOException
+    {
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+        int bufferSize = 2048;
+        byte[] buffer = new byte[bufferSize];
+
+        int len;
+        while ((len = in.read(buffer)) != -1)
+        {
+            byteBuffer.write(buffer, 0, len);
+        }
+
+        byteBuffer.close();
+        return byteBuffer.toByteArray();
     }
 
     /**
@@ -1154,7 +1161,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         return keyAddress;
     }
 
-    synchronized static String getFilePath(Context context, String fileName)
+    public synchronized static String getFilePath(Context context, String fileName)
     {
         //check for matching file
         File check = new File(context.getFilesDir(), fileName);
@@ -1180,85 +1187,18 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     private boolean writeBytesToFile(String path, byte[] data)
     {
-        FileOutputStream fos = null;
-        try
+        File file = new File(path);
+        try (FileOutputStream fos = new FileOutputStream(file))
         {
-            File file = new File(path);
-            fos = new FileOutputStream(file);
-            // Writes bytes from the specified byte array to this file output stream
             fos.write(data);
-            return true;
-        }
-        catch (FileNotFoundException e)
-        {
-            Timber.d("File not found" + e);
-        }
-        catch (IOException ioe)
-        {
-            Timber.d(ioe, "Exception while writing file ");
-        }
-        finally
-        {
-            // close the streams using close method
-            try
-            {
-                if (fos != null)
-                {
-                    fos.close();
-                }
-            }
-            catch (IOException ioe)
-            {
-                Timber.d("Error while closing stream: " + ioe);
-            }
-        }
-        return false;
-    }
-
-    static byte[] readBytesFromStream(InputStream in)
-    {
-        // this dynamically extends to take the bytes you read
-        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-        // this is storage overwritten on each iteration with bytes
-        int bufferSize = 1024;
-        byte[] buffer = new byte[bufferSize];
-        // we need to know how may bytes were read to write them to the byteBuffer
-        int len;
-        try
-        {
-            while ((len = in.read(buffer)) != -1)
-            {
-                byteBuffer.write(buffer, 0, len);
-            }
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Timber.d(e, "Exception while writing file ");
+            return false;
         }
-        finally
-        {
-            try
-            {
-                byteBuffer.close();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            if (in != null)
-            {
-                try
-                {
-                    in.close();
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-        // and then we can return your byte array.
-        return byteBuffer.toByteArray();
+
+        return true;
     }
 
     /**
@@ -1402,7 +1342,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
             String matchingAddr = findMatchingAddrInKeyStore(walletAddress);
-            return matchingAddr.equalsIgnoreCase(walletAddress);
+            return keyStore.containsAlias(matchingAddr);
         }
         catch (KeyStoreException|NoSuchAlgorithmException|CertificateException|IOException e)
         {
@@ -1410,88 +1350,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
 
         return false;
-    }
-
-    public List<String> detectOrphanedWallets(Map<String, Wallet> walletList)
-    {
-        List<String> orphanedWallets = new ArrayList<>();
-        try
-        {
-            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
-            keyStore.load(null);
-            Enumeration<String> keys = keyStore.aliases();
-
-            while (keys.hasMoreElements())
-            {
-                String thisKey = keys.nextElement();
-                if (!TextUtils.isEmpty(thisKey) && WalletUtils.isValidAddress(thisKey) && walletList.get(thisKey.toLowerCase()) == null)
-                {
-                    orphanedWallets.add(thisKey);
-                }
-            }
-        }
-        catch (KeyStoreException|NoSuchAlgorithmException|CertificateException|IOException e)
-        {
-            Timber.e(e);
-        }
-
-        return orphanedWallets;
-    }
-
-    public boolean detectWalletIssues(List<Wallet> walletList)
-    {
-        boolean hasChanges = false;
-        //double check for consistency
-        List<Wallet> removalList = new ArrayList<>();
-        for (Wallet w : walletList)
-        {
-            //Test legacy key
-            if (w.type == WalletType.KEYSTORE_LEGACY)
-            {
-                try
-                {
-                    currentWallet = new Wallet(w.address);
-                    getLegacyPassword(context, currentWallet.address);
-                }
-                catch (ServiceErrorException ke)
-                {
-                    switch (ke.code)
-                    {
-                        case UNKNOWN_ERROR:
-                        case KEY_STORE_ERROR:
-                        case FAIL_TO_SAVE_IV_FILE:
-                        case KEY_STORE_SECRET:
-                            break;
-                        case USER_NOT_AUTHENTICATED:
-                        case INVALID_KEY:
-                            //key is authenticated, must be new style
-                            w.type = WalletType.KEYSTORE;
-                            w.lastBackupTime = System.currentTimeMillis();
-                            if (hasStrongbox()) w.authLevel = AuthenticationLevel.STRONGBOX_AUTHENTICATION;
-                            else w.authLevel = AuthenticationLevel.TEE_AUTHENTICATION;
-                            hasChanges = true;
-                            break;
-                        case KEY_IS_GONE:
-                        case INVALID_DATA:
-                        case IV_OR_ALIAS_NO_ON_DISK:
-                            //need to delete this data
-                            deleteKey(w.address);
-                            removalList.add(w);
-                            hasChanges = true;
-                            break;
-                    }
-                    ke.printStackTrace();
-                    Timber.d("KSE: %s", ke.code);
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        for (Wallet w : removalList) walletList.remove(w);
-        return hasChanges;
     }
 
     static boolean hasStrongbox()

@@ -73,6 +73,8 @@ public class WalletDataRealmSource {
                 .sort("dateAdded", Sort.ASCENDING)
                 .findAll();
 
+        List<Wallet> walletUpdates = new ArrayList<>();
+
         if (realmKeyTypes.size() > 0)
         {
             //Load fixed wallet data: wallet type, creation and backup times
@@ -88,7 +90,7 @@ public class WalletDataRealmSource {
                 if (w.type == WalletType.KEYSTORE_LEGACY && !testLegacyCipher(w, keyService))
                 {
                     w.type = WalletType.KEYSTORE;
-                    updateWalletData(w, () -> Timber.d("Stored %s", w.address));
+                    walletUpdates.add(w);
                 }
 
                 walletList.put(w.address.toLowerCase(), w);
@@ -96,22 +98,25 @@ public class WalletDataRealmSource {
         }
         else //only zero on upgrade from v2.01.3 and lower (pre-HD key)
         {
-            realm.executeTransaction(r -> {
-                for (Wallet wallet : wallets)
+            for (Wallet wallet : wallets)
+            {
+                wallet.authLevel = KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
+                if (testLegacyCipher(wallet, keyService))
                 {
-                    wallet.authLevel = KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
-                    if (testLegacyCipher(wallet, keyService))
-                    {
-                        wallet.type = WalletType.KEYSTORE_LEGACY;
-                    }
-                    else
-                    {
-                        wallet.type = WalletType.KEYSTORE;
-                    }
-                    storeKeyData(wallet, r);
-                    walletList.put(wallet.address.toLowerCase(), wallet);
+                    wallet.type = WalletType.KEYSTORE_LEGACY;
                 }
-            });
+                else
+                {
+                    wallet.type = WalletType.KEYSTORE;
+                }
+                walletList.put(wallet.address.toLowerCase(), wallet);
+                walletUpdates.add(wallet);
+            }
+        }
+
+        if (walletUpdates.size() > 0)
+        {
+            storeWallets(realm, walletUpdates.toArray(new Wallet[0]));
         }
 
         Timber.tag("RealmDebug").d("loadorcreate %s", walletList.size());
@@ -158,20 +163,29 @@ public class WalletDataRealmSource {
         else return value;
     }
 
-    public Single<Wallet[]> storeWallets(Wallet[] wallets) {
+    public Single<Wallet[]> storeWallets(Wallet[] wallets)
+    {
         return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
-
-                realm.executeTransaction(r -> {
-                    for (Wallet wallet : wallets)
-                    {
-                        storeKeyData(wallet, r);
-                    }
-                });
-            } catch (Exception e) {
+            try (Realm realm = realmManager.getWalletDataRealmInstance())
+            {
+                storeWallets(realm, wallets);
+            }
+            catch (Exception e)
+            {
                 Timber.e(e, "storeWallets: %s", e.getMessage());
             }
             return wallets;
+        });
+    }
+
+    private void storeWallets(Realm realm, Wallet[] wallets)
+    {
+        realm.executeTransaction(r -> {
+            for (Wallet wallet : wallets)
+            {
+                storeKeyData(wallet, r);
+                storeWalletData(wallet, r);
+            }
         });
     }
 

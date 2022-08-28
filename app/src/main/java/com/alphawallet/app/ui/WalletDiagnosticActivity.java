@@ -7,7 +7,6 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,20 +34,10 @@ import com.alphawallet.token.tools.Numeric;
 import org.web3j.crypto.Credentials;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.security.InvalidKeyException;
-import java.security.KeyStore;
-import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -65,10 +54,6 @@ import wallet.core.jni.PrivateKey;
 @AndroidEntryPoint
 public class WalletDiagnosticActivity extends BaseActivity implements StandardFunctionInterface
 {
-    private static final String LEGACY_CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
-    private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
-    private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
-
     private BackupKeyViewModel viewModel;
     private AWalletAlertDialog dialog;
 
@@ -115,7 +100,7 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
             @Override
             public void carryOn(boolean passed)
             {
-                Pair<KeyExceptionType, String> res = testCipher(LEGACY_CIPHER_ALGORITHM);
+                Pair<KeyService.KeyExceptionType, String> res = viewModel.testCipher(wallet.address, KeyService.LEGACY_CIPHER_ALGORITHM);
                 switch (res.first)
                 {
                     case UNKNOWN:
@@ -208,9 +193,9 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
         //first test key to see if it's unlocked
         if (!isLocked)
         {
-            Pair<KeyExceptionType, String> res = testCipher(LEGACY_CIPHER_ALGORITHM);
+            Pair<KeyService.KeyExceptionType, String> res = viewModel.testCipher(wallet.address, KeyService.LEGACY_CIPHER_ALGORITHM);
 
-            isLocked = (res.first == KeyExceptionType.REQUIRES_AUTH);
+            isLocked = (res.first == KeyService.KeyExceptionType.REQUIRES_AUTH);
             lockedState.setText(isLocked ? "Locked" : "Unlocked");
             lockedState.setTextColor(isLocked ? getColor(R.color.green) : getColor(R.color.danger));
         }
@@ -331,7 +316,7 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
     //Now test if this is a v2 keystore
     private void testKeyStore()
     {
-        Pair<KeyExceptionType, String> res = testCipher(CIPHER_ALGORITHM);
+        Pair<KeyService.KeyExceptionType, String> res = viewModel.testCipher(wallet.address, KeyService.CIPHER_ALGORITHM);
         switch (res.first)
         {
             case UNKNOWN:
@@ -443,59 +428,7 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
         }, this, Operation.FETCH_MNEMONIC);
     }
 
-    private Pair<KeyExceptionType, String> testCipher(String cipherAlgorithm)
-    {
-        KeyExceptionType retVal = KeyExceptionType.UNKNOWN;
-        String keyData = null;
-        try
-        {
-            String encryptedDataFilePath = KeyService.getFilePath(this, wallet.address);
-            String keyIv = KeyService.getFilePath(this, wallet.address + "iv");
-            boolean ivExists = new File(keyIv).exists();
-            boolean aliasExists = new File(encryptedDataFilePath).exists();
 
-            if (!ivExists)
-            {
-                retVal = KeyExceptionType.IV_NOT_FOUND;
-                throw new Exception("iv file doesn't exist");
-            }
-            if (!aliasExists)
-            {
-                retVal = KeyExceptionType.ENCRYPTED_FILE_NOT_FOUND;
-                throw new Exception("Key file doesn't exist");
-            }
-
-            //test legacy key
-            byte[] iv = KeyService.readBytesFromFile(keyIv);
-
-            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
-            keyStore.load(null);
-            SecretKey secretKey = (SecretKey) keyStore.getKey(wallet.address, null);
-
-            Cipher outCipher = Cipher.getInstance(cipherAlgorithm);
-            final AlgorithmParameterSpec spec = cipherAlgorithm.equals(CIPHER_ALGORITHM) ? new GCMParameterSpec(128, iv) : new IvParameterSpec(iv);
-            outCipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
-            CipherInputStream cipherInputStream = new CipherInputStream(new FileInputStream(encryptedDataFilePath), outCipher);
-            byte[] keyBytes = KeyService.readBytesFromStream(cipherInputStream);
-            keyData = new String(keyBytes);
-            retVal = KeyExceptionType.SUCCESSFUL_DECODE;
-        }
-        catch (UserNotAuthenticatedException e)
-        {
-            retVal = KeyExceptionType.REQUIRES_AUTH;
-        }
-        catch (InvalidKeyException e)
-        {
-            //Wrong spec
-            retVal = KeyExceptionType.INVALID_CIPHER;
-        }
-        catch (Exception e)
-        {
-            // Other
-        }
-
-        return new Pair<>(retVal, keyData);
-    }
 
     private void showError(String error)
     {
@@ -517,10 +450,5 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
     private interface UnlockCallback
     {
         default void carryOn(boolean passed) { };
-    }
-
-    private enum KeyExceptionType
-    {
-        UNKNOWN, REQUIRES_AUTH, INVALID_CIPHER, SUCCESSFUL_DECODE, IV_NOT_FOUND, ENCRYPTED_FILE_NOT_FOUND
     }
 }

@@ -2,6 +2,7 @@ package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -180,6 +181,11 @@ public class BackupKeyViewModel extends BaseViewModel {
     public Single<Wallet> storeWallet(Wallet wallet)
     {
         return fetchWalletsInteract.storeWallet(wallet);
+    }
+
+    public Pair<KeyService.KeyExceptionType, String> testCipher(String walletAddress, String cipherAlgorithm)
+    {
+        return keyService.testCipher(walletAddress, cipherAlgorithm);
     }
 }
 

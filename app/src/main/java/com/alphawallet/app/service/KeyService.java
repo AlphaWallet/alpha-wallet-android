@@ -23,6 +23,7 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.StrongBoxUnavailableException;
 import android.security.keystore.UserNotAuthenticatedException;
+import android.util.Pair;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -65,6 +66,7 @@ import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.security.spec.AlgorithmParameterSpec;
 import java.util.Enumeration;
 
 import javax.crypto.Cipher;
@@ -74,6 +76,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
 
 import timber.log.Timber;
 import wallet.core.jni.CoinType;
@@ -86,12 +89,14 @@ import wallet.core.jni.PrivateKey;
 public class KeyService implements AuthenticationCallback, PinAuthenticationCallbackInterface
 {
     private static final String TAG = "HDWallet";
-    private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
-    private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM;
-    private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_NONE;
-    private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final int AUTHENTICATION_DURATION_SECONDS = 30;
     public  static final String FAILED_SIGNATURE = "00000000000000000000000000000000000000000000000000000000000000000";
+    private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM;
+    private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_NONE;
+
+    public static final String ANDROID_KEY_STORE = "AndroidKeyStore";
+    public static final String LEGACY_CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
+    public static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
 
     //This value determines the time interval between the user swiping away the backup warning notice and it re-appearing
     public static final long TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000L * 60L * 60L * 24L * 30L; //30 days //1000 * 60 * 3; //3 minutes for testing
@@ -507,6 +512,60 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         {
             throw new KeyServiceException(e.getMessage());
         }
+    }
+
+    public Pair<KeyExceptionType, String> testCipher(String walletAddress, String cipherAlgorithm)
+    {
+        KeyExceptionType retVal = KeyExceptionType.UNKNOWN;
+        String keyData = null;
+        try
+        {
+            String encryptedDataFilePath = KeyService.getFilePath(context, walletAddress);
+            String keyIv = KeyService.getFilePath(context, walletAddress + "iv");
+            boolean ivExists = new File(keyIv).exists();
+            boolean aliasExists = new File(encryptedDataFilePath).exists();
+
+            if (!ivExists)
+            {
+                retVal = KeyExceptionType.IV_NOT_FOUND;
+                throw new Exception("iv file doesn't exist");
+            }
+            if (!aliasExists)
+            {
+                retVal = KeyExceptionType.ENCRYPTED_FILE_NOT_FOUND;
+                throw new Exception("Key file doesn't exist");
+            }
+
+            //test legacy key
+            byte[] iv = KeyService.readBytesFromFile(keyIv);
+
+            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore.load(null);
+            SecretKey secretKey = (SecretKey) keyStore.getKey(walletAddress, null);
+
+            Cipher outCipher = Cipher.getInstance(cipherAlgorithm);
+            final AlgorithmParameterSpec spec = cipherAlgorithm.equals(CIPHER_ALGORITHM) ? new GCMParameterSpec(128, iv) : new IvParameterSpec(iv);
+            outCipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
+            CipherInputStream cipherInputStream = new CipherInputStream(new FileInputStream(encryptedDataFilePath), outCipher);
+            byte[] keyBytes = KeyService.readBytesFromStream(cipherInputStream);
+            keyData = new String(keyBytes);
+            retVal = KeyExceptionType.SUCCESSFUL_DECODE;
+        }
+        catch (UserNotAuthenticatedException e)
+        {
+            retVal = KeyExceptionType.REQUIRES_AUTH;
+        }
+        catch (InvalidKeyException e)
+        {
+            //Wrong spec
+            retVal = KeyExceptionType.INVALID_CIPHER;
+        }
+        catch (Exception e)
+        {
+            // Other
+        }
+
+        return new Pair<>(retVal, keyData);
     }
 
     private void createHDKey()
@@ -1355,5 +1414,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     static boolean hasStrongbox()
     {
         return securityStatus == SecurityStatus.HAS_STRONGBOX;
+    }
+
+    public enum KeyExceptionType
+    {
+        UNKNOWN, REQUIRES_AUTH, INVALID_CIPHER, SUCCESSFUL_DECODE, IV_NOT_FOUND, ENCRYPTED_FILE_NOT_FOUND
     }
 }

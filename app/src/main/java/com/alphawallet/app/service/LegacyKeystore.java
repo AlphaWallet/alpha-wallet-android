@@ -1,30 +1,33 @@
 package com.alphawallet.app.service;
 
+import static com.alphawallet.app.entity.ServiceErrorException.ServiceErrorCode;
+import static com.alphawallet.app.entity.ServiceErrorException.ServiceErrorCode.KEY_IS_GONE;
+
 import android.content.Context;
 import android.security.keystore.UserNotAuthenticatedException;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ServiceErrorException;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.*;
-import java.security.cert.CertificateException;
-
-import static com.alphawallet.app.entity.ServiceErrorException.*;
-import static com.alphawallet.app.entity.ServiceErrorException.ServiceErrorCode.KEY_IS_GONE;
 
 public class LegacyKeystore
 {
-    private static final String LEGACY_CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
-    private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
-
     public static synchronized byte[] getLegacyPassword(
             final Context context,
             String keyName)
@@ -34,7 +37,7 @@ public class LegacyKeystore
         String encryptedDataFilePath = KeyService.getFilePath(context, keyName);
         try
         {
-            keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore = KeyStore.getInstance(KeyService.ANDROID_KEY_STORE);
             keyStore.load(null);
             SecretKey secretKey = (SecretKey) keyStore.getKey(keyName, null);
             if (secretKey == null)
@@ -64,7 +67,7 @@ public class LegacyKeystore
             {
                 throw new NullPointerException(context.getString(R.string.cannot_read_encrypt_file));
             }
-            Cipher outCipher = Cipher.getInstance(LEGACY_CIPHER_ALGORITHM);
+            Cipher outCipher = Cipher.getInstance(KeyService.LEGACY_CIPHER_ALGORITHM);
             outCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
             CipherInputStream cipherInputStream = new CipherInputStream(new FileInputStream(encryptedDataFilePath), outCipher);
             return KeyService.readBytesFromStream(cipherInputStream);

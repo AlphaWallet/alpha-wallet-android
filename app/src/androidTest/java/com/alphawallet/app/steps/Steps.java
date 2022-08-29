@@ -152,10 +152,7 @@ public class Steps
     }
 
     public static void importKSWalletFromSettingsPage(String keystore, String password) {
-        gotoSettingsPage();
-        click(withText("Change / Add Wallet"));
-        click(withId(R.id.action_add));
-        click(withId(R.id.import_account_action));
+        click(withText("I already have a Wallet"));
         click(withText("Keystore"));
         Helper.wait(1);
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_keystore)))))).perform(replaceText(keystore));
@@ -164,8 +161,6 @@ public class Steps
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_password)))))).perform(replaceText(password));
         click(withText("Continue"));
         Helper.wait(5);
-        shouldSee("Select Active Networks");
-        pressBack();
     }
 
     public static void gotoSettingsPage() {

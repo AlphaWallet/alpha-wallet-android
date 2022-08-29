@@ -1,7 +1,5 @@
 package com.alphawallet.app;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.assertions.Should.shouldSee;
@@ -10,11 +8,10 @@ import static com.alphawallet.app.steps.Steps.gotoSettingsPage;
 import static com.alphawallet.app.steps.Steps.importKSWalletFromSettingsPage;
 import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.util.Helper.click;
+import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
 import static org.junit.Assert.fail;
 
 import android.os.Build;
-
-import androidx.test.espresso.action.ViewActions;
 
 import com.alphawallet.app.util.Helper;
 
@@ -71,17 +68,13 @@ public class KeyServiceTest extends BaseE2ETest {
             fail("Please config seed phrase and wallet address for this API level first.");
         }
 
-        createNewWallet();
-        gotoSettingsPage();
+        if (isDeviceRooted()) {
+            click(withText(R.string.ok));
+        }
 
         importKSWalletFromSettingsPage(keystore, password);
 
-        Helper.wait(5);
         selectTestNet();
-
-        Helper.wait(5);
-
-        gotoSettingsPage();
 
         Helper.wait(5);
 
@@ -90,8 +83,9 @@ public class KeyServiceTest extends BaseE2ETest {
         Helper.wait(5);
 
         //Click the second hamburger button in the wallets view (should be the 6th item)
-        onView(withId(R.id.list)).perform(actionOnItemAtPosition(6, ViewActions.pressKey(R.id.manage_wallet_btn)));
-        //click(withId(R.id.manage_wallet_btn));
+//        onView(withId(R.id.list)).perform(actionOnItemAtPosition(6, ViewActions.pressKey(R.id.manage_wallet_btn)));
+//        onView(nthChildOf(R.id.manage_wallet_btn, withId(R.id.list), 6)).perform(ViewActions.click());
+        click(withId(R.id.manage_wallet_btn));
         click(withId(R.id.action_key_status));
 
         //can we click it?
@@ -100,7 +94,7 @@ public class KeyServiceTest extends BaseE2ETest {
         //now check the key is decoded correctly
         Helper.wait(1);
 
-        shouldSee("Key Found");
+        shouldSee("Key found");
         shouldSee("Unlocked");
         shouldSee("Decoded Keystore public key");
         shouldSee("KEYSTORE");

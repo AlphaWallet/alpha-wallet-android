@@ -363,25 +363,6 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
                 HDWallet newWallet = new HDWallet(keyData, "");
                 PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
 
-                //can we export as keystore?
-                byte[] priv = pk.data();
-                byte[] pub = pk.getPublicKeySecp256k1(true).data();
-                ECKeyPair keyPair = ECKeyPair.create(priv); //new ECKeyPair(Numeric.toBigInt(priv), Numeric.toBigInt(pub));
-
-                try
-                {
-                    WalletFile wf = org.web3j.crypto.Wallet.createLight("hellohello", keyPair);
-                    String keystore = objectMapper.writeValueAsString(wf);
-
-                    System.out.println("KEYSTOREA: " + keystore);
-
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                    //
-                }
-
                 status.setText(getString(R.string.seed_phrase_public_key, Numeric.toHexString(pk.getPublicKeySecp256k1(false).data())));
                 status.setTextColor(getColor(R.color.green));
                 isSeedPhrase = true;
@@ -451,7 +432,26 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
         }, this, Operation.FETCH_MNEMONIC);
     }
 
+    //This function could be useful for future, in case this is needed
+    @SuppressWarnings("unused")
+    private String dumpKeystoreFromSeedPhrase(String seedPhrase, String keystorePassword)
+    {
+        HDWallet newWallet = new HDWallet(seedPhrase, "");
+        PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
+        ECKeyPair keyPair = ECKeyPair.create(pk.data());
 
+        try
+        {
+            WalletFile wf = org.web3j.crypto.Wallet.createLight(keystorePassword, keyPair);
+            return objectMapper.writeValueAsString(wf);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return "";
+    }
 
     private void showError(String error)
     {

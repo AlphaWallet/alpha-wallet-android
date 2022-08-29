@@ -3,6 +3,7 @@ package com.alphawallet.app;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.assertions.Should.shouldSee;
+import static com.alphawallet.app.steps.Steps.closeSecurityWarning;
 import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.steps.Steps.gotoSettingsPage;
 import static com.alphawallet.app.steps.Steps.importKSWalletFromSettingsPage;
@@ -68,20 +69,11 @@ public class KeyServiceTest extends BaseE2ETest {
             fail("Please config seed phrase and wallet address for this API level first.");
         }
 
-        if (isDeviceRooted()) {
-            click(withText(R.string.ok));
-        }
-
+        closeSecurityWarning();
         importKSWalletFromSettingsPage(keystore, password);
-
-        selectTestNet();
-
+        selectTestNet("Görli");
         Helper.wait(5);
-
         click(withText("Change / Add Wallet"));
-
-        Helper.wait(5);
-
         //Click the second hamburger button in the wallets view (should be the 6th item)
 //        onView(withId(R.id.list)).perform(actionOnItemAtPosition(6, ViewActions.pressKey(R.id.manage_wallet_btn)));
 //        onView(nthChildOf(R.id.manage_wallet_btn, withId(R.id.list), 6)).perform(ViewActions.click());

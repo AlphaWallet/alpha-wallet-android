@@ -527,14 +527,7 @@ public class WalletFragment extends BaseFragment implements
             buyEthDialog.dismiss();
         });
         buyEthOptionsView.setOnBuyWithCoinbasePayListener(v -> {
-            if (CoinbasePayRepository.APP_ID.isEmpty())
-            {
-                Toast.makeText(getActivity(), "Missing Coinbase Pay App ID.", Toast.LENGTH_SHORT).show();
-            }
-            else
-            {
-                viewModel.showBuyEthOptions(getActivity());
-            }
+            viewModel.showBuyEthOptions(getActivity());
         });
         buyEthDialog.setContentView(buyEthOptionsView);
         buyEthDialog.show();

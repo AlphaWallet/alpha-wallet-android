@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -78,7 +79,16 @@ public class CoinbasePayActivity extends BaseActivity
             list.add(blockchain);
         }
 
-        webView.loadUrl(viewModel.getUri(type, wallet.address, list));
+        String uri = viewModel.getUri(type, wallet.address, list);
+        if (TextUtils.isEmpty(uri))
+        {
+            Toast.makeText(this, "Missing Coinbase Pay App ID.", Toast.LENGTH_LONG).show();
+            finish();
+        }
+        else
+        {
+            webView.loadUrl(uri);
+        }
     }
 
     @Override

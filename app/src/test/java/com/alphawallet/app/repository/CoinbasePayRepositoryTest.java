@@ -24,13 +24,14 @@ public class CoinbasePayRepositoryTest
     @Test
     public void uri_should_match() throws UnsupportedEncodingException
     {
+        String appId = KeyProviderFactory.get().getCoinbasePayAppId();
         CoinbasePayRepository repository = new CoinbasePayRepository();
         String actualUri = repository.getUri(DestinationWallet.Type.ASSETS, "0x1234", Collections.singletonList("ETH"));
-        String expectedEncodedUri = "https://pay.coinbase.com/buy/select-asset?appId=" + CoinbasePayRepository.APP_ID + "&destinationWallets=%5B%7B%22address%22%3A%220x1234%22%2C%22assets%22%3A%5B%22ETH%22%5D%7D%5D";
+        String expectedEncodedUri = "https://pay.coinbase.com/buy/select-asset?appId=" + appId + "&destinationWallets=%5B%7B%22address%22%3A%220x1234%22%2C%22assets%22%3A%5B%22ETH%22%5D%7D%5D";
         assertThat(actualUri, equalTo(expectedEncodedUri));
 
         String decodedUri = URLDecoder.decode(actualUri, "UTF-8");
-        String expectedDecodedUri = "https://pay.coinbase.com/buy/select-asset?appId=" + CoinbasePayRepository.APP_ID + "&destinationWallets=[{\"address\":\"0x1234\",\"assets\":[\"ETH\"]}]";
+        String expectedDecodedUri = "https://pay.coinbase.com/buy/select-asset?appId=" + appId + "&destinationWallets=[{\"address\":\"0x1234\",\"assets\":[\"ETH\"]}]";
         assertThat(decodedUri, equalTo(expectedDecodedUri));
     }
 }

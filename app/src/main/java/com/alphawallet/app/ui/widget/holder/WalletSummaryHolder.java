@@ -29,14 +29,9 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceException;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.interact.FetchTokensInteract;
-import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.WalletActionsActivity;
 import com.alphawallet.app.ui.widget.adapter.TestNetHorizontalListAdapter;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
@@ -78,17 +73,14 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     private final TextView walletAddressSeparator;
     private final TextView walletAddressText;
     private final TextView wallet24hChange;
-    private RecyclerView recyclerView;
-    private TestNetHorizontalListAdapter testNetHorizontalListAdapter;
+    private final RecyclerView recyclerView;
     private final Realm realm;
     private RealmResults<RealmWalletData> realmUpdate;
-
     private final WalletClickCallback clickCallback;
     private Wallet wallet = null;
     protected final MutableLiveData<ErrorEnvelope> error = new MutableLiveData<>();
     protected Disposable disposable;
-    private Context context;
-    private Boolean isMainNetActive = false;
+    private final Context context;
 
     public WalletSummaryHolder(int resId, ViewGroup parent, WalletClickCallback callback, Realm realm, Context context)
     {
@@ -276,18 +268,12 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
             w.ENSname = realmWallet.getENSName();
             w.name = realmWallet.getName();
             w.ENSAvatar = realmWallet.getENSAvatar();
+
             if (w.tokens != null)
             {
-                for (Token t : w.tokens)
-                {
-                    if (t.getWallet().equals(w.address))
-                    {
-                        testNetHorizontalListAdapter = new TestNetHorizontalListAdapter(w.tokens, context);
-                        recyclerView.setAdapter(testNetHorizontalListAdapter);
-                    }
-                }
+                TestNetHorizontalListAdapter testNetHorizontalListAdapter = new TestNetHorizontalListAdapter(w.tokens, context);
+                recyclerView.setAdapter(testNetHorizontalListAdapter);
             }
-
         }
         return w;
     }

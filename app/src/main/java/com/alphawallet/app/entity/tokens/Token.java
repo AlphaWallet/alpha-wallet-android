@@ -2,6 +2,8 @@ package com.alphawallet.app.entity.tokens;
 
 import static android.text.Html.FROM_HTML_MODE_COMPACT;
 
+import static androidx.core.content.ContextCompat.getColorStateList;
+
 import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
@@ -9,6 +11,7 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Pair;
+import android.view.View;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractInteract;
@@ -20,6 +23,7 @@ import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -204,9 +208,15 @@ public class Token
     }
 
     public String getTokenSymbol(Token token){
-        String symbol = token.getSymbol().substring(0, Math.min(token.getSymbol().length(), 5))
-                .toUpperCase(Locale.ROOT);
-        return symbol;
+
+        if (!TextUtils.isEmpty(token.tokenInfo.symbol) && token.tokenInfo.symbol.length() > 1)
+        {
+           return Utils.getIconisedText(token.tokenInfo.symbol);
+        }
+        else
+        {
+            return Utils.getIconisedText(token.getName());
+        }
     }
 
     public String getTSName(AssetDefinitionService assetDefinition, int count) {

@@ -19,6 +19,8 @@ import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.SyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.tokendata.TokenUpdateType;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -55,10 +57,7 @@ import io.reactivex.schedulers.Schedulers;
 @HiltViewModel
 public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallback
 {
-    private final static String TAG = WalletsViewModel.class.getSimpleName();
-
     private static final int BALANCE_CHECK_INTERVAL_SECONDS = 20;
-
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final GenericWalletInteract genericWalletInteract;
@@ -80,6 +79,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final MutableLiveData<Wallet> createdWallet = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
+    private final MutableLiveData<Token[]> baseTokens = new MutableLiveData<>();
 
     private NetworkInfo currentNetwork;
     private final Map<String, Wallet> walletBalances = new HashMap<>();
@@ -154,6 +154,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         return createWalletError;
     }
     public LiveData<Boolean> noWalletsError() { return noWalletsError; }
+    public LiveData<Token[]> baseTokens() { return baseTokens; }
 
     public void setDefaultWallet(Wallet wallet, boolean isNewWallet)
     {
@@ -175,7 +176,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     {
         walletBalances.clear();
         progress.postValue(true);
-
 
         disposable = genericWalletInteract
                 .find()
@@ -326,7 +326,10 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         if (nextWalletToCheck != null)
         {
             Wallet w = walletUpdate.get(nextWalletToCheck);
-            currentWalletUpdates.put(nextWalletToCheck, startWalletSyncProcess(w));
+            if (w != null)
+            {
+                currentWalletUpdates.put(nextWalletToCheck, startWalletSyncProcess(w));
+            }
         }
     }
 

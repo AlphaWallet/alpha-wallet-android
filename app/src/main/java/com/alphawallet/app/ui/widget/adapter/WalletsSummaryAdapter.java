@@ -35,7 +35,7 @@ import io.realm.Realm;
 public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder> implements WalletClickCallback, Runnable
 {
     private final OnSetWalletDefaultListener onSetWalletDefaultListener;
-    private boolean mainNetActivated;
+    private final boolean mainNetActivated;
     private final ArrayList<Wallet> wallets;
     private final Map<String, Pair<Double, Double>> valueMap = new HashMap<>();
     private final Handler handler = new Handler(Looper.getMainLooper());

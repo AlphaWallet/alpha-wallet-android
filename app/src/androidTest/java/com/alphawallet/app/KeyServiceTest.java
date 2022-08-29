@@ -74,18 +74,16 @@ public class KeyServiceTest extends BaseE2ETest {
         selectTestNet("Görli");
         Helper.wait(5);
         click(withText("Change / Add Wallet"));
-        //Click the second hamburger button in the wallets view (should be the 6th item)
-//        onView(withId(R.id.list)).perform(actionOnItemAtPosition(6, ViewActions.pressKey(R.id.manage_wallet_btn)));
-//        onView(nthChildOf(R.id.manage_wallet_btn, withId(R.id.list), 6)).perform(ViewActions.click());
+        // ensure there is only one wallet
         click(withId(R.id.manage_wallet_btn));
         click(withId(R.id.action_key_status));
 
         //can we click it?
         click(withText("Run Key Diagnostic"));
 
-        //now check the key is decoded correctly
         Helper.wait(1);
 
+        //now check the key is decoded correctly
         shouldSee("Key found");
         shouldSee("Unlocked");
         shouldSee("Decoded Keystore public key");

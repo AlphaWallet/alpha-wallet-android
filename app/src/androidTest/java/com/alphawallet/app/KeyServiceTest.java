@@ -54,7 +54,7 @@ public class KeyServiceTest extends BaseE2ETest {
         //now check the key is decoded correctly
         Helper.wait(1);
 
-        shouldSee("Key Found");
+        shouldSee("Key found");
         shouldSee("Unlocked");
         shouldSee("Seed Phrase detected public key");
         shouldSee("HDKEY");

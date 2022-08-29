@@ -36,13 +36,23 @@ public class Steps
 {
     public static void createNewWallet()
     {
+        closeSecurityWarning();
+        click(withId(R.id.button_create));
+        closeSelectNetworkPage();
+        click(withText(R.string.action_close)); // works well locally but NOT work with GitHub actions
+    }
+
+    public static void closeSecurityWarning()
+    {
         if (isDeviceRooted()) {
             click(withText(R.string.ok));
         }
-        click(withId(R.id.button_create));
-        shouldSee("Select Active Networks");
+    }
+
+    public static void closeSelectNetworkPage()
+    {
+        Helper.wait(5);
         pressBack();
-        click(withText(R.string.action_close)); // works well locally but NOT work with GitHub actions
     }
 
     public static void visit(String urlString)
@@ -57,16 +67,14 @@ public class Steps
         click(withId(R.id.nav_browser_text));
     }
 
-    public static void selectTestNet()
+    public static void selectTestNet(String name)
     {
         gotoSettingsPage();
         selectMenu("Select Active Networks");
         toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
         click(withSubstring("Rinkeby")); // Deselect
-        click(withSubstring("Görli")); // Select
-//        onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(1, ViewActions.click())); // Rinkeby
-//        onView(withId(R.id.test_list)).perform(actionOnItemAtPosition(3, ViewActions.click())); // Kovan
+        click(withSubstring(name)); // Select
         pressBack();
     }
 
@@ -101,8 +109,8 @@ public class Steps
 
     private static void ensureBalanceFetched()
     {
-        shouldSee("Görli (Test)");
-        shouldNotSee("0 GöETH");
+        shouldSee("Ganache");
+        shouldNotSee("0 ETH");
     }
 
     public static void switchToWallet(String address) {
@@ -120,17 +128,39 @@ public class Steps
         return getTextAction.getText().toString().replace(" ", ""); // The address show on 2 lines so there is a blank space
     }
 
-    public static void importWalletFromSettingsPage(String seedPhrase) {
+    public static void importWalletFromSettingsPage(String text) {
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
         click(withId(R.id.action_add));
 //        SnapshotUtil.take("after-add");
         click(withId(R.id.import_account_action));
-        onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_seed)))))).perform(replaceText(seedPhrase));
+        int textId;
+        int buttonId;
+        boolean isPrivateKey = text.startsWith("0x");
+        if (isPrivateKey) {
+            click(withText("Private key"));
+            textId = R.id.input_private_key;
+            buttonId = R.id.import_action_pk;
+        } else {
+            textId = R.id.input_seed;
+            buttonId = R.id.import_action;
+        }
+        onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(textId)))))).perform(replaceText(text));
         Helper.wait(2); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis
-        click(withId(R.id.import_action));
-        shouldSee("Select Active Networks");
-        pressBack();
+        click(withId(buttonId));
+        closeSelectNetworkPage();
+    }
+
+    public static void importKSWalletFromFrontPage(String keystore, String password) {
+        click(withText("I already have a Wallet"));
+        click(withText("Keystore"));
+        Helper.wait(1);
+        onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_keystore)))))).perform(replaceText(keystore));
+        Helper.wait(1); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis
+        click(withText("Continue"));
+        onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_password)))))).perform(replaceText(password));
+        click(withText("Continue"));
+        Helper.wait(5);
     }
 
     public static void importKSWalletFromSettingsPage(String keystore, String password) {
@@ -163,13 +193,15 @@ public class Steps
         selectMenu("Select Active Networks");
         click(withId(R.id.action_add));
         input(R.id.input_network_name, name);
-        input(R.id.input_network_rpc_url,"http://xxx.yyy.zzz");
-        input(R.id.input_network_chain_id, "123456");
-        input(R.id.input_network_symbol, "MTNSYM");
-        input(R.id.input_network_explorer_api, "http://xxx.yyy.zzz");
-        input(R.id.input_network_block_explorer_url, "http://xxx.yyy.zzz");
+        String url = "http://10.0.2.2:8545";
+        input(R.id.input_network_rpc_url, url);
+        input(R.id.input_network_chain_id, "2");
+        input(R.id.input_network_symbol, "ETH");
+        input(R.id.input_network_explorer_api, url);
+        input(R.id.input_network_block_explorer_url, url);
         click(withId(R.id.checkbox_testnet));
         click(withId(R.string.action_add_network));
+        pressBack();
     }
 
     private static void input(int id, String text)

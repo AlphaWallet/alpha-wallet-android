@@ -1,7 +1,7 @@
 package com.alphawallet.app.interact;
 
 import com.alphawallet.app.repository.WalletRepositoryType;
-import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;

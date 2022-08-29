@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package com.alphawallet.app.web3j.ens;
+package com.alphawallet.app.util.ens;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
@@ -18,6 +18,13 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.web3j.ens.Contracts;
+import com.alphawallet.app.web3j.ens.EnsGatewayRequestDTO;
+import com.alphawallet.app.web3j.ens.EnsGatewayResponseDTO;
+import com.alphawallet.app.web3j.ens.EnsResolutionException;
+import com.alphawallet.app.web3j.ens.EnsUtils;
+import com.alphawallet.app.web3j.ens.NameHash;
+import com.alphawallet.app.web3j.ens.OffchainLookup;
 import com.alphawallet.token.entity.ContractAddress;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,8 +49,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.NetVersion;
-import org.web3j.tx.ClientTransactionManager;
-import org.web3j.tx.TransactionManager;
 import org.web3j.utils.Numeric;
 
 import java.io.BufferedReader;
@@ -62,11 +67,11 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
 /** Resolution logic for contract addresses. According to https://eips.ethereum.org/EIPS/eip-2544 */
-public class EnsResolver {
+public class EnsResolver implements Resolvable
+{
 
     private static final Logger log = LoggerFactory.getLogger(EnsResolver.class);
 
-    public static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
     public static final MediaType JSON = MediaType.parse("application/json");
 
     // Permit number offchain calls  for a single contract call.
@@ -76,7 +81,6 @@ public class EnsResolver {
 
     private final Web3j web3j;
     protected final int addressLength;
-    private final TransactionManager transactionManager;
     protected final long chainId;
 
     private OkHttpClient client = new OkHttpClient();
@@ -86,7 +90,6 @@ public class EnsResolver {
     public EnsResolver(Web3j web3j, int addressLength)
     {
         this.web3j = web3j;
-        transactionManager = new ClientTransactionManager(web3j, null); // don't use empty string
         this.addressLength = addressLength;
 
         long chainId = 1;
@@ -120,6 +123,7 @@ public class EnsResolver {
      * @param ensName The specified node.
      * @return address of the resolver.
      */
+    @Override
     public String resolve(String ensName) throws Exception
     {
         if (TextUtils.isEmpty(ensName) || (ensName.trim().length() == 1 && ensName.contains("."))) {
@@ -384,7 +388,7 @@ public class EnsResolver {
                 }));
     }
 
-    protected String getResolverAddress(String ensName) throws Exception
+    public String getResolverAddress(String ensName) throws Exception
     {
         String registryContract = Contracts.resolveRegistryContract(chainId);
         byte[] nameHash = NameHash.nameHashAsBytes(ensName);
@@ -396,6 +400,10 @@ public class EnsResolver {
         }
 
         return address;
+    }
+
+    public boolean validate(String input) {
+        return isValidEnsName(input, addressLength);
     }
 
     public static boolean isValidEnsName(String input) {
@@ -483,7 +491,7 @@ public class EnsResolver {
         return getContractData(address, function, "");
     }
 
-    protected <T> T getContractData(String address, Function function, T type) throws Exception
+    public <T> T getContractData(String address, Function function, T type) throws Exception
     {
         String responseValue = callSmartContractFunction(function, address);
 

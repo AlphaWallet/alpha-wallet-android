@@ -7,14 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.widget.TokenIcon;
-
 import timber.log.Timber;
 
 public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHorizontalListAdapter.ViewHolder>
@@ -27,9 +24,9 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
     // - loop through this list and check for non-zero balance testnet (using getTokenOrBase(chainId, tokensService.getCurrentAddress()) )
     // - send list of tokens below but use Token[] instead of TokenCardMeta[]. Now you won't need TokensService or AssetDefinitionService
 
-    public TestNetHorizontalListAdapter(Token[] tokens, Context context)
+    public  TestNetHorizontalListAdapter(Token[] token, Context context)
     {
-        this.tokens = tokens;
+        this.tokens = token;
         this.context = context;
     }
 

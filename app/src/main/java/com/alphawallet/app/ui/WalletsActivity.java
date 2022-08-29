@@ -59,7 +59,6 @@ public class WalletsActivity extends BaseActivity implements
     private final long balanceChain = EthereumNetworkRepository.getOverrideToken().chainId;
     private WalletsViewModel viewModel;
     private RecyclerView list;
-    private SwipeRefreshLayout refreshLayout;
     private SystemView systemView;
     private Dialog dialog;
     private AWalletAlertDialog aDialog;
@@ -152,7 +151,7 @@ public class WalletsActivity extends BaseActivity implements
 
     private void initViews()
     {
-        refreshLayout = findViewById(R.id.refresh_layout);
+        SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         list = findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
 
@@ -178,25 +177,19 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public void syncUpdate(String wallet, Pair<Double, Double> value)
     {
-        runOnUiThread(() -> {
-            adapter.updateWalletState(wallet, value);
-        });
+        runOnUiThread(() -> adapter.updateWalletState(wallet, value));
     }
 
     @Override
     public void syncCompleted(String wallet, Pair<Double, Double> value)
     {
-        runOnUiThread(() -> {
-            adapter.completeWalletSync(wallet, value);
-        });
+        runOnUiThread(() -> adapter.completeWalletSync(wallet, value));
     }
 
     @Override
     public void syncStarted(String wallet, Pair<Double, Double> value)
     {
-        runOnUiThread(() -> {
-            adapter.setUnsyncedWalletValue(wallet, value);
-        });
+        runOnUiThread(() -> adapter.setUnsyncedWalletValue(wallet, value));
     }
 
     @Override

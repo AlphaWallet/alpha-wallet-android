@@ -57,10 +57,7 @@ import io.reactivex.schedulers.Schedulers;
 @HiltViewModel
 public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallback
 {
-    private final static String TAG = WalletsViewModel.class.getSimpleName();
-
     private static final int BALANCE_CHECK_INTERVAL_SECONDS = 20;
-
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final GenericWalletInteract genericWalletInteract;
@@ -329,7 +326,10 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         if (nextWalletToCheck != null)
         {
             Wallet w = walletUpdate.get(nextWalletToCheck);
-            currentWalletUpdates.put(nextWalletToCheck, startWalletSyncProcess(w));
+            if (w != null)
+            {
+                currentWalletUpdates.put(nextWalletToCheck, startWalletSyncProcess(w));
+            }
         }
     }
 
@@ -402,7 +402,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
             //Testnet Mode, need to update chain balances for visible chains
             updateWallets(wallets, TokenUpdateType.ACTIVE_SYNC);
         }
-
         progress.postValue(false);
     }
 

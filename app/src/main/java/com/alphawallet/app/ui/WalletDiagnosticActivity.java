@@ -30,8 +30,11 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.tools.Numeric;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.WalletFile;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -65,6 +68,7 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
     private boolean isLocked = false;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -358,6 +362,25 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
                 //is valid seed phrase
                 HDWallet newWallet = new HDWallet(keyData, "");
                 PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
+
+                //can we export as keystore?
+                byte[] priv = pk.data();
+                byte[] pub = pk.getPublicKeySecp256k1(true).data();
+                ECKeyPair keyPair = ECKeyPair.create(priv); //new ECKeyPair(Numeric.toBigInt(priv), Numeric.toBigInt(pub));
+
+                try
+                {
+                    WalletFile wf = org.web3j.crypto.Wallet.createLight("hellohello", keyPair);
+                    String keystore = objectMapper.writeValueAsString(wf);
+
+                    System.out.println("KEYSTOREA: " + keystore);
+
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    //
+                }
 
                 status.setText(getString(R.string.seed_phrase_public_key, Numeric.toHexString(pk.getPublicKeySecp256k1(false).data())));
                 status.setTextColor(getColor(R.color.green));

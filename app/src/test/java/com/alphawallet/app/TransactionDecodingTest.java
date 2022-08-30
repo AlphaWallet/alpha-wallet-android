@@ -1,9 +1,12 @@
 package com.alphawallet.app;
 
+import static org.junit.Assert.assertEquals;
+
 import com.alphawallet.app.entity.TransactionDecoder;
 import com.alphawallet.app.entity.TransactionInput;
-import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
+
 import java.math.BigInteger;
 
 /**
@@ -74,6 +77,7 @@ public class TransactionDecodingTest {
                         default:
                             break;
                     }
+                    System.out.println("TX: " + i.buildFunctionCallText());
                 }
             }
         } catch (Exception e) {

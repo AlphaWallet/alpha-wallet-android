@@ -7,7 +7,7 @@ on:
 jobs:
   test:
     runs-on: self-hosted
-    timeout-minutes: 5
+    timeout-minutes: 8
     strategy:
       matrix:
         api-level: [30]

@@ -149,18 +149,20 @@ android {
     }
     buildTypes {
         debug {
-            minifyEnabled false
-            shrinkResources false
-//            proguardFiles getDefaultProguardFile('proguard-android.txt'),
-//                    'proguard-rules.pro'
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
             if (signingConfigs.release.storeFile) {
                 signingConfig signingConfigs.release
             }
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            }
+        }
     }
     packagingOptions {
         exclude 'META-INF/NOTICE' // will not include NOTICE file

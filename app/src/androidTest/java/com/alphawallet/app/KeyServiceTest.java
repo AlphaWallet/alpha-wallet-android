@@ -20,25 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class KeyServiceTest extends BaseE2ETest {
-    // On CI server, run tests on different API levels concurrently may cause failure: Replacement transaction underpriced.
-    // Use different wallet to transfer token from can avoid this error
-    private static final Map<String, String[]> WALLETS = new HashMap<String, String[]>() {{
-        put("24", new String[]{"essence allow crisp figure tired task melt honey reduce planet twenty rookie", "0xD0c424B3016E9451109ED97221304DeC639b3F84"});
-        put("30", new String[]{"deputy review citizen bacon measure combine bag dose chronic retreat attack fly", "0xD8790c1eA5D15F8149C97F80524AC87f56301204"});
-        put("32", new String[]{"omit mobile upgrade warm flock two era hamster local cat wink virus", "0x32f6F38137a79EA8eA237718b0AFAcbB1c58ca2e"});
-    }};
-
     private static final String keystore = "{\"address\":\"f9c883c8dca140ebbdc87a225fe6e330be5d25ef\",\"id\":\"5648908b-1862-4f3e-b425-d1ba0790a601\",\"version\":3,\"crypto\":{\"cipher\":\"aes-128-ctr\",\"cipherparams\":{\"iv\":\"bcbfcffb52f42e9d149b97a8512d4c49\"},\"ciphertext\":\"967d3cd0db82445e4e74a6d5e537c799632e91cf0ca6f9fec17c769812e9454f\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"084c44b6e76e2b879257520ac00bb59c93e17321ce4a029f9b8294e304defc7a\"},\"mac\":\"0e4a74746d0c3e2739653200bcffb92716e77677d41f84c1184a4eb2054963c6\"}}\n";
     private static final String password = "hellohello";
 
     @Test
     public void cipher_integrity_test() {
-        int apiLevel = Build.VERSION.SDK_INT;
-        String[] array = WALLETS.get(String.valueOf(apiLevel));
-        if (array == null) {
-            fail("Please config seed phrase and wallet address for this API level first.");
-        }
-
         createNewWallet();
         gotoSettingsPage();
 
@@ -46,12 +32,11 @@ public class KeyServiceTest extends BaseE2ETest {
         click(withId(R.id.manage_wallet_btn));
         click(withId(R.id.action_key_status));
 
-        //can we click it?
         click(withText("Run Key Diagnostic"));
 
-        //now check the key is decoded correctly
         Helper.wait(1);
 
+        //now check the key is decoded correctly
         shouldSee("Key found");
         shouldSee("Unlocked");
         shouldSee("Seed Phrase detected public key");
@@ -60,16 +45,8 @@ public class KeyServiceTest extends BaseE2ETest {
 
     @Test
     public void cipher_integrity_test_keystore() {
-        int apiLevel = Build.VERSION.SDK_INT;
-        String[] array = WALLETS.get(String.valueOf(apiLevel));
-        if (array == null)
-        {
-            fail("Please config seed phrase and wallet address for this API level first.");
-        }
-
         importKSWalletFromFrontPage(keystore, password);
 
-        Helper.wait(3);
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
         Helper.wait(1);
@@ -80,10 +57,8 @@ public class KeyServiceTest extends BaseE2ETest {
 
         Helper.wait(1);
 
-        //can we click it?
         click(withText("Run Key Diagnostic"));
 
-        //now check the key is decoded correctly
         Helper.wait(1);
 
         //now check the key is decoded correctly

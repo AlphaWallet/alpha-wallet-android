@@ -38,7 +38,7 @@ public class Steps
     {
         click(withId(R.id.button_create));
         closeSelectNetworkPage();
-        click(withText(R.string.action_close)); // works well locally but NOT work with GitHub actions
+        click(withText(R.string.action_close));
     }
 
     public static void closeSecurityWarning()

@@ -1,9 +1,9 @@
 package com.alphawallet.app.service;
 
-import android.text.TextUtils;
-import android.util.Log;
+import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 
-import com.alphawallet.app.BuildConfig;
+import android.text.TextUtils;
+
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
@@ -47,8 +47,6 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
-
-import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 
 public class KeystoreAccountService implements AccountKeystoreService
 {
@@ -319,6 +317,25 @@ public class KeystoreAccountService implements AccountKeystoreService
         catch (Exception e)
         {
             Timber.e(e);
+        }
+
+        Timber.tag("RealmDebug").d("gotcredentials + %s", address);
+        return credentials;
+    }
+
+    public static Credentials getCredentialsWithThrow(File keyFolder, String address, String password) throws Exception
+    {
+        Credentials credentials = null;
+
+        address = Numeric.cleanHexPrefix(address);
+        File[] contents = keyFolder.listFiles();
+        for (File f : contents)
+        {
+            if (f.getName().contains(address))
+            {
+                credentials = WalletUtils.loadCredentials(password, f);
+                break;
+            }
         }
 
         Timber.tag("RealmDebug").d("gotcredentials + %s", address);

@@ -36,7 +36,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class ImportSeedFragment extends ImportFragment implements OnSuggestionClickListener {
     private static final OnImportSeedListener dummyOnImportSeedListener = (s, c) -> {};
-    private static final String validator = "[^a-z^A-Z^ ]";
+
+    public static final String validator = "[^a-z^A-Z^ ]";
 
     private PasswordInputView seedPhrase;
     private Button importButton;

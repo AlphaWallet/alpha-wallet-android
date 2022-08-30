@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <!-- NB: Wrapped in RelativeLayout to enable the 'big green success tick' -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <include layout="@layout/layout_simple_toolbar" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <View style="@style/Aw.Component.Separator" />
+
+            <View style="@style/Aw.Component.Separator.Large" />
+
+            <LinearLayout
+                android:id="@+id/layout_backup_method"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <View style="@style/Aw.Component.Separator" />
+
+                <TextView
+                    android:id="@+id/key_entry"
+                    android:layout_margin="@dimen/standard_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/key_entry_in_secure_enclave" />
+
+                <TextView
+                    android:id="@+id/key_in_enclave"
+                    android:layout_margin="@dimen/standard_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <View style="@style/Aw.Component.Separator" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_margin="@dimen/standard_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enclave_locked" />
+
+                <TextView
+                    android:id="@+id/key_is_locked"
+                    android:layout_margin="@dimen/standard_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <View style="@style/Aw.Component.Separator" />
+
+            <LinearLayout
+                android:id="@+id/layout_key_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+                <TextView
+                    android:id="@+id/database_txt"
+                    android:layout_margin="@dimen/standard_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/key_type_in_database" />
+
+                <TextView
+                    android:id="@+id/key_type"
+                    android:layout_margin="@dimen/standard_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <View style="@style/Aw.Component.Separator" />
+
+                <TextView
+                    android:layout_margin="@dimen/standard_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/status" />
+
+                <TextView
+                    android:id="@+id/status_txt"
+                    android:layout_margin="@dimen/standard_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <View style="@style/Aw.Component.Separator" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_success_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/translucent_dark"
+        android:contentDescription="@string/transaction_succeeded"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|center_horizontal|center_vertical"
+            android:background="@drawable/big_green_tick"
+            android:contentDescription="@string/transaction_succeeded"
+            android:foregroundGravity="center" />
+
+    </LinearLayout>
+
+
+    <com.alphawallet.app.widget.FunctionButtonBar
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" />
+
+</RelativeLayout>

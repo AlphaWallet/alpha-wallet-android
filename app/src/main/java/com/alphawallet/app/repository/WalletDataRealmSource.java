@@ -1,6 +1,7 @@
 package com.alphawallet.app.repository;
 
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -43,7 +44,7 @@ public class WalletDataRealmSource {
             Map<String, Wallet> walletList;
             try (Realm realm = realmManager.getWalletDataRealmInstance())
             {
-                walletList = loadOrCreateKeyRealmDB(realm, keystoreWallets); //call has action on upgrade to new UX
+                walletList = loadOrCreateKeyRealmDB(realm, keystoreWallets, keyService); //call has action on upgrade to new UX
                 //Add additional - non critical wallet data. This database can be voided for upgrade if required
                 for (Wallet wallet : walletList.values())
                 {
@@ -53,19 +54,16 @@ public class WalletDataRealmSource {
 
                     composeWallet(wallet, data);
                 }
-
-                //TODO: Make this a manual process.
-                //recoverLostWallets(realm, keystoreWallets, walletList, keyService);
             }
 
-            migrateWalletTypeData(walletList);
+            migrateWalletTypeData(walletList, keyService);
 
             Timber.tag("RealmDebug").d("populate %s", walletList.size());
             return walletList.values().toArray(new Wallet[0]);
         });
     }
 
-    private Map<String, Wallet> loadOrCreateKeyRealmDB(Realm realm, Wallet[] wallets)
+    private Map<String, Wallet> loadOrCreateKeyRealmDB(Realm realm, Wallet[] wallets, KeyService keyService)
     {
         Map<String, Wallet> walletList = new HashMap<>();
         List<String> keyStoreList = walletArrayToAddressList(wallets);
@@ -74,6 +72,8 @@ public class WalletDataRealmSource {
         RealmResults<RealmKeyType> realmKeyTypes = realm.where(RealmKeyType.class)
                 .sort("dateAdded", Sort.ASCENDING)
                 .findAll();
+
+        List<Wallet> walletUpdates = new ArrayList<>();
 
         if (realmKeyTypes.size() > 0)
         {
@@ -87,23 +87,39 @@ public class WalletDataRealmSource {
                     continue;
                 }
 
+                if (w.type == WalletType.KEYSTORE_LEGACY && !testLegacyCipher(w, keyService))
+                {
+                    w.type = WalletType.KEYSTORE;
+                    walletUpdates.add(w);
+                }
+
                 walletList.put(w.address.toLowerCase(), w);
             }
         }
         else //only zero on upgrade from v2.01.3 and lower (pre-HD key)
         {
-            realm.executeTransaction(r -> {
-                for (Wallet wallet : wallets)
+            for (Wallet wallet : wallets)
+            {
+                wallet.authLevel = KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
+                if (testLegacyCipher(wallet, keyService))
                 {
-                    wallet.authLevel = KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
                     wallet.type = WalletType.KEYSTORE_LEGACY;
-                    storeKeyData(wallet, r);
-                    walletList.put(wallet.address.toLowerCase(), wallet);
                 }
-            });
+                else
+                {
+                    wallet.type = WalletType.KEYSTORE;
+                }
+                walletList.put(wallet.address.toLowerCase(), wallet);
+                walletUpdates.add(wallet);
+            }
         }
 
-        Timber.tag("RealmDebug").d("loadorcreate " + walletList.size());
+        if (walletUpdates.size() > 0)
+        {
+            storeWallets(realm, walletUpdates.toArray(new Wallet[0]));
+        }
+
+        Timber.tag("RealmDebug").d("loadorcreate %s", walletList.size());
         return walletList;
     }
 
@@ -147,20 +163,29 @@ public class WalletDataRealmSource {
         else return value;
     }
 
-    public Single<Wallet[]> storeWallets(Wallet[] wallets) {
+    public Single<Wallet[]> storeWallets(Wallet[] wallets)
+    {
         return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
-
-                realm.executeTransaction(r -> {
-                    for (Wallet wallet : wallets)
-                    {
-                        storeKeyData(wallet, r);
-                    }
-                });
-            } catch (Exception e) {
+            try (Realm realm = realmManager.getWalletDataRealmInstance())
+            {
+                storeWallets(realm, wallets);
+            }
+            catch (Exception e)
+            {
                 Timber.e(e, "storeWallets: %s", e.getMessage());
             }
             return wallets;
+        });
+    }
+
+    private void storeWallets(Realm realm, Wallet[] wallets)
+    {
+        realm.executeTransaction(r -> {
+            for (Wallet wallet : wallets)
+            {
+                storeKeyData(wallet, r);
+                storeWalletData(wallet, r);
+            }
         });
     }
 
@@ -180,7 +205,7 @@ public class WalletDataRealmSource {
             realm.executeTransactionAsync(r -> {
                 storeKeyData(wallet, r);
                 storeWalletData(wallet, r);
-                Timber.tag("RealmDebug").d("storedKeydata " + wallet.address);
+                Timber.tag("RealmDebug").d("storedKeydata %s", wallet.address);
             }, onSuccess);
         }
         catch (Exception e)
@@ -219,7 +244,7 @@ public class WalletDataRealmSource {
 
                     r.insertOrUpdate(walletData);
                 }
-                Timber.tag("RealmDebug").d("storedKeydata " + wallet.address);
+                Timber.tag("RealmDebug").d("storedKeydata %s", wallet.address);
             }, onSuccess);
 
         }
@@ -483,9 +508,16 @@ public class WalletDataRealmSource {
         r.insertOrUpdate(item);
     }
 
+    private boolean testLegacyCipher(Wallet w, KeyService service)
+    {
+        //test for legacy cipher, any failure we know it's a KEYSTORE
+        Pair<KeyService.KeyExceptionType, String> cipherTest = service.testCipher(w.address, KeyService.LEGACY_CIPHER_ALGORITHM);
+        return cipherTest.first == KeyService.KeyExceptionType.SUCCESSFUL_DECODE;
+    }
+
     //One-time removal of the WalletTypeRealmInstance usage - this extra database was a
     // workaround for an issue that has since been fixed correctly.
-    private void migrateWalletTypeData(Map<String, Wallet> walletList)
+    private void migrateWalletTypeData(Map<String, Wallet> walletList, KeyService service)
     {
         Map<String, Wallet> walletTypeData = new HashMap<>();
 
@@ -498,7 +530,14 @@ public class WalletDataRealmSource {
             for (RealmKeyType rk : rr)
             {
                 Wallet w = composeKeyType(rk);
-                if (w != null) walletTypeData.put(w.address.toLowerCase(), w);
+                if (w != null)
+                {
+                    walletTypeData.put(w.address.toLowerCase(), w);
+                    if (w.type == WalletType.KEYSTORE_LEGACY && !testLegacyCipher(w, service))
+                    {
+                        w.type = WalletType.KEYSTORE;
+                    }
+                }
             }
         }
 

@@ -65,7 +65,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         switch (viewType)
         {
             case WalletHolder.VIEW_TYPE:
-                binderViewHolder = new WalletSummaryHolder(R.layout.item_wallet_summary_manage, parent, this, realm, context);
+                binderViewHolder = new WalletSummaryHolder(R.layout.item_wallet_summary_manage, parent, this, realm);
                 break;
             case TextHolder.VIEW_TYPE:
                 binderViewHolder = new TextHolder(R.layout.item_standard_header, parent);
@@ -341,15 +341,6 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
 
     public void setTokens(Token[] walletToken)
     {
-        // This wont work.
-        // You have a list of wallets (this.wallets), each of which has a collection of different tokens (walletToken from the args)
-        // When you receive each walletToken array (ie this function is called), you must first determine the wallet address, eg 0xd8f8..... This you can get the same way as the system.print I showed:
-        // First check there's more than 1 walletToken. Then do Token t = walletToken[0]; The wallet address is t.getWallet()
-        // Then use this function int index = getWalletIndex(t.getWallet())
-        // Then pull the wallet from the this.wallets list (you have the index)
-        // Then set the tokens
-        // Then update that specific entry with notifyItemChanged(index);
-
         if(walletToken != null && walletToken.length > 0)
         {
             Token t = walletToken[0];

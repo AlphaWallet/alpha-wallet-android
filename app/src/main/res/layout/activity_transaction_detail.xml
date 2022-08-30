@@ -359,11 +359,11 @@
                 android:id="@+id/layout_1559"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:baselineAligned="false"
                 android:layout_marginTop="6dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
                 android:visibility="gone"
-                tools:visibility="visible"
-                android:orientation="horizontal">
+                tools:visibility="visible">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -390,9 +390,9 @@
 
                         <TextView
                             android:id="@+id/text_gas_max_unit"
-                            android:layout_marginStart="@dimen/dp5"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/dp5"
                             android:text="Gwei" />
                     </LinearLayout>
 
@@ -422,9 +422,9 @@
                             tools:text="1.2" />
 
                         <TextView
-                            android:layout_marginStart="@dimen/dp5"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/dp5"
                             android:text="Gwei" />
                     </LinearLayout>
 

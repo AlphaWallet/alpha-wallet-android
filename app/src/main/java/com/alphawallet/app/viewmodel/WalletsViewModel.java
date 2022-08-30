@@ -65,7 +65,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final KeyService keyService;
     private final ImportWalletRouter importWalletRouter;
     private final HomeRouter homeRouter;
-    public final TokensService tokensService;
+    private final TokensService tokensService;
     private final AWEnsResolver ensResolver;
     private final AssetDefinitionService assetService;
     private final PreferenceRepositoryType preferenceRepository;

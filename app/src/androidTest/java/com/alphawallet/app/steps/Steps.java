@@ -36,7 +36,6 @@ public class Steps
 {
     public static void createNewWallet()
     {
-        closeSecurityWarning();
         click(withId(R.id.button_create));
         closeSelectNetworkPage();
         click(withText(R.string.action_close)); // works well locally but NOT work with GitHub actions

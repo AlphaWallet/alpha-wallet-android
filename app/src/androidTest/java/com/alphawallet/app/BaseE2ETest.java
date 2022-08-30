@@ -3,6 +3,8 @@ package com.alphawallet.app;
 
 import static androidx.test.espresso.Espresso.setFailureHandler;
 
+import static com.alphawallet.app.steps.Steps.closeSecurityWarning;
+
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -10,6 +12,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.util.CustomFailureHandler;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
@@ -29,4 +32,10 @@ public abstract class BaseE2ETest
     @Rule
     public ActivityScenarioRule<SplashActivity> activityScenarioRule
             = new ActivityScenarioRule<>(SplashActivity.class);
+
+    @Before
+    public void setUp()
+    {
+        closeSecurityWarning();
+    }
 }

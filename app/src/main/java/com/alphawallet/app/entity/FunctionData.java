@@ -1,13 +1,13 @@
 package com.alphawallet.app.entity;
 
-import com.alphawallet.app.C;
-import com.alphawallet.app.widget.FunctionButtonBar;
+import static com.alphawallet.app.entity.ContractType.CREATION;
+import static com.alphawallet.app.entity.ContractType.ERC20;
+import static com.alphawallet.app.entity.ContractType.ERC875;
+import static com.alphawallet.app.entity.ContractType.ERC875_LEGACY;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static com.alphawallet.app.entity.ContractType.*;
 
 /**
  * Created by James on 2/02/2018.

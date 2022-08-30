@@ -55,7 +55,7 @@ public class TransactionDetailWidget extends LinearLayout
         else
         {
             TransactionInput transactionInput = Transaction.decoder.decodeInput(w3tx, chainId, walletAddress);
-            textTransactionSummary.setText(transactionInput.getOperationTitle(getContext()));
+            textTransactionSummary.setText(transactionInput.buildFunctionCallText());
         }
 
         layoutHolder.setOnClickListener(v -> {

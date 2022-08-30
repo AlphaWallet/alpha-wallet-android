@@ -314,6 +314,10 @@
         <activity
             android:name=".ui.CoinbasePayActivity"
             android:label="@string/title_buy_with_coinbase_pay" />
+            
+        <activity
+            android:name=".ui.WalletDiagnosticActivity"
+            android:label="@string/key_diagnostic" />
 
         <service
             android:name=".service.PriceAlertsService"

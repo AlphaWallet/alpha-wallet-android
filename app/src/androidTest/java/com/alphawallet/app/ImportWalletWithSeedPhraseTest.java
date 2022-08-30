@@ -41,7 +41,6 @@ public class ImportWalletWithSeedPhraseTest extends BaseE2ETest {
         String seedPhrase = array[0];
         String existedWalletAddress = array[1];
 
-        closeSecurityWarning();
         click(withText("I already have a Wallet"));
 
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_seed)))))).perform(replaceText(seedPhrase));

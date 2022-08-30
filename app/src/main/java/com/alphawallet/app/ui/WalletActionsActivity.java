@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -35,8 +36,6 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.SettingsItemView;
 import com.alphawallet.app.widget.UserAvatar;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -105,6 +104,14 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.menu_wallet_manage, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
     private void onTaskStatusChanged(Boolean isTaskRunning) {
 
     }
@@ -122,6 +129,14 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         {
             onBackPressed();
             return true;
+        }
+        else if (item.getItemId() == R.id.action_key_status)
+        {
+            //show the key status
+            Intent intent = new Intent(this, WalletDiagnosticActivity.class);
+            intent.putExtra("wallet", wallet);
+            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }

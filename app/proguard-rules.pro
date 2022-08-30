@@ -53,5 +53,6 @@
 -keep class com.alphawallet.app.web3j.** { *; }
 -keep class com.alphawallet.app.entity.** { *; }
 
+-repackageclasses
 #-dontobfuscate
 #-printconfiguration ../full-r8-config.txt

@@ -4,8 +4,6 @@ import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_CHANGE;
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_VALUE;
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.IS_MAINNET_ACTIVE;
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.IS_SYNCED;
-
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -17,17 +15,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.ServiceException;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -67,7 +59,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     private final ImageView defaultWalletIndicator;
     private final ImageView manageWalletBtn;
     private final UserAvatar walletIcon;
-    private final RelativeLayout arrow_right;
+    private final RelativeLayout arrowRight;
     private final TextView walletBalanceText;
     private final TextView walletNameText;
     private final TextView walletAddressSeparator;
@@ -78,11 +70,9 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     private RealmResults<RealmWalletData> realmUpdate;
     private final WalletClickCallback clickCallback;
     private Wallet wallet = null;
-    protected final MutableLiveData<ErrorEnvelope> error = new MutableLiveData<>();
     protected Disposable disposable;
-    private final Context context;
 
-    public WalletSummaryHolder(int resId, ViewGroup parent, WalletClickCallback callback, Realm realm, Context context)
+    public WalletSummaryHolder(int resId, ViewGroup parent, WalletClickCallback callback, Realm realm)
     {
         super(resId, parent);
 
@@ -93,34 +83,12 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         walletNameText = findViewById(R.id.wallet_name);
         walletAddressSeparator = findViewById(R.id.wallet_address_separator);
         walletAddressText = findViewById(R.id.wallet_address);
-        arrow_right = findViewById(R.id.container);
+        arrowRight = findViewById(R.id.container);
         wallet24hChange = findViewById(R.id.wallet_24h_change);
         recyclerView = findViewById(R.id.horizontal_list);
         clickCallback = callback;
-        this.context = context;
-
         manageWalletLayout = findViewById(R.id.layout_manage_wallet);
         this.realm = realm;
-    }
-
-    protected void onError(Throwable throwable)
-    {
-        if (throwable instanceof ServiceException)
-        {
-            error.postValue(((ServiceException) throwable).error);
-        }
-        else
-        {
-            String message = throwable.getMessage();
-            if (TextUtils.isEmpty(message))
-            {
-                error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null, throwable));
-            }
-            else
-            {
-                error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, message, throwable));
-            }
-        }
     }
 
     @Override
@@ -133,7 +101,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         {
 
             wallet = fetchWallet(data);
-            arrow_right.setOnClickListener(this);
+            arrowRight.setOnClickListener(this);
             manageWalletLayout.setOnClickListener(this);
 
             if (addition.getBoolean(IS_DEFAULT_ADDITION, false))
@@ -271,7 +239,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 
             if (w.tokens != null)
             {
-                TestNetHorizontalListAdapter testNetHorizontalListAdapter = new TestNetHorizontalListAdapter(w.tokens, context);
+                TestNetHorizontalListAdapter testNetHorizontalListAdapter = new TestNetHorizontalListAdapter(w.tokens);
                 recyclerView.setAdapter(testNetHorizontalListAdapter);
             }
         }

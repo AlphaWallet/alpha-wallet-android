@@ -9,39 +9,9 @@
     android:nestedScrollingEnabled="true"
     tools:ignore="MissingDefaultResource">
 
-
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:visibility="visible"
-        android:paddingStart="0dp"
-        android:paddingEnd="@dimen/dp7">
-
-        <com.alphawallet.app.widget.TokenIcon
-            android:id="@+id/token_icon"
-            android:layout_width="@dimen/dp22"
-            android:layout_height="@dimen/dp22"
-            android:layout_gravity="center" />
-
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_asset_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/eth"
-            android:textSize="@dimen/sp12"
-            android:visibility="gone" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/title_set_price"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="@dimen/dp5"
-            android:paddingEnd="@dimen/dp5"
-            android:textSize="@dimen/sp12" />
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
+    <com.alphawallet.app.widget.TokenWithBalanceView
+        android:id="@+id/token_with_balance_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </RelativeLayout>

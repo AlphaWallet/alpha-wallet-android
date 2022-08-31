@@ -69,6 +69,17 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getRampKey( JNIEnv* env, 
 }
 
 JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getCoinbasePayAppId( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, coinbasePayAppId);
+#else
+    const jstring key = ""; // <-- replace with your Coinbase Pay app id
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSecondaryInfuraKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)

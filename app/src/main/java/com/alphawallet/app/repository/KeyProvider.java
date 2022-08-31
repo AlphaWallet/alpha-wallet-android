@@ -14,4 +14,5 @@ public interface KeyProvider
     String getRampKey();
     String getOpenSeaKey();
     String getMailchimpKey();
+    String getCoinbasePayAppId();
 }

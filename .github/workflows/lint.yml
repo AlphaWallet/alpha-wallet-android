@@ -8,6 +8,8 @@ jobs:
   lint:
     name: Run Lint
     runs-on: macos-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v3
@@ -18,12 +20,6 @@ jobs:
           java-version: 11
           cache: gradle
       - name: Run Kotlin lint
-        env:
-          USERNAME: ${{ env.GITHUB_ACTOR }}
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :app:detekt
       - name: Run Android Lint
-        env:
-          USERNAME: ${{ env.GITHUB_ACTOR }}
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :app:lintAnalyticsDebug

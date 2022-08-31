@@ -20,7 +20,7 @@ buildscript {
 // WARNING WARNING WARNING
 // DON'T add any plugins that is Google Play Service or uses Google Play Service
 // Search China in this file for the reason
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'realm-android'
 apply plugin: 'kotlin-android'
 apply plugin: 'dagger.hilt.android.plugin'
@@ -84,7 +84,7 @@ android {
         versionCode 201
         versionName "3.58.2"
 
-        applicationId "io.stormbird.wallet"
+//        applicationId "io.stormbird.wallet"
         minSdkVersion 23
         targetSdkVersion 32
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -128,7 +128,7 @@ android {
             Below code is used to include analytics only when Flavor is "No Analytics"
             This is due to China release where Google services should not be included
              */
-            apply plugin: 'com.google.gms.google-services'
+//            apply plugin: 'com.google.gms.google-services'
             apply plugin: 'com.google.firebase.crashlytics'
         }
         noAnalytics {
@@ -335,4 +335,3 @@ dependencies {
 
 // WARNING WARNING WARNING
 // don't add any additional things here without first search "China" in this file
-

@@ -246,7 +246,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         dissableDisplayHomeAsUp();
 
         viewModel.error().observe(this, this::onError);
-        viewModel.installIntent().observe(this, this::onInstallIntent);
+//        viewModel.installIntent().observe(this, this::onInstallIntent);
         viewModel.walletName().observe(this, this::onWalletName);
         viewModel.backUpMessage().observe(this, this::onBackup);
         viewModel.splashReset().observe(this, this::onRequireInit);
@@ -962,30 +962,30 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private void onInstallIntent(File installFile)
-    {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        {
-            String authority = BuildConfig.APPLICATION_ID + ".fileprovider";
-            Uri apkUri = FileProvider.getUriForFile(getApplicationContext(), authority, installFile);
-            Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-            intent.setData(apkUri);
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(intent);
-        }
-        else
-        {
-            Uri apkUri = Uri.fromFile(installFile);
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        }
-
-        //Blank install time here so that next time the app runs the install time will be correctly set up
-        viewModel.setInstallTime(0);
-        finish();
-    }
+//    private void onInstallIntent(File installFile)
+//    {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+//        {
+//            String authority = BuildConfig.APPLICATION_ID + ".fileprovider";
+//            Uri apkUri = FileProvider.getUriForFile(getApplicationContext(), authority, installFile);
+//            Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+//            intent.setData(apkUri);
+//            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//            startActivity(intent);
+//        }
+//        else
+//        {
+//            Uri apkUri = Uri.fromFile(installFile);
+//            Intent intent = new Intent(Intent.ACTION_VIEW);
+//            intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            startActivity(intent);
+//        }
+//
+//        //Blank install time here so that next time the app runs the install time will be correctly set up
+//        viewModel.setInstallTime(0);
+//        finish();
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)

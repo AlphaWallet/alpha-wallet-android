@@ -60,7 +60,7 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
             props.putString(C.AN_USE_GAS, analyticsProperties.getData());
         }
 
-        props.putString(C.APP_NAME, BuildConfig.APPLICATION_ID);
+//        props.putString(C.APP_NAME, BuildConfig.APPLICATION_ID);
 
         firebaseAnalytics.logEvent(eventName, props);
     }

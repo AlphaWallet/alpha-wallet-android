@@ -262,19 +262,18 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     public void onClick(View view)
     {
         //if (wallet == null) { return; } //protect against click between constructor and bind
-        switch (view.getId())
+        int id = view.getId();
+        if (id == R.id.wallet_click_layer)
         {
-            case R.id.wallet_click_layer:
-                clickCallback.onWalletClicked(wallet);
-                break;
-
-            case R.id.layout_manage_wallet:
-                Intent intent = new Intent(getContext(), WalletActionsActivity.class);
-                intent.putExtra("wallet", wallet);
-                intent.putExtra("currency", wallet.balanceSymbol);
-                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                getContext().startActivity(intent);
-                break;
+            clickCallback.onWalletClicked(wallet);
+        }
+        else if (id == R.id.layout_manage_wallet)
+        {
+            Intent intent = new Intent(getContext(), WalletActionsActivity.class);
+            intent.putExtra("wallet", wallet);
+            intent.putExtra("currency", wallet.balanceSymbol);
+            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            getContext().startActivity(intent);
         }
     }
 

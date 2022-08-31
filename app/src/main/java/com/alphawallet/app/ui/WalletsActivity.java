@@ -234,19 +234,15 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        final int action_add = R.id.action_add;
-        switch (item.getItemId())
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_add)
         {
-            case action_add:
-            {
-                onAddWallet();
-            }
-            break;
-            case android.R.id.home:
-            {
-                onBackPressed();
-                return true;
-            }
+            onAddWallet();
+        }
+        else if (itemId == android.R.id.home)
+        {
+            onBackPressed();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

@@ -34,36 +34,32 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
-
-        final int close_action = R.id.close_action;
-        final int new_account_action = R.id.new_account_action;
-        final int import_account_action = R.id.import_account_action;
-        final int watch_account_action = R.id.watch_account_action;
-
-        switch (view.getId()) {
-            case close_action: {
-                if (onCloseActionListener != null) {
-                    onCloseActionListener.onClose(view);
-                }
-                break;
+        if (view.getId() == R.id.close_action)
+        {
+            if (onCloseActionListener != null)
+            {
+                onCloseActionListener.onClose(view);
             }
-            case new_account_action: {
-                if (onNewWalletClickListener != null) {
-                    onNewWalletClickListener.onNewWallet(view);
-                }
-                break;
+        }
+        else if (view.getId() == R.id.new_account_action)
+        {
+            if (onNewWalletClickListener != null)
+            {
+                onNewWalletClickListener.onNewWallet(view);
             }
-            case import_account_action: {
-                if (onImportWalletClickListener != null) {
-                    onImportWalletClickListener.onImportWallet(view);
-                }
-                break;
+        }
+        else if (view.getId() == R.id.import_account_action)
+        {
+            if (onImportWalletClickListener != null)
+            {
+                onImportWalletClickListener.onImportWallet(view);
             }
-            case watch_account_action: {
-                if (onWatchWalletClickListener != null) {
-                    onWatchWalletClickListener.onWatchWallet(view);
-                }
-                break;
+        }
+        else if (view.getId() == R.id.watch_account_action)
+        {
+            if (onWatchWalletClickListener != null)
+            {
+                onWatchWalletClickListener.onWatchWallet(view);
             }
         }
     }

@@ -355,12 +355,12 @@ public class NewSettingsFragment extends BaseFragment
 
     private void setInitialSettingsData(View view)
     {
-        TextView appVersionText = view.findViewById(R.id.text_version);
-        appVersionText.setText(String.format(Locale.getDefault(), "%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
-        TextView tokenScriptVersionText = view.findViewById(R.id.text_tokenscript_compatibility);
-        tokenScriptVersionText.setText(TOKENSCRIPT_CURRENT_SCHEMA);
-
-        notificationsSetting.setToggleState(viewModel.getNotificationState());
+//        TextView appVersionText = view.findViewById(R.id.text_version);
+//        appVersionText.setText(String.format(Locale.getDefault(), "%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
+//        TextView tokenScriptVersionText = view.findViewById(R.id.text_tokenscript_compatibility);
+//        tokenScriptVersionText.setText(TOKENSCRIPT_CURRENT_SCHEMA);
+//
+//        notificationsSetting.setToggleState(viewModel.getNotificationState());
     }
 
     private void openShowSeedPhrase(Wallet wallet)
@@ -626,7 +626,7 @@ public class NewSettingsFragment extends BaseFragment
             updateLayout.setVisibility(View.VISIBLE);
             TextView current = view.findViewById(R.id.text_detail_current);
             TextView available = view.findViewById(R.id.text_detail_available);
-            current.setText(getString(R.string.installed_version, String.valueOf(BuildConfig.VERSION_CODE)));
+//            current.setText(getString(R.string.installed_version, String.valueOf(BuildConfig.VERSION_CODE)));
             available.setText(getString(R.string.available_version, String.valueOf(pendingUpdate)));
             if (getActivity() != null)
             {

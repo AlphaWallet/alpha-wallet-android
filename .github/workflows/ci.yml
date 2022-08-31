@@ -18,6 +18,8 @@ jobs:
           architecture: arm64
 
       - name: Run unit tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: sh ./build.sh
 
       - name: Upload Test Reports Folder

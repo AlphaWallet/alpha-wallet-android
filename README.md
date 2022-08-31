@@ -64,7 +64,7 @@ We want to give businesses the whitelabel tools they need to develop their ether
 1. [Download](https://developer.android.com/studio/) Android Studio.
 2. Clone this repository
 3. Obtain a free Infura API key and replace the one in build.gradle
-4. Generate a GitHub [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with `read:packages` permission
+4. Generate a GitHub [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with `read:packages, read:user` permission
 5. Edit `~/.gradle/gradle.properties` add blow properties:
 ```properties
 gpr.user=Your GitHub Email

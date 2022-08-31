@@ -18,17 +18,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.WalletActionsActivity;
-import com.alphawallet.app.ui.widget.adapter.TestNetHorizontalListAdapter;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.widget.TokensBalanceView;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.app.widget.UserAvatar;
 import com.google.gson.Gson;
@@ -65,7 +64,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     private final TextView walletAddressSeparator;
     private final TextView walletAddressText;
     private final TextView wallet24hChange;
-    private final RecyclerView recyclerView;
+    private final TokensBalanceView tokensBalanceView;
     private final Realm realm;
     private RealmResults<RealmWalletData> realmUpdate;
     private final WalletClickCallback clickCallback;
@@ -85,7 +84,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         walletAddressText = findViewById(R.id.wallet_address);
         arrowRight = findViewById(R.id.container);
         wallet24hChange = findViewById(R.id.wallet_24h_change);
-        recyclerView = findViewById(R.id.horizontal_list);
+        tokensBalanceView = findViewById(R.id.token_with_balance_view);
         clickCallback = callback;
         manageWalletLayout = findViewById(R.id.layout_manage_wallet);
         this.realm = realm;
@@ -239,8 +238,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 
             if (w.tokens != null)
             {
-                TestNetHorizontalListAdapter testNetHorizontalListAdapter = new TestNetHorizontalListAdapter(w.tokens);
-                recyclerView.setAdapter(testNetHorizontalListAdapter);
+                tokensBalanceView.bindTokens(w.tokens);
             }
         }
         return w;

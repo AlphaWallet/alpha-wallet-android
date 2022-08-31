@@ -1,26 +1,32 @@
 package com.alphawallet.app.ui.widget.adapter;
 
+import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.widget.TokenWithBalanceView;
+import com.alphawallet.app.widget.TokenIcon;
 
 import timber.log.Timber;
 
 public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHorizontalListAdapter.ViewHolder>
 {
     private final Token[] tokens;
+    private final Context context;
     //TODO - JB: populate the token list using this method:
     // - from tokensService get the tokenFilter with getNetworkFilters()
     // - loop through this list and check for non-zero balance testnet (using getTokenOrBase(chainId, tokensService.getCurrentAddress()) )
     // - send list of tokens below but use Token[] instead of TokenCardMeta[]. Now you won't need TokensService or AssetDefinitionService
-    public  TestNetHorizontalListAdapter(Token[] token)
+    public  TestNetHorizontalListAdapter(Token[] tokens, Context context)
     {
-        this.tokens = token;
+        this.tokens = tokens;
+        this.context = context;
     }
 
     @NonNull
@@ -36,10 +42,19 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        Token token = tokens[position];
+        holder.tokenIcon.clearLoad();
         try
         {
-           holder.tokenWithBalanceView.setTokenIconWithBalance(token);
+            String coinBalance = tokens[position].getStringBalanceForUI(4);
+            if (!TextUtils.isEmpty(coinBalance))
+            {
+                holder.tokenPrice.setText(context.getString(R.string.valueSymbol, coinBalance, tokens[position].getTokenSymbol(tokens[position])));
+            }
+            holder.tokenIcon.bindData(tokens[position].tokenInfo.chainId);
+            if (!tokens[position].isEthereum())
+            {
+                holder.tokenIcon.setChainIcon(tokens[position].tokenInfo.chainId); //Add in when we upgrade the design
+            }
         }
         catch (Exception e)
         {
@@ -55,11 +70,14 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
 
     static class ViewHolder extends RecyclerView.ViewHolder
     {
-        TokenWithBalanceView tokenWithBalanceView;
+        TokenIcon tokenIcon;
+        TextView tokenPrice;
         ViewHolder(@NonNull View itemView)
         {
             super(itemView);
-            tokenWithBalanceView = itemView.findViewById(R.id.token_with_balance_view);
+            tokenIcon = itemView.findViewById(R.id.token_icon);
+            tokenPrice = itemView.findViewById(R.id.title_set_price);
         }
     }
 }
+

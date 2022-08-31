@@ -29,6 +29,7 @@
             android:layout_height="@dimen/tiny_8"
             android:layout_marginStart="@dimen/mini_4"
             android:src="@drawable/ic_wallet_indicator"
+            tools:ignore="ContentDescription"
             android:visibility="invisible" />
 
         <ImageView
@@ -36,9 +37,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/transparent"
-            android:paddingStart="0dp"
             android:src="@drawable/ic_menu"
             android:visibility="gone"
+            tools:ignore="ContentDescription"
             app:tint="?colorControlNormal"
             tools:visibility="visible" />
 
@@ -99,16 +100,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/horizontal_list"
+            <com.alphawallet.app.widget.TokensBalanceView
+                android:id="@+id/token_with_balance_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:nestedScrollingEnabled="true"
-                android:orientation="horizontal"
-                android:visibility="visible"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_horizontal_testnet_list" />
+                android:layout_height="wrap_content"/>
 
         </LinearLayout>
 
@@ -132,7 +127,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/mini_4"
                 android:paddingRight="@dimen/mini_4"
-                android:text="|" />
+                android:text="@string/vertical_pipe" />
 
             <TextView
                 android:id="@+id/wallet_address"
@@ -153,6 +148,7 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center"
+        tools:ignore="ContentDescription"
         android:src="@drawable/ic_arrow_right"
         app:tint="?colorControlNormal" />
 

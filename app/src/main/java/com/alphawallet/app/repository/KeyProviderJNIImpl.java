@@ -19,4 +19,5 @@ public class KeyProviderJNIImpl implements KeyProvider
     public native String getRampKey();
     public native String getOpenSeaKey();
     public native String getMailchimpKey();
+    public native String getCoinbasePayAppId();
 }

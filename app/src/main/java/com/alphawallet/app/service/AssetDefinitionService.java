@@ -130,9 +130,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private static final String ASSET_DEFINITION_DB = "ASSET-db.realm";
     private static final String BUNDLED_SCRIPT = "bundled";
     private static final long CHECK_TX_LOGS_INTERVAL = 20;
-    private static final String EIP5169_ISSUER = "EIP5169-IPFS";
-    private static final String EIP5169_CERTIFIER = "Smart Token Labs";
-    private static final String EIP5169_KEY_OWNER = "Contract Owner"; //TODO Source this from the contract via owner()
 
     private final Context context;
     private final OkHttpClient okHttpClient;
@@ -931,7 +928,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             final TokenDefinition td = parseFile(tsf.getInputStream());
             List<ContractLocator> originContracts = getOriginContracts(td);
             //remove all old definitions & certificates
-            deleteScriptEntriesFromRealm(originContracts, isDebugOverride, tsf.calcMD5());
+            deleteScriptEntriesFromRealm(originContracts, isDebugOverride);
             cachedDefinition = null;
             return cacheSignature(tsf)
                     .map(contracts -> fileLoadComplete(originContracts, tsf, td));
@@ -944,7 +941,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return Single.fromCallable(TokenDefinition::new);
     }
 
-    private void deleteScriptEntriesFromRealm(List<ContractLocator> origins, boolean isDebug, String newFileHash)
+    private void deleteScriptEntriesFromRealm(List<ContractLocator> origins, boolean isDebug)
     {
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
@@ -961,7 +958,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         RealmCertificateData realmCert = r.where(RealmCertificateData.class)
                                 .equalTo("instanceKey", realmData.getFileHash())
                                 .findFirst();
-                        if (realmCert != null && !realmData.getFileHash().equals(newFileHash)) realmCert.deleteFromRealm(); //don't delete cert if new cert will overwrite it
+                        if (realmCert != null) realmCert.deleteFromRealm();
                         deleteEventDataForScript(realmData);
                         realmData.deleteFromRealm();
                     }
@@ -978,7 +975,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     if (!TextUtils.isEmpty(uri)) updateFlag.postValue(true);
                     return uri; })
                 .map(uri -> downloadScript(uri, 0))
-                .map(dlResponse -> storeFile(token.tokenInfo.address, dlResponse));
+                .map(xmlBody -> storeFile(token.tokenInfo.address, xmlBody));
     }
 
     private Single<File> tryServerIfRequired(File contractScript, String address)
@@ -1028,10 +1025,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     "/" +
                     address;
 
-            Pair<String, Boolean> downloadResponse = downloadScript(sb, fileTime);
-            if (!TextUtils.isEmpty(downloadResponse.first))
+            String xmlBody = downloadScript(sb, fileTime);
+            if (!TextUtils.isEmpty(xmlBody))
             {
-                result = storeFile(address, downloadResponse);
+                result = storeFile(address, xmlBody);
             }
 
             assetChecked.put(address, System.currentTimeMillis());
@@ -1040,10 +1037,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    private Pair<String, Boolean> downloadScript(String Uri, long currentFileTime) throws PackageManager.NameNotFoundException
+    private String downloadScript(String Uri, long currentFileTime) throws PackageManager.NameNotFoundException
     {
-        boolean isIPFS = false;
-        if (TextUtils.isEmpty(Uri)) return new Pair<>("", false);
+        if (TextUtils.isEmpty(Uri)) return "";
         SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         String dateFormat = format.format(new Date(currentFileTime));
@@ -1062,7 +1058,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 .url(Uri)
                 .get();
 
-        if (!Uri.toLowerCase().contains("ipfs.io"))
+        if (!Uri.toLowerCase().contains("ipfs"))
         {
             bld.addHeader("Accept", "text/xml; charset=UTF-8")
                .addHeader("X-Client-Name", "AlphaWallet")
@@ -1070,10 +1066,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                .addHeader("X-Platform-Name", "Android")
                .addHeader("X-Platform-Version", OSVersion)
                .addHeader("If-Modified-Since", dateFormat);
-        }
-        else
-        {
-            isIPFS = true;
         }
 
         Request request = bld.build();
@@ -1087,7 +1079,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 case HttpURLConnection.HTTP_NOT_MODIFIED:
                     break;
                 case HttpURLConnection.HTTP_OK:
-                    return new Pair<>(response.body().string(), isIPFS);
+                    return response.body().string();
             }
         }
         catch (Exception e)
@@ -1095,7 +1087,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             Timber.e(e);
         }
 
-        return new Pair<>("", false);
+        return "";
     }
 
     private boolean definitionIsOutOfDate(TokenDefinition td)
@@ -1594,18 +1586,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
-            realm.executeTransaction(r -> {
+            realm.executeTransactionAsync(r -> {
                 //if signature present, then just update
                 RealmCertificateData realmData = r.where(RealmCertificateData.class)
                         .equalTo("instanceKey", hash)
                         .findFirst();
 
                 if (realmData == null)
-                {
                     realmData = r.createObject(RealmCertificateData.class, hash);
-                }
                 realmData.setFromSig(sig);
-                r.insertOrUpdate(realmData);
             });
         }
     }
@@ -1639,19 +1628,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return sig;
     }
 
-    private XMLDsigDescriptor IPFSSigDescriptor()
-    {
-        XMLDsigDescriptor sig = new XMLDsigDescriptor();
-        sig.issuer = EIP5169_ISSUER;
-        sig.certificateName = EIP5169_CERTIFIER;
-        sig.keyName = EIP5169_KEY_OWNER;
-        sig.keyType = "ECDSA";
-        sig.result = "Pass";
-        sig.subject = "";
-        sig.type = SigReturnType.SIGNATURE_PASS;
-        return sig;
-    }
-
     /**
      * Use internal directory to store contracts fetched from the server
      * @param address
@@ -1659,9 +1635,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      * @return
      * @throws
      */
-    private File storeFile(String address, Pair<String, Boolean> result) throws IOException
+    private File storeFile(String address, String result) throws IOException
     {
-        if (result.first == null || result.first.length() < 10) return new File("");
+        if (result == null || result.length() < 10) return new File("");
 
         String fName = address + ".xml";
 
@@ -1670,19 +1646,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         FileOutputStream fos = new FileOutputStream(file);
         OutputStream os = new BufferedOutputStream(fos);
-        os.write(result.first.getBytes());
+        os.write(result.getBytes());
         fos.flush();
         os.close();
         fos.close();
-
-        //handle signature for IPFS
-        if (result.second)
-        {
-            TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
-            String hash = tsf.calcMD5();
-            storeCertificateData(hash, IPFSSigDescriptor());
-        }
-
         return file;
     }
 
@@ -2023,7 +1990,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 String hash = tsf.calcMD5();
                 XMLDsigDescriptor sig = getCertificateFromRealm(hash);
-                if (sig == null || (sig.result != null && sig.result.equalsIgnoreCase("fail")))
+                if (sig == null || (sig.result != null && sig.result.equals("fail")))
                 {
                     sig = alphaWalletService.checkTokenScriptSignature(tsf);
                     tsf.determineSignatureType(sig);

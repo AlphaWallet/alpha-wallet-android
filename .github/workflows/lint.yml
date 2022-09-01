@@ -8,9 +8,6 @@ jobs:
   lint:
     name: Run Lint
     runs-on: macos-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK

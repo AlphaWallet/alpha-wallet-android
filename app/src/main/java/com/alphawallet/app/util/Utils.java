@@ -813,11 +813,11 @@ public class Utils {
         int ipfsIndex = URL.lastIndexOf("/ipfs/");
         if (ipfsIndex >= 0)
         {
-            parsed = "https://gateway.ipfs.io" + URL.substring(ipfsIndex);
+            parsed = "https://alphawallet.infura-ipfs.io" + URL.substring(ipfsIndex);
         }
         else if (URL.startsWith(IPFS_PREFIX))
         {
-            parsed = "https://gateway.ipfs.io/ipfs/" + URL.substring(IPFS_PREFIX.length());
+            parsed = "https://alphawallet.infura-ipfs.io/ipfs/" + URL.substring(IPFS_PREFIX.length());
         }
 
         return parsed;

@@ -24,8 +24,6 @@ jobs:
 
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}

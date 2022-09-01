@@ -4,9 +4,6 @@ jobs:
   lint:
     name: Comments lint result on PR
     runs-on: macos-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     steps:
       - uses: actions/checkout@v3
       - name: set up JDK

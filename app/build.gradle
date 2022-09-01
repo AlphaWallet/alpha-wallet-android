@@ -217,15 +217,15 @@ task printVersionCode {
 gradle.projectsEvaluated({
     def username = getGitHubUsername()
     def password = getPAT()
-    def isOnCI = System.getenv("GITHUB_TOKEN")
-    if (!isOnCI && (!username || !password)) {
+    if (!username || !password) {
         throw new GradleException('Please provide GitHub username and Personal Access Token. Find more here https://github.com/alphaWallet/alpha-wallet-android#getting-started')
     }
 })
 
 // GitHub Personal Access Token
 private String getPAT() {
-    project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+    def encodedToken = project.findProperty("gpr.key")
+    new String(encodedToken.decodeBase64())
 }
 
 private String getGitHubUsername() {

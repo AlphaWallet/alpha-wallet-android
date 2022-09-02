@@ -41,5 +41,8 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.12'
-    implementation project(':app')
+    // dagger-hilt
+    implementation "com.google.dagger:hilt-android:2.40.5"
+    annotationProcessor "com.google.dagger:hilt-compiler:2.40.5"
+    implementation ('com.alphawallet.app:app:3.58.2@aar')
 }

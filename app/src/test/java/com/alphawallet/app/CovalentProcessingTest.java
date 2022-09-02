@@ -19,15 +19,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import timber.log.Timber;
-
 /**
  * Created by JB on 2/09/2022.
  */
 public class CovalentProcessingTest
 {
     private String APIReturn;
-    private String walletAddr = "0x99c839a196497eda48c5dee9545ce10d497fd8f5";
 
     public CovalentProcessingTest() throws IOException
     {
@@ -38,7 +35,7 @@ public class CovalentProcessingTest
     @Test
     public void testCovalentTx() throws JSONException
     {
-        CovalentTransaction[] covalentTransactions = getCovalentTransactions(APIReturn, walletAddr);
+        CovalentTransaction[] covalentTransactions = getCovalentTransactions(APIReturn);
 
         NetworkInfo info = new NetworkInfo("Klaytn", "Klaytn", "", "", KLAYTN_ID, "", "");
         EtherscanEvent[] events = CovalentTransaction.toEtherscanEvents(covalentTransactions);
@@ -60,21 +57,13 @@ public class CovalentProcessingTest
         assertEquals(ev.to, "0xf9c883c8dca140ebbdc87a225fe6e330be5d25ef");
     }
 
-    private CovalentTransaction[] getCovalentTransactions(String response, String walletAddress) throws JSONException
+    private CovalentTransaction[] getCovalentTransactions(String response) throws JSONException
     {
         if (response == null || response.length() < 80)
         {
             return new CovalentTransaction[0];
         }
-        JSONObject stateData = null;
-        try
-        {
-            stateData = new JSONObject(response);
-        }
-        catch (JSONException e)
-        {
-            Timber.w(e);
-        }
+        JSONObject stateData = new JSONObject(response);
 
         JSONObject data = stateData.getJSONObject("data");
         JSONArray orders = data.getJSONArray("items");

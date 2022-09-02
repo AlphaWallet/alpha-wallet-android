@@ -7,6 +7,7 @@ import com.alphawallet.app.entity.CovalentTransaction;
 import com.alphawallet.app.entity.EtherscanEvent;
 import com.alphawallet.app.entity.EtherscanTransaction;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.google.common.io.Resources;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -15,9 +16,8 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import timber.log.Timber;
 
@@ -26,58 +26,38 @@ import timber.log.Timber;
  */
 public class CovalentProcessingTest
 {
-    String APIReturn;
+    private String APIReturn;
+    private String walletAddr = "0x99c839a196497eda48c5dee9545ce10d497fd8f5";
 
-    String walletAddr = "0x99c839a196497eda48c5dee9545ce10d497fd8f5";
-    private static final String filePath = "src/test/java/com/alphawallet/app/resources/";
-
-    public CovalentProcessingTest()
-        {
-            String validStructuredDataJSONFilePath = filePath +
-                    "covalenttxs.json";
-            try
-            {
-                APIReturn = getResource(validStructuredDataJSONFilePath);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-    private String getResource(String jsonFile) throws IOException {
-        return new String(
-                Files.readAllBytes(Paths.get(jsonFile).toAbsolutePath()), StandardCharsets.UTF_8);
+    public CovalentProcessingTest() throws IOException
+    {
+        URL url = Resources.getResource("covalenttxs.json");
+        APIReturn = Resources.toString(url, StandardCharsets.UTF_8);
     }
 
     @Test
-    public void testCovalentTx() {
-        try
-        {
-            CovalentTransaction[] covalentTransactions = getCovalentTransactions(APIReturn, walletAddr);
+    public void testCovalentTx() throws JSONException
+    {
+        CovalentTransaction[] covalentTransactions = getCovalentTransactions(APIReturn, walletAddr);
 
-            NetworkInfo info = new NetworkInfo("Klaytn", "Klaytn", "", "", KLAYTN_ID, "", "");
-            EtherscanEvent[] events = CovalentTransaction.toEtherscanEvents(covalentTransactions);
-            EtherscanTransaction[] txs = CovalentTransaction.toRawEtherscanTransactions(covalentTransactions, info);
+        NetworkInfo info = new NetworkInfo("Klaytn", "Klaytn", "", "", KLAYTN_ID, "", "");
+        EtherscanEvent[] events = CovalentTransaction.toEtherscanEvents(covalentTransactions);
+        EtherscanTransaction[] txs = CovalentTransaction.toRawEtherscanTransactions(covalentTransactions, info);
 
-            assertEquals(events.length, 517);
-            assertEquals(txs.length, 139);
+        assertEquals(events.length, 517);
+        assertEquals(txs.length, 139);
 
-            EtherscanEvent ev = events[0];
-            assertEquals(ev.value, "2700000000");
-            assertEquals(ev.tokenDecimal, "6");
+        EtherscanEvent ev = events[0];
+        assertEquals(ev.value, "2700000000");
+        assertEquals(ev.tokenDecimal, "6");
 
-            ev = events[516];
+        ev = events[516];
 
-            assertEquals(ev.value, "");
-            assertEquals(ev.tokenID, "20007");
-            assertEquals(ev.tokenDecimal, "0");
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
+        assertEquals(ev.value, "");
+        assertEquals(ev.tokenID, "20007");
+        assertEquals(ev.tokenDecimal, "0");
+        assertEquals(ev.from, "0xc067a53c91258ba513059919e03b81cf93f57ac7");
+        assertEquals(ev.to, "0xf9c883c8dca140ebbdc87a225fe6e330be5d25ef");
     }
 
     private CovalentTransaction[] getCovalentTransactions(String response, String walletAddress) throws JSONException

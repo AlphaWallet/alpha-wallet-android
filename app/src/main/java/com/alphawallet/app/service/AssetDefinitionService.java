@@ -159,9 +159,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private Disposable checkEventDisposable;
 
     /* Designed with the assmuption that only a single instance of this class at any given time
-    *  ^^ The "service" part of AssetDefinitionService is the keyword here.
-    *  This is shorthand in the project to indicate this is a singleton that other classes inject.
-    *  This is the design pattern of the app. See class RepositoriesModule for constructors which are called at App init only */
+     *  ^^ The "service" part of AssetDefinitionService is the keyword here.
+     *  This is shorthand in the project to indicate this is a singleton that other classes inject.
+     *  This is the design pattern of the app. See class RepositoriesModule for constructors which are called at App init only */
     public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs,
                                   RealmManager rm, TokensService tokensService,
                                   TokenLocalSource trs, TransactionRepositoryType trt,
@@ -174,7 +174,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         realmManager = rm;
         alphaWalletService = alphaService;
         this.tokensService = tokensService;
-        tokenscriptUtility = new TokenscriptFunction() { }; //no overridden functions
+        tokenscriptUtility = new TokenscriptFunction()
+        {
+        }; //no overridden functions
         tokenLocalSource = trs;
         transactionRepository = trt;
         assetLoadingLock = new Semaphore(1);
@@ -183,13 +185,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         loadAssetScripts();
     }
 
-    public TokenLocalSource getTokenLocalSource() {
+    public TokenLocalSource getTokenLocalSource()
+    {
         return tokenLocalSource;
     }
 
     /**
      * Load all TokenScripts
-     *
+     * <p>
      * This order has to be observed because it's an expected developer override order. If a script is placed in the /AlphaWallet directory
      * it is expected to override the one fetched from the repo server.
      * If a developer clicks on a script intent this script is expected to override the one fetched from the server.
@@ -232,7 +235,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             for (RealmTokenScriptData entry : realmData)
             {
-                if (handledHashes.contains(entry.getFileHash())) continue; //already checked - note that if a contract has multiple origins it could have more than one entry
+                if (handledHashes.contains(entry.getFileHash()))
+                    continue; //already checked - note that if a contract has multiple origins it could have more than one entry
                 //get file
                 TokenScriptFile tsf = new TokenScriptFile(context, entry.getFilePath());
                 handledHashes.add(entry.getFileHash());
@@ -245,7 +249,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         handledHashes.add(tsf.calcMD5()); //add the hash of the new file
                         //re-parse script, file hash has changed
                         final TokenDefinition td = parseFile(tsf.getInputStream());
-                                cacheSignature(tsf)
+                        cacheSignature(tsf)
                                 .map(definition -> getOriginContracts(td))
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(Schedulers.io())
@@ -299,7 +303,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         handledHashes.add(new TokenScriptFile(context, file.getAbsolutePath()).calcMD5());
                         handleFileLoadError(e, file);
                     }
-                } );
+                });
     }
 
     private void deleteTokenScriptFromRealm(Realm realm, String fileHash) throws RealmException
@@ -399,22 +403,22 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             final String hash = file.calcMD5();
 
-            realm.beginTransaction();
-            for (ContractLocator cl : originContracts)
-            {
-                String entryKey = getTSDataKey(cl.chainId, cl.address);
-                RealmTokenScriptData entry = realm.where(RealmTokenScriptData.class)
-                        .equalTo("instanceKey", entryKey)
-                        .findFirst();
-                if (entry != null) continue; // at this point, don't override any existing entry
-                entry = realm.createObject(RealmTokenScriptData.class, entryKey);
-                entry.setFileHash(hash);
-                entry.setFilePath(file.getAbsolutePath());
-                entry.setNames(td.getTokenNameList());
-                entry.setViewList(td.getViews());
-                entry.setHasEvents(hasEvents);
-            }
-            realm.commitTransaction();
+            realm.executeTransaction(r -> {
+                for (ContractLocator cl : originContracts)
+                {
+                    String entryKey = getTSDataKey(cl.chainId, cl.address);
+                    RealmTokenScriptData entry = realm.where(RealmTokenScriptData.class)
+                            .equalTo("instanceKey", entryKey)
+                            .findFirst();
+                    if (entry != null) continue; // at this point, don't override any existing entry
+                    entry = realm.createObject(RealmTokenScriptData.class, entryKey);
+                    entry.setFileHash(hash);
+                    entry.setFilePath(file.getAbsolutePath());
+                    entry.setNames(td.getTokenNameList());
+                    entry.setViewList(td.getViews());
+                    entry.setHasEvents(hasEvents);
+                }
+            });
         }
         catch (Exception e)
         {
@@ -488,11 +492,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             //then include the files in the app external directory - these are placed here when there's no file permission
             files = context.getExternalFilesDir("").listFiles();
-            if (files != null) fileList.addAll(Arrays.asList(files)); //now add files in the app's external directory; /Android/data/[app-name]/files. These override internal
+            if (files != null)
+                fileList.addAll(Arrays.asList(files)); //now add files in the app's external directory; /Android/data/[app-name]/files. These override internal
 
             //finally the files downloaded from the server
             files = context.getFilesDir().listFiles();
-            if (files != null) fileList.addAll(Arrays.asList(files)); //first add files in app internal area - these are downloaded from the server
+            if (files != null)
+                fileList.addAll(Arrays.asList(files)); //first add files in app internal area - these are downloaded from the server
         }
         catch (Exception e)
         {
@@ -690,7 +696,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private boolean checkReadPermission() {
+    private boolean checkReadPermission()
+    {
         return context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED;
     }
@@ -789,7 +796,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         if (address == null) return Single.fromCallable(TokenDefinition::new);
         String contractName = address;
-        if (contractName.equalsIgnoreCase(tokensService.getCurrentAddress())) contractName = "ethereum";
+        if (contractName.equalsIgnoreCase(tokensService.getCurrentAddress()))
+            contractName = "ethereum";
 
         // hold until asset definitions have finished loading
         waitForAssets();
@@ -882,7 +890,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void loadScriptFromServer(String correctedAddress)
     {
         //first check the last time we tried this session
-        if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() > (assetChecked.get(correctedAddress) + 1000L*60L*60L)))
+        if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() > (assetChecked.get(correctedAddress) + 1000L * 60L * 60L)))
         {
             fetchXMLFromServer(correctedAddress)
                     .flatMap(this::cacheSignature)
@@ -906,7 +914,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private TokenDefinition parseFile(InputStream xmlInputStream) throws Exception
     {
         Locale locale;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
             locale = context.getResources().getConfiguration().getLocales().get(0);
         }
         else
@@ -961,7 +970,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         RealmCertificateData realmCert = r.where(RealmCertificateData.class)
                                 .equalTo("instanceKey", realmData.getFileHash())
                                 .findFirst();
-                        if (realmCert != null && !realmData.getFileHash().equals(newFileHash)) realmCert.deleteFromRealm(); //don't delete cert if new cert will overwrite it
+                        if (realmCert != null && !realmData.getFileHash().equals(newFileHash))
+                            realmCert.deleteFromRealm(); //don't delete cert if new cert will overwrite it
                         deleteEventDataForScript(realmData);
                         realmData.deleteFromRealm();
                     }
@@ -976,7 +986,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return token.getScriptURI()
                 .map(uri -> {
                     if (!TextUtils.isEmpty(uri)) updateFlag.postValue(true);
-                    return uri; })
+                    return uri;
+                })
                 .map(uri -> downloadScript(uri, 0))
                 .map(dlResponse -> storeFile(token.tokenInfo.address, dlResponse));
     }
@@ -1021,7 +1032,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 result = defaultReturn;
             }
 
-            if (assetChecked.get(address) != null && (System.currentTimeMillis() > (assetChecked.get(address) + 1000L*60L*60L))) return result;
+            if (assetChecked.get(address) != null && (System.currentTimeMillis() > (assetChecked.get(address) + 1000L * 60L * 60L)))
+                return result;
 
             String sb = TOKENSCRIPT_REPO_SERVER +
                     TOKENSCRIPT_CURRENT_SCHEMA +
@@ -1065,11 +1077,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (!Uri.toLowerCase().contains("ipfs.io"))
         {
             bld.addHeader("Accept", "text/xml; charset=UTF-8")
-               .addHeader("X-Client-Name", "AlphaWallet")
-               .addHeader("X-Client-Version", appVersion)
-               .addHeader("X-Platform-Name", "Android")
-               .addHeader("X-Platform-Version", OSVersion)
-               .addHeader("If-Modified-Since", dateFormat);
+                    .addHeader("X-Client-Name", "AlphaWallet")
+                    .addHeader("X-Client-Version", appVersion)
+                    .addHeader("X-Platform-Name", "Android")
+                    .addHeader("X-Platform-Version", OSVersion)
+                    .addHeader("If-Modified-Since", dateFormat);
         }
         else
         {
@@ -1128,12 +1140,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     /**
      * Only used for loading bundled TokenScripts
+     *
      * @param asset
      * @return
      */
     private boolean addContractAssets(String asset)
     {
-        try (InputStream input = context.getResources().getAssets().open(asset)) {
+        try (InputStream input = context.getResources().getAssets().open(asset))
+        {
             TokenDefinition token = parseFile(input);
             TokenScriptFile tsf = new TokenScriptFile(context, asset);
             ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
@@ -1157,7 +1171,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 }
                 return true;
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Timber.e(e);
         }
         return false;
@@ -1182,7 +1198,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 String entryKey = getTSDataKey(chainId, address);
                 RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
                         .equalTo("instanceKey", entryKey)
@@ -1201,7 +1217,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public TokenDefinition getTokenDefinition(File file)
     {
-        try (FileInputStream input = new FileInputStream(file)) {
+        try (FileInputStream input = new FileInputStream(file))
+        {
             return parseFile(input);
         }
         catch (Exception e)
@@ -1255,7 +1272,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public void stopEventListener()
     {
         if (eventListener != null && !eventListener.isDisposed()) eventListener.dispose();
-        if (checkEventDisposable != null && !checkEventDisposable.isDisposed()) checkEventDisposable.dispose();
+        if (checkEventDisposable != null && !checkEventDisposable.isDisposed())
+            checkEventDisposable.dispose();
     }
 
     public void startEventListener()
@@ -1263,7 +1281,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (assetLoadingLock.availablePermits() == 0) return;
 
         if (eventListener != null && !eventListener.isDisposed()) eventListener.dispose();
-        eventListener =  Observable.interval(0, CHECK_TX_LOGS_INTERVAL, TimeUnit.SECONDS)
+        eventListener = Observable.interval(0, CHECK_TX_LOGS_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> {
                     checkEvents()
                             .subscribeOn(Schedulers.io())
@@ -1290,7 +1308,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             EthFilter filter = getEventFilter(ev);
             if (filter == null) return;
-            if (BuildConfig.DEBUG) eventConnection.acquire(); //prevent overlapping event calls while debugging
+            if (BuildConfig.DEBUG)
+                eventConnection.acquire(); //prevent overlapping event calls while debugging
             final String walletAddress = tokensService.getCurrentAddress();
             Web3j web3j = getWeb3jService(ev.getEventChainId());
 
@@ -1359,10 +1378,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         for (int i = index; i >= 0; i--)
         {
             EthLog.LogResult ethLog = logs.get(i);
-            String txHash = ((Log)ethLog.get()).getTransactionHash();
+            String txHash = ((Log) ethLog.get()).getTransactionHash();
             if (TextUtils.isEmpty(firstTxHash)) firstTxHash = txHash;
             String selectVal = EventUtils.getSelectVal(ev, ethLog);
-            BigInteger blockNumber = ((Log)ethLog.get()).getBlockNumber();
+            BigInteger blockNumber = ((Log) ethLog.get()).getBlockNumber();
 
             if (blockNumber.compareTo(ev.readBlock) > 0)
             {
@@ -1376,7 +1395,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
             else
             {
-                EthBlock txBlock = EventUtils.getBlockDetails(((Log)ethLog.get()).getBlockHash(), web3j).blockingGet();
+                EthBlock txBlock = EventUtils.getBlockDetails(((Log) ethLog.get()).getBlockHash(), web3j).blockingGet();
                 long blockTime = txBlock.getBlock().getTimestamp().longValue();
 
                 storeActivityValue(walletAddress, ev, ethLog, blockTime, ev.activityName);
@@ -1401,7 +1420,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 RealmAuxData realmToken = r.where(RealmAuxData.class)
                         .equalTo("instanceKey", databaseKey)
                         .findFirst();
-                if (realmToken == null) realmToken = r.createObject(RealmAuxData.class, databaseKey);
+                if (realmToken == null)
+                    realmToken = r.createObject(RealmAuxData.class, databaseKey);
                 realmToken.setResultTime(System.currentTimeMillis());
                 realmToken.setResult(ev.readBlock.toString(16));
                 realmToken.setFunctionId(eventName);
@@ -1440,7 +1460,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 RealmAuxData realmToken = r.where(RealmAuxData.class)
                         .equalTo("instanceKey", databaseKey)
                         .findFirst();
-                if (realmToken == null) realmToken = r.createObject(RealmAuxData.class, databaseKey);
+                if (realmToken == null)
+                    realmToken = r.createObject(RealmAuxData.class, databaseKey);
                 realmToken.setResultTime(blockTime);
                 realmToken.setResult(eventData);
                 realmToken.setFunctionId(activityName);
@@ -1467,7 +1488,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TransactionResult txResult = getFunctionResult(eventContractAddress, attr, tokenId);
         txResult.result = attr.getSyntaxVal(selectVal);
 
-        long blockNumber = ((Log)log.get()).getBlockNumber().longValue();
+        long blockNumber = ((Log) log.get()).getBlockNumber().longValue();
 
         //Update the entry for the attribute if required
         if (txResult.resultTime == 0 || blockNumber >= txResult.resultTime)
@@ -1482,7 +1503,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         int index = file.getName().lastIndexOf(".");
         if (index >= 0)
         {
-            String extension = file.getName().substring(index+1);
+            String extension = file.getName().substring(index + 1);
             switch (extension)
             {
                 case "xml":
@@ -1520,6 +1541,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     /**
      * This is used to retrieve the file from the secure area in order to check the date.
      * Note: it only finds files previously downloaded from the server
+     *
      * @param contractAddress
      * @return
      */
@@ -1551,7 +1573,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 .filter(this::allowableExtension)
                 .filter(File::canRead)
                 .filter(this::isAddress)
-                .forEach(file -> checkScripts.add(getFileName(file)) ).isDisposed();
+                .forEach(file -> checkScripts.add(getFileName(file))).isDisposed();
 
         return checkScripts;
     }
@@ -1654,6 +1676,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     /**
      * Use internal directory to store contracts fetched from the server
+     *
      * @param address
      * @param result
      * @return
@@ -1799,7 +1822,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         TSSelection selection = action.exclude != null ? td.getSelection(action.exclude) : null;
                         if (selection == null)
                         {
-                            if (!validActions.containsKey(tokenId)) validActions.put(tokenId, new ArrayList<>());
+                            if (!validActions.containsKey(tokenId))
+                                validActions.put(tokenId, new ArrayList<>());
                             validActions.get(tokenId).add(actionName);
                         }
                         else
@@ -1813,7 +1837,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             boolean exclude = EvaluateSelection.evaluate(selection.head, idAttrResults);
                             if (!exclude || selection.denialMessage != null)
                             {
-                                if (!validActions.containsKey(tokenId)) validActions.put(tokenId, new ArrayList<>());
+                                if (!validActions.containsKey(tokenId))
+                                    validActions.put(tokenId, new ArrayList<>());
                                 validActions.get(tokenId).add(actionName);
                             }
                         }
@@ -1950,6 +1975,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         FileObserver observer = new FileObserver(path)
         {
             private final String listenerPath = path;
+
             @Override
             public void onEvent(int event, @Nullable String file)
             {
@@ -1978,7 +2004,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         }
                         catch (Exception e)
                         {
-                            if (homeMessenger != null) homeMessenger.tokenScriptError(e.getMessage());
+                            if (homeMessenger != null)
+                                homeMessenger.tokenScriptError(e.getMessage());
                         }
                         break;
                     default:
@@ -2124,7 +2151,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     @Override
     public TransactionResult storeAuxData(String walletAddress, TransactionResult tResult)
     {
-        if (tokensService.getCurrentAddress() == null || !Utils.isAddressValid(tokensService.getCurrentAddress())) return tResult;
+        if (tokensService.getCurrentAddress() == null || !Utils.isAddressValid(tokensService.getCurrentAddress()))
+            return tResult;
         if (tResult.result == null || tResult.resultTime < 0) return tResult;
         try (Realm realm = realmManager.getRealmInstance(walletAddress))
         {
@@ -2257,17 +2285,22 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void addOpenSeaAttributes(StringBuilder attrs, Token erc721Token, BigInteger tokenId)
     {
         NFTAsset tokenAsset = erc721Token.getAssetForToken(tokenId.toString());
-        if(tokenAsset == null) return;
+        if (tokenAsset == null) return;
 
         try
         {
             //add all asset IDs
-            if (tokenAsset.getBackgroundColor() != null) TokenScriptResult.addPair(attrs, "background_colour", URLEncoder.encode(tokenAsset.getBackgroundColor(), "utf-8"));
-            if (tokenAsset.getThumbnail() != null) TokenScriptResult.addPair(attrs, "image_preview_url", URLEncoder.encode(tokenAsset.getThumbnail(), "utf-8"));
-            if (tokenAsset.getDescription() != null) TokenScriptResult.addPair(attrs, "description", URLEncoder.encode(tokenAsset.getDescription(), "utf-8"));
-            if (tokenAsset.getExternalLink() != null) TokenScriptResult.addPair(attrs, "external_link", URLEncoder.encode(tokenAsset.getExternalLink(), "utf-8"));
+            if (tokenAsset.getBackgroundColor() != null)
+                TokenScriptResult.addPair(attrs, "background_colour", URLEncoder.encode(tokenAsset.getBackgroundColor(), "utf-8"));
+            if (tokenAsset.getThumbnail() != null)
+                TokenScriptResult.addPair(attrs, "image_preview_url", URLEncoder.encode(tokenAsset.getThumbnail(), "utf-8"));
+            if (tokenAsset.getDescription() != null)
+                TokenScriptResult.addPair(attrs, "description", URLEncoder.encode(tokenAsset.getDescription(), "utf-8"));
+            if (tokenAsset.getExternalLink() != null)
+                TokenScriptResult.addPair(attrs, "external_link", URLEncoder.encode(tokenAsset.getExternalLink(), "utf-8"));
             //if (tokenAsset.getTraits() != null) TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
-            if (tokenAsset.getName() != null) TokenScriptResult.addPair(attrs, "name", URLEncoder.encode(tokenAsset.getName(), "utf-8"));
+            if (tokenAsset.getName() != null)
+                TokenScriptResult.addPair(attrs, "name", URLEncoder.encode(tokenAsset.getName(), "utf-8"));
         }
         catch (UnsupportedEncodingException e)
         {
@@ -2294,7 +2327,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenScriptResult.addPair(attrs, "tokenId", tokenId);
         TokenScriptResult.addPair(attrs, "ownerAddress", token.getWallet());
 
-        if(token instanceof ERC721Token)
+        if (token instanceof ERC721Token)
         {
             addOpenSeaAttributes(attrs, token, tokenId);
         }
@@ -2309,6 +2342,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     /**
      * Get all the magic values - eg native crypto balances for all chains
+     *
      * @return
      */
     public String getMagicValuesForInjection(long chainId) throws Exception
@@ -2340,7 +2374,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
-        if (definition == null) return Observable.fromCallable(() -> new TokenScriptResult.Attribute("RAttrs", "", BigInteger.ZERO, ""));
+        if (definition == null)
+            return Observable.fromCallable(() -> new TokenScriptResult.Attribute("RAttrs", "", BigInteger.ZERO, ""));
 
         definition.context = new TokenscriptContext();
         definition.context.cAddr = cAddr;
@@ -2353,7 +2388,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         return Observable.fromIterable(attrList)
                 .flatMap(attr -> tokenscriptUtility.fetchAttrResult(token, attr, tokenId,
-                                                                    definition, this, itemView));
+                        definition, this, itemView));
     }
 
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds, List<Attribute> extraAttrs)
@@ -2508,7 +2543,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         catch (Exception e)
                         {
                             TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
-                            ContractInfo contractInfo = new ContractInfo("Contract Type",new HashMap<>());
+                            ContractInfo contractInfo = new ContractInfo("Contract Type", new HashMap<>());
                             StringWriter stackTrace = new StringWriter();
                             e.printStackTrace(new PrintWriter(stackTrace));
 
@@ -2523,7 +2558,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public Single<TokenDefinition> checkServerForScript(Token token, MutableLiveData<Boolean> updateFlag)
     {
         TokenScriptFile tf = getTokenScriptFile(token.tokenInfo.chainId, token.getAddress());
-        if ((tf != null && !TextUtils.isEmpty(tf.getName())) && !isInSecureZone(tf)) return Single.fromCallable(TokenDefinition::new); //early return for debug script check
+        if ((tf != null && !TextUtils.isEmpty(tf.getName())) && !isInSecureZone(tf))
+            return Single.fromCallable(TokenDefinition::new); //early return for debug script check
 
         //try the contractURI, then server
         return fetchTokenScriptFromContract(token, updateFlag)
@@ -2634,7 +2670,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 if (hash.equals(realmToken.getResult()))
                 {
                     //can use this height
-                    return (int)realmToken.getResultTime();
+                    return (int) realmToken.getResultTime();
                 }
             }
             catch (Exception e)

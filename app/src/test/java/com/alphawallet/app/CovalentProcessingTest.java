@@ -1,7 +1,6 @@
 package com.alphawallet.app;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
-
 import static org.junit.Assert.assertEquals;
 
 import com.alphawallet.app.entity.CovalentTransaction;
@@ -19,10 +18,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import timber.log.Timber;
 
@@ -106,24 +101,6 @@ public class CovalentProcessingTest
         CovalentTransaction[] ctxs = new Gson().fromJson(orders.toString(), CovalentTransaction[].class);
 
         return ctxs;
-    }
-
-    private Map<String, List<EtherscanEvent>> getEventMap(EtherscanEvent[] events)
-    {
-        Map<String, List<EtherscanEvent>> eventMap = new HashMap<>();
-        for (EtherscanEvent ev : events)
-        {
-            List<EtherscanEvent> thisEventList = eventMap.get(ev.contractAddress);
-            if (thisEventList == null)
-            {
-                thisEventList = new ArrayList<>();
-                eventMap.put(ev.contractAddress, thisEventList);
-            }
-
-            thisEventList.add(ev);
-        }
-
-        return eventMap;
     }
 }
 

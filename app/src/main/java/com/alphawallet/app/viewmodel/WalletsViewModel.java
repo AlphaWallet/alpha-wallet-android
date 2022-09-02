@@ -57,7 +57,7 @@ import io.reactivex.schedulers.Schedulers;
 @HiltViewModel
 public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallback
 {
-    private static final int BALANCE_CHECK_INTERVAL_SECONDS = 20;
+    private static final int BALANCE_CHECK_INTERVAL_SECONDS = 30;
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final GenericWalletInteract genericWalletInteract;
@@ -79,7 +79,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final MutableLiveData<Wallet> createdWallet = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
-    private final MutableLiveData<Token[]> baseTokens = new MutableLiveData<>();
+    private final MutableLiveData<Map<String, Token[]>> baseTokens = new MutableLiveData<>();
 
     private NetworkInfo currentNetwork;
     private final Map<String, Wallet> walletBalances = new HashMap<>();
@@ -154,7 +154,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         return createWalletError;
     }
     public LiveData<Boolean> noWalletsError() { return noWalletsError; }
-    public LiveData<Token[]> baseTokens() { return baseTokens; }
+    public LiveData<Map<String, Token[]>> baseTokens() { return baseTokens; }
 
     public void setDefaultWallet(Wallet wallet, boolean isNewWallet)
     {
@@ -373,8 +373,8 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
         if (!tokensService.isMainNetActive())
         {
-            updateWallets(wallets, TokenUpdateType.STORED); //initially show values from database, update 5 seconds later
-            initialDelay = 5;
+            updateAllWallets(wallets, TokenUpdateType.STORED); //initially show values from database, update 5 seconds later
+            initialDelay = 10;
         }
 
         balanceTimerDisposable = Observable.interval(initialDelay, BALANCE_CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS) //initial delay 1 second to allow view to stabilise
@@ -400,18 +400,28 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         else
         {
             //Testnet Mode, need to update chain balances for visible chains
-            updateWallets(wallets, TokenUpdateType.ACTIVE_SYNC);
+            updateAllWallets(wallets, TokenUpdateType.ACTIVE_SYNC);
         }
         progress.postValue(false);
     }
 
-    private void updateWallets(Wallet[] wallets, TokenUpdateType updateType)
+    private void updateAllWallets(Wallet[] wallets, TokenUpdateType updateType)
     {
-        disposable = Observable.fromArray(wallets)
-                .forEach(wallet -> walletBalanceUpdate = tokensService.syncChainBalances(wallet.address.toLowerCase(), updateType)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(baseTokens::postValue, e -> {}));
+        disposable = Single.fromCallable(() -> {
+            //fetch all wallets in one go
+            Map<String, Token[]> walletTokenMap = new HashMap<>();
+            for (Wallet wallet : wallets)
+            {
+                Token[] walletTokens = tokensService.syncChainBalances(wallet.address.toLowerCase(), updateType).blockingGet();
+                if (walletTokens.length > 0)
+                {
+                    walletTokenMap.put(walletTokens[0].getWallet(), walletTokens);
+                }
+            }
+            return walletTokenMap;
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(baseTokens::postValue, e -> {});
     }
 
     @Override

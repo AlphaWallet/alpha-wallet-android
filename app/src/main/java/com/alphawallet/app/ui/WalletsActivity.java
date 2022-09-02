@@ -41,6 +41,8 @@ import com.alphawallet.app.widget.SystemView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -132,9 +134,9 @@ public class WalletsActivity extends BaseActivity implements
         initViews(); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
     }
 
-    private void updateBaseTokens(Token[] tokens)
+    private void updateBaseTokens(Map<String, Token[]> walletTokens)
     {
-        adapter.setTokens(tokens);
+        adapter.setTokens(walletTokens);
     }
 
     protected Activity getThisActivity()

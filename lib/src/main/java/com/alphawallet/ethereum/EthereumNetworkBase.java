@@ -15,7 +15,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final long ROPSTEN_ID = 3;
     public static final long SOKOL_ID = 77;
     public static final long RINKEBY_ID = 4;
-    public static final long XDAI_ID = 100;
+    public static final long GNOSIS_ID = 100;
     public static final long GOERLI_ID = 5;
     public static final long ARTIS_SIGMA1_ID = 246529;
     public static final long ARTIS_TAU1_ID = 246785;
@@ -27,8 +27,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final long FANTOM_TEST_ID = 4002;
     public static final long AVALANCHE_ID = 43114;
     public static final long FUJI_TEST_ID = 43113;
-    public static final long MATIC_ID = 137;
-    public static final long MATIC_TEST_ID = 80001;
+    public static final long POLYGON_ID = 137;
+    public static final long POLYGON_TEST_ID = 80001;
     public static final long OPTIMISTIC_MAIN_ID = 10;
     public static final long OPTIMISTIC_TEST_ID = 69;
     public static final long CRONOS_MAIN_ID = 25;
@@ -92,8 +92,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     MAINNET_ID, false));
             put(CLASSIC_ID, new NetworkInfo("Ethereum Classic", "ETC", CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/tx/",
                     CLASSIC_ID, false));
-            put(XDAI_ID, new NetworkInfo("Gnosis", "xDAi", XDAI_RPC_URL, "https://blockscout.com/xdai/mainnet/tx/",
-                    XDAI_ID, false));
+            put(GNOSIS_ID, new NetworkInfo("Gnosis", "xDAi", XDAI_RPC_URL, "https://blockscout.com/xdai/mainnet/tx/",
+                    GNOSIS_ID, false));
             put(POA_ID, new NetworkInfo("POA", "POA", POA_RPC_URL, "https://blockscout.com/poa/core/tx/",
                     POA_ID, false));
             put(ARTIS_SIGMA1_ID, new NetworkInfo("ARTIS sigma1", "ATS", ARTIS_SIGMA1_RPC_URL, "https://explorer.sigma1.artis.network/tx/",
@@ -129,10 +129,10 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
             put(FANTOM_TEST_ID, new NetworkInfo("Fantom (Test)", "FTM", FANTOM_TEST_RPC_URL, "https://explorer.testnet.fantom.network/tx/",
                     FANTOM_TEST_ID, false));
 
-            put(MATIC_ID, new NetworkInfo("Polygon", "POLY", MATIC_RPC_URL, "https://polygonscan.com/tx/",
-                    MATIC_ID, false));
-            put(MATIC_TEST_ID, new NetworkInfo("Mumbai (Test)", "POLY", MUMBAI_TEST_RPC_URL, "https://mumbai.polygonscan.com/tx/",
-                    MATIC_TEST_ID, false));
+            put(POLYGON_ID, new NetworkInfo("Polygon", "POLY", MATIC_RPC_URL, "https://polygonscan.com/tx/",
+                    POLYGON_ID, false));
+            put(POLYGON_TEST_ID, new NetworkInfo("Mumbai (Test)", "POLY", MUMBAI_TEST_RPC_URL, "https://mumbai.polygonscan.com/tx/",
+                    POLYGON_TEST_ID, false));
 
             put(OPTIMISTIC_MAIN_ID, new NetworkInfo("Optimistic","ETH", OPTIMISTIC_MAIN_URL, "https://optimistic.etherscan.io/tx/",
                     OPTIMISTIC_MAIN_ID, false));

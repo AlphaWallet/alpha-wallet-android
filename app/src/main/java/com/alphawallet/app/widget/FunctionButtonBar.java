@@ -4,9 +4,9 @@ import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -621,7 +621,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
      */
     private boolean setupCustomTokenActions()
     {
-        if (token.tokenInfo.chainId == MATIC_ID && token.isNonFungible())
+        if (token.tokenInfo.chainId == POLYGON_ID && token.isNonFungible())
         {
             return false;
         }
@@ -652,7 +652,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                 return true;
             }
         }
-        else if (token.tokenInfo.chainId == MATIC_ID)
+        else if (token.tokenInfo.chainId == POLYGON_ID)
         {
             addFunction(R.string.swap_with_quickswap);
             return true;
@@ -728,7 +728,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private void addBuyFunction()
     {
         if (token.tokenInfo.chainId == MAINNET_ID
-                || token.tokenInfo.chainId == XDAI_ID)
+                || token.tokenInfo.chainId == GNOSIS_ID)
         {
             addPurchaseVerb(token, onRampRepository);
         }

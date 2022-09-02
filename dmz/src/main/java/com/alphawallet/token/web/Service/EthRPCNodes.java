@@ -35,7 +35,7 @@ public class EthRPCNodes
                 return SOKOL_RPC_URL;
             case (int)EthereumNetworkBase.CLASSIC_ID:
                 return CLASSIC_RPC_URL;
-            case (int)EthereumNetworkBase.XDAI_ID:
+            case (int)EthereumNetworkBase.GNOSIS_ID:
                 return XDAI_RPC_URL;
             case (int)EthereumNetworkBase.GOERLI_ID:
                 return GOERLI_RPC_URL;

@@ -5,31 +5,15 @@ import com.alphawallet.ethereum.NetworkInfo;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_RPC_URL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_RPC_URL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_RPC_URL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_RPC_URL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MUMBAI_TEST_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SOKOL_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 
 /**
  * Created by James on 2/03/2019.
@@ -98,7 +82,7 @@ public class MagicLinkInfo
                 return sokolMagicLinkDomain;
             case (int)CLASSIC_ID:
                 return classicMagicLinkDomain;
-            case (int)XDAI_ID:
+            case (int) GNOSIS_ID:
                 return xDaiMagicLinkDomain;
             case (int)GOERLI_ID:
                 return goerliMagicLinkDomain;
@@ -131,7 +115,7 @@ public class MagicLinkInfo
             case sokolMagicLinkDomain:
                 return SOKOL_ID;
             case xDaiMagicLinkDomain:
-                return XDAI_ID;
+                return GNOSIS_ID;
             case goerliMagicLinkDomain:
                 return GOERLI_ID;
             case artisSigma1MagicLinkDomain:
@@ -159,7 +143,7 @@ public class MagicLinkInfo
                 return sokolEtherscan;
             case (int)CLASSIC_ID:
                 return classicEtherscan;
-            case (int)XDAI_ID:
+            case (int) GNOSIS_ID:
                 return xDaiEtherscan;
             case (int)GOERLI_ID:
                 return goerliEtherscan;

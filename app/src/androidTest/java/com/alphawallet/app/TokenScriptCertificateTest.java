@@ -8,6 +8,7 @@ import static com.alphawallet.app.steps.Steps.importKSWalletFromFrontPage;
 import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.steps.Steps.switchToWallet;
 import static com.alphawallet.app.util.Helper.click;
+import static com.alphawallet.app.util.Helper.waitUntil;
 
 import androidx.test.espresso.action.ViewActions;
 
@@ -32,10 +33,12 @@ public class TokenScriptCertificateTest extends BaseE2ETest {
         switchToWallet("0xF9c883c8DcA140EBbdC87a225Fe6E330BE5D25ef");
 
         //Wait for TokensService engine to resolve the STL token
-        Helper.wait(8);
+        //Helper.wait(8);
 
         //Swipe up
         onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());
+
+        waitUntil(withSubstring("OFFIC"), 30 * 60);
 
         //Select token
         click(withSubstring("OFFIC"));

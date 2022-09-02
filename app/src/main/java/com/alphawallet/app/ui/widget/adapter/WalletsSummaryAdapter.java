@@ -341,16 +341,18 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     //Note: this now returns a mapping of wallet address vs tokens, please refactor this method to handle this new data format
     public void setTokens(Map<String, Token[]> walletTokens)
     {
-        /*if(walletTokens != null && allWalletTokens.length > 0)
+        if(walletTokens != null && walletTokens.size() > 0)
         {
-            Token t = allWalletTokens[0];
-            String walletAddress = t.getWallet();
-            int walletIndex = getWalletIndex(walletAddress);
-            if(walletIndex != -1)
-            {
-                this.wallets.get(walletIndex).tokens = allWalletTokens;
-                notifyItemChanged(walletIndex);
+            for(Token[] token: walletTokens.values()){
+                Token[] t = walletTokens.get(token[0].getAddress());
+                String walletAddress = token[0].getAddress();
+                int walletIndex = getWalletIndex(walletAddress);
+                if(walletIndex != -1)
+                {
+                    this.wallets.get(walletIndex).tokens = t;
+                    notifyItemChanged(walletIndex);
+                }
             }
-        }*/
+        }
     }
 }

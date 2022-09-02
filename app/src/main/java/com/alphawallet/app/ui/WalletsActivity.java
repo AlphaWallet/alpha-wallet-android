@@ -110,7 +110,7 @@ public class WalletsActivity extends BaseActivity implements
         int position = adapter.getDefaultWalletIndex();
         if (position != -1)
         {
-            list.smoothScrollToPosition(position);
+            list.getLayoutManager().scrollToPosition(position);
         }
     }
 

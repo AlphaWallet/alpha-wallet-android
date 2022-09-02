@@ -167,7 +167,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 {
                     lastTransaction = syncDownwards(updates, instance, svs, networkInfo, tokenAddress, 9999999999L);
                 }
-                else // try to sydenc upwards from the last read
+                else // try to sync upwards from the last read
                 {
                     lastTransaction = syncUpwards(updates, instance, svs, networkInfo, tokenAddress, lastBlockNumber);
                 }
@@ -699,7 +699,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         else if (networkInfo.chainId == POLYGON_ID || networkInfo.chainId == POLYGON_TEST_ID)
         {
-
             return POLYGONSCAN_API_KEY;
         }
         else if (networkInfo.chainId == AURORA_MAINNET_ID || networkInfo.chainId == AURORA_TESTNET_ID)

@@ -79,8 +79,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/standard_16"
                 android:layout_marginEnd="@dimen/standard_16"
-                app:flexDirection="row"
-                app:flexWrap="wrap" />
+                />
 
         </LinearLayout>
 

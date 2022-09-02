@@ -27,9 +27,7 @@
         android:layout_marginLeft="@dimen/standard_16"
         android:layout_marginTop="@dimen/double_base_48"
         android:layout_marginRight="@dimen/standard_16"
-        app:flexDirection="row"
-        app:flexWrap="wrap" />
-
+        />
     <com.alphawallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"

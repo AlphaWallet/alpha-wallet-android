@@ -1,6 +1,7 @@
 package cn.seabornlee.myapplication;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.alphawallet.app.App;
 import com.alphawallet.app.entity.ImportWalletCallback;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
@@ -52,7 +54,7 @@ public class FirstFragment extends Fragment
                     @Override
                     public void walletValidated(String s, KeyEncodingType keyEncodingType, KeyService.AuthenticationLevel authenticationLevel)
                     {
-
+                        Log.d("seaborn", s);
                     }
                 });
 

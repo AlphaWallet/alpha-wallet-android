@@ -1,6 +1,8 @@
 package com.alphawallet.app;
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.pressBack;
+import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static com.alphawallet.app.assertions.Should.shouldSee;
@@ -8,7 +10,7 @@ import static com.alphawallet.app.steps.Steps.importKSWalletFromFrontPage;
 import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.steps.Steps.switchToWallet;
 import static com.alphawallet.app.util.Helper.click;
-import static com.alphawallet.app.util.Helper.waitUntil;
+import static org.hamcrest.Matchers.allOf;
 
 import androidx.test.espresso.action.ViewActions;
 
@@ -24,7 +26,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest {
     private static final String password = "hellohello";
 
     @Test
-    public void cipher_integrity_test_keystore() {
+    public void certificate_test() {
         importKSWalletFromFrontPage(keystore, password);
 
         selectTestNet("Kovan");
@@ -33,12 +35,27 @@ public class TokenScriptCertificateTest extends BaseE2ETest {
         switchToWallet("0xF9c883c8DcA140EBbdC87a225Fe6E330BE5D25ef");
 
         //Wait for TokensService engine to resolve the STL token
-        Helper.wait(8);
+        Helper.wait(1);
+
+        //add the token manually since test doesn't seem to work normally
+        click(withId(R.id.action_my_wallet));
+        click(withSubstring("Add / Hide Tokens"));
+        Helper.wait(1);
+        click(withId(R.id.action_add));
+        Helper.wait(1);
+
+        onView(allOf(withId(R.id.edit_text))).perform(replaceText("0x9afb1e2822edab926d0dea894f8864368b7bb47a"));
+
+        Helper.wait(15);
+
+        click(withId(R.id.select_token));
+
+        click(withSubstring("Save"));
+
+        pressBack();
 
         //Swipe up
         onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());
-
-        waitUntil(withSubstring("OFFIC"), 600);
 
         //Select token
         click(withSubstring("OFFIC"));

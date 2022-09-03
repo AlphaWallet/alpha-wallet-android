@@ -198,6 +198,8 @@ public class Steps
         input(R.id.input_network_symbol, "ETH");
         input(R.id.input_network_explorer_api, url);
         input(R.id.input_network_block_explorer_url, url);
+        onView(withId(R.id.network_input_scroll)).perform(ViewActions.swipeUp());
+        Helper.wait(1);
         click(withId(R.id.checkbox_testnet));
         click(withId(R.string.action_add_network));
         pressBack();

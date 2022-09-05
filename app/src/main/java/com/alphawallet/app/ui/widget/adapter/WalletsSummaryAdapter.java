@@ -338,7 +338,6 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         void onSetDefault(Wallet wallet);
     }
 
-    //Note: this now returns a mapping of wallet address vs tokens, please refactor this method to handle this new data format
     public void setTokens(Map<String, Token[]> walletTokens)
     {
         if(walletTokens != null && walletTokens.size() > 0)

@@ -19,10 +19,7 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
 {
     private final Token[] tokens;
     private final Context context;
-    //TODO - JB: populate the token list using this method:
-    // - from tokensService get the tokenFilter with getNetworkFilters()
-    // - loop through this list and check for non-zero balance testnet (using getTokenOrBase(chainId, tokensService.getCurrentAddress()) )
-    // - send list of tokens below but use Token[] instead of TokenCardMeta[]. Now you won't need TokensService or AssetDefinitionService
+
     public  TestNetHorizontalListAdapter(Token[] tokens, Context context)
     {
         this.tokens = tokens;
@@ -38,7 +35,6 @@ public class TestNetHorizontalListAdapter extends RecyclerView.Adapter<TestNetHo
         return new TestNetHorizontalListAdapter.ViewHolder(view);
     }
 
-    //TODO - JB: Fix formatting (no whitespace at top of function, fix tabbing)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {

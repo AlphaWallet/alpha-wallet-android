@@ -46,6 +46,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
+
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final String TAG = "TKNADAPTER";
 
@@ -59,6 +61,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private boolean debugView = false;
 
     private boolean gridFlag;
+    private boolean testNetWhereAreMyTokensViewFlag;
 
     protected final TokensAdapterCallback tokensAdapterCallback;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -100,14 +103,14 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
-
     public TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, TokensService tService,
-                         ActivityResultLauncher<Intent> launcher)
+                         ActivityResultLauncher<Intent> launcher,Boolean viewType)
     {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = tService;
         this.managementLauncher = launcher;
+        this.testNetWhereAreMyTokensViewFlag = viewType;
 
         new TokensMappingRepository(aService.getTokenLocalSource());
     }
@@ -140,6 +143,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     @Override
     public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
+        if (testNetWhereAreMyTokensViewFlag)
+        Timber.tag(TAG).d("ViewTag:::%s", testNetWhereAreMyTokensViewFlag);
         BinderViewHolder<?> holder;
         switch (viewType)
         {
@@ -166,8 +171,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 break;
 
             case TestNetTipsHolder.VIEW_TYPE:
-                holder = new TestNetTipsHolder(R.layout.layout_testnet_header, parent);
-                holder.setOnTokenClickListener(tokensAdapterCallback);
+                    holder = new TestNetTipsHolder(R.layout.layout_testnet_header, parent);
+                    holder.setOnTokenClickListener(tokensAdapterCallback);
                 break;
 
             case SearchTokensHolder.VIEW_TYPE:
@@ -425,7 +430,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void addTestNetTips()
     {
-        if (!tokensService.isMainNetActive())
+        if (!tokensService.isMainNetActive() && testNetWhereAreMyTokensViewFlag)
         {
             items.add(new TestNetTipsItem(0));
         }

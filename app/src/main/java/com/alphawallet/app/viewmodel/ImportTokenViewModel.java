@@ -45,8 +45,6 @@ import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.ParseMagicLink;
 
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -249,7 +247,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private void setupTokenAddr(String contractAddress)
     {
         disposable = tokensService
-                .update(contractAddress, importOrder.chainId)
+                .update(contractAddress, importOrder.chainId, ContractType.NOT_SET)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::getTokenSpec, this::onError);

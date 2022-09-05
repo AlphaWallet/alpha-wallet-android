@@ -4,21 +4,11 @@ import android.util.Pair;
 
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.SubscribeWrapper;
-import com.alphawallet.app.entity.tokendata.TokenGroup;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.entity.tokendata.TokenTicker;
-import com.alphawallet.app.entity.TransferFromEventResponse;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.service.AssetDefinitionService;
-
-import io.reactivex.disposables.Disposable;
-
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
@@ -41,7 +31,7 @@ public interface TokenRepositoryType {
     Single<Token[]> checkInterface(Token[] tokens, Wallet wallet);
     void setEnable(Wallet wallet, Token token, boolean isEnabled);
     void setVisibilityChanged(Wallet wallet, Token token);
-    Single<TokenInfo> update(String address, long chainId);
+    Single<TokenInfo> update(String address, long chainId, ContractType type);
     Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
     Single<TokenTicker> getEthTicker(long chainId);
     TokenTicker getTokenTicker(Token token);
@@ -60,6 +50,7 @@ public interface TokenRepositoryType {
     Single<Boolean> fetchIsRedeemed(Token token, BigInteger tokenId);
 
     void addImageUrl(long chainId, String address, String imageUrl);
+    void updateLocalAddress(String walletAddress);
 
     Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Long> networkFilters,
                                             AssetDefinitionService svs);

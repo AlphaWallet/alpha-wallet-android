@@ -1,6 +1,5 @@
 package com.alphawallet.app.repository;
 
-import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
@@ -28,8 +27,8 @@ import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.MagicLinkData;
 
@@ -99,6 +98,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private final Map<Long, Web3j> web3jNodeServers;
     private AWEnsResolver ensResolver;
+    private String currentAddress;
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -114,6 +114,7 @@ public class TokenRepository implements TokenRepositoryType {
         this.tickerService = tickerService;
 
         web3jNodeServers = new ConcurrentHashMap<>();
+        currentAddress = ethereumNetworkRepository.getCurrentWalletAddress();
     }
 
     private void buildWeb3jClient(NetworkInfo networkInfo)
@@ -190,6 +191,12 @@ public class TokenRepository implements TokenRepositoryType {
 
             return tokens;
         }).flatMap(this::checkTokenData);
+    }
+
+    @Override
+    public void updateLocalAddress(String walletAddress)
+    {
+        currentAddress = walletAddress;
     }
 
     @Override
@@ -371,9 +378,21 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<TokenInfo> update(String contractAddr, long chainId)
+    public Single<TokenInfo> update(String contractAddr, long chainId, ContractType type)
     {
-        return setupTokensFromLocal(contractAddr, chainId);
+        switch (type)
+        {
+            case ERC721:
+            case ERC875_LEGACY:
+            case ERC721_LEGACY:
+            case ERC721_UNDETERMINED:
+            case ERC1155:
+            case ERC875:
+            case ERC721_TICKET:
+                return setupNFTFromLocal(contractAddr, chainId);
+            default:
+                return setupTokensFromLocal(contractAddr, chainId);
+        }
     }
 
     @Override
@@ -531,6 +550,7 @@ public class TokenRepository implements TokenRepositoryType {
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
             String responseValue = callSmartContractFunction(function, tokenInfo.address, network, wallet);
 
+
             if (!TextUtils.isEmpty(responseValue))
             {
                 List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
@@ -660,7 +680,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private <T> T getContractData(NetworkInfo network, String address, Function function, T type) throws Exception
     {
-        String responseValue = callSmartContractFunction(function, address, network, new Wallet(ZERO_ADDRESS));
+        String responseValue = callSmartContractFunction(function, address, network, new Wallet(currentAddress));
 
         if (TextUtils.isEmpty(responseValue))
         {
@@ -789,7 +809,7 @@ public class TokenRepository implements TokenRepositoryType {
     private int getDecimals(String address, NetworkInfo network) throws Exception {
         if (EthereumNetworkRepository.decimalOverride(address, network.chainId) > 0) return EthereumNetworkRepository.decimalOverride(address, network.chainId);
         Function function = decimalsOf();
-        String responseValue = callSmartContractFunction(function, address, network, new Wallet(ZERO_ADDRESS));
+        String responseValue = callSmartContractFunction(function, address, network, new Wallet(currentAddress));
         if (TextUtils.isEmpty(responseValue)) return 18;
 
         List<Type> response = FunctionReturnDecoder.decode(
@@ -1051,6 +1071,19 @@ public class TokenRepository implements TokenRepositoryType {
         }).onErrorReturnItem(new TokenInfo());
     }
 
+    private Single<TokenInfo> setupNFTFromLocal(String address, long chainId)
+    {
+        return Single.fromCallable(() -> {
+            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
+            return new TokenInfo(
+                    address,
+                    getContractData(network, address, nameOf(), ""),
+                    getContractData(network, address, symbolOf(), ""),
+                    0,
+                    false, chainId);
+        }).onErrorReturnItem(new TokenInfo());
+    }
+
     private Single<Token[]> checkTokenData(Token[] tokens)
     {
         return Single.fromCallable(() -> {
@@ -1136,7 +1169,7 @@ public class TokenRepository implements TokenRepositoryType {
                 catch (Exception e) { isERC875 = false; }
                 try
                 {
-                    responseValue = callSmartContractFunction(balanceOf(ZERO_ADDRESS), tokenInfo.address, network, new Wallet(ZERO_ADDRESS));
+                    responseValue = callSmartContractFunction(balanceOf(currentAddress), tokenInfo.address, network, new Wallet(currentAddress));
                 }
                 catch (Exception e) { responseValue = ""; }
 

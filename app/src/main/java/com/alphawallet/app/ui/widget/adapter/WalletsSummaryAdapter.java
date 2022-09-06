@@ -340,17 +340,17 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
 
     public void setTokens(Map<String, Token[]> walletTokens)
     {
-        if(walletTokens != null && walletTokens.size() > 0)
+        if (walletTokens == null) return;
+
+        for (Token[] token : walletTokens.values())
         {
-            for(Token[] token: walletTokens.values()){
-                Token[] t = walletTokens.get(token[0].getAddress());
-                String walletAddress = token[0].getAddress();
-                int walletIndex = getWalletIndex(walletAddress);
-                if(walletIndex != -1)
-                {
-                    this.wallets.get(walletIndex).tokens = t;
-                    notifyItemChanged(walletIndex);
-                }
+            Token[] t = walletTokens.get(token[0].getAddress());
+            String walletAddress = token[0].getAddress();
+            int walletIndex = getWalletIndex(walletAddress);
+            if (walletIndex != -1)
+            {
+                this.wallets.get(walletIndex).tokens = t;
+                notifyItemChanged(walletIndex);
             }
         }
     }

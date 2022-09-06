@@ -585,7 +585,7 @@
     <string name="tokenscript_file_error">TokenScript ဖိုင်အမှားအယွင်းဖြစ်နေပါသည်</string>
     <string name="toast_browser_cache_cleared">Browser cache ဖိုင်များကိုရှင်းလင်းမည်</string>
     <string name="toast_token_data_cleared">တိုကင်အချက်အလက်များကိုရှင်းလင်းပြီးပါပြီ</string>
-    <string name="connected_wallets" translatable="false">ချိတ်ဆက်ထားသောဝေါလက်များ</string> <!--- What's this for? -->
+    <string name="connected_wallets">ချိတ်ဆက်ထားသောဝေါလက်များ</string>
     <string name="token_data_being_cleared">တိုကင်အချက်လက်များကိုရှင်းလင်းနေပါသည်။ ခေတ္တစောင့်ဆိုင်းပါ။</string>
     <string name="your_wallets">သင်၏ ဝေါလက်များ</string>
     <string name="action_copy">ကူးယူမည်</string>
@@ -795,7 +795,7 @@
     <string name="enter_wallet_name">ဝေါလက်အမည်ကိုထည့်သွင်းပါ</string>
     <string name="action_save_name">အမည်ကိုသိမ်းဆည်းမည်</string>
     <string name="select_amount">ပမာဏကိုရွေးချယ်ပါ</string>
-    <string name="safe_transfer" translatable="false">လုံခြုံစွာပြောင်းရွှေ့မည်</string>
+    <string name="safe_transfer">လုံခြုံစွာပြောင်းရွှေ့မည်</string>
     <string name="selected_tokens">ရွေးချယ်ထားသောတိုကင်များ</string>
     <string name="send_tokens">တိုကင်များကိုပို့မည်</string>
     <string name="rate_prompt">အသုံးပြုသည်ကိုကျေနပ်မှုရှိလျှင် ကျေးဇူးပြု၍ ကျွန်တော်တို့အားအဆင့်သတ်မှတ်ပေး၍ကူညီပါ။</string>

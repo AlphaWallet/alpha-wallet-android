@@ -40,13 +40,14 @@ import java.util.Map;
 /**
  * Created by JB on 1/09/2022.
  */
-public class TokenScriptCertificateTest extends BaseE2ETest {
-
+public class TokenScriptCertificateTest extends BaseE2ETest
+{
     private final String doorContractAddress;
     private final String contractOwnerPk = "0x69c22d654be7fe75e31fbe26cb56c93ec91144fab67cb71529c8081971635069";
     private final Web3j web3j;
 
-    private static final Map<String, String[]> WALLETS_ON_GANACHE = new HashMap<String, String[]>() {{
+    private static final Map<String, String[]> WALLETS_ON_GANACHE = new HashMap<String, String[]>()
+    {{
         put("24", new String[]{"0x644022aef70ad515ee186345fd74b005d759f41be8157c2835de3597d943146d", "0xE494323823fdF1A1Ab6ca79d2538C7182690D52a"});
         put("30", new String[]{"0x5c8843768e0e1916255def80ae7f6197e1f6a2dbcba720038748fc7634e5cffd", "0x162f5e0b63646AAA33a85eA13346F15C5289f901"});
         put("32", new String[]{"0x992b442eaa34de3c6ba0b61c75b2e4e0241d865443e313c4fa6ab8ba488a6957", "0xd7Ba01f596a7cc926b96b3B0a037c47A22904c06"});
@@ -56,7 +57,9 @@ public class TokenScriptCertificateTest extends BaseE2ETest {
     {
         int apiLevel = Build.VERSION.SDK_INT;
         String[] array = WALLETS_ON_GANACHE.get(String.valueOf(apiLevel));
-        if (array == null) {
+
+        if (array == null)
+        {
             fail("Please config seed phrase and wallet address for this API level first.");
         }
 
@@ -81,7 +84,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest {
     }
 
     @Test
-    public void certificate_test()
+    public void should_view_signature_details()
     {
         int apiLevel = Build.VERSION.SDK_INT;
         String[] array = WALLETS_ON_GANACHE.get(String.valueOf(apiLevel));

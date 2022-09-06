@@ -42,7 +42,6 @@ import java.util.Map;
  */
 public class TokenScriptCertificateTest extends BaseE2ETest
 {
-
     private final String doorContractAddress;
     private final String contractOwnerPk = "0x69c22d654be7fe75e31fbe26cb56c93ec91144fab67cb71529c8081971635069";
     private final Web3j web3j;
@@ -58,6 +57,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest
     {
         int apiLevel = Build.VERSION.SDK_INT;
         String[] array = WALLETS_ON_GANACHE.get(String.valueOf(apiLevel));
+
         if (array == null)
         {
             fail("Please config seed phrase and wallet address for this API level first.");

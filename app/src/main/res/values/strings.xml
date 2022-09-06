@@ -76,8 +76,8 @@
     <string name="action_more_details">More details</string>
     <string name="action_add_wallet">Add wallet</string>
     <string name="action_open_etherscan">View in Block Explorer</string>
-    <string name="action_coinbase">Coinbase</string>
-    <string name="action_localeth">LocalEthereum</string>
+    <string name="action_coinbase" translatable="false">Coinbase</string>
+    <string name="action_localeth" translatable="false">LocalEthereum</string>
     <string name="action_changelly">Changelly (Buy with Credit card)</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">Transaction detail</string>
@@ -92,8 +92,8 @@
     <string name="NA">N/A</string>
     <string name="error_wallet_not_selected">Wallet is not selected</string>
     <string name="no_transactions_yet">Activities will appear here</string>
-    <string name="unknown_balance_without_symbol">--</string>
-    <string name="dummy_transaction_value">&#45;&#45;</string>
+    <string name="unknown_balance_without_symbol" translatable="false">--</string>
+    <string name="dummy_transaction_value" translatable="false">&#45;&#45;</string>
     <string name="title_dialog_sending">Sending…</string>
     <string name="scan_qr">Get address from QR Code</string>
     <string name="info_gas_price">The higher the gas price, the more expensive your transaction fee will be, but the quicker your transaction will be processed by the Ethereum network.</string>
@@ -106,7 +106,7 @@
     <string name="error_fail_load_tokens">Failed to load tokens list</string>
     <string name="error_create_wallet">Failed to create a wallet</string>
 
-    <string name="app_name">AlphaWallet</string>
+    <string name="app_name" translatable="false">AlphaWallet</string>
     <string name="all">All</string>
     <string name="currency">Currencies</string>
     <string name="advanced">Advanced Options</string>
@@ -124,9 +124,9 @@
     <string name="action_redeem">Redeem</string>
     <string name="add_ids_to_redeem">Tickets Redeemed</string>
     <string name="title_use_token">Use Token</string>
-    <string name="token_balance">%1$s%2$s</string>
+    <string name="token_balance" translatable="false">%1$s%2$s</string>
     <!--<string name="token_balance">%1$s%2$s %3$s</string>-->
-    <string name="token_name">%1$s (%2$s)</string>
+    <string name="token_name" translatable="false">%1$s (%2$s)</string>
     <string name="create_sell_order">Create Sales Order</string>
     <string name="select_tickets">Select %1$s to Sell:</string>
     <string name="select_tickets_redeem">Select Tickets to Redeem:</string>show
@@ -191,11 +191,10 @@
     <string-array name="filter_search_date">
         <item>DD/MM/YY</item>
     </string-array>
-    <string name="eth">ETH</string>
     <string name="quantity_of_tickets">Quantity of Tickets</string>
     <string name="total_cost_label">Total Cost:</string>
     <string name="equivalent_in_usd">Equivalent in USD</string>
-    <string name="total_cost">%1$s %2$s</string>
+    <string name="total_cost" translatable="false">%1$s %2$s</string>
     <string name="select_quantity_tickets">Select Quantity of %1$s</string>
     <string name="ticket_redeemed">Your ticket has been redeemed</string>
     <string name="search_for">Search for:</string>
@@ -212,7 +211,7 @@
     <string name="help_question8">Terms of Service</string>
     <string name="privacy_policy" translatable="false">privacyPolicy.html</string>
     <string name="terms_of_service" translatable="false">termsOfService.html</string>
-    <string name="tokenscript_explaination">tokenscript_explaination.html</string>
+    <string name="tokenscript_explaination" translatable="false">tokenscript_explaination.html</string>
     <string name="twenty_four_hours">24 hours</string>
     <string name="appreciation">Appreciation</string>
     <string name="eth_per_ticket">%1$s/Ticket</string>
@@ -255,7 +254,7 @@
     <string name="send_universal_link">Share MagicLink</string>
     <string name="generate_sale_transfer_link">Generate MagicLink</string>
     <string name="place_tickets_marketplace">List on marketplace</string>
-    <string name="hint_time">--:--</string>
+    <string name="hint_time" translatable="false">--:--</string>
     <string name="link_expiry_time">MagicLink Expiry Time</string>
     <string name="error_time">Please select expiry time</string>
     <string name="error_date">Please select expiry date</string>
@@ -279,11 +278,11 @@
     <string name="label_important">Important</string>
     <string name="eth_00">0.00 ETH</string>
     <string name="toolbar_title_wallets">Change Wallet</string>
-    <string name="facebook">Facebook</string>
-    <string name="twitter">Twitter</string>
-    <string name="erc20">ERC 20</string>
-    <string name="erc875">ERC 875</string>
-    <string name="erc875legacy">ERC 875*</string>
+    <string name="facebook" translatable="false">Facebook</string>
+    <string name="twitter" translatable="false">Twitter</string>
+    <string name="erc20" translatable="false">ERC 20</string>
+    <string name="erc875" translatable="false">ERC 875</string>
+    <string name="erc875legacy" translatable="false">ERC 875*</string>
     <string name="erc1155" translatable="false">ERC 1155</string>
     <string name="what_is_eth">Ethereum is an open-source, public, blockchain-based distributed computing platform and operating system featuring smart contract (scripting) functionality. It is the infrastructure for blockchain products and services.\n\nETH/Ether is a cryptocurrency whose blockchain is generated by the Ethereum platform. Ether can be transferred between accounts and used to compensate participant mining nodes for computations performed. Ethereum provides a decentralised Turing-complete virtual machine, the Ethereum Virtual Machine (EVM), which can execute scripts using an international network of public nodes. "Gas", an internal transaction pricing mechanism, is used to mitigate spam and allocate resources on the network.</string>
     <string name="why_alphawallet_eth">Currently, Ethereum is the best and largest blockchain for developing smart contract application and services. AlphaWallet starts with supporting Ethereum blockchain and helps improving its technology.</string>
@@ -402,14 +401,14 @@
     <string name="currency_drop">Take Currency Drop</string>
     <string name="currency_import">Currency Import</string>
     <string name="you_will_receive">you will receive</string>
-    <string name="dust_value"><![CDATA[~0.00]]></string>
+    <string name="dust_value" translatable="false"><![CDATA[~0.00]]></string>
     <string name="action_scan_dapp">Scan QR Code</string>
     <string name="toast_invalid_code">Invalid Scan Result</string>
     <string name="address_found">Ethereum Address</string>
     <string name="is_address">Just scanned an Ethereum address. Do you want to try to load this as a Token?</string>
     <string name="dialog_load_as_contract">Load Token</string>
     <string name="blockchain">%1$s Blockchain</string>
-    <string name="currency_00">0.00 %s</string>
+    <string name="currency_00" translatable="false">0.00 %s</string>
     <string name="telegram">Telegram (Customer Support)</string>
     <string name="transfer_request">Transfer request</string>
     <string name="token_transfer_request">Token transfer request: %1$s</string>
@@ -552,7 +551,7 @@
     <string name="tokenscript_element_not_present">function input \'%1$s\' not found in HTML elements.</string>
     <string name="complete_tokenscript_value">Invalid input value: %1$s</string>
     <string name="value">Value</string>
-    <string name="linkedin">LinkedIn</string>
+    <string name="linkedin" translatable="false">LinkedIn</string>
     <string name="please_enable_security">Unable to create key. Try enabling security on your phone.</string>
     <string name="what_is_seed_phrase">A seed phrase, seed recovery phrase or backup seed phrase is a list of words which store all the information needed to recover a crypto wallet. Wallet software will typically generate a seed phrase and instruct the user to write it down on paper.</string>
     <string name="transaction_too_large">Transaction Too Large</string>
@@ -561,10 +560,10 @@
     <string name="signature_details">Signature details</string>
     <string name="copy_contract_address">Copy Contract Address</string>
     <string name="self">Self</string>
-    <string name="ERC721T">ERC721T</string>
+    <string name="ERC721T" translatable="false">ERC721T</string>
     <string name="fail_sign">Failed to sign redeem message</string>
     <string name="hint_contract_type">Token Type</string>
-    <string name="reddit">Reddit</string>
+    <string name="reddit" translatable="false">Reddit</string>
     <string name="tokenscript_compatibility">TokenScript Compatibility</string>
     <string name="version">Version</string>
     <string name="debug_script">TokenScript debug</string>
@@ -603,10 +602,10 @@
     <string name="title_console">Console</string>
     <string name="title_clear_browser_cache">Clear Browser Cache</string>
     <string name="title_reload_token_data">Reload Token Data</string>
-    <string name="title_tokenscript">TokenScript</string>
+    <string name="title_tokenscript" translatable="false">TokenScript</string>
     <string name="title_change_language">Change Language</string>
     <string name="add_hide_tokens">Add / Hide Tokens</string>
-    <string name="instagram">Instagram</string>
+    <string name="instagram" translatable="false">Instagram</string>
     <string name="settings_locale_currency">Change Currency</string>
     <string name="dialog_title_select_currency">Select FIAT Currency</string>
     <string name="tokenscript_file_error">TokenScript file error</string>
@@ -640,7 +639,7 @@
     <string name="invalid_parameters">Invalid parameter while calling TokenScript Transaction. Please check inputs.</string>
     <string name="file_override">TokenScript overridden by %1$s%2$s\n\n</string>
     <string name="origin_token_title">Origin Tokens:\n\n</string>
-    <string name="tokenscript_contract_line">%1$s -> %2$s\n\n</string>
+    <string name="tokenscript_contract_line" translatable="false">%1$s -> %2$s\n\n</string>
     <string name="is_debug_script"> (Debug)</string>
     <string name="confirm_delete_file">Confirm File Delete</string>
     <string name="confirm_delete_file_message">Delete file %1$s</string>
@@ -676,7 +675,7 @@
     <string name="hidden_tokens">Hidden Tokens</string>
     <string name="ignore">Ignore</string>
     <string name="search_for_tokens">Search for Tokens...</string>
-    <string name="title_wallet_connect">WalletConnect</string>
+    <string name="title_wallet_connect" translatable="false">WalletConnect</string>
     <string name="action_end_session">End Session</string>
     <string name="dialog_send_eth_transaction">Send ETH Transaction</string>
     <string name="message_reject_request">Rejected by the user</string>
@@ -685,7 +684,7 @@
     <string name="tx_rejected">Transaction rejected (try using more gas)</string>
     <string name="from">from: %1$s</string>
     <string name="from_op">from</string>
-    <string name="valueSymbol">%1$s %2$s</string>
+    <string name="valueSymbol" translatable="false">%1$s %2$s</string>
     <string name="sent_to">to: %1$s</string>
     <string name="operation_definition" translatable="false">%1$s: %2$s</string>
     <string name="approval_granted_to">approved to transfer tokens: %1$s</string>
@@ -703,10 +702,10 @@
     <string name="restart_walletconnect_session">Previous WalletConnect session not correctly terminated. Please return to webpage and disconnect, then start a new session.</string>
     <string name="invalid_walletconnect_data">Invalid WalletConnect QR data</string>
     <string name="walletconnect_timeout">Connection attempt timed out. Please cancel the request from the Dapp and start a new session.</string>
-    <string name="label_nonce">Nonce</string>
+    <string name="label_nonce" translatable="false">Nonce</string>
     <string name="payload">Payload</string>
     <string name="signed_transactions">Signed Transactions</string>
-    <string name="delete_session">%1$s</string>
+    <string name="delete_session" translatable="false">%1$s</string>
     <string name="title_delete_session">Delete this session record?</string>
     <string name="session_terminated">Session has been terminated. Switch back to Dapp and start a new WalletConnect session.</string>
     <string name="message_transaction_not_sent">Transaction not sent</string>
@@ -824,8 +823,8 @@
     <string name="input_amount_max" translatable="false">(max. %1$s)</string>
     <string name="this_is_testnet">This is Testnet</string>
     <string name="swap_with_quickswap">Swap with Quickswap</string>
-    <string name="email">Email</string>
-    <string name="discord">Discord</string>
+    <string name="email" translatable="false">Email</string>
+    <string name="discord" translatable="false">Discord</string>
     <string name="name_this_wallet">Name This Wallet</string>
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
@@ -875,7 +874,7 @@
     <string name="performance">Performance</string>
     <string name="token_name_hint">Search token</string>
     <string name="assets">Assets</string>
-    <string name="defi_header">DeFi</string>
+    <string name="defi_header" translatable="false">DeFi</string>
     <string name="governance_header">Governance</string>
     <string name="collectibles_header">Collectibles</string>
     <string name="whats_new">What\'s new?</string>
@@ -892,7 +891,7 @@
     <string name="wc_no_active_sessions">No Active sessions</string>
     <string name="wc_connect_wallet">Connect Wallet</string>
     <string name="error_seed_phrase_must_words">Seed phrase can only contain words</string>
-    <string name="label_token_id">Token #</string>
+    <string name="label_token_id" translatable="false">Token #</string>
     <string name="label_external_link">External Link</string>
     <string name="label_description">Description</string>
     <string name="label_details">Details</string>
@@ -926,7 +925,6 @@
     <string name="unable_store_key">Unable to store key: %1$s</string>
     <string name="title_ens_lookup_warning">ENS Lookup Warning</string>
     <string name="message_ens_node_not_sync">AlphaWallet has detected a discrepancy between ethereum\'s timestamp and your device\'s current time, or possibly the blockchain connection is not synchronized, please check your phone\'s time is correct, or ignore this warning.</string>
-    <string name="zero">0</string>
     <string name="decrease">Decrease</string>
     <string name="increase">Increase</string>
     <string name="message_transaction_timeout">The transaction has timed out. You can view the status in activity page.</string>
@@ -963,7 +961,7 @@
     <string name="hint_custom_slippage" translatable="false">0.01</string>
     <string name="label_api_v1_app_name">Name</string>
     <string name="label_api_v1_note">Note</string>
-    <string name="label_api_v1_app_url">URL</string>
+    <string name="label_api_v1_app_url" translatable="false">URL</string>
     <string name="action_connect">Connect</string>
     <string name="title_api_v1_connect_to">Connect to</string>
     <string name="action_sign">Sign</string>
@@ -987,4 +985,6 @@
     <string name="enclave_locked">Locked</string>
     <string name="key_type_in_database">Key type in Database</string>
     <string name="key_entry_in_secure_enclave">Key Entry in Secure Enclave</string>
+    <string name="eth" translatable="false">ETH</string>
+    <string name="zero" translatable="false">0</string>
 </resources>

@@ -74,8 +74,6 @@
     <string name="action_more_details">Plus de détails</string>
     <string name="action_add_wallet">Ajouter portefeuille</string>
     <string name="action_open_etherscan">Voir sur Block Explorer</string>
-    <string name="action_coinbase">Coinbase</string>
-    <string name="action_localeth">LocalEthereum</string>
     <string name="action_changelly">Changelly (Acheter avec une carte de crédit)</string>
     <string name="subject_transaction_detail">Détail de la Transaction </string>
     <string name="error_fail_generate_qr">Impossible de générer le code QR.</string>
@@ -89,8 +87,6 @@
     <string name="NA">N/A</string>
     <string name="error_wallet_not_selected">le portefeuille n\'est pas sélectionné</string>
     <string name="no_transactions_yet">Les activités apparaîtront ici</string>
-    <string name="unknown_balance_without_symbol">--</string>
-    <string name="dummy_transaction_value">&#45;&#45;</string>
     <string name="title_dialog_sending">Envoi en cours...</string>
     <string name="scan_qr">Obtenir l\'adresse à partir du code QR</string>
     <string name="info_gas_price">Plus le prix du gaz est élevé, plus vos frais de transaction seront élevés, mais plus votre transaction sera traitée rapidement par le réseau Ethereum.</string>
@@ -103,7 +99,6 @@
     <string name="error_fail_load_tokens">Echec du chargement de la liste des tokens</string>
     <string name="error_create_wallet">Impossible de créer un portefeuille</string>
 
-    <string name="app_name">AlphaWallet</string>
     <string name="all">Tous</string>
     <string name="currency">Devises</string>
     <string name="advanced">Options avancées</string>
@@ -121,9 +116,7 @@
     <string name="action_redeem">Racheter</string>
     <string name="add_ids_to_redeem">Tickets Rachetés</string>
     <string name="title_use_token">Utiliser Token</string>
-    <string name="token_balance">%1$s%2$s</string>
     <!--<string name="token_balance">%1$s%2$s %3$s</string>-->
-    <string name="token_name">%1$s (%2$s)</string>
     <string name="create_sell_order">Créer un ordre de vente</string>
     <string name="select_tickets">Selectionner %1$s à vendre:</string>
     <string name="select_tickets_redeem">Selectionner les tickets à racheter:</string>montrer
@@ -188,11 +181,9 @@
     <string-array name="filter_search_date">
         <item>DD/MM/YY</item>
     </string-array>
-    <string name="eth">ETH</string>
     <string name="quantity_of_tickets">Quantité de Tickets</string>
     <string name="total_cost_label">Coût total:</string>
     <string name="equivalent_in_usd">Equivalent en USD</string>
-    <string name="total_cost">%1$s %2$s</string>
     <string name="select_quantity_tickets">Selectionner Quantité of %1$s</string>
     <string name="ticket_redeemed">Votre ticket a été racheté</string>
     <string name="search_for">Chercher:</string>
@@ -205,7 +196,6 @@
     <string name="help_question4">Qu\'est ce qu\'une Phrase Seed?</string>
     <string name="help_question5">Comment transférer de l\'ETH dans mon portefeuille?</string>
     <string name="help_question6">Qu\'est ce que TokenScript?</string>
-    <string name="tokenscript_explaination">tokenscript_explaination.html</string>
     <string name="twenty_four_hours">24 heures</string>
     <string name="appreciation">Appréciation</string>
     <string name="eth_per_ticket">%1$s/Ticket</string>
@@ -248,7 +238,6 @@
     <string name="send_universal_link">Partager le lien Magique</string>
     <string name="generate_sale_transfer_link">Générer le lien Magique</string>
     <string name="place_tickets_marketplace">Lister sur la marketplace</string>
-    <string name="hint_time">--:--</string>
     <string name="link_expiry_time">Date d\'expiration du lien Magique</string>
     <string name="error_time">Veuillez selectionner l\'heure d\'expiration</string>
     <string name="error_date">Veuillez selectionner la date d\'expiration</string>
@@ -272,11 +261,6 @@
     <string name="label_important">Important</string>
     <string name="eth_00">0.00 ETH</string>
     <string name="toolbar_title_wallets">Changer de portefeuille</string>
-    <string name="facebook">Facebook</string>
-    <string name="twitter">Twitter</string>
-    <string name="erc20">ERC 20</string>
-    <string name="erc875">ERC 875</string>
-    <string name="erc875legacy">ERC 875*</string>
     <string name="what_is_eth">Ethereum est une plate-forme informatique distribuée et un système d\'exploitation open source, public et basé sur la blockchain, avec une fonctionnalité de contrat intelligent (script). C\'est l\'infrastructure des produits et services blockchain.\n\nETH/Ether est une crypto-monnaie dont la blockchain est générée par la plateforme Ethereum. L\'éther peut être transféré entre comptes et utilisé pour compenser les nœuds de minage des participants pour les calculs effectués. Ethereum fournit une machine virtuelle décentralisée complète de Turing, la machine virtuelle Ethereum (EVM), peut exécuter des scripts à l\'aide d\'un réseau international de nœuds publics. «Gas», un mécanisme interne de tarification des transactions, est utilisé pour atténuer le spam et allouer des ressources sur le réseau.</string>
     <string name="why_alphawallet_eth">Actuellement, Ethereum est la meilleure et la plus grande blockchain pour le développement d\'applications et de services de contrats intelligents. AlphaWallet supporte la blockchain Ethereum et aide à améliorer sa technologie.</string>
     <string name="how_i_get_money">Vous pouvez convertir votre Ethereum en monnaie fiat et les tranférer sur votre compte bancaire avec n\'importe quel échange crypto.</string>
@@ -392,14 +376,12 @@
     <string name="currency_drop">Accepter baisse de devises</string>
     <string name="currency_import">Importation Devises</string>
     <string name="you_will_receive">vous recevrez</string>
-    <string name="dust_value"><![CDATA[~0.00]]></string>
     <string name="action_scan_dapp">Scannez le code QR</string>
     <string name="toast_invalid_code">Résultat du scan Invalide</string>
     <string name="address_found">Adresse Ethereum</string>
     <string name="is_address">Vous venez de scanner une adresse Ethereum. Voulez-vous essayer de la charger en tant que token?</string>
     <string name="dialog_load_as_contract">Chargement de token</string>
     <string name="blockchain">%1$s Blockchain</string>
-    <string name="currency_00">0.00 %s</string>
     <string name="telegram">Telegram (Support Client)</string>
     <string name="transfer_request">Demande de transfert</string>
     <string name="token_transfer_request">Demande de transfert de token: %1$s</string>
@@ -542,7 +524,6 @@
     <string name="tokenscript_element_not_present">entrée de fonction \'%1$s\' introuvable dans les éléments HTML.</string>
     <string name="complete_tokenscript_value">Valeur d\'Entrée Invalide: %1$s</string>
     <string name="value">Valeur</string>
-    <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">Impossible de créer la clé. Essayer d\'activer la sécurité de votre téléphone.</string>
     <string name="what_is_seed_phrase">Une phrase seed, une phrase de récupération seed ou une phrase seed de sauvegarde est une liste de mots qui stockent toutes les informations nécessaires pour récupérer un portefeuille cryptographique. Le logiciel de portefeuille génère généralement une phrase seed et demande à l\'utilisateur de l\'écrire sur papier.</string>
     <string name="transaction_too_large">Transaction Trop Grande</string>
@@ -551,10 +532,8 @@
     <string name="signature_details">Détails Signature</string>
     <string name="copy_contract_address">Copier l\'adresse du Contrat</string>
     <string name="self">Soi</string>
-    <string name="ERC721T">ERC721T</string>
     <string name="fail_sign">Échec de la signature du message d\'échange</string>
     <string name="hint_contract_type">Type de Token</string>
-    <string name="reddit">Reddit</string>
     <string name="tokenscript_compatibility">Comptabilité TokenScript</string>
     <string name="version">Version</string>
     <string name="debug_script">TokenScript debug</string>
@@ -593,10 +572,8 @@
     <string name="title_console">Console</string>
     <string name="title_clear_browser_cache">Effacer le Cache du Navigateur</string>
     <string name="title_reload_token_data">Recharger les données du Tokens</string>
-    <string name="title_tokenscript">TokenScript</string>
     <string name="title_change_language">Changer Langue</string>
     <string name="add_hide_tokens">Ajouter / Cacher Tokens</string>
-    <string name="instagram">Instagram</string>
     <string name="settings_locale_currency">Changer Devise</string>
     <string name="dialog_title_select_currency">Selectionner Devise FIAT</string>
     <string name="tokenscript_file_error">TokenScript fichier erreur</string>
@@ -629,7 +606,6 @@
     <string name="invalid_parameters">Paramètre non valide lors de l\'appel de TokenScript Transaction. Veuillez vérifier les entrées.</string>
     <string name="file_override">TokenScript remplacé par %1$s%2$s\n\n</string>
     <string name="origin_token_title">Tokens d\'Origine:\n\n</string>
-    <string name="tokenscript_contract_line">%1$s -> %2$s\n\n</string>
     <string name="is_debug_script"> (Debug)</string>
     <string name="confirm_delete_file">Confirmer la Suppression du Fichier</string>
     <string name="confirm_delete_file_message">Supprimer fichier %1$s</string>
@@ -665,7 +641,6 @@
     <string name="hidden_tokens">Tokens Cachés</string>
     <string name="ignore">Ignorer</string>
     <string name="search_for_tokens">Chercher des Tokens...</string>
-    <string name="title_wallet_connect">WalletConnect</string>
     <string name="action_end_session">Terminer Session</string>
     <string name="dialog_send_eth_transaction">Envoyer une Transaction ETH</string>
     <string name="message_reject_request">Rejeté par l\'utilisateur</string>
@@ -674,7 +649,6 @@
     <string name="tx_rejected">Transaction rejetée (essayer d\'utiliser plus de gas)</string>
     <string name="from">de: %1$s</string>
     <string name="from_op">de</string>
-    <string name="valueSymbol">%1$s %2$s</string>
     <string name="sent_to">à: %1$s</string>
     <string name="approval_granted_to">Approuvé pour transférer des tokens: %1$s</string>
     <string name="approval_obtained_from">à dépenser au nom de: %1$s</string>
@@ -690,10 +664,8 @@
     <string name="restart_walletconnect_session">La session précédente de WalletConnect ne s\'est pas correctement terminée. Veuillez retourner à la page Web et vous déconnecter, puis démarrer une nouvelle session.</string>
     <string name="invalid_walletconnect_data">Données QR WalletConnect Invalide</string>
     <string name="walletconnect_timeout">Connection attempt timed out. Please cancel the request from the Dapp and start a new session.</string>
-    <string name="label_nonce">Nonce</string>
     <string name="payload">Puissance</string>
     <string name="signed_transactions">Transactions Signés</string>
-    <string name="delete_session">%1$s</string>
     <string name="title_delete_session">Supprimer cet enregistrement de session?</string>
     <string name="session_terminated">La session a été terminée. Revenez à Dapp et démarrez une nouvelle session WalletConnect.</string>
     <string name="message_transaction_not_sent">Transaction pas envoyée</string>
@@ -790,8 +762,6 @@
     <string name="asset_description_text_plural">%1$s Assets | %2$s</string>
     <string name="this_is_testnet">This is Testnet</string>
     <string name="swap_with_quickswap">Swap with Quickswap</string>
-    <string name="email">Email</string>
-    <string name="discord">Discord</string>
     <string name="name_this_wallet">Name This Wallet</string>
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
@@ -847,7 +817,6 @@
     <string name="performance">Performance</string>
     <string name="token_name_hint">Search token</string>
     <string name="assets">Assets</string>
-    <string name="defi_header">DeFi</string>
     <string name="governance_header">Gouvernance</string>
     <string name="collectibles_header">Collectibles</string>
     <string name="whats_new">Quoi de neuf?</string>
@@ -864,7 +833,6 @@
     <string name="wc_no_active_sessions">No Active sessions</string>
     <string name="wc_connect_wallet">Connect Wallet</string>
     <string name="error_seed_phrase_must_words">La phrase de graine ne peut contenir que des mots</string>
-    <string name="label_token_id">Token #</string>
     <string name="label_external_link">External Link</string>
     <string name="label_description">Description</string>
     <string name="label_details">Details</string>
@@ -900,7 +868,6 @@
     <string name="unable_store_key">Unable to store key: %1$s</string>
     <string name="title_ens_lookup_warning">ENS Lookup Warning</string>
     <string name="message_ens_node_not_sync">AlphaWallet has detected a discrepancy between ethereum\'s timestamp and your device\'s current time, or possibly the blockchain connection is not synchronized, please check your phone\'s time is correct, or ignore this warning.</string>
-    <string name="zero">0</string>
     <string name="decrease">Diminuer</string>
     <string name="increase">Augmenter</string>
     <string name="message_transaction_timeout">The transaction has timed out. You can view the status in activity page.</string>
@@ -933,7 +900,6 @@
     <string name="label_slippage_custom">Custom</string>
     <string name="label_api_v1_app_name">Name</string>
     <string name="label_api_v1_note">Note</string>
-    <string name="label_api_v1_app_url">URL</string>
     <string name="action_connect">Connect</string>
     <string name="title_api_v1_connect_to">Connect to</string>
     <string name="action_sign">Sign</string>

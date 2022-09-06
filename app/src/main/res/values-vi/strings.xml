@@ -22,7 +22,6 @@
     <string name="no_repeat">Không, quay lại</string>
     <string name="transfer">Chuyển khoản %s</string>
     <string name="action_buy">Mua %s</string>
-    <string name="empty" />
     <string name="try_again">Thử lại</string>
     <string name="already_have_account">Đã có ví?</string>
     <string name="action_create_new_account">Tạo một ví mới</string>
@@ -110,7 +109,7 @@
     <string name="currency">Tài sản</string>
     <string name="advanced">Tùy chọn nâng cao</string>
     <string name="copy_wallet_address">Sao chép địa chỉ ví</string>
-    <string name="rename_this_wallet_action">Đổi tên Ví này</string>
+    <string name="rename_this_wallet_action">Đổi tên ví này</string>
     <string name="hint_contract_name">Tên</string>
     <string name="hint_contract_venue">Venue</string>
     <string name="hint_contract_date">Ngày</string>
@@ -209,8 +208,6 @@
     <string name="help_question6">TokenScript là gì?</string>
     <string name="help_question7" translatable="false">Chính sách bảo mật</string>
     <string name="help_question8" translatable="false">Điều khoản dịch vụ</string>
-    <string name="privacy_policy" translatable="false">privacyPolicy.html</string>
-    <string name="terms_of_service" translatable="false">termsOfService.html</string>
     <string name="tokenscript_explaination">tokenscript_explaination.html</string>
     <string name="twenty_four_hours">24 hours</string>
     <string name="appreciation">Appreciation</string>
@@ -329,8 +326,6 @@
     <string name="ticket_magiclink_purchase">Magiclink Purchase</string>
     <string name="token_mint">Mint</string>
     <string name="token_burn">Burn</string>
-    <string name="remix" translatable="false">Remix</string>
-    <string name="commit_nft" translatable="false">Commit NFT</string>
 
     <string name="action_next">Tiếp tục</string>
     <string name="action_save">Lưu lại</string>
@@ -692,7 +687,6 @@
     <string name="activity_approved">Chấp thuận</string>
     <string name="activity_approval_granted">Approval granted</string>
     <string name="tokenscript_call">TokenScript call:</string>
-    <string name="testnet" translatable="false">Mạng thử nghiệm</string>
     <string name="today">Hôm nay</string>
     <string name="go_to_token">Đi tới Token</string>
     <string name="invalid_walletconnect_session">WalletConnect không hợp lệ</string>
@@ -965,4 +959,8 @@
     <string name="enclave_locked">Locked</string>
     <string name="key_type_in_database">Key type in Database</string>
     <string name="key_entry_in_secure_enclave">Key Entry in Secure Enclave</string>
+    <string name="error_insufficient_balance">Không đủ %1$s cân bằng</string>
+    <string name="safe_transfer" translatable="false">Chuyển giao an toàn</string>
+    <string name="help_question7">Chính sách bảo mật</string>
+    <string name="connected_wallets">Ví kết nối</string>
 </resources>

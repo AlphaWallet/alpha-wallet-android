@@ -22,7 +22,6 @@
     <string name="no_repeat">Tidak, ulangi</string>
     <string name="transfer">Transfer %s</string>
     <string name="action_buy">Membeli %s</string>
-    <string name="empty" />
     <string name="try_again">Coba lagi</string>
     <string name="already_have_account">Sudah memiliki dompet?</string>
     <string name="action_create_new_account">Membuat dompet Baru</string>
@@ -686,7 +685,6 @@
     <string name="activity_approved">Disetujui</string>
     <string name="activity_approval_granted">Persetujuan diberikan</string>
     <string name="tokenscript_call">TokenScript Hubungi:</string>
-    <string name="testnet">Testnet</string>
     <string name="today">Hari ini</string>
     <string name="go_to_token">beralih ke Token</string>
     <string name="invalid_walletconnect_session">Sesi WalletConnect Tidak Berlaku</string>
@@ -960,4 +958,8 @@
     <string name="enclave_locked">Locked</string>
     <string name="key_type_in_database">Key type in Database</string>
     <string name="key_entry_in_secure_enclave">Key Entry in Secure Enclave</string>
+    <string name="safe_transfer">Transfer yang aman</string>
+    <string name="help_question7">Kebijakan pribadi</string>
+    <string name="help_question8">Ketentuan Layanan</string>
+    <string name="connected_wallets">Dompet yang terhubung</string>
 </resources>

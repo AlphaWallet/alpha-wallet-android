@@ -21,7 +21,6 @@
     <string name="no_repeat">否，重复</string>
     <string name="transfer">转移%s</string>
     <string name="action_buy">购买%s</string>
-    <string name="empty"></string>
     <string name="try_again">重试</string>
     <string name="already_have_account">已经有钱包了吗？</string>
     <string name="action_create_new_account">创建新钱包</string>
@@ -865,7 +864,6 @@
     <string name="i_already_have_a_wallet">I already have a Wallet</string>
     <string name="title_select_theme">Select Mode</string>
     <string name="title_network_info">Network Info</string>
-    <string name="testnet">Testnet</string>
     <string name="website_text">Website</string>
     <string name="setting_theme_light">Light</string>
     <string name="setting_theme_dark">Dark</string>
@@ -946,4 +944,9 @@
     <string name="enclave_locked">Locked</string>
     <string name="key_type_in_database">Key type in Database</string>
     <string name="key_entry_in_secure_enclave">Key Entry in Secure Enclave</string>
+    <string name="error_insufficient_balance">余额不足 %1$s</string>
+    <string name="safe_transfer">安全转账</string>
+    <string name="help_question7">隐私政策</string>
+    <string name="help_question8">服务条款</string>
+    <string name="connected_wallets">已连接的钱包</string>
 </resources>

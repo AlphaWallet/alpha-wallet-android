@@ -21,7 +21,6 @@
     <string name="no_repeat">No, repetir</string>
     <string name="transfer">Transferir %s</string>
     <string name="action_buy">Comprar %s</string>
-    <string name="empty"></string>
     <string name="try_again">Inténtalo de nuevo</string>
     <string name="already_have_account">¿Ya tienes un monedero?</string>
     <string name="action_create_new_account">Crear un monedero nuevo</string>
@@ -865,7 +864,6 @@
     <string name="i_already_have_a_wallet">I already have a Wallet</string>
     <string name="title_select_theme">Select Mode</string>
     <string name="title_network_info">Network Info</string>
-    <string name="testnet">Testnet</string>
     <string name="website_text">Website</string>
     <string name="setting_theme_light">Light</string>
     <string name="setting_theme_dark">Dark</string>
@@ -946,4 +944,9 @@
     <string name="enclave_locked">Locked</string>
     <string name="key_type_in_database">Key type in Database</string>
     <string name="key_entry_in_secure_enclave">Key Entry in Secure Enclave</string>
+    <string name="error_insufficient_balance">Isuficiente %1$s saldo</string>
+    <string name="safe_transfer">Transferencia segura</string>
+    <string name="help_question7">Política de privacidad</string>
+    <string name="help_question8">Términos de servicio</string>
+    <string name="connected_wallets">Billeteras conectadas</string>
 </resources>

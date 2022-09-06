@@ -22,7 +22,6 @@
     <string name="no_repeat">Non, recommencer</string>
     <string name="transfer">Transférer %s</string>
     <string name="action_buy">Acheter %s</string>
-    <string name="empty" />
     <string name="try_again">Essayer encore</string>
     <string name="already_have_account">Avez vous déja un portefeuille?</string>
     <string name="action_create_new_account">Créer un nouveau portefeuille</string>
@@ -958,4 +957,9 @@
     <string name="enclave_locked">Locked</string>
     <string name="key_type_in_database">Key type in Database</string>
     <string name="key_entry_in_secure_enclave">Key Entry in Secure Enclave</string>
+    <string name="error_insufficient_balance">Solde de %1$s insuffisant</string>
+    <string name="safe_transfer">Transfert de sécurité</string>
+    <string name="help_question7">Politique de confidentialité</string>
+    <string name="help_question8">Conditions d\'utilisation</string>
+    <string name="connected_wallets">Portefeuilles connectés</string>
 </resources>

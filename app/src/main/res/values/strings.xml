@@ -22,7 +22,7 @@
     <string name="no_repeat">No, repeat</string>
     <string name="transfer">Transfer %s</string>
     <string name="action_buy">Buy %s</string>
-    <string name="empty" />
+    <string name="empty" translatable="false" />
     <string name="try_again">Try again</string>
     <string name="already_have_account">Already have a wallet?</string>
     <string name="action_create_new_account">Create a New Wallet</string>
@@ -208,8 +208,8 @@
     <string name="help_question4">What is a Seed Phrase?</string>
     <string name="help_question5">How do I transfer ETH into my wallet?</string>
     <string name="help_question6">What is TokenScript?</string>
-    <string name="help_question7" translatable="false">Privacy Policy</string>
-    <string name="help_question8" translatable="false">Terms of Service</string>
+    <string name="help_question7">Privacy Policy</string>
+    <string name="help_question8">Terms of Service</string>
     <string name="privacy_policy" translatable="false">privacyPolicy.html</string>
     <string name="terms_of_service" translatable="false">termsOfService.html</string>
     <string name="tokenscript_explaination">tokenscript_explaination.html</string>
@@ -612,7 +612,7 @@
     <string name="tokenscript_file_error">TokenScript file error</string>
     <string name="toast_browser_cache_cleared">Browser cache cleared</string>
     <string name="toast_token_data_cleared">Token Data cleared</string>
-    <string name="connected_wallets" translatable="false">Connected Wallets</string> <!--- What's this for? -->
+    <string name="connected_wallets">Connected Wallets</string> <!--- What's this for? -->
     <string name="token_data_being_cleared">Token data being cleared … Please wait</string>
     <string name="your_wallets">Your Wallets</string>
     <string name="action_copy">Copy</string>
@@ -696,7 +696,7 @@
     <string name="activity_approved">Approved</string>
     <string name="activity_approval_granted">Approval granted</string>
     <string name="tokenscript_call">TokenScript call:</string>
-    <string name="testnet">Testnet</string>
+    <string name="testnet" translatable="false">Testnet</string>
     <string name="today">Today</string>
     <string name="go_to_token">Go to Token</string>
     <string name="invalid_walletconnect_session">Invalid WalletConnect Session</string>
@@ -830,7 +830,7 @@
     <string name="enter_wallet_name">Enter Wallet Name</string>
     <string name="action_save_name">Save Name</string>
     <string name="select_amount">Select Amount</string>
-    <string name="safe_transfer" translatable="false">Safe Transfer</string>
+    <string name="safe_transfer">Safe Transfer</string>
     <string name="safe_batch_transfer" translatable="false">Safe Batch Transfer</string>
     <string name="hash_tokenid" translatable="false">#%1$s</string>
     <string name="selected_tokens">Selected Tokens</string>

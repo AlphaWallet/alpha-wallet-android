@@ -37,5 +37,9 @@ public class I18nTest extends BaseE2ETest
         selectMenu("Thay đổi ngôn ngữ");
         click(withText("Tiếng Miến Điện"));
         pressBack();
+
+        selectMenu("ဘာသာစကားပြောင်းမည်");
+        click(withText("အင်ဒိုနီးရှား"));
+        pressBack();
     }
 }

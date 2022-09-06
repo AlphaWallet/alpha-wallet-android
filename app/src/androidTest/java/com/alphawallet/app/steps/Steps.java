@@ -233,7 +233,7 @@ public class Steps
         Helper.wait(1);
         click(withText("Watch-only Wallets"));
         Helper.wait(1);
-        onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_watch_address)))))).perform(replaceText(ens));
+        input(R.id.input_watch_address, ens);
         Helper.wait(5);
         click(withText("Watch Wallet"));
     }

@@ -208,10 +208,6 @@
     <string name="help_question4">Apa yang dimaksud dengan Seed Phrase?</string>
     <string name="help_question5">Bagaimana cara mentransfer ETH ke dompet saya?</string>
     <string name="help_question6">Apa itu TokenScript?</string>
-    <string name="help_question7" translatable="false">Kebijakan Privasi</string>
-    <string name="help_question8" translatable="false">Ketentuan Layanan</string>
-    <string name="privacy_policy" translatable="false">kebijakanprivasi.html</string>
-    <string name="terms_of_service" translatable="false">KetentuanLayanan.html</string>
     <string name="tokenscript_explaination">tokenscript_penjelasan.html</string>
     <string name="twenty_four_hours">24 jam</string>
     <string name="appreciation">Penghargaan</string>
@@ -284,7 +280,6 @@
     <string name="erc20">ERC 20</string>
     <string name="erc875">ERC 875</string>
     <string name="erc875legacy">ERC 875*</string>
-    <string name="erc1155" translatable="false">ERC 1155</string>
     <string name="what_is_eth">Ethereum adalah sistem yang terbuka, secara umum, platform komputasi terdistribusi berbasis blockchain dan sistem operasi yang menampilkan fungsionalitas Smart Contract (scripting). Ini adalah infrastruktur untuk produk dan layanan blockchain.\n\nETH/Ether adalah mata uang kripto yang blockchain-nya dihasilkan oleh platform Ethereum. Ether dapat ditransfer antar akun dan digunakan untuk mengkompensasi node penambangan peserta untuk perhitungan yang dilakukan. Ethereum menyediakan mesin virtual lengkap yang terdesentralisasi, Mesin Virtual Ethereum (EVM), yang dapat mengeksekusi skrip menggunakan jaringan internasional node publik. "Gas", mekanisme penetapan harga transaksi internal, digunakan untuk mengurangi spam dan mengalokasikan sumber daya pada jaringan.</string>
     <string name="why_alphawallet_eth">Saat ini, Ethereum adalah blockchain terbaik dan terbesar untuk mengembangkan aplikasi dan layanan Smart Contract. AlphaWallet dimulai dengan mendukung blockchain Ethereum dan membantu meningkatkan teknologinya.</string>
     <string name="how_i_get_money">Anda dapat mengubah Ethereum menjadi uang fiat dan mentransfernya ke rekening bank Anda melalui bursa mata uang kripto apa pun.</string>
@@ -331,9 +326,6 @@
     <string name="ticket_magiclink_purchase">Pembelian Magiclink</string>
     <string name="token_mint">Mint</string>
     <string name="token_burn">Bakar</string>
-    <string name="remix" translatable="false">Campuran</string>
-    <string name="commit_nft" translatable="false">Melakukan NFT</string>
-
     <string name="action_next">Selanjutnya</string>
     <string name="action_save">Simpan</string>
     <string name="action_contract_info">Info Kontrak</string>
@@ -612,7 +604,6 @@
     <string name="tokenscript_file_error">Kesalahan pada berkas TokenScript</string>
     <string name="toast_browser_cache_cleared">Browser cache dihapus</string>
     <string name="toast_token_data_cleared">Data Token dihapus</string>
-    <string name="connected_wallets" translatable="false">Dompet Terhubung</string> <!--- What's this for? -->
     <string name="token_data_being_cleared">Data token sedang dihapus … Mohon tunggu</string>
     <string name="your_wallets">Dompet Anda</string>
     <string name="action_copy">Salin</string>
@@ -687,7 +678,6 @@
     <string name="from_op">dari</string>
     <string name="valueSymbol">%1$s %2$s</string>
     <string name="sent_to">kepada: %1$s</string>
-    <string name="operation_definition" translatable="false">%1$s: %2$s</string>
     <string name="approval_granted_to">disetujui untuk mentransfer token: %1$s</string>
     <string name="approval_obtained_from">untuk dibelanjakan atas nama: %1$s</string>
     <string name="unknown_event">Kejadian yang tidak diketahui</string>
@@ -714,14 +704,6 @@
     <string name="unable_to_get_biometrics">Tidak dapat memperoleh kunci Biometrik</string>
     <string name="all_funds">Semua Dana</string>
     <string name="recipient_address">Alamat Penerima</string>
-
-    <string name="address_separator" translatable="false">%1$s | %2$s</string>
-    <string name="bracketed" translatable="false">(%1$s)</string>
-    <string name="ens_resolved" translatable="false">ENS: %1$s</string>
-    <string name="fiat_format" translatable="false">%1$s %2$s ≈ %3$s %4$s</string>
-    <string name="gas_amount" translatable="false">&lt; %1$s %2$s</string>
-    <string name="gas_fiat_suffix" translatable="false">(%1$s %2$s)</string>
-    <string name="gas_time_suffix" translatable="false"> ≈ %1$s</string>
     <string name="confirm_transaction">Konfirmasi Transaksi</string>
     <string name="balance">Saldo</string>
     <string name="speed_average">Rata-rata</string>
@@ -819,9 +801,6 @@
     <string name="unsupported_walletconnect">WalletConnect: Jaringan tidak mendukung. Tutup koneksi dan ubah Jaringan DappBrowser</string>
     <string name="asset_description_text">%1$s Aset | %2$s</string>
     <string name="asset_description_text_plural">%1$s Aset | %2$s</string>
-    <string name="erc1155_idname" translatable="false">%1$s #%2$s</string>
-    <string name="asset_count_val" translatable="false">x%1$s</string>
-    <string name="input_amount_max" translatable="false">(maksimal. %1$s)</string>
     <string name="this_is_testnet">Ini adalah Testnet</string>
     <string name="swap_with_quickswap">Tukar dengan Quickswap</string>
     <string name="email">Email</string>
@@ -830,9 +809,6 @@
     <string name="enter_wallet_name">Masukkan Nama Dompet</string>
     <string name="action_save_name">Simpan Nama</string>
     <string name="select_amount">Pilih Jumlah</string>
-    <string name="safe_transfer" translatable="false">Transfer Aman</string>
-    <string name="safe_batch_transfer" translatable="false">Transfer Kelompok Aman</string>
-    <string name="hash_tokenid" translatable="false">#%1$s</string>
     <string name="selected_tokens">Token yang Terpilih</string>
     <string name="send_tokens">Kirim Token</string>
     <string name="rate_prompt">Jika Anda senang menggunakan %1$s, tolong bantu kami dengan memberi penilaian.</string>
@@ -949,7 +925,6 @@
     <string name="action_help">Bantuan</string>
     <string name="help_title_node_status">Apa yang dimaksud dengan status Node?</string>
     <string name="help_message_what_is_node_status">Dengan Node Status, Anda dapat mengukur seberapa cepat node merespon transaksi</string>
-    <string name="node_status_label" translatable="false">- %s</string>
     <string name="node_status_strong">di bawah 1 detik</string>
     <string name="mode_status_medium">lebih dari 1 detik</string>
     <string name="node_status_not_responding">tidak merespon</string>
@@ -959,8 +934,6 @@
     <string name="button_switch_to_mainnet">Beralih ke Mainnet</string>
     <string name="action_select_token">Pilih Token</string>
     <string name="label_slippage_custom">Khusus</string>
-    <string name="misc_percentage" translatable="false">%</string>
-    <string name="hint_custom_slippage" translatable="false">0.01</string>
     <string name="label_api_v1_app_name">Nama</string>
     <string name="label_api_v1_note">Catatan</string>
     <string name="label_api_v1_app_url">URL</string>

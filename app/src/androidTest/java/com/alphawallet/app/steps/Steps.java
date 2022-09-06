@@ -5,6 +5,7 @@ import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
+import static androidx.test.espresso.matcher.ViewMatchers.isClickable;
 import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withHint;
@@ -78,7 +79,7 @@ public class Steps
         pressBack();
     }
 
-    private static void selectMenu(String text)
+    public static void selectMenu(String text)
     {
         ViewInteraction selectActiveNetworks = onView(withText(text));
         selectActiveNetworks.perform(scrollTo(), ViewActions.click());
@@ -218,6 +219,18 @@ public class Steps
     private static void input(int id, String text)
     {
         onView(allOf(withId(R.id.edit_text), isDescendantOfA(withId(id)))).perform(replaceText(text));
+    }
+
+    public static void watchWalletWithENS(String ens)
+    {
+        click(withText("I already have a Wallet"));
+        click(withText("Private key")); // Scroll to right
+        Helper.wait(1);
+        click(withText("Watch-only Wallets"));
+        Helper.wait(1);
+        onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_watch_address)))))).perform(replaceText(ens));
+        Helper.wait(5);
+        click(withText("Watch Wallet"));
     }
 
 }

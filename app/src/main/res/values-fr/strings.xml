@@ -206,10 +206,6 @@
     <string name="help_question4">Qu\'est ce qu\'une Phrase Seed?</string>
     <string name="help_question5">Comment transférer de l\'ETH dans mon portefeuille?</string>
     <string name="help_question6">Qu\'est ce que TokenScript?</string>
-    <string name="help_question7" translatable="false">Politique de Confidentialité</string>
-    <string name="help_question8" translatable="false">Termes de Service</string>
-    <string name="privacy_policy" translatable="false">privacyPolicy.html</string>
-    <string name="terms_of_service" translatable="false">termsOfService.html</string>
     <string name="tokenscript_explaination">tokenscript_explaination.html</string>
     <string name="twenty_four_hours">24 heures</string>
     <string name="appreciation">Appréciation</string>
@@ -689,7 +685,6 @@
     <string name="activity_approved">Approuvé</string>
     <string name="activity_approval_granted">Approbation accordé</string>
     <string name="tokenscript_call">appel de TokenScript:</string>
-    <string name="testnet" translatable="false">Testnet</string>
     <string name="today">Aujourd\'hui</string>
     <string name="go_to_token">Aller au Token</string>
     <string name="invalid_walletconnect_session">Session WalletConnect Invalide</string>

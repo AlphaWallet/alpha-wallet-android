@@ -666,7 +666,7 @@
     <string name="display_tokens">Token Ditampilkan</string>
     <string name="hidden_tokens">Token Tersembunyi</string>
     <string name="ignore">Abaikan</string>
-    <string name="search_for_tokens">Mencari Token...</string>
+    <string name="search_for_tokens">Mencari Token…</string>
     <string name="title_wallet_connect">Dompet Terhubung</string>
     <string name="action_end_session">Sesi Berakhir</string>
     <string name="dialog_send_eth_transaction">Kirim Transaksi ETH</string>

@@ -22,7 +22,6 @@
     <string name="no_repeat">Tidak, ulangi</string>
     <string name="transfer">Transfer %s</string>
     <string name="action_buy">Membeli %s</string>
-    <string name="empty" />
     <string name="try_again">Coba lagi</string>
     <string name="already_have_account">Sudah memiliki dompet?</string>
     <string name="action_create_new_account">Membuat dompet Baru</string>
@@ -76,8 +75,6 @@
     <string name="action_more_details">Lebih detail</string>
     <string name="action_add_wallet">Tambahkan dompet</string>
     <string name="action_open_etherscan">Lihat di Blok Penjelajah</string>
-    <string name="action_coinbase">Coinbase</string>
-    <string name="action_localeth">LokalEthereum</string>
     <string name="action_changelly">Changelly (Beli dengan kartu kredit)</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">Detail transaksi</string>
@@ -92,8 +89,6 @@
     <string name="NA">N/A</string>
     <string name="error_wallet_not_selected">Dompet tidak dipilih</string>
     <string name="no_transactions_yet">Aktivitas akan muncul di sini</string>
-    <string name="unknown_balance_without_symbol">--</string>
-    <string name="dummy_transaction_value">&#45;&#45;</string>
     <string name="title_dialog_sending">Mengirim…</string>
     <string name="scan_qr">Dapatkan alamat dari Kode QR</string>
     <string name="info_gas_price">Semakin tinggi harga Gas, semakin mahal biaya transaksi Anda, tetapi semakin cepat transaksi Anda akan diproses oleh jaringan Ethereum.</string>
@@ -106,7 +101,6 @@
     <string name="error_fail_load_tokens">Gagal memuat daftar token</string>
     <string name="error_create_wallet">Gagal membuat dompet</string>
 
-    <string name="app_name">AlphaWallet</string>
     <string name="all">Semua</string>
     <string name="currency">Mata Uang</string>
     <string name="advanced">Pilihan Lanjutan</string>
@@ -124,9 +118,7 @@
     <string name="action_redeem">menukarkan</string>
     <string name="add_ids_to_redeem">Tiket Ditukarkan</string>
     <string name="title_use_token">Gunakan Token</string>
-    <string name="token_balance">%1$s%2$s</string>
     <!--<string name="token_balance">%1$s%2$s %3$s</string>-->
-    <string name="token_name">%1$s (%2$s)</string>
     <string name="create_sell_order">Membuat Pesanan Penjualan</string>
     <string name="select_tickets">Pilih %1$s untuk menjual:</string>
     <string name="select_tickets_redeem">Pilih Tiket untuk Ditukarkan:</string>show
@@ -191,11 +183,9 @@
     <string-array name="filter_search_date">
         <item>HARI/BULAN/TAHUN</item>
     </string-array>
-    <string name="eth">ETH</string>
     <string name="quantity_of_tickets">Jumlah Tiket</string>
     <string name="total_cost_label">Total Biaya:</string>
     <string name="equivalent_in_usd">Setara dalam USD</string>
-    <string name="total_cost">%1$s %2$s</string>
     <string name="select_quantity_tickets">Pilih Kuantitas of %1$s</string>
     <string name="ticket_redeemed">Tiket Anda telah ditukarkan</string>
     <string name="search_for">Cari:</string>
@@ -208,7 +198,6 @@
     <string name="help_question4">Apa yang dimaksud dengan Seed Phrase?</string>
     <string name="help_question5">Bagaimana cara mentransfer ETH ke dompet saya?</string>
     <string name="help_question6">Apa itu TokenScript?</string>
-    <string name="tokenscript_explaination">tokenscript_penjelasan.html</string>
     <string name="twenty_four_hours">24 jam</string>
     <string name="appreciation">Penghargaan</string>
     <string name="eth_per_ticket">%1$s/Tiket</string>
@@ -251,7 +240,6 @@
     <string name="send_universal_link">Bagikan MagicLink</string>
     <string name="generate_sale_transfer_link">Hasilkan MagicLink</string>
     <string name="place_tickets_marketplace">Daftar di tempat pemasaran</string>
-    <string name="hint_time">--:--</string>
     <string name="link_expiry_time">MagicLink Waktu Kadaluwarsa</string>
     <string name="error_time">Silakan pilih waktu kadaluwarsa</string>
     <string name="error_date">Silakan pilih tanggal kadaluwarsa</string>
@@ -275,11 +263,6 @@
     <string name="label_important">Penting</string>
     <string name="eth_00">0.00 ETH</string>
     <string name="toolbar_title_wallets">Ubah Dompet</string>
-    <string name="facebook">Facebook</string>
-    <string name="twitter">Twitter</string>
-    <string name="erc20">ERC 20</string>
-    <string name="erc875">ERC 875</string>
-    <string name="erc875legacy">ERC 875*</string>
     <string name="what_is_eth">Ethereum adalah sistem yang terbuka, secara umum, platform komputasi terdistribusi berbasis blockchain dan sistem operasi yang menampilkan fungsionalitas Smart Contract (scripting). Ini adalah infrastruktur untuk produk dan layanan blockchain.\n\nETH/Ether adalah mata uang kripto yang blockchain-nya dihasilkan oleh platform Ethereum. Ether dapat ditransfer antar akun dan digunakan untuk mengkompensasi node penambangan peserta untuk perhitungan yang dilakukan. Ethereum menyediakan mesin virtual lengkap yang terdesentralisasi, Mesin Virtual Ethereum (EVM), yang dapat mengeksekusi skrip menggunakan jaringan internasional node publik. "Gas", mekanisme penetapan harga transaksi internal, digunakan untuk mengurangi spam dan mengalokasikan sumber daya pada jaringan.</string>
     <string name="why_alphawallet_eth">Saat ini, Ethereum adalah blockchain terbaik dan terbesar untuk mengembangkan aplikasi dan layanan Smart Contract. AlphaWallet dimulai dengan mendukung blockchain Ethereum dan membantu meningkatkan teknologinya.</string>
     <string name="how_i_get_money">Anda dapat mengubah Ethereum menjadi uang fiat dan mentransfernya ke rekening bank Anda melalui bursa mata uang kripto apa pun.</string>
@@ -394,14 +377,12 @@
     <string name="currency_drop">Ambil Penurunan Mata Uang</string>
     <string name="currency_import">Impor Mata Uang</string>
     <string name="you_will_receive">Anda akan menerima</string>
-    <string name="dust_value"><![CDATA[~0.00]]></string>
     <string name="action_scan_dapp">Pindai Kode QR</string>
     <string name="toast_invalid_code">Hasil Pemindaian Tidak valid</string>
     <string name="address_found">Alamat Ethereum</string>
     <string name="is_address">Baru saja memindai alamat Ethereum. Apakah Anda ingin mencoba mengunggah ini sebagai Token?</string>
     <string name="dialog_load_as_contract">Ungu Token</string>
     <string name="blockchain">%1$s Blockchain</string>
-    <string name="currency_00">0.00 %s</string>
     <string name="telegram">Telegram (Layanan Pelanggan)</string>
     <string name="transfer_request">Permintaan transfer</string>
     <string name="token_transfer_request">Permintaan transfer token: %1$s</string>
@@ -544,7 +525,6 @@
     <string name="tokenscript_element_not_present">masukan fungsi \'%1$s\' tidak ditemukan dalam elemen HTML.</string>
     <string name="complete_tokenscript_value">Nilai yang dimasukkan tidak berlaku: %1$s</string>
     <string name="value">Nilai</string>
-    <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">Tidak dapat membuat kunci. Coba aktifkan keamanan pada ponsel Anda.</string>
     <string name="what_is_seed_phrase">Sebuah Seed Phrase, seed pemulihan phrase atau seed phrase cadangan adalah daftar kata yang menyimpan semua informasi yang diperlukan untuk memulihkan dompet kripto. Perangkat lunak dompet biasanya akan menghasilkan seed phrase dan menginstruksikan pengguna untuk menuliskannya di atas kertas.</string>
     <string name="transaction_too_large">Transaksi Terlalu Besar</string>
@@ -553,10 +533,8 @@
     <string name="signature_details">Rincian tanda tangan</string>
     <string name="copy_contract_address">Salin Alamat Kontrak</string>
     <string name="self">Diri sendiri</string>
-    <string name="ERC721T">ERC721T</string>
     <string name="fail_sign">Gagal menandatangani pertukaran pesan</string>
     <string name="hint_contract_type">Tipe Token</string>
-    <string name="reddit">Reddit</string>
     <string name="tokenscript_compatibility">Kecocokan TokenScript</string>
     <string name="version">Versi</string>
     <string name="debug_script">TokenScript debug</string>
@@ -595,10 +573,8 @@
     <string name="title_console">Console</string>
     <string name="title_clear_browser_cache">Hapus Perambah Cache</string>
     <string name="title_reload_token_data">Muat Ulang Data Token</string>
-    <string name="title_tokenscript">TokenScript</string>
     <string name="title_change_language">Ubah Bahasa</string>
     <string name="add_hide_tokens">Tambahkan / Sembunyikan Token</string>
-    <string name="instagram">Instagram</string>
     <string name="settings_locale_currency">Ubah Mata Uang</string>
     <string name="dialog_title_select_currency">Pilih Mata Uang FIAT</string>
     <string name="tokenscript_file_error">Kesalahan pada berkas TokenScript</string>
@@ -631,7 +607,6 @@
     <string name="invalid_parameters">Parameter tidak valid saat melakukan Transaksi TokenScript . Silakan periksa masukan.</string>
     <string name="file_override">TokenScript diganti oleh%1$s%2$s\n\n</string>
     <string name="origin_token_title">Token Asal:\n\n</string>
-    <string name="tokenscript_contract_line">%1$s -> %2$s\n\n</string>
     <string name="is_debug_script"> (Debug)</string>
     <string name="confirm_delete_file">Konfirmasi Penghapusan File</string>
     <string name="confirm_delete_file_message">Hapus berkas %1$s</string>
@@ -667,7 +642,6 @@
     <string name="hidden_tokens">Token Tersembunyi</string>
     <string name="ignore">Abaikan</string>
     <string name="search_for_tokens">Mencari Token…</string>
-    <string name="title_wallet_connect">Dompet Terhubung</string>
     <string name="action_end_session">Sesi Berakhir</string>
     <string name="dialog_send_eth_transaction">Kirim Transaksi ETH</string>
     <string name="message_reject_request">Ditolak oleh pengguna</string>
@@ -676,7 +650,6 @@
     <string name="tx_rejected">Transaksi ditolak (coba gunakan lebih banyak gas)</string>
     <string name="from">dari: %1$s</string>
     <string name="from_op">dari</string>
-    <string name="valueSymbol">%1$s %2$s</string>
     <string name="sent_to">kepada: %1$s</string>
     <string name="approval_granted_to">disetujui untuk mentransfer token: %1$s</string>
     <string name="approval_obtained_from">untuk dibelanjakan atas nama: %1$s</string>
@@ -686,17 +659,14 @@
     <string name="activity_approved">Disetujui</string>
     <string name="activity_approval_granted">Persetujuan diberikan</string>
     <string name="tokenscript_call">TokenScript Hubungi:</string>
-    <string name="testnet">Testnet</string>
     <string name="today">Hari ini</string>
     <string name="go_to_token">beralih ke Token</string>
     <string name="invalid_walletconnect_session">Sesi WalletConnect Tidak Berlaku</string>
     <string name="restart_walletconnect_session">Sesi WalletConnect sebelumnya tidak diakhiri dengan benar. Silakan kembali ke halaman web dan putuskan sambungan, kemudian memulai sesi baru.</string>
     <string name="invalid_walletconnect_data">Data QR WalletConnect tidak berlaku</string>
     <string name="walletconnect_timeout">Waktu untuk koneksi habis. Harap batalkan permintaan dari Dapp dan mulai sesi baru.</string>
-    <string name="label_nonce">Nonce</string>
     <string name="payload">Beban Pembayaran</string>
     <string name="signed_transactions">Transaksi telah ditandatangani</string>
-    <string name="delete_session">%1$s</string>
     <string name="title_delete_session">Hapus catatan sesi ini?</string>
     <string name="session_terminated">Sesi telah dihentikan. Beralih kembali ke Dapp dan memulai sesi WalletConnect baru.</string>
     <string name="message_transaction_not_sent">Transaksi tidak terkirim</string>
@@ -803,8 +773,6 @@
     <string name="asset_description_text_plural">%1$s Aset | %2$s</string>
     <string name="this_is_testnet">Ini adalah Testnet</string>
     <string name="swap_with_quickswap">Tukar dengan Quickswap</string>
-    <string name="email">Email</string>
-    <string name="discord">Discord</string>
     <string name="name_this_wallet">Beri Nama Dompet Ini</string>
     <string name="enter_wallet_name">Masukkan Nama Dompet</string>
     <string name="action_save_name">Simpan Nama</string>
@@ -851,7 +819,6 @@
     <string name="performance">Kinerja</string>
     <string name="token_name_hint">Cari token</string>
     <string name="assets">Aset</string>
-    <string name="defi_header">DeFi</string>
     <string name="governance_header">Tata Kelola Pemerintahan</string>
     <string name="collectibles_header">Barang Koleksi</string>
     <string name="whats_new">Apa yang baru?</string>
@@ -868,7 +835,6 @@
     <string name="wc_no_active_sessions">Tidak ada sesi Aktif</string>
     <string name="wc_connect_wallet">Hubungkan Dompet</string>
     <string name="error_seed_phrase_must_words">Seed phrase hanya bisa berisi kata-kata</string>
-    <string name="label_token_id">Token #</string>
     <string name="label_external_link">Tautan Eksternal</string>
     <string name="label_description">Penjelasan</string>
     <string name="label_details">Rincian</string>
@@ -902,7 +868,6 @@
     <string name="unable_store_key">Tidak dapat menyimpan kunci: %1$s</string>
     <string name="title_ens_lookup_warning">Peringatan Pencarian ENS</string>
     <string name="message_ens_node_not_sync">AlphaWallet telah mendeteksi perbedaan antara penanda waktu ethereum dan waktu perangkat Anda saat ini, atau mungkin koneksi blockchain tidak disinkronkan, harap periksa waktu mobile Anda sudah benar, atau abaikan peringatan ini.</string>
-    <string name="zero">0</string>
     <string name="decrease">Penurunan</string>
     <string name="increase">Peningkatan</string>
     <string name="message_transaction_timeout">Transaksi telah habis waktunya. Anda bisa melihat status di halaman aktivitas.</string>
@@ -936,7 +901,6 @@
     <string name="label_slippage_custom">Khusus</string>
     <string name="label_api_v1_app_name">Nama</string>
     <string name="label_api_v1_note">Catatan</string>
-    <string name="label_api_v1_app_url">URL</string>
     <string name="action_connect">Terhubung</string>
     <string name="title_api_v1_connect_to">Terhubung ke</string>
     <string name="action_sign">Tanda tangan</string>
@@ -960,4 +924,8 @@
     <string name="enclave_locked">Locked</string>
     <string name="key_type_in_database">Key type in Database</string>
     <string name="key_entry_in_secure_enclave">Key Entry in Secure Enclave</string>
+    <string name="safe_transfer">Transfer yang aman</string>
+    <string name="help_question7">Kebijakan pribadi</string>
+    <string name="help_question8">Ketentuan Layanan</string>
+    <string name="connected_wallets">Dompet yang terhubung</string>
 </resources>

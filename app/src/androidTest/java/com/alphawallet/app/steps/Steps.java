@@ -5,6 +5,7 @@ import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
+import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withHint;
@@ -78,7 +79,7 @@ public class Steps
         pressBack();
     }
 
-    private static void selectMenu(String text)
+    public static void selectMenu(String text)
     {
         ViewInteraction selectActiveNetworks = onView(withText(text));
         selectActiveNetworks.perform(scrollTo(), ViewActions.click());
@@ -190,6 +191,11 @@ public class Steps
         pressBack();
     }
 
+    public static void gotoWalletPage()
+    {
+        click(withId(R.id.nav_wallet_text));
+    }
+
     public static void gotoSettingsPage() {
         click(withId(R.id.nav_settings_text));
     }
@@ -208,7 +214,7 @@ public class Steps
         input(R.id.input_network_symbol, "ETH");
         input(R.id.input_network_explorer_api, GANACHE_URL);
         input(R.id.input_network_block_explorer_url, GANACHE_URL);
-        onView(withId(R.id.network_input_scroll)).perform(ViewActions.swipeUp());
+        onView(withId(R.id.network_input_scroll)).perform(swipeUp());
         Helper.wait(1);
         click(withId(R.id.checkbox_testnet));
         click(withId(R.string.action_add_network));
@@ -220,4 +226,32 @@ public class Steps
         onView(allOf(withId(R.id.edit_text), isDescendantOfA(withId(id)))).perform(replaceText(text));
     }
 
+    public static void watchWalletWithENS(String ens)
+    {
+        click(withText("I already have a Wallet"));
+        click(withText("Private key")); // Scroll to right
+        Helper.wait(1);
+        click(withText("Watch-only Wallets"));
+        Helper.wait(1);
+        input(R.id.input_watch_address, ens);
+        Helper.wait(5);
+        click(withText("Watch Wallet"));
+    }
+
+    public static void selectCurrency(String currency)
+    {
+        gotoSettingsPage();
+        selectMenu("Change Currency");
+        Helper.wait(1);
+        try
+        {
+            click(withText(currency));
+        }
+        catch (Exception e)
+        {
+            onView(withId(R.id.list)).perform(ViewActions.swipeUp());
+            click(withText(currency));
+        }
+        pressBack();
+    }
 }

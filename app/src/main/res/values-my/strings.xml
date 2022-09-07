@@ -203,7 +203,7 @@
     <string name="help_question4">Seed Phrase ဆိုသည်မှာအဘယ်နည်း။</string>
     <string name="help_question5">ETHကိုမိမိ ဝေါလက်အတွင်းသို့မည်ကဲ့သို့လွှဲပြောင်းရမည်နည်း။</string>
     <string name="help_question6">Tokenscriptဆိုသည်မှာအဘယ်နည်း။</string>
-    <string name="help_question8" translatable="false">ဝန်ဆောင်မှု၏စည်းကမ်းချက်များ</string>
+    <string name="help_question8">ဝန်ဆောင်မှု၏စည်းကမ်းချက်များ</string>
     <string name="twenty_four_hours">၂၄နာရီ</string>
     <string name="appreciation">ကျေးဇူးတင်ရှိခြင်း</string>
     <string name="eth_per_ticket">%1$s/လက်မှတ်</string>

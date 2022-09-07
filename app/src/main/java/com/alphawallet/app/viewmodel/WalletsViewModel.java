@@ -369,15 +369,13 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
 
     private void startBalanceUpdateTimer(final Wallet[] wallets)
     {
-        long initialDelay = 1;
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
         if (!tokensService.isMainNetActive())
         {
-            updateAllWallets(wallets, TokenUpdateType.STORED); //initially show values from database, update 5 seconds later
-            initialDelay = 10;
+            updateAllWallets(wallets, TokenUpdateType.STORED); //initially show values from database, start update 1 second later
         }
 
-        balanceTimerDisposable = Observable.interval(initialDelay, BALANCE_CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS) //initial delay 1 second to allow view to stabilise
+        balanceTimerDisposable = Observable.interval(1, BALANCE_CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS) //initial delay 1 second to allow view to stabilise
                 .doOnNext(l -> getWalletsBalance(wallets)).subscribe();
     }
 

@@ -59,6 +59,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private boolean debugView = false;
 
     private boolean gridFlag;
+    private boolean testNetWhereAreMyTokensViewFlag;
 
     protected final TokensAdapterCallback tokensAdapterCallback;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -102,12 +103,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
 
     public TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, TokensService tService,
-                         ActivityResultLauncher<Intent> launcher)
+                         ActivityResultLauncher<Intent> launcher, Boolean viewType)
     {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = tService;
         this.managementLauncher = launcher;
+        this.testNetWhereAreMyTokensViewFlag = viewType;
 
         new TokensMappingRepository(aService.getTokenLocalSource());
     }
@@ -425,7 +427,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void addTestNetTips()
     {
-        if (!tokensService.isMainNetActive())
+        if (!tokensService.isMainNetActive() && testNetWhereAreMyTokensViewFlag)
         {
             items.add(new TestNetTipsItem(0));
         }

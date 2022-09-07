@@ -201,7 +201,7 @@ public class WalletFragment extends BaseFragment implements
     private void initList()
     {
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),
-                tokenManagementLauncher);
+                tokenManagementLauncher, false);
         adapter.setHasStableIds(true);
         setLinearLayoutManager(TokenFilter.ALL.ordinal());
         recyclerView.setAdapter(adapter);

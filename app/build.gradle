@@ -27,6 +27,7 @@ apply plugin: 'dagger.hilt.android.plugin'
 apply plugin: 'com.worker8.android_lint_reporter'
 apply plugin: 'io.gitlab.arturbosch.detekt'
 apply plugin: 'com.dicedmelon.gradle.jacoco-android'
+apply plugin: 'com.google.firebase.crashlytics'
 
 jacoco {
     toolVersion = "0.8.8"
@@ -120,23 +121,6 @@ android {
                 cFlags "-DPSKEY=\\\"" + DEFAULT_POLYGONSCAN_API_KEY + "\\\""
                 cFlags "-DASKEY=\\\"" + DEFAULT_AURORA_API_KEY + "\\\""
             }
-        }
-    }
-    flavorDimensions "targetting"
-
-    productFlavors {
-        analytics {
-            dimension "targetting"
-
-            /*
-            Below code is used to include analytics only when Flavor is "No Analytics"
-            This is due to China release where Google services should not be included
-             */
-//            apply plugin: 'com.google.gms.google-services'
-            apply plugin: 'com.google.firebase.crashlytics'
-        }
-        noAnalytics {
-            dimension "targetting"
         }
     }
     signingConfigs {
@@ -349,10 +333,10 @@ dependencies {
     implementation 'androidx.work:work-runtime:2.7.1'
 
     //Analytics
-    analyticsImplementation 'com.google.android.play:core:1.10.3'
-    analyticsImplementation 'com.google.firebase:firebase-analytics:20.1.2'
-    analyticsImplementation 'com.mixpanel.android:mixpanel-android:5.8.4'
-    analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.2.9'
+    implementation 'com.google.android.play:core:1.10.3'
+    implementation 'com.google.firebase:firebase-analytics:20.1.2'
+    implementation 'com.mixpanel.android:mixpanel-android:5.8.4'
+    implementation 'com.google.firebase:firebase-crashlytics:18.2.9'
 }
 
 // WARNING WARNING WARNING

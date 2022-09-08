@@ -1,5 +1,25 @@
 plugins {
     id 'com.android.application'
+    id 'dagger.hilt.android.plugin'
+}
+
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
+        credentials {
+            username = getGitHubUsername()
+            password = getPAT()
+        }
+    }
+}
+
+private String getPAT() {
+    def encodedToken = project.findProperty("gpr.key")
+    new String(encodedToken.decodeBase64())
+}
+
+private String getGitHubUsername() {
+    project.findProperty("gpr.user")
 }
 
 android {
@@ -44,5 +64,5 @@ dependencies {
     // dagger-hilt
     implementation "com.google.dagger:hilt-android:2.40.5"
     annotationProcessor "com.google.dagger:hilt-compiler:2.40.5"
-    implementation ('com.alphawallet.app:app:3.58.2@aar')
+    implementation(project(":app"))
 }

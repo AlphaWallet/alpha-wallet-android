@@ -4,10 +4,12 @@
     package="cn.seabornlee.myapplication">
 
     <application
+        android:name="com.alphawallet.app.App"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        tools:replace="android:name"
         >
         <activity
             android:name=".MainActivity"

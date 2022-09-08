@@ -19,7 +19,6 @@
         android:required="false" />
 
     <application
-        android:name=".App"
         android:allowBackup="false"
         android:extractNativeLibs="true"
         android:hardwareAccelerated="true"
@@ -32,7 +31,7 @@
         android:testOnly="false"
         android:theme="@style/AppTheme.NoActionBar"
         android:usesCleartextTraffic="true"
-        tools:replace="android:name, android:theme, android:allowBackup">
+        >
 
         <activity
             android:name=".ui.HomeActivity"

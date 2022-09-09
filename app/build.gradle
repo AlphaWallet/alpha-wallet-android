@@ -28,6 +28,38 @@ apply plugin: 'com.worker8.android_lint_reporter'
 apply plugin: 'io.gitlab.arturbosch.detekt'
 apply plugin: 'com.dicedmelon.gradle.jacoco-android'
 apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        bar(MavenPublication) {
+            groupId 'com.alphawalet'
+            artifactId 'alphawallet-library'
+            version '3.58.2'
+            artifact("$buildDir/outputs/aar/app-debug.aar")
+        }
+    }
+
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            /** Configure path of your package repository on Github
+             ** Replace GITHUB_USERID with your/organisation Github userID
+             ** and REPOSITORY with the repository name on GitHub
+             */
+            url = uri("https://maven.pkg.github.com/alphawallet/alpha-wallet-android")
+            credentials {
+                /** Create github.properties in root project folder file with
+                 ** gpr.usr=GITHUB_USER_ID & gpr.key=PERSONAL_ACCESS_TOKEN
+                 ** Set env variable GPR_USER & GPR_API_KEY if not adding a properties file**/
+
+                username = getGitHubUsername()
+                password = getPAT()
+            }
+        }
+    }
+}
 
 jacoco {
     toolVersion = "0.8.8"

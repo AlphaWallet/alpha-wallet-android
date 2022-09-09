@@ -19,7 +19,6 @@ public class TokensBalanceView extends LinearLayout
         super(context, attrs);
         inflate(context, R.layout.item_token_with_balance_view, this);
         horizontalListView = findViewById(R.id.horizontal_list);
-
     }
 
     public void bindTokens(Token[] token)
@@ -28,5 +27,10 @@ public class TokensBalanceView extends LinearLayout
         horizontalListView.setAdapter(testNetHorizontalListAdapter);
     }
 
+    public void blankView()
+    {
+        //clear adapter
+        bindTokens(new Token[0]);
+    }
 }
 

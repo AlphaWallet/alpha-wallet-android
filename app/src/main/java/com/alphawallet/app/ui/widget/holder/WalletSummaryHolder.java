@@ -88,7 +88,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 
         if (data != null)
         {
-
+            tokensBalanceView.blankView();
             wallet = fetchWallet(data);
             arrowRight.setOnClickListener(this);
             manageWalletLayout.setOnClickListener(this);

@@ -20,6 +20,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.util.Patterns;
 import android.util.TypedValue;
 import android.webkit.URLUtil;
@@ -34,6 +35,8 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -49,6 +52,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -313,6 +318,22 @@ public class Utils {
         }
         return json;
     }
+
+    public static String loadJSONStringFromAsset(Context context, String fileName) {
+        String returnString = null;
+        try{
+            Reader reader= new InputStreamReader(context.getAssets().open(fileName));
+            JsonElement json=new Gson().fromJson(reader,JsonElement.class);
+            returnString = json.toString();
+        }catch (IOException ex){
+            ex.printStackTrace();
+            return null;
+        }
+        Log.e("customLockedChains22", returnString);
+        return returnString;
+    }
+
+
 
     public static boolean copyFile(String source, String dest)
     {

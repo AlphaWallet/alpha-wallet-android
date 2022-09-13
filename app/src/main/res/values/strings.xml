@@ -191,7 +191,7 @@
     <string-array name="filter_search_date">
         <item>DD/MM/YY</item>
     </string-array>
-    <string name="eth">ETH</string>
+    <string name="eth" translatable="false">ETH</string>
     <string name="quantity_of_tickets">Quantity of Tickets</string>
     <string name="total_cost_label">Total Cost:</string>
     <string name="equivalent_in_usd">Equivalent in USD</string>
@@ -926,7 +926,7 @@
     <string name="unable_store_key">Unable to store key: %1$s</string>
     <string name="title_ens_lookup_warning">ENS Lookup Warning</string>
     <string name="message_ens_node_not_sync">AlphaWallet has detected a discrepancy between ethereum\'s timestamp and your device\'s current time, or possibly the blockchain connection is not synchronized, please check your phone\'s time is correct, or ignore this warning.</string>
-    <string name="zero">0</string>
+    <string name="zero" translatable="false">0</string>
     <string name="decrease">Decrease</string>
     <string name="increase">Increase</string>
     <string name="message_transaction_timeout">The transaction has timed out. You can view the status in activity page.</string>

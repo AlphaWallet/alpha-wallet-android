@@ -52,9 +52,11 @@ import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.google.protobuf.Any;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -349,17 +351,17 @@ public class NewSettingsFragment extends BaseFragment
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
 
-        JSONObject customSettingsJsonObject = new JSONObject();
+        JSONObject customSettingsJsonObject;
         try {
             String lockedChains = Utils.loadJSONStringFromAsset(getContext(), CUSTOM_SETTINGS_FILENAME);
             customSettingsJsonObject = new JSONObject(lockedChains);
-            if (customSettingsJsonObject.getLong("locked_chains") == 0)
+            JSONArray chainsArray = customSettingsJsonObject.getJSONArray("locked_chains");
+            if (chainsArray.length() == 0)
             {
-                Log.e("inIF", customSettingsJsonObject.getString("locked_chains"));
                 systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
             }
         }catch (JSONException err){
-            Log.d("Error", err.toString());
+            err.printStackTrace();
         }
 
 

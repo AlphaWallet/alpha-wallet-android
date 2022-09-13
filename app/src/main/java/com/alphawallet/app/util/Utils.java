@@ -329,7 +329,6 @@ public class Utils {
             ex.printStackTrace();
             return null;
         }
-        Log.e("customLockedChains22", returnString);
         return returnString;
     }
 

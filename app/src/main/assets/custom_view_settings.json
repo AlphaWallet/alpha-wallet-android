@@ -1,0 +1,9 @@
+{
+  "exclusive_chains" :[
+    {
+      "chain" : 1
+    }],
+  "locked_chains" : [],
+  "locked_tokens" : [],
+  "dark_mode" : ""
+}

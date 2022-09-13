@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,18 +39,30 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.DApp;
+import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
 import com.google.android.material.card.MaterialCardView;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.google.protobuf.Any;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -58,6 +71,7 @@ import io.reactivex.schedulers.Schedulers;
 @AndroidEntryPoint
 public class NewSettingsFragment extends BaseFragment
 {
+    private static final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
     ActivityResultLauncher<Intent> handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result ->
             {
@@ -334,8 +348,20 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
-        if (CustomViewSettings.getLockedChains().size() == 0)
-            systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
+
+        JSONObject customSettingsJsonObject = new JSONObject();
+        try {
+            String lockedChains = Utils.loadJSONStringFromAsset(getContext(), CUSTOM_SETTINGS_FILENAME);
+            customSettingsJsonObject = new JSONObject(lockedChains);
+            if (customSettingsJsonObject.getLong("locked_chains") == 0)
+            {
+                Log.e("inIF", customSettingsJsonObject.getString("locked_chains"));
+                systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
+            }
+        }catch (JSONException err){
+            Log.d("Error", err.toString());
+        }
+
 
         if (biometricsSetting != null)
             systemSettingsLayout.addView(biometricsSetting, systemIndex++);

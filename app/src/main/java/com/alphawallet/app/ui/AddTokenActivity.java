@@ -123,8 +123,9 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         lastCheck = "";
 
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),
-                null, false);
+                null);
         adapter.setHasStableIds(true);
+        adapter.showTestNetTips();
         adapter.setFilterType(TokenFilter.NO_FILTER);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

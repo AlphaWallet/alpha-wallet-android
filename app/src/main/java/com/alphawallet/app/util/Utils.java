@@ -4,10 +4,10 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 
 import android.app.Activity;
 import android.content.Context;
@@ -773,12 +773,12 @@ public class Utils {
     private static final Map<Long, String> twChainNames = new HashMap<Long, String>() {
         {
             put(CLASSIC_ID, "classic");
-            put(XDAI_ID, "xdai");
+            put(GNOSIS_ID, "xdai");
             put(POA_ID, "poa");
             put(BINANCE_MAIN_ID, "smartchain");
             put(AVALANCHE_ID, "avalanche");
             put(OPTIMISTIC_MAIN_ID, "optimism");
-            put(MATIC_ID, "polygon");
+            put(POLYGON_ID, "polygon");
             put(MAINNET_ID, "ethereum");
         }
     };
@@ -813,11 +813,11 @@ public class Utils {
         int ipfsIndex = URL.lastIndexOf("/ipfs/");
         if (ipfsIndex >= 0)
         {
-            parsed = "https://gateway.ipfs.io" + URL.substring(ipfsIndex);
+            parsed = "https://alphawallet.infura-ipfs.io" + URL.substring(ipfsIndex);
         }
         else if (URL.startsWith(IPFS_PREFIX))
         {
-            parsed = "https://gateway.ipfs.io/ipfs/" + URL.substring(IPFS_PREFIX.length());
+            parsed = "https://alphawallet.infura-ipfs.io/ipfs/" + URL.substring(IPFS_PREFIX.length());
         }
 
         return parsed;

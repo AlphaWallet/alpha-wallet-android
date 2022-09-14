@@ -176,7 +176,9 @@ public class ActivityHistoryList extends LinearLayout
     {
         return realm.where(RealmTransaction.class)
                 .sort("timeStamp", Sort.DESCENDING)
-                .equalTo("input", "0x")
+                .beginGroup()
+                .equalTo("input", "0x").or().equalTo("input", "")
+                .endGroup()
                 .beginGroup()
                 .equalTo("to", wallet.address, Case.INSENSITIVE)
                 .or()

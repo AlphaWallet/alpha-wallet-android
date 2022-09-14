@@ -165,7 +165,7 @@ public class Transaction implements Parcelable
 		else
 		{
 			to = cTx.to_address;
-			input = "";
+			input = "0x";
 		}
 
 		this.hash = cTx.tx_hash;

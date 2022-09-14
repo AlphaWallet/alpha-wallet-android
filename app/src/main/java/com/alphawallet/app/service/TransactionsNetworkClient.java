@@ -8,8 +8,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 
 import android.text.TextUtils;
 
@@ -167,7 +167,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 {
                     lastTransaction = syncDownwards(updates, instance, svs, networkInfo, tokenAddress, 9999999999L);
                 }
-                else // try to sydenc upwards from the last read
+                else // try to sync upwards from the last read
                 {
                     lastTransaction = syncUpwards(updates, instance, svs, networkInfo, tokenAddress, lastBlockNumber);
                 }
@@ -697,9 +697,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             return BSC_EXPLORER_API_KEY;
         }
-        else if (networkInfo.chainId == MATIC_ID || networkInfo.chainId == MATIC_TEST_ID)
+        else if (networkInfo.chainId == POLYGON_ID || networkInfo.chainId == POLYGON_TEST_ID)
         {
-
             return POLYGONSCAN_API_KEY;
         }
         else if (networkInfo.chainId == AURORA_MAINNET_ID || networkInfo.chainId == AURORA_TESTNET_ID)

@@ -7,7 +7,7 @@ on:
 jobs:
   test:
     runs-on: self-hosted
-    timeout-minutes: 8
+    timeout-minutes: 15
     strategy:
       matrix:
         api-level: [30]
@@ -24,8 +24,6 @@ jobs:
 
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}

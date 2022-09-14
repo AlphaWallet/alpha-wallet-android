@@ -13,7 +13,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.KeyProviderFactory;
-import com.alphawallet.app.repository.KeyProviderJNIImpl;
 import com.alphawallet.app.util.JsonUtils;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.gson.Gson;
@@ -357,7 +356,7 @@ public class OpenSeaService
         {
             api = C.OPENSEA_ASSETS_API_RINKEBY;
         }
-        else if (networkId == EthereumNetworkBase.MATIC_ID)
+        else if (networkId == EthereumNetworkBase.POLYGON_ID)
         {
             api = C.OPENSEA_ASSETS_API_MATIC;
             ownerOption = "owner_address";
@@ -383,7 +382,7 @@ public class OpenSeaService
         {
             api = C.OPENSEA_SINGLE_ASSET_API_RINKEBY + contractAddress + "/" + tokenId;
         }
-        else if (networkId == EthereumNetworkBase.MATIC_ID)
+        else if (networkId == EthereumNetworkBase.POLYGON_ID)
         {
             api = C.OPENSEA_SINGLE_ASSET_API_MATIC + contractAddress + "/" + tokenId;
         }

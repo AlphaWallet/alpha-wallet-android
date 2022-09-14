@@ -5,6 +5,7 @@ import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
+import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withHint;
@@ -14,6 +15,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.assertions.Should.shouldNotSee;
 import static com.alphawallet.app.assertions.Should.shouldSee;
+import static com.alphawallet.app.util.EthUtils.GANACHE_URL;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
@@ -77,7 +79,7 @@ public class Steps
         pressBack();
     }
 
-    private static void selectMenu(String text)
+    public static void selectMenu(String text)
     {
         ViewInteraction selectActiveNetworks = onView(withText(text));
         selectActiveNetworks.perform(scrollTo(), ViewActions.click());
@@ -150,6 +152,16 @@ public class Steps
         closeSelectNetworkPage();
     }
 
+    public static void importPKWalletFromFrontPage(String privateKey) {
+        click(withText("I already have a Wallet"));
+        click(withText("Private key"));
+        Helper.wait(1);
+        onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_private_key)))))).perform(replaceText(privateKey));
+        Helper.wait(1); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis
+        click(withId(R.id.import_action_pk));
+        Helper.wait(5);
+    }
+
     public static void importKSWalletFromFrontPage(String keystore, String password) {
         click(withText("I already have a Wallet"));
         click(withText("Keystore"));
@@ -179,6 +191,11 @@ public class Steps
         pressBack();
     }
 
+    public static void gotoWalletPage()
+    {
+        click(withId(R.id.nav_wallet_text));
+    }
+
     public static void gotoSettingsPage() {
         click(withId(R.id.nav_settings_text));
     }
@@ -192,12 +209,13 @@ public class Steps
         selectMenu("Select Active Networks");
         click(withId(R.id.action_add));
         input(R.id.input_network_name, name);
-        String url = "http://10.0.2.2:8545";
-        input(R.id.input_network_rpc_url, url);
+        input(R.id.input_network_rpc_url, GANACHE_URL);
         input(R.id.input_network_chain_id, "2");
         input(R.id.input_network_symbol, "ETH");
-        input(R.id.input_network_explorer_api, url);
-        input(R.id.input_network_block_explorer_url, url);
+        input(R.id.input_network_explorer_api, GANACHE_URL);
+        input(R.id.input_network_block_explorer_url, GANACHE_URL);
+        onView(withId(R.id.network_input_scroll)).perform(swipeUp());
+        Helper.wait(1);
         click(withId(R.id.checkbox_testnet));
         click(withId(R.string.action_add_network));
         pressBack();
@@ -208,4 +226,32 @@ public class Steps
         onView(allOf(withId(R.id.edit_text), isDescendantOfA(withId(id)))).perform(replaceText(text));
     }
 
+    public static void watchWalletWithENS(String ens)
+    {
+        click(withText("I already have a Wallet"));
+        click(withText("Private key")); // Scroll to right
+        Helper.wait(1);
+        click(withText("Watch-only Wallets"));
+        Helper.wait(1);
+        input(R.id.input_watch_address, ens);
+        Helper.wait(5);
+        click(withText("Watch Wallet"));
+    }
+
+    public static void selectCurrency(String currency)
+    {
+        gotoSettingsPage();
+        selectMenu("Change Currency");
+        Helper.wait(1);
+        try
+        {
+            click(withText(currency));
+        }
+        catch (Exception e)
+        {
+            onView(withId(R.id.list)).perform(ViewActions.swipeUp());
+            click(withText(currency));
+        }
+        pressBack();
+    }
 }

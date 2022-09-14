@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionData;
@@ -17,19 +18,15 @@ import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -107,7 +104,7 @@ public class SendViewModel extends BaseViewModel {
 
     public void fetchToken(long chainId, String address, String walletAddress)
     {
-        tokensService.update(address, chainId)
+        tokensService.update(address, chainId, ContractType.NOT_SET)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(tokenInfo -> gotTokenUpdate(tokenInfo, walletAddress), this::onError).isDisposed();

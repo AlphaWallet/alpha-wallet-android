@@ -123,7 +123,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     @Override
-    public long getItemId(int position) {
+    public long getItemId(int position)
+    {
         Object obj = items.get(position);
         if (obj instanceof TokenSortedItem) {
             TokenCardMeta tcm = ((TokenSortedItem) obj).value;
@@ -197,7 +198,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(BinderViewHolder holder, int position) {
+    public void onBindViewHolder(BinderViewHolder holder, int position)
+    {
         items.get(position).view = holder;
         holder.bind(items.get(position).value);
     }
@@ -214,7 +216,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     @Override
-    public int getItemViewType(int position) {
+    public int getItemViewType(int position)
+    {
         if (position < items.size())
         {
             return items.get(position).viewType;
@@ -234,7 +237,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.walletAddress = walletAddress;
     }
 
-    private void addSearchTokensLayout() {
+    private void addSearchTokensLayout()
+    {
         if (walletAddress != null && !walletAddress.isEmpty()) {
             items.add(new ManageTokensSearchItem(new ManageTokensData(walletAddress, managementLauncher), -1));
         }
@@ -247,7 +251,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         items.add(new ChainItem(tcm.getChain(), tcm.group));
     }
 
-    private void addManageTokensLayout() {
+    private void addManageTokensLayout()
+    {
         if (walletAddress != null && !walletAddress.isEmpty() && tokensService.isMainNetActive()
             && (filterType == TokenFilter.ALL || filterType == TokenFilter.ASSETS)) { //only show buy button if filtering all or assets
             items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress, managementLauncher)));
@@ -331,7 +336,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
-    public void removeToken(TokenCardMeta token) {
+    public void removeToken(TokenCardMeta token)
+    {
         for (int i = 0; i < items.size(); i++) {
             Object si = items.get(i);
             if (si instanceof TokenSortedItem) {
@@ -345,7 +351,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
-    public void removeToken(long chainId, String tokenAddress) {
+    public void removeToken(long chainId, String tokenAddress)
+    {
         String id = TokensRealmSource.databaseKey(chainId, tokenAddress);
         for (int i = 0; i < items.size(); i++) {
             Object si = items.get(i);
@@ -427,12 +434,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private void addTestNetTips()
     {
         if (!tokensService.isMainNetActive() && !showTestNetTips)
-        {
             items.add(new TestNetTipsItem(0));
-        }
     }
 
-    public void setTotal(BigDecimal totalInCurrency) {
+    public void setTotal(BigDecimal totalInCurrency)
+    {
         total = new TotalBalanceSortedItem(totalInCurrency);
         //see if we need an update
         items.beginBatchedUpdates();
@@ -478,7 +484,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         filterAdapterItems();
     }
 
-    public void showTestNetTips(){
+    public void showTestNetTips()
+    {
         this.showTestNetTips = true;
         notifyDataSetChanged();
     }

@@ -948,7 +948,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static List<Long> addDefaultNetworks()
     {
-        return CustomViewSettings.alwaysVisibleChains;
+        ArrayList<Long> exclusiveChains = Utils.getChainsFromJsonFile("exclusive_chains");
+        return exclusiveChains;
     }
 
     public static ContractLocator getOverrideToken()

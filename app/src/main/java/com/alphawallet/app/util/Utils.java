@@ -29,9 +29,11 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.RawRes;
 import androidx.fragment.app.FragmentActivity;
 
+import com.alphawallet.app.App;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
@@ -39,6 +41,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
@@ -83,6 +87,7 @@ public class Utils {
     private static final String TRUST_ICON_REPO_BASE = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/";
     private static final String TRUST_ICON_REPO = TRUST_ICON_REPO_BASE + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
     private static final String ALPHAWALLET_ICON_REPO = ALPHAWALLET_REPO_NAME + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
+    public static final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
 
     public static int dp2px(Context context, int dp) {
         Resources r = context.getResources();
@@ -985,5 +990,83 @@ public class Utils {
 
     public static String removeDoubleQuotes(String string) {
         return string != null ? string.replace("\"", "") : null;
+    }
+
+    public static ArrayList<Long> getChainsFromJsonFile(String chainName)
+    {
+        ArrayList<Long> chains = new ArrayList<>();
+        try {
+            String lockedChains = Utils.loadJSONStringFromAsset(App.getContext(), CUSTOM_SETTINGS_FILENAME);
+            if(lockedChains != null)
+            {
+                JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
+                JSONArray chainsArray = customSettingsJsonObject.getJSONArray(chainName);
+                if (chainsArray.length() > 0)
+                {
+                    for(int i=0; i < chainsArray.length(); i++)
+                    {
+                        JSONObject chainObject = chainsArray.getJSONObject(i);
+                        Long chain = chainObject.getLong("chain");
+                        chains.add(chain);
+                    }
+                }
+            }
+        }catch (JSONException err){
+            err.printStackTrace();
+        }
+
+        return chains;
+    }
+
+
+    public static ArrayList<TokenInfo> getLockedTokensFromJsonFile(String chainName)
+    {
+        ArrayList<TokenInfo> chains = new ArrayList<>();
+        try {
+            String lockedTokens = Utils.loadJSONStringFromAsset(App.getContext(), CUSTOM_SETTINGS_FILENAME);
+            if(lockedTokens != null)
+            {
+                JSONObject customSettingsJsonObject = new JSONObject(lockedTokens);
+                JSONArray chainsArray = customSettingsJsonObject.getJSONArray(chainName);
+                if (chainsArray.length() > 0)
+                {
+                    for(int i=0; i < chainsArray.length(); i++)
+                    {
+                        JSONObject chainObject = chainsArray.getJSONObject(i);
+                        String tokenAddress = chainObject.getString("tokenAddress");
+                        String tokenName = chainObject.getString("tokenName");
+                        String tokenSymbol = chainObject.getString("tokenSymbol");
+                        Integer tokenDecimals = chainObject.getInt("tokenDecimals");
+                        Boolean isEnabled = chainObject.getBoolean("isEnabled");
+                        Long chainId = chainObject.getLong("chainId");
+                        TokenInfo tokenInfo = new TokenInfo(tokenAddress, tokenName, tokenSymbol, tokenDecimals, isEnabled, chainId);
+                        chains.add(tokenInfo);
+                    }
+                }
+            }
+
+        }catch (JSONException err){
+            err.printStackTrace();
+        }
+
+        return chains;
+    }
+
+    public static Boolean getDarkModeValueFromJsonFile(String chainName)
+    {
+        Boolean darkModeValue = false;
+        try {
+            String darkMode = Utils.loadJSONStringFromAsset(App.getContext(), CUSTOM_SETTINGS_FILENAME);
+            if(darkMode != null)
+            {
+                JSONObject customSettingsJsonObject = new JSONObject(darkMode);
+                darkModeValue = customSettingsJsonObject.getBoolean(chainName);
+            }
+
+
+        }catch (JSONException err){
+            err.printStackTrace();
+        }
+        return darkModeValue;
     }
 }

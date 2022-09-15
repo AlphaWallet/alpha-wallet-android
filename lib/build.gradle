@@ -9,6 +9,39 @@ buildscript {
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+
+// GitHub Personal Access Token
+private String getPAT() {
+    def encodedToken = project.findProperty("gpr.key")
+    new String(encodedToken.decodeBase64())
+}
+
+private String getGitHubUsername() {
+    project.findProperty("gpr.user")
+}
+
+publishing {
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+            groupId 'com.alphawallet'
+            artifactId 'lib'
+            version '3.58.3'
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/alphawallet/alpha-wallet-android")
+            credentials {
+                username = getGitHubUsername()
+                password = getPAT()
+            }
+        }
+    }
+}
 
 dependencies {
     implementation files('..\\app\\libs\\abi-4.8.8-android.jar')

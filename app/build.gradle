@@ -128,7 +128,17 @@ android_lint_reporter {
 
 repositories {
     maven {
+        name = "trustwallet"
         url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
+        credentials {
+            username = getGitHubUsername()
+            password = getPAT()
+        }
+    }
+
+    maven {
+        name = "alphawallet"
+        url = uri("https://maven.pkg.github.com/alphawallet/alpha-wallet-android")
         credentials {
             username = getGitHubUsername()
             password = getPAT()
@@ -276,7 +286,7 @@ private String getGitHubUsername() {
 }
 
 dependencies {
-    implementation project(":lib")
+    implementation 'com.alphawallet:lib:3.58.3'
 
     // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
     // WARNING!  Don't add dependency on Google Play Services without consulting

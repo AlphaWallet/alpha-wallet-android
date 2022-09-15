@@ -1,9 +1,15 @@
 {
-  "exclusive_chains" :[
+  "exclusive_chains" :[{"chain" : 1}],
+  "locked_chains" : [{"chain" : 1}, {"chain" : 4}, {"chain" : 10}],
+  "locked_tokens" : [
     {
-      "chain" : 1
-    }],
-  "locked_chains" : [],
-  "locked_tokens" : [],
-  "dark_mode" : ""
+      "tokenAddress" : "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "tokenName" : "USD Coin",
+      "tokenSymbol" : "USDC",
+      "tokenDecimals" : 6,
+      "isEnabled" : true,
+      "chainId" : 1
+    }
+  ],
+  "dark_mode" : false
 }

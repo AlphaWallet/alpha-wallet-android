@@ -22,10 +22,13 @@ import timber.log.Timber;
 public class App extends Application
 {
 
+    private static Context mContext;
+
     @Override
     public void onCreate()
     {
         super.onCreate();
+        mContext = getApplicationContext();
         Realm.init(this);
 
         if (BuildConfig.DEBUG)
@@ -67,5 +70,9 @@ public class App extends Application
 //		LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
 //		lockManager.enableAppLock(this, CustomPinActivity.class);
 //		lockManager.getAppLock().setShouldShowForgot(false);
+    }
+
+    public static Context getContext() {
+        return mContext;
     }
 }

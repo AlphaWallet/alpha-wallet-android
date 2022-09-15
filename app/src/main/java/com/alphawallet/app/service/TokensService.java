@@ -9,6 +9,7 @@ import android.util.Pair;
 
 import androidx.annotation.Nullable;
 
+import com.alphawallet.app.App;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
@@ -35,6 +36,9 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -400,9 +404,10 @@ public class TokensService
     public void setupFilter(boolean userUpdated)
     {
         networkFilter.clear();
-        if (CustomViewSettings.getLockedChains().size() > 0)
+        ArrayList<Long> lockedChains = Utils.getChainsFromJsonFile("locked_chains");
+        if (lockedChains.size() > 0)
         {
-            networkFilter.addAll(CustomViewSettings.getLockedChains());
+            networkFilter.addAll(lockedChains);
         }
         else
         {
@@ -959,7 +964,8 @@ public class TokensService
             }
         }
 
-        for (Long lockedChain : CustomViewSettings.getLockedChains())
+        ArrayList<Long> getLockedChains = Utils.getChainsFromJsonFile("locked_chains");
+        for (Long lockedChain : getLockedChains)
         {
             if (!networkFilter.contains(lockedChain)) networkFilter.add(lockedChain);
         }
@@ -1004,7 +1010,8 @@ public class TokensService
         mainNetActive = ethereumNetworkRepository.isMainNetSelected();
         final String wallet = currentAddress;
         //ensure locked tokens are displaying
-        Observable.fromIterable(CustomViewSettings.getLockedTokens())
+        ArrayList<TokenInfo> lockedTokens = Utils.getLockedTokensFromJsonFile("locked_tokens");
+        Observable.fromIterable(lockedTokens)
                 .forEach(info -> addToken(info, wallet)
                         .flatMapCompletable(token -> enableToken(wallet, token))
                         .subscribeOn(Schedulers.io())

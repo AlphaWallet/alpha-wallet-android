@@ -9,8 +9,10 @@ import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -53,7 +55,8 @@ public class CustomViewSettings
 
     public static boolean alwaysShow(long chainId)
     {
-        return alwaysVisibleChains.contains(chainId);
+        ArrayList<Long> exclusiveChains = Utils.getChainsFromJsonFile("exclusive_chains");
+        return exclusiveChains.contains(chainId);
     }
 
     //TODO: Wallet can only show the above tokens
@@ -85,6 +88,7 @@ public class CustomViewSettings
 
     private static boolean isLockedToken(long chainId, String contractAddress)
     {
+        ArrayList<TokenInfo> lockedTokens = Utils.getLockedTokensFromJsonFile("locked_tokens");
         for (TokenInfo tInfo : lockedTokens)
         {
             if (tInfo.chainId == chainId && tInfo.address.equalsIgnoreCase(contractAddress)) return true;

@@ -72,7 +72,6 @@ import io.reactivex.schedulers.Schedulers;
 @AndroidEntryPoint
 public class NewSettingsFragment extends BaseFragment
 {
-    private static final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
     ActivityResultLauncher<Intent> handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result ->
             {
@@ -351,10 +350,9 @@ public class NewSettingsFragment extends BaseFragment
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
 
-        JSONObject customSettingsJsonObject;
         try {
-            String lockedChains = Utils.loadJSONStringFromAsset(getContext(), CUSTOM_SETTINGS_FILENAME);
-            customSettingsJsonObject = new JSONObject(lockedChains);
+            String lockedChains = Utils.loadJSONStringFromAsset(getContext(), Utils.CUSTOM_SETTINGS_FILENAME);
+            JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
             JSONArray chainsArray = customSettingsJsonObject.getJSONArray("locked_chains");
             if (chainsArray.length() == 0)
             {

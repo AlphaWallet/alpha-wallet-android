@@ -19,6 +19,8 @@ import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.SyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.tokendata.TokenUpdateType;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -55,10 +57,7 @@ import io.reactivex.schedulers.Schedulers;
 @HiltViewModel
 public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallback
 {
-    private final static String TAG = WalletsViewModel.class.getSimpleName();
-
-    private static final int BALANCE_CHECK_INTERVAL_SECONDS = 20;
-
+    private static final int BALANCE_CHECK_INTERVAL_SECONDS = 30;
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final GenericWalletInteract genericWalletInteract;
@@ -80,6 +79,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final MutableLiveData<Wallet> createdWallet = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
+    private final MutableLiveData<Map<String, Token[]>> baseTokens = new MutableLiveData<>();
 
     private NetworkInfo currentNetwork;
     private final Map<String, Wallet> walletBalances = new HashMap<>();
@@ -154,6 +154,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         return createWalletError;
     }
     public LiveData<Boolean> noWalletsError() { return noWalletsError; }
+    public LiveData<Map<String, Token[]>> baseTokens() { return baseTokens; }
 
     public void setDefaultWallet(Wallet wallet, boolean isNewWallet)
     {
@@ -175,7 +176,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     {
         walletBalances.clear();
         progress.postValue(true);
-
 
         disposable = genericWalletInteract
                 .find()
@@ -326,7 +326,10 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         if (nextWalletToCheck != null)
         {
             Wallet w = walletUpdate.get(nextWalletToCheck);
-            currentWalletUpdates.put(nextWalletToCheck, startWalletSyncProcess(w));
+            if (w != null)
+            {
+                currentWalletUpdates.put(nextWalletToCheck, startWalletSyncProcess(w));
+            }
         }
     }
 
@@ -367,6 +370,10 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private void startBalanceUpdateTimer(final Wallet[] wallets)
     {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
+        if (!tokensService.isMainNetActive())
+        {
+            updateAllWallets(wallets, TokenUpdateType.STORED); //initially show values from database, start update 1 second later
+        }
 
         balanceTimerDisposable = Observable.interval(1, BALANCE_CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS) //initial delay 1 second to allow view to stabilise
                 .doOnNext(l -> getWalletsBalance(wallets)).subscribe();
@@ -379,14 +386,40 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
      */
     private void getWalletsBalance(Wallet[] wallets)
     {
-        //loop through wallets and update balance
-        disposable = Observable.fromArray(wallets)
-                .forEach(wallet -> walletBalanceUpdate = tokensService.getChainBalance(wallet.address.toLowerCase(), currentNetwork.chainId)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(newBalance -> genericWalletInteract.updateBalanceIfRequired(wallet, newBalance), e -> { }));
-
+        if (tokensService.isMainNetActive())
+        {
+            //loop through wallets and update balance
+            disposable = Observable.fromArray(wallets)
+                    .forEach(wallet -> walletBalanceUpdate = tokensService.getChainBalance(wallet.address.toLowerCase(), currentNetwork.chainId)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(newBalance -> genericWalletInteract.updateBalanceIfRequired(wallet, newBalance), e -> {}));
+        }
+        else
+        {
+            //Testnet Mode, need to update chain balances for visible chains
+            updateAllWallets(wallets, TokenUpdateType.ACTIVE_SYNC);
+        }
         progress.postValue(false);
+    }
+
+    private void updateAllWallets(Wallet[] wallets, TokenUpdateType updateType)
+    {
+        disposable = Single.fromCallable(() -> {
+            //fetch all wallets in one go
+            Map<String, Token[]> walletTokenMap = new HashMap<>();
+            for (Wallet wallet : wallets)
+            {
+                Token[] walletTokens = tokensService.syncChainBalances(wallet.address.toLowerCase(), updateType).blockingGet();
+                if (walletTokens.length > 0)
+                {
+                    walletTokenMap.put(walletTokens[0].getWallet(), walletTokens);
+                }
+            }
+            return walletTokenMap;
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(baseTokens::postValue, e -> {});
     }
 
     @Override

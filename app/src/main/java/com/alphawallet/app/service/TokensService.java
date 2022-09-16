@@ -21,6 +21,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
+import com.alphawallet.app.entity.tokendata.TokenUpdateType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
@@ -585,6 +586,33 @@ public class TokensService
         return tokenRepository.fetchChainBalance(walletAddress, chainId);
     }
 
+    // Note that this routine works across different wallets, so there's no usage of currentAddress
+    public Single<Token[]> syncChainBalances(String walletAddress, TokenUpdateType updateType)
+    {
+        //update all chain balances
+        return Single.fromCallable(() -> {
+            List<Token> baseTokens = new ArrayList<>();
+            for (long chainId : networkFilter)
+            {
+                Token baseToken = tokenRepository.fetchToken(chainId, walletAddress, walletAddress);
+                if (baseToken == null)
+                {
+                    baseToken = ethereumNetworkRepository.getBlankOverrideToken(ethereumNetworkRepository.getNetworkByChain(chainId));
+                }
+                baseToken.setTokenWallet(walletAddress);
+                BigDecimal balance = baseToken.balance;
+                if (updateType == TokenUpdateType.ACTIVE_SYNC) balance = tokenRepository.updateTokenBalance(walletAddress, baseToken).blockingGet();
+                if (balance.compareTo(BigDecimal.ZERO) > 0)
+                {
+                    baseToken.balance = balance;
+                    baseTokens.add(baseToken);
+                }
+            }
+
+            return baseTokens.toArray(new Token[0]);
+        });
+    }
+
     private void onBalanceChange(BigDecimal newBalance, Token t)
     {
         boolean balanceChange = !newBalance.equals(t.balance);
@@ -1076,6 +1104,7 @@ public class TokensService
         }
     }
 
+    @NotNull
     public Token getTokenOrBase(long chainId, String address)
     {
         Token token = getToken(chainId, address);

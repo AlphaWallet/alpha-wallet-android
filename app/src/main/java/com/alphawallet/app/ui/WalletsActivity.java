@@ -27,6 +27,7 @@ import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.KeyService;
@@ -39,6 +40,8 @@ import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -56,9 +59,8 @@ public class WalletsActivity extends BaseActivity implements
 {
     private final Handler handler = new Handler();
     private final long balanceChain = EthereumNetworkRepository.getOverrideToken().chainId;
-    WalletsViewModel viewModel;
+    private WalletsViewModel viewModel;
     private RecyclerView list;
-    private SwipeRefreshLayout refreshLayout;
     private SystemView systemView;
     private Dialog dialog;
     private AWalletAlertDialog aDialog;
@@ -101,7 +103,6 @@ public class WalletsActivity extends BaseActivity implements
     {
         super.onResume();
         initViewModel();
-        initViews();
     }
 
     private void scrollToDefaultWallet()
@@ -109,7 +110,7 @@ public class WalletsActivity extends BaseActivity implements
         int position = adapter.getDefaultWalletIndex();
         if (position != -1)
         {
-            list.smoothScrollToPosition(position);
+            list.getLayoutManager().scrollToPosition(position);
         }
     }
 
@@ -127,9 +128,15 @@ public class WalletsActivity extends BaseActivity implements
             viewModel.createdWallet().observe(this, this::onCreatedWallet);
             viewModel.createWalletError().observe(this, this::onCreateWalletError);
             viewModel.noWalletsError().observe(this, this::noWallets);
+            viewModel.baseTokens().observe(this, this::updateBaseTokens);
         }
+        viewModel.onPrepare(balanceChain, this);
+        initViews(); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
+    }
 
-        viewModel.onPrepare(balanceChain, this); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
+    private void updateBaseTokens(Map<String, Token[]> walletTokens)
+    {
+        adapter.setTokens(walletTokens);
     }
 
     protected Activity getThisActivity()
@@ -146,7 +153,7 @@ public class WalletsActivity extends BaseActivity implements
 
     private void initViews()
     {
-        refreshLayout = findViewById(R.id.refresh_layout);
+        SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         list = findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
 
@@ -172,25 +179,19 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public void syncUpdate(String wallet, Pair<Double, Double> value)
     {
-        runOnUiThread(() -> {
-            adapter.updateWalletState(wallet, value);
-        });
+        runOnUiThread(() -> adapter.updateWalletState(wallet, value));
     }
 
     @Override
     public void syncCompleted(String wallet, Pair<Double, Double> value)
     {
-        runOnUiThread(() -> {
-            adapter.completeWalletSync(wallet, value);
-        });
+        runOnUiThread(() -> adapter.completeWalletSync(wallet, value));
     }
 
     @Override
     public void syncStarted(String wallet, Pair<Double, Double> value)
     {
-        runOnUiThread(() -> {
-            adapter.setUnsyncedWalletValue(wallet, value);
-        });
+        runOnUiThread(() -> adapter.setUnsyncedWalletValue(wallet, value));
     }
 
     @Override

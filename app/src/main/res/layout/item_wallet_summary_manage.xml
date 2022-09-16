@@ -29,6 +29,7 @@
             android:layout_height="@dimen/tiny_8"
             android:layout_marginStart="@dimen/mini_4"
             android:src="@drawable/ic_wallet_indicator"
+            tools:ignore="ContentDescription"
             android:visibility="invisible" />
 
         <ImageView
@@ -36,9 +37,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/transparent"
-            android:paddingStart="0dp"
             android:src="@drawable/ic_menu"
             android:visibility="gone"
+            tools:ignore="ContentDescription"
             app:tint="?colorControlNormal"
             tools:visibility="visible" />
 
@@ -62,7 +63,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/wallet_balance"
@@ -73,6 +75,7 @@
                 android:layout_weight="0.7"
                 android:lines="1"
                 android:textIsSelectable="true"
+                android:visibility="gone"
                 app:autoSizeTextType="uniform"
                 tools:text="123,567,890.1234" />
 
@@ -87,8 +90,20 @@
                 android:lines="1"
                 android:textColor="@color/positive"
                 android:textIsSelectable="true"
+                android:visibility="gone"
                 app:autoSizeTextType="uniform"
                 tools:text="+123.45%" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <com.alphawallet.app.widget.TokensBalanceView
+                android:id="@+id/token_with_balance_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
 
         </LinearLayout>
 
@@ -112,7 +127,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="@dimen/mini_4"
                 android:paddingRight="@dimen/mini_4"
-                android:text="|" />
+                android:text="@string/vertical_pipe" />
 
             <TextView
                 android:id="@+id/wallet_address"
@@ -133,18 +148,8 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center"
+        tools:ignore="ContentDescription"
         android:src="@drawable/ic_arrow_right"
         app:tint="?colorControlNormal" />
 
-    <LinearLayout
-        android:id="@+id/wallet_click_layer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@id/wallet_info_layout"
-        android:layout_alignTop="@id/layout_manage_wallet"
-        android:layout_alignBottom="@id/layout_manage_wallet"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="@dimen/small_12"
-        android:layout_marginBottom="-17dp"
-        android:orientation="vertical" />
 </RelativeLayout>

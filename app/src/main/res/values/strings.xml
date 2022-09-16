@@ -985,6 +985,7 @@
     <string name="enclave_locked">Locked</string>
     <string name="key_type_in_database">Key type in Database</string>
     <string name="key_entry_in_secure_enclave">Key Entry in Secure Enclave</string>
+    <string name="vertical_pipe">|</string>
     <string name="eth" translatable="false">ETH</string>
     <string name="zero" translatable="false">0</string>
 </resources>

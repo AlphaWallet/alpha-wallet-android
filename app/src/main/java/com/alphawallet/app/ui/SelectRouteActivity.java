@@ -158,10 +158,9 @@ public class SelectRouteActivity extends BaseActivity
 
     private void onProgressInfo(ProgressInfo progressInfo)
     {
-        progressDialog.setMessage(progressInfo.getMessage());
-
         if (progressInfo.shouldShow())
         {
+            progressDialog.setMessage(progressInfo.getMessage());
             progressDialog.show();
         }
         else

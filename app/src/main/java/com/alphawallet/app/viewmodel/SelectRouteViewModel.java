@@ -73,7 +73,7 @@ public class SelectRouteViewModel extends BaseViewModel
 
     private void onRoutes(String result)
     {
-        progressInfo.postValue(new ProgressInfo(false, R.string.message_fetching_routes));
+        progressInfo.postValue(new ProgressInfo(false));
 
         try
         {

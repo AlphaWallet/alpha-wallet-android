@@ -67,7 +67,6 @@ public class SwapViewModel extends BaseViewModel
     private final MutableLiveData<Chain> chain = new MutableLiveData<>();
     private final MutableLiveData<List<Connection>> connections = new MutableLiveData<>();
     private final MutableLiveData<Quote> quote = new MutableLiveData<>();
-    private final MutableLiveData<String> routes = new MutableLiveData<>();
     private final MutableLiveData<Long> network = new MutableLiveData<>();
     private final MutableLiveData<ProgressInfo> progressInfo = new MutableLiveData<>();
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
@@ -123,11 +122,6 @@ public class SwapViewModel extends BaseViewModel
     public LiveData<Quote> quote()
     {
         return quote;
-    }
-
-    public LiveData<String> routes()
-    {
-        return routes;
     }
 
     public LiveData<Long> network()

@@ -16,6 +16,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 public class StandardHeader extends LinearLayout
 {
     private TextView headerText;
+    private TextView control;
     private ChainName chainName;
     private SwitchMaterial switchMaterial;
     private View separator;
@@ -40,30 +41,28 @@ public class StandardHeader extends LinearLayout
             int headerId = a.getResourceId(R.styleable.StandardHeader_headerText, R.string.empty);
             boolean showSwitch = a.getBoolean(R.styleable.StandardHeader_showSwitch, false);
             boolean showChainName = a.getBoolean(R.styleable.StandardHeader_showChain, false);
+            boolean showControl = a.getBoolean(R.styleable.StandardHeader_showControl, false);
+            int controlText = a.getResourceId(R.styleable.StandardHeader_controlText, -1);
 
             headerText = findViewById(R.id.text_header);
             chainName = findViewById(R.id.chain_name);
             switchMaterial = findViewById(R.id.switch_material);
             separator = findViewById(R.id.separator);
+            control = findViewById(R.id.control);
 
             headerText.setText(headerId);
 
-            if (showSwitch)
-            {
-                switchMaterial.setVisibility(View.VISIBLE);
-            }
-            else
-            {
-                switchMaterial.setVisibility(View.GONE);
-            }
+            switchMaterial.setVisibility(showSwitch ? View.VISIBLE : View.GONE);
+            chainName.setVisibility(showChainName ? View.VISIBLE : View.GONE);
 
-            if (showChainName)
+            if (showControl)
             {
-                chainName.setVisibility(View.VISIBLE);
+                control.setVisibility(View.VISIBLE);
+                control.setText(controlText);
             }
             else
             {
-                chainName.setVisibility(View.GONE);
+                control.setVisibility(View.GONE);
             }
         }
         finally
@@ -90,6 +89,11 @@ public class StandardHeader extends LinearLayout
     public SwitchMaterial getSwitch()
     {
         return switchMaterial;
+    }
+
+    public TextView getControl()
+    {
+        return control;
     }
 
     public void hideSeparator()

@@ -11,7 +11,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/standard_16"
+        android:layout_marginStart="@dimen/standard_16"
+        android:layout_marginVertical="@dimen/standard_16"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
@@ -42,6 +43,12 @@
             android:visibility="gone"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:visibility="visible" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
+            android:visibility="invisible"/>
 
     </LinearLayout>
 

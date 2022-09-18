@@ -25,7 +25,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
 import com.alphawallet.app.entity.lifi.Quote;
-import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.lifi.Token;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.SwapUtils;
@@ -63,16 +63,17 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private RelativeLayout tokenLayout;
     private LinearLayout infoLayout;
     private TokenInfoView provider;
-    private TokenInfoView fees;
+    private TokenInfoView gasFees;
+    private TokenInfoView otherFees;
     private TokenInfoView currentPrice;
     private TokenInfoView minReceived;
     private LinearLayout noConnectionsLayout;
     private MaterialButton continueBtn;
     private MaterialButton openSettingsBtn;
     private TextView chainName;
-    private Token token;
+    private com.alphawallet.app.entity.tokens.Token token;
     private Wallet wallet;
-    private Connection.LToken sourceToken;
+    private Token sourceToken;
     private List<Chain> chains;
     private final Handler getQuoteHandler = new Handler();
     private final Runnable getQuoteRunnable = new Runnable()
@@ -82,12 +83,15 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         {
             if (confirmationDialog == null || !confirmationDialog.isShowing())
             {
-                viewModel.getQuote(
+                viewModel.getRoutes(
+                        SwapActivity.this,
                         sourceSelector.getToken(),
                         destSelector.getToken(),
                         wallet.address,
                         sourceSelector.getAmount(),
-                        settingsDialog.getSlippage());
+                        settingsDialog.getSlippage(),
+                        viewModel.getPreferredExchanges()
+                );
             }
             else
             {
@@ -125,6 +129,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         viewModel.chain().observe(this, this::onChain);
         viewModel.connections().observe(this, this::onConnections);
         viewModel.quote().observe(this, this::onQuote);
+        viewModel.routes().observe(this, this::onRoutes);
         viewModel.progress().observe(this, this::onProgress);
         viewModel.progressInfo().observe(this, this::onProgressInfo);
         viewModel.transactionFinalised().observe(this, this::txWritten);
@@ -146,7 +151,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         tokenLayout = findViewById(R.id.layout_tokens);
         infoLayout = findViewById(R.id.layout_info);
         provider = findViewById(R.id.tiv_provider);
-        fees = findViewById(R.id.tiv_fees);
+        gasFees = findViewById(R.id.tiv_gas_fees);
+        otherFees = findViewById(R.id.tiv_other_fees);
         currentPrice = findViewById(R.id.tiv_current_price);
         minReceived = findViewById(R.id.tiv_min_received);
         noConnectionsLayout = findViewById(R.id.layout_no_connections);
@@ -190,7 +196,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             }
 
             @Override
-            public void onSelectionChanged(Connection.LToken token)
+            public void onSelectionChanged(Token token)
             {
                 sourceTokenChanged(token);
             }
@@ -221,7 +227,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             }
 
             @Override
-            public void onSelectionChanged(Connection.LToken token)
+            public void onSelectionChanged(Token token)
             {
                 destTokenChanged(token);
             }
@@ -248,7 +254,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         ActionSheetDialog confDialog = null;
         try
         {
-            Token activeToken = viewModel.getTokensService().getTokenOrBase(sourceToken.chainId, sourceToken.address);
+            com.alphawallet.app.entity.tokens.Token activeToken = viewModel.getTokensService().getTokenOrBase(sourceToken.chainId, sourceToken.address);
             Web3Transaction w3Tx = viewModel.buildWeb3Transaction(quote);
             confDialog = new ActionSheetDialog(this, w3Tx, activeToken,
                     "", w3Tx.recipient.toString(), viewModel.getTokensService(), this);
@@ -264,7 +270,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         return confDialog;
     }
 
-    private void destTokenChanged(Connection.LToken token)
+    private void destTokenChanged(Token token)
     {
         destSelector.setBalance(viewModel.getBalance(token));
 
@@ -275,7 +281,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         startQuoteTask(0);
     }
 
-    private void sourceTokenChanged(Connection.LToken token)
+    private void sourceTokenChanged(Token token)
     {
         if (destSelector.getToken() == null)
         {
@@ -301,10 +307,14 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     protected void onResume()
     {
         super.onResume();
+        if (settingsDialog != null)
+        {
+            settingsDialog.setTools(viewModel.getTools(this));
+        }
     }
 
     // The source token should default to the token selected in the main wallet dialog (ie the token from the intent).
-    private void initSourceToken(Connection.LToken selectedToken)
+    private void initSourceToken(Token selectedToken)
     {
         if (selectedToken != null)
         {
@@ -318,7 +328,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         }
     }
 
-    private void initFromDialog(List<Connection.LToken> fromTokens)
+    private void initFromDialog(List<Token> fromTokens)
     {
         Tokens.sortValue(fromTokens);
         sourceTokenDialog = new SelectTokenDialog(fromTokens, this, tokenItem -> {
@@ -327,7 +337,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         });
     }
 
-    private void initToDialog(List<Connection.LToken> toTokens)
+    private void initToDialog(List<Token> toTokens)
     {
         Tokens.sortName(toTokens);
         Tokens.sortValue(toTokens);
@@ -360,7 +370,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     {
         this.chains = chains;
 
-        settingsDialog = new SwapSettingsDialog(this, chains,
+        settingsDialog = new SwapSettingsDialog(this, chains, viewModel.getTools(this),
                 chain -> {
                     chainName.setText(chain.name);
                     viewModel.setChain(chain);
@@ -400,13 +410,13 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     {
         if (!connections.isEmpty())
         {
-            List<Connection.LToken> fromTokens = new ArrayList<>();
-            List<Connection.LToken> toTokens = new ArrayList<>();
-            Connection.LToken selectedToken = null;
+            List<Token> fromTokens = new ArrayList<>();
+            List<Token> toTokens = new ArrayList<>();
+            Token selectedToken = null;
 
             for (Connection c : connections)
             {
-                for (Connection.LToken t : c.fromTokens)
+                for (Token t : c.fromTokens)
                 {
                     if (!fromTokens.contains(t))
                     {
@@ -425,7 +435,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                     }
                 }
 
-                for (Connection.LToken t : c.toTokens)
+                for (Token t : c.toTokens)
                 {
                     if (!toTokens.contains(t))
                     {
@@ -470,6 +480,13 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         getQuoteHandler.postDelayed(getQuoteRunnable, GET_QUOTE_INTERVAL_MS);
     }
 
+    private void onRoutes(String routes)
+    {
+        Intent intent = new Intent(this, SelectRouteActivity.class);
+        intent.putExtra("routes", routes);
+        startActivity(intent);
+    }
+
     private void updateDestAmount(Quote quote)
     {
         String amount = quote.estimate.toAmountMin;
@@ -485,7 +502,13 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private void updateInfoSummary(Quote quote)
     {
         provider.setValue(quote.toolDetails.name);
-        fees.setValue(SwapUtils.getTotalGasFees(quote.estimate.gasCosts));
+        String toolUrl = viewModel.getToolUrl(this, quote.toolDetails.key);
+        if (!TextUtils.isEmpty(toolUrl))
+        {
+            provider.setLink(toolUrl);
+        }
+        gasFees.setValue(SwapUtils.getTotalGasFees(quote.estimate.gasCosts));
+        otherFees.setValue(SwapUtils.getOtherFees(quote.estimate.feeCosts));
         currentPrice.setValue(SwapUtils.getFormattedCurrentPrice(quote).trim());
         minReceived.setValue(SwapUtils.getMinimumAmountReceived(quote));
         infoLayout.setVisibility(View.VISIBLE);
@@ -631,5 +654,30 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
         return null;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
+    {
+        if (requestCode == 1313)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                String provider = data.getStringExtra("provider");
+
+                viewModel.getQuote(
+                        sourceSelector.getToken(),
+                        destSelector.getToken(),
+                        wallet.address,
+                        sourceSelector.getAmount(),
+                        settingsDialog.getSlippage(),
+                        provider
+                );
+            }
+        }
+        else
+        {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 }

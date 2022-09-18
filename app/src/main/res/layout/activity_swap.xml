@@ -119,6 +119,11 @@
                     android:text="@string/action_open_settings" />
             </LinearLayout>
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/quote_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
             <LinearLayout
                 android:id="@+id/layout_info"
                 android:layout_width="match_parent"
@@ -134,11 +139,18 @@
                     custom:tokenInfoLabel="@string/label_provider" />
 
                 <com.alphawallet.app.widget.TokenInfoView
-                    android:id="@+id/tiv_fees"
+                    android:id="@+id/tiv_gas_fees"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
-                    custom:tokenInfoLabel="@string/label_fees" />
+                    custom:tokenInfoLabel="@string/label_gas_fees" />
+
+                <com.alphawallet.app.widget.TokenInfoView
+                    android:id="@+id/tiv_other_fees"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    custom:tokenInfoLabel="@string/label_other_fees" />
 
                 <com.alphawallet.app.widget.TokenInfoView
                     android:id="@+id/tiv_current_price"

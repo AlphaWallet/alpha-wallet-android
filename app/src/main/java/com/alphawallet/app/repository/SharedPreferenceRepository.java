@@ -10,7 +10,9 @@ import androidx.preference.PreferenceManager;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CurrencyItem;
 
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String CURRENT_ACCOUNT_ADDRESS_KEY = "current_account_address";
@@ -41,6 +43,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String MARSHMALLOW_SUPPORT_WARNING = "marshmallow_version_support_warning_shown";
     private static final String LAST_FRAGMENT_ID = "lastfrag_id";
     private static final String LAST_VERSION_CODE = "last_version_code";
+    private static final String SWAP_PROVIDERS_KEY = "swap_providers";
 
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
@@ -377,6 +380,18 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public void setNewWallet(String address, boolean isNewWallet)
     {
         pref.edit().putBoolean(keyOf(address), isNewWallet).apply();
+    }
+
+    @Override
+    public Set<String> getSwapProviders()
+    {
+        return pref.getStringSet(SWAP_PROVIDERS_KEY, new HashSet<>());
+    }
+
+    @Override
+    public void setSwapProviders(Set<String> providers)
+    {
+        pref.edit().putStringSet(SWAP_PROVIDERS_KEY, providers).apply();
     }
 
     @NonNull

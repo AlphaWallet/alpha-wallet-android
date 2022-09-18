@@ -122,6 +122,17 @@ public class TokenInfoView extends LinearLayout
         });
     }
 
+    public void setLink(String url)
+    {
+        isLink = true;
+        value.setTextColor(ContextCompat.getColor(getContext(), R.color.brand));
+        value.setOnClickListener(v -> {
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse(url));
+            getContext().startActivity(i);
+        });
+    }
+
     public void setHasPrefix(boolean hasPrefix)
     {
         this.hasPrefix = hasPrefix;

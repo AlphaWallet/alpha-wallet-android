@@ -928,4 +928,11 @@
     <string name="help_question7">Politique de confidentialité</string>
     <string name="help_question8">Conditions d\'utilisation</string>
     <string name="connected_wallets">Portefeuilles connectés</string>
+    <string name="preferred_exchanges">Preferred Exchanges</string>
+    <string name="info_gas_fee">Gas Fee: %s</string>
+    <string name="message_fetching_routes">Fetching Routes</string>
+    <string name="title_select_route">Select Route</string>
+    <string name="title_select_exchanges">Select Exchanges</string>
+    <string name="label_available_routes">Available Routes</string>
+    <string name="label_amount_to_swap">Amount To Swap</string>
 </resources>

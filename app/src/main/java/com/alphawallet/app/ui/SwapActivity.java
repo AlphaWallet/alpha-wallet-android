@@ -130,7 +130,6 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         viewModel.chain().observe(this, this::onChain);
         viewModel.connections().observe(this, this::onConnections);
         viewModel.quote().observe(this, this::onQuote);
-        viewModel.routes().observe(this, this::onRoutes);
         viewModel.progress().observe(this, this::onProgress);
         viewModel.progressInfo().observe(this, this::onProgressInfo);
         viewModel.transactionFinalised().observe(this, this::txWritten);
@@ -479,13 +478,6 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         continueBtn.setEnabled(true);
 
         getQuoteHandler.postDelayed(getQuoteRunnable, GET_QUOTE_INTERVAL_MS);
-    }
-
-    private void onRoutes(String routes)
-    {
-        Intent intent = new Intent(this, SelectRouteActivity.class);
-        intent.putExtra("routes", routes);
-        startActivity(intent);
     }
 
     private void updateDestAmount(Quote quote)

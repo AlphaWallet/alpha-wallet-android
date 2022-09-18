@@ -321,13 +321,6 @@ public abstract class C {
     public static final String OPENSEA_SINGLE_ASSET_API_RINKEBY = "https://testnets-api.opensea.io/api/v1/asset/";
     public static final String OPENSEA_SINGLE_ASSET_API_MATIC = "https://api.opensea.io/api/v2/metadata/matic/";
 
-    // Progress Info
-    public interface ProgressInfo {
-        int FETCHING_CHAINS = 1;
-        int FETCHING_CONNECTIONS = 2;
-        int FETCHING_QUOTE = 3;
-    }
-
     //Timing
     public static long CONNECT_TIMEOUT = 10; //Seconds
     public static long READ_TIMEOUT = 10;

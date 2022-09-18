@@ -27,6 +27,7 @@ import com.alphawallet.app.entity.lifi.Connection;
 import com.alphawallet.app.entity.lifi.Quote;
 import com.alphawallet.app.entity.lifi.Token;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
+import com.alphawallet.app.ui.widget.entity.ProgressInfo;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.SwapUtils;
 import com.alphawallet.app.viewmodel.SwapViewModel;
@@ -514,25 +515,17 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         infoLayout.setVisibility(View.VISIBLE);
     }
 
-    private void onProgressInfo(int code)
+    private void onProgressInfo(ProgressInfo progressInfo)
     {
-        String message;
-        switch (code)
+        if (progressInfo.shouldShow())
         {
-            case C.ProgressInfo.FETCHING_CHAINS:
-                message = getString(R.string.message_fetching_chains);
-                break;
-            case C.ProgressInfo.FETCHING_CONNECTIONS:
-                message = getString(R.string.message_fetching_connections);
-                break;
-            case C.ProgressInfo.FETCHING_QUOTE:
-                message = getString(R.string.message_fetching_quote);
-                break;
-            default:
-                message = getString(R.string.title_dialog_handling);
-                break;
+            progressDialog.setTitle(progressInfo.getMessage());
+            progressDialog.show();
         }
-        progressDialog.setTitle(message);
+        else
+        {
+            progressDialog.dismiss();
+        }
     }
 
     private void onProgress(Boolean shouldShowProgress)

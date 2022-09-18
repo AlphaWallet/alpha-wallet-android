@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionData;
@@ -24,6 +25,7 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.SwapService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.SelectRouteActivity;
+import com.alphawallet.app.ui.widget.entity.ProgressInfo;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.Utils;
@@ -67,7 +69,7 @@ public class SwapViewModel extends BaseViewModel
     private final MutableLiveData<Quote> quote = new MutableLiveData<>();
     private final MutableLiveData<String> routes = new MutableLiveData<>();
     private final MutableLiveData<Long> network = new MutableLiveData<>();
-    private final MutableLiveData<Integer> progressInfo = new MutableLiveData<>();
+    private final MutableLiveData<ProgressInfo> progressInfo = new MutableLiveData<>();
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
 
@@ -133,7 +135,7 @@ public class SwapViewModel extends BaseViewModel
         return network;
     }
 
-    public LiveData<Integer> progressInfo()
+    public LiveData<ProgressInfo> progressInfo()
     {
         return progressInfo;
     }
@@ -160,8 +162,7 @@ public class SwapViewModel extends BaseViewModel
 
     public void getChains()
     {
-        progressInfo.postValue(C.ProgressInfo.FETCHING_CHAINS);
-        progress.postValue(true);
+        progressInfo.postValue(new ProgressInfo(true, R.string.message_fetching_chains));
 
         chainsDisposable = swapService.getChains()
                 .subscribeOn(Schedulers.io())
@@ -186,8 +187,7 @@ public class SwapViewModel extends BaseViewModel
 
     public void getConnections(long from, long to)
     {
-        progressInfo.postValue(C.ProgressInfo.FETCHING_CONNECTIONS);
-        progress.postValue(true);
+        progressInfo.postValue(new ProgressInfo(true, R.string.message_fetching_connections));
 
         connectionsDisposable = swapService.getConnections(from, to)
                 .subscribeOn(Schedulers.io())
@@ -199,8 +199,7 @@ public class SwapViewModel extends BaseViewModel
     {
         if (hasEnoughBalance(source, amount))
         {
-            progressInfo.postValue(C.ProgressInfo.FETCHING_QUOTE);
-            progress.postValue(true);
+            progressInfo.postValue(new ProgressInfo(true, R.string.message_fetching_quote));
 
             quoteDisposable = swapService.getQuote(source, dest, address, amount, slippage, allowExchanges)
                     .subscribeOn(Schedulers.io())
@@ -286,7 +285,7 @@ public class SwapViewModel extends BaseViewModel
             postError(C.ErrorCode.SWAP_CONNECTIONS_ERROR, Objects.requireNonNull(e.getMessage()));
         }
 
-        progress.postValue(false);
+        progressInfo.postValue(new ProgressInfo(false));
     }
 
     private void onQuote(String result)
@@ -301,14 +300,7 @@ public class SwapViewModel extends BaseViewModel
             quote.postValue(q);
         }
 
-        progress.postValue(false);
-    }
-
-    private void onRoutes(String result)
-    {
-        progress.postValue(false);
-
-        routes.postValue(result);
+        progressInfo.postValue(new ProgressInfo(false));
     }
 
     private void postError(int errorCode, String errorStr)

@@ -11,23 +11,18 @@ public class ProgressInfo
         this.messageRes = messageRes;
     }
 
+    public ProgressInfo(boolean shouldShow)
+    {
+        this.shouldShow = shouldShow;
+    }
+
     public boolean shouldShow()
     {
         return shouldShow;
     }
 
-    public void setShouldShow(boolean shouldShow)
-    {
-        this.shouldShow = shouldShow;
-    }
-
     public int getMessage()
     {
         return messageRes;
-    }
-
-    public void setMessage(int messageRes)
-    {
-        this.messageRes = messageRes;
     }
 }

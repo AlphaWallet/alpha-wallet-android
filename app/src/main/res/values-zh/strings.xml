@@ -916,4 +916,11 @@
     <string name="help_question8">服务条款</string>
     <string name="connected_wallets">已连接的钱包</string>
     <string name="asset_rarity">稀有度</string>
+    <string name="preferred_exchanges">Preferred Exchanges</string>
+    <string name="info_gas_fee">Gas Fee: %s</string>
+    <string name="message_fetching_routes">Fetching Routes</string>
+    <string name="title_select_route">Select Route</string>
+    <string name="title_select_exchanges">Select Exchanges</string>
+    <string name="label_available_routes">Available Routes</string>
+    <string name="label_amount_to_swap">Amount To Swap</string>
 </resources>

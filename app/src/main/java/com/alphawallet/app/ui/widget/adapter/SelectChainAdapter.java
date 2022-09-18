@@ -1,11 +1,9 @@
 package com.alphawallet.app.ui.widget.adapter;
 
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.widget.SwapSettingsDialog;
-import com.bumptech.glide.Glide;
+import com.alphawallet.app.widget.TokenIcon;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.List;
@@ -51,11 +49,7 @@ public class SelectChainAdapter extends RecyclerView.Adapter<SelectChainAdapter.
         {
             holder.name.setText(item.metamask.chainName);
             holder.chainId.setText(context.getString(R.string.chain_id, item.id));
-
-            Glide.with(context)
-                    .load(item.logoURI)
-                    .circleCrop()
-                    .into(holder.chainIcon);
+            holder.chainIcon.bindData(item.id);
 
             if (item.id == selectedChainId)
             {
@@ -78,15 +72,15 @@ public class SelectChainAdapter extends RecyclerView.Adapter<SelectChainAdapter.
         notifyDataSetChanged();
     }
 
+    public long getSelectedChain()
+    {
+        return this.selectedChainId;
+    }
+
     public void setSelectedChain(long selectedChainId)
     {
         this.selectedChainId = selectedChainId;
         notifyDataSetChanged();
-    }
-
-    public long getSelectedChain()
-    {
-        return this.selectedChainId;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder
@@ -95,7 +89,7 @@ public class SelectChainAdapter extends RecyclerView.Adapter<SelectChainAdapter.
         TextView name;
         TextView chainId;
         View itemLayout;
-        ImageView chainIcon;
+        TokenIcon chainIcon;
 
         ViewHolder(View view)
         {

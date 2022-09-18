@@ -1,6 +1,8 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -13,14 +15,18 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
 import com.alphawallet.app.entity.lifi.Quote;
-import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.lifi.Token;
+import com.alphawallet.app.entity.lifi.ToolDetails;
 import com.alphawallet.app.interact.CreateTransactionInteract;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.SwapService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.SelectRouteActivity;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Hex;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.google.gson.Gson;
@@ -35,6 +41,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -48,6 +55,7 @@ import timber.log.Timber;
 public class SwapViewModel extends BaseViewModel
 {
     private final AssetDefinitionService assetDefinitionService;
+    private final PreferenceRepositoryType preferenceRepository;
     private final TokensService tokensService;
     private final SwapService swapService;
     private final CreateTransactionInteract createTransactionInteract;
@@ -57,6 +65,7 @@ public class SwapViewModel extends BaseViewModel
     private final MutableLiveData<Chain> chain = new MutableLiveData<>();
     private final MutableLiveData<List<Connection>> connections = new MutableLiveData<>();
     private final MutableLiveData<Quote> quote = new MutableLiveData<>();
+    private final MutableLiveData<String> routes = new MutableLiveData<>();
     private final MutableLiveData<Long> network = new MutableLiveData<>();
     private final MutableLiveData<Integer> progressInfo = new MutableLiveData<>();
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
@@ -70,12 +79,14 @@ public class SwapViewModel extends BaseViewModel
     @Inject
     public SwapViewModel(
             AssetDefinitionService assetDefinitionService,
+            PreferenceRepositoryType preferenceRepository,
             TokensService tokensService,
             SwapService swapService,
             CreateTransactionInteract createTransactionInteract,
             KeyService keyService)
     {
         this.assetDefinitionService = assetDefinitionService;
+        this.preferenceRepository = preferenceRepository;
         this.tokensService = tokensService;
         this.swapService = swapService;
         this.createTransactionInteract = createTransactionInteract;
@@ -110,6 +121,11 @@ public class SwapViewModel extends BaseViewModel
     public LiveData<Quote> quote()
     {
         return quote;
+    }
+
+    public LiveData<String> routes()
+    {
+        return routes;
     }
 
     public LiveData<Long> network()
@@ -153,6 +169,21 @@ public class SwapViewModel extends BaseViewModel
                 .subscribe(this::onChains, this::onChainsError);
     }
 
+    public String getToolUrl(Context context, String key)
+    {
+        List<ToolDetails> tools = getTools(context);
+
+        for (ToolDetails td : tools)
+        {
+            if (key.startsWith(td.key))
+            {
+                return td.url;
+            }
+        }
+
+        return "";
+    }
+
     public void getConnections(long from, long to)
     {
         progressInfo.postValue(C.ProgressInfo.FETCHING_CONNECTIONS);
@@ -164,14 +195,14 @@ public class SwapViewModel extends BaseViewModel
                 .subscribe(this::onConnections, this::onConnectionsError);
     }
 
-    public void getQuote(Connection.LToken source, Connection.LToken dest, String address, String amount, String slippage)
+    public void getQuote(Token source, Token dest, String address, String amount, String slippage, String allowExchanges)
     {
         if (hasEnoughBalance(source, amount))
         {
             progressInfo.postValue(C.ProgressInfo.FETCHING_QUOTE);
             progress.postValue(true);
 
-            quoteDisposable = swapService.getQuote(source, dest, address, amount, slippage)
+            quoteDisposable = swapService.getQuote(source, dest, address, amount, slippage, allowExchanges)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onQuote, this::onQuoteError);
@@ -197,7 +228,7 @@ public class SwapViewModel extends BaseViewModel
         postError(C.ErrorCode.SWAP_QUOTE_ERROR, Objects.requireNonNull(t.getMessage()));
     }
 
-    public boolean hasEnoughBalance(Connection.LToken source, String amount)
+    public boolean hasEnoughBalance(Token source, String amount)
     {
         BigDecimal bal = new BigDecimal(getBalance(source));
         BigDecimal reqAmount = new BigDecimal(amount);
@@ -273,6 +304,13 @@ public class SwapViewModel extends BaseViewModel
         progress.postValue(false);
     }
 
+    private void onRoutes(String result)
+    {
+        progress.postValue(false);
+
+        routes.postValue(result);
+    }
+
     private void postError(int errorCode, String errorStr)
     {
         Timber.e(errorStr);
@@ -308,9 +346,9 @@ public class SwapViewModel extends BaseViewModel
                 && result.contains("tool");
     }
 
-    public String getBalance(Connection.LToken token)
+    public String getBalance(Token token)
     {
-        Token t;
+        com.alphawallet.app.entity.tokens.Token t;
         if (token.isNativeToken())
         {
             t = tokensService.getServiceToken(token.chainId);
@@ -360,6 +398,43 @@ public class SwapViewModel extends BaseViewModel
         );
     }
 
+    public List<ToolDetails> getTools(Context context)
+    {
+        List<ToolDetails> tools = new Gson().fromJson(Utils.loadJSONFromAsset(context, "swap_providers_list.json"),
+                new TypeToken<List<ToolDetails>>()
+                {
+                }.getType());
+
+        if (tools != null)
+        {
+            Set<String> preferredProviders = getPreferredExchanges();
+            if (preferredProviders.isEmpty())
+            {
+                for (ToolDetails tool : tools)
+                {
+                    tool.isChecked = true;
+                }
+            }
+            else
+            {
+                for (ToolDetails tool : tools)
+                {
+                    if (preferredProviders.contains(tool.key))
+                    {
+                        tool.isChecked = true;
+                    }
+                }
+            }
+        }
+
+        return tools;
+    }
+
+    public Set<String> getPreferredExchanges()
+    {
+        return preferenceRepository.getSwapProviders();
+    }
+
     @Override
     protected void onCleared()
     {
@@ -380,5 +455,29 @@ public class SwapViewModel extends BaseViewModel
             transactionDisposable.dispose();
         }
         super.onCleared();
+    }
+
+    public void getRoutes(Activity activity, Token source, Token dest, String address, String amount, String slippage, Set<String> exchanges)
+    {
+        if (hasEnoughBalance(source, amount))
+        {
+            Intent intent = new Intent(activity, SelectRouteActivity.class);
+            intent.putExtra("fromChainId", String.valueOf(source.chainId));
+            intent.putExtra("toChainId", String.valueOf(dest.chainId));
+            intent.putExtra("fromTokenAddress", String.valueOf(source.address));
+            intent.putExtra("toTokenAddress", String.valueOf(dest.address));
+            intent.putExtra("fromAddress", address);
+            intent.putExtra("fromAmount", BalanceUtils.getRawFormat(amount, source.decimals));
+            intent.putExtra("fromTokenDecimals", source.decimals);
+            intent.putExtra("slippage", slippage);
+            intent.putExtra("fromTokenSymbol", source.symbol);
+            intent.putExtra("fromTokenIcon", source.symbol);
+            intent.putExtra("fromTokenLogoUri", source.logoURI);
+            activity.startActivityForResult(intent, 1313);
+        }
+        else
+        {
+            error.postValue(new ErrorEnvelope(C.ErrorCode.INSUFFICIENT_BALANCE, ""));
+        }
     }
 }

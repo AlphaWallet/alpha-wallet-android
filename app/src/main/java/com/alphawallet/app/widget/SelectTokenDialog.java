@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.lifi.Connection;
+import com.alphawallet.app.entity.lifi.Token;
 import com.alphawallet.app.ui.widget.adapter.SelectTokenAdapter;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -56,7 +56,7 @@ public class SelectTokenDialog extends BottomSheetDialog
         btnClose.setOnClickListener(v -> dismiss());
     }
 
-    public SelectTokenDialog(List<Connection.LToken> tokenItems, Activity activity, SelectTokenDialogEventListener callback)
+    public SelectTokenDialog(List<Token> tokenItems, Activity activity, SelectTokenDialogEventListener callback)
     {
         this(activity);
 
@@ -102,6 +102,6 @@ public class SelectTokenDialog extends BottomSheetDialog
 
     public interface SelectTokenDialogEventListener
     {
-        void onChainSelected(Connection.LToken tokenItem);
+        void onChainSelected(Token tokenItem);
     }
 }

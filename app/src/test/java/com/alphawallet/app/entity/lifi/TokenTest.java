@@ -5,12 +5,12 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 import org.junit.Test;
 
-public class ConnectionTest
+public class TokenTest
 {
     @Test
     public void getFiatValue()
     {
-        Connection.LToken lToken = new Connection.LToken();
+        Token lToken = new Token();
         lToken.priceUSD = "6.72";
         lToken.balance = "1";
 
@@ -20,7 +20,7 @@ public class ConnectionTest
     @Test
     public void getFiatValue_should_handle_exception()
     {
-        Connection.LToken lToken = new Connection.LToken();
+        Token lToken = new Token();
         lToken.priceUSD = "6.72";
         lToken.balance = "";
         assertThat(lToken.getFiatValue(), equalTo(0.0));

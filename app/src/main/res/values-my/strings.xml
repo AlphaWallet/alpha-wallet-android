@@ -950,4 +950,11 @@
     <string name="error_insufficient_balance">%1$s ချိန်ခွင်လျှာမလုံလောက်</string>
     <string name="help_question7">ကိုယ်ရေးအချက်အလက်မူဝါဒ</string>
     <string name="asset_rarity">ရှားပါးသည်။</string>
+    <string name="preferred_exchanges">Preferred Exchanges</string>
+    <string name="info_gas_fee">Gas Fee: %s</string>
+    <string name="message_fetching_routes">Fetching Routes</string>
+    <string name="title_select_route">Select Route</string>
+    <string name="title_select_exchanges">Select Exchanges</string>
+    <string name="label_available_routes">Available Routes</string>
+    <string name="label_amount_to_swap">Amount To Swap</string>
 </resources>

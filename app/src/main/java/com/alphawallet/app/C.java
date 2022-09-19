@@ -208,6 +208,8 @@ public abstract class C {
     public static final String SETTINGS_INSTANTIATED = "com.stormbird.wallet.SETTINGS_INSTANTIATED";
     public static final String APP_FOREGROUND_STATE = "com.alphawallet.APP_FOREGROUND_STATE";
     public static final String EXTRA_APP_FOREGROUND = "com.alphawallet.IS_FOREGORUND";
+    public static final String SIGNAL_NFT_SYNC = "com.alphawallet.SYNC_NFT";
+    public static final String SYNC_STATUS = "com.alphawallet.SYNC_STATUS";
 
     public static final String DEFAULT_GAS_PRICE =     "10000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";

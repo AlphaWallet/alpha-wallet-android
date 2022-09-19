@@ -370,6 +370,13 @@ public class ERC721Token extends Token
             Timber.w(e);
         }
 
+        //check for possible issues
+        if (endBlock == DefaultBlockParameterName.LATEST && balance.compareTo(BigDecimal.valueOf(tokenBalanceAssets.size())) != 0)
+        {
+            //possible mismatch, scan from beginning again
+            eventSync.resetEventReads(realm);
+        }
+
         return balance;
     }
 
@@ -469,7 +476,7 @@ public class ERC721Token extends Token
         for (BigInteger tokenId : eventIds)
         {
             String owner = callSmartContractFunction(web3j, ownerOf(tokenId), getAddress(), getWallet());
-            if (owner == null || owner.toLowerCase().equals(getWallet()))
+            if (owner == null || owner.equalsIgnoreCase(getWallet()))
             {
                 heldTokens.add(tokenId);
             }
@@ -624,7 +631,7 @@ public class ERC721Token extends Token
             {
                 checkAsset.setBalance(BigDecimal.ONE);
             }
-            else if (owner.toLowerCase().equals(getWallet()))
+            else if (owner.equalsIgnoreCase(getWallet()))
             {
                 checkAsset.setBalance(BigDecimal.ONE);
             }

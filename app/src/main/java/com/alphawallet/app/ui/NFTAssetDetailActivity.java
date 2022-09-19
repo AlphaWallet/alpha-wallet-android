@@ -484,6 +484,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         //does the function have a view? If it's transaction only then handle here
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        if (functions == null) return;
         TSAction action = functions.get(function);
         token.clearResultMap();
 

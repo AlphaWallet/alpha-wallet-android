@@ -1,27 +1,30 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+import android.os.NetworkOnMainThreadException;
+
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-
-import android.os.NetworkOnMainThreadException;
-import androidx.annotation.Nullable;
 
 import com.alphawallet.app.entity.MessagePair;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignaturePair;
-import com.alphawallet.app.entity.tokens.Ticket;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Ticket;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.MemPoolInteract;
 import com.alphawallet.app.interact.SignatureGenerateInteract;
-
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
+import com.alphawallet.token.entity.TicketRange;
+
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 
@@ -30,18 +33,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import com.alphawallet.app.service.TokensService;
-import com.alphawallet.token.entity.TicketRange;
-import com.alphawallet.app.service.AssetDefinitionService;
-
-import javax.inject.Inject;
 
 /**
  * Created by James on 25/01/2018.
@@ -171,7 +170,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     {
         this.token = token;
 
-        if (token != null && token.tokenInfo.address.equals(address) && token.hasArrayBalance())
+        if (token != null && token.tokenInfo.address.equalsIgnoreCase(address) && token.hasArrayBalance())
         {
             boolean allBurned = true;
             List<BigInteger> balance = token.getArrayBalance();

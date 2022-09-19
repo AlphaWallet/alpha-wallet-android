@@ -2,8 +2,6 @@ package com.alphawallet.app.entity.tokens;
 
 import static android.text.Html.FROM_HTML_MODE_COMPACT;
 
-import static androidx.core.content.ContextCompat.getColorStateList;
-
 import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
@@ -11,7 +9,6 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Pair;
-import android.view.View;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractInteract;
@@ -23,7 +20,6 @@ import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -392,7 +388,7 @@ public class Token
 
     public void setTokenWallet(String address)
     {
-        this.tokenWallet = address;
+        this.tokenWallet = address.toLowerCase(Locale.ROOT);
     }
 
     public void setupRealmToken(RealmToken realmToken)

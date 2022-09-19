@@ -310,6 +310,11 @@ public class EventSync
         updateEventReads(realm, sync.eventReadEndBlock.longValue(), calcNewIntervalSize(sync, evReads), sync.state);
     }
 
+    public void resetEventReads(Realm realm)
+    {
+        updateEventReads(realm, 0, 0, EventSyncState.DOWNWARD_SYNC_START);
+    }
+
     private void updateEventReads(Realm realm, long lastRead, long readInterval, EventSyncState state)
     {
         if (realm == null) return;

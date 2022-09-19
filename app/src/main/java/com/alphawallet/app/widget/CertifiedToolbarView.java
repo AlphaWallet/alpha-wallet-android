@@ -2,15 +2,16 @@ package com.alphawallet.app.widget;
 
 import android.app.Activity;
 import android.content.Context;
-import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import androidx.annotation.Nullable;
+
+import com.alphawallet.app.R;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
-import com.alphawallet.app.R;
 import com.google.android.material.appbar.MaterialToolbar;
 
 public class CertifiedToolbarView extends MaterialToolbar
@@ -18,6 +19,7 @@ public class CertifiedToolbarView extends MaterialToolbar
     private Activity activity;
     private AWalletAlertDialog dialog;
     private final ProgressBar downloadSpinner;
+    private final ProgressBar syncSpinner;
     private int lockResource = 0;
 
     public CertifiedToolbarView(Context ctx, @Nullable AttributeSet attrs)
@@ -25,6 +27,7 @@ public class CertifiedToolbarView extends MaterialToolbar
         super(ctx, attrs);
         inflate(ctx, R.layout.layout_certified_toolbar, this);
         downloadSpinner = findViewById(R.id.cert_progress_spinner);
+        syncSpinner = findViewById(R.id.nft_scan_spinner);
     }
 
     public void onSigData(final XMLDsigDescriptor sigData, final Activity act)
@@ -123,5 +126,15 @@ public class CertifiedToolbarView extends MaterialToolbar
     public void stopDownload()
     {
         downloadSpinner.setVisibility(View.GONE);
+    }
+
+    public void showNFTSync()
+    {
+        syncSpinner.setVisibility(View.VISIBLE);
+    }
+
+    public void nftSyncComplete()
+    {
+        syncSpinner.setVisibility(View.GONE);
     }
 }

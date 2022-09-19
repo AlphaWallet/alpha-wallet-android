@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class Action
 {
@@ -42,6 +43,8 @@ public class Action
     public String getCurrentPrice()
     {
         return new BigDecimal(fromToken.priceUSD)
-                .multiply(new BigDecimal(toToken.priceUSD)).toString();
+                .divide(new BigDecimal(toToken.priceUSD), (int) toToken.decimals, RoundingMode.DOWN)
+                .stripTrailingZeros()
+                .toPlainString();
     }
 }

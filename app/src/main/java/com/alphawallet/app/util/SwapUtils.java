@@ -52,21 +52,6 @@ public class SwapUtils
                 feeCost.token.symbol);
     }
 
-    public static String getFormattedCurrentPrice(Quote quote)
-    {
-        return String.format(CURRENT_PRICE_FORMAT,
-                quote.action.fromToken.symbol,
-                quote.getCurrentPrice(),
-                quote.action.toToken.symbol);
-    }
-
-    public static String getMinimumAmountReceived(Quote quote)
-    {
-        return String.format(MINIMUM_RECEIVED_FORMAT,
-                BalanceUtils.getShortFormat(quote.estimate.toAmountMin, quote.action.toToken.decimals),
-                quote.action.toToken.symbol);
-    }
-
     public static String getFormattedCurrentPrice(Action action)
     {
         return String.format(CURRENT_PRICE_FORMAT,

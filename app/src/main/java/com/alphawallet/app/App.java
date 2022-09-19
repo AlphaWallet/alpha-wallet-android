@@ -3,7 +3,6 @@ package com.alphawallet.app;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES;
 
-import android.app.Application;
 import android.app.UiModeManager;
 import android.content.Context;
 
@@ -12,21 +11,22 @@ import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.util.ReleaseTree;
 
-import dagger.hilt.android.HiltAndroidApp;
-import io.reactivex.functions.Consumer;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.realm.Realm;
 import timber.log.Timber;
 
-@HiltAndroidApp
-public class App extends Application
+public class App
 {
+    private final Context context;
 
-    @Override
+    public App(Context context)
+    {
+        this.context = context;
+    }
+
     public void onCreate()
     {
-        super.onCreate();
-        Realm.init(this);
+        Realm.init(context);
 
         if (BuildConfig.DEBUG)
         {
@@ -37,7 +37,7 @@ public class App extends Application
             Timber.plant(new ReleaseTree());
         }
 
-        int defaultTheme = PreferenceManager.getDefaultSharedPreferences(this).getInt("theme", C.THEME_AUTO);
+        int defaultTheme = PreferenceManager.getDefaultSharedPreferences(context).getInt("theme", C.THEME_AUTO);
 
         if (defaultTheme == C.THEME_LIGHT)
         {
@@ -49,7 +49,7 @@ public class App extends Application
         }
         else
         {
-            UiModeManager uiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
+            UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
             int mode = uiModeManager.getNightMode();
             if (mode == UiModeManager.MODE_NIGHT_YES)
             {

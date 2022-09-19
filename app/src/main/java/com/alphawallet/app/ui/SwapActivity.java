@@ -64,6 +64,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private RelativeLayout tokenLayout;
     private LinearLayout infoLayout;
     private TokenInfoView provider;
+    private TokenInfoView providerWebsite;
     private TokenInfoView gasFees;
     private TokenInfoView otherFees;
     private TokenInfoView currentPrice;
@@ -151,6 +152,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         tokenLayout = findViewById(R.id.layout_tokens);
         infoLayout = findViewById(R.id.layout_info);
         provider = findViewById(R.id.tiv_provider);
+        providerWebsite = findViewById(R.id.tiv_provider_website);
         gasFees = findViewById(R.id.tiv_gas_fees);
         otherFees = findViewById(R.id.tiv_other_fees);
         currentPrice = findViewById(R.id.tiv_current_price);
@@ -427,7 +429,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                         {
                             fromTokens.add(t);
 
-                            if (t.chainId == token.tokenInfo.chainId && t.address.equalsIgnoreCase(token.getAddress()))
+                            if (t.isSimilarTo(token, wallet.address))
                             {
                                 selectedToken = t;
                             }
@@ -498,7 +500,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         String toolUrl = viewModel.getToolUrl(this, quote.toolDetails.key);
         if (!TextUtils.isEmpty(toolUrl))
         {
-            provider.setLink(toolUrl);
+            providerWebsite.setValue(toolUrl);
+            providerWebsite.setLink();
         }
         gasFees.setValue(SwapUtils.getTotalGasFees(quote.estimate.gasCosts));
         otherFees.setValue(SwapUtils.getOtherFees(quote.estimate.feeCosts));

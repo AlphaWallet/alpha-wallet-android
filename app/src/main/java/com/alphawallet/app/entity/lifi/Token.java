@@ -77,4 +77,15 @@ public class Token
             return 0.0;
         }
     }
+
+    public boolean isSimilarTo(com.alphawallet.app.entity.tokens.Token aToken, String walletAddress)
+    {
+        if (this.chainId == aToken.tokenInfo.chainId
+                && this.address.equalsIgnoreCase(aToken.getAddress()))
+        {
+            return true;
+        }
+
+        return aToken.getAddress().equalsIgnoreCase(walletAddress) && isNativeToken();
+    }
 }

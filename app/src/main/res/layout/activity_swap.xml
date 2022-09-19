@@ -139,6 +139,13 @@
                     custom:tokenInfoLabel="@string/label_provider" />
 
                 <com.alphawallet.app.widget.TokenInfoView
+                    android:id="@+id/tiv_provider_website"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    custom:tokenInfoLabel="@string/label_provider_website" />
+
+                <com.alphawallet.app.widget.TokenInfoView
                     android:id="@+id/tiv_gas_fees"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

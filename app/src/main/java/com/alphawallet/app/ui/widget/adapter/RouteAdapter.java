@@ -61,7 +61,7 @@ public class RouteAdapter extends RecyclerView.Adapter<RouteAdapter.ViewHolder>
                 }
             }
 
-            holder.value.setText(BalanceUtils.getScaledValue(step.estimate.toAmountMin, step.action.toToken.decimals, 4));
+            holder.value.setText(SwapUtils.getFormattedMinAmount(step.estimate, step.action));
             holder.icon.bindData(step.action.toToken.logoURI, step.action.toToken.chainId, step.action.toToken.address, step.action.toToken.symbol);
             holder.symbol.setText(step.action.toToken.symbol);
             holder.gas.setText(context.getString(R.string.info_gas_fee, SwapUtils.getTotalGasFees(step.estimate.gasCosts)));

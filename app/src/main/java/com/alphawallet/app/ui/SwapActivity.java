@@ -1,4 +1,4 @@
-package com.alphawallet.app.ui;
+ package com.alphawallet.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -505,8 +505,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         }
         gasFees.setValue(SwapUtils.getTotalGasFees(quote.estimate.gasCosts));
         otherFees.setValue(SwapUtils.getOtherFees(quote.estimate.feeCosts));
-        currentPrice.setValue(SwapUtils.getFormattedCurrentPrice(quote).trim());
-        minReceived.setValue(SwapUtils.getMinimumAmountReceived(quote));
+        currentPrice.setValue(SwapUtils.getFormattedCurrentPrice(quote.action).trim());
+        minReceived.setValue(SwapUtils.getMinimumAmountReceived(quote.estimate, quote.action));
         infoLayout.setVisibility(View.VISIBLE);
     }
 

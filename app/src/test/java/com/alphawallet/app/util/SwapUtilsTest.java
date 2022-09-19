@@ -60,22 +60,23 @@ public class SwapUtilsTest
         quote.action.toToken.decimals = 6;
         quote.action.toToken.symbol = "ETH";
 
-        assertThat(SwapUtils.getMinimumAmountReceived(quote), equalTo("1.000000 ETH"));
+        assertThat(SwapUtils.getMinimumAmountReceived(quote.estimate, quote.action), equalTo("1.000000 ETH"));
     }
 
     @Test
     public void should_return_formatted_current_price()
     {
-        Quote quote = new Quote();
-        quote.action = new Action();
-        quote.action.fromToken = new Token();
-        quote.action.toToken = new Token();
-        quote.action.fromToken.priceUSD = "5";
-        quote.action.fromToken.symbol = "ETH";
-        quote.action.toToken.priceUSD = "1000";
-        quote.action.toToken.symbol = "USDC";
+        Action action = new Action();
+        action.fromToken = new Token();
+        action.toToken = new Token();
+        action.fromToken.priceUSD = "2000";
+        action.fromToken.symbol = "ETH";
+        action.fromToken.decimals = 18;
+        action.toToken.priceUSD = "1";
+        action.toToken.symbol = "USDC";
+        action.toToken.decimals = 6;
 
-        String expected = "1 ETH ≈ 5000 USDC";
-        assertThat(SwapUtils.getFormattedCurrentPrice(quote), equalTo(expected));
+        String expected = "1 ETH ≈ 2000 USDC";
+        assertThat(SwapUtils.getFormattedCurrentPrice(action), equalTo(expected));
     }
 }

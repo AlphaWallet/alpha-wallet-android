@@ -34,6 +34,7 @@ public class TokenFactory
                 thisToken = new ERC721Ticket(tokenInfo, balances, updateBlancaTime, networkName, type);
                 break;
             case ERC721:
+            case ERC721_ENUMERABLE:
             case ERC721_LEGACY:
                 if (tokenInfo.decimals != 0)
                 {
@@ -122,6 +123,7 @@ public class TokenFactory
 
             case ERC721:
             case ERC721_LEGACY:
+            case ERC721_ENUMERABLE:
                 thisToken = new ERC721Token(tokenInfo, null, decimalBalance, updateBlancaTime, networkName, type);
                 break;
 
@@ -157,6 +159,7 @@ public class TokenFactory
             case ERC721:
             case ERC721_LEGACY:
             case ERC721_UNDETERMINED:
+            case ERC721_ENUMERABLE:
                 thisToken = new ERC721Token(tokenInfo, null, BigDecimal.ZERO, currentTime, networkName, type);
                 break;
             case ETHEREUM:

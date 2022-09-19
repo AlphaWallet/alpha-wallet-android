@@ -56,6 +56,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
             case ERC721_LEGACY:
             case ERC721_TICKET:
             case ERC721_UNDETERMINED:
+            case ERC721_ENUMERABLE:
                 for (BigInteger i : token.getUniqueTokenIds())
                 {
                     NFTAsset asset = token.getAssetForToken(i);

@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity.tokens;
 
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.util.Utils.parseTokenId;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 import static org.web3j.tx.Contract.staticExtractEventParameters;
@@ -53,7 +54,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.realm.Case;
 import io.realm.Realm;
+import io.realm.RealmResults;
 import timber.log.Timber;
 
 /**
@@ -340,10 +343,18 @@ public class ERC721Token extends Token
         try
         {
             final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
+            if (contractType == ContractType.ERC721_ENUMERABLE)
+            {
+                updateEnumerableBalance(web3j, realm);
+            }
+
             Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> evRead = eventSync.processTransferEvents(web3j,
                     getTransferEvents(), startBlock, endBlock, realm);
 
             eventSync.updateEventReads(realm, sync, currentBlock, evRead.first); //means our event read was fine
+
+            //No need to go any further if this is enumerable
+            if (contractType == ContractType.ERC721_ENUMERABLE) return balance;
 
             HashSet<BigInteger> allMovingTokens = new HashSet<>(evRead.second.first);
             allMovingTokens.addAll(evRead.second.second);
@@ -371,6 +382,26 @@ public class ERC721Token extends Token
         }
 
         return balance;
+    }
+
+    /***********
+     * For ERC721Enumerable interface
+     **********/
+    private void updateEnumerableBalance(Web3j web3j, Realm realm)
+    {
+        HashSet<BigInteger> tokenIdsHeld = new HashSet<>();
+        //get enumerable balance
+        //find tokenIds held
+        long currentBalance = balance != null ? balance.longValue() : 0;
+        for (long tokenIndex = 0; tokenIndex < currentBalance; tokenIndex++)
+        {
+            // find tokenId from index
+            String tokenId = callSmartContractFunction(web3j, tokenOfOwnerByIndex(BigInteger.valueOf(tokenIndex)), getAddress(), getWallet());
+            if (tokenId == null) continue;
+            tokenIdsHeld.add(new BigInteger(tokenId));
+        }
+
+        updateRealmForEnumerable(realm, tokenIdsHeld);
     }
 
     private void updateRealmBalance(Realm realm, Set<BigInteger> tokenIds, Set<BigInteger> allMovingTokens)
@@ -417,6 +448,40 @@ public class ERC721Token extends Token
                 }
             }
         });
+    }
+
+    private void updateRealmForEnumerable(Realm realm, HashSet<BigInteger> currentTokens)
+    {
+        HashSet<BigInteger> storedBalance = new HashSet<>();
+        RealmResults<RealmNFTAsset> results = realm.where(RealmNFTAsset.class)
+                .like("tokenIdAddr", databaseKey(this) + "-*", Case.INSENSITIVE)
+                .findAll();
+
+        for (RealmNFTAsset t : results)
+        {
+            storedBalance.add(new BigInteger(t.getTokenId()));
+        }
+
+        if (!currentTokens.equals(storedBalance))
+        {
+            realm.executeTransaction(r -> {
+                results.deleteAllFromRealm();
+                for (BigInteger tokenId : currentTokens)
+                {
+                    String key = RealmNFTAsset.databaseKey(this, tokenId);
+                    RealmNFTAsset realmAsset = realm.where(RealmNFTAsset.class)
+                            .equalTo("tokenIdAddr", key)
+                            .findFirst();
+
+                    if (realmAsset == null)
+                    {
+                        realmAsset = r.createObject(RealmNFTAsset.class, key); //create asset in realm
+                        realmAsset.setMetaData(new NFTAsset(tokenId).jsonMetaData());
+                        r.insertOrUpdate(realmAsset);
+                    }
+                }
+            });
+        }
     }
 
     private void updateRealmBalances(Realm realm, Set<BigInteger> tokenIds)
@@ -698,6 +763,13 @@ public class ERC721Token extends Token
                 Collections.singletonList(new TypeReference<Address>()
                 {
                 }));
+    }
+
+    private Function tokenOfOwnerByIndex(BigInteger index)
+    {
+        return new Function("tokenOfOwnerByIndex",
+                Arrays.asList(new Address(getWallet()), new Uint256(index)),
+                Collections.singletonList(new TypeReference<Uint256>() {}));
     }
 
     @Override

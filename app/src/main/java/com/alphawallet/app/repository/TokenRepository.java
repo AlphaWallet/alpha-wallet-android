@@ -92,6 +92,7 @@ public class TokenRepository implements TokenRepositoryType {
     public static final BigInteger INTERFACE_BALANCES_721_TICKET = new BigInteger ("c84aae17", 16);
     public static final BigInteger INTERFACE_SUPERRARE = new BigInteger ("5b5e139f", 16);
     public static final BigInteger INTERFACE_ERC1155 = new BigInteger("d9b67a26", 16);
+    public static final BigInteger INTERFACE_ERC721_ENUMERABLE = new BigInteger("780e9d63", 16);
 
     private static final int NODE_COMMS_ERROR = -1;
     private static final int CONTRACT_BALANCE_NULL = -2;
@@ -166,6 +167,7 @@ public class TokenRepository implements TokenRepositoryType {
                         case ERC1155:
                             break;
                         case ERC721:
+                        case ERC721_ENUMERABLE:
                         case ERC721_LEGACY:
                             Map<BigInteger, NFTAsset> NFTBalance = t.getTokenAssets(); //add balance from Opensea
                             t.balance = checkUint256Balance(wallet, tInfo.chainId, tInfo.address); //get balance for wallet from contract
@@ -383,6 +385,7 @@ public class TokenRepository implements TokenRepositoryType {
         switch (type)
         {
             case ERC721:
+            case ERC721_ENUMERABLE:
             case ERC875_LEGACY:
             case ERC721_LEGACY:
             case ERC721_UNDETERMINED:
@@ -429,6 +432,7 @@ public class TokenRepository implements TokenRepositoryType {
                             break;
                         case ERC721_LEGACY:
                         case ERC721:
+                        case ERC721_ENUMERABLE:
                             balance = updateERC721Balance(token, wallet);
                             break;
                         case ERC20:
@@ -477,12 +481,13 @@ public class TokenRepository implements TokenRepositoryType {
     private BigDecimal updateERC721Balance(Token token, Wallet wallet)
     {
         token.setTokenWallet(wallet.address);
+        token.balance = checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
         try (Realm realm = getRealmInstance(wallet))
         {
             token.updateBalance(realm);
         }
 
-        return checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
+        return token.balance;
     }
 
     private BigDecimal updateERC1155Balance(Token token, Wallet wallet)
@@ -1139,6 +1144,8 @@ public class TokenRepository implements TokenRepositoryType {
             {
                 if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_BALANCES_721_TICKET), Boolean.TRUE))
                     returnType = ContractType.ERC721_TICKET;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_ERC721_ENUMERABLE), Boolean.TRUE))
+                    returnType = ContractType.ERC721_ENUMERABLE;
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OFFICIAL_ERC721), Boolean.TRUE))
                     returnType = ContractType.ERC721;
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_SUPERRARE), Boolean.TRUE))

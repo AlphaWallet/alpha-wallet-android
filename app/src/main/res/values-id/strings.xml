@@ -932,7 +932,7 @@
     <string name="message_fetching_routes">Fetching Routes</string>
     <string name="title_select_route">Select Route</string>
     <string name="title_select_exchanges">Select Exchanges</string>
-    <string name="label_available_routes">Available Routes</string>
+    <string name="label_available_routes">New Routes in %s</string>
     <string name="label_amount_to_swap">Amount To Swap</string>
     <string name="label_provider_website">Provider Website</string>
 </resources>

@@ -69,14 +69,9 @@ public class SelectRouteActivity extends BaseActivity
             @Override
             public void onTick(long millisUntilFinished)
             {
-                if (millisUntilFinished < 10000)
-                {
-                    countdownText.setText(String.format(Locale.ENGLISH, "0:0%d", millisUntilFinished / 1000));
-                }
-                else
-                {
-                    countdownText.setText(String.format(Locale.ENGLISH, "0:%d", millisUntilFinished / 1000));
-                }
+                String format = millisUntilFinished < 10000 ? "0:0%d" : "0:%d";
+                String time = String.format(Locale.ENGLISH, format, millisUntilFinished / 1000);
+                countdownText.setText(getString(R.string.label_available_routes, time));
             }
 
             @Override

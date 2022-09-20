@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         app:controlText="@string/edit"
         app:headerText="@string/preferred_exchanges"
-        app:showControl="true" />
+        app:showTextControl="true" />
 
     <com.google.android.flexbox.FlexboxLayout
         android:id="@+id/layout_exchanges"

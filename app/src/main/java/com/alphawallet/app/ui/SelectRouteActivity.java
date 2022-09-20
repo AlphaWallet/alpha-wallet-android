@@ -56,13 +56,13 @@ public class SelectRouteActivity extends BaseActivity
 
         initViewModel();
 
-        initTimers();
+        initTimer();
 
         getRoutes();
 
     }
 
-    private void initTimers()
+    private void initTimer()
     {
         timer = new CountDownTimer(GET_ROUTES_INTERVAL_MS, COUNTDOWN_INTERVAL_MS)
         {
@@ -178,5 +178,12 @@ public class SelectRouteActivity extends BaseActivity
             timer.cancel();
         }
         super.onPause();
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        setResult(RESULT_CANCELED);
+        super.onBackPressed();
     }
 }

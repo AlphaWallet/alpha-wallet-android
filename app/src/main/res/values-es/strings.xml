@@ -924,4 +924,6 @@
     <string name="label_available_routes">New Routes in %s</string>
     <string name="label_amount_to_swap">Amount To Swap</string>
     <string name="label_provider_website">Provider Website</string>
+    <string name="header_quote_details">Quote Details</string>
+    <string name="label_swap_via">Swap via %s</string>
 </resources>

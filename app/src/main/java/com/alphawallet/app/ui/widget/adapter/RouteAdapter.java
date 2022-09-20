@@ -50,7 +50,7 @@ public class RouteAdapter extends RecyclerView.Adapter<RouteAdapter.ViewHolder>
         {
             Route.Step step = item.steps.get(0);
 
-            holder.provider.setText("Swap via " + step.toolDetails.name);
+            holder.provider.setText(context.getString(R.string.label_swap_via, step.toolDetails.name));
 
             for (String tag : item.tags)
             {
@@ -63,7 +63,7 @@ public class RouteAdapter extends RecyclerView.Adapter<RouteAdapter.ViewHolder>
 
             holder.value.setText(SwapUtils.getFormattedMinAmount(step.estimate, step.action));
             holder.icon.bindData(step.action.toToken.logoURI, step.action.toToken.chainId, step.action.toToken.address, step.action.toToken.symbol);
-            holder.symbol.setText(step.action.toToken.symbol);
+//            holder.symbol.setText(step.action.toToken.symbol);
             holder.gas.setText(context.getString(R.string.info_gas_fee, SwapUtils.getTotalGasFees(step.estimate.gasCosts)));
             holder.fees.setVisibility(step.estimate.feeCosts.isEmpty() ? View.GONE : View.VISIBLE);
             holder.fees.setText(SwapUtils.getOtherFees(step.estimate.feeCosts));

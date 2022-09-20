@@ -43,7 +43,7 @@ public class Action
     public String getCurrentPrice()
     {
         return new BigDecimal(fromToken.priceUSD)
-                .divide(new BigDecimal(toToken.priceUSD), (int) toToken.decimals, RoundingMode.DOWN)
+                .divide(new BigDecimal(toToken.priceUSD), 4, RoundingMode.DOWN)
                 .stripTrailingZeros()
                 .toPlainString();
     }

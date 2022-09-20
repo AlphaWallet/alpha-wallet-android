@@ -1,8 +1,8 @@
- package com.alphawallet.app.ui;
+package com.alphawallet.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.CountDownTimer;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,6 +36,7 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.SelectTokenDialog;
+import com.alphawallet.app.widget.StandardHeader;
 import com.alphawallet.app.widget.SwapSettingsDialog;
 import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.app.widget.TokenSelector;
@@ -52,6 +53,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class SwapActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
 {
     private static final long GET_QUOTE_INTERVAL_MS = 30000;
+    private static final long COUNTDOWN_INTERVAL_MS = 1000;
     private SwapViewModel viewModel;
     private TokenSelector sourceSelector;
     private TokenSelector destSelector;
@@ -63,6 +65,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private AWalletAlertDialog errorDialog;
     private RelativeLayout tokenLayout;
     private LinearLayout infoLayout;
+    private StandardHeader quoteHeader;
     private TokenInfoView provider;
     private TokenInfoView providerWebsite;
     private TokenInfoView gasFees;
@@ -77,30 +80,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private Wallet wallet;
     private Token sourceToken;
     private List<Chain> chains;
-    private final Handler getQuoteHandler = new Handler();
-    private final Runnable getQuoteRunnable = new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            if (confirmationDialog == null || !confirmationDialog.isShowing())
-            {
-                viewModel.getRoutes(
-                        SwapActivity.this,
-                        sourceSelector.getToken(),
-                        destSelector.getToken(),
-                        wallet.address,
-                        sourceSelector.getAmount(),
-                        settingsDialog.getSlippage(),
-                        viewModel.getPreferredExchanges()
-                );
-            }
-            else
-            {
-                startQuoteTask(GET_QUOTE_INTERVAL_MS);
-            }
-        }
-    };
+    private String selectedRouteProvider;
+    private CountDownTimer getRoutesTimer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -118,6 +99,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         getIntentData();
 
         initViews();
+
+        initTimer();
 
         viewModel.getChains();
     }
@@ -137,6 +120,26 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         viewModel.transactionError().observe(this, this::txError);
     }
 
+    private void initTimer()
+    {
+        getRoutesTimer = new CountDownTimer(GET_QUOTE_INTERVAL_MS, COUNTDOWN_INTERVAL_MS)
+        {
+            @Override
+            public void onTick(long millisUntilFinished)
+            {
+//                String format = millisUntilFinished < 10000 ? "0:0%d" : "0:%d";
+//                String time = String.format(Locale.ENGLISH, format, millisUntilFinished / 1000);
+//                countdownText.setText(getString(R.string.label_available_routes, time));
+            }
+
+            @Override
+            public void onFinish()
+            {
+                getQuote();
+            }
+        };
+    }
+
     private void getIntentData()
     {
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
@@ -151,6 +154,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         destSelector = findViewById(R.id.to_input);
         tokenLayout = findViewById(R.id.layout_tokens);
         infoLayout = findViewById(R.id.layout_info);
+        quoteHeader = findViewById(R.id.header_quote);
         provider = findViewById(R.id.tiv_provider);
         providerWebsite = findViewById(R.id.tiv_provider_website);
         gasFees = findViewById(R.id.tiv_gas_fees);
@@ -160,6 +164,10 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         noConnectionsLayout = findViewById(R.id.layout_no_connections);
         continueBtn = findViewById(R.id.btn_continue);
         openSettingsBtn = findViewById(R.id.btn_open_settings);
+
+        quoteHeader.getImageControl().setOnClickListener(v -> {
+            getAvailableRoutes();
+        });
 
         progressDialog = new AWalletAlertDialog(this);
         progressDialog.setCancelable(false);
@@ -194,7 +202,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             @Override
             public void onAmountChanged(String amount)
             {
-                startQuoteTask(0);
+                getAvailableRoutes();
             }
 
             @Override
@@ -280,7 +288,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         destTokenDialog.setSelectedToken(token.address);
 
-        startQuoteTask(0);
+        getAvailableRoutes();
     }
 
     private void sourceTokenChanged(Token token)
@@ -302,7 +310,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         sourceToken = token;
 
-        startQuoteTask(0);
+        getAvailableRoutes();
     }
 
     @Override
@@ -313,6 +321,16 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         {
             settingsDialog.setTools(viewModel.getTools(this));
         }
+    }
+
+    @Override
+    protected void onPause()
+    {
+        if (getRoutesTimer != null)
+        {
+            getRoutesTimer.cancel();
+        }
+        super.onPause();
     }
 
     // The source token should default to the token selected in the main wallet dialog (ie the token from the intent).
@@ -349,23 +367,29 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         });
     }
 
-    private void startQuoteTask(long delay)
+    private void getAvailableRoutes()
     {
-        stopQuoteTask();
-
-        continueBtn.setEnabled(false);
+        if (getRoutesTimer != null)
+        {
+            getRoutesTimer.cancel();
+        }
 
         if (sourceSelector.getToken() != null
                 && destSelector.getToken() != null
                 && !TextUtils.isEmpty(sourceSelector.getAmount()))
         {
-            getQuoteHandler.postDelayed(getQuoteRunnable, delay);
-        }
-    }
+//            continueBtn.setEnabled(false);
 
-    private void stopQuoteTask()
-    {
-        getQuoteHandler.removeCallbacks(getQuoteRunnable);
+            viewModel.getRoutes(
+                    SwapActivity.this,
+                    sourceSelector.getToken(),
+                    destSelector.getToken(),
+                    wallet.address,
+                    sourceSelector.getAmount(),
+                    settingsDialog.getSlippage(),
+                    viewModel.getPreferredExchanges()
+            );
+        }
     }
 
     private void onChains(List<Chain> chains)
@@ -463,7 +487,21 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             infoLayout.setVisibility(View.GONE);
             noConnectionsLayout.setVisibility(View.VISIBLE);
         }
+    }
 
+    private void getQuote()
+    {
+        if (!TextUtils.isEmpty(selectedRouteProvider))
+        {
+            viewModel.getQuote(
+                    sourceSelector.getToken(),
+                    destSelector.getToken(),
+                    wallet.address,
+                    sourceSelector.getAmount(),
+                    settingsDialog.getSlippage(),
+                    selectedRouteProvider
+            );
+        }
     }
 
     private void onQuote(Quote quote)
@@ -479,7 +517,9 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         continueBtn.setEnabled(true);
 
-        getQuoteHandler.postDelayed(getQuoteRunnable, GET_QUOTE_INTERVAL_MS);
+//        getQuoteHandler.postDelayed(getQuoteRunnable, GET_QUOTE_INTERVAL_MS);
+
+        getRoutesTimer.start();
     }
 
     private void updateDestAmount(Quote quote)
@@ -506,7 +546,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         gasFees.setValue(SwapUtils.getTotalGasFees(quote.estimate.gasCosts));
         otherFees.setValue(SwapUtils.getOtherFees(quote.estimate.feeCosts));
         currentPrice.setValue(SwapUtils.getFormattedCurrentPrice(quote.action).trim());
-        minReceived.setValue(SwapUtils.getMinimumAmountReceived(quote.estimate, quote.action));
+        minReceived.setValue(SwapUtils.getFormattedMinAmount(quote.estimate, quote.action));
         infoLayout.setVisibility(View.VISIBLE);
     }
 
@@ -559,7 +599,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 sourceSelector.setError(getString(R.string.error_insufficient_balance, sourceSelector.getToken().symbol));
                 break;
             case C.ErrorCode.SWAP_TIMEOUT_ERROR:
-                startQuoteTask(0);
+                getAvailableRoutes();
                 break;
             case C.ErrorCode.SWAP_CONNECTIONS_ERROR:
             case C.ErrorCode.SWAP_CHAIN_ERROR:
@@ -578,7 +618,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 errorDialog.setTitle(R.string.title_dialog_error);
                 errorDialog.setMessage(errorEnvelope.message);
                 errorDialog.setButton(R.string.try_again, v -> {
-                    startQuoteTask(0);
+                    getAvailableRoutes();
                     errorDialog.dismiss();
                 });
                 errorDialog.setSecondaryButton(R.string.action_cancel, v -> errorDialog.dismiss());
@@ -651,16 +691,15 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         {
             if (resultCode == RESULT_OK)
             {
-                String provider = data.getStringExtra("provider");
-
-                viewModel.getQuote(
-                        sourceSelector.getToken(),
-                        destSelector.getToken(),
-                        wallet.address,
-                        sourceSelector.getAmount(),
-                        settingsDialog.getSlippage(),
-                        provider
-                );
+                if (data != null)
+                {
+                    selectedRouteProvider = data.getStringExtra("provider");
+                    getQuote();
+                }
+            }
+            else if (resultCode == RESULT_CANCELED)
+            {
+                continueBtn.setEnabled(!TextUtils.isEmpty(selectedRouteProvider));
             }
         }
         else

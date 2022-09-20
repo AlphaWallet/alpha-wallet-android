@@ -60,13 +60,6 @@ public class SwapUtils
                 action.toToken.symbol);
     }
 
-    public static String getMinimumAmountReceived(Estimate estimate, Action action)
-    {
-        return String.format(MINIMUM_RECEIVED_FORMAT,
-                BalanceUtils.getShortFormat(estimate.toAmountMin, action.toToken.decimals),
-                action.toToken.symbol);
-    }
-
     public static String getFormattedMinAmount(Estimate estimate, Action action)
     {
         return String.format(MINIMUM_RECEIVED_FORMAT,

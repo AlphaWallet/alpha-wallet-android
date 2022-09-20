@@ -54,7 +54,7 @@ public class SwapSettingsDialog extends BottomSheetDialog
         closeBtn.setOnClickListener(v -> dismiss());
 
         preferredExchangesHeader = findViewById(R.id.header_exchanges);
-        preferredExchangesHeader.getControl().setOnClickListener(v -> {
+        preferredExchangesHeader.getTextControl().setOnClickListener(v -> {
             Intent intent = new Intent(activity, SelectExchangesActivity.class);
             activity.startActivity(intent);
         });

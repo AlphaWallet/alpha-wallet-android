@@ -43,13 +43,13 @@
   },
   {
     "key": "quickswap",
-    "name": "Quickswap",
+    "name": "QuickSwap",
     "url": "https://quickswap.exchange/",
     "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/quick.png"
   },
   {
     "key": "pancakeswap",
-    "name": "Pancake",
+    "name": "PancakeSwap",
     "url": "https://pancakeswap.finance/",
     "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/pancake.png"
   },

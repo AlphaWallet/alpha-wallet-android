@@ -174,6 +174,7 @@ public class TokensRealmSource implements TokenLocalSource {
             case MAYBE_ERC20:
             case ERC721:
             case ERC721_LEGACY:
+            case ERC721_ENUMERABLE:
             case ERC1155:
                 saveToken(r, token);
                 break;
@@ -1367,6 +1368,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 case ERC721_UNDETERMINED:
                 case ERC721:
                 case ERC721_LEGACY:
+                case ERC721_ENUMERABLE:
                 case ERC1155:
                 default:
                     return balance;
@@ -1573,6 +1575,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 return tg;
 
             case ERC721:
+            case ERC721_ENUMERABLE:
             case ERC875_LEGACY:
             case ERC875:
             case ERC1155:

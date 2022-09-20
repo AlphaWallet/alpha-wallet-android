@@ -307,6 +307,7 @@ public class WalletViewModel extends BaseViewModel
             case ERC721_LEGACY:
             case ERC721_TICKET:
             case ERC721_UNDETERMINED:
+            case ERC721_ENUMERABLE:
                 tokenDetailRouter.open(activity, token, defaultWallet.getValue(), false); //TODO: Fold this into tokenDetailRouter
                 break;
 

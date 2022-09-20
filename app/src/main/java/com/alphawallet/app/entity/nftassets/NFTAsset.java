@@ -81,7 +81,8 @@ public class NFTAsset implements Parcelable
 
     public NFTAsset(RealmNFTAsset realmAsset)
     {
-        loadFromMetaData(realmAsset.getMetaData());
+        String metaData = realmAsset.getMetaData() != null ? realmAsset.getMetaData() : new NFTAsset(new BigInteger(realmAsset.getTokenId())).jsonMetaData();
+        loadFromMetaData(metaData);
         balance = realmAsset.getBalance();
     }
 

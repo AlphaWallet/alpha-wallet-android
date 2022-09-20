@@ -454,6 +454,7 @@ public class GasService implements ContractGasProvider
             case ERC721_LEGACY:
             case ERC721_TICKET:
             case ERC721_UNDETERMINED:
+            case ERC721_ENUMERABLE:
                 return new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS);
             default:
                 //unknown

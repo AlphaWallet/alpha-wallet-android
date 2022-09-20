@@ -25,5 +25,6 @@ public enum ContractType
     ETHEREUM_INVISIBLE,
     MAYBE_ERC20,
     ERC1155,
+    ERC721_ENUMERABLE,
     CREATION //Placeholder for generic, should be at end of list
 }

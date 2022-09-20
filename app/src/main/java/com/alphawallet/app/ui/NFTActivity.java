@@ -1,6 +1,8 @@
 package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.C.SIGNAL_NFT_SYNC;
+import static com.alphawallet.app.C.SYNC_STATUS;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -86,7 +88,25 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         setupViewPager();
 
         //check NFT events, expedite balance update
+        syncListener();
         viewModel.checkEventsForToken(token);
+    }
+
+    private void syncListener()
+    {
+        getSupportFragmentManager()
+                .setFragmentResultListener(SIGNAL_NFT_SYNC, this, (requestKey, b) ->
+                {
+                    CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
+                    if (!b.getBoolean(SYNC_STATUS, false))
+                    {
+                        certificateToolbar.nftSyncComplete();
+                    }
+                    else
+                    {
+                        certificateToolbar.showNFTSync();
+                    }
+                });
     }
 
     private boolean hasTokenScriptOverride(Token t)
@@ -197,6 +217,13 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         viewPager.setAdapter(new TabPagerAdapter(this, pages));
         viewPager.setOffscreenPageLimit(pages.size());
         setupTabs(viewPager, pages);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (assetsFragment == null) recreate();
     }
 
     private void setupTabs(ViewPager2 viewPager, List<Pair<String, Fragment>> pages)

@@ -387,7 +387,7 @@ public class Token
 
     public void setTokenWallet(String address)
     {
-        this.tokenWallet = address;
+        this.tokenWallet = address.toLowerCase(Locale.ROOT);
     }
 
     public void setupRealmToken(RealmToken realmToken)

@@ -12,6 +12,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -81,7 +82,10 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private Token sourceToken;
     private List<Chain> chains;
     private String selectedRouteProvider;
-    private CountDownTimer getRoutesTimer;
+    private CountDownTimer getQuoteTimer;
+    private ActivityResultLauncher<Intent> selectExchangesLauncher;
+    private ActivityResultLauncher<Intent> gasSettingsLauncher;
+    private ActivityResultLauncher<Intent> getRoutesLauncher;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -102,7 +106,40 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         initTimer();
 
-        viewModel.getChains();
+        registerActivityResultLaunchers();
+
+        viewModel.prepare(this, selectExchangesLauncher);
+    }
+
+    private void registerActivityResultLaunchers()
+    {
+        selectExchangesLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK)
+                    {
+                        viewModel.getChains();
+                    }
+                });
+
+        gasSettingsLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result -> confirmationDialog.setCurrentGasIndex(result));
+
+        getRoutesLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK)
+                    {
+                        Intent data = result.getData();
+                        if (data != null)
+                        {
+                            selectedRouteProvider = data.getStringExtra("provider");
+                            getQuote();
+                        }
+                    }
+                    else if (result.getResultCode() == RESULT_CANCELED)
+                    {
+                        continueBtn.setEnabled(!TextUtils.isEmpty(selectedRouteProvider));
+                    }
+                });
     }
 
     private void initViewModel()
@@ -122,7 +159,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void initTimer()
     {
-        getRoutesTimer = new CountDownTimer(GET_QUOTE_INTERVAL_MS, COUNTDOWN_INTERVAL_MS)
+        getQuoteTimer = new CountDownTimer(GET_QUOTE_INTERVAL_MS, COUNTDOWN_INTERVAL_MS)
         {
             @Override
             public void onTick(long millisUntilFinished)
@@ -317,16 +354,16 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         super.onResume();
         if (settingsDialog != null)
         {
-            settingsDialog.setTools(viewModel.getTools(this));
+            settingsDialog.setExchanges(viewModel.getPreferredExchanges());
         }
     }
 
     @Override
     protected void onPause()
     {
-        if (getRoutesTimer != null)
+        if (getQuoteTimer != null)
         {
-            getRoutesTimer.cancel();
+            getQuoteTimer.cancel();
         }
         super.onPause();
     }
@@ -367,9 +404,9 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void getAvailableRoutes()
     {
-        if (getRoutesTimer != null)
+        if (getQuoteTimer != null)
         {
-            getRoutesTimer.cancel();
+            getQuoteTimer.cancel();
         }
 
         if (sourceSelector.getToken() != null
@@ -378,13 +415,13 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 && !TextUtils.isEmpty(sourceSelector.getAmount()))
         {
             viewModel.getRoutes(
-                    SwapActivity.this,
+                    this,
+                    getRoutesLauncher,
                     sourceSelector.getToken(),
                     destSelector.getToken(),
                     wallet.address,
                     sourceSelector.getAmount(),
-                    settingsDialog.getSlippage(),
-                    viewModel.getPreferredExchanges()
+                    settingsDialog.getSlippage()
             );
         }
     }
@@ -393,7 +430,10 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     {
         this.chains = chains;
 
-        settingsDialog = new SwapSettingsDialog(this, chains, viewModel.getTools(this),
+        settingsDialog = new SwapSettingsDialog(
+                this,
+                chains,
+                viewModel.getPreferredExchanges(),
                 chain -> {
                     chainName.setText(chain.name);
                     viewModel.setChain(chain);
@@ -514,7 +554,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         continueBtn.setEnabled(true);
 
-        getRoutesTimer.start();
+        getQuoteTimer.start();
     }
 
     private void updateDestAmount(Quote quote)
@@ -676,30 +716,6 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     @Override
     public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
-        return null;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
-    {
-        if (requestCode == 1313)
-        {
-            if (resultCode == RESULT_OK)
-            {
-                if (data != null)
-                {
-                    selectedRouteProvider = data.getStringExtra("provider");
-                    getQuote();
-                }
-            }
-            else if (resultCode == RESULT_CANCELED)
-            {
-                continueBtn.setEnabled(!TextUtils.isEmpty(selectedRouteProvider));
-            }
-        }
-        else
-        {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
+        return gasSettingsLauncher;
     }
 }

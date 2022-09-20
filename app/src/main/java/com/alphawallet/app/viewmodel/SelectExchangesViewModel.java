@@ -28,6 +28,24 @@ public class SelectExchangesViewModel extends BaseViewModel
         this.preferenceRepository = preferenceRepository;
     }
 
+    public Set<String> getPreferredExchanges(Context context)
+    {
+        Set<String> exchanges = preferenceRepository.getSelectedExchanges();
+        if (exchanges.isEmpty())
+        {
+            List<ToolDetails> tools = getTools(context);
+            if (tools != null)
+            {
+                for (ToolDetails tool : tools)
+                {
+                    exchanges.add(tool.key);
+                }
+                preferenceRepository.setSelectedExchanges(exchanges);
+            }
+        }
+        return exchanges;
+    }
+
     public List<ToolDetails> getTools(Context context)
     {
         List<ToolDetails> tools = new Gson().fromJson(Utils.loadJSONFromAsset(context, "swap_providers_list.json"),
@@ -37,22 +55,12 @@ public class SelectExchangesViewModel extends BaseViewModel
 
         if (tools != null)
         {
-            Set<String> preferredProviders = getPreferredProviders();
-            if (preferredProviders.isEmpty())
+            Set<String> preferredProviders =  preferenceRepository.getSelectedExchanges();
+            for (ToolDetails tool : tools)
             {
-                for (ToolDetails tool : tools)
+                if (preferredProviders.contains(tool.key))
                 {
                     tool.isChecked = true;
-                }
-            }
-            else
-            {
-                for (ToolDetails tool : tools)
-                {
-                    if (preferredProviders.contains(tool.key))
-                    {
-                        tool.isChecked = true;
-                    }
                 }
             }
         }
@@ -60,14 +68,22 @@ public class SelectExchangesViewModel extends BaseViewModel
         return tools;
     }
 
-    public Set<String> getPreferredProviders()
+    public boolean savePreferences(List<ToolDetails> selectedExchanges)
     {
-        return preferenceRepository.getSelectedExchanges();
-    }
-
-    public void savePreferences(List<String> preferredProviders)
-    {
-        Set<String> stringSet = new HashSet<>(preferredProviders);
-        preferenceRepository.setSelectedExchanges(stringSet);
+        boolean hasSelection = false;
+        Set<String> stringSet = new HashSet<>();
+        for (ToolDetails tool : selectedExchanges)
+        {
+            if (tool.isChecked)
+            {
+                stringSet.add(tool.key);
+                hasSelection = true;
+            }
+        }
+        if (hasSelection)
+        {
+            preferenceRepository.setSelectedExchanges(stringSet);
+        }
+        return hasSelection;
     }
 }

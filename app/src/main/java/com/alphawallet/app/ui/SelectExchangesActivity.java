@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -53,8 +54,15 @@ public class SelectExchangesActivity extends BaseActivity
     @Override
     public void onBackPressed()
     {
-        viewModel.savePreferences(adapter.getSelectedExchanges());
-        super.onBackPressed();
+        if (viewModel.savePreferences(adapter.getExchanges()))
+        {
+            setResult(RESULT_OK);
+            super.onBackPressed();
+        }
+        else
+        {
+            Toast.makeText(this, getString(R.string.message_select_one_exchange), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -62,7 +70,8 @@ public class SelectExchangesActivity extends BaseActivity
     {
         if (item.getItemId() == android.R.id.home)
         {
-            this.onBackPressed();
+            onBackPressed();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

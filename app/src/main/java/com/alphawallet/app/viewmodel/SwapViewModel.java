@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -24,6 +25,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.SwapService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.SelectExchangesActivity;
 import com.alphawallet.app.ui.SelectRouteActivity;
 import com.alphawallet.app.ui.widget.entity.ProgressInfo;
 import com.alphawallet.app.util.BalanceUtils;
@@ -386,34 +388,10 @@ public class SwapViewModel extends BaseViewModel
 
     public List<ToolDetails> getTools(Context context)
     {
-        List<ToolDetails> tools = new Gson().fromJson(Utils.loadJSONFromAsset(context, "swap_providers_list.json"),
+        return new Gson().fromJson(Utils.loadJSONFromAsset(context, "swap_providers_list.json"),
                 new TypeToken<List<ToolDetails>>()
                 {
                 }.getType());
-
-        if (tools != null)
-        {
-            Set<String> preferredProviders = getPreferredExchanges();
-            if (preferredProviders.isEmpty())
-            {
-                for (ToolDetails tool : tools)
-                {
-                    tool.isChecked = true;
-                }
-            }
-            else
-            {
-                for (ToolDetails tool : tools)
-                {
-                    if (preferredProviders.contains(tool.key))
-                    {
-                        tool.isChecked = true;
-                    }
-                }
-            }
-        }
-
-        return tools;
     }
 
     public Set<String> getPreferredExchanges()
@@ -443,7 +421,13 @@ public class SwapViewModel extends BaseViewModel
         super.onCleared();
     }
 
-    public void getRoutes(Activity activity, Token source, Token dest, String address, String amount, String slippage, Set<String> exchanges)
+    public void getRoutes(Activity activity,
+                          ActivityResultLauncher<Intent> launcher,
+                          Token source,
+                          Token dest,
+                          String address,
+                          String amount,
+                          String slippage)
     {
         if (hasEnoughBalance(source, amount))
         {
@@ -459,11 +443,24 @@ public class SwapViewModel extends BaseViewModel
             intent.putExtra("fromTokenSymbol", source.symbol);
             intent.putExtra("fromTokenIcon", source.symbol);
             intent.putExtra("fromTokenLogoUri", source.logoURI);
-            activity.startActivityForResult(intent, 1313);
+            launcher.launch(intent);
         }
         else
         {
             error.postValue(new ErrorEnvelope(C.ErrorCode.INSUFFICIENT_BALANCE, ""));
+        }
+    }
+
+    public void prepare(Activity activity, ActivityResultLauncher<Intent> launcher)
+    {
+        if (getPreferredExchanges().isEmpty())
+        {
+            Intent intent = new Intent(activity, SelectExchangesActivity.class);
+            launcher.launch(intent);
+        }
+        else
+        {
+            getChains();
         }
     }
 }

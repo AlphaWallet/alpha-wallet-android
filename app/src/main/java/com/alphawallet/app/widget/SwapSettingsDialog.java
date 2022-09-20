@@ -24,6 +24,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.List;
+import java.util.Set;
 
 public class SwapSettingsDialog extends BottomSheetDialog
 {
@@ -62,14 +63,14 @@ public class SwapSettingsDialog extends BottomSheetDialog
         preferredExchanges = findViewById(R.id.layout_exchanges);
     }
 
-    public SwapSettingsDialog(Activity activity, List<Chain> chains, List<ToolDetails> tools, SwapSettingsInterface swapSettingsInterface)
+    public SwapSettingsDialog(Activity activity, List<Chain> chains, Set<String> preferredExchanges, SwapSettingsInterface swapSettingsInterface)
     {
         this(activity);
         ChainFilter filter = new ChainFilter(chains);
         adapter = new SelectChainAdapter(activity, filter.getSupportedChains(), swapSettingsInterface);
         chainList.setLayoutManager(new LinearLayoutManager(getContext()));
         chainList.setAdapter(adapter);
-        setTools(tools);
+        setExchanges(preferredExchanges);
     }
 
     private TextView addExchange(String name)
@@ -85,15 +86,12 @@ public class SwapSettingsDialog extends BottomSheetDialog
         return exchange;
     }
 
-    public void setTools(List<ToolDetails> tools)
+    public void setExchanges(Set<String> exchanges)
     {
         preferredExchanges.removeAllViews();
-        for (ToolDetails tool : tools)
+        for (String exchange : exchanges)
         {
-            if (tool.isChecked)
-            {
-                preferredExchanges.addView(addExchange(tool.name));
-            }
+            preferredExchanges.addView(addExchange(exchange));
         }
         preferredExchanges.invalidate();
     }

@@ -14,18 +14,15 @@ import com.alphawallet.app.entity.lifi.ToolDetails;
 import com.alphawallet.app.widget.AddressIcon;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ExchangeAdapter extends RecyclerView.Adapter<ExchangeAdapter.ViewHolder>
 {
-    private final List<ToolDetails> displayData;
-    private final List<String> selectedExchanges;
+    private final List<ToolDetails> data;
 
     public ExchangeAdapter(List<ToolDetails> data)
     {
-        displayData = data;
-        selectedExchanges = new ArrayList<>();
+        this.data = data;
     }
 
     @NonNull
@@ -41,7 +38,7 @@ public class ExchangeAdapter extends RecyclerView.Adapter<ExchangeAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        ToolDetails item = displayData.get(position);
+        ToolDetails item = data.get(position);
         if (item != null)
         {
             holder.title.setText(item.name);
@@ -52,31 +49,21 @@ public class ExchangeAdapter extends RecyclerView.Adapter<ExchangeAdapter.ViewHo
 
             holder.layout.setOnClickListener(v -> holder.checkBox.setChecked(!item.isChecked));
 
-            holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                item.isChecked = isChecked;
-                if (isChecked)
-                {
-                    selectedExchanges.add(item.key);
-                }
-                else
-                {
-                    selectedExchanges.remove(item.key);
-                }
-            });
+            holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> item.isChecked = isChecked);
 
             holder.checkBox.setChecked(item.isChecked);
         }
     }
 
-    public List<String> getSelectedExchanges()
+    public List<ToolDetails> getExchanges()
     {
-        return selectedExchanges;
+        return data;
     }
 
     @Override
     public int getItemCount()
     {
-        return displayData.size();
+        return data.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder

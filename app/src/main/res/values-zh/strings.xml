@@ -573,7 +573,7 @@
     <string name="your_wallets">您的钱包</string>
     <string name="action_copy">复制</string>
     <string name="title_version_support_warning">重要更新</string>
-    <string name="message_version_support_warning">从版本 3.0 开始，AlphaWallet 将不再支持在 Android 6.0 及以下设备上运行。</string>
+    <string name="message_version_support_warning">这是 AlphaWallet 的最终版本，支持在 Android 6 上运行的设备。</string>
     <string name="hide_notification">隐藏通知</string>
     <string name="card_view_not_found_error">未找到%1$s</string>
     <string name="tokenscript_management">TokenScript 管理</string>

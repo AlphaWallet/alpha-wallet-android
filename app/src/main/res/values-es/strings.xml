@@ -573,7 +573,7 @@
     <string name="your_wallets">Tus monederos</string>
     <string name="action_copy">Copiar</string>
     <string name="title_version_support_warning">Actualización importante</string>
-    <string name="message_version_support_warning">A partir de la versión 3.0, AlphaWallet ya no será compatible con dispositivos que ejecuten Android 6.0 o inferior.</string>
+    <string name="message_version_support_warning">Esta es la versión final de los dispositivos compatibles con AlphaWallet que se ejecutan en Android 6.</string>
     <string name="hide_notification">Ocultar notificación</string>
     <string name="card_view_not_found_error">%1$s no encontrado</string>
     <string name="tokenscript_management">Gestión de TokenScript</string>

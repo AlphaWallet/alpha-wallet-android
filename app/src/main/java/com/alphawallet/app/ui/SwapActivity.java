@@ -127,9 +127,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             @Override
             public void onTick(long millisUntilFinished)
             {
-//                String format = millisUntilFinished < 10000 ? "0:0%d" : "0:%d";
-//                String time = String.format(Locale.ENGLISH, format, millisUntilFinished / 1000);
-//                countdownText.setText(getString(R.string.label_available_routes, time));
+                // TODO: Display countdown timer?
             }
 
             @Override
@@ -376,10 +374,9 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         if (sourceSelector.getToken() != null
                 && destSelector.getToken() != null
+                && !sourceSelector.getToken().equals(destSelector.getToken())
                 && !TextUtils.isEmpty(sourceSelector.getAmount()))
         {
-//            continueBtn.setEnabled(false);
-
             viewModel.getRoutes(
                     SwapActivity.this,
                     sourceSelector.getToken(),
@@ -516,8 +513,6 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         }
 
         continueBtn.setEnabled(true);
-
-//        getQuoteHandler.postDelayed(getQuoteRunnable, GET_QUOTE_INTERVAL_MS);
 
         getRoutesTimer.start();
     }

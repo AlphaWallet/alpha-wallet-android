@@ -27,8 +27,8 @@ jobs:
           name: ut-reports
           path: app/build/reports/tests
 
-       # - name: Upload coverage reports to Codecov
-       # run: |
-       #   curl -Os https://uploader.codecov.io/latest/macos/codecov
-       #   chmod +x codecov
-       #   ./codecov
+      - name: Upload coverage reports to Codecov
+        run: |
+          curl -Os https://uploader.codecov.io/latest/macos/codecov
+          chmod +x codecov
+          ./codecov

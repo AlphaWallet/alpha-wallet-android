@@ -79,11 +79,10 @@ public class SwapSettingsDialog extends BottomSheetDialog
                 new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(margin, margin, margin, margin);
 
-        TextView seedWord = new TextView(getContext(), null);
-        seedWord.setText(name);
-        seedWord.setLayoutParams(params);
-
-        return seedWord;
+        TextView exchange = new TextView(getContext(), null);
+        exchange.setText(name);
+        exchange.setLayoutParams(params);
+        return exchange;
     }
 
     public void setTools(List<ToolDetails> tools)

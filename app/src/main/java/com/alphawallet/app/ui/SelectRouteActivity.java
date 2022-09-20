@@ -3,6 +3,8 @@ package com.alphawallet.app.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -19,6 +21,7 @@ import com.alphawallet.app.util.SwapUtils;
 import com.alphawallet.app.viewmodel.SelectRouteViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AddressIcon;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 import java.util.Locale;
@@ -36,10 +39,11 @@ public class SelectRouteActivity extends BaseActivity
     private TextView fromSymbol;
     private TextView currentPrice;
     private TextView countdownText;
+    private LinearLayout noRoutesLayout;
+    private MaterialButton selectExchangesBtn;
     private AddressIcon fromTokenIcon;
     private AWalletAlertDialog progressDialog;
-    private boolean isFirstRun;
-    private CountDownTimer timer;
+    private CountDownTimer getRoutesTimer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -57,14 +61,56 @@ public class SelectRouteActivity extends BaseActivity
         initViewModel();
 
         initTimer();
+    }
 
+    @Override
+    protected void onResume()
+    {
         getRoutes();
+        super.onResume();
+    }
 
+    @Override
+    protected void onPause()
+    {
+        if (getRoutesTimer != null)
+        {
+            getRoutesTimer.cancel();
+        }
+        super.onPause();
+    }
+
+    private void initViews()
+    {
+        recyclerView = findViewById(R.id.list_routes);
+        fromAmount = findViewById(R.id.from_amount);
+        fromSymbol = findViewById(R.id.from_symbol);
+        fromTokenIcon = findViewById(R.id.from_token_icon);
+        currentPrice = findViewById(R.id.current_price);
+        countdownText = findViewById(R.id.text_countdown);
+        noRoutesLayout = findViewById(R.id.layout_no_routes_found);
+        selectExchangesBtn = findViewById(R.id.btn_select_exchanges);
+        selectExchangesBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SelectExchangesActivity.class);
+            startActivity(intent);
+        });
+
+        progressDialog = new AWalletAlertDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setProgressMode();
+    }
+
+    private void initViewModel()
+    {
+        viewModel = new ViewModelProvider(this)
+                .get(SelectRouteViewModel.class);
+        viewModel.routes().observe(this, this::onRoutes);
+        viewModel.progressInfo().observe(this, this::onProgressInfo);
     }
 
     private void initTimer()
     {
-        timer = new CountDownTimer(GET_ROUTES_INTERVAL_MS, COUNTDOWN_INTERVAL_MS)
+        getRoutesTimer = new CountDownTimer(GET_ROUTES_INTERVAL_MS, COUNTDOWN_INTERVAL_MS)
         {
             @Override
             public void onTick(long millisUntilFinished)
@@ -80,28 +126,6 @@ public class SelectRouteActivity extends BaseActivity
                 getRoutes();
             }
         };
-    }
-
-    private void initViews()
-    {
-        recyclerView = findViewById(R.id.list_routes);
-        fromAmount = findViewById(R.id.from_amount);
-        fromSymbol = findViewById(R.id.from_symbol);
-        fromTokenIcon = findViewById(R.id.from_token_icon);
-        currentPrice = findViewById(R.id.current_price);
-        countdownText = findViewById(R.id.text_countdown);
-
-        progressDialog = new AWalletAlertDialog(this);
-        progressDialog.setCancelable(false);
-        progressDialog.setProgressMode();
-    }
-
-    private void initViewModel()
-    {
-        viewModel = new ViewModelProvider(this)
-                .get(SelectRouteViewModel.class);
-        viewModel.routes().observe(this, this::onRoutes);
-        viewModel.progressInfo().observe(this, this::onProgressInfo);
     }
 
     private void getRoutes()
@@ -126,11 +150,9 @@ public class SelectRouteActivity extends BaseActivity
 
     private void onRoutes(List<Route> routes)
     {
-        isFirstRun = false;
-
         processRoutes(routes);
 
-        timer.start();
+        getRoutesTimer.start();
     }
 
     private void processRoutes(List<Route> routeList)
@@ -148,6 +170,12 @@ public class SelectRouteActivity extends BaseActivity
         {
             Route route = routeList.get(0);
             currentPrice.setText(SwapUtils.getFormattedCurrentPrice(route.steps.get(0).action));
+            noRoutesLayout.setVisibility(View.GONE);
+        }
+        else
+        {
+            currentPrice.setText(R.string.NA);
+            noRoutesLayout.setVisibility(View.VISIBLE);
         }
     }
 
@@ -162,22 +190,6 @@ public class SelectRouteActivity extends BaseActivity
         {
             progressDialog.dismiss();
         }
-    }
-
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause()
-    {
-        if (timer != null)
-        {
-            timer.cancel();
-        }
-        super.onPause();
     }
 
     @Override

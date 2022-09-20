@@ -1,17 +1,28 @@
 package com.alphawallet.app.ui;
 
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.widget.Toolbar;
+import android.content.Intent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.BackupTokenCallback;
+import com.alphawallet.app.entity.ContractLocator;
+import com.alphawallet.app.entity.FragmentMessenger;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickListener {
+public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickListener,
+        BackupTokenCallback
+{
     private Toolbar toolbar;
     private TextView toolbarTitle;
 
@@ -86,4 +97,20 @@ public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickLis
 
     public void softKeyboardVisible() { }
     public void softKeyboardGone() { }
+    public void onItemClick(String url) { }
+    public void signalUpdate(int updateVersion) { }
+    public void backupSeedSuccess(boolean hasNoLock) { }
+    public void storeWalletBackupTime(String backedUpKey) { }
+    public void resetTokens() { }
+    public void resetTransactions() { }
+    public void gotCameraAccess(@NotNull String[] permissions, int[] grantResults) { }
+    public void gotGeoAccess(@NotNull String[] permissions, int[] grantResults) { }
+    public void gotFileAccess(@NotNull String[] permissions, int[] grantResults) { }
+    public void handleQRCode(int resultCode, Intent data, FragmentMessenger messenger) { }
+    public void pinAuthorisation(boolean gotAuth) { }
+    public void switchNetworkAndLoadUrl(long chainId, String url) { }
+    public void scrollToTop() { }
+    public void addedToken(List<ContractLocator> tokenContracts) { }
+    public void setImportFilename(String fName) { }
+    public void backPressed() { }
 }

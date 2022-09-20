@@ -79,7 +79,6 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
-import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -315,9 +314,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         homePressed = false;
         if (currentFragment == null) currentFragment = DAPP_BROWSER;
         attachFragment(currentFragment);
-        if ((web3 == null || viewModel == null) && getActivity() != null) //trigger reload
+        if ((web3 == null || viewModel == null)) //trigger reload
         {
-            ((HomeActivity) getActivity()).resetFragment(WalletPage.DAPP_BROWSER);
+            //reboot
+            requireActivity().recreate();
         }
         else
         {
@@ -898,6 +898,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
     }
 
+    @Override
     public void switchNetworkAndLoadUrl(long chainId, String url)
     {
         forceChainChange = chainId; //avoid prompt to change chain for 1inch
@@ -1487,6 +1488,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         resultDialog.show();
     }
 
+    @Override
     public void backPressed()
     {
         if (web3 == null || back == null || back.getAlpha() == 0.3f) return;
@@ -1706,8 +1708,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         if (web3 == null)
         {
-            if (getActivity() != null)
-                ((HomeActivity) getActivity()).resetFragment(WalletPage.DAPP_BROWSER);
+            requireActivity().recreate();
             loadOnInit = urlText;
         }
         else
@@ -1775,6 +1776,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         setUrlText(getDefaultDappUrl());
     }
 
+    @Override
     public void handleQRCode(int resultCode, Intent data, FragmentMessenger messenger)
     {
         //result
@@ -1945,6 +1947,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
     }
 
+    @Override
     public void gotCameraAccess(@NotNull String[] permissions, int[] grantResults)
     {
         boolean cameraAccess = false;
@@ -1961,6 +1964,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             Toast.makeText(getContext(), "Permission not given", Toast.LENGTH_SHORT).show();
     }
 
+    @Override
     public void gotGeoAccess(@NotNull String[] permissions, int[] grantResults)
     {
         boolean geoAccess = false;
@@ -1978,6 +1982,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             geoCallback.invoke(geoOrigin, geoAccess, false);
     }
 
+    @Override
     public void gotFileAccess(@NotNull String[] permissions, int[] grantResults)
     {
         boolean fileAccess = false;
@@ -2129,6 +2134,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
      *
      * @param gotAuth
      */
+    @Override
     public void pinAuthorisation(boolean gotAuth)
     {
         if (confirmationDialog != null && confirmationDialog.isShowing())

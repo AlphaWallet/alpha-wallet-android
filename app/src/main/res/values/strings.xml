@@ -1001,4 +1001,5 @@
     <string name="header_quote_details">Quote Details</string>
     <string name="label_swap_via">Swap via %s</string>
     <string name="message_no_routes_found_for_the_given_parameters">No routes found for the given parameters.</string>
+    <string name="message_select_one_exchange">Select at least one exchange.</string>
 </resources>

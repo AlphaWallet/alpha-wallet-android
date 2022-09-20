@@ -2,7 +2,9 @@ package com.alphawallet.app.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import androidx.annotation.Nullable;
+
+import com.alphawallet.app.util.Utils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -160,6 +162,11 @@ public class QRResult implements Parcelable
             else if (params.size() == 2)
             {
                 type = EIP681Type.OTHER_PROTOCOL;
+            }
+            else if (isEIP681() && Utils.isAddressValid(address)) //Metamask addresses
+            {
+                type = EIP681Type.ADDRESS;
+                return;
             }
             else
             {

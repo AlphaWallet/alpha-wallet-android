@@ -1,5 +1,10 @@
 package com.alphawallet.app;
 
+import static com.alphawallet.app.entity.EIP681Type.OTHER;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.QRResult;
@@ -15,12 +20,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.math.BigInteger;
 import java.util.Base64;
 import java.util.Map;
-
-import static org.mockito.Mockito.when;
-
-import static com.alphawallet.app.entity.EIP681Type.OTHER;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -155,8 +154,13 @@ public class QRExtractorTest {
         result = parser.parse("ethereum:0x0000000000000000000000000000000000000XyZ");
         assertTrue("ethereum".equals(result.getProtocol()));
         assertTrue("0x0000000000000000000000000000000000000XyZ".equals(result.getAddress()));
-
         assertTrue(result.getFunction().length() == 0);
+
+        // No params, valid address eg MetaMask format
+        result = parser.parse("ethereum:0x82357f25AD0db74D2e4Cc1a2Ae2803d88B178112");
+        assertTrue("ethereum".equals(result.getProtocol()));
+        assertTrue("0x82357f25AD0db74D2e4Cc1a2Ae2803d88B178112".equals(result.getAddress()));
+        assertTrue(result.type == EIP681Type.ADDRESS);
 
         // No parameters
         result = parser.parse("ethereum:0x0000000000000000000000000000000000000XyZ?");

@@ -433,6 +433,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         settingsDialog = new SwapSettingsDialog(
                 this,
                 chains,
+                viewModel.getTools(this),
                 viewModel.getPreferredExchanges(),
                 chain -> {
                     chainName.setText(chain.name);

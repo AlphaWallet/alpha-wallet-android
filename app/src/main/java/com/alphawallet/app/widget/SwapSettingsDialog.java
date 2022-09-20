@@ -30,7 +30,7 @@ public class SwapSettingsDialog extends BottomSheetDialog
 {
     private RecyclerView chainList;
     private SelectChainAdapter adapter;
-    private List<Chain> chains;
+    private List<ToolDetails> tools;
     private SlippageWidget slippageWidget;
     private StandardHeader preferredExchangesHeader;
     private FlexboxLayout preferredExchanges;
@@ -43,7 +43,7 @@ public class SwapSettingsDialog extends BottomSheetDialog
 
         setOnShowListener(dialogInterface -> {
             view.setMinimumHeight(Resources.getSystem().getDisplayMetrics().heightPixels);
-            BottomSheetBehavior<View>behavior = BottomSheetBehavior.from((View) view.getParent());
+            BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
             behavior.setState(STATE_EXPANDED);
             behavior.setSkipCollapsed(true);
         });
@@ -63,17 +63,22 @@ public class SwapSettingsDialog extends BottomSheetDialog
         preferredExchanges = findViewById(R.id.layout_exchanges);
     }
 
-    public SwapSettingsDialog(Activity activity, List<Chain> chains, Set<String> preferredExchanges, SwapSettingsInterface swapSettingsInterface)
+    public SwapSettingsDialog(Activity activity,
+                              List<Chain> chains,
+                              List<ToolDetails> tools,
+                              Set<String> preferredExchanges,
+                              SwapSettingsInterface swapSettingsInterface)
     {
         this(activity);
         ChainFilter filter = new ChainFilter(chains);
         adapter = new SelectChainAdapter(activity, filter.getSupportedChains(), swapSettingsInterface);
         chainList.setLayoutManager(new LinearLayoutManager(getContext()));
         chainList.setAdapter(adapter);
+        this.tools = tools;
         setExchanges(preferredExchanges);
     }
 
-    private TextView addExchange(String name)
+    private TextView createTextView(String name)
     {
         int margin = (int) getContext().getResources().getDimension(R.dimen.tiny_8);
         FlexboxLayout.LayoutParams params =
@@ -89,9 +94,12 @@ public class SwapSettingsDialog extends BottomSheetDialog
     public void setExchanges(Set<String> exchanges)
     {
         preferredExchanges.removeAllViews();
-        for (String exchange : exchanges)
+        for (ToolDetails tool : tools)
         {
-            preferredExchanges.addView(addExchange(exchange));
+            if (exchanges.contains(tool.key))
+            {
+                preferredExchanges.addView(createTextView(tool.name));
+            }
         }
         preferredExchanges.invalidate();
     }

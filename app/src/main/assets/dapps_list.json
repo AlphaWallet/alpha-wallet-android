@@ -89,5 +89,6 @@
   {"name": "Swapzone", "description": "Swapzone is a custody-free cryptocurrency exchange aggregator with no registration needed.", "url": "https://swapzone.io/", "category": "Exchange"},
   {"name": "mail³", "description": "Decentralized mail system for web3 natives.", "url": "https://app.mail3.me/", "category": "Social Media"},
   {"name": "ApeNow", "description": "Buy now, pay later marketplace for NFTs.", "url": "https://www.apenowpaylater.com/", "category": "Marketplace"},
-  {"name": "AirCash", "description": "AirCash is the first and largest decentralized OTC platform in the galaxy.", "url": "https://aircash.finance", "category": "Exchange"}
+  {"name": "AirCash", "description": "AirCash is the first and largest decentralized OTC platform in the galaxy.", "url": "https://aircash.finance", "category": "Exchange"},
+  {"name": "Lido", "description": "Liquidity for staked assets", "url": "https://lido.fi/", "category": "Finance"}
 ]

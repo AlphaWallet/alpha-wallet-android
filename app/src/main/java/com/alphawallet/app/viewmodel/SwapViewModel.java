@@ -193,6 +193,7 @@ public class SwapViewModel extends BaseViewModel
 
     public void getQuote(Token source, Token dest, String address, String amount, String slippage, String allowExchanges)
     {
+        if (!isValidAmount(amount)) return;
         if (hasEnoughBalance(source, amount))
         {
             progressInfo.postValue(new ProgressInfo(true, R.string.message_fetching_quote));
@@ -206,6 +207,19 @@ public class SwapViewModel extends BaseViewModel
         {
             error.postValue(new ErrorEnvelope(C.ErrorCode.INSUFFICIENT_BALANCE, ""));
         }
+    }
+
+    private boolean isValidAmount(String amount)
+    {
+        try
+        {
+            BigDecimal d = new BigDecimal(amount);
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+        return true;
     }
 
     private void onChainsError(Throwable t)
@@ -429,6 +443,7 @@ public class SwapViewModel extends BaseViewModel
                           String amount,
                           String slippage)
     {
+        if (!isValidAmount(amount)) return;
         if (hasEnoughBalance(source, amount))
         {
             Intent intent = new Intent(activity, SelectRouteActivity.class);

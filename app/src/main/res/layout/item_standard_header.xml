@@ -41,12 +41,14 @@
         android:id="@+id/text_control"
         style="@style/Aw.Typography.Control"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:padding="@dimen/standard_16"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/standard_16"
         android:visibility="gone"
-        tools:text="Control" />
+        tools:text="Control"
+        tools:visibility="visible" />
 
     <ImageView
         android:id="@+id/image_control"

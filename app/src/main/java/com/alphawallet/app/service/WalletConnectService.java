@@ -306,17 +306,6 @@ public class WalletConnectService extends Service
             return Unit.INSTANCE;
         });
 
-        client.setOnCustomRequest((id, payload) -> {
-            if (client.sessionId() == null) return Unit.INSTANCE;
-            setLastUsed(client);
-
-            System.out.println("YOLESS: " + payload);
-
-            //WCRequest rq = new WCRequest(client.sessionId(), id, transaction, false, client.chainIdVal());
-            //sendRequest(client, rq);
-            return Unit.INSTANCE;
-        });
-
         client.setOnSwitchEthereumChain((requestId, chainId) -> {
             Timber.tag(TAG).d("onSwitchEthereumChain: request.id: %s, sessionId: %s, chainId: %s", requestId, client.sessionId(), chainId);
             // send broadcast to show dialog for switching chain

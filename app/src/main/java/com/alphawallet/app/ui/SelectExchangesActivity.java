@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.ui.widget.adapter.SwapProviderAdapter;
+import com.alphawallet.app.ui.widget.adapter.ExchangeAdapter;
 import com.alphawallet.app.viewmodel.SelectExchangesViewModel;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -18,8 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class SelectExchangesActivity extends BaseActivity
 {
     private SelectExchangesViewModel viewModel;
-    private RecyclerView recyclerView;
-    private SwapProviderAdapter adapter;
+    private ExchangeAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -35,7 +34,6 @@ public class SelectExchangesActivity extends BaseActivity
         initViewModel();
 
         initViews();
-
     }
 
     private void initViewModel()
@@ -46,16 +44,16 @@ public class SelectExchangesActivity extends BaseActivity
 
     private void initViews()
     {
-        recyclerView = findViewById(R.id.list);
+        RecyclerView recyclerView = findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new SwapProviderAdapter(this, viewModel.getTools(this));
+        adapter = new ExchangeAdapter(viewModel.getTools(this));
         recyclerView.setAdapter(adapter);
     }
 
     @Override
     public void onBackPressed()
     {
-        viewModel.savePreferences(adapter.getSelectedProviders());
+        viewModel.savePreferences(adapter.getSelectedExchanges());
         super.onBackPressed();
     }
 

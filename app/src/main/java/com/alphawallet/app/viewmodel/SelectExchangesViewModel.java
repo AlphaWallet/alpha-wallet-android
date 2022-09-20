@@ -62,12 +62,12 @@ public class SelectExchangesViewModel extends BaseViewModel
 
     public Set<String> getPreferredProviders()
     {
-        return preferenceRepository.getSwapProviders();
+        return preferenceRepository.getSelectedExchanges();
     }
 
     public void savePreferences(List<String> preferredProviders)
     {
         Set<String> stringSet = new HashSet<>(preferredProviders);
-        preferenceRepository.setSwapProviders(stringSet);
+        preferenceRepository.setSelectedExchanges(stringSet);
     }
 }

@@ -584,7 +584,7 @@
     <string name="your_wallets">Dompet Anda</string>
     <string name="action_copy">Salin</string>
     <string name="title_version_support_warning">Pembaruan Penting</string>
-    <string name="message_version_support_warning">Mulai Versi 3.0, AlphaWallet tidak mendukung perangkat yang berjalan di Android 6.0 dan di bawahnya.</string>
+    <string name="message_version_support_warning">Ini adalah build terakhir dari perangkat pendukung AlphaWallet yang berjalan di Android 6.</string>
     <string name="hide_notification">Sembunyikan Pemberitahuan</string>
     <string name="card_view_not_found_error">%1$s tidak ditemukan</string>
     <string name="tokenscript_management">Pengelolaan TokenScript</string>

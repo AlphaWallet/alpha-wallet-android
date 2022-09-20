@@ -52,15 +52,18 @@ public class SwapUtilsTest
     @Test
     public void should_return_formatted_minimum_received()
     {
-        Quote quote = new Quote();
-        quote.action = new Action();
-        quote.action.toToken = new Token();
-        quote.estimate = new Estimate();
-        quote.estimate.toAmountMin = "1000000";
-        quote.action.toToken.decimals = 6;
-        quote.action.toToken.symbol = "ETH";
+        Action action = new Action();
+        action.toToken = new Token();
+        action.toToken.decimals = 6;
+        action.toToken.symbol = "ETH";
 
-        assertThat(SwapUtils.getMinimumAmountReceived(quote.estimate, quote.action), equalTo("1.000000 ETH"));
+        Estimate estimate1 = new Estimate();
+        estimate1.toAmountMin = "1000000";
+        assertThat(SwapUtils.getFormattedMinAmount(estimate1, action), equalTo("1 ETH"));
+
+        Estimate estimate2 = new Estimate();
+        estimate2.toAmountMin = "1234567";
+        assertThat(SwapUtils.getFormattedMinAmount(estimate2, action), equalTo("1.2345 ETH"));
     }
 
     @Test

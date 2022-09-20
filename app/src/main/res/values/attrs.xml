@@ -36,10 +36,12 @@
     </declare-styleable>
     <declare-styleable name="StandardHeader">
         <attr name="headerText" format="string" />
-        <attr name="controlText" format="string" />
+        <attr name="controlText" format="integer" />
+        <attr name="controlImageRes" format="integer" />
         <attr name="showSwitch" format="boolean" />
         <attr name="showChain" format="boolean" />
-        <attr name="showControl" format="boolean" />
+        <attr name="showTextControl" format="boolean" />
+        <attr name="showImageControl" format="boolean" />
     </declare-styleable>
     <declare-styleable name="TokenInfoCategoryView">
         <attr name="title" format="string" />

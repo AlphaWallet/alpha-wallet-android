@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -16,7 +17,8 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 public class StandardHeader extends LinearLayout
 {
     private TextView headerText;
-    private TextView control;
+    private TextView textControl;
+    private ImageView imageControl;
     private ChainName chainName;
     private SwitchMaterial switchMaterial;
     private View separator;
@@ -41,28 +43,41 @@ public class StandardHeader extends LinearLayout
             int headerId = a.getResourceId(R.styleable.StandardHeader_headerText, R.string.empty);
             boolean showSwitch = a.getBoolean(R.styleable.StandardHeader_showSwitch, false);
             boolean showChainName = a.getBoolean(R.styleable.StandardHeader_showChain, false);
-            boolean showControl = a.getBoolean(R.styleable.StandardHeader_showControl, false);
+            boolean showTextControl = a.getBoolean(R.styleable.StandardHeader_showTextControl, false);
+            boolean showImageControl = a.getBoolean(R.styleable.StandardHeader_showImageControl, false);
             int controlText = a.getResourceId(R.styleable.StandardHeader_controlText, -1);
+            int controlImageRes = a.getResourceId(R.styleable.StandardHeader_controlImageRes, -1);
 
             headerText = findViewById(R.id.text_header);
             chainName = findViewById(R.id.chain_name);
             switchMaterial = findViewById(R.id.switch_material);
             separator = findViewById(R.id.separator);
-            control = findViewById(R.id.control);
+            textControl = findViewById(R.id.text_control);
+            imageControl = findViewById(R.id.image_control);
 
             headerText.setText(headerId);
 
             switchMaterial.setVisibility(showSwitch ? View.VISIBLE : View.GONE);
             chainName.setVisibility(showChainName ? View.VISIBLE : View.GONE);
 
-            if (showControl)
+            if (showTextControl)
             {
-                control.setVisibility(View.VISIBLE);
-                control.setText(controlText);
+                textControl.setVisibility(View.VISIBLE);
+                textControl.setText(controlText);
             }
             else
             {
-                control.setVisibility(View.GONE);
+                textControl.setVisibility(View.GONE);
+            }
+
+            if (showImageControl)
+            {
+                imageControl.setVisibility(View.VISIBLE);
+                imageControl.setImageResource(controlImageRes);
+            }
+            else
+            {
+                imageControl.setVisibility(View.GONE);
             }
         }
         finally
@@ -91,9 +106,14 @@ public class StandardHeader extends LinearLayout
         return switchMaterial;
     }
 
-    public TextView getControl()
+    public TextView getTextControl()
     {
-        return control;
+        return textControl;
+    }
+
+    public ImageView getImageControl()
+    {
+        return imageControl;
     }
 
     public void hideSeparator()

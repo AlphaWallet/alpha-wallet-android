@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/standard_header_height"
@@ -23,8 +24,7 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_marginEnd="@dimen/standard_16"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        android:visibility="gone" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/switch_material"
@@ -35,11 +35,10 @@
         android:layout_marginEnd="@dimen/tiny_8"
         android:clickable="true"
         android:focusable="true"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        android:visibility="gone" />
 
     <TextView
-        android:id="@+id/control"
+        android:id="@+id/text_control"
         style="@style/Aw.Typography.Control"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,7 +46,18 @@
         android:layout_centerVertical="true"
         android:padding="@dimen/standard_16"
         android:visibility="gone"
-        tools:text="Control"
+        tools:text="Control" />
+
+    <ImageView
+        android:id="@+id/image_control"
+        android:layout_width="@dimen/token_icon_small"
+        android:layout_height="@dimen/token_icon_small"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="@dimen/small_12"
+        android:visibility="gone"
+        app:tint="?colorControlNormal"
+        tools:src="@drawable/ic_swap_horizontal"
         tools:visibility="visible" />
 
 </RelativeLayout>

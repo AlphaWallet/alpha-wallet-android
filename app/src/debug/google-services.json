@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "409922468441",
+    "firebase_url": "https://alpha-wallet-android-186eb.firebaseio.com",
+    "project_id": "alpha-wallet-android-186eb",
+    "storage_bucket": "alpha-wallet-android-186eb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:409922468441:android:7418a1fbeb4b2ab0144f48",
+        "android_client_info": {
+          "package_name": "io.stormbird.wallet.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "409922468441-379o98s1143kp1vlgk26e140ej1mgoq0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANAsW3omQK0Ze19NlIXtQTWNhZWv_PS3k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "409922468441-379o98s1143kp1vlgk26e140ej1mgoq0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

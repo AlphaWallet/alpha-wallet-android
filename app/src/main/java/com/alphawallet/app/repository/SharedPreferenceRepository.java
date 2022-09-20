@@ -43,7 +43,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String MARSHMALLOW_SUPPORT_WARNING = "marshmallow_version_support_warning_shown";
     private static final String LAST_FRAGMENT_ID = "lastfrag_id";
     private static final String LAST_VERSION_CODE = "last_version_code";
-    private static final String SWAP_PROVIDERS_KEY = "swap_providers";
+    private static final String SELECTED_EXCHANGES_KEY = "selected_exchanges";
 
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
@@ -383,15 +383,15 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public Set<String> getSwapProviders()
+    public Set<String> getSelectedExchanges()
     {
-        return pref.getStringSet(SWAP_PROVIDERS_KEY, new HashSet<>());
+        return pref.getStringSet(SELECTED_EXCHANGES_KEY, new HashSet<>());
     }
 
     @Override
-    public void setSwapProviders(Set<String> providers)
+    public void setSelectedExchanges(Set<String> exchanges)
     {
-        pref.edit().putStringSet(SWAP_PROVIDERS_KEY, providers).apply();
+        pref.edit().putStringSet(SELECTED_EXCHANGES_KEY, exchanges).apply();
     }
 
     @NonNull

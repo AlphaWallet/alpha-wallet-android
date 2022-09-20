@@ -1,11 +1,8 @@
 package com.alphawallet.app.ui.widget.adapter;
 
-
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -14,30 +11,28 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.lifi.ToolDetails;
-import com.bumptech.glide.Glide;
+import com.alphawallet.app.widget.AddressIcon;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SwapProviderAdapter extends RecyclerView.Adapter<SwapProviderAdapter.ViewHolder>
+public class ExchangeAdapter extends RecyclerView.Adapter<ExchangeAdapter.ViewHolder>
 {
-    private final Context context;
     private final List<ToolDetails> displayData;
-    private List<String> selectedProviders;
+    private final List<String> selectedExchanges;
 
-    public SwapProviderAdapter(Context context, List<ToolDetails> data)
+    public ExchangeAdapter(List<ToolDetails> data)
     {
-        this.context = context;
         displayData = data;
-        selectedProviders = new ArrayList<>();
+        selectedExchanges = new ArrayList<>();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
-        int buttonTypeId = R.layout.item_swap_provider;
+        int buttonTypeId = R.layout.item_exchange;
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(buttonTypeId, parent, false);
         return new ViewHolder(itemView);
@@ -50,14 +45,10 @@ public class SwapProviderAdapter extends RecyclerView.Adapter<SwapProviderAdapte
         if (item != null)
         {
             holder.title.setText(item.name);
+
             holder.subtitle.setText(item.url);
-            Glide.with(context)
-                    .load(item.logoURI)
-//                    .error(new ColorDrawable(Color.GRAY))
-//                    .fallback(new ColorDrawable(Color.GRAY))
-//                    .placeholder(new ColorDrawable(Color.GRAY))
-                    .circleCrop()
-                    .into(holder.icon);
+
+            holder.icon.bindData(item.logoURI, -1, "", "");
 
             holder.layout.setOnClickListener(v -> holder.checkBox.setChecked(!item.isChecked));
 
@@ -65,11 +56,11 @@ public class SwapProviderAdapter extends RecyclerView.Adapter<SwapProviderAdapte
                 item.isChecked = isChecked;
                 if (isChecked)
                 {
-                    selectedProviders.add(item.key);
+                    selectedExchanges.add(item.key);
                 }
                 else
                 {
-                    selectedProviders.remove(item.key);
+                    selectedExchanges.remove(item.key);
                 }
             });
 
@@ -77,9 +68,9 @@ public class SwapProviderAdapter extends RecyclerView.Adapter<SwapProviderAdapte
         }
     }
 
-    public List<String> getSelectedProviders()
+    public List<String> getSelectedExchanges()
     {
-        return selectedProviders;
+        return selectedExchanges;
     }
 
     @Override
@@ -91,7 +82,7 @@ public class SwapProviderAdapter extends RecyclerView.Adapter<SwapProviderAdapte
     static class ViewHolder extends RecyclerView.ViewHolder
     {
         RelativeLayout layout;
-        ImageView icon;
+        AddressIcon icon;
         TextView title;
         TextView subtitle;
         MaterialCheckBox checkBox;
@@ -100,7 +91,7 @@ public class SwapProviderAdapter extends RecyclerView.Adapter<SwapProviderAdapte
         {
             super(view);
             layout = view.findViewById(R.id.layout_list_item);
-            icon = view.findViewById(R.id.icon);
+            icon = view.findViewById(R.id.token_icon);
             title = view.findViewById(R.id.provider);
             subtitle = view.findViewById(R.id.subtitle);
             checkBox = view.findViewById(R.id.checkbox);

@@ -40,19 +40,16 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
-import com.alphawallet.app.entity.BackupTokenCallback;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.repository.CoinbasePayRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TickerService;
@@ -95,7 +92,6 @@ public class WalletFragment extends BaseFragment implements
         TokensAdapterCallback,
         View.OnClickListener,
         Runnable,
-        BackupTokenCallback,
         AvatarWriteCallback,
         ServiceSyncCallback
 {
@@ -541,7 +537,7 @@ public class WalletFragment extends BaseFragment implements
         selectedToken = null;
         if (viewModel == null)
         {
-            ((HomeActivity) getActivity()).resetFragment(WalletPage.WALLET);
+            requireActivity().recreate();
         }
         else if (largeTitleView != null)
         {
@@ -670,6 +666,7 @@ public class WalletFragment extends BaseFragment implements
         if (adapter != null && recyclerView != null) adapter.onDestroy(recyclerView);
     }
 
+    @Override
     public void resetTokens()
     {
         if (viewModel != null && adapter != null)
@@ -727,6 +724,7 @@ public class WalletFragment extends BaseFragment implements
         });
     }
 
+    @Override
     public void storeWalletBackupTime(String backedUpKey)
     {
         handler.post(() ->
@@ -736,6 +734,7 @@ public class WalletFragment extends BaseFragment implements
         });
     }
 
+    @Override
     public void setImportFilename(String fName)
     {
         importFileName = fName;

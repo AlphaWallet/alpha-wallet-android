@@ -39,7 +39,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.util.LocaleUtils;
@@ -193,6 +192,7 @@ public class NewSettingsFragment extends BaseFragment
         }
     }
 
+    @Override
     public void signalUpdate(int updateVersion)
     {
         //add wallet update signal to adapter
@@ -476,7 +476,7 @@ public class NewSettingsFragment extends BaseFragment
         super.onResume();
         if (viewModel == null)
         {
-            ((HomeActivity) getActivity()).resetFragment(WalletPage.SETTINGS);
+            requireActivity().recreate();
         }
         else
         {
@@ -484,6 +484,7 @@ public class NewSettingsFragment extends BaseFragment
         }
     }
 
+    @Override
     public void backupSeedSuccess(boolean hasNoLock)
     {
         if (viewModel != null) viewModel.TestWalletBackup();

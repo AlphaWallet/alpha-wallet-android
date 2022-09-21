@@ -21,7 +21,6 @@ import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.interact.ActivityDataInteract;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
@@ -221,6 +220,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         viewModel.prepare();
     }
 
+    @Override
     public void resetTokens()
     {
         if (adapter != null)
@@ -231,6 +231,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         }
     }
 
+    @Override
     public void addedToken(List<ContractLocator> tokenContracts)
     {
         if (adapter != null) adapter.updateItems(tokenContracts);
@@ -252,7 +253,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         super.onResume();
         if (viewModel == null)
         {
-            ((HomeActivity) getActivity()).resetFragment(WalletPage.ACTIVITY);
+            requireActivity().recreate();
         }
         else
         {
@@ -298,12 +299,14 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         if (realm != null && !realm.isClosed()) realm.close();
     }
 
+    @Override
     public void resetTransactions()
     {
         //called when we just refreshed the database
         refreshTransactionList();
     }
 
+    @Override
     public void scrollToTop()
     {
         if (listView != null) listView.smoothScrollToPosition(0);

@@ -70,20 +70,18 @@ public class SelectExchangesViewModel extends BaseViewModel
 
     public boolean savePreferences(List<ToolDetails> selectedExchanges)
     {
-        boolean hasSelection = false;
         Set<String> stringSet = new HashSet<>();
         for (ToolDetails tool : selectedExchanges)
         {
             if (tool.isChecked)
             {
                 stringSet.add(tool.key);
-                hasSelection = true;
             }
         }
-        if (hasSelection)
+        if (!stringSet.isEmpty())
         {
             preferenceRepository.setSelectedExchanges(stringSet);
         }
-        return hasSelection;
+        return !stringSet.isEmpty();
     }
 }

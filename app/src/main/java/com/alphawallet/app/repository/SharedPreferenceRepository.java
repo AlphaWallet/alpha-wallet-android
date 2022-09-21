@@ -45,6 +45,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
     private static final String NEW_WALLET = "new_wallet_";
+    private static final String API23_NOTIFICATION = "api23_notification";
 
     private final SharedPreferences pref;
 
@@ -241,6 +242,18 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public void blankHasSetNetworkFilters()
     {
         pref.edit().putBoolean(SET_NETWORK_FILTERS, false).apply();
+    }
+
+    @Override
+    public void cancelAPI23Notification()
+    {
+        pref.edit().putBoolean(API23_NOTIFICATION, true).apply();
+    }
+
+    @Override
+    public boolean hasCancelledAPI23Notification()
+    {
+        return pref.getBoolean(API23_NOTIFICATION, false);
     }
 
     //Ensure settings are committed

@@ -2,8 +2,8 @@ package com.alphawallet.app.ui.widget.entity;
 
 public class ProgressInfo
 {
-    boolean shouldShow;
-    int messageRes;
+    private boolean shouldShow;
+    private int messageRes;
 
     public ProgressInfo(boolean shouldShow, int messageRes)
     {

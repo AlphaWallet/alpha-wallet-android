@@ -138,7 +138,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         if (td != null && td.getActivityCards().containsKey(data.eventName))
         {
             TSTokenView view = td.getActivityCards().get(data.eventName).getView(ASSET_SUMMARY_VIEW_NAME);
-            if (view != null) itemView = view.tokenView;
+            if (view != null) itemView = view.getTokenView();
         }
 
         String transactionValue = transferData.getEventAmount(token, tx);

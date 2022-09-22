@@ -72,13 +72,14 @@ public class TokenDefinition
     private final TSTokenViewHolder tokenViews = new TSTokenViewHolder();
     private final Map<String, TSSelection> selections = new HashMap<>();
     private final Map<String, TSActivityView> activityCards = new HashMap<>();
+    private final Map<String, Element> viewContent = new HashMap<>();
 
     public String nameSpace;
     public TokenscriptContext context;
     public String holdingToken = null;
     private int actionCount;
 
-    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2020/06";
+    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2022/09";
     public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
     public static final String TOKENSCRIPT_NAMESPACE = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
 
@@ -615,9 +616,16 @@ public class TokenDefinition
                     case "card":
                         extractCard(card);
                         break;
+                    case "viewContent":
+                        this.viewContent.put(card.getAttribute("name"), card);
+                        break;
                 }
             }
         }
+    }
+
+    public Element getViewContent(String name){
+        return this.viewContent.get(name);
     }
 
     private TSActivityView processActivityView(Element card) throws Exception
@@ -641,7 +649,7 @@ public class TokenDefinition
                 case "view": //TODO: Localisation
                 case "item-view":
                     if (activityView == null) throw new SAXException("Activity card declared without origins tag");
-                    activityView.addView(node.getLocalName(), new TSTokenView(element));
+                    activityView.addView(node.getLocalName(), new TSTokenView(element, this));
                     break;
                 default:
                     throw new SAXException("Unknown tag <" + node.getLocalName() + "> tag in tokens");
@@ -670,7 +678,7 @@ public class TokenDefinition
                     break;
                 case "view": //TODO: Localisation
                 case "item-view":
-                    TSTokenView v = new TSTokenView(element);
+                    TSTokenView v = new TSTokenView(element, this);
                     tokenViews.views.put(node.getLocalName(), v);
                     break;
                 case "view-iconified":
@@ -848,7 +856,7 @@ public class TokenDefinition
                 case "selection":
                     throw new SAXException("<ts:selection> tag must be in main scope (eg same as <ts:origins>)");
                 case "view": //localised?
-                    tsAction.view = new TSTokenView(element);
+                    tsAction.view = new TSTokenView(element, this);
                     break;
                 case "style":
                     tsAction.style = getHTMLContent(element);
@@ -1686,8 +1694,8 @@ public class TokenDefinition
     {
         TSTokenView view = tokenViews.views.get("view");
 
-        if (tag.equals("view")) return view.tokenView;
-        else if (tag.equals("style")) return view.style;
+        if (tag.equals("view")) return view.getTokenView();
+        else if (tag.equals("style")) return view.getTokenView();
         else return null;
     }
 

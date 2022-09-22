@@ -33,6 +33,7 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
@@ -80,6 +81,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
     private final MutableLiveData<Map<String, Token[]>> baseTokens = new MutableLiveData<>();
+    private final JsonSettingService jsonSettingService;
 
     private NetworkInfo currentNetwork;
     private final Map<String, Wallet> walletBalances = new HashMap<>();
@@ -114,7 +116,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
             TickerService tickerService,
             AssetDefinitionService assetService,
             PreferenceRepositoryType preferenceRepository,
-            @ApplicationContext Context context)
+            @ApplicationContext Context context, JsonSettingService jsonSettingService)
     {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
@@ -128,8 +130,8 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         this.tickerService = tickerService;
         this.assetService = assetService;
         this.preferenceRepository = preferenceRepository;
-        this.tokensService = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null);
-
+        this.jsonSettingService = jsonSettingService;
+        this.tokensService = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null, this.jsonSettingService);
         ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
         syncCallback = null;
     }
@@ -283,7 +285,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private Single<Wallet> startWalletSync(Wallet wallet)
     {
         return Single.fromCallable(() -> {
-            TokensService svs = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null);
+            TokensService svs = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null, jsonSettingService);
             svs.setCurrentAddress(wallet.address.toLowerCase());
             svs.startUpdateCycle();
             svs.setCompletionCallback(this, 2);

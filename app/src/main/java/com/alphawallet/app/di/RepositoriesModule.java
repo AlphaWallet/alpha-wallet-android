@@ -29,6 +29,7 @@ import com.alphawallet.app.service.AnalyticsService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
 import com.alphawallet.app.service.NotificationService;
@@ -157,8 +158,8 @@ public class RepositoriesModule {
 
     @Singleton
     @Provides
-    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository) {
-	    return new TokensRealmSource(realmManager, ethereumNetworkRepository);
+    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, JsonSettingService jsonSettingService) {
+	    return new TokensRealmSource(realmManager, ethereumNetworkRepository,jsonSettingService);
     }
 
 	@Singleton
@@ -173,8 +174,8 @@ public class RepositoriesModule {
 									   TokenRepositoryType tokenRepository,
 									   TickerService tickerService,
 									   OpenSeaService openseaService,
-									   AnalyticsServiceType analyticsService) {
-		return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService);
+									   AnalyticsServiceType analyticsService,JsonSettingService jsonSettingService) {
+		return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService, jsonSettingService);
 	}
 
 	@Singleton
@@ -228,6 +229,12 @@ public class RepositoriesModule {
 														 AlphaWalletService alphaService) {
 		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, tokensService, tls, trt, alphaService);
 	}
+
+    @Singleton
+    @Provides
+    JsonSettingService provideJsonSettingService(@ApplicationContext Context context,String chainName){
+        return new JsonSettingService(context,chainName);
+    }
 
 	@Singleton
 	@Provides

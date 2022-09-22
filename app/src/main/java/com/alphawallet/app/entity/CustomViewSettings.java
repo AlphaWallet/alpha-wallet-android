@@ -1,29 +1,35 @@
 package com.alphawallet.app.entity;
-
-import android.content.Context;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.widget.entity.NetworkItem;
-import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import javax.inject.Inject;
 
 public class CustomViewSettings
 {
     public static final long primaryChain = MAINNET_ID;
     private static final String primaryChainName = C.ETHEREUM_NETWORK_NAME;
 
+    @Inject
+    public CustomViewSettings(JsonSettingService jsonSettingService)
+    {
+    }
+  /*  public static Context context;
+    public CustomViewSettings(@NonNull Application application)
+    {
+        super(application);
+        context = application.getApplicationContext();
+    }
+*/
     //You can use the settings in this file to customise the wallet appearance
 
     //IF you want to re-order the the way chains appear in the wallet, see this line in EthereumNetworkBase:
@@ -53,11 +59,13 @@ public class CustomViewSettings
             EthereumNetworkBase.MAINNET_ID
     );
 
-    public static boolean alwaysShow(long chainId)
+
+
+    /*public static boolean alwaysShow(long chainId)
     {
-        ArrayList<Long> exclusiveChains = Utils.getChainsFromJsonFile("exclusive_chains");
+        ArrayList<Long> exclusiveChains = getChainsFromJsonFile("exclusive_chains");
         return exclusiveChains.contains(chainId);
-    }
+    }*/
 
     //TODO: Wallet can only show the above tokens
     private static final boolean onlyShowTheseTokens = true;
@@ -81,14 +89,14 @@ public class CustomViewSettings
     //Does main wallet page show tokens with zero balance? NB: any 'Locked' tokens above will always be shown
     public static boolean showZeroBalance() { return false; }
 
-    public static boolean tokenCanBeDisplayed(TokenCardMeta token)
+   /* public static boolean tokenCanBeDisplayed(TokenCardMeta token)
     {
         return token.type == ContractType.ETHEREUM || token.isEnabled || isLockedToken(token.getChain(), token.getAddress());
-    }
+    }*/
 
-    private static boolean isLockedToken(long chainId, String contractAddress)
+   /* private static boolean isLockedToken(long chainId, String contractAddress)
     {
-        ArrayList<TokenInfo> lockedTokens = Utils.getLockedTokensFromJsonFile("locked_tokens");
+        ArrayList<TokenInfo> lockedTokens = getLockedTokensFromJsonFile("locked_tokens");
         for (TokenInfo tInfo : lockedTokens)
         {
             if (tInfo.chainId == chainId && tInfo.address.equalsIgnoreCase(contractAddress)) return true;
@@ -96,7 +104,7 @@ public class CustomViewSettings
 
         return false;
     }
-
+*/
     public static ContractType checkKnownTokens(TokenInfo tokenInfo)
     {
         return ContractType.OTHER;

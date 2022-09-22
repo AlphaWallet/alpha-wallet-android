@@ -3,6 +3,7 @@ package com.alphawallet.app.repository;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
+import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Pair;

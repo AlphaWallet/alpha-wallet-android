@@ -10,13 +10,13 @@ import androidx.recyclerview.widget.SortedList;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.TokensMappingRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.ChainItem;
@@ -52,6 +52,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private TokenFilter filterType = TokenFilter.ALL;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
+    private JsonSettingService jsonSettingService;
     private final ActivityResultLauncher<Intent> managementLauncher;
     private ContractLocator scrollToken; // designates a token that should be scrolled to
 
@@ -103,11 +104,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
 
     public TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, TokensService tService,
-                         ActivityResultLauncher<Intent> launcher)
+                         JsonSettingService jsonSettingService, ActivityResultLauncher<Intent> launcher)
     {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = tService;
+        this.jsonSettingService = jsonSettingService;
         this.managementLauncher = launcher;
 
         new TokensMappingRepository(aService.getTokenLocalSource());
@@ -371,7 +373,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         if (token == null) return false;
         //Add token to display list if it's the base currency, or if it has balance
-        boolean allowThroughFilter = CustomViewSettings.tokenCanBeDisplayed(token);
+        boolean allowThroughFilter = jsonSettingService.tokenCanBeDisplayed(token);
         allowThroughFilter = checkTokenValue(token, allowThroughFilter);
 
         switch (filterType)

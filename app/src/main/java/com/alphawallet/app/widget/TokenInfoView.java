@@ -1,5 +1,9 @@
 package com.alphawallet.app.widget;
 
+import static android.content.Context.CLIPBOARD_SERVICE;
+
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -9,11 +13,13 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.util.Utils;
 
 public class TokenInfoView extends LinearLayout
 {
@@ -77,6 +83,31 @@ public class TokenInfoView extends LinearLayout
             TextView useView = getTextView(text.length());
             useView.setText(text);
         }
+    }
+
+    public void setAddressValue(String text){
+
+        if (TextUtils.isEmpty(text))
+            return;
+
+        valueLongText.setText(text);
+        setVisibility(View.VISIBLE);
+
+        String formatted = Utils.formatAddress(text);
+
+        TextView useView = getTextView(formatted.length());
+        useView.setText(formatted);
+
+        setCopyListener(useView);
+    }
+
+    private void setCopyListener(TextView textView){
+        textView.setOnLongClickListener(view -> {
+            ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(CLIPBOARD_SERVICE);
+            clipboard.setPrimaryClip(ClipData.newPlainText(label.getText(), valueLongText.getText()));
+            Toast.makeText(getContext(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
+            return true;
+        });
     }
 
     public void setCurrencyValue(double v)

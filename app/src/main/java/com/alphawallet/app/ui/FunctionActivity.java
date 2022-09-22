@@ -146,12 +146,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             TSAction action = functions.get(actionMethod);
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
 
-            String injectedView = tokenView.injectWeb3TokenInit(action.view.tokenView, tokenAttrs, tokenId);
+            String injectedView = tokenView.injectWeb3TokenInit(action.view.getTokenView(), tokenAttrs, tokenId);
             injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
-            injectedView = tokenView.injectStyleAndWrapper(injectedView, action.style + "\n" + action.view.style);
+            injectedView = tokenView.injectStyleAndWrapper(injectedView, action.style + "\n" + action.view.getStyle());
 
             String base64 = Base64.encodeToString(injectedView.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
-            tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
+            tokenView.loadData(base64 + (action.view.getUrlFragment() != null ? "#"+action.view.getUrlFragment() : ""), "text/html; charset=utf-8", "base64");
         }
         catch (Exception e)
         {

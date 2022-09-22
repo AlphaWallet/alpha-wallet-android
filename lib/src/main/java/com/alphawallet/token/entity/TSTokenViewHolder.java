@@ -15,14 +15,14 @@ public class TSTokenViewHolder
     public String getView(String viewName)
     {
         TSTokenView v = views.get(viewName);
-        if (v != null) return v.tokenView;
+        if (v != null) return v.getTokenView();
         else return null;
     }
 
     public String getViewStyle(String viewName)
     {
         TSTokenView v = views.get(viewName);
-        if (v != null) return globalStyle + v.style;
+        if (v != null) return globalStyle + v.getStyle();
         else return null;
     }
 }

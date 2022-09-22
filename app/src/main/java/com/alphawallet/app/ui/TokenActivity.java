@@ -659,9 +659,9 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         {
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
 
-            String injectedView = tokenView.injectWeb3TokenInit(scriptViewData.tokenView, tokenAttrs, tokenId);
+            String injectedView = tokenView.injectWeb3TokenInit(scriptViewData.getTokenView(), tokenAttrs, tokenId);
             injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
-            injectedView = tokenView.injectStyleAndWrapper(injectedView, scriptViewData.style);
+            injectedView = tokenView.injectStyleAndWrapper(injectedView, scriptViewData.getStyle());
 
             String base64 = Base64.encodeToString(injectedView.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
             tokenView.loadData(base64, "text/html; charset=utf-8", "base64");

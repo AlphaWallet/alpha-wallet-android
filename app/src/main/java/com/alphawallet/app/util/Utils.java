@@ -32,6 +32,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.alphawallet.app.App;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
@@ -324,7 +325,7 @@ public class Utils {
         return json;
     }
 
-    public static String loadJSONStringFromAsset(Context context, String fileName) {
+    /*public static String loadJSONStringFromAsset(Context context, String fileName) {
         String returnString = null;
         try{
             Reader reader= new InputStreamReader(context.getAssets().open(fileName));
@@ -335,7 +336,7 @@ public class Utils {
             return null;
         }
         return returnString;
-    }
+    }*/
 
 
 
@@ -992,11 +993,11 @@ public class Utils {
         return string != null ? string.replace("\"", "") : null;
     }
 
-    public static ArrayList<Long> getChainsFromJsonFile(String chainName)
+   /* public static ArrayList<Long> getChainsFromJsonFile(String chainName)
     {
         ArrayList<Long> chains = new ArrayList<>();
         try {
-            String lockedChains = Utils.loadJSONStringFromAsset(App.getContext(), CUSTOM_SETTINGS_FILENAME);
+            String lockedChains = Utils.loadJSONStringFromAsset(CustomViewSettings.context, CUSTOM_SETTINGS_FILENAME);
             if(lockedChains != null)
             {
                 JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
@@ -1023,7 +1024,7 @@ public class Utils {
     {
         ArrayList<TokenInfo> chains = new ArrayList<>();
         try {
-            String lockedTokens = Utils.loadJSONStringFromAsset(App.getContext(), CUSTOM_SETTINGS_FILENAME);
+            String lockedTokens = Utils.loadJSONStringFromAsset(CustomViewSettings.context,CUSTOM_SETTINGS_FILENAME);
             if(lockedTokens != null)
             {
                 JSONObject customSettingsJsonObject = new JSONObject(lockedTokens);
@@ -1052,11 +1053,11 @@ public class Utils {
         return chains;
     }
 
-    public static Boolean getDarkModeValueFromJsonFile(String chainName)
+    public static Boolean getDarkModeValueFromJsonFile(Context context, String chainName)
     {
         Boolean darkModeValue = false;
         try {
-            String darkMode = Utils.loadJSONStringFromAsset(App.getContext(), CUSTOM_SETTINGS_FILENAME);
+            String darkMode = Utils.loadJSONStringFromAsset(CustomViewSettings.context, CUSTOM_SETTINGS_FILENAME);
             if(darkMode != null)
             {
                 JSONObject customSettingsJsonObject = new JSONObject(darkMode);
@@ -1068,5 +1069,5 @@ public class Utils {
             err.printStackTrace();
         }
         return darkModeValue;
-    }
+    }*/
 }

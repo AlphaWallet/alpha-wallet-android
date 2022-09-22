@@ -62,6 +62,9 @@ public class PriceAlertsService extends Service
     @Nullable
     private Disposable heartBeatTimer;
 
+    @Inject
+    JsonSettingService jsonSettingService;
+
     public class LocalBinder extends Binder
     {
         public PriceAlertsService getService()

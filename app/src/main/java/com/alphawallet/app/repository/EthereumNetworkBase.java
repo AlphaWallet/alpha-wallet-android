@@ -22,6 +22,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
@@ -33,8 +34,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_TEST_ID;
@@ -45,10 +44,11 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_NETWORK_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SOKOL_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 
 import android.text.TextUtils;
 import android.util.LongSparseArray;
@@ -946,11 +946,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return null;
     }
 
-    public static List<Long> addDefaultNetworks()
-    {
-        ArrayList<Long> exclusiveChains = Utils.getChainsFromJsonFile("exclusive_chains");
-        return exclusiveChains;
-    }
+//    public static List<Long> addDefaultNetworks()
+//    {
+//        ArrayList<Long> exclusiveChains = getChainsFromJsonFile("exclusive_chains");
+//        return exclusiveChains;
+//    }
 
     public static ContractLocator getOverrideToken()
     {

@@ -52,7 +52,6 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.repository.CoinbasePayRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TickerService;
@@ -201,7 +200,7 @@ public class WalletFragment extends BaseFragment implements
     private void initList()
     {
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),
-                tokenManagementLauncher);
+                null, tokenManagementLauncher);
         adapter.setHasStableIds(true);
         setLinearLayoutManager(TokenFilter.ALL.ordinal());
         recyclerView.setAdapter(adapter);

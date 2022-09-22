@@ -45,6 +45,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
@@ -154,6 +155,7 @@ public class NewSettingsFragment extends BaseFragment
     private MaterialCardView updateLayout;
     private int pendingUpdate = 0;
     private Wallet wallet;
+    private JsonSettingService jsonSettingService;
 
     @Nullable
     @Override
@@ -351,7 +353,7 @@ public class NewSettingsFragment extends BaseFragment
 
 
         try {
-            String lockedChains = Utils.loadJSONStringFromAsset(getContext(), Utils.CUSTOM_SETTINGS_FILENAME);
+            String lockedChains = jsonSettingService.loadJSONStringFromAsset(Utils.CUSTOM_SETTINGS_FILENAME);
             JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
             JSONArray chainsArray = customSettingsJsonObject.getJSONArray("locked_chains");
             if (chainsArray.length() == 0)

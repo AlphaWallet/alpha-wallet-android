@@ -29,6 +29,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.AddEditDappActivity;
@@ -74,6 +75,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     @Nullable
     private Disposable balanceTimerDisposable;
+    private JsonSettingService jsonSettingService;
 
     @Inject
     DappBrowserViewModel(
@@ -83,7 +85,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
-            GasService gasService) {
+            GasService gasService, JsonSettingService jsonSettingService) {
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
@@ -91,6 +93,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.keyService = keyService;
         this.gasService = gasService;
+        this.jsonSettingService = jsonSettingService;
     }
 
     public AssetDefinitionService getAssetDefinitionService() {

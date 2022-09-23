@@ -232,8 +232,8 @@ public class RepositoriesModule {
 
     @Singleton
     @Provides
-    JsonSettingService provideJsonSettingService(@ApplicationContext Context context,String chainName){
-        return new JsonSettingService(context,chainName);
+    JsonSettingService provideJsonSettingService(@ApplicationContext Context context){
+        return new JsonSettingService(context);
     }
 
 	@Singleton

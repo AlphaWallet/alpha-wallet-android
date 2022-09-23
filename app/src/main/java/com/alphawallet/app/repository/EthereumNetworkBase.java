@@ -66,6 +66,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ChainSpec;
 import com.google.gson.Gson;
@@ -784,7 +785,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public Long getDefaultNetwork(boolean isMainNet)
     {
-        return isMainNet ? CustomViewSettings.primaryChain : RINKEBY_ID;
+        return isMainNet ? JsonSettingService.primaryChain : RINKEBY_ID;
     }
 
     @Override
@@ -957,15 +958,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return null;
     }
 
-//    public static List<Long> addDefaultNetworks()
+//    public List<Long> addDefaultNetworks()
 //    {
-//        ArrayList<Long> exclusiveChains = getChainsFromJsonFile("exclusive_chains");
+//        ArrayList<Long> exclusiveChains = JsonSettingService.getChainsFromJsonFile("exclusive_chains");
 //        return exclusiveChains;
 //    }
 
     public static ContractLocator getOverrideToken()
     {
-        return new ContractLocator("", CustomViewSettings.primaryChain, ContractType.ETHEREUM);
+        return new ContractLocator("", JsonSettingService.primaryChain, ContractType.ETHEREUM);
     }
 
     @Override

@@ -50,6 +50,7 @@ import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
@@ -119,6 +120,7 @@ public class HomeViewModel extends BaseViewModel {
     private final ExternalBrowserRouter externalBrowserRouter;
     private final OkHttpClient httpClient;
     private final RealmManager realmManager;
+    private final JsonSettingService jsonSettingService;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -144,7 +146,7 @@ public class HomeViewModel extends BaseViewModel {
             AnalyticsServiceType analyticsService,
             ExternalBrowserRouter externalBrowserRouter,
             OkHttpClient httpClient,
-            RealmManager realmManager) {
+            RealmManager realmManager, JsonSettingService jsonSettingService) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.localeRepository = localeRepository;
@@ -159,6 +161,7 @@ public class HomeViewModel extends BaseViewModel {
         this.externalBrowserRouter = externalBrowserRouter;
         this.httpClient = httpClient;
         this.realmManager = realmManager;
+        this.jsonSettingService = jsonSettingService;
 
 
         this.preferenceRepository.incrementLaunchCount();
@@ -524,6 +527,12 @@ public class HomeViewModel extends BaseViewModel {
     {
         preferenceRepository.storeLastFragmentPage(ordinal);
     }
+
+    public List<Long> addDefaultNetworks()
+    {
+        return jsonSettingService.getChainsFromJsonFile("exclusive_chains");
+    }
+
 
     public int getLastFragmentId()
     {

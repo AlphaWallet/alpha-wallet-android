@@ -25,6 +25,13 @@ buildscript {
 }
 
 allprojects {
+    apply plugin: 'checkstyle'
+
+    checkstyle {
+        toolVersion = "10.3.3"
+        configFile = file("${rootProject.projectDir}/checkstyle.xml")
+    }
+
     repositories {
         google()
         jcenter()

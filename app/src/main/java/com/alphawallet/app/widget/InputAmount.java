@@ -21,6 +21,7 @@ import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
@@ -63,6 +64,7 @@ public class InputAmount extends LinearLayout
     private Realm tickerRealm;
     private TokensService tokensService;
     private AssetDefinitionService assetService;
+    private JsonSettingService jsonSettingService;
     private BigInteger gasPriceEstimate = BigInteger.ZERO;
     private BigDecimal exactAmount = BigDecimal.ZERO;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -89,7 +91,7 @@ public class InputAmount extends LinearLayout
         availableAmount = findViewById(R.id.text_available);
         allFunds = findViewById(R.id.text_all_funds);
         gasFetch = findViewById(R.id.gas_fetch_progress);
-        showingCrypto = !CustomViewSettings.inputAmountFiatDefault();
+        showingCrypto = !jsonSettingService.inputAmountFiatDefault();
         amountReady = false;
 
         setupAttrs(context, attrs);

@@ -350,9 +350,7 @@ public class NewSettingsFragment extends BaseFragment
         walletSettingsLayout.addView(nameThisWallet, walletIndex++);
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
-
-
-        try {
+      /*  try {
             String lockedChains = jsonSettingService.loadJSONStringFromAsset(Utils.CUSTOM_SETTINGS_FILENAME);
             JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
             JSONArray chainsArray = customSettingsJsonObject.getJSONArray("locked_chains");
@@ -363,7 +361,8 @@ public class NewSettingsFragment extends BaseFragment
         }catch (JSONException err){
             err.printStackTrace();
         }
-
+*/
+        systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
 
         if (biometricsSetting != null)
             systemSettingsLayout.addView(biometricsSetting, systemIndex++);

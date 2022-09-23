@@ -37,6 +37,7 @@ import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.NameThisWalletActivity;
@@ -50,7 +51,6 @@ import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -75,6 +75,7 @@ public class WalletViewModel extends BaseViewModel
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
+    private final JsonSettingService jsonSettingService;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final MyAddressRouter myAddressRouter;
@@ -92,7 +93,7 @@ public class WalletViewModel extends BaseViewModel
             GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
-            ChangeTokenEnableInteract changeTokenEnableInteract,
+            JsonSettingService jsonSettingService, ChangeTokenEnableInteract changeTokenEnableInteract,
             MyAddressRouter myAddressRouter,
             CoinbasePayRouter coinbasePayRouter,
             ManageWalletsRouter manageWalletsRouter,
@@ -105,6 +106,7 @@ public class WalletViewModel extends BaseViewModel
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
+        this.jsonSettingService = jsonSettingService;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.myAddressRouter = myAddressRouter;
         this.coinbasePayRouter = coinbasePayRouter;
@@ -187,6 +189,8 @@ public class WalletViewModel extends BaseViewModel
     {
         return tokensService;
     }
+
+    public JsonSettingService getJsonSettingService(){ return jsonSettingService ;}
 
     public Token getTokenFromService(@NotNull Token token)
     {

@@ -15,6 +15,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.ui.widget.adapter.SingleSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
@@ -36,6 +37,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     private SelectNetworkViewModel viewModel;
     private SingleSelectNetworkAdapter mainNetAdapter;
     private SingleSelectNetworkAdapter testNetAdapter;
+    private JsonSettingService jsonSettingService;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -159,7 +161,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (!localSelectionMode && !CustomViewSettings.showAllNetworks())
+        if (!localSelectionMode && !jsonSettingService.showAllNetworks())
         {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.menu_filter_network, menu);

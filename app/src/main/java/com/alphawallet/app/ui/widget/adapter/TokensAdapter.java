@@ -159,7 +159,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
             case ManageTokensHolder.VIEW_TYPE:
                 ManageTokensHolder manageTokensHolder = new ManageTokensHolder(R.layout.layout_manage_tokens_with_buy, parent);
-                manageTokensHolder.setOnTokenClickListener(tokensAdapterCallback);
+//                manageTokensHolder.setOnTokenClickListener(tokensAdapterCallback);
                 holder = manageTokensHolder;
                 break;
 

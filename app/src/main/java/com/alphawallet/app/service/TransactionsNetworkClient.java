@@ -88,7 +88,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         this.httpClient = httpClient;
         this.gson = gson;
         this.realmManager = realmManager;
-
+        System.out.println("cronoscanapi"+keyProvider.getEtherscanKey());
         BSC_EXPLORER_API_KEY = keyProvider.getBSCExplorerKey().length() > 0 ? "&apikey=" + keyProvider.getBSCExplorerKey() : "";
         ETHERSCAN_API_KEY = "&apikey=" + keyProvider.getEtherscanKey();
         POLYGONSCAN_API_KEY = keyProvider.getPolygonScanKey().length() > 3 ? "&apikey=" + keyProvider.getPolygonScanKey() : "";

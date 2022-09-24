@@ -95,11 +95,11 @@ public class SupportSettingsActivity extends BaseActivity {
                 .withListener(this::onGitHubClicked)
                 .build();
 
-        faq = new SettingsItemView.Builder(this)
-                .withIcon(R.drawable.ic_settings_faq)
-                .withTitle(R.string.title_faq)
-                .withListener(this::onFaqClicked)
-                .build();
+//        faq = new SettingsItemView.Builder(this)
+//                .withIcon(R.drawable.ic_settings_faq)
+//                .withTitle(R.string.title_faq)
+//                .withListener(this::onFaqClicked)
+//                .build();
     }
 
     private void addSettingsToLayout() {
@@ -135,7 +135,7 @@ public class SupportSettingsActivity extends BaseActivity {
         if (MediaLinks.AWALLET_BLOG_URL != null) {
             supportSettingsLayout.addView(blog);
         }*/
-        supportSettingsLayout.addView(faq);
+//        supportSettingsLayout.addView(faq);
     }
 
     private void onTelegramClicked() {
@@ -260,7 +260,7 @@ public class SupportSettingsActivity extends BaseActivity {
 
     private void onFaqClicked() {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(MediaLinks.AWALLET_FAQ_URL));
+//        intent.setData(Uri.parse(MediaLinks.AWALLET_FAQ_URL));
 
         try {
             startActivity(intent);

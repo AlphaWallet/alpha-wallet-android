@@ -15,11 +15,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.CRONOS_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class CustomViewSettings
 {
-    public static final long primaryChain = MAINNET_ID;
+    public static final long primaryChain = CRONOS_MAIN_ID;
     private static final String primaryChainName = C.ETHEREUM_NETWORK_NAME;
 
     //You can use the settings in this file to customise the wallet appearance
@@ -45,10 +46,12 @@ public class CustomViewSettings
             //EthereumNetworkBase.XDAI_ID,
             //EthereumNetworkBase.RINKEBY_ID, //You can mix testnets and mainnets, but probably shouldn't as it may result in people getting scammed
             //EthereumNetworkBase.GOERLI_ID
+//            EthereumNetworkBase.CRONOS_MAIN_ID,
+//            EthereumNetworkBase.CRONOS_TEST_ID
     );
 
     public static final List<Long> alwaysVisibleChains = Arrays.asList(
-            EthereumNetworkBase.MAINNET_ID
+            EthereumNetworkBase.CRONOS_MAIN_ID
     );
 
     public static boolean alwaysShow(long chainId)
@@ -152,7 +155,7 @@ public class CustomViewSettings
     public static boolean showManageTokens() { return true; }
 
     //Show all networks in Select Network screen. Set to `true` to show only filtered networks.
-    public static boolean showAllNetworks() { return false; }
+    public static boolean showAllNetworks() { return true; }
 
     public static String getDecimalFormat() { return "0.####E0"; }
 

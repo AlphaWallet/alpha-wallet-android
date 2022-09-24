@@ -113,7 +113,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String FREE_OPTIMISM_TESTRPC_URL = "https://kovan.optimism.io";
     public static final String FREE_PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/3a961d6501e54add9a41aa53f15de99b";
     public static final String FREE_PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/3a961d6501e54add9a41aa53f15de99b";
-    public static final String FREE_CRONOS_MAIN_BETA_RPC_URL = "https://evm.cronos.org";
+    public static final String FREE_CRONOS_MAIN_BETA_RPC_URL = "https://cronosrpc-1.xstaking.sg";
 
     public static final String MAINNET_RPC_URL = usesProductionKey ? "https://mainnet.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_MAINNET_RPC_URL;
@@ -143,7 +143,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             : KLAYTN_RPC;
     public static final String USE_KLAYTN_BAOBAB_RPC = usesProductionKey ? "https://node-api.klaytnapi.com/v1/klaytn"
             : KLAYTN_BAOBAB_RPC;
-    public static final String CRONOS_MAIN_RPC_URL = "https://evm.cronos.org";
+    public static final String CRONOS_MAIN_RPC_URL = "https://cronosrpc-1.xstaking.sg";
 
     // Use the "Free" routes as backup in order to diversify node usage; to avoid single point of failure
     public static final String MAINNET_FALLBACK_RPC_URL = usesProductionKey ? FREE_MAINNET_RPC_URL : "https://mainnet.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
@@ -176,7 +176,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String MUMBAI_FALLBACK_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_FALLBACK_URL = "https://kovan.optimism.io";
-    public static final String CRONOS_TEST_URL = "https://evm-t3.cronos.org";
+    public static final String CRONOS_TEST_URL = "https://cronos-testnet-3.crypto.org:8545";
     public static final String ARBITRUM_FALLBACK_TESTNET_RPC = "https://rinkeby.arbitrum.io/rpc";
 
     public static final String IOTEX_MAINNET_RPC_URL = "https://babel-api.mainnet.iotex.io";
@@ -190,10 +190,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //Note: This list also determines the order of display for main net chains in the wallet.
     //If your wallet prioritises xDai for example, you may want to move the XDAI_ID to the front of this list,
     //Then xDai would appear as the first token at the top of the wallet
-    private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
-            MAINNET_ID, GNOSIS_ID, POLYGON_ID, CLASSIC_ID, POA_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
-            FANTOM_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID,
-            PHI_NETWORK_MAIN_ID));
+    private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(CRONOS_MAIN_ID));
 
     // for reset built-in network
     private static final LongSparseArray<NetworkInfo> builtinNetworkMap = new LongSparseArray<NetworkInfo>() {
@@ -688,10 +685,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             for (int i = 0; i < networkMap.size(); i++)
             {
                 NetworkInfo info = networkMap.valueAt(i);
-                if (!hasValue.contains(info.chainId) && !result.contains(info))
-                {
+                if(info.chainId==338){
                     result.add(info);
                 }
+//                if (!hasValue.contains(info.chainId) && !result.contains(info))
+//                {
+//                    result.add(info);
+//                }
             }
         }
     }
@@ -750,6 +750,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public List<Long> getSelectedFilters(boolean isMainNet)
     {
         String filterList = preferences.getNetworkFilterList();
+        System.out.println("filterd network list "+filterList);
         List<Long> storedIds = Utils.longListToArray(filterList);
         List<Long> selectedIds = new ArrayList<>();
 
@@ -773,7 +774,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public Long getDefaultNetwork(boolean isMainNet)
     {
-        return isMainNet ? CustomViewSettings.primaryChain : RINKEBY_ID;
+        return isMainNet ? CustomViewSettings.primaryChain : CRONOS_TEST_ID;
     }
 
     @Override
@@ -807,13 +808,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         /* merging static compile time network list with runtime network list */
         List<NetworkInfo> networks = new ArrayList<>();
 
-        addNetworks(additionalNetworks, networks, true);
+//        addNetworks(additionalNetworks, networks, true);
         addNetworks(networks, true);
         /* the order is passed to the user interface. So if a user has a token on one
          * of the additionalNetworks, the same token on DEFAULT_NETWORKS, and on a few
          * test nets, they are displayed by that order.
          */
-        addNetworks(additionalNetworks, networks, false);
+//        addNetworks(additionalNetworks, networks, false);
         if (useTestNets) addNetworks(networks, false);
         return networks.toArray(new NetworkInfo[0]);
     }

@@ -818,7 +818,7 @@
     <string name="token_name_hint">Search token</string>
     <string name="assets">Assets</string>
     <string name="governance_header">Gouvernance</string>
-    <string name="collectibles_header">Collectibles</string>
+    <string name="collectibles_header">NFTs</string>
     <string name="whats_new">Quoi de neuf?</string>
     <string name="price_alert_indicator_below">Au dessous de</string>
     <string name="price_alert_indicator_above">Au dessus</string>

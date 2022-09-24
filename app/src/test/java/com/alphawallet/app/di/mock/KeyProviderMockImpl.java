@@ -21,7 +21,7 @@ public class KeyProviderMockImpl implements KeyProvider
     @Override
     public String getEtherscanKey()
     {
-        return FAKE_KEY_FOR_TESTING;
+        return "124BV7FPRF5AEWNXPUNBR4TVWSP6VH4PSF";
     }
 
     @Override

@@ -53,6 +53,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     {
         if (intent != null)
         {
+            System.out.println("filtered networks"+viewModel.getFilterNetworkList());
             localSelectionMode = intent.getBooleanExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, false);
             long selectedChainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
 

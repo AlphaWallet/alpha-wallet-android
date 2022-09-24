@@ -72,8 +72,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String MUMBAI_TEST_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_URL = "https://mainnet.optimism.io";
     public static final String OPTIMISTIC_TEST_URL = "https://kovan.optimism.io";
-    public static final String CRONOS_MAIN_RPC_URL = "https://evm.cronos.org";
-    public static final String CRONOS_TEST_URL = "https://evm-t3.cronos.org";
+    public static final String CRONOS_MAIN_RPC_URL = "https://cronosrpc-1.xstaking.sg";
+    public static final String CRONOS_TEST_URL = "https://cronos-testnet-3.crypto.org:8545";
     public static final String ARBITRUM_RPC_URL = "https://arbitrum-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String ARBITRUM_TEST_RPC_URL = "https://arbitrum-rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";

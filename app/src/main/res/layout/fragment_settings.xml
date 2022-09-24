@@ -88,43 +88,43 @@
 
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/layout_tokenscript_compatibility"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="?colorSurfaceSecondary"
-                android:paddingLeft="@dimen/standard_16"
-                android:paddingRight="@dimen/standard_16">
+<!--            <RelativeLayout-->
+<!--                android:id="@+id/layout_tokenscript_compatibility"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="50dp"-->
+<!--                android:background="?colorSurfaceSecondary"-->
+<!--                android:paddingLeft="@dimen/standard_16"-->
+<!--                android:paddingRight="@dimen/standard_16">-->
 
-                <TextView
-                    style="@style/Aw.Typography.Label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:text="@string/tokenscript_compatibility" />
+<!--                <TextView-->
+<!--                    style="@style/Aw.Typography.Label"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_centerVertical="true"-->
+<!--                    android:text="@string/tokenscript_compatibility" />-->
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true">
+<!--                <LinearLayout-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_alignParentEnd="true"-->
+<!--                    android:layout_centerVertical="true">-->
 
-                    <TextView
-                        style="@style/Aw.Typography.Sub"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/version" />
+<!--                    <TextView-->
+<!--                        style="@style/Aw.Typography.Sub"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="@string/version" />-->
 
-                    <TextView
-                        android:id="@+id/text_tokenscript_compatibility"
-                        style="@style/Aw.Typography.Sub"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/tiny_8" />
+<!--                    <TextView-->
+<!--                        android:id="@+id/text_tokenscript_compatibility"-->
+<!--                        style="@style/Aw.Typography.Sub"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginStart="@dimen/tiny_8" />-->
 
-                </LinearLayout>
+<!--                </LinearLayout>-->
 
-            </RelativeLayout>
+<!--            </RelativeLayout>-->
 
         </LinearLayout>
 

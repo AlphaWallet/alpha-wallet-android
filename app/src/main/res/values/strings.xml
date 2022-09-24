@@ -443,7 +443,7 @@
     <string name="search_or_type_web_address">Search or type web address</string>
     <string name="network">Networks</string>
     <string name="select_active_networks">Select Active Networks</string>
-    <string name="collectibles">Collectibles</string>
+    <string name="collectibles">NFTs</string>
     <string name="token_function">Token Function</string>
     <string name="channel_description">Alphawallet notification channel</string>
     <string name="error_camera_permission_denied">Permission to use the camera was denied.</string>
@@ -876,7 +876,7 @@
     <string name="assets">Assets</string>
     <string name="defi_header" translatable="false">DeFi</string>
     <string name="governance_header">Governance</string>
-    <string name="collectibles_header">Collectibles</string>
+    <string name="collectibles_header">NFTs</string>
     <string name="whats_new">What\'s new?</string>
     <string name="price_alert_indicator_below">Below</string>
     <string name="price_alert_indicator_above">Above</string>

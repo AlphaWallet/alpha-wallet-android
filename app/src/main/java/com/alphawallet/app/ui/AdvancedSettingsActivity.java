@@ -37,13 +37,13 @@ public class AdvancedSettingsActivity extends BaseActivity
     private AdvancedSettingsViewModel viewModel;
 
     private SettingsItemView nodeStatus;
-    private SettingsItemView console;
+//    private SettingsItemView console;
     private SettingsItemView clearBrowserCache;
-    private SettingsItemView tokenScript;
-    private SettingsItemView tokenScriptManagement;
+//    private SettingsItemView tokenScript;
+//    private SettingsItemView tokenScriptManagement;
     private SettingsItemView fullScreenSettings;
     private SettingsItemView refreshTokenDatabase;
-    private SettingsItemView eip1559Transactions;
+//    private SettingsItemView eip1559Transactions;
     private AWalletAlertDialog waitDialog = null;
 
     @Nullable
@@ -84,11 +84,11 @@ public class AdvancedSettingsActivity extends BaseActivity
                 .withListener(this::onNodeStatusClicked)
                 .build();
 
-        console = new SettingsItemView.Builder(this)
-                .withIcon(R.drawable.ic_settings_console)
-                .withTitle(R.string.title_console)
-                .withListener(this::onConsoleClicked)
-                .build();
+//        console = new SettingsItemView.Builder(this)
+//                .withIcon(R.drawable.ic_settings_console)
+//                .withTitle(R.string.title_console)
+//                .withListener(this::onConsoleClicked)
+//                .build();
 
         clearBrowserCache = new SettingsItemView.Builder(this)
                 .withIcon(R.drawable.ic_settings_cache)
@@ -96,18 +96,18 @@ public class AdvancedSettingsActivity extends BaseActivity
                 .withListener(this::onClearBrowserCacheClicked)
                 .build();
 
-        tokenScript = new SettingsItemView.Builder(this)
-                .withIcon(R.drawable.ic_settings_tokenscript)
-                .withTitle(R.string.title_tokenscript)
-                .withListener(this::onTokenScriptClicked)
-                .build();
+//        tokenScript = new SettingsItemView.Builder(this)
+//                .withIcon(R.drawable.ic_settings_tokenscript)
+//                .withTitle(R.string.title_tokenscript)
+//                .withListener(this::onTokenScriptClicked)
+//                .build();
 
         //TODO Change Icon
-        tokenScriptManagement = new SettingsItemView.Builder(this)
-                .withIcon(R.drawable.ic_settings_tokenscript_manage)
-                .withTitle(R.string.tokenscript_management)
-                .withListener(this::onTokenScriptManagementClicked)
-                .build();
+//        tokenScriptManagement = new SettingsItemView.Builder(this)
+//                .withIcon(R.drawable.ic_settings_tokenscript_manage)
+//                .withTitle(R.string.tokenscript_management)
+//                .withListener(this::onTokenScriptManagementClicked)
+//                .build();
 
         fullScreenSettings = new SettingsItemView.Builder(this)
                 .withType(SettingsItemView.Type.TOGGLE)
@@ -122,16 +122,16 @@ public class AdvancedSettingsActivity extends BaseActivity
                 .withListener(this::onReloadTokenDataClicked)
                 .build();
 
-        eip1559Transactions = new SettingsItemView.Builder(this)
-                .withType(SettingsItemView.Type.TOGGLE)
-                .withIcon(R.drawable.ic_icons_settings_1559)
-                .withTitle(R.string.experimental_1559)
-                .withSubtitle(R.string.experimental_1559_tx_sub)
-                .withListener(this::on1559TransactionsClicked)
-                .build();
+//        eip1559Transactions = new SettingsItemView.Builder(this)
+//                .withType(SettingsItemView.Type.TOGGLE)
+//                .withIcon(R.drawable.ic_icons_settings_1559)
+//                .withTitle(R.string.experimental_1559)
+//                .withSubtitle(R.string.experimental_1559_tx_sub)
+//                .withListener(this::on1559TransactionsClicked)
+//                .build();
 
         fullScreenSettings.setToggleState(viewModel.getFullScreenState());
-        eip1559Transactions.setToggleState(viewModel.get1559TransactionsState());
+//        eip1559Transactions.setToggleState(viewModel.get1559TransactionsState());
     }
 
     private void onFullScreenClicked()
@@ -141,23 +141,23 @@ public class AdvancedSettingsActivity extends BaseActivity
 
     private void on1559TransactionsClicked()
     {
-        viewModel.toggle1559Transactions(eip1559Transactions.getToggleState());
+//        viewModel.toggle1559Transactions(eip1559Transactions.getToggleState());
     }
 
     private void addSettingsToLayout()
     {
         LinearLayout advancedSettingsLayout = findViewById(R.id.layout);
         advancedSettingsLayout.addView(nodeStatus);
-        advancedSettingsLayout.addView(console);
+//        advancedSettingsLayout.addView(console);
         advancedSettingsLayout.addView(clearBrowserCache);
 
-        if (!checkWritePermission() && EthereumNetworkRepository.extraChains() == null)
-            advancedSettingsLayout.addView(tokenScript);
+//        if (!checkWritePermission() && EthereumNetworkRepository.extraChains() == null)
+//            advancedSettingsLayout.addView(tokenScript);
 
-        advancedSettingsLayout.addView(tokenScriptManagement);
+//        advancedSettingsLayout.addView(tokenScriptManagement);
         advancedSettingsLayout.addView(fullScreenSettings);
         advancedSettingsLayout.addView(refreshTokenDatabase);
-        advancedSettingsLayout.addView(eip1559Transactions);
+//        advancedSettingsLayout.addView(eip1559Transactions);
     }
 
     private void onNodeStatusClicked()
@@ -314,7 +314,7 @@ public class AdvancedSettingsActivity extends BaseActivity
                 if (viewModel.createDirectory())
                 {
                     LinearLayout advancedSettingsLayout = findViewById(R.id.layout);
-                    advancedSettingsLayout.removeView(tokenScript);
+//                    advancedSettingsLayout.removeView(tokenScript);
                     showAlphaWalletDirectoryConfirmation();
                     //need to set up the listener
                     viewModel.startFileListeners();

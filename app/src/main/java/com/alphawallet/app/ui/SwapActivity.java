@@ -83,7 +83,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private List<Chain> chains;
     private String selectedRouteProvider;
     private CountDownTimer getQuoteTimer;
-    private ActivityResultLauncher<Intent> selectExchangesLauncher;
+    private ActivityResultLauncher<Intent> selectSwapProviderLauncher;
     private ActivityResultLauncher<Intent> gasSettingsLauncher;
     private ActivityResultLauncher<Intent> getRoutesLauncher;
 
@@ -108,12 +108,12 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         registerActivityResultLaunchers();
 
-        viewModel.prepare(this, selectExchangesLauncher);
+        viewModel.prepare(this, selectSwapProviderLauncher);
     }
 
     private void registerActivityResultLaunchers()
     {
-        selectExchangesLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+        selectSwapProviderLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK)
                     {
@@ -303,7 +303,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             Web3Transaction w3Tx = viewModel.buildWeb3Transaction(quote);
             confDialog = new ActionSheetDialog(this, w3Tx, activeToken,
                     "", w3Tx.recipient.toString(), viewModel.getTokensService(), this);
-            confDialog.setURL(quote.toolDetails.name);
+            confDialog.setURL(quote.swapProvider.name);
             confDialog.setCanceledOnTouchOutside(false);
             confDialog.setGasEstimate(Numeric.toBigInt(quote.transactionRequest.gasLimit));
         }
@@ -354,7 +354,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         super.onResume();
         if (settingsDialog != null)
         {
-            settingsDialog.setExchanges(viewModel.getPreferredExchanges());
+            settingsDialog.setSwapProviders(viewModel.getPreferredSwapProviders());
         }
     }
 
@@ -433,8 +433,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         settingsDialog = new SwapSettingsDialog(
                 this,
                 chains,
-                viewModel.getTools(this),
-                viewModel.getPreferredExchanges(),
+                viewModel.getSwapProviders(),
+                viewModel.getPreferredSwapProviders(),
                 chain -> {
                     chainName.setText(chain.name);
                     viewModel.setChain(chain);
@@ -572,11 +572,11 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void updateInfoSummary(Quote quote)
     {
-        provider.setValue(quote.toolDetails.name);
-        String toolUrl = viewModel.getToolUrl(this, quote.toolDetails.key);
-        if (!TextUtils.isEmpty(toolUrl))
+        provider.setValue(quote.swapProvider.name);
+        String url = viewModel.getSwapProviderUrl(quote.swapProvider.key);
+        if (!TextUtils.isEmpty(url))
         {
-            providerWebsite.setValue(toolUrl);
+            providerWebsite.setValue(url);
             providerWebsite.setLink();
         }
         gasFees.setValue(SwapUtils.getTotalGasFees(quote.estimate.gasCosts));

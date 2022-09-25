@@ -99,6 +99,6 @@ public interface PreferenceRepositoryType {
     boolean isNewWallet(String address);
     void setNewWallet(String address, boolean isNewWallet);
 
-    Set<String> getSelectedExchanges();
-    void setSelectedExchanges(Set<String> exchanges);
+    Set<String> getSelectedSwapProviders();
+    void setSelectedSwapProviders(Set<String> swapProviders);
 }

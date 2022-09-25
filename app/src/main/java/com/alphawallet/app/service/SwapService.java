@@ -5,6 +5,7 @@ import android.net.Uri;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.lifi.RouteOptions;
 import com.alphawallet.app.entity.lifi.Token;
+import com.alphawallet.app.repository.SwapRepository;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.JsonUtils;
 
@@ -25,12 +26,6 @@ import timber.log.Timber;
 
 public class SwapService
 {
-    private static final String FETCH_CHAINS = "https://li.quest/v1/chains";
-    private static final String FETCH_TOKENS = "https://li.quest/v1/connections";
-    private static final String SWAP_TOKEN = "https://li.quest/v1/quote";
-    private static final String FETCH_TOOLS = "https://li.quest/v1/tools";
-    private static final String FETCH_ROUTES = "https://li.quest/v1/advanced/routes";
-
     private static OkHttpClient httpClient;
 
     public SwapService()
@@ -165,21 +160,21 @@ public class SwapService
     public String fetchChains()
     {
         Uri.Builder builder = new Uri.Builder();
-        builder.encodedPath(FETCH_CHAINS);
+        builder.encodedPath(SwapRepository.FETCH_CHAINS);
         return executeRequest(builder.build().toString());
     }
 
     public String fetchTools()
     {
         Uri.Builder builder = new Uri.Builder();
-        builder.encodedPath(FETCH_TOOLS);
+        builder.encodedPath(SwapRepository.FETCH_TOOLS);
         return executeRequest(builder.build().toString());
     }
 
     public String fetchPairs(long fromChain, long toChain)
     {
         Uri.Builder builder = new Uri.Builder();
-        builder.encodedPath(FETCH_TOKENS)
+        builder.encodedPath(SwapRepository.FETCH_TOKENS)
                 .appendQueryParameter("fromChain", String.valueOf(fromChain))
                 .appendQueryParameter("toChain", String.valueOf(toChain));
         return executeRequest(builder.build().toString());
@@ -193,7 +188,7 @@ public class SwapService
                              String allowExchanges)
     {
         Uri.Builder builder = new Uri.Builder();
-        builder.encodedPath(SWAP_TOKEN)
+        builder.encodedPath(SwapRepository.FETCH_QUOTE)
                 .appendQueryParameter("fromChain", String.valueOf(source.chainId))
                 .appendQueryParameter("toChain", String.valueOf(dest.chainId))
                 .appendQueryParameter("fromToken", source.address)
@@ -234,7 +229,7 @@ public class SwapService
             Timber.e(e);
         }
 
-        return executePostRequest(FETCH_ROUTES, body);
+        return executePostRequest(SwapRepository.FETCH_ROUTES, body);
     }
 
     public String fetchRoutes(String fromChainId,
@@ -268,6 +263,6 @@ public class SwapService
             Timber.e(e);
         }
 
-        return executePostRequest(FETCH_ROUTES, body);
+        return executePostRequest(SwapRepository.FETCH_ROUTES, body);
     }
 }

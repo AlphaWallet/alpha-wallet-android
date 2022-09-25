@@ -3,7 +3,7 @@ package com.alphawallet.app.entity.lifi;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ToolDetails
+public class SwapProvider
 {
     @SerializedName("key")
     @Expose

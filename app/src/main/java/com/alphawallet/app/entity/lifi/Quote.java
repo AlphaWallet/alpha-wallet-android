@@ -3,9 +3,6 @@ package com.alphawallet.app.entity.lifi;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
 public class Quote
 {
     @SerializedName("id")
@@ -22,7 +19,7 @@ public class Quote
 
     @SerializedName("toolDetails")
     @Expose
-    public ToolDetails toolDetails;
+    public SwapProvider swapProvider;
 
     @SerializedName("action")
     @Expose

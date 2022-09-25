@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.lifi.Chain;
-import com.alphawallet.app.entity.lifi.ToolDetails;
-import com.alphawallet.app.ui.SelectExchangesActivity;
+import com.alphawallet.app.entity.lifi.SwapProvider;
+import com.alphawallet.app.ui.SelectSwapProvidersActivity;
 import com.alphawallet.app.ui.widget.adapter.ChainFilter;
 import com.alphawallet.app.ui.widget.adapter.SelectChainAdapter;
 import com.google.android.flexbox.FlexboxLayout;
@@ -30,10 +30,10 @@ public class SwapSettingsDialog extends BottomSheetDialog
 {
     private RecyclerView chainList;
     private SelectChainAdapter adapter;
-    private List<ToolDetails> tools;
+    private List<SwapProvider> swapProviders;
     private SlippageWidget slippageWidget;
     private StandardHeader preferredExchangesHeader;
-    private FlexboxLayout preferredExchanges;
+    private FlexboxLayout preferredSwapProviders;
 
     public SwapSettingsDialog(@NonNull Activity activity)
     {
@@ -56,17 +56,17 @@ public class SwapSettingsDialog extends BottomSheetDialog
 
         preferredExchangesHeader = findViewById(R.id.header_exchanges);
         preferredExchangesHeader.getTextControl().setOnClickListener(v -> {
-            Intent intent = new Intent(activity, SelectExchangesActivity.class);
+            Intent intent = new Intent(activity, SelectSwapProvidersActivity.class);
             activity.startActivity(intent);
         });
 
-        preferredExchanges = findViewById(R.id.layout_exchanges);
+        preferredSwapProviders = findViewById(R.id.layout_exchanges);
     }
 
     public SwapSettingsDialog(Activity activity,
                               List<Chain> chains,
-                              List<ToolDetails> tools,
-                              Set<String> preferredExchanges,
+                              List<SwapProvider> swapProviders,
+                              Set<String> preferredSwapProviders,
                               SwapSettingsInterface swapSettingsInterface)
     {
         this(activity);
@@ -74,8 +74,8 @@ public class SwapSettingsDialog extends BottomSheetDialog
         adapter = new SelectChainAdapter(activity, filter.getSupportedChains(), swapSettingsInterface);
         chainList.setLayoutManager(new LinearLayoutManager(getContext()));
         chainList.setAdapter(adapter);
-        this.tools = tools;
-        setExchanges(preferredExchanges);
+        this.swapProviders = swapProviders;
+        setSwapProviders(preferredSwapProviders);
     }
 
     private TextView createTextView(String name)
@@ -91,17 +91,17 @@ public class SwapSettingsDialog extends BottomSheetDialog
         return exchange;
     }
 
-    public void setExchanges(Set<String> exchanges)
+    public void setSwapProviders(Set<String> swapProviders)
     {
-        preferredExchanges.removeAllViews();
-        for (ToolDetails tool : tools)
+        preferredSwapProviders.removeAllViews();
+        for (SwapProvider provider : this.swapProviders)
         {
-            if (exchanges.contains(tool.key))
+            if (swapProviders.contains(provider.key))
             {
-                preferredExchanges.addView(createTextView(tool.name));
+                preferredSwapProviders.addView(createTextView(provider.name));
             }
         }
-        preferredExchanges.invalidate();
+        preferredSwapProviders.invalidate();
     }
 
     public void setChains(List<Chain> chains)

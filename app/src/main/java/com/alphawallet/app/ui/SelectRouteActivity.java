@@ -91,7 +91,7 @@ public class SelectRouteActivity extends BaseActivity
         noRoutesLayout = findViewById(R.id.layout_no_routes_found);
         selectExchangesBtn = findViewById(R.id.btn_select_exchanges);
         selectExchangesBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(this, SelectExchangesActivity.class);
+            Intent intent = new Intent(this, SelectSwapProvidersActivity.class);
             startActivity(intent);
         });
 

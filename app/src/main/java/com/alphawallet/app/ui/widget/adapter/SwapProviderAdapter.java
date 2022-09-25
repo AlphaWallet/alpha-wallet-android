@@ -10,17 +10,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.lifi.ToolDetails;
+import com.alphawallet.app.entity.lifi.SwapProvider;
 import com.alphawallet.app.widget.AddressIcon;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.List;
 
-public class ExchangeAdapter extends RecyclerView.Adapter<ExchangeAdapter.ViewHolder>
+public class SwapProviderAdapter extends RecyclerView.Adapter<SwapProviderAdapter.ViewHolder>
 {
-    private final List<ToolDetails> data;
+    private final List<SwapProvider> data;
 
-    public ExchangeAdapter(List<ToolDetails> data)
+    public SwapProviderAdapter(List<SwapProvider> data)
     {
         this.data = data;
     }
@@ -38,7 +38,7 @@ public class ExchangeAdapter extends RecyclerView.Adapter<ExchangeAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        ToolDetails item = data.get(position);
+        SwapProvider item = data.get(position);
         if (item != null)
         {
             holder.title.setText(item.name);
@@ -55,7 +55,7 @@ public class ExchangeAdapter extends RecyclerView.Adapter<ExchangeAdapter.ViewHo
         }
     }
 
-    public List<ToolDetails> getExchanges()
+    public List<SwapProvider> getExchanges()
     {
         return data;
     }

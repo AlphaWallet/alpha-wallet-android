@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.lifi.Route;
 import com.alphawallet.app.ui.widget.entity.OnRouteSelectedListener;
-import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.SwapUtils;
 import com.alphawallet.app.widget.AddressIcon;
 import com.google.android.material.card.MaterialCardView;
@@ -50,7 +49,7 @@ public class RouteAdapter extends RecyclerView.Adapter<RouteAdapter.ViewHolder>
         {
             Route.Step step = item.steps.get(0);
 
-            holder.provider.setText(context.getString(R.string.label_swap_via, step.toolDetails.name));
+            holder.provider.setText(context.getString(R.string.label_swap_via, step.swapProvider.name));
 
             for (String tag : item.tags)
             {
@@ -67,7 +66,7 @@ public class RouteAdapter extends RecyclerView.Adapter<RouteAdapter.ViewHolder>
             holder.gas.setText(context.getString(R.string.info_gas_fee, SwapUtils.getTotalGasFees(step.estimate.gasCosts)));
             holder.fees.setVisibility(step.estimate.feeCosts.isEmpty() ? View.GONE : View.VISIBLE);
             holder.fees.setText(SwapUtils.getOtherFees(step.estimate.feeCosts));
-            holder.layout.setOnClickListener(v -> listener.onRouteSelected(step.toolDetails.key));
+            holder.layout.setOnClickListener(v -> listener.onRouteSelected(step.swapProvider.key));
         }
     }
 

@@ -312,8 +312,8 @@
             android:label="@string/title_select_route" />
 
         <activity
-            android:name=".ui.SelectExchangesActivity"
-            android:label="Select Exchanges" />
+            android:name=".ui.SelectSwapProvidersActivity"
+            android:label="@string/title_select_exchanges" />
 
         <activity
             android:name=".ui.NodeStatusActivity"

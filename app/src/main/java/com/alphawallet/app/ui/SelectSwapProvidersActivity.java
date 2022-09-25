@@ -10,16 +10,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.ui.widget.adapter.ExchangeAdapter;
-import com.alphawallet.app.viewmodel.SelectExchangesViewModel;
+import com.alphawallet.app.ui.widget.adapter.SwapProviderAdapter;
+import com.alphawallet.app.viewmodel.SelectSwapProvidersViewModel;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class SelectExchangesActivity extends BaseActivity
+public class SelectSwapProvidersActivity extends BaseActivity
 {
-    private SelectExchangesViewModel viewModel;
-    private ExchangeAdapter adapter;
+    private SelectSwapProvidersViewModel viewModel;
+    private SwapProviderAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -40,14 +40,14 @@ public class SelectExchangesActivity extends BaseActivity
     private void initViewModel()
     {
         viewModel = new ViewModelProvider(this)
-                .get(SelectExchangesViewModel.class);
+                .get(SelectSwapProvidersViewModel.class);
     }
 
     private void initViews()
     {
         RecyclerView recyclerView = findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ExchangeAdapter(viewModel.getTools(this));
+        adapter = new SwapProviderAdapter(viewModel.getSwapProviders());
         recyclerView.setAdapter(adapter);
     }
 

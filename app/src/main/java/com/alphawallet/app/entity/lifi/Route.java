@@ -19,11 +19,11 @@ public class Route
     @Expose
     public List<String> tags;
 
-    public class Step
+    public static class Step
     {
         @SerializedName("toolDetails")
         @Expose
-        public ToolDetails toolDetails;
+        public SwapProvider swapProvider;
 
         @SerializedName("action")
         @Expose
@@ -32,23 +32,5 @@ public class Route
         @SerializedName("estimate")
         @Expose
         public Estimate estimate;
-
-        @Override
-        public String toString()
-        {
-            return "Step{" +
-                    "toolDetails=" + toolDetails +
-                    ", estimate=" + estimate.toString() +
-                    '}';
-        }
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Route{" +
-                "gasCostUSD='" + gasCostUSD + '\'' +
-                ", steps=" + steps.toString() +
-                '}';
     }
 }

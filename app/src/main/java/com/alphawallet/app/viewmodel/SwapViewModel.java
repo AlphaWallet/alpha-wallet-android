@@ -1,7 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -17,20 +16,20 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
 import com.alphawallet.app.entity.lifi.Quote;
+import com.alphawallet.app.entity.lifi.SwapProvider;
 import com.alphawallet.app.entity.lifi.Token;
-import com.alphawallet.app.entity.lifi.ToolDetails;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.repository.SwapRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.SwapService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.SelectExchangesActivity;
 import com.alphawallet.app.ui.SelectRouteActivity;
+import com.alphawallet.app.ui.SelectSwapProvidersActivity;
 import com.alphawallet.app.ui.widget.entity.ProgressInfo;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Hex;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.google.gson.Gson;
@@ -60,6 +59,7 @@ public class SwapViewModel extends BaseViewModel
 {
     private final AssetDefinitionService assetDefinitionService;
     private final PreferenceRepositoryType preferenceRepository;
+    private final SwapRepositoryType swapRepository;
     private final TokensService tokensService;
     private final SwapService swapService;
     private final CreateTransactionInteract createTransactionInteract;
@@ -83,6 +83,7 @@ public class SwapViewModel extends BaseViewModel
     public SwapViewModel(
             AssetDefinitionService assetDefinitionService,
             PreferenceRepositoryType preferenceRepository,
+            SwapRepositoryType swapRepository,
             TokensService tokensService,
             SwapService swapService,
             CreateTransactionInteract createTransactionInteract,
@@ -90,6 +91,7 @@ public class SwapViewModel extends BaseViewModel
     {
         this.assetDefinitionService = assetDefinitionService;
         this.preferenceRepository = preferenceRepository;
+        this.swapRepository = swapRepository;
         this.tokensService = tokensService;
         this.swapService = swapService;
         this.createTransactionInteract = createTransactionInteract;
@@ -166,11 +168,10 @@ public class SwapViewModel extends BaseViewModel
                 .subscribe(this::onChains, this::onChainsError);
     }
 
-    public String getToolUrl(Context context, String key)
+    public String getSwapProviderUrl(String key)
     {
-        List<ToolDetails> tools = getTools(context);
-
-        for (ToolDetails td : tools)
+        List<SwapProvider> tools = getSwapProviders();
+        for (SwapProvider td : tools)
         {
             if (key.startsWith(td.key))
             {
@@ -400,17 +401,14 @@ public class SwapViewModel extends BaseViewModel
         );
     }
 
-    public List<ToolDetails> getTools(Context context)
+    public List<SwapProvider> getSwapProviders()
     {
-        return new Gson().fromJson(Utils.loadJSONFromAsset(context, "swap_providers_list.json"),
-                new TypeToken<List<ToolDetails>>()
-                {
-                }.getType());
+        return swapRepository.getProviders();
     }
 
-    public Set<String> getPreferredExchanges()
+    public Set<String> getPreferredSwapProviders()
     {
-        return preferenceRepository.getSelectedExchanges();
+        return preferenceRepository.getSelectedSwapProviders();
     }
 
     @Override
@@ -468,9 +466,9 @@ public class SwapViewModel extends BaseViewModel
 
     public void prepare(Activity activity, ActivityResultLauncher<Intent> launcher)
     {
-        if (getPreferredExchanges().isEmpty())
+        if (getPreferredSwapProviders().isEmpty())
         {
-            Intent intent = new Intent(activity, SelectExchangesActivity.class);
+            Intent intent = new Intent(activity, SelectSwapProvidersActivity.class);
             launcher.launch(intent);
         }
         else

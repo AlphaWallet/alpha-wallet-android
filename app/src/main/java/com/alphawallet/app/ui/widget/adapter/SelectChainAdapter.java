@@ -69,7 +69,7 @@ public class SelectChainAdapter extends RecyclerView.Adapter<SelectChainAdapter.
     public void setChains(List<Chain> chains)
     {
         this.chains = chains;
-        notifyDataSetChanged();
+        notifyItemRangeChanged(0, getItemCount());
     }
 
     public long getSelectedChain()
@@ -80,7 +80,7 @@ public class SelectChainAdapter extends RecyclerView.Adapter<SelectChainAdapter.
     public void setSelectedChain(long selectedChainId)
     {
         this.selectedChainId = selectedChainId;
-        notifyDataSetChanged();
+        notifyItemRangeChanged(0, getItemCount());
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder

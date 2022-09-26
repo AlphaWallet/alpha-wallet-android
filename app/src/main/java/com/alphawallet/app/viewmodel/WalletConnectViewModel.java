@@ -50,7 +50,6 @@ import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -249,9 +248,17 @@ public class WalletConnectViewModel extends BaseViewModel
         }
     }
 
-    public Single<BigInteger> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount, BigInteger defaultLimit)
+    public Single<BigInteger> calculateGasEstimate(Wallet wallet, Web3Transaction transaction, long chainId)
     {
-        return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet, defaultLimit);
+        if (transaction.isBaseTransfer())
+        {
+            return Single.fromCallable(() -> BigInteger.valueOf(C.GAS_LIMIT_MIN));
+        }
+        else
+        {
+            return gasService.calculateGasEstimate(org.web3j.utils.Numeric.hexStringToByteArray(transaction.payload), chainId,
+                    transaction.recipient.toString(), transaction.value, wallet, transaction.gasLimit);
+        }
     }
 
     public void resetSignDialog()

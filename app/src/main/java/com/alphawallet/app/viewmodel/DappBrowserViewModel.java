@@ -43,7 +43,8 @@ import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
 
-import java.math.BigDecimal;
+import org.web3j.utils.Numeric;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -320,9 +321,17 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return tokensService;
     }
 
-    public Single<BigInteger> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount, BigInteger defaultGasLimit)
+    public Single<BigInteger> calculateGasEstimate(Wallet wallet, Web3Transaction transaction, long chainId)
     {
-        return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet, defaultGasLimit);
+        if (transaction.isBaseTransfer())
+        {
+            return Single.fromCallable(() -> BigInteger.valueOf(C.GAS_LIMIT_MIN));
+        }
+        else
+        {
+            return gasService.calculateGasEstimate(Numeric.hexStringToByteArray(transaction.payload), chainId,
+                    transaction.recipient.toString(), transaction.value, wallet, transaction.gasLimit);
+        }
     }
 
     public String getNetworkNodeRPC(long chainId)

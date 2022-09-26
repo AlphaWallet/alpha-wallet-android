@@ -151,7 +151,7 @@ public class GasService implements ContractGasProvider
                 .map(result -> updateEIP1559Realm(result, currentChainId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(r -> Timber.d(r ? "Updated Fees" : "Fail to update fees"), this::handleError).isDisposed();
+                .subscribe(r -> { if (!r) Timber.d("Fail to update fees"); }, this::handleError).isDisposed();
     }
 
     private Single<Boolean> useNodeFallback(Boolean updated)
@@ -279,7 +279,7 @@ public class GasService implements ContractGasProvider
             }
             catch (Exception e)
             {
-                Timber.e(e);
+                Timber.w(e);
             }
 
             return update;
@@ -312,7 +312,7 @@ public class GasService implements ContractGasProvider
 
     private boolean updateEIP1559Realm(final Map<Integer, EIP1559FeeOracleResult> result, final long chainId)
     {
-        boolean hasError = false;
+        boolean succeeded = true;
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {
             realm.executeTransaction(r -> {
@@ -330,10 +330,10 @@ public class GasService implements ContractGasProvider
         }
         catch (Exception e)
         {
-            hasError = true;
+            succeeded = false;
         }
 
-        return hasError;
+        return succeeded;
     }
 
     public Single<BigInteger> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress,

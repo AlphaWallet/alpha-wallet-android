@@ -69,7 +69,6 @@ import com.google.gson.Gson;
 import org.jetbrains.annotations.NotNull;
 import org.web3j.utils.Numeric;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
@@ -939,8 +938,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 confDialog.setCanceledOnTouchOutside(false);
                 confDialog.waitForEstimate();
 
-                viewModel.calculateGasEstimate(viewModel.getWallet(), Numeric.hexStringToByteArray(w3Tx.payload),
-                        chainId, w3Tx.recipient.toString(), new BigDecimal(w3Tx.value), w3Tx.gasLimit)
+                viewModel.calculateGasEstimate(viewModel.getWallet(), w3Tx, chainId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(confDialog::setGasEstimate,

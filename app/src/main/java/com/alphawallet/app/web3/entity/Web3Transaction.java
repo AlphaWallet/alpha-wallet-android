@@ -234,6 +234,11 @@ public class Web3Transaction implements Parcelable {
         return (recipient.equals(Address.EMPTY) && payload != null);
     }
 
+    public boolean isBaseTransfer()
+    {
+        return payload == null || payload.equals("0x");
+    }
+
     /**
      * Can be used anywhere to generate an 'instant' human readable transaction dump
      * @param ctx

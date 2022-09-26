@@ -179,6 +179,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
     private void checkSyncStatus()
     {
+        if (token == null || token.getTokenAssets() == null) return;
         Bundle result = new Bundle();
         result.putBoolean(SYNC_STATUS, token.getTokenCount() != token.getTokenAssets().size());
         getParentFragmentManager().setFragmentResult(SIGNAL_NFT_SYNC, result);

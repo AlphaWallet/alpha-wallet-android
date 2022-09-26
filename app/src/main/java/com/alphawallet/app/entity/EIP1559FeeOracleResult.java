@@ -8,8 +8,6 @@ import com.alphawallet.app.util.BalanceUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import timber.log.Timber;
-
 /**
  * Created by JB on 20/01/2022.
  */
@@ -78,11 +76,6 @@ public class EIP1559FeeOracleResult implements Parcelable
         if (input == null)
         {
             return BalanceUtils.gweiToWei(BigDecimal.ONE);
-        }
-        else if (input.equals(BigInteger.ZERO))
-        {
-            Timber.w("Zero gas price detected");
-            return input;
         }
         else
         {

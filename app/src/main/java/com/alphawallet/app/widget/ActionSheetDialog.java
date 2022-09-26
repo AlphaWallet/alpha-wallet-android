@@ -405,8 +405,8 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     {
         AddressDetailView requester = findViewById(R.id.requester);
         requester.setupRequester(url);
-        detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId, tokensService.getCurrentAddress(),
-                tokensService.getNetworkSymbol(token.tokenInfo.chainId), this);
+        setupTransactionDetails();
+
         if (candidateTransaction.isConstructor())
         {
             addressDetail.setVisibility(View.GONE);
@@ -427,7 +427,15 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     {
         detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId, tokensService.getCurrentAddress(),
                 tokensService.getNetworkSymbol(token.tokenInfo.chainId), this);
-        detailWidget.setVisibility(View.VISIBLE);
+
+        if (candidateTransaction.isBaseTransfer())
+        {
+            detailWidget.setVisibility(View.GONE);
+        }
+        else
+        {
+            detailWidget.setVisibility(View.VISIBLE);
+        }
     }
 
     public void setCurrentGasIndex(ActivityResult result)

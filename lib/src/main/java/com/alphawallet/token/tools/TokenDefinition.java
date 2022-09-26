@@ -1695,7 +1695,7 @@ public class TokenDefinition
         TSTokenView view = tokenViews.views.get("view");
 
         if (tag.equals("view")) return view.getTokenView();
-        else if (tag.equals("style")) return view.getTokenView();
+        else if (tag.equals("style")) return view.getStyle();
         else return null;
     }
 

@@ -586,7 +586,7 @@
     <string name="your_wallets">Ví của bạn</string>
     <string name="action_copy">Sao chép</string>
     <string name="title_version_support_warning">Important Update</string>
-    <string name="message_version_support_warning">Bắt đầu từ Phiên bản 3.0, AlphaWallet sẽ không còn hỗ trợ các thiết bị chạy trên Android 6.0 trở xuống.</string>
+    <string name="message_version_support_warning">Đây là bản dựng cuối cùng của AlphaWallet hỗ trợ các thiết bị chạy trên Android 6.</string>
     <string name="hide_notification">Tắt thông báo</string>
     <string name="card_view_not_found_error">%1$s not found</string>
     <string name="tokenscript_management">TokenScript Management</string>

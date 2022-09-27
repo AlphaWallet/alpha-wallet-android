@@ -590,7 +590,7 @@
     <string name="your_wallets">သင်၏ ဝေါလက်များ</string>
     <string name="action_copy">ကူးယူမည်</string>
     <string name="title_version_support_warning">အရေးကြီးသောအသစ်ပြုပြင်မွမ်းမံမှုများ</string>
-    <string name="message_version_support_warning">Alphawalletဗားရှင်း 3.0မှစ၍ Wallet သည် Android ဗားရှင်း 6.0ထက်နိမ့်သောစက်များတွင်အသုံးမပြုနိုင်တော့ပါ။</string>
+    <string name="message_version_support_warning">၎င်းသည် Android 6 ပေါ်တွင် အသုံးပြုနေသည့် AlphaWallet ပံ့ပိုးပေးသည့် စက်ပစ္စည်းများ၏ နောက်ဆုံးတည်ဆောက်မှုဖြစ်သည်။</string>
     <string name="hide_notification">အသိပေးကြေငြာချက်များကိုပုန်းကွယ်မည်</string>
     <string name="card_view_not_found_error">%1$s ကိုရှာမတွေ့ပါ</string>
     <string name="tokenscript_management">TokenScriptကို စီမံခန့်ခွဲခြင်း</string>

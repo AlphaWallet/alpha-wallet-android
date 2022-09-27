@@ -1,11 +1,7 @@
 package com.alphawallet.app.web3;
 
-import static androidx.webkit.WebSettingsCompat.FORCE_DARK_OFF;
-import static androidx.webkit.WebSettingsCompat.FORCE_DARK_ON;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -19,8 +15,6 @@ import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.webkit.WebSettingsCompat;
-import androidx.webkit.WebViewFeature;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.URLLoadInterface;
@@ -35,6 +29,8 @@ import com.alphawallet.token.entity.Signable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -380,7 +376,7 @@ public class Web3View extends WebView {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url)
         {
-            redirect = true;
+            redirect = isRedirect(view, url);
 
             return externalClient.shouldOverrideUrlLoading(view, url)
                     || internalClient.shouldOverrideUrlLoading(view, url);
@@ -398,10 +394,42 @@ public class Web3View extends WebView {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request)
         {
-            redirect = true;
+            redirect = isRedirect(view, request);
 
             return externalClient.shouldOverrideUrlLoading(view, request)
                     || internalClient.shouldOverrideUrlLoading(view, request);
+        }
+
+        private boolean isRedirect(WebView view, String url)
+        {
+            try
+            {
+                return isRedirect(new URL(view.getUrl()), new URL(url));
+            }
+            catch (MalformedURLException e)
+            {
+                return true;
+            }
+        }
+
+        private boolean isRedirect(WebView view, WebResourceRequest request)
+        {
+            try
+            {
+                return isRedirect(new URL(view.getUrl()), new URL(request.toString()));
+            }
+            catch (MalformedURLException e)
+            {
+                return true;
+            }
+        }
+
+        private boolean isRedirect(URL urlSource, URL urlDestination)
+        {
+            String sourceBase = urlSource.getHost();
+            String destinationBase = urlDestination.getHost();
+
+            return !sourceBase.equals(destinationBase) || urlSource.toString().equals(urlDestination.toString());
         }
     }
 }

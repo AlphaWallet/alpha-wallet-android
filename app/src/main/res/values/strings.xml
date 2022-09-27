@@ -616,7 +616,7 @@
     <string name="your_wallets">Your Wallets</string>
     <string name="action_copy">Copy</string>
     <string name="title_version_support_warning">Important Update</string>
-    <string name="message_version_support_warning">Starting Version 3.0, AlphaWallet will no longer support devices running on Android 6.0 and below.</string>
+    <string name="message_version_support_warning">This is the final build of AlphaWallet supporting devices running on Android 6.</string>
     <string name="hide_notification">Hide Notification</string>
     <string name="card_view_not_found_error">%1$s not found</string>
     <string name="tokenscript_management">TokenScript Management</string>

@@ -583,7 +583,7 @@
     <string name="your_wallets">Vos Portefeuilles</string>
     <string name="action_copy">Copier</string>
     <string name="title_version_support_warning">Mise à jour importante</string>
-    <string name="message_version_support_warning">À partir de la version 3.0, AlphaWallet ne prendra plus en charge les appareils fonctionnant sous Android 6.0 et versions antérieures.</string>
+    <string name="message_version_support_warning">Il s\'agit de la version finale d\'AlphaWallet prenant en charge les appareils fonctionnant sous Android 6.</string>
     <string name="hide_notification">Cacher Notification</string>
     <string name="card_view_not_found_error">%1$s pas trouvé</string>
     <string name="tokenscript_management">Gestion TokenScript</string>

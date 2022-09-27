@@ -86,6 +86,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
@@ -333,7 +334,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         LocaleUtils.setActiveLocale(getContext());
         loadOnInit = null;
-        int webViewID = CustomViewSettings.minimiseBrowserURLBar() ? R.layout.fragment_webview_compact : R.layout.fragment_webview;
+        int webViewID = JsonSettingService.minimiseBrowserURLBar() ? R.layout.fragment_webview_compact : R.layout.fragment_webview;
         View view = inflater.inflate(webViewID, container, false);
         initViewModel();
         initView(view);
@@ -533,7 +534,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         //If you are wondering about the strange way the menus are inflated - this is required to ensure
         //that the menu text gets created with the correct localisation under every circumstance
         MenuInflater inflater = new MenuInflater(LocaleUtils.getActiveLocaleContext(getContext()));
-        if (CustomViewSettings.minimiseBrowserURLBar())
+        if (viewModel.getJsonSettingService().minimiseBrowserURLBar())
         {
             inflater.inflate(R.menu.menu_scan, toolbar.getMenu());
         }
@@ -1798,11 +1799,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                                 break;
                             case PAYMENT:
                                 //EIP681 payment request scanned, should go to send
-                                viewModel.showSend(getContext(), result);
+                                viewModel.showSend(getContext(), result,viewModel.getJsonSettingService());
                                 break;
                             case TRANSFER:
                                 //EIP681 transfer, go to send
-                                viewModel.showSend(getContext(), result);
+                                viewModel.showSend(getContext(), result,viewModel.getJsonSettingService());
                                 break;
                             case FUNCTION_CALL:
                                 //EIP681 function call. TODO: create function call confirmation. For now treat same way as tokenscript function call

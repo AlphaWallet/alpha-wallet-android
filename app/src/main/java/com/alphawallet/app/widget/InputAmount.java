@@ -13,7 +13,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -64,7 +63,7 @@ public class InputAmount extends LinearLayout
     private Realm tickerRealm;
     private TokensService tokensService;
     private AssetDefinitionService assetService;
-    private JsonSettingService jsonSettingService;
+    private final JsonSettingService jsonSettingService;
     private BigInteger gasPriceEstimate = BigInteger.ZERO;
     private BigDecimal exactAmount = BigDecimal.ZERO;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -77,10 +76,11 @@ public class InputAmount extends LinearLayout
 
     private boolean showingCrypto;
 
-    public InputAmount(Context context, AttributeSet attrs)
+    public InputAmount(Context context, AttributeSet attrs, JsonSettingService jsonSettingService)
     {
         super(context, attrs);
         this.context = context;
+        this.jsonSettingService = jsonSettingService;
         inflate(context, R.layout.item_input_amount, this);
 
         editText = findViewById(R.id.amount_entry);
@@ -107,7 +107,7 @@ public class InputAmount extends LinearLayout
      * @param assetDefinitionService
      * @param svs
      */
-    public void setupToken(@NotNull Token token, @Nullable AssetDefinitionService assetDefinitionService,
+    public void setupToken(@NotNull Token token, @Nullable AssetDefinitionService assetDefinitionService,@Nullable JsonSettingService jsonSettingService,
                            @NotNull TokensService svs, @NotNull AmountReadyCallback amountCallback)
     {
         this.token = token;

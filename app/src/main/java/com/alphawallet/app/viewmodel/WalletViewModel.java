@@ -185,12 +185,15 @@ public class WalletViewModel extends BaseViewModel
         return assetDefinitionService;
     }
 
+    public JsonSettingService getJsonSettingService()
+    {
+        return jsonSettingService ;
+    }
+
     public TokensService getTokensService()
     {
         return tokensService;
     }
-
-    public JsonSettingService getJsonSettingService(){ return jsonSettingService ;}
 
     public Token getTokenFromService(@NotNull Token token)
     {

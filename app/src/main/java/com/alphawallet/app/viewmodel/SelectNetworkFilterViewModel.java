@@ -59,7 +59,7 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
 
         if (deselected) networkRepository.setActiveBrowserNetwork(null);
         networkRepository.setFilterNetworkList(selectedIds);
-        tokensService.setupFilter(hasSelected && !shouldBlankUserSelection);
+        tokensService.setupFilter(jsonSettingService, hasSelected && !shouldBlankUserSelection);
 
         if (shouldBlankUserSelection) preferenceRepository.blankHasSetNetworkFilters();
 

@@ -19,7 +19,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AddressMode;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.EIP681Request;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
@@ -139,7 +138,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (CustomViewSettings.hideEIP681()) return super.onCreateOptionsMenu(menu);
+        if (viewModel.getJsonSettingService().hideEIP681()) return super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_receive, menu);
 
         switch (currentMode)
@@ -210,7 +209,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private void setupPOSMode(NetworkInfo info)
     {
         if (token == null) token = viewModel.getTokenService().getToken(info.chainId, wallet.address);
-        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getJsonSettingService(), viewModel.getTokenService(), this);
         amountInput.setAmount("");
         updateCryptoAmount(BigDecimal.ZERO);
     }
@@ -339,7 +338,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
             }
             else
             {
-                amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+                amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getJsonSettingService(), viewModel.getTokenService(), this);
             }
         }
     }

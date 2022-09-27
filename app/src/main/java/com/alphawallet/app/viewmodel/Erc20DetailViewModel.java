@@ -18,6 +18,7 @@ import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
@@ -41,6 +42,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final MyAddressRouter myAddressRouter;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
+    private final JsonSettingService jsonSettingService;
     private final TokensService tokensService;
     private final OnRampRepositoryType onRampRepository;
 
@@ -51,12 +53,13 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public Erc20DetailViewModel(MyAddressRouter myAddressRouter,
                                 FetchTransactionsInteract fetchTransactionsInteract,
                                 AssetDefinitionService assetDefinitionService,
-                                TokensService tokensService,
+                                JsonSettingService jsonSettingService, TokensService tokensService,
                                 OnRampRepositoryType onRampRepository)
     {
         this.myAddressRouter = myAddressRouter;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
+        this.jsonSettingService = jsonSettingService;
         this.tokensService = tokensService;
         this.onRampRepository = onRampRepository;
     }
@@ -96,6 +99,11 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return this.assetDefinitionService;
+    }
+
+    public JsonSettingService jsonSettingService()
+    {
+    return jsonSettingService;
     }
 
     public void showSendToken(Activity act, Wallet wallet, Token token)

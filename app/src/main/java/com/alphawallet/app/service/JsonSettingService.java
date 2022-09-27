@@ -22,32 +22,21 @@ import java.util.ArrayList;
 
 public class JsonSettingService
 {
-    public static final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
+    public final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
     public static final long primaryChain = MAINNET_ID;
     private final Context context;
-    private String chainName;
 
     public JsonSettingService(Context ctx)
     {
         context = ctx;
-//        loadJsonSetting();
     }
-
-    private void loadJsonSetting()
-    {
-
-//        getChainsFromJsonFile(chainName);
-//        getLockedTokensFromJsonFile(chainName);
-//        getDarkModeValueFromJsonFile(chainName);
-    }
-
 
     public ArrayList<Long> getChainsFromJsonFile(String chainName)
     {
         ArrayList<Long> chains = new ArrayList<>();
         try
         {
-            String lockedChains = loadJSONStringFromAsset(CUSTOM_SETTINGS_FILENAME);
+            String lockedChains = loadJSONStringFromAsset();
             if (lockedChains != null)
             {
                 JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
@@ -71,13 +60,12 @@ public class JsonSettingService
         return chains;
     }
 
-
     public ArrayList<TokenInfo> getLockedTokensFromJsonFile(String chainName)
     {
         ArrayList<TokenInfo> chains = new ArrayList<>();
         try
         {
-            String lockedTokens = loadJSONStringFromAsset(CUSTOM_SETTINGS_FILENAME);
+            String lockedTokens = loadJSONStringFromAsset();
             if (lockedTokens != null)
             {
                 JSONObject customSettingsJsonObject = new JSONObject(lockedTokens);
@@ -108,11 +96,11 @@ public class JsonSettingService
         return chains;
     }
 
-   /* public Boolean getDarkModeValueFromJsonFile(String chainName)
+    public Boolean getDarkModeValueFromJsonFile(String chainName)
     {
         boolean darkModeValue = false;
         try {
-            String darkMode = loadJSONStringFromAsset(CUSTOM_SETTINGS_FILENAME);
+            String darkMode = loadJSONStringFromAsset();
             if(darkMode != null)
             {
                 JSONObject customSettingsJsonObject = new JSONObject(darkMode);
@@ -124,9 +112,8 @@ public class JsonSettingService
             err.printStackTrace();
         }
         return darkModeValue;
-    }*/
-
-    public String loadJSONStringFromAsset(String chainName)
+    }
+    public String loadJSONStringFromAsset()
     {
         String returnString;
         try
@@ -218,7 +205,7 @@ public class JsonSettingService
     }
 
     //In main wallet menu, if wallet allows adding new tokens
-    public boolean canAddTokens()
+    public static boolean canAddTokens()
     {
         return true;
     }
@@ -226,7 +213,7 @@ public class JsonSettingService
     //Implement minimal dappbrowser with no URL bar. You may want this if you want your browser to point to a specific website and only
     // allow navigation within that website
     // use this setting in conjunction with changing DEFAULT_HOMEPAGE in class EthereumNetworkBase
-    public boolean minimiseBrowserURLBar()
+    public static boolean minimiseBrowserURLBar()
     {
         return false;
     }

@@ -327,6 +327,10 @@ public class HomeViewModel extends BaseViewModel {
         assetDefinitionService.setErrorCallback(callback);
     }
 
+    public JsonSettingService jsonSettingService(){
+        return jsonSettingService;
+    }
+
     public void handleQRCode(Activity activity, String qrCode)
     {
         try
@@ -345,7 +349,7 @@ public class HomeViewModel extends BaseViewModel {
                     break;
                 case PAYMENT:
                 case TRANSFER:
-                    showSend(activity, qrResult);
+                    showSend(activity, qrResult,jsonSettingService);
                     break;
                 case FUNCTION_CALL:
                     //TODO: Handle via ConfirmationActivity, need to generate function signature + data then call ConfirmationActivity
@@ -378,7 +382,7 @@ public class HomeViewModel extends BaseViewModel {
         View.OnClickListener listener = v -> {
             if (v.getId() == R.id.send_to_this_address_action)
             {
-                showSend(activity, qrResult);
+                showSend(activity, qrResult,jsonSettingService);
             }
             else if (v.getId() == R.id.add_custom_token_action)
             {
@@ -433,7 +437,7 @@ public class HomeViewModel extends BaseViewModel {
         dialog.show();
     }
 
-    public void showSend(Activity ctx, QRResult result)
+    public void showSend(Activity ctx, QRResult result,JsonSettingService jsonSettingService)
     {
         Intent intent = new Intent(ctx, SendActivity.class);
         boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);
@@ -528,11 +532,7 @@ public class HomeViewModel extends BaseViewModel {
         preferenceRepository.storeLastFragmentPage(ordinal);
     }
 
-    public List<Long> addDefaultNetworks()
-    {
-        return jsonSettingService.getChainsFromJsonFile("exclusive_chains");
-    }
-
+    public JsonSettingService getJsonSettingService(){return jsonSettingService;}
 
     public int getLastFragmentId()
     {

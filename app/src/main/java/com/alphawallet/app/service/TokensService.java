@@ -117,7 +117,7 @@ public class TokensService
         this.analyticsService = analyticsService;
         this.jsonSettingService = jsonSettingService;
         networkFilter = new ArrayList<>();
-        setupFilter(ethereumNetworkRepository.hasSetNetworkFilters());
+        setupFilter(jsonSettingService,ethereumNetworkRepository.hasSetNetworkFilters());
         focusToken = null;
         this.unknownTokens = new ConcurrentLinkedDeque<>();
         this.baseTokenCheck = new ConcurrentLinkedQueue<>();
@@ -398,7 +398,7 @@ public class TokensService
 
     public static void setWalletStartup() { walletStartup = true; }
 
-    public void setupFilter(boolean userUpdated)
+    public void setupFilter(JsonSettingService jsonSettingService, boolean userUpdated)
     {
         networkFilter.clear();
         ArrayList<Long> lockedChains = jsonSettingService.getChainsFromJsonFile("locked_chains");

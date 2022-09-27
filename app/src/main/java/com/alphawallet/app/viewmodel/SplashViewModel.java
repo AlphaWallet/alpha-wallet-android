@@ -16,6 +16,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.KeyService;
 
 import java.io.File;
@@ -36,6 +37,7 @@ public class SplashViewModel extends ViewModel
     private final FetchWalletsInteract fetchWalletsInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final KeyService keyService;
+    private final JsonSettingService jsonSettingService;
 
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private final MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
@@ -43,13 +45,14 @@ public class SplashViewModel extends ViewModel
     @Inject
     SplashViewModel(FetchWalletsInteract fetchWalletsInteract,
                     PreferenceRepositoryType preferenceRepository,
-                    KeyService keyService) {
+                    KeyService keyService, JsonSettingService jsonSettingService) {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.preferenceRepository = preferenceRepository;
         this.keyService = keyService;
 
         // increase launch count
 //        this.preferenceRepository.incrementLaunchCount();
+        this.jsonSettingService = jsonSettingService;
     }
 
     public void fetchWallets()
@@ -152,11 +155,18 @@ public class SplashViewModel extends ViewModel
         preferenceRepository.setActiveBrowserNetwork(MAINNET_ID);
     }
 
-    public long getInstallTime() {
+    public long getInstallTime()
+    {
         return preferenceRepository.getInstallTime();
     }
 
-    public void setInstallTime(long time) {
+    public void setInstallTime(long time)
+    {
         preferenceRepository.setInstallTime(time);
+    }
+
+    public JsonSettingService getJsonSettingService()
+    {
+        return jsonSettingService;
     }
 }

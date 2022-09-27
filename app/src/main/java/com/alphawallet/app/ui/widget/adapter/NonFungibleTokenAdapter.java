@@ -16,6 +16,7 @@ import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
@@ -65,8 +66,8 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     private boolean isGrid;
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
-                                   OpenSeaService opensea, Activity activity) {
-        super(tokenClickListener, service);
+                                   JsonSettingService jsonSettingService, OpenSeaService opensea, Activity activity) {
+        super(tokenClickListener, service, jsonSettingService);
         assetCount = 0;
         token = t;
         clickThrough = true;
@@ -75,9 +76,8 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         this.activity = activity;
     }
 
-    public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
-                                   OpenSeaService opensea, Activity activity, boolean isGrid) {
-        super(tokenClickListener, service);
+    public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service, JsonSettingService jsonSettingService, OpenSeaService opensea, Activity activity, boolean isGrid) {
+        super(tokenClickListener, service, jsonSettingService);
         assetCount = 0;
         token = t;
         clickThrough = true;
@@ -88,9 +88,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, List<BigInteger> tokenSelection,
-                                   AssetDefinitionService service)
+                                   AssetDefinitionService service, JsonSettingService jsonSettingService)
     {
-        super(tokenClickListener, service);
+        super(tokenClickListener, service, jsonSettingService);
         assetCount = 0;
         token = t;
         clickThrough = false;
@@ -100,9 +100,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, ArrayList<Pair<BigInteger, NFTAsset>> assetSelection,
-                                   AssetDefinitionService service)
+                                   AssetDefinitionService service, JsonSettingService jsonSettingService)
     {
-        super(tokenClickListener, service);
+        super(tokenClickListener, service, jsonSettingService);
         assetCount = 0;
         token = t;
         clickThrough = false;

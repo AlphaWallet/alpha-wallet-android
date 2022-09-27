@@ -15,6 +15,7 @@ import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.util.LocaleUtils;
 
@@ -38,6 +39,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final LocaleRepositoryType localeRepository;
     private final CurrencyRepositoryType currencyRepository;
     private final TransactionsService transactionsService;
+    private final JsonSettingService jsonSettingService;
 
     @Inject
     NewSettingsViewModel(
@@ -47,7 +49,7 @@ public class NewSettingsViewModel extends BaseViewModel {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             CurrencyRepositoryType currencyRepository,
-            TransactionsService transactionsService) {
+            TransactionsService transactionsService, JsonSettingService jsonSettingService) {
         this.genericWalletInteract = genericWalletInteract;
         this.myAddressRouter = myAddressRouter;
         this.manageWalletsRouter = manageWalletsRouter;
@@ -55,6 +57,7 @@ public class NewSettingsViewModel extends BaseViewModel {
         this.localeRepository = localeRepository;
         this.currencyRepository = currencyRepository;
         this.transactionsService = transactionsService;
+        this.jsonSettingService = jsonSettingService;
     }
 
     public ArrayList<LocaleItem> getLocaleList(Context context) {
@@ -98,6 +101,12 @@ public class NewSettingsViewModel extends BaseViewModel {
     {
         return preferenceRepository.getNotificationsState();
     }
+
+    public JsonSettingService getJsonSettingService()
+    {
+        return jsonSettingService;
+    }
+
     public void setNotificationState(boolean notificationState)
     {
         preferenceRepository.setNotificationState(notificationState);

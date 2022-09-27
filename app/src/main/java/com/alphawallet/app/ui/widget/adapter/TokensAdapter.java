@@ -52,7 +52,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private TokenFilter filterType = TokenFilter.ALL;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
-    private JsonSettingService jsonSettingService;
+    private final JsonSettingService jsonSettingService;
     private final ActivityResultLauncher<Intent> managementLauncher;
     private ContractLocator scrollToken; // designates a token that should be scrolled to
 
@@ -115,9 +115,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         new TokensMappingRepository(aService.getTokenLocalSource());
     }
 
-    protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService) {
+    protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, JsonSettingService jsonSettingService) {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
+        this.jsonSettingService = jsonSettingService;
         this.tokensService = null;
 
         new TokensMappingRepository(aService.getTokenLocalSource());

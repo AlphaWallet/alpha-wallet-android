@@ -58,7 +58,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
@@ -252,7 +251,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.splashReset().observe(this, this::onRequireInit);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
-        if (CustomViewSettings.hideDappBrowser())
+        if (viewModel.getJsonSettingService().hideDappBrowser())
         {
             removeDappBrowser();
         }
@@ -1239,7 +1238,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     activityFragment = new ActivityFragment();
                     return activityFragment;
                 case DAPP_BROWSER:
-                    if (CustomViewSettings.hideDappBrowser()) dappBrowserFragment = new Fragment();
+                    if (viewModel.getJsonSettingService().hideDappBrowser()) dappBrowserFragment = new Fragment();
                     else dappBrowserFragment = new DappBrowserFragment();
                     return dappBrowserFragment;
                 case SETTINGS:

@@ -138,7 +138,7 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
 
         //we should import a token and a list of chosen ids
         list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(this, token, selection, viewModel.getAssetDefinitionService());
+        adapter = new NonFungibleTokenAdapter(this, token, selection, viewModel.getAssetDefinitionService(),viewModel.jsonSettingService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -439,7 +439,7 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
             Timber.d("date : %s", dateString);
             UTCTimeStamp = (date.getTime())/1000;
         } catch (ParseException e) {
-            Timber.e(e);;
+            Timber.e(e);
         }
 
         //1. validate price

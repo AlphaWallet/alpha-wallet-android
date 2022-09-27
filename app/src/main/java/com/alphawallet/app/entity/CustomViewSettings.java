@@ -1,14 +1,13 @@
 package com.alphawallet.app.entity;
+
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

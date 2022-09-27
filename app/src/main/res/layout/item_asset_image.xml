@@ -46,6 +46,13 @@
             android:src="@drawable/masking_circle"
             android:visibility="gone" />
 
+        <ImageView
+            android:id="@+id/overlay_rect"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/masking_rectangle"
+            android:visibility="gone" />
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -65,4 +72,5 @@
             android:focusable="false"
             custom:square="true" />
     </RelativeLayout>
+
 </RelativeLayout>

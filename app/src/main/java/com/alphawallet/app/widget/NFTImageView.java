@@ -3,6 +3,7 @@ package com.alphawallet.app.widget;
 import static com.alphawallet.app.util.Utils.loadFile;
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -13,9 +14,9 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Base64;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -52,7 +53,9 @@ public class NFTImageView extends RelativeLayout
     private final RelativeLayout fallbackLayout;
     private final TokenIcon fallbackIcon;
     private final ProgressBar progressBar;
+    private final ImageView overlay;
     private final Handler handler = new Handler(Looper.getMainLooper());
+
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
@@ -65,7 +68,7 @@ public class NFTImageView extends RelativeLayout
             if (model != null)
             {
                 progressBar.setVisibility(View.GONE);
-                setWebView(model.toString());
+                setWebView(model.toString(), ImageType.IMAGE);
             }
             return false;
         }
@@ -93,9 +96,11 @@ public class NFTImageView extends RelativeLayout
         fallbackLayout = findViewById(R.id.layout_fallback);
         fallbackIcon = findViewById(R.id.icon_fallback);
         progressBar = findViewById(R.id.avatar_progress_spinner);
+        overlay = findViewById(R.id.overlay_rect);
 
         webLayout.setVisibility(View.GONE);
         webView.setVisibility(View.GONE);
+        showProgress = false;
 
         if (loadRequest != null && loadRequest.isRunning())
         {
@@ -113,9 +118,17 @@ public class NFTImageView extends RelativeLayout
 
     public void setupTokenImage(NFTAsset asset) throws IllegalArgumentException
     {
-        if (shouldLoad(asset.getImage()))
+        String anim = asset.getAnimation();
+
+        if (anim != null && !isGlb(anim))
         {
-            showLoadingProgress(true);
+            if (!shouldLoad(anim)) return;
+            //attempt to load animation
+            setWebView(anim, ImageType.ANIM);
+        }
+        else if (shouldLoad(asset.getImage()))
+        {
+            showLoadingProgress();
             progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
             loadImage(asset.getImage(), asset.getBackgroundColor(), 16);
         }
@@ -153,19 +166,49 @@ public class NFTImageView extends RelativeLayout
                 .into(new DrawableImageViewTarget(image)).getRequest();
     }
 
-    private void setWebView(String imageUrl)
+    @SuppressLint("SetJavaScriptEnabled")
+    private void setWebView(String imageUrl, ImageType hint)
     {
-        String loader = loadFile(getContext(), R.raw.token_graphic).replace("[URL]", imageUrl);
-        String base64 = android.util.Base64.encodeToString(loader.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
-
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
 
+        //determine how to display this URL
+        final DisplayType useType = new DisplayType(imageUrl, hint);
+
         handler.post(() -> {
+            this.imageUrl = imageUrl;
             image.setVisibility(View.GONE);
             webLayout.setVisibility(View.VISIBLE);
             webView.setVisibility(View.VISIBLE);
-            webView.loadData(base64, "text/html; charset=utf-8", "base64");
+            overlay.setVisibility(View.VISIBLE);
+
+            if (useType.getImageType() == ImageType.WEB)
+            {
+                webView.getSettings().setJavaScriptEnabled(true);
+                webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+                webView.loadUrl(imageUrl);
+            }
+            else if (useType.getImageType() == ImageType.ANIM)
+            {
+                String loaderAnim = loadFile(getContext(), R.raw.token_anim).replace("[URL]", imageUrl).replace("[MIME]", useType.getMimeType());
+                webView.getSettings().setJavaScriptEnabled(true);
+                webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+                webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+                String base64 = android.util.Base64.encodeToString(loaderAnim.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+                webView.loadData(base64, "text/html; charset=utf-8", "base64");
+            }
+            else if (useType.getImageType() == ImageType.MODEL)
+            {
+                String loader = loadFile(getContext(), R.raw.token_model).replace("[URL]", imageUrl);
+                String base64 = android.util.Base64.encodeToString(loader.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+                webView.loadData(base64, "text/html; charset=utf-8", "base64");
+            }
+            else
+            {
+                String loader = loadFile(getContext(), R.raw.token_graphic).replace("[URL]", imageUrl);
+                String base64 = android.util.Base64.encodeToString(loader.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+                webView.loadData(base64, "text/html; charset=utf-8", "base64");
+            }
         });
     }
 
@@ -210,15 +253,9 @@ public class NFTImageView extends RelativeLayout
         return hasContent;
     }
 
-    public void showLoadingProgress(boolean showProgress)
+    public void showLoadingProgress()
     {
-        this.showProgress = showProgress;
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev)
-    {
-        return true;
+        this.showProgress = true;
     }
 
     public boolean shouldLoad(String url)
@@ -248,5 +285,78 @@ public class NFTImageView extends RelativeLayout
     public boolean isDisplayingImage()
     {
         return !TextUtils.isEmpty(imageUrl);
+    }
+
+    private boolean isGlb(String url)
+    {
+        return (url != null && MimeTypeMap.getFileExtensionFromUrl(url).equals("glb"));
+    }
+
+    private static class DisplayType
+    {
+        private final ImageType type;
+        private final String mimeStr;
+
+        // Should handle most cases; this is a handler for anim or drop through cases,
+        // Previously these were not handled so this is a big improvement in display handling
+        public DisplayType(String url, ImageType hint)
+        {
+            if (url == null || url.length() < 5)
+            {
+                type = hint;
+                mimeStr = "";
+                return;
+            }
+
+            String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+
+            switch (extension)
+            {
+                case "":
+                    mimeStr = "";
+                    if (hint == ImageType.IMAGE)
+                    {
+                        type = hint;
+                    }
+                    else
+                    {
+                        type = ImageType.WEB;
+                    }
+                    break;
+                case "mp4":
+                case "webm":
+                case "avi":
+                case "mpeg":
+                case "mpg":
+                case "m2v":
+                    type = ImageType.ANIM;
+                    mimeStr = "video/" + extension;
+                    break;
+                case "bmp":
+                case "png":
+                case "jpg":
+                case "svg":
+                case "glb": //currently avoid handling these
+                default:
+                    type = ImageType.IMAGE;
+                    mimeStr = "image/" + extension;
+                    break;
+            }
+        }
+
+        public String getMimeType()
+        {
+            return mimeStr;
+        }
+
+        public ImageType getImageType()
+        {
+            return type;
+        }
+    }
+
+    private enum ImageType
+    {
+        IMAGE, ANIM, WEB, MODEL
     }
 }

@@ -235,8 +235,6 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
 
         TabUtils.decorateTabLayout(this, tabLayout);
 
-//        viewPager.setCurrentItem(1, true);
-
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
         {
             @Override

@@ -16,6 +16,7 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
@@ -66,6 +67,7 @@ import timber.log.Timber;
 public class ERC721Token extends Token
 {
     private final Map<BigInteger, NFTAsset> tokenBalanceAssets;
+    private static final Map<String, Boolean> balanceChecks = new ConcurrentHashMap<>();
 
     public ERC721Token(TokenInfo tokenInfo, Map<BigInteger, NFTAsset> balanceList, BigDecimal balance, long blancaTime, String networkName, ContractType type)
     {
@@ -329,6 +331,11 @@ public class ERC721Token extends Token
     @Override
     public BigDecimal updateBalance(Realm realm)
     {
+        if (balanceChecks.containsKey(tokenInfo.address))
+        {
+            return balance;
+        }
+
         //first get current block
         SyncDef sync = eventSync.getSyncDef(realm);
         if (sync == null) return balance;
@@ -342,6 +349,7 @@ public class ERC721Token extends Token
 
         try
         {
+            balanceChecks.put(tokenInfo.address, true); //set checking
             final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
             if (contractType == ContractType.ERC721_ENUMERABLE)
             {
@@ -351,7 +359,7 @@ public class ERC721Token extends Token
             Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> evRead = eventSync.processTransferEvents(web3j,
                     getTransferEvents(), startBlock, endBlock, realm);
 
-            eventSync.updateEventReads(realm, sync, currentBlock, evRead.first); //means our event read was fine
+           eventSync.updateEventReads(realm, sync, currentBlock, evRead.first); //means our event read was fine
 
             //No need to go any further if this is enumerable
             if (contractType == ContractType.ERC721_ENUMERABLE) return balance;
@@ -364,8 +372,12 @@ public class ERC721Token extends Token
                 allMovingTokens.addAll(tokenBalanceAssets.keySet());
             }
 
-            HashSet<BigInteger> tokenIdsHeld = checkBalances(web3j, allMovingTokens);
-            updateRealmBalance(realm, tokenIdsHeld, allMovingTokens);
+            //no need to check balances if this chain is supported by OpenSea
+            if (allMovingTokens.size() < 10 || !EthereumNetworkBase.hasOpenseaAPI(tokenInfo.chainId))
+            {
+                HashSet<BigInteger> tokenIdsHeld = checkBalances(web3j, allMovingTokens);
+                updateRealmBalance(realm, tokenIdsHeld, allMovingTokens);
+            }
         }
         catch (LogOverflowException e)
         {
@@ -379,6 +391,10 @@ public class ERC721Token extends Token
         catch (Exception e)
         {
             Timber.w(e);
+        }
+        finally
+        {
+            balanceChecks.remove(tokenInfo.address);
         }
 
         //check for possible issues
@@ -752,6 +768,10 @@ public class ERC721Token extends Token
             if (!responseValues.isEmpty())
             {
                 return responseValues.get(0).getValue().toString();
+            }
+            else if (response.hasError() && response.getError().getCode() == 3) //reverted
+            {
+                return "";
             }
         }
         catch (Exception e)

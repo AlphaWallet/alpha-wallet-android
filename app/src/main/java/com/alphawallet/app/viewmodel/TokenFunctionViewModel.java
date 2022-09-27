@@ -870,7 +870,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
                     }
                     else
                     {
-                        storeAsset(token, tokenId, new NFTAsset(result), oldAsset);
+                        storeAsset(token, tokenId, asset, oldAsset);
                         asset.attachOpenSeaAssetData(osAsset);
                         nftAsset.postValue(asset);
                     }

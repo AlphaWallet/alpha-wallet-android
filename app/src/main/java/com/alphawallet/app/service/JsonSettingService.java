@@ -26,6 +26,7 @@ public class JsonSettingService
     public static final long primaryChain = MAINNET_ID;
     private final Context context;
 
+
     public JsonSettingService(Context ctx)
     {
         context = ctx;

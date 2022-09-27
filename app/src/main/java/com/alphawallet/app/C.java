@@ -58,6 +58,7 @@ public abstract class C {
     public static final String MILKOMEDA_NAME = "Milkomeda Cardano";
     public static final String MILKOMEDA_TESTNET_NAME = "Milkomeda Cardano (Test)";
     public static final String PHI_NETWORK_NAME = "PHI";
+    public static final String PHI_V2_NETWORK_NAME = "PHI v2";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";

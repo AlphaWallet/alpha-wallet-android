@@ -113,8 +113,8 @@ public class ContractInteract
         if (client == null)
         {
             client = new OkHttpClient.Builder()
-                    .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
-                    .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
+                    .connectTimeout(C.CONNECT_TIMEOUT*4, TimeUnit.SECONDS)
+                    .readTimeout(C.READ_TIMEOUT*4, TimeUnit.SECONDS)
                     .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
                     .retryOnConnectionFailure(true)
                     .build();

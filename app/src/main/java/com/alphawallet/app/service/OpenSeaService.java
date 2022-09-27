@@ -334,8 +334,16 @@ public class OpenSeaService
 
     public Single<String> getAsset(Token token, BigInteger tokenId)
     {
-        return Single.fromCallable(() ->
-                fetchAsset(token.tokenInfo.chainId, token.tokenInfo.address, tokenId.toString()));
+        if (!com.alphawallet.app.repository.EthereumNetworkBase.hasOpenseaAPI(token.tokenInfo.chainId))
+        {
+            return Single.fromCallable(() -> "");
+        }
+        else
+        {
+            return Single.fromCallable(() ->
+                    fetchAsset(token.tokenInfo.chainId, token.tokenInfo.address, tokenId.toString()));
+        }
+
     }
 
     public Single<String> getCollection(Token token, String slug)

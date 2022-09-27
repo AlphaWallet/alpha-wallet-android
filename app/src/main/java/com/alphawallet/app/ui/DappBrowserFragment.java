@@ -1178,14 +1178,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         return true;
     }
 
-    public void setCurrentGasIndex(int gasSelectionIndex, BigDecimal customGasPrice, BigDecimal customGasLimit, long expectedTxTime, long customNonce)
-    {
-        /*if (confirmationDialog != null && confirmationDialog.isShowing())
-        {
-            confirmationDialog.setCurrentGasIndex(gasSelectionIndex, customGasPrice, customGasLimit, expectedTxTime, customNonce);
-        }*/
-    }
-
     @Override
     public void onSignMessage(final EthereumMessage message)
     {
@@ -2232,7 +2224,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
         else
         {
-            //TODO: Resolve types
             switch (firstType)
             {
                 case "png":
@@ -2240,16 +2231,25 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 case "svg":
                 case "jpg":
                 case "jpeg":
-                case "image/*":
-                    mime = "image/*";
+                case "bmp":
+                    mime = "image/" + firstType;
                     break;
 
                 case "mp4":
                 case "x-msvideo":
                 case "x-ms-wmv":
                 case "mpeg4-generic":
+                case "webm":
+                case "avi":
+                case "mpg":
+                case "m2v":
+                    mime = "video/" + firstType;
+                    break;
+
+                case "image/*":
+                case "audio/*":
                 case "video/*":
-                    mime = "video/*";
+                    mime = firstType;
                     break;
 
                 case "mpeg":
@@ -2258,8 +2258,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 case "ogg":
                 case "midi":
                 case "x-ms-wma":
-                case "audio/*":
-                    mime = "audio/*";
+                    mime = "audio/" + firstType;
                     break;
 
                 case "pdf":
@@ -2268,7 +2267,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
                 case "xml":
                 case "csv":
-                    mime = "text/*";
+                    mime = "text/" + firstType;
                     break;
 
                 default:

@@ -170,10 +170,9 @@ public class NFTAsset implements Parcelable
         return assetMap.get(NAME);
     }
 
-    public boolean isAnimation()
+    public String getAnimation()
     {
-        String anim = assetMap.get(IMAGE_ANIMATION);
-        return anim != null;
+        return assetMap.get(IMAGE_ANIMATION);
     }
 
     public String getImage()

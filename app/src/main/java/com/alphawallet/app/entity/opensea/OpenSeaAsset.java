@@ -40,6 +40,10 @@ public class OpenSeaAsset
     @Expose
     public String animationUrl;
 
+    @SerializedName("animation_url")
+    @Expose
+    public String animation_url;
+
     @SerializedName("name")
     @Expose
     public String name;
@@ -323,6 +327,22 @@ public class OpenSeaAsset
         return result;
     }
 
+    public String getAnimationUrl()
+    {
+        if (animationUrl != null)
+        {
+            return animationUrl;
+        }
+        else if (animation_url != null)
+        {
+            return animation_url;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     public String getImageUrl()
     {
         if (image != null)
@@ -344,6 +364,10 @@ public class OpenSeaAsset
         else if (imagePreviewUrl != null)
         {
             return imagePreviewUrl;
+        }
+        else if (animation_url != null)
+        {
+            return animation_url;
         }
         else
         {

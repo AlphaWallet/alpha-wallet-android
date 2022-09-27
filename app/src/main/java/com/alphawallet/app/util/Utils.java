@@ -3,11 +3,11 @@ package com.alphawallet.app.util;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 
 import android.app.Activity;
 import android.content.Context;
@@ -805,22 +805,39 @@ public class Utils {
     }
 
     private static final String IPFS_PREFIX = "ipfs://";
+    private static final String IPFS_DESIGNATOR = "/ipfs/";
+    private static final String IPFS_INFURA_RESOLVER = "https://alphawallet.infura-ipfs.io";
+    private static final String IPFS_IO_RESOLVER = "https://ipfs.io";
+
+    public static boolean isIPFS(String url)
+    {
+        return url.contains(IPFS_DESIGNATOR) || url.startsWith(IPFS_PREFIX);
+    }
 
     public static String parseIPFS(String URL)
     {
         if (TextUtils.isEmpty(URL)) return URL;
         String parsed = URL;
-        int ipfsIndex = URL.lastIndexOf("/ipfs/");
+        int ipfsIndex = URL.lastIndexOf(IPFS_DESIGNATOR);
         if (ipfsIndex >= 0)
         {
-            parsed = "https://alphawallet.infura-ipfs.io" + URL.substring(ipfsIndex);
+            parsed = IPFS_INFURA_RESOLVER + URL.substring(ipfsIndex);
         }
         else if (URL.startsWith(IPFS_PREFIX))
         {
-            parsed = "https://alphawallet.infura-ipfs.io/ipfs/" + URL.substring(IPFS_PREFIX.length());
+            parsed = IPFS_INFURA_RESOLVER + IPFS_DESIGNATOR + URL.substring(IPFS_PREFIX.length());
+        }
+        else if (shouldBeIPFS(URL)) //have seen some NFTs designating only the IPFS hash
+        {
+            parsed = IPFS_INFURA_RESOLVER + IPFS_DESIGNATOR + URL;
         }
 
         return parsed;
+    }
+
+    private static boolean shouldBeIPFS(String url)
+    {
+        return url.startsWith("Qm") && url.length() == 46 && !url.contains(".") && !url.contains("/");
     }
 
     public static String loadFile(Context context, @RawRes int rawRes) {

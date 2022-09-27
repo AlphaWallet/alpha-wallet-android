@@ -1,0 +1,105 @@
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
+apply plugin: 'checkstyle'
+
+checkstyle {
+    // default path is config/checkstyle/checkstyle.xml
+    toolVersion "10.3.4"
+    configFile rootProject.file("checkstyle.xml")
+}
+
+// Customize all the Checkstyle tasks
+tasks.withType(Checkstyle) {
+    // Specify all files that should be checked
+    classpath = files()
+    source "${project.rootDir}"
+
+    reports {
+        html {
+            enabled true
+            destination rootProject.file("build/reports/checkstyle/checkstyle.html")
+        }
+        xml {
+            enabled true
+            destination rootProject.file("build/reports/checkstyle/checkstyle.xml")
+        }
+    }
+}
+
+// Execute Checkstyle on all files
+task checkstyle(type: Checkstyle) {
+}
+
+// Execute Checkstyle on all modified files
+task checkstyleChanged(type: Checkstyle) {
+    def changedFiles = getChangedFiles()
+    include changedFiles
+}
+
+/**
+ * Get all files that are changed but not deleted nor renamed.
+ * Compares to master or the specified target branch.
+ *
+ * @return list of all changed files
+ */
+def getChangedFiles() {
+    // Get the target and source branch
+    def ghprbTargetBranch = System.getenv("ghprbTargetBranch")
+    def ghprbSourceBranch = System.getenv("ghprbSourceBranch")
+
+    // Compare to master if no branch specified
+    def targetBranch
+    if (project.hasProperty("branch")) {
+        targetBranch = project.property("branch")
+    } else {
+        targetBranch = ghprbTargetBranch ? "origin/${ghprbTargetBranch}" : getParentBranch()
+    }
+    def sourceBranch = ghprbSourceBranch ? "origin/${ghprbSourceBranch}" : ""
+
+    // Get list of all changed files including status
+    def systemOutStream = new ByteArrayOutputStream()
+    def command = "git diff --name-status --diff-filter=dr $targetBranch $sourceBranch"
+    command.execute().waitForProcessOutput(systemOutStream, System.err)
+    def allFiles = systemOutStream.toString().trim().split('\n')
+    systemOutStream.close()
+
+    // Remove the status prefix
+    Pattern statusPattern = Pattern.compile("(\\w)\\t+(.+)")
+    List<String> files = new ArrayList<>()
+    for (file in allFiles) {
+        Matcher matcher = statusPattern.matcher(file)
+        if (matcher.find()) {
+            files.add(matcher.group(2))
+        }
+    }
+
+    // Return the list of touched files
+    files
+}
+
+/**
+ * Determines the parent branch.
+ *
+ * @return the found parent branch or master if not possible
+ */
+def getParentBranch() {
+    def branch = ""
+    // Get short name of the HEAD branch
+    def branchDeterminer = "git rev-parse --abbrev-ref HEAD".execute()
+    branchDeterminer.in.eachLine { line -> branch = line }
+    branchDeterminer.err.eachLine { line -> println line }
+    branchDeterminer.waitFor()
+    // Search all branches for parent
+    def branchLine = 'git show-branch -a'.execute().text.readLines().find {
+        it.contains('*') && !(it ==~ ".*\\[$branch[~^\\]].*")
+    }
+    try {
+        // Filter parent branch name
+        def parent = (branchLine =~ /\[([^~^\]]*)[~^\]]/)[0][1]
+        return parent
+    } catch (Exception ignored) {
+        println "Could not determine parent branch, compare to master"
+        return "master"
+    }
+}

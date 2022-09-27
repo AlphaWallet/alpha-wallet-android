@@ -23,6 +23,7 @@ import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
@@ -50,6 +51,7 @@ public class SendViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final GasService gasService;
     private final AssetDefinitionService assetDefinitionService;
+    private final JsonSettingService jsonSettingService;
     private final KeyService keyService;
     private final CreateTransactionInteract createTransactionInteract;
     private final AnalyticsServiceType analyticsService;
@@ -59,7 +61,7 @@ public class SendViewModel extends BaseViewModel {
                          EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                          TokensService tokensService,
                          FetchTransactionsInteract fetchTransactionsInteract,
-                         CreateTransactionInteract createTransactionInteract,
+                         JsonSettingService jsonSettingService, CreateTransactionInteract createTransactionInteract,
                          GasService gasService,
                          AssetDefinitionService assetDefinitionService,
                          KeyService keyService,
@@ -69,6 +71,7 @@ public class SendViewModel extends BaseViewModel {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        this.jsonSettingService = jsonSettingService;
         this.gasService = gasService;
         this.assetDefinitionService = assetDefinitionService;
         this.keyService = keyService;
@@ -121,6 +124,11 @@ public class SendViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public JsonSettingService jsonSettingService()
+    {
+        return jsonSettingService;
     }
 
     public TokensService getTokenService()

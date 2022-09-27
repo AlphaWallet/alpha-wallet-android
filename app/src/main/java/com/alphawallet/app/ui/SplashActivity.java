@@ -14,7 +14,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.router.HomeRouter;
@@ -24,8 +23,6 @@ import com.alphawallet.app.util.RootUtil;
 import com.alphawallet.app.viewmodel.SplashViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -99,7 +96,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         }
         else
         {
-            handler.postDelayed(this, CustomViewSettings.startupDelay());
+            handler.postDelayed(this, splashViewModel.getJsonSettingService().startupDelay());
         }
     }
 

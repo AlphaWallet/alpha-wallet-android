@@ -19,6 +19,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.SellDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.SellDetailActivity;
@@ -52,6 +53,7 @@ public class SellDetailViewModel extends BaseViewModel {
     private final SellDetailRouter sellDetailRouter;
     private final KeyService keyService;
     private final AssetDefinitionService assetDefinitionService;
+    private final JsonSettingService jsonSettingService;
 
     private byte[] linkMessage;
 
@@ -61,13 +63,14 @@ public class SellDetailViewModel extends BaseViewModel {
                         CreateTransactionInteract createTransactionInteract,
                         SellDetailRouter sellDetailRouter,
                         KeyService keyService,
-                        AssetDefinitionService assetDefinitionService) {
+                        AssetDefinitionService assetDefinitionService, JsonSettingService jsonSettingService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.tokensService = tokensService;
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;
         this.keyService = keyService;
         this.assetDefinitionService = assetDefinitionService;
+        this.jsonSettingService = jsonSettingService;
     }
 
     private void initParser()
@@ -150,6 +153,11 @@ public class SellDetailViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public JsonSettingService jsonSettingService()
+    {
+        return jsonSettingService;
     }
 
     public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)

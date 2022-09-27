@@ -61,13 +61,15 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 @HiltViewModel
-public class DappBrowserViewModel extends BaseViewModel  {
+public class DappBrowserViewModel extends BaseViewModel
+{
     private static final int BALANCE_CHECK_INTERVAL_SECONDS = 20;
 
     private final MutableLiveData<NetworkInfo> activeNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
+    private final JsonSettingService jsonSettingService;
     private final CreateTransactionInteract createTransactionInteract;
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -76,7 +78,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     @Nullable
     private Disposable balanceTimerDisposable;
-    private JsonSettingService jsonSettingService;
+
 
     @Inject
     DappBrowserViewModel(
@@ -86,7 +88,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
-            GasService gasService, JsonSettingService jsonSettingService) {
+            GasService gasService, JsonSettingService jsonSettingService)
+    {
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
@@ -97,19 +100,28 @@ public class DappBrowserViewModel extends BaseViewModel  {
         this.jsonSettingService = jsonSettingService;
     }
 
-    public AssetDefinitionService getAssetDefinitionService() {
+    public AssetDefinitionService getAssetDefinitionService()
+    {
         return assetDefinitionService;
     }
 
-    public LiveData<NetworkInfo> activeNetwork() {
+    public LiveData<NetworkInfo> activeNetwork()
+    {
         return activeNetwork;
     }
 
-    public LiveData<Wallet> defaultWallet() {
+    public LiveData<Wallet> defaultWallet()
+    {
         return defaultWallet;
     }
 
-    public void findWallet() {
+    public JsonSettingService getJsonSettingService()
+    {
+        return jsonSettingService;
+    }
+
+    public void findWallet()
+    {
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -125,7 +137,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
         activeNetwork.postValue(ethereumNetworkRepository.getActiveBrowserNetwork());
     }
 
-    private void onDefaultWallet(final Wallet wallet) {
+    private void onDefaultWallet(final Wallet wallet)
+    {
         defaultWallet.setValue(wallet);
     }
 
@@ -137,34 +150,39 @@ public class DappBrowserViewModel extends BaseViewModel  {
             disposable = tokensService.getChainBalance(wallet.address.toLowerCase(), info.chainId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
-                    .subscribe(w -> { }, e -> { });
+                    .subscribe(w -> {}, e -> {});
         }
     }
 
-    public void signMessage(Signable message, DAppFunction dAppFunction) {
+    public void signMessage(Signable message, DAppFunction dAppFunction)
+    {
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), message,
-                getActiveNetwork().chainId)
+                        getActiveNetwork().chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
                         error -> dAppFunction.DAppError(error, message));
     }
 
-    public void setLastUrl(Context context, String url) {
+    public void setLastUrl(Context context, String url)
+    {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit().putString(C.DAPP_LASTURL_KEY, url).apply();
     }
 
-    public void setHomePage(Context context, String url) {
+    public void setHomePage(Context context, String url)
+    {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit().putString(C.DAPP_HOMEPAGE_KEY, url).apply();
     }
 
-    public String getHomePage(Context context) {
+    public String getHomePage(Context context)
+    {
         return PreferenceManager.getDefaultSharedPreferences(context).getString(C.DAPP_HOMEPAGE_KEY, null);
     }
 
-    public void addToMyDapps(Context context, String title, String url) {
+    public void addToMyDapps(Context context, String title, String url)
+    {
         Intent intent = new Intent(context, AddEditDappActivity.class);
         DApp dapp = new DApp(title, url);
         intent.putExtra(AddEditDappActivity.KEY_DAPP, dapp);
@@ -172,7 +190,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
         context.startActivity(intent);
     }
 
-    public void share(Context context, String url) {
+    public void share(Context context, String url)
+    {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_TEXT, url);
@@ -180,19 +199,22 @@ public class DappBrowserViewModel extends BaseViewModel  {
         context.startActivity(intent);
     }
 
-    public void onClearBrowserCacheClicked(Context context) {
+    public void onClearBrowserCacheClicked(Context context)
+    {
         WebView webView = new WebView(context);
         webView.clearCache(true);
         Toast.makeText(context, context.getString(R.string.toast_browser_cache_cleared),
                 Toast.LENGTH_SHORT).show();
     }
 
-    public void startScan(Activity activity) {
+    public void startScan(Activity activity)
+    {
         Intent intent = new Intent(activity, QRScanner.class);
         activity.startActivityForResult(intent, HomeActivity.DAPP_BARCODE_READER_REQUEST_CODE);
     }
 
-    public List<DApp> getDappsMasterList(Context context) {
+    public List<DApp> getDappsMasterList(Context context)
+    {
         return DappBrowserUtils.getDappsList(context);
     }
 
@@ -234,7 +256,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         keyService.failedAuthentication(signData);
     }
 
-    public void showSend(Context ctx, QRResult result)
+    public void showSend(Context ctx, QRResult result,JsonSettingService jsonSettingService)
     {
         Intent intent = new Intent(ctx, SendActivity.class);
         boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);
@@ -353,14 +375,15 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return Uri.parse(uriString).getUserInfo();
     }
 
-    public void addCustomChain(WalletAddEthereumChainObject chainObject) {
+    public void addCustomChain(WalletAddEthereumChainObject chainObject)
+    {
         this.ethereumNetworkRepository.saveCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
                 chainObject.nativeCurrency.symbol, "", "", false, -1L);
 
         tokensService.createBaseToken(chainObject.getChainId())
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe(w -> { }, e -> { })
+                .subscribe(w -> {}, e -> {})
                 .isDisposed();
     }
 
@@ -369,7 +392,10 @@ public class DappBrowserViewModel extends BaseViewModel  {
     {
         for (String thisRpc : chainObject.rpcUrls)
         {
-            if (thisRpc.toLowerCase().startsWith("http")) { return thisRpc; }
+            if (thisRpc.toLowerCase().startsWith("http"))
+            {
+                return thisRpc;
+            }
         }
 
         return "";
@@ -389,7 +415,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
             ethereumNetworkRepository.setFilterNetworkList(filters.toArray(new Long[0]));
         }
 
-        tokensService.setupFilter(true);
+        tokensService.setupFilter(jsonSettingService, true);
     }
 
     public void setMainNetsSelected(boolean isMainNet)

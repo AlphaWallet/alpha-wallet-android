@@ -499,6 +499,11 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         return genericWalletInteract;
     }
 
+    public JsonSettingService getJsonSettingService()
+    {
+        return jsonSettingService;
+    }
+
     public void stopUpdates()
     {
         assetService.stopEventListener();

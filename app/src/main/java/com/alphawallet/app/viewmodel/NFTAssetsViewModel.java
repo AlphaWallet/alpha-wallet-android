@@ -9,6 +9,7 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.Erc1155AssetListActivity;
@@ -26,17 +27,19 @@ public class NFTAssetsViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final OpenSeaService openSeaService;
+    private final JsonSettingService jsonSettingService;
 
     @Inject
     public NFTAssetsViewModel(FetchTransactionsInteract fetchTransactionsInteract,
                               AssetDefinitionService assetDefinitionService,
                               TokensService tokensService,
-                              OpenSeaService openSeaService)
+                              OpenSeaService openSeaService, JsonSettingService jsonSettingService)
     {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.openSeaService = openSeaService;
+        this.jsonSettingService = jsonSettingService;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -52,6 +55,11 @@ public class NFTAssetsViewModel extends BaseViewModel {
     public TokensService getTokensService()
     {
         return tokensService;
+    }
+
+    public JsonSettingService getJsonSettingService()
+    {
+        return jsonSettingService;
     }
 
     public Intent showAssetListDetails(Context context, Wallet wallet, Token token, NFTAsset asset)

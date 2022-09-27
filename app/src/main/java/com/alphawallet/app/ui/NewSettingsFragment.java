@@ -19,7 +19,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,33 +37,21 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
-import com.alphawallet.app.entity.CustomViewSettings;
-import com.alphawallet.app.entity.DApp;
-import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
 import com.google.android.material.card.MaterialCardView;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
-import com.google.protobuf.Any;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -154,7 +141,6 @@ public class NewSettingsFragment extends BaseFragment
     private MaterialCardView updateLayout;
     private int pendingUpdate = 0;
     private Wallet wallet;
-    private JsonSettingService jsonSettingService;
 
     @Nullable
     @Override
@@ -339,7 +325,7 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(myAddressSetting, walletIndex++);
 
-        if (CustomViewSettings.canChangeWallets())
+        if (viewModel.getJsonSettingService().canChangeWallets())
             walletSettingsLayout.addView(changeWalletSetting, walletIndex++);
 
         walletSettingsLayout.addView(backUpWalletSetting, walletIndex++);
@@ -350,8 +336,8 @@ public class NewSettingsFragment extends BaseFragment
         walletSettingsLayout.addView(nameThisWallet, walletIndex++);
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
-      /*  try {
-            String lockedChains = jsonSettingService.loadJSONStringFromAsset(Utils.CUSTOM_SETTINGS_FILENAME);
+        try {
+            String lockedChains = viewModel.getJsonSettingService().loadJSONStringFromAsset();
             JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
             JSONArray chainsArray = customSettingsJsonObject.getJSONArray("locked_chains");
             if (chainsArray.length() == 0)
@@ -361,8 +347,6 @@ public class NewSettingsFragment extends BaseFragment
         }catch (JSONException err){
             err.printStackTrace();
         }
-*/
-        systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
 
         if (biometricsSetting != null)
             systemSettingsLayout.addView(biometricsSetting, systemIndex++);

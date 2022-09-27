@@ -17,6 +17,7 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.SendActivity;
@@ -50,6 +51,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private final GenericWalletInteract genericWalletInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
+    private final JsonSettingService jsonSettingService;
     private final TokensService tokensService;
 
     private boolean foundNetwork;
@@ -77,11 +79,12 @@ public class AddTokenViewModel extends BaseViewModel {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService) {
+            JsonSettingService jsonSettingService, TokensService tokensService) {
         this.genericWalletInteract = genericWalletInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
+        this.jsonSettingService = jsonSettingService;
         this.tokensService = tokensService;
     }
 
@@ -174,7 +177,7 @@ public class AddTokenViewModel extends BaseViewModel {
         findWallet();
     }
 
-    public void showSend(Context ctx, QRResult result, Token token)
+    public void showSend(Context ctx, QRResult result, Token token,JsonSettingService jsonSettingService)
     {
         Intent intent = new Intent(ctx, SendActivity.class);
         boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);
@@ -303,5 +306,10 @@ public class AddTokenViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public JsonSettingService jsonSettingService()
+    {
+    return jsonSettingService;
     }
 }

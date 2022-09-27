@@ -32,6 +32,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
@@ -99,6 +100,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
     private final OpenSeaService openseaService;
+    private final JsonSettingService jsonSettingService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AnalyticsServiceType analyticsService;
     private final MutableLiveData<Token> insufficientFunds = new MutableLiveData<>();
@@ -139,6 +141,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
             OpenSeaService openseaService,
+            JsonSettingService jsonSettingService,
             FetchTransactionsInteract fetchTransactionsInteract,
             AnalyticsServiceType analyticsService)
     {
@@ -150,6 +153,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
         this.keyService = keyService;
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
+        this.jsonSettingService = jsonSettingService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.analyticsService = analyticsService;
     }
@@ -157,6 +161,11 @@ public class TokenFunctionViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public JsonSettingService getJsonSettingService()
+    {
+        return jsonSettingService;
     }
 
     public LiveData<Token> insufficientFunds()

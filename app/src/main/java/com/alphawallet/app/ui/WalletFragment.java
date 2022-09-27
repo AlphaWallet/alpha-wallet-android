@@ -41,6 +41,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.ContractLocator;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.TokenFilter;
@@ -153,7 +154,7 @@ public class WalletFragment extends BaseFragment implements
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
         LocaleUtils.setActiveLocale(getContext()); // Can't be placed before above line
 
-        if (viewModel.getJsonSettingService().canAddTokens())
+        if (JsonSettingService.canAddTokens())
         {
             toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
         }
@@ -197,7 +198,7 @@ public class WalletFragment extends BaseFragment implements
     private void initList()
     {
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),
-                null, tokenManagementLauncher);
+                viewModel.getJsonSettingService(), tokenManagementLauncher);
         adapter.setHasStableIds(true);
         setLinearLayoutManager(TokenFilter.ALL.ordinal());
         recyclerView.setAdapter(adapter);

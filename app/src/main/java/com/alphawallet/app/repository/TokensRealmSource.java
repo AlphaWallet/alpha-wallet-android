@@ -8,7 +8,6 @@ import android.text.format.DateUtils;
 import android.util.Pair;
 
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;

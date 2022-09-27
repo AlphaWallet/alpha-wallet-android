@@ -120,7 +120,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         lastCheck = "";
 
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),
-                null, null);
+                viewModel.jsonSettingService(), null);
         adapter.setHasStableIds(true);
         adapter.showTestNetTips();
         adapter.setFilterType(TokenFilter.NO_FILTER);
@@ -259,14 +259,14 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             }
             else
             {
-                viewModel.showSend(this, currentResult, token);
+                viewModel.showSend(this, currentResult, token, viewModel.jsonSettingService());
                 finish();
             }
         }
         else
         {
             //launch send payment screen for eth transaction
-            viewModel.showSend(this, currentResult, viewModel.getToken(currentResult.chainId, viewModel.wallet().getValue().address));
+            viewModel.showSend(this, currentResult, viewModel.getToken(currentResult.chainId, viewModel.wallet().getValue().address), viewModel.jsonSettingService());
             finish();
         }
     }

@@ -18,3 +18,9 @@ jobs:
           cache: gradle
       - name: Run
         run: ./gradlew checkStyleChanged
+      - name: Upload report
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }} # IMPORTANT: Upload reports regardless of status
+        with:
+          name: checkstyle-reports
+          path: build/reports/checkstyle/

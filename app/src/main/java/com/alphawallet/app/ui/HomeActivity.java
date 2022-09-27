@@ -58,6 +58,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
@@ -68,6 +69,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
+import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
@@ -111,7 +113,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private final ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> getSupportFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle()));
 
-    private HomeViewModel viewModel;
+    public HomeViewModel viewModel;
     private Dialog dialog;
     private ViewPager2 viewPager;
     private LinearLayout successOverlay;
@@ -1180,7 +1182,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private static class ScreenSlidePagerAdapter extends FragmentStateAdapter
+    private class ScreenSlidePagerAdapter extends FragmentStateAdapter
     {
         public ScreenSlidePagerAdapter(@NonNull FragmentActivity fragmentActivity)
         {

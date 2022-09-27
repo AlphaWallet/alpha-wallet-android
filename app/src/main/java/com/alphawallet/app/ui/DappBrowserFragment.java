@@ -334,7 +334,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         LocaleUtils.setActiveLocale(getContext());
         loadOnInit = null;
-        int webViewID = JsonSettingService.minimiseBrowserURLBar() ? R.layout.fragment_webview_compact : R.layout.fragment_webview;
+        int webViewID = CustomViewSettings.minimiseBrowserURLBar() ? R.layout.fragment_webview_compact : R.layout.fragment_webview;
         View view = inflater.inflate(webViewID, container, false);
         initViewModel();
         initView(view);

@@ -55,7 +55,7 @@ def getChangedFiles() {
     if (project.hasProperty("branch")) {
         targetBranch = project.property("branch")
     } else {
-        targetBranch = 'origin/' + ghprbTargetBranch ? ${ghprbTargetBranch} : getParentBranch()
+        targetBranch = "origin/${ghprbTargetBranch ? ghprbTargetBranch : getParentBranch()}"
     }
     def sourceBranch = ghprbSourceBranch ? "origin/${ghprbSourceBranch}" : ""
 
@@ -70,7 +70,7 @@ def getChangedFiles() {
     systemOutStream.close()
 
     println "----allFiles---"
-    println allFiles
+    println allFiles.length
 
     // Remove the status prefix
     Pattern statusPattern = Pattern.compile("(\\w)\\t+(.+)")

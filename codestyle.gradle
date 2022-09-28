@@ -58,20 +58,15 @@ def getChangedFiles() {
 
     // Get list of all changed files including status
     def systemOutStream = new ByteArrayOutputStream()
-    def command = "git diff --name-status --diff-filter=dr $targetBranch $sourceBranch"
+    def command = "git diff --name-only $targetBranch $sourceBranch"
     command.execute().waitForProcessOutput(systemOutStream, System.err)
     def allFiles = systemOutStream.toString().trim().split('\n')
     systemOutStream.close()
 
     // Remove the status prefix
-    Pattern statusPattern = Pattern.compile("(\\w)\\t+(.+)")
     List<String> files = new ArrayList<>()
     for (file in allFiles) {
         println file
-        Matcher matcher = statusPattern.matcher(file)
-        if (matcher.find()) {
-            files.add(matcher.group(2))
-        }
     }
 
     println "----files---"

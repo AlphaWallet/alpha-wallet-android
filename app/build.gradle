@@ -85,8 +85,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 202
-        versionName "3.58.3"
+        versionCode 204
+        versionName "3.60"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
@@ -245,8 +245,8 @@ dependencies {
     // Ethereum client
     //implementation "org.web3j:core:4.8.8-android"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.2'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
     implementation 'org.slf4j:slf4j-api:2.0.0-alpha7'
 
     // Http client

@@ -58,7 +58,7 @@ def getChangedFiles() {
 
     // Get list of all changed files including status
     def systemOutStream = new ByteArrayOutputStream()
-    def command = "git diff --name-only $targetBranch $sourceBranch"
+    def command = "git diff --name-only origin/$targetBranch $sourceBranch"
     command.execute().waitForProcessOutput(systemOutStream, System.err)
     def allFiles = systemOutStream.toString().trim().split('\n')
     systemOutStream.close()

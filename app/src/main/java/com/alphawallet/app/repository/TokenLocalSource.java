@@ -1,5 +1,6 @@
 package com.alphawallet.app.repository;
 
+import android.content.Context;
 import android.util.Pair;
 
 import com.alphawallet.app.entity.ContractType;

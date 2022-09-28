@@ -19,4 +19,4 @@ jobs:
       - name: Run Kotlin lint
         run: ./gradlew :app:detekt
       - name: Run Android Lint
-        run: ./gradlew :app:lintAnalyticsDebug
+        run: ./gradlew :app:lintAnalyticsDebug -x checkStyleMain -x checkStyleTest

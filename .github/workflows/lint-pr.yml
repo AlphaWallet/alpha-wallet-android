@@ -16,7 +16,7 @@ jobs:
         run: ./gradlew :app:detekt
         continue-on-error: true
       - name: Run Android Lint
-        run: ./gradlew :app:lintAnalyticsDebug
+        run: ./gradlew :app:lintAnalyticsDebug -x checkStyleMain -x checkStyleTest
       - name: Run Android Lint Reporter to report Lint and Detekt result to PR
         env:
           PR_NUMBER: ${{ github.event.number }}

@@ -38,8 +38,7 @@ import java.util.Map;
  *    including the signatures in it;
  * 4. already included in a blockchain.
  */
-public class Transaction implements Parcelable
-{
+public class Transaction implements Parcelable {
     @SerializedName("id")
     public final String hash;
     public final String blockNumber;

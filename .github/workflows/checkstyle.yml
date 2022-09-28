@@ -7,6 +7,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
@@ -14,7 +17,7 @@ jobs:
           java-version: 11
           cache: gradle
       - name: Run
-        run: git fetch origin master && ./gradlew --no-daemon checkStyleChanged
+        run: ./gradlew --no-daemon checkStyleChanged
       - name: Upload report
         uses: actions/upload-artifact@v2
         if: ${{ always() }} # IMPORTANT: Upload reports regardless of status

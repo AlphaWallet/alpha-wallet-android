@@ -31,8 +31,8 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
@@ -91,7 +91,8 @@ import timber.log.Timber;
  * Stormbird in Singapore
  */
 @HiltViewModel
-public class TokenFunctionViewModel extends BaseViewModel {
+public class TokenFunctionViewModel extends BaseViewModel
+{
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
@@ -100,7 +101,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
     private final OpenSeaService openseaService;
-    private final JsonSettingService jsonSettingService;
+    private final CustomSettings customSettings;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AnalyticsServiceType analyticsService;
     private final MutableLiveData<Token> insufficientFunds = new MutableLiveData<>();
@@ -141,7 +142,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
             OpenSeaService openseaService,
-            JsonSettingService jsonSettingService,
+            CustomSettings customSettings,
             FetchTransactionsInteract fetchTransactionsInteract,
             AnalyticsServiceType analyticsService)
     {
@@ -153,7 +154,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
         this.keyService = keyService;
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
-        this.jsonSettingService = jsonSettingService;
+        this.customSettings = customSettings;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.analyticsService = analyticsService;
     }
@@ -163,9 +164,9 @@ public class TokenFunctionViewModel extends BaseViewModel {
         return assetDefinitionService;
     }
 
-    public JsonSettingService getJsonSettingService()
+    public CustomSettings getCustomSettings()
     {
-        return jsonSettingService;
+        return customSettings;
     }
 
     public LiveData<Token> insufficientFunds()
@@ -193,7 +194,10 @@ public class TokenFunctionViewModel extends BaseViewModel {
         return newScriptFound;
     }
 
-    public LiveData<Boolean> scriptUpdateInProgress() { return scriptUpdateInProgress; }
+    public LiveData<Boolean> scriptUpdateInProgress()
+    {
+        return scriptUpdateInProgress;
+    }
 
     public MutableLiveData<TransactionData> transactionFinalised()
     {

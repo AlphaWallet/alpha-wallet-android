@@ -1,7 +1,16 @@
 {
-  "exclusive_chains" :[{"chain" : 1}],
-  "locked_chains" : [{"chain" : 1}, {"chain" : 4}, {"chain" : 10}],
-  "locked_tokens" : [
+  "exclusive_chains" :
+  [
+    {"chain" : 1}
+  ],
+  "locked_chains" :
+  [
+    {"chain" : 1},
+    {"chain" : 4},
+    {"chain" : 10}
+  ],
+  "locked_tokens" :
+  [
     {
       "tokenAddress" : "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
       "tokenName" : "USD Coin",

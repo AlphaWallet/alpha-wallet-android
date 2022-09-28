@@ -49,7 +49,8 @@ import java.util.List;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListener, TokensAdapterCallback {
+public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListener, TokensAdapterCallback
+{
     private final Handler delayHandler = new Handler(Looper.getMainLooper());
     NFTAssetsViewModel viewModel;
     private Token token;
@@ -164,13 +165,13 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         if (hasTokenScriptOverride(token))
         {
             searchLayout.setVisibility(View.GONE);
-            adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getJsonSettingService(), viewModel.getOpenseaService(), getActivity(), isGridView);
+            adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getCustomSettings(), viewModel.getOpenseaService(), getActivity(), isGridView);
         }
         else
         {
             searchLayout.setVisibility(View.VISIBLE);
             adapter = new NFTAssetsAdapter(getActivity(), token, this, isGridView);
-            search.addTextChangedListener(setupTextWatcher((NFTAssetsAdapter)adapter));
+            search.addTextChangedListener(setupTextWatcher((NFTAssetsAdapter) adapter));
         }
 
         recyclerView.setAdapter(adapter);
@@ -192,7 +193,8 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
     private TextWatcher setupTextWatcher(NFTAssetsAdapter adapter)
     {
-        return new TextWatcher() {
+        return new TextWatcher()
+        {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count)
             {
@@ -222,7 +224,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         super.onDestroy();
         if (adapter instanceof NFTAssetsAdapter)
         {
-            ((NFTAssetsAdapter)adapter).onDestroy();
+            ((NFTAssetsAdapter) adapter).onDestroy();
         }
     }
 }

@@ -81,7 +81,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private ViewPager2 viewPager;
 
-    private static class DetailPage {
+    private static class DetailPage
+    {
         private final int tabNameResourceId;
         private final Fragment fragment;
 
@@ -98,7 +99,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
     }
 
-    private final DetailPage[] detailPages = new DetailPage[] {
+    private final DetailPage[] detailPages = new DetailPage[]{
             new DetailPage(R.string.tab_info, new TokenInfoFragment()),
             new DetailPage(R.string.tab_activity, new TokenActivityFragment()),
             new DetailPage(R.string.tab_alert, new TokenAlertsFragment())
@@ -147,19 +148,23 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         viewPager.setAdapter(new TabPagerAdapter(this, pages));
         viewPager.setOffscreenPageLimit(detailPages.length);  // to retain fragments in memory
         viewPager.setUserInputEnabled(false);
-        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback()
+        {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels);
             }
 
             @Override
-            public void onPageSelected(int position) {
+            public void onPageSelected(int position)
+            {
                 super.onPageSelected(position);
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
+            public void onPageScrollStateChanged(int state)
+            {
                 super.onPageScrollStateChanged(state);
             }
         });
@@ -178,7 +183,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private List<Pair<String, Fragment>> getPages(Bundle bundle)
     {
         List<Pair<String, Fragment>> pages = new ArrayList<>();
-        for (int i = 0; i< detailPages.length; i++) {
+        for (int i = 0; i < detailPages.length; i++)
+        {
             pages.add(i, detailPages[i].init(this, bundle));
         }
         return pages;
@@ -261,14 +267,15 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     {
         if (tokenViewAdapter != null) return;
         tokenView = findViewById(R.id.token_view);
-        tokenView.setLayoutManager(new LinearLayoutManager(this) {
+        tokenView.setLayoutManager(new LinearLayoutManager(this)
+        {
             @Override
             public boolean canScrollVertically()
             {
                 return false;
             }
         });
-        tokenViewAdapter = new TokensAdapter(null, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), viewModel.jsonSettingService(), null);
+        tokenViewAdapter = new TokensAdapter(null, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), viewModel.getCustomSettings(), null);
         tokenViewAdapter.updateToken(tokenMeta, true);
         tokenView.setAdapter(tokenViewAdapter);
         setTokenListener();
@@ -510,7 +517,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public void handleGeneratePaymentRequest(Token token) {
+    public void handleGeneratePaymentRequest(Token token)
+    {
         Intent intent = new Intent(this, MyAddressActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);

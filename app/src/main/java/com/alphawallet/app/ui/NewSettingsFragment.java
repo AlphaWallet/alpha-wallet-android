@@ -325,7 +325,7 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(myAddressSetting, walletIndex++);
 
-        if (viewModel.getJsonSettingService().canChangeWallets())
+        if (viewModel.getCustomSettings().canChangeWallets())
             walletSettingsLayout.addView(changeWalletSetting, walletIndex++);
 
         walletSettingsLayout.addView(backUpWalletSetting, walletIndex++);
@@ -336,16 +336,11 @@ public class NewSettingsFragment extends BaseFragment
         walletSettingsLayout.addView(nameThisWallet, walletIndex++);
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
-        try {
-            String lockedChains = viewModel.getJsonSettingService().loadJSONStringFromAsset();
-            JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
-            JSONArray chainsArray = customSettingsJsonObject.getJSONArray("locked_chains");
-            if (chainsArray.length() == 0)
-            {
-                systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
-            }
-        }catch (JSONException err){
-            err.printStackTrace();
+
+        JSONArray chainsArray = viewModel.getCustomSettings().getChainsArrayJsonFile("locked_chains");
+        if (chainsArray.length() == 0)
+        {
+            systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
         }
 
         if (biometricsSetting != null)

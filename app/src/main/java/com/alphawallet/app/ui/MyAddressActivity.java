@@ -71,8 +71,9 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private InputAmount amountInput;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        screenWidth = (int) ((float)DisplayUtils.getScreenResolution(this).x * 0.8f);
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
+        screenWidth = (int) ((float) DisplayUtils.getScreenResolution(this).x * 0.8f);
         super.onCreate(savedInstanceState);
         initViewModel();
         overrideNetwork = 0;
@@ -101,7 +102,8 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         }
     }
 
-    private void initViews() {
+    private void initViews()
+    {
         toolbar();
         layoutInputAmount = findViewById(R.id.layout_define_request);
         qrImageView = findViewById(R.id.qr_image);
@@ -111,7 +113,8 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         if (viewModel == null) initViewModel();
     }
 
-    private void initViewModel() {
+    private void initViewModel()
+    {
         viewModel = new ViewModelProvider(this)
                 .get(MyAddressViewModel.class);
     }
@@ -138,7 +141,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (viewModel.getJsonSettingService().hideEIP681()) return super.onCreateOptionsMenu(menu);
+        if (viewModel.getCustomSettings().hideEIP681()) return super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_receive, menu);
 
         switch (currentMode)
@@ -184,7 +187,8 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         {
             showAddress();
         }
-        else if (item.getItemId() == R.id.action_networks) {
+        else if (item.getItemId() == R.id.action_networks)
+        {
             selectNetwork();
         }
 
@@ -208,8 +212,9 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
 
     private void setupPOSMode(NetworkInfo info)
     {
-        if (token == null) token = viewModel.getTokenService().getToken(info.chainId, wallet.address);
-        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getJsonSettingService(), viewModel.getTokenService(), this);
+        if (token == null)
+            token = viewModel.getTokenService().getToken(info.chainId, wallet.address);
+        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getCustomSettings(), viewModel.getTokenService(), this);
         amountInput.setAmount("");
         updateCryptoAmount(BigDecimal.ZERO);
     }
@@ -234,7 +239,8 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         setTitle(getString(R.string.my_wallet_address));
         copyAddress.setText(displayAddress);
         currentMode = AddressMode.MODE_ADDRESS;
-        if (getCurrentFocus() != null) {
+        if (getCurrentFocus() != null)
+        {
             KeyboardUtils.hideKeyboard(getCurrentFocus());
         }
         copyAddress.setVisibility(View.VISIBLE);
@@ -242,14 +248,15 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         updateAddressWithENS(wallet.ENSname); //JB: see if there's any cached value to display while we wait for ENS
 
         //When view changes, this function loads again. It will again try to fetch ENS
-        if(TextUtils.isEmpty(displayName))
+        if (TextUtils.isEmpty(displayName))
         {
             new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), getApplicationContext())
                     .reverseResolveEns(displayAddress)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
                     .subscribe(this::updateAddressWithENS, this::printTrace).isDisposed();
-            if (ensFetchProgressBar != null) {
+            if (ensFetchProgressBar != null)
+            {
                 ensFetchProgressBar.setVisibility(View.VISIBLE);
             }
         }
@@ -259,8 +266,10 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         }
     }
 
-    private void printTrace(Throwable throwable) {
-        if (ensFetchProgressBar != null) {
+    private void printTrace(Throwable throwable)
+    {
+        if (ensFetchProgressBar != null)
+        {
             ensFetchProgressBar.setVisibility(View.GONE);
         }
         updateAddressWithENS(wallet.ENSname); // JB: if there's any issue then fall back to cached name
@@ -284,7 +293,8 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
 
     private void updateAddressWithENS(String ensName)
     {
-        if (ensFetchProgressBar != null) {
+        if (ensFetchProgressBar != null)
+        {
             ensFetchProgressBar.setVisibility(View.GONE);
         }
 
@@ -315,9 +325,10 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
                         setupPOSMode(info);
                     }
                 }
-    });
+            });
 
-    private void selectNetwork() {
+    private void selectNetwork()
+    {
         Intent intent = new Intent(MyAddressActivity.this, SelectNetworkActivity.class);
         intent.putExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
@@ -338,7 +349,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
             }
             else
             {
-                amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getJsonSettingService(), viewModel.getTokenService(), this);
+                amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getCustomSettings(), viewModel.getTokenService(), this);
             }
         }
     }

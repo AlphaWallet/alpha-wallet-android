@@ -40,12 +40,16 @@ public class PriceAlertsService extends Service
 
     @Inject
     TokenLocalSource localSource;
+
     @Inject
     PreferenceRepositoryType preferenceRepository;
+
     @Inject
     TokensService tokensService;
+
     @Inject
     TickerService tickerService;
+
     @Inject
     NotificationService notificationService;
 
@@ -63,7 +67,7 @@ public class PriceAlertsService extends Service
     private Disposable heartBeatTimer;
 
     @Inject
-    JsonSettingService jsonSettingService;
+    CustomSettings customSettings;
 
     public class LocalBinder extends Binder
     {
@@ -89,7 +93,6 @@ public class PriceAlertsService extends Service
         genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, Throwable::printStackTrace).isDisposed();
-
     }
 
     private void onDefaultWallet(Wallet wallet)

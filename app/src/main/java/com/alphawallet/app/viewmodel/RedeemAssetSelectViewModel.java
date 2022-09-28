@@ -2,14 +2,12 @@ package com.alphawallet.app.viewmodel;
 
 import android.content.Context;
 
-import androidx.lifecycle.MutableLiveData;
-
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.RedeemSignatureDisplayRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.JsonSettingService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.token.entity.TicketRange;
@@ -27,20 +25,20 @@ public class RedeemAssetSelectViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final GenericWalletInteract genericWalletInteract;
-    private final JsonSettingService jsonSettingService;
+    private final CustomSettings customSettings;
 
     @Inject
     public RedeemAssetSelectViewModel(
             RedeemSignatureDisplayRouter redeemSignatureDisplayRouter,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
-            GenericWalletInteract genericWalletInteract, JsonSettingService jsonSettingService)
+            GenericWalletInteract genericWalletInteract, CustomSettings customSettings)
     {
         this.redeemSignatureDisplayRouter = redeemSignatureDisplayRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.genericWalletInteract = genericWalletInteract;
-        this.jsonSettingService = jsonSettingService;
+        this.customSettings = customSettings;
     }
 
     public void showRedeemSignature(Context ctx, TicketRange range, Token token)
@@ -63,8 +61,8 @@ public class RedeemAssetSelectViewModel extends BaseViewModel {
         return assetDefinitionService;
     }
 
-    public JsonSettingService getJsonSettingService()
+    public CustomSettings getCustomSettings()
     {
-        return jsonSettingService;
+        return customSettings;
     }
 }

@@ -20,13 +20,13 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 
-public class JsonSettingService
+public class CustomSettings
 {
     public final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
     public static final long primaryChain = MAINNET_ID;
     private final Context context;
 
-    public JsonSettingService(Context ctx)
+    public CustomSettings(Context ctx)
     {
         context = ctx;
     }
@@ -56,7 +56,6 @@ public class JsonSettingService
         {
             err.printStackTrace();
         }
-
         return chains;
     }
 
@@ -86,7 +85,6 @@ public class JsonSettingService
                     }
                 }
             }
-
         }
         catch (JSONException err)
         {
@@ -96,23 +94,43 @@ public class JsonSettingService
         return chains;
     }
 
+
+    public JSONArray getChainsArrayJsonFile(String chainName)
+    {
+        JSONArray chainsArray = new JSONArray();
+        try
+        {
+            String lockedChains = loadJSONStringFromAsset();
+            JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
+            chainsArray = customSettingsJsonObject.getJSONArray(chainName);
+        }
+        catch (JSONException err)
+        {
+            err.printStackTrace();
+        }
+
+        return chainsArray;
+    }
+
     public Boolean getDarkModeValueFromJsonFile(String chainName)
     {
         boolean darkModeValue = false;
-        try {
+        try
+        {
             String darkMode = loadJSONStringFromAsset();
-            if(darkMode != null)
+            if (darkMode != null)
             {
                 JSONObject customSettingsJsonObject = new JSONObject(darkMode);
                 darkModeValue = customSettingsJsonObject.getBoolean(chainName);
             }
-
-
-        }catch (JSONException err){
+        }
+        catch (JSONException err)
+        {
             err.printStackTrace();
         }
         return darkModeValue;
     }
+
     public String loadJSONStringFromAsset()
     {
         String returnString;
@@ -149,7 +167,6 @@ public class JsonSettingService
             if (tInfo.chainId == chainId && tInfo.address.equalsIgnoreCase(contractAddress))
                 return true;
         }
-
         return false;
     }
 
@@ -213,7 +230,7 @@ public class JsonSettingService
     //Implement minimal dappbrowser with no URL bar. You may want this if you want your browser to point to a specific website and only
     // allow navigation within that website
     // use this setting in conjunction with changing DEFAULT_HOMEPAGE in class EthereumNetworkBase
-    public boolean minimiseBrowserURLBar()
+    public static boolean minimiseBrowserURLBar()
     {
         return false;
     }

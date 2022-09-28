@@ -16,7 +16,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.service.JsonSettingService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.KeyService;
 
 import java.io.File;
@@ -37,7 +37,7 @@ public class SplashViewModel extends ViewModel
     private final FetchWalletsInteract fetchWalletsInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final KeyService keyService;
-    private final JsonSettingService jsonSettingService;
+    private final CustomSettings customSettings;
 
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private final MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
@@ -45,14 +45,15 @@ public class SplashViewModel extends ViewModel
     @Inject
     SplashViewModel(FetchWalletsInteract fetchWalletsInteract,
                     PreferenceRepositoryType preferenceRepository,
-                    KeyService keyService, JsonSettingService jsonSettingService) {
+                    KeyService keyService, CustomSettings customSettings)
+    {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.preferenceRepository = preferenceRepository;
         this.keyService = keyService;
 
         // increase launch count
 //        this.preferenceRepository.incrementLaunchCount();
-        this.jsonSettingService = jsonSettingService;
+        this.customSettings = customSettings;
     }
 
     public void fetchWallets()
@@ -64,14 +65,18 @@ public class SplashViewModel extends ViewModel
     }
 
     //on wallet error ensure execution still continues and splash screen terminates
-    private void onError(Throwable throwable) {
+    private void onError(Throwable throwable)
+    {
         wallets.postValue(new Wallet[0]);
     }
 
-    public LiveData<Wallet[]> wallets() {
+    public LiveData<Wallet[]> wallets()
+    {
         return wallets;
     }
-    public LiveData<Wallet> createWallet() {
+
+    public LiveData<Wallet> createWallet()
+    {
         return createWallet;
     }
 
@@ -92,7 +97,10 @@ public class SplashViewModel extends ViewModel
             wallet.type = WalletType.HDKEY;
             wallet.authLevel = authLevel;
             fetchWalletsInteract.storeWallet(wallet)
-                    .map(w -> { preferenceRepository.setCurrentWalletAddress(w.address); return w; })
+                    .map(w -> {
+                        preferenceRepository.setCurrentWalletAddress(w.address);
+                        return w;
+                    })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(newWallet -> wallets.postValue(new Wallet[]{newWallet}), this::onError).isDisposed();
@@ -165,8 +173,8 @@ public class SplashViewModel extends ViewModel
         preferenceRepository.setInstallTime(time);
     }
 
-    public JsonSettingService getJsonSettingService()
+    public CustomSettings getCustomSettings()
     {
-        return jsonSettingService;
+        return customSettings;
     }
 }

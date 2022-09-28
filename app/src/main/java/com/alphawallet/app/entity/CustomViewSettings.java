@@ -5,7 +5,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.service.JsonSettingService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.util.Arrays;
@@ -19,7 +19,7 @@ public class CustomViewSettings
     private static final String primaryChainName = C.ETHEREUM_NETWORK_NAME;
 
     @Inject
-    public CustomViewSettings(JsonSettingService jsonSettingService)
+    public CustomViewSettings(CustomSettings customSettings)
     {
     }
   /*  public static Context context;
@@ -86,24 +86,27 @@ public class CustomViewSettings
     }
 
     //Does main wallet page show tokens with zero balance? NB: any 'Locked' tokens above will always be shown
-    public static boolean showZeroBalance() { return false; }
+    public static boolean showZeroBalance()
+    {
+        return false;
+    }
 
    /* public static boolean tokenCanBeDisplayed(TokenCardMeta token)
     {
         return token.type == ContractType.ETHEREUM || token.isEnabled || isLockedToken(token.getChain(), token.getAddress());
     }*/
 
-   /* private static boolean isLockedToken(long chainId, String contractAddress)
-    {
-        ArrayList<TokenInfo> lockedTokens = getLockedTokensFromJsonFile("locked_tokens");
-        for (TokenInfo tInfo : lockedTokens)
-        {
-            if (tInfo.chainId == chainId && tInfo.address.equalsIgnoreCase(contractAddress)) return true;
-        }
+    /* private static boolean isLockedToken(long chainId, String contractAddress)
+     {
+         ArrayList<TokenInfo> lockedTokens = getLockedTokensFromJsonFile("locked_tokens");
+         for (TokenInfo tInfo : lockedTokens)
+         {
+             if (tInfo.chainId == chainId && tInfo.address.equalsIgnoreCase(contractAddress)) return true;
+         }
 
-        return false;
-    }
-*/
+         return false;
+     }
+ */
     public static ContractType checkKnownTokens(TokenInfo tokenInfo)
     {
         return ContractType.OTHER;
@@ -149,25 +152,46 @@ public class CustomViewSettings
     }
 
     //Hide EIP681 generation (Payment request, generates a QR code another wallet user can scan to have all payment fields filled in)
-    public static boolean hideEIP681() { return false; }
+    public static boolean hideEIP681()
+    {
+        return false;
+    }
 
     //In main wallet menu, if wallet allows adding new tokens
-    public static boolean canAddTokens() { return true; }
+    public static boolean canAddTokens()
+    {
+        return true;
+    }
 
     //Implement minimal dappbrowser with no URL bar. You may want this if you want your browser to point to a specific website and only
     // allow navigation within that website
     // use this setting in conjunction with changing DEFAULT_HOMEPAGE in class EthereumNetworkBase
-    public static boolean minimiseBrowserURLBar() { return false; }
+    public static boolean minimiseBrowserURLBar()
+    {
+        return false;
+    }
 
     //Allow showing token management view
-    public static boolean showManageTokens() { return true; }
+    public static boolean showManageTokens()
+    {
+        return true;
+    }
 
     //Show all networks in Select Network screen. Set to `true` to show only filtered networks.
-    public static boolean showAllNetworks() { return false; }
+    public static boolean showAllNetworks()
+    {
+        return false;
+    }
 
-    public static String getDecimalFormat() { return "0.####E0"; }
+    public static String getDecimalFormat()
+    {
+        return "0.####E0";
+    }
 
-    public static int getDecimalPlaces() { return 5; }
+    public static int getDecimalPlaces()
+    {
+        return 5;
+    }
 
     //set if the Input Amount defaults to Fiat or Crypto
     public static boolean inputAmountFiatDefault()

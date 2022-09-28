@@ -17,7 +17,7 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.JsonSettingService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.SendActivity;
@@ -35,7 +35,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 @HiltViewModel
-public class AddTokenViewModel extends BaseViewModel {
+public class AddTokenViewModel extends BaseViewModel
+{
 
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Long> switchNetwork = new MutableLiveData<>();
@@ -51,7 +52,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private final GenericWalletInteract genericWalletInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
-    private final JsonSettingService jsonSettingService;
+    private final CustomSettings customSettings;
     private final TokensService tokensService;
 
     private boolean foundNetwork;
@@ -59,14 +60,35 @@ public class AddTokenViewModel extends BaseViewModel {
     private long primaryChainId = 1;
     private final List<Token> discoveredTokenList = new ArrayList<>();
 
-    public MutableLiveData<Wallet> wallet() {
+    public MutableLiveData<Wallet> wallet()
+    {
         return wallet;
     }
-    public MutableLiveData<Token> tokenType() { return tokentype; }
-    public LiveData<Long> switchNetwork() { return switchNetwork; }
-    public LiveData<Integer> chainScanCount() { return scanCount; }
-    public LiveData<Token> onToken() { return onToken; }
-    public LiveData<Token[]> allTokens() { return allTokens; }
+
+    public MutableLiveData<Token> tokenType()
+    {
+        return tokentype;
+    }
+
+    public LiveData<Long> switchNetwork()
+    {
+        return switchNetwork;
+    }
+
+    public LiveData<Integer> chainScanCount()
+    {
+        return scanCount;
+    }
+
+    public LiveData<Token> onToken()
+    {
+        return onToken;
+    }
+
+    public LiveData<Token[]> allTokens()
+    {
+        return allTokens;
+    }
 
     @Nullable
     Disposable scanNetworksDisposable;
@@ -79,12 +101,13 @@ public class AddTokenViewModel extends BaseViewModel {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
-            JsonSettingService jsonSettingService, TokensService tokensService) {
+            CustomSettings customSettings, TokensService tokensService)
+    {
         this.genericWalletInteract = genericWalletInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
-        this.jsonSettingService = jsonSettingService;
+        this.customSettings = customSettings;
         this.tokensService = tokensService;
     }
 
@@ -97,7 +120,8 @@ public class AddTokenViewModel extends BaseViewModel {
     protected void onCleared()
     {
         super.onCleared();
-        if (scanNetworksDisposable != null && !scanNetworksDisposable.isDisposed()) scanNetworksDisposable.dispose();
+        if (scanNetworksDisposable != null && !scanNetworksDisposable.isDisposed())
+            scanNetworksDisposable.dispose();
     }
 
     public void setPrimaryChain(long chainId)
@@ -143,7 +167,10 @@ public class AddTokenViewModel extends BaseViewModel {
         finalisedToken.postValue(token);
     }
 
-    public NetworkInfo getNetworkInfo(long chainId) { return ethereumNetworkRepository.getNetworkByChain(chainId); }
+    public NetworkInfo getNetworkInfo(long chainId)
+    {
+        return ethereumNetworkRepository.getNetworkByChain(chainId);
+    }
 
     private void findWallet()
     {
@@ -151,7 +178,8 @@ public class AddTokenViewModel extends BaseViewModel {
                 .subscribe(wallet::setValue, this::onError);
     }
 
-    private void onTokensSetup(TokenInfo info) {
+    private void onTokensSetup(TokenInfo info)
+    {
         disposable = tokensService.addToken(info, wallet.getValue().address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -177,7 +205,7 @@ public class AddTokenViewModel extends BaseViewModel {
         findWallet();
     }
 
-    public void showSend(Context ctx, QRResult result, Token token,JsonSettingService jsonSettingService)
+    public void showSend(Context ctx, QRResult result, Token token)
     {
         Intent intent = new Intent(ctx, SendActivity.class);
         boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);
@@ -308,8 +336,8 @@ public class AddTokenViewModel extends BaseViewModel {
         return assetDefinitionService;
     }
 
-    public JsonSettingService jsonSettingService()
+    public CustomSettings getCustomSettings()
     {
-    return jsonSettingService;
+        return customSettings;
     }
 }

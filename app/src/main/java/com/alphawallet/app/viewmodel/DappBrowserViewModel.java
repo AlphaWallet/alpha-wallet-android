@@ -28,8 +28,8 @@ import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.AddEditDappActivity;
@@ -69,7 +69,7 @@ public class DappBrowserViewModel extends BaseViewModel
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
-    private final JsonSettingService jsonSettingService;
+    private final CustomSettings customSettings;
     private final CreateTransactionInteract createTransactionInteract;
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -88,7 +88,7 @@ public class DappBrowserViewModel extends BaseViewModel
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
-            GasService gasService, JsonSettingService jsonSettingService)
+            GasService gasService, CustomSettings customSettings)
     {
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -97,7 +97,7 @@ public class DappBrowserViewModel extends BaseViewModel
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.keyService = keyService;
         this.gasService = gasService;
-        this.jsonSettingService = jsonSettingService;
+        this.customSettings = customSettings;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -115,9 +115,9 @@ public class DappBrowserViewModel extends BaseViewModel
         return defaultWallet;
     }
 
-    public JsonSettingService getJsonSettingService()
+    public CustomSettings getCustomSettings()
     {
-        return jsonSettingService;
+        return customSettings;
     }
 
     public void findWallet()
@@ -256,7 +256,7 @@ public class DappBrowserViewModel extends BaseViewModel
         keyService.failedAuthentication(signData);
     }
 
-    public void showSend(Context ctx, QRResult result,JsonSettingService jsonSettingService)
+    public void showSend(Context ctx, QRResult result)
     {
         Intent intent = new Intent(ctx, SendActivity.class);
         boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);
@@ -301,7 +301,8 @@ public class DappBrowserViewModel extends BaseViewModel
 
     public void onDestroy()
     {
-        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
+        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed())
+            balanceTimerDisposable.dispose();
         gasService.stopGasPriceCycle();
     }
 
@@ -326,7 +327,8 @@ public class DappBrowserViewModel extends BaseViewModel
 
     public void stopBalanceUpdate()
     {
-        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
+        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed())
+            balanceTimerDisposable.dispose();
         balanceTimerDisposable = null;
         gasService.stopGasPriceCycle();
     }
@@ -415,7 +417,7 @@ public class DappBrowserViewModel extends BaseViewModel
             ethereumNetworkRepository.setFilterNetworkList(filters.toArray(new Long[0]));
         }
 
-        tokensService.setupFilter(jsonSettingService, true);
+        tokensService.setupFilter(customSettings, true);
     }
 
     public void setMainNetsSelected(boolean isMainNet)

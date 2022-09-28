@@ -16,7 +16,7 @@ import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.JsonSettingService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.ui.widget.NonFungibleAdapterInterface;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
@@ -66,8 +66,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     private boolean isGrid;
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
-                                   JsonSettingService jsonSettingService, OpenSeaService opensea, Activity activity) {
-        super(tokenClickListener, service, jsonSettingService);
+                                   CustomSettings customSettings, OpenSeaService opensea, Activity activity)
+    {
+        super(tokenClickListener, service, customSettings);
         assetCount = 0;
         token = t;
         clickThrough = true;
@@ -76,8 +77,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         this.activity = activity;
     }
 
-    public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service, JsonSettingService jsonSettingService, OpenSeaService opensea, Activity activity, boolean isGrid) {
-        super(tokenClickListener, service, jsonSettingService);
+    public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service, CustomSettings customSettings, OpenSeaService opensea, Activity activity, boolean isGrid)
+    {
+        super(tokenClickListener, service, customSettings);
         assetCount = 0;
         token = t;
         clickThrough = true;
@@ -88,9 +90,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, List<BigInteger> tokenSelection,
-                                   AssetDefinitionService service, JsonSettingService jsonSettingService)
+                                   AssetDefinitionService service, CustomSettings customSettings)
     {
-        super(tokenClickListener, service, jsonSettingService);
+        super(tokenClickListener, service, customSettings);
         assetCount = 0;
         token = t;
         clickThrough = false;
@@ -100,9 +102,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, ArrayList<Pair<BigInteger, NFTAsset>> assetSelection,
-                                   AssetDefinitionService service, JsonSettingService jsonSettingService)
+                                   AssetDefinitionService service, CustomSettings customSettings)
     {
-        super(tokenClickListener, service, jsonSettingService);
+        super(tokenClickListener, service, customSettings);
         assetCount = 0;
         token = t;
         clickThrough = false;
@@ -118,9 +120,11 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
 
     @NotNull
     @Override
-    public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    {
         BinderViewHolder<?> holder = null;
-        switch (viewType) {
+        switch (viewType)
+        {
             case TicketHolder.VIEW_TYPE: //Ticket holder now deprecated //TODO: remove
                 holder = new TicketHolder(R.layout.item_ticket, parent, token, assetService);
                 holder.setOnTokenClickListener(tokensAdapterCallback);
@@ -146,9 +150,11 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         return holder;
     }
 
-    public int getTicketRangeCount() {
+    public int getTicketRangeCount()
+    {
         int count = 0;
-        if (currentRange != null) {
+        if (currentRange != null)
+        {
             count = currentRange.tokenIds.size();
         }
         return count;
@@ -167,7 +173,8 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         int holderType = getHolderType();
 
         //TokenScript view for ERC721 overrides OpenSea display
-        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
+        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME))
+            holderType = AssetInstanceScriptHolder.VIEW_TYPE;
 
         List<TicketRangeElement> sortedList = generateSortedList(assetService, token, tokenIds); //generate sorted list
         addSortedItems(sortedList, t, holderType); //insert sorted items into view
@@ -183,7 +190,8 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         int holderType = getHolderType();
 
         //TokenScript view for ERC721 overrides OpenSea display
-        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
+        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME))
+            holderType = AssetInstanceScriptHolder.VIEW_TYPE;
 
         addRanges(t, holderType);
         items.endBatchedUpdates();
@@ -197,7 +205,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
 
         for (int i = 0; i < selection.size(); i++)
         {
-            items.add(new NFTSortedItem(selection.get(i), i+1));
+            items.add(new NFTSortedItem(selection.get(i), i + 1));
         }
 
         items.endBatchedUpdates();
@@ -256,7 +264,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
             {
                 currentRange = new TicketRange(e.id, t.getAddress());
                 final T item = generateType(currentRange, 10 + i, id);
-                items.add((SortedItem)item);
+                items.add((SortedItem) item);
                 currentTime = e.time;
             }
         }
@@ -303,7 +311,8 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
             if (si.view != null)
             {
                 AppCompatRadioButton button = si.view.itemView.findViewById(R.id.radioBox);
-                if (button != null && (button.isChecked() || si.isItemChecked())) button.setChecked(false);
+                if (button != null && (button.isChecked() || si.isItemChecked()))
+                    button.setChecked(false);
             }
             si.setIsChecked(false);
             si.setExposeRadio(expose);
@@ -325,7 +334,8 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
             if (si.isItemChecked())
             {
                 List<BigInteger> rangeIds = si.getTokenIds();
-                for (BigInteger tokenId : rangeIds) if (!tokenIds.contains(tokenId)) tokenIds.add(tokenId);
+                for (BigInteger tokenId : rangeIds)
+                    if (!tokenIds.contains(tokenId)) tokenIds.add(tokenId);
             }
         }
 

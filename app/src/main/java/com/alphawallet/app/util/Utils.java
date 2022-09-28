@@ -68,18 +68,20 @@ import java.util.regex.Pattern;
 
 import timber.log.Timber;
 
-public class Utils {
+public class Utils
+{
 
     private static final String ISOLATE_NUMERIC = "(0?x?[0-9a-fA-F]+)";
     private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
     private static final String CHAIN_REPO_ADDRESS_TOKEN = "[CHAIN]";
     private static final String TOKEN_LOGO = "/logo.png";
-    public  static final String ALPHAWALLET_REPO_NAME = "https://raw.githubusercontent.com/alphawallet/iconassets/lowercased/";
+    public static final String ALPHAWALLET_REPO_NAME = "https://raw.githubusercontent.com/alphawallet/iconassets/lowercased/";
     private static final String TRUST_ICON_REPO_BASE = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/";
     private static final String TRUST_ICON_REPO = TRUST_ICON_REPO_BASE + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
     private static final String ALPHAWALLET_ICON_REPO = ALPHAWALLET_REPO_NAME + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
 
-    public static int dp2px(Context context, int dp) {
+    public static int dp2px(Context context, int dp)
+    {
         Resources r = context.getResources();
         return (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
@@ -88,19 +90,27 @@ public class Utils {
         );
     }
 
-    public static String formatUrl(String url) {
-        if (URLUtil.isHttpsUrl(url) || URLUtil.isHttpUrl(url)) {
+    public static String formatUrl(String url)
+    {
+        if (URLUtil.isHttpsUrl(url) || URLUtil.isHttpUrl(url))
+        {
             return url;
-        } else {
-            if (isValidUrl(url)) {
+        }
+        else
+        {
+            if (isValidUrl(url))
+            {
                 return C.HTTPS_PREFIX + url;
-            } else {
+            }
+            else
+            {
                 return C.INTERNET_SEARCH_PREFIX + url;
             }
         }
     }
 
-    public static boolean isValidUrl(String url) {
+    public static boolean isValidUrl(String url)
+    {
         Pattern p = Patterns.WEB_URL;
         Matcher m = p.matcher(url.toLowerCase());
         return m.matches();
@@ -146,7 +156,8 @@ public class Utils {
         return result;
     }
 
-    private static String getFirstWord(String text) {
+    private static String getFirstWord(String text)
+    {
         if (TextUtils.isEmpty(text)) return "";
         text = text.trim();
         int index;
@@ -269,7 +280,7 @@ public class Utils {
             int spaceIndex = operationName.lastIndexOf(' ');
             if (spaceIndex > 0)
             {
-                operationName = operationName.substring(0, spaceIndex) + '\n' + operationName.substring(spaceIndex+1);
+                operationName = operationName.substring(0, spaceIndex) + '\n' + operationName.substring(spaceIndex + 1);
             }
             else
             {
@@ -298,16 +309,20 @@ public class Utils {
         return sb;
     }
 
-    public static String loadJSONFromAsset(Context context, String fileName) {
+    public static String loadJSONFromAsset(Context context, String fileName)
+    {
         String json = null;
-        try {
+        try
+        {
             InputStream is = context.getAssets().open(fileName);
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
             is.close();
             json = new String(buffer, StandardCharsets.UTF_8);
-        } catch (IOException ex) {
+        }
+        catch (IOException ex)
+        {
             ex.printStackTrace();
             return null;
         }
@@ -374,7 +389,8 @@ public class Utils {
     public static int[] bigIntegerListToIntList(List<BigInteger> ticketSendIndexList)
     {
         int[] indexList = new int[ticketSendIndexList.size()];
-        for (int i = 0; i < ticketSendIndexList.size(); i++) indexList[i] = ticketSendIndexList.get(i).intValue();
+        for (int i = 0; i < ticketSendIndexList.size(); i++)
+            indexList[i] = ticketSendIndexList.get(i).intValue();
         return indexList;
     }
 
@@ -395,6 +411,7 @@ public class Utils {
 
     /**
      * Produce a string CSV of integer IDs given an input list of values
+     *
      * @param idList
      * @param keepZeros
      * @return
@@ -453,7 +470,7 @@ public class Utils {
         for (Integer id : intList)
         {
             if (!keepZeros && id == 0) continue;
-            if (!first)sb.append(",");
+            if (!first) sb.append(",");
             sb.append(id);
             first = false;
         }
@@ -478,7 +495,10 @@ public class Utils {
 
         for (int i = 0; i < numString.length(); i++)
         {
-            if (Character.digit(numString.charAt(i), 10) == -1) { return false; }
+            if (Character.digit(numString.charAt(i), 10) == -1)
+            {
+                return false;
+            }
         }
 
         return true;
@@ -491,7 +511,10 @@ public class Utils {
 
         for (int i = 0; i < hexStr.length(); i++)
         {
-            if (Character.digit(hexStr.charAt(i), 16) == -1) { return false; }
+            if (Character.digit(hexStr.charAt(i), 16) == -1)
+            {
+                return false;
+            }
         }
 
         return true;
@@ -518,7 +541,8 @@ public class Utils {
         return valueFromInput;
     }
 
-    public static String formatAddress(String address) {
+    public static String formatAddress(String address)
+    {
         if (isAddressValid(address))
         {
             address = Keys.toChecksumAddress(address);
@@ -535,12 +559,15 @@ public class Utils {
 
     /**
      * Just enough for diagnosis of most errors
+     *
      * @param s String to be HTML escaped
      * @return escaped string
      */
-    public static String escapeHTML(String s) {
+    public static String escapeHTML(String s)
+    {
         StringBuilder out = new StringBuilder(Math.max(16, s.length()));
-        for (int i = 0; i < s.length(); i++) {
+        for (int i = 0; i < s.length(); i++)
+        {
             char c = s.charAt(i);
             switch (c)
             {
@@ -565,12 +592,12 @@ public class Utils {
 
     public static String convertTimePeriodInSeconds(long pendingTimeInSeconds, Context ctx)
     {
-        long days = pendingTimeInSeconds/(60*60*24);
-        pendingTimeInSeconds -= (days*60*60*24);
-        long hours = pendingTimeInSeconds/(60*60);
-        pendingTimeInSeconds -= (hours*60*60);
-        long minutes = pendingTimeInSeconds/60;
-        long seconds = pendingTimeInSeconds%60;
+        long days = pendingTimeInSeconds / (60 * 60 * 24);
+        pendingTimeInSeconds -= (days * 60 * 60 * 24);
+        long hours = pendingTimeInSeconds / (60 * 60);
+        pendingTimeInSeconds -= (hours * 60 * 60);
+        long minutes = pendingTimeInSeconds / 60;
+        long seconds = pendingTimeInSeconds % 60;
 
         StringBuilder sb = new StringBuilder();
         int timePoints = 0;
@@ -647,12 +674,12 @@ public class Utils {
 
     public static String shortConvertTimePeriodInSeconds(long pendingTimeInSeconds, Context ctx)
     {
-        long days = pendingTimeInSeconds/(60*60*24);
-        pendingTimeInSeconds -= (days*60*60*24);
-        long hours = pendingTimeInSeconds/(60*60);
-        pendingTimeInSeconds -= (hours*60*60);
-        long minutes = pendingTimeInSeconds/60;
-        long seconds = pendingTimeInSeconds%60;
+        long days = pendingTimeInSeconds / (60 * 60 * 24);
+        pendingTimeInSeconds -= (days * 60 * 60 * 24);
+        long hours = pendingTimeInSeconds / (60 * 60);
+        pendingTimeInSeconds -= (hours * 60 * 60);
+        long minutes = pendingTimeInSeconds / 60;
+        long seconds = pendingTimeInSeconds % 60;
 
         String timeStr;
 
@@ -672,7 +699,7 @@ public class Utils {
             }
             else
             {
-                BigDecimal hourStr = BigDecimal.valueOf(hours + (double)minutes/60.0)
+                BigDecimal hourStr = BigDecimal.valueOf(hours + (double) minutes / 60.0)
                         .setScale(1, RoundingMode.HALF_DOWN); //to 1 dp
                 timeStr = ctx.getString(R.string.hour_plural, hourStr.toString());
             }
@@ -685,7 +712,7 @@ public class Utils {
             }
             else
             {
-                BigDecimal minsStr = BigDecimal.valueOf(minutes + (double)seconds/60.0)
+                BigDecimal minsStr = BigDecimal.valueOf(minutes + (double) seconds / 60.0)
                         .setScale(1, RoundingMode.HALF_DOWN); //to 1 dp
                 timeStr = ctx.getString(R.string.minute_plural, minsStr.toString());
             }
@@ -720,7 +747,8 @@ public class Utils {
         return timeFormat.format(date) + " | " + dateFormat.format(date);
     }
 
-    public static long randomId() {
+    public static long randomId()
+    {
         return new Date().getTime();
     }
 
@@ -770,7 +798,8 @@ public class Utils {
         return "";
     }
 
-    private static final Map<Long, String> twChainNames = new HashMap<Long, String>() {
+    private static final Map<Long, String> twChainNames = new HashMap<Long, String>()
+    {
         {
             put(CLASSIC_ID, "classic");
             put(GNOSIS_ID, "xdai");
@@ -840,16 +869,21 @@ public class Utils {
         return url.startsWith("Qm") && url.length() == 46 && !url.contains(".") && !url.contains("/");
     }
 
-    public static String loadFile(Context context, @RawRes int rawRes) {
+    public static String loadFile(Context context, @RawRes int rawRes)
+    {
         byte[] buffer = new byte[0];
-        try {
+        try
+        {
             InputStream in = context.getResources().openRawResource(rawRes);
             buffer = new byte[in.available()];
             int len = in.read(buffer);
-            if (len < 1) {
+            if (len < 1)
+            {
                 throw new IOException("Nothing is read.");
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             Timber.tag("READ_JS_TAG").d(ex, "Ex");
         }
         return new String(buffer);
@@ -861,12 +895,14 @@ public class Utils {
     }
 
     //TODO: detect various App Library installs and re-direct appropriately
-    public static boolean verifyInstallerId(Context context) {
+    public static boolean verifyInstallerId(Context context)
+    {
         try
         {
             PackageManager packageManager = context.getPackageManager();
             String installingPackageName;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            {
                 final InstallSourceInfo installer = packageManager.getInstallSourceInfo(context.getPackageName());
                 installingPackageName = installer.getInstallingPackageName();
             }
@@ -891,16 +927,20 @@ public class Utils {
         if (input == null || (input.length() != 66 && input.length() != 64)) return false;
         String cleanInput = Numeric.cleanHexPrefix(input);
 
-        try {
+        try
+        {
             Numeric.toBigIntNoPrefix(cleanInput);
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e)
+        {
             return false;
         }
 
         return cleanInput.length() == 64;
     }
 
-    public static @ColorInt int getColorFromAttr(Context context, int resId)
+    public static @ColorInt
+    int getColorFromAttr(Context context, int resId)
     {
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = context.getTheme();
@@ -980,7 +1020,8 @@ public class Utils {
         }
     }
 
-    public static String removeDoubleQuotes(String string) {
+    public static String removeDoubleQuotes(String string)
+    {
         return string != null ? string.replace("\"", "") : null;
     }
 }

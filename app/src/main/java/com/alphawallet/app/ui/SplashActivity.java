@@ -35,7 +35,8 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     private String errorMessage;
 
     @Override
-    protected void attachBaseContext(Context base) {
+    protected void attachBaseContext(Context base)
+    {
         super.attachBaseContext(base);
     }
 
@@ -71,7 +72,8 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         onWallets(wallets);
     }
 
-    private void onWallets(Wallet[] wallets) {
+    private void onWallets(Wallet[] wallets)
+    {
         //event chain should look like this:
         //1. check if wallets are empty:
         //      - yes, get either create a new account or take user to wallet page if SHOW_NEW_ACCOUNT_PROMPT is set
@@ -96,12 +98,13 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         }
         else
         {
-            handler.postDelayed(this, splashViewModel.getJsonSettingService().startupDelay());
+            handler.postDelayed(this, splashViewModel.getCustomSettings().startupDelay());
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)

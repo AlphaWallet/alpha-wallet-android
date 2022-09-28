@@ -20,7 +20,7 @@ import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.JsonSettingService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
@@ -63,7 +63,7 @@ public class InputAmount extends LinearLayout
     private Realm tickerRealm;
     private TokensService tokensService;
     private AssetDefinitionService assetService;
-    private final JsonSettingService jsonSettingService;
+    private final CustomSettings customSettings;
     private BigInteger gasPriceEstimate = BigInteger.ZERO;
     private BigDecimal exactAmount = BigDecimal.ZERO;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -76,11 +76,11 @@ public class InputAmount extends LinearLayout
 
     private boolean showingCrypto;
 
-    public InputAmount(Context context, AttributeSet attrs, JsonSettingService jsonSettingService)
+    public InputAmount(Context context, AttributeSet attrs, CustomSettings customSettings)
     {
         super(context, attrs);
         this.context = context;
-        this.jsonSettingService = jsonSettingService;
+        this.customSettings = customSettings;
         inflate(context, R.layout.item_input_amount, this);
 
         editText = findViewById(R.id.amount_entry);
@@ -91,7 +91,7 @@ public class InputAmount extends LinearLayout
         availableAmount = findViewById(R.id.text_available);
         allFunds = findViewById(R.id.text_all_funds);
         gasFetch = findViewById(R.id.gas_fetch_progress);
-        showingCrypto = !jsonSettingService.inputAmountFiatDefault();
+        showingCrypto = !customSettings.inputAmountFiatDefault();
         amountReady = false;
 
         setupAttrs(context, attrs);
@@ -107,7 +107,7 @@ public class InputAmount extends LinearLayout
      * @param assetDefinitionService
      * @param svs
      */
-    public void setupToken(@NotNull Token token, @Nullable AssetDefinitionService assetDefinitionService,@Nullable JsonSettingService jsonSettingService,
+    public void setupToken(@NotNull Token token, @Nullable AssetDefinitionService assetDefinitionService, @Nullable CustomSettings customSettings,
                            @NotNull TokensService svs, @NotNull AmountReadyCallback amountCallback)
     {
         this.token = token;
@@ -224,7 +224,7 @@ public class InputAmount extends LinearLayout
         tokensService.storeToken(token);
 
         realmTokenUpdate.addChangeListener(realmToken -> {
-            RealmToken rt = (RealmToken)realmToken;
+            RealmToken rt = (RealmToken) realmToken;
             if (rt.isValid() && exactAmount.compareTo(BigDecimal.ZERO) == 0)
             {
                 token = tokensService.getToken(rt.getChainId(), rt.getTokenAddress());
@@ -250,20 +250,24 @@ public class InputAmount extends LinearLayout
             else
             {
                 showingCrypto = true;
-                if (tickerRealm != null) tickerRealm.removeAllChangeListeners(); //stop ticker listener
+                if (tickerRealm != null)
+                    tickerRealm.removeAllChangeListeners(); //stop ticker listener
             }
 
             updateAvailableBalance();
         });
 
-        editText.addTextChangedListener(new TextWatcher() {
+        editText.addTextChangedListener(new TextWatcher()
+        {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
 
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
                 if (editText.hasFocus())
                 {
                     exactAmount = BigDecimal.ZERO; //invalidate the 'all funds' amount
@@ -272,7 +276,8 @@ public class InputAmount extends LinearLayout
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void afterTextChanged(Editable s)
+            {
                 if (editText.hasFocus())
                 {
                     amountReadyCallback.updateCryptoAmount(getWeiInputAmount());
@@ -386,8 +391,8 @@ public class InputAmount extends LinearLayout
             if (token.isEthereum() && token.hasPositiveBalance())
             {
                 RealmGasSpread gasSpread = tokensService.getTickerRealmInstance().where(RealmGasSpread.class)
-                            .equalTo("chainId", token.tokenInfo.chainId)
-                            .findFirst();
+                        .equalTo("chainId", token.tokenInfo.chainId)
+                        .findFirst();
 
                 if (gasSpread != null && gasSpread.getGasPrice().compareTo(BigInteger.ZERO) > 0)
                 {

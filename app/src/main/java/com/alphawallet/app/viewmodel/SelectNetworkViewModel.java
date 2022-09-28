@@ -7,7 +7,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.service.JsonSettingService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.SelectNetworkFilterActivity;
 
@@ -22,17 +22,17 @@ public class SelectNetworkViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
     private final PreferenceRepositoryType preferenceRepository;
-    private final JsonSettingService jsonSettingService;
+    private final CustomSettings customSettings;
 
     @Inject
     public SelectNetworkViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                   TokensService tokensService,
-                                  PreferenceRepositoryType preferenceRepository, JsonSettingService jsonSettingService)
+                                  PreferenceRepositoryType preferenceRepository, CustomSettings customSettings)
     {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
         this.preferenceRepository = preferenceRepository;
-        this.jsonSettingService = jsonSettingService;
+        this.customSettings = customSettings;
     }
 
     public NetworkInfo[] getNetworkList()
@@ -45,9 +45,9 @@ public class SelectNetworkViewModel extends BaseViewModel {
         return networkRepository.getFilterNetworkList();
     }
 
-    public JsonSettingService getJsonSettingService()
+    public CustomSettings getCustomSettings()
     {
-        return jsonSettingService;
+        return customSettings;
     }
 
     public void openSelectNetworkFilters(Activity ctx, int requestCode)

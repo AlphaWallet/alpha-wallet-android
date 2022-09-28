@@ -37,7 +37,8 @@ import static com.alphawallet.app.ui.AddCustomRPCNetworkActivity.CHAIN_ID;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback {
+public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback
+{
     private SelectNetworkFilterViewModel viewModel;
 
     private MultiSelectNetworkAdapter mainNetAdapter;
@@ -60,7 +61,8 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         setupFilterList();
     }
@@ -103,9 +105,11 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         List<NetworkItem> mainNetList = viewModel.getNetworkList(true);
         List<NetworkItem> testNetList = viewModel.getNetworkList(false);
 
-        MultiSelectNetworkAdapter.EditNetworkListener editNetworkListener = new MultiSelectNetworkAdapter.EditNetworkListener() {
+        MultiSelectNetworkAdapter.EditNetworkListener editNetworkListener = new MultiSelectNetworkAdapter.EditNetworkListener()
+        {
 
-            private void showPopup(View view, long chainId) {
+            private void showPopup(View view, long chainId)
+            {
                 LayoutInflater inflater = LayoutInflater.from(SelectNetworkFilterActivity.this);
                 View popupView = inflater.inflate(R.layout.popup_view_delete_network, null);
 
@@ -121,14 +125,17 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
                 });
 
                 NetworkInfo network = viewModel.getNetworkByChain(chainId);
-                if (network.isCustom) {
+                if (network.isCustom)
+                {
                     popupView.findViewById(R.id.popup_delete).setOnClickListener(v -> {
                         // delete network
                         viewModel.removeCustomNetwork(chainId);
                         popupWindow.dismiss();
                         setupFilterList();
                     });
-                } else {
+                }
+                else
+                {
                     popupView.findViewById(R.id.popup_delete).setVisibility(View.GONE);
                 }
 
@@ -141,7 +148,8 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
             }
 
             @Override
-            public void onEditNetwork(long chainId, View parent) {
+            public void onEditNetwork(long chainId, View parent)
+            {
                 showPopup(parent, chainId);
             }
         };

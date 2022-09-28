@@ -4,7 +4,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.service.JsonSettingService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 
@@ -16,23 +16,26 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
-public class SelectNetworkFilterViewModel extends BaseViewModel {
+public class SelectNetworkFilterViewModel extends BaseViewModel
+{
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
     private final PreferenceRepositoryType preferenceRepository;
-    private final JsonSettingService jsonSettingService;
+    private final CustomSettings customSettings;
 
     @Inject
     public SelectNetworkFilterViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                         TokensService tokensService,
-                                        PreferenceRepositoryType preferenceRepository, JsonSettingService jsonSettingService) {
+                                        PreferenceRepositoryType preferenceRepository, CustomSettings customSettings)
+    {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
         this.preferenceRepository = preferenceRepository;
-        this.jsonSettingService = jsonSettingService;
+        this.customSettings = customSettings;
     }
 
-    public NetworkInfo[] getNetworkList() {
+    public NetworkInfo[] getNetworkList()
+    {
         return networkRepository.getAvailableNetworkList();
     }
 
@@ -42,7 +45,8 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
 
         NetworkInfo activeNetwork = networkRepository.getActiveBrowserNetwork();
         long activeNetworkId = -99;
-        if (activeNetwork != null) {
+        if (activeNetwork != null)
+        {
             activeNetworkId = networkRepository.getActiveBrowserNetwork().chainId;
         }
 
@@ -50,8 +54,10 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         boolean deselected = true;
         Long[] selectedIds = new Long[selectedItems.size()];
         int index = 0;
-        for (Long selectedId : selectedItems) {
-            if (EthereumNetworkRepository.hasRealValue(selectedId) == mainnetActive && activeNetworkId == selectedId) {
+        for (Long selectedId : selectedItems)
+        {
+            if (EthereumNetworkRepository.hasRealValue(selectedId) == mainnetActive && activeNetworkId == selectedId)
+            {
                 deselected = false;
             }
             selectedIds[index++] = selectedId;
@@ -59,7 +65,7 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
 
         if (deselected) networkRepository.setActiveBrowserNetwork(null);
         networkRepository.setFilterNetworkList(selectedIds);
-        tokensService.setupFilter(jsonSettingService, hasSelected && !shouldBlankUserSelection);
+        tokensService.setupFilter(customSettings, hasSelected && !shouldBlankUserSelection);
 
         if (shouldBlankUserSelection) preferenceRepository.blankHasSetNetworkFilters();
 
@@ -102,11 +108,13 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         return networkList;
     }
 
-    public void removeCustomNetwork(long chainId) {
+    public void removeCustomNetwork(long chainId)
+    {
         networkRepository.removeCustomRPCNetwork(chainId);
     }
 
-    public TokensService getTokensService() {
+    public TokensService getTokensService()
+    {
         return tokensService;
     }
 }

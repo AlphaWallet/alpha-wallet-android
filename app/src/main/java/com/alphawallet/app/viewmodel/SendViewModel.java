@@ -22,8 +22,8 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.JsonSettingService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
@@ -40,7 +40,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 @HiltViewModel
-public class SendViewModel extends BaseViewModel {
+public class SendViewModel extends BaseViewModel
+{
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
     private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
@@ -51,7 +52,7 @@ public class SendViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final GasService gasService;
     private final AssetDefinitionService assetDefinitionService;
-    private final JsonSettingService jsonSettingService;
+    private final CustomSettings customSettings;
     private final KeyService keyService;
     private final CreateTransactionInteract createTransactionInteract;
     private final AnalyticsServiceType analyticsService;
@@ -61,7 +62,7 @@ public class SendViewModel extends BaseViewModel {
                          EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                          TokensService tokensService,
                          FetchTransactionsInteract fetchTransactionsInteract,
-                         JsonSettingService jsonSettingService, CreateTransactionInteract createTransactionInteract,
+                         CustomSettings customSettings, CreateTransactionInteract createTransactionInteract,
                          GasService gasService,
                          AssetDefinitionService assetDefinitionService,
                          KeyService keyService,
@@ -71,7 +72,7 @@ public class SendViewModel extends BaseViewModel {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.jsonSettingService = jsonSettingService;
+        this.customSettings = customSettings;
         this.gasService = gasService;
         this.assetDefinitionService = assetDefinitionService;
         this.keyService = keyService;
@@ -83,7 +84,11 @@ public class SendViewModel extends BaseViewModel {
     {
         return transactionFinalised;
     }
-    public MutableLiveData<Throwable> transactionError() { return transactionError; }
+
+    public MutableLiveData<Throwable> transactionError()
+    {
+        return transactionError;
+    }
 
     public void showContractInfo(Context ctx, Wallet wallet, Token token)
     {
@@ -95,7 +100,10 @@ public class SendViewModel extends BaseViewModel {
         return networkRepository.getNetworkByChain(chainId);
     }
 
-    public Token getToken(long chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); }
+    public Token getToken(long chainId, String tokenAddress)
+    {
+        return tokensService.getToken(chainId, tokenAddress);
+    }
 
     public void showImportLink(Context context, String importTxt)
     {
@@ -126,9 +134,9 @@ public class SendViewModel extends BaseViewModel {
         return assetDefinitionService;
     }
 
-    public JsonSettingService jsonSettingService()
+    public CustomSettings getCustomSettings()
     {
-        return jsonSettingService;
+        return customSettings;
     }
 
     public TokensService getTokenService()

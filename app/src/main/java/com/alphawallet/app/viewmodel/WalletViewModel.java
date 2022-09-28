@@ -37,7 +37,7 @@ import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.JsonSettingService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.NameThisWalletActivity;
@@ -75,7 +75,7 @@ public class WalletViewModel extends BaseViewModel
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
-    private final JsonSettingService jsonSettingService;
+    private final CustomSettings customSettings;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final MyAddressRouter myAddressRouter;
@@ -93,7 +93,7 @@ public class WalletViewModel extends BaseViewModel
             GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
-            JsonSettingService jsonSettingService, ChangeTokenEnableInteract changeTokenEnableInteract,
+            CustomSettings customSettings, ChangeTokenEnableInteract changeTokenEnableInteract,
             MyAddressRouter myAddressRouter,
             CoinbasePayRouter coinbasePayRouter,
             ManageWalletsRouter manageWalletsRouter,
@@ -106,7 +106,7 @@ public class WalletViewModel extends BaseViewModel
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
-        this.jsonSettingService = jsonSettingService;
+        this.customSettings = customSettings;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.myAddressRouter = myAddressRouter;
         this.coinbasePayRouter = coinbasePayRouter;
@@ -116,19 +116,39 @@ public class WalletViewModel extends BaseViewModel
         this.onRampRepository = onRampRepository;
     }
 
-    public LiveData<TokenCardMeta[]> tokens() {
+    public LiveData<TokenCardMeta[]> tokens()
+    {
         return tokens;
     }
-    public LiveData<Wallet> defaultWallet() { return defaultWallet; }
-    public LiveData<GenericWalletInteract.BackupLevel> backupEvent() { return backupEvent; }
-    public LiveData<Pair<Double, Double>> onFiatValues() { return fiatValues; }
 
-    public String getWalletAddr() { return defaultWallet.getValue() != null ? defaultWallet.getValue().address : ""; }
-    public WalletType getWalletType() { return defaultWallet.getValue() != null ? defaultWallet.getValue().type : WalletType.KEYSTORE; }
+    public LiveData<Wallet> defaultWallet()
+    {
+        return defaultWallet;
+    }
+
+    public LiveData<GenericWalletInteract.BackupLevel> backupEvent()
+    {
+        return backupEvent;
+    }
+
+    public LiveData<Pair<Double, Double>> onFiatValues()
+    {
+        return fiatValues;
+    }
+
+    public String getWalletAddr()
+    {
+        return defaultWallet.getValue() != null ? defaultWallet.getValue().address : "";
+    }
+
+    public WalletType getWalletType()
+    {
+        return defaultWallet.getValue() != null ? defaultWallet.getValue().type : WalletType.KEYSTORE;
+    }
 
     public void prepare()
     {
-        lastBackupCheck = System.currentTimeMillis() - BALANCE_BACKUP_CHECK_INTERVAL + 5*DateUtils.SECOND_IN_MILLIS;
+        lastBackupCheck = System.currentTimeMillis() - BALANCE_BACKUP_CHECK_INTERVAL + 5 * DateUtils.SECOND_IN_MILLIS;
         //load the activity meta list
         disposable = genericWalletInteract
                 .find()
@@ -185,9 +205,9 @@ public class WalletViewModel extends BaseViewModel
         return assetDefinitionService;
     }
 
-    public JsonSettingService getJsonSettingService()
+    public CustomSettings getCustomSettings()
     {
-        return jsonSettingService ;
+        return customSettings;
     }
 
     public TokensService getTokensService()
@@ -223,7 +243,8 @@ public class WalletViewModel extends BaseViewModel
         genericWalletInteract.updateWarningTime(walletAddr);
     }
 
-    public void setTokenEnabled(Token token, boolean enabled) {
+    public void setTokenEnabled(Token token, boolean enabled)
+    {
         changeTokenEnableInteract.setEnable(defaultWallet.getValue(), token, enabled);
         token.tokenInfo.isEnabled = enabled;
     }
@@ -241,7 +262,8 @@ public class WalletViewModel extends BaseViewModel
             dialog.dismiss();
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText(KEY_ADDRESS, Keys.toChecksumAddress(getWalletAddr()));
-            if (clipboard != null) {
+            if (clipboard != null)
+            {
                 clipboard.setPrimaryClip(clip);
             }
 
@@ -272,7 +294,8 @@ public class WalletViewModel extends BaseViewModel
         dialog.show();
     }
 
-    public void showQRCodeScanning(Activity activity) {
+    public void showQRCodeScanning(Activity activity)
+    {
         Intent intent = new Intent(activity, QRScanner.class);
         intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
         activity.startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
@@ -328,7 +351,8 @@ public class WalletViewModel extends BaseViewModel
 
     public void checkBackup(double fiatValue)
     {
-        if (TextUtils.isEmpty(getWalletAddr()) || System.currentTimeMillis() < (lastBackupCheck + BALANCE_BACKUP_CHECK_INTERVAL)) return;
+        if (TextUtils.isEmpty(getWalletAddr()) || System.currentTimeMillis() < (lastBackupCheck + BALANCE_BACKUP_CHECK_INTERVAL))
+            return;
         lastBackupCheck = System.currentTimeMillis();
         double walletUSDValue = tokensService.convertToUSD(fiatValue);
 
@@ -388,20 +412,23 @@ public class WalletViewModel extends BaseViewModel
         manageWalletsRouter.open(context, clearStack);
     }
 
-    public boolean isMarshMallowWarningShown() {
+    public boolean isMarshMallowWarningShown()
+    {
         return preferenceRepository.isMarshMallowWarningShown();
     }
 
-    public void setMarshMallowWarning(boolean shown) {
+    public void setMarshMallowWarning(boolean shown)
+    {
         preferenceRepository.setMarshMallowWarning(shown);
     }
 
     public void saveAvatar(Wallet wallet)
     {
-        genericWalletInteract.updateWalletItem(wallet, WalletItem.ENS_AVATAR, () -> { });
+        genericWalletInteract.updateWalletItem(wallet, WalletItem.ENS_AVATAR, () -> {});
     }
 
-    public Intent getBuyIntent(String address) {
+    public Intent getBuyIntent(String address)
+    {
         Intent intent = new Intent();
         intent.putExtra(C.DAPP_URL_LOAD, onRampRepository.getUri(address, null));
         return intent;

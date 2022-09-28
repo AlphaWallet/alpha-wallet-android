@@ -1,0 +1,90 @@
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
+apply plugin: 'checkstyle'
+
+checkstyle {
+    // default path is config/checkstyle/checkstyle.xml
+    toolVersion "10.3.4"
+    ignoreFailures false
+    maxWarnings 0
+    configFile rootProject.file("checkstyle.xml")
+}
+
+// Customize all the Checkstyle tasks
+tasks.withType(Checkstyle) {
+    // Specify all files that should be checked
+    classpath = files()
+    source "${project.rootDir}"
+
+    reports {
+        html {
+            enabled true
+            destination rootProject.file("build/reports/checkstyle/checkstyle.html")
+        }
+        xml {
+            enabled true
+            destination rootProject.file("build/reports/checkstyle/checkstyle.xml")
+        }
+    }
+}
+
+// Execute Checkstyle on all files
+task checkstyle(type: Checkstyle) {
+}
+
+// Execute Checkstyle on all modified files
+task checkstyleChanged(type: Checkstyle) {
+    def changedFiles = getChangedFiles()
+    include changedFiles
+}
+
+/**
+ * Get all files that are changed but not deleted nor renamed.
+ * Compares to master or the specified target branch.
+ *
+ * @return list of all changed files
+ */
+def getChangedFiles() {
+    // Get the target and source branch
+    def baseRef = System.getenv("GITHUB_BASE_REF")
+    def headRef = System.getenv("GITHUB_HEAD_REF")
+
+    def targetBranch = 'origin/' + (baseRef ? baseRef : getParentBranch())
+    def sourceBranch = headRef ? 'origin/' + headRef : ""
+
+    // Get list of all changed files including status
+    def systemOutStream = new ByteArrayOutputStream()
+    def command = "git diff --name-only $targetBranch $sourceBranch"
+    command.execute().waitForProcessOutput(systemOutStream, System.err)
+    def allFiles = systemOutStream.toString().trim().split('\n')
+    systemOutStream.close()
+
+    allFiles.toList()
+}
+
+/**
+ * Determines the parent branch.
+ *
+ * @return the found parent branch or master if not possible
+ */
+def getParentBranch() {
+    def branch = ""
+    // Get short name of the HEAD branch
+    def branchDeterminer = "git rev-parse --abbrev-ref HEAD".execute()
+    branchDeterminer.in.eachLine { line -> branch = line }
+    branchDeterminer.err.eachLine { line -> println line }
+    branchDeterminer.waitFor()
+    // Search all branches for parent
+    def branchLine = 'git show-branch -a'.execute().text.readLines().find {
+        it.contains('*') && !(it ==~ ".*\\[$branch[~^\\]].*")
+    }
+    try {
+        // Filter parent branch name
+        def parent = (branchLine =~ /\[([^~^\]]*)[~^\]]/)[0][1]
+        return parent
+    } catch (Exception ignored) {
+        println "Could not determine parent branch, compare to master"
+        return "master"
+    }
+}

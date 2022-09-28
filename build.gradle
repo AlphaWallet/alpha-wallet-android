@@ -25,6 +25,8 @@ buildscript {
 }
 
 allprojects {
+    apply from: rootProject.file("codestyle.gradle")
+
     repositories {
         google()
         jcenter()

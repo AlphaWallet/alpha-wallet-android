@@ -50,15 +50,15 @@ def getChangedFiles() {
     def baseRef = System.getenv("GITHUB_BASE_REF")
     def headRef = System.getenv("GITHUB_HEAD_REF")
 
-    def targetBranch = baseRef ? baseRef : getParentBranch()
-    def sourceBranch = headRef ? headRef : ""
+    def targetBranch = 'origin/' + (baseRef ? baseRef : getParentBranch())
+    def sourceBranch = headRef ? 'origin/' + headRef : ""
 
     println sourceBranch
     println targetBranch
 
     // Get list of all changed files including status
     def systemOutStream = new ByteArrayOutputStream()
-    def command = "git diff --name-only origin/$targetBranch $sourceBranch"
+    def command = "git diff --name-only $targetBranch $sourceBranch"
     command.execute().waitForProcessOutput(systemOutStream, System.err)
     def allFiles = systemOutStream.toString().trim().split('\n')
     systemOutStream.close()
@@ -97,6 +97,6 @@ def getParentBranch() {
         return parent
     } catch (Exception ignored) {
         println "Could not determine parent branch, compare to master"
-        return "origin/master"
+        return "master"
     }
 }

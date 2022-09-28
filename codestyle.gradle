@@ -55,7 +55,7 @@ def getChangedFiles() {
     if (project.hasProperty("branch")) {
         targetBranch = project.property("branch")
     } else {
-        targetBranch = ghprbTargetBranch ? "origin/${ghprbTargetBranch}" : getParentBranch()
+        targetBranch = "origin/" + ghprbTargetBranch ? ${ghprbTargetBranch} : getParentBranch()
     }
     def sourceBranch = ghprbSourceBranch ? "origin/${ghprbSourceBranch}" : ""
 
@@ -69,6 +69,9 @@ def getChangedFiles() {
     def allFiles = systemOutStream.toString().trim().split('\n')
     systemOutStream.close()
 
+    println "----allFiles---"
+    println allFiles
+
     // Remove the status prefix
     Pattern statusPattern = Pattern.compile("(\\w)\\t+(.+)")
     List<String> files = new ArrayList<>()
@@ -79,6 +82,7 @@ def getChangedFiles() {
         }
     }
 
+    println "----files---"
     println files
     // Return the list of touched files
     files

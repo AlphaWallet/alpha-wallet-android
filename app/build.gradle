@@ -270,7 +270,6 @@ dependencies {
 
     // Sugar
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'com.github.apl-devs:appintro:v4.2.2'
 
     //coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.5'
 

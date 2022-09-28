@@ -53,9 +53,6 @@ def getChangedFiles() {
     def targetBranch = 'origin/' + (baseRef ? baseRef : getParentBranch())
     def sourceBranch = headRef ? 'origin/' + headRef : ""
 
-    println sourceBranch
-    println targetBranch
-
     // Get list of all changed files including status
     def systemOutStream = new ByteArrayOutputStream()
     def command = "git diff --name-only $targetBranch $sourceBranch"
@@ -63,16 +60,7 @@ def getChangedFiles() {
     def allFiles = systemOutStream.toString().trim().split('\n')
     systemOutStream.close()
 
-    // Remove the status prefix
-    List<String> files = new ArrayList<>()
-    for (file in allFiles) {
-        println file
-    }
-
-    println "----files---"
-    println files
-    // Return the list of touched files
-    files
+    allFiles.toList()
 }
 
 /**

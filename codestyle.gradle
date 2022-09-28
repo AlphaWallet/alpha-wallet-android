@@ -59,6 +59,9 @@ def getChangedFiles() {
     }
     def sourceBranch = ghprbSourceBranch ? "origin/${ghprbSourceBranch}" : ""
 
+    println sourceBranch
+    println targetBranch
+
     // Get list of all changed files including status
     def systemOutStream = new ByteArrayOutputStream()
     def command = "git diff --name-status --diff-filter=dr $targetBranch $sourceBranch"
@@ -76,6 +79,7 @@ def getChangedFiles() {
         }
     }
 
+    println files
     // Return the list of touched files
     files
 }

@@ -47,8 +47,8 @@ task checkstyleChanged(type: Checkstyle) {
  */
 def getChangedFiles() {
     // Get the target and source branch
-    def ghprbTargetBranch = System.getenv("ghprbTargetBranch")
-    def ghprbSourceBranch = System.getenv("GITHUB_REF")
+    def ghprbTargetBranch = System.getenv("GITHUB_BASE_REF")
+    def ghprbSourceBranch = System.getenv("GITHUB_HEAD_REF")
 
     // Compare to master if no branch specified
     def targetBranch

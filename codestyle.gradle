@@ -6,6 +6,8 @@ apply plugin: 'checkstyle'
 checkstyle {
     // default path is config/checkstyle/checkstyle.xml
     toolVersion "10.3.4"
+    ignoreFailures false
+    maxWarnings 0
     configFile rootProject.file("checkstyle.xml")
 }
 

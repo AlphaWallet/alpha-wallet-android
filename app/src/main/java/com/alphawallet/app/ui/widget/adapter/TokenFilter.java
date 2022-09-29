@@ -1,11 +1,14 @@
 package com.alphawallet.app.ui.widget.adapter;
 
+import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 
 import com.alphawallet.app.entity.lifi.Token;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 
 public class TokenFilter
@@ -15,6 +18,20 @@ public class TokenFilter
     public TokenFilter(List<Token> tokens)
     {
         this.tokens = tokens;
+        removeBadTokens();
+    }
+
+    private void removeBadTokens()
+    {
+        ListIterator<Token> iterator = this.tokens.listIterator();
+        while (iterator.hasNext())
+        {
+            Token t = iterator.next();
+            if (TextUtils.isEmpty(t.name) || TextUtils.isEmpty(t.symbol))
+            {
+                iterator.remove();
+            }
+        }
     }
 
     public List<Token> filterBy(String keyword)

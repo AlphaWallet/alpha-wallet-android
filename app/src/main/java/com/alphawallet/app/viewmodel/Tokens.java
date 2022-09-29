@@ -41,7 +41,7 @@ public class Tokens
             }
             else
             {
-                return l.name.compareToIgnoreCase(r.name);
+                return l.name.trim().compareToIgnoreCase(r.name.trim());
             }
         });
     }

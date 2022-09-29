@@ -25,6 +25,7 @@ public class TokenFilterTest
         list.add(createToken("Ethereum", "ETH", "1"));
         list.add(createToken("Solana", "SOL", "2"));
         list.add(createToken("Binance", "BNB", "3"));
+        list.add(createToken("", "", "4"));
         tokenFilter = new TokenFilter(list);
     }
 

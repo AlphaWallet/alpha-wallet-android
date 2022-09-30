@@ -949,5 +949,5 @@
     <string name="token_count">%1$s တိုကင်</string>
     <string name="error_insufficient_balance">%1$s ချိန်ခွင်လျှာမလုံလောက်</string>
     <string name="help_question7">ကိုယ်ရေးအချက်အလက်မူဝါဒ</string>
-    <string name="asset_rarity">Rarity</string>
+    <string name="asset_rarity">ရှားပါးသည်။</string>
 </resources>

@@ -250,7 +250,7 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    CustomSettings provideJsonSettingService(@ApplicationContext Context context)
+    CustomSettings provideCustomSettings(@ApplicationContext Context context)
     {
         return new CustomSettings(context);
     }

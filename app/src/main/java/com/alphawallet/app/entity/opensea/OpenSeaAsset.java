@@ -90,7 +90,7 @@ public class OpenSeaAsset
 
     @SerializedName("rarity_data")
     @Expose
-    public RarityData rarityData;
+    public Rarity rarity;
 
     public static class Collection
     {

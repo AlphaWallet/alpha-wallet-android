@@ -3,7 +3,7 @@ package com.alphawallet.app.entity.opensea;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class RarityData
+public class Rarity
 {
     @SerializedName("strategy_id")
     @Expose

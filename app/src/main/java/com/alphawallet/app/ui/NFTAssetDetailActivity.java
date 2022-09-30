@@ -409,9 +409,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             nftAttributeLayout.bind(token, openSeaAsset.traits, 0);
         }
 
-        if (openSeaAsset.rarityData != null && openSeaAsset.rarityData.rank > 0)
+        if (openSeaAsset.rarity != null && openSeaAsset.rarity.rank > 0)
         {
-            tivRarityData.setValue("#" + openSeaAsset.rarityData.rank);
+            tivRarityData.setValue("#" + openSeaAsset.rarity.rank);
         }
 
         if (openSeaAsset.owner != null

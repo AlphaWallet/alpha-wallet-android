@@ -69,7 +69,6 @@ public class DappBrowserViewModel extends BaseViewModel
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
-    private final CustomSettings customSettings;
     private final CreateTransactionInteract createTransactionInteract;
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -97,7 +96,6 @@ public class DappBrowserViewModel extends BaseViewModel
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.keyService = keyService;
         this.gasService = gasService;
-        this.customSettings = customSettings;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -113,11 +111,6 @@ public class DappBrowserViewModel extends BaseViewModel
     public LiveData<Wallet> defaultWallet()
     {
         return defaultWallet;
-    }
-
-    public CustomSettings getCustomSettings()
-    {
-        return customSettings;
     }
 
     public void findWallet()
@@ -417,7 +410,7 @@ public class DappBrowserViewModel extends BaseViewModel
             ethereumNetworkRepository.setFilterNetworkList(filters.toArray(new Long[0]));
         }
 
-        tokensService.setupFilter(customSettings, true);
+        tokensService.setupFilter(true);
     }
 
     public void setMainNetsSelected(boolean isMainNet)

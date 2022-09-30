@@ -65,7 +65,7 @@ public class SelectNetworkFilterViewModel extends BaseViewModel
 
         if (deselected) networkRepository.setActiveBrowserNetwork(null);
         networkRepository.setFilterNetworkList(selectedIds);
-        tokensService.setupFilter(customSettings, hasSelected && !shouldBlankUserSelection);
+        tokensService.setupFilter(hasSelected && !shouldBlankUserSelection);
 
         if (shouldBlankUserSelection) preferenceRepository.blankHasSetNetworkFilters();
 

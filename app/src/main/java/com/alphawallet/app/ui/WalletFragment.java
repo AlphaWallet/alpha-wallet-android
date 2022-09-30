@@ -51,7 +51,6 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
@@ -153,15 +152,6 @@ public class WalletFragment extends BaseFragment implements
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
         LocaleUtils.setActiveLocale(getContext()); // Can't be placed before above line
 
-        if (CustomSettings.canAddTokens())
-        {
-            toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
-        }
-        else
-        {
-            toolbar(view);
-        }
-
         initViews(view);
 
         initViewModel();
@@ -175,6 +165,15 @@ public class WalletFragment extends BaseFragment implements
         setImportToken();
 
         viewModel.prepare();
+
+        if (viewModel.getCustomSettings().canAddTokens())
+        {
+            toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
+        }
+        else
+        {
+            toolbar(view);
+        }
 
         addressAvatar.setWaiting();
 

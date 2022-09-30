@@ -1,24 +1,32 @@
 package com.alphawallet.app.service;
 
+import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.content.Context;
+import android.text.TextUtils;
+import android.util.Pair;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.util.Utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.web3j.crypto.Keys;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+
+import io.realm.Realm;
 
 public class CustomSettings
 {
@@ -170,7 +178,6 @@ public class CustomSettings
         return false;
     }
 
-
     public ContractType checkKnownTokens(TokenInfo tokenInfo)
     {
         return ContractType.OTHER;
@@ -222,7 +229,7 @@ public class CustomSettings
     }
 
     //In main wallet menu, if wallet allows adding new tokens
-    public static boolean canAddTokens()
+    public boolean canAddTokens()
     {
         return true;
     }

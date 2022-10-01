@@ -928,4 +928,5 @@
     <string name="error_insufficient_balance">Không đủ %1$s cân bằng</string>
     <string name="safe_transfer">Chuyển giao an toàn</string>
     <string name="connected_wallets">Ví kết nối</string>
+    <string name="asset_rarity">Việc hiếm có</string>
 </resources>

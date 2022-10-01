@@ -988,4 +988,5 @@
     <string name="vertical_pipe">|</string>
     <string name="eth" translatable="false">ETH</string>
     <string name="zero" translatable="false">0</string>
+    <string name="asset_rarity">Rarity</string>
 </resources>

@@ -915,4 +915,5 @@
     <string name="help_question7">隐私政策</string>
     <string name="help_question8">服务条款</string>
     <string name="connected_wallets">已连接的钱包</string>
+    <string name="asset_rarity">稀有度</string>
 </resources>

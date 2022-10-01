@@ -90,6 +90,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private TokenInfoView tivLastSale;
     private TokenInfoView tivAveragePrice;
     private TokenInfoView tivFloorPrice;
+    private TokenInfoView tivRarityData;
     private Animation rotation;
     private ActivityResultLauncher<Intent> handleTransactionSuccess;
     private ActivityResultLauncher<Intent> getGasSettings;
@@ -196,6 +197,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         tivLastSale = findViewById(R.id.last_sale);
         tivAveragePrice = findViewById(R.id.average_price);
         tivFloorPrice = findViewById(R.id.floor_price);
+        tivRarityData = findViewById(R.id.rarity);
 
         rotation = AnimationUtils.loadAnimation(this, R.anim.rotate_refresh);
         rotation.setRepeatCount(Animation.INFINITE);
@@ -405,6 +407,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         else
         {
             nftAttributeLayout.bind(token, openSeaAsset.traits, 0);
+        }
+
+        if (openSeaAsset.rarity != null && openSeaAsset.rarity.rank > 0)
+        {
+            tivRarityData.setValue("#" + openSeaAsset.rarity.rank);
         }
 
         if (openSeaAsset.owner != null

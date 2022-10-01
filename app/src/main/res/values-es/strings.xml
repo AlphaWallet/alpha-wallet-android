@@ -915,4 +915,5 @@
     <string name="help_question7">Política de privacidad</string>
     <string name="help_question8">Términos de servicio</string>
     <string name="connected_wallets">Billeteras conectadas</string>
+    <string name="asset_rarity">Rareza</string>
 </resources>

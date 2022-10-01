@@ -928,4 +928,5 @@
     <string name="help_question7">Politique de confidentialité</string>
     <string name="help_question8">Conditions d\'utilisation</string>
     <string name="connected_wallets">Portefeuilles connectés</string>
+    <string name="asset_rarity">Rareté</string>
 </resources>

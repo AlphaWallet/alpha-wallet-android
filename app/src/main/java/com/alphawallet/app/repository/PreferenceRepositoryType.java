@@ -2,6 +2,8 @@ package com.alphawallet.app.repository;
 
 import com.alphawallet.app.entity.CurrencyItem;
 
+import java.util.Set;
+
 public interface PreferenceRepositoryType {
     String getCurrentWalletAddress();
 
@@ -96,4 +98,7 @@ public interface PreferenceRepositoryType {
 
     boolean isNewWallet(String address);
     void setNewWallet(String address, boolean isNewWallet);
+
+    Set<String> getSelectedSwapProviders();
+    void setSelectedSwapProviders(Set<String> swapProviders);
 }

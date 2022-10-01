@@ -950,4 +950,16 @@
     <string name="error_insufficient_balance">%1$s ချိန်ခွင်လျှာမလုံလောက်</string>
     <string name="help_question7">ကိုယ်ရေးအချက်အလက်မူဝါဒ</string>
     <string name="asset_rarity">ရှားပါးသည်။</string>
+    <string name="preferred_exchanges">နှစ်သက်သော ဖလှယ်မှုများ</string>
+    <string name="info_gas_fee">ဓာတ်ငွေ့ကြေး: %s</string>
+    <string name="message_fetching_routes">လမ်းကြောင်းများ ရယူခြင်း။</string>
+    <string name="title_select_route">လမ်းကြောင်းကို ရွေးပါ။</string>
+    <string name="title_select_exchanges">Exchanges ကို ရွေးပါ။</string>
+    <string name="label_available_routes">လမ်းကြောင်းအသစ်များ %s</string>
+    <string name="label_amount_to_swap">လဲလှယ်ရန် ပမာဏ</string>
+    <string name="label_provider_website">ဝန်ဆောင်မှုပေးသော ဝဘ်ဆိုဒ်</string>
+    <string name="header_quote_details">ကိုးကားအသေးစိတ်</string>
+    <string name="label_swap_via">မှတဆင့်လဲလှယ်ပါ။ %s</string>
+    <string name="message_no_routes_found_for_the_given_parameters">ပေးထားသော ကန့်သတ်ဘောင်များအတွက် လမ်းကြောင်းများ ရှာမတွေ့ပါ။</string>
+    <string name="message_select_one_exchange">အနည်းဆုံးလဲလှယ်မှုတစ်ခုကို ရွေးပါ။</string>
 </resources>

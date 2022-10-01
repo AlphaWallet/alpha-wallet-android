@@ -929,4 +929,16 @@
     <string name="safe_transfer">Chuyển giao an toàn</string>
     <string name="connected_wallets">Ví kết nối</string>
     <string name="asset_rarity">Việc hiếm có</string>
+    <string name="preferred_exchanges">Sở giao dịch ưu tiên</string>
+    <string name="info_gas_fee">Phí xăng: %s</string>
+    <string name="message_fetching_routes">Tìm nạp các tuyến đường</string>
+    <string name="title_select_route">Chọn tuyến đường</string>
+    <string name="title_select_exchanges">Chọn trao đổi</string>
+    <string name="label_available_routes">Các tuyến đường mới trong %s</string>
+    <string name="label_amount_to_swap">Số tiền để hoán đổi</string>
+    <string name="label_provider_website">Trang web của nhà cung cấp</string>
+    <string name="header_quote_details">Trích dẫn Chi tiết</string>
+    <string name="label_swap_via">Hoán đổi qua %s</string>
+    <string name="message_no_routes_found_for_the_given_parameters">Không tìm thấy các tuyến đường cho các thông số đã cho.</string>
+    <string name="message_select_one_exchange">Chọn ít nhất một sàn giao dịch.</string>
 </resources>

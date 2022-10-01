@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    app:cardElevation="0dp"
+    app:contentPadding="@dimen/standard_16"
+    app:strokeColor="?android:textColorPrimary"
+    app:strokeWidth="1dp">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/provider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:lines="1"
+            tools:text="Swap via PancakeSwap" />
+
+        <TextView
+            android:id="@+id/tag"
+            style="@style/Aw.Typography.Label.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/tiny_8"
+            android:layout_toEndOf="@id/provider"
+            android:textColor="?colorPrimary"
+            android:visibility="gone"
+            tools:text="RECOMMENDED"
+            tools:visibility="visible" />
+
+        <LinearLayout
+            android:id="@+id/layout_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/provider"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/value"
+                style="@style/Aw.Typography.Title.Large.Bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                tools:text="1234.56 " />
+
+            <com.alphawallet.app.widget.AddressIcon
+                android:id="@+id/token_icon"
+                android:layout_width="@dimen/token_icon_small"
+                android:layout_height="@dimen/token_icon_small"
+                android:layout_gravity="center_vertical"
+                android:layout_marginHorizontal="@dimen/mini_4"
+                android:src="@drawable/ic_ethereum"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/symbol"
+                style="@style/Aw.Typography.Title.Large"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:visibility="gone"
+                tools:text="USDC" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_title"
+            android:layout_marginTop="@dimen/tiny_8"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/price"
+                style="@style/Aw.Typography.Sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:text="1 ETH = 1500 USDC" />
+
+            <TextView
+                android:id="@+id/gas"
+                style="@style/Aw.Typography.Sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Gas fee: 1.23 USDC" />
+
+            <TextView
+                android:id="@+id/fees"
+                style="@style/Aw.Typography.Sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:text="Other fees: 1.23 USDC"
+                tools:visibility="visible" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_arrow_right" />
+
+    </RelativeLayout>
+
+</com.google.android.material.card.MaterialCardView>

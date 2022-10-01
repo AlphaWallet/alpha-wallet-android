@@ -916,4 +916,16 @@
     <string name="help_question8">服务条款</string>
     <string name="connected_wallets">已连接的钱包</string>
     <string name="asset_rarity">稀有度</string>
+    <string name="preferred_exchanges">首选交易所</string>
+    <string name="info_gas_fee">汽油费: %s</string>
+    <string name="message_fetching_routes">获取路线</string>
+    <string name="title_select_route">选择路线</string>
+    <string name="title_select_exchanges">选择交易所</string>
+    <string name="label_available_routes">新航线 %s</string>
+    <string name="label_amount_to_swap">交换金额</string>
+    <string name="label_provider_website">提供者网站</string>
+    <string name="header_quote_details">报价详情</string>
+    <string name="label_swap_via">通过 %s 交换</string>
+    <string name="message_no_routes_found_for_the_given_parameters">没有找到给定参数的路由。</string>
+    <string name="message_select_one_exchange">至少选择一个交易所。</string>
 </resources>

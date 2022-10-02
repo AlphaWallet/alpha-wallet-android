@@ -59,6 +59,9 @@ public abstract class C {
     public static final String MILKOMEDA_TESTNET_NAME = "Milkomeda Cardano (Test)";
     public static final String PHI_NETWORK_NAME = "PHI";
     public static final String PHI_V2_NETWORK_NAME = "PHI v2";
+    public static final String SEPOLIA_TESTNET_NAME = "Sepolia (Test)";
+    public static final String OPTIMISM_GOERLI_TESTNET_NAME = "Optimism Goerli (Test)";
+    public static final String ARBITRUM_GOERLI_TESTNET_NAME = "Arbitrum Goerli (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -92,6 +95,9 @@ public abstract class C {
     public static final String MILKOMEDA_SYMBOL = "milkADA";
     public static final String MILKOMEDA_TEST_SYMBOL = "milktADA";
     public static final String PHI_NETWORK_SYMBOL = "\u03d5";
+    public static final String SEPOLIA_SYMBOL = "ETH";
+    public static final String OPTIMISM_GOERLI_TEST_SYMBOL = "ETH";
+    public static final String ARBITRUM_GOERLI_TEST_SYMBOL = "AGOR";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 

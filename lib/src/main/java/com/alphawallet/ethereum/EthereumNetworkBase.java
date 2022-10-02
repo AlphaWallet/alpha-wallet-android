@@ -47,6 +47,9 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final long MILKOMEDA_C1_TEST_ID = 200101;
     public static final long PHI_MAIN_ID = 4181;
     public static final long PHI_V2_MAIN_ID = 144;
+    public static final long SEPOLIA_TESTNET_ID = 11155111;
+    public static final long OPTIMISM_GOERLI_TEST_ID = 420;
+    public static final long ARBITRUM_GOERLI_TEST_ID = 421613;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -86,6 +89,9 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String MILKOMEDA_C1_TEST_RPC = "https://rpc-devnet-cardano-evm.c1.milkomeda.com";
     public static final String PHI_MAIN_RPC_URL = "https://rpc1.phi.network";
     public static final String PHI_NETWORK_V2_RPC = "https://connect.phi.network";
+    public static final String SEPOLIA_TESTNET_RPC_URL = "https://rpc.sepolia.dev";
+    public static final String OPTIMISM_GOERLI_TESTNET_RPC_URL = "https://optimism-goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    public static final String ARBITRUM_GOERLI_TESTNET_RPC_URL = "https://arbitrum-goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
 
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>() {
         {
@@ -168,6 +174,12 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     PHI_MAIN_ID, false));
             put(PHI_V2_MAIN_ID, new NetworkInfo("PHI v2", "\u03d5", PHI_NETWORK_V2_RPC, "https://phiscan.com/tx/",
                     PHI_V2_MAIN_ID, false));
+            put(SEPOLIA_TESTNET_ID, new NetworkInfo("Sepolia (Test)", "ETH", SEPOLIA_TESTNET_RPC_URL, "https://sepolia.etherscan.io/tx/",
+                    SEPOLIA_TESTNET_ID, false));
+            put(OPTIMISM_GOERLI_TEST_ID, new NetworkInfo("Optimism Goerli (Test)", "ETH", OPTIMISM_GOERLI_TESTNET_RPC_URL, "https://blockscout.com/optimism/goerli/tx/",
+                    OPTIMISM_GOERLI_TEST_ID, false));
+            put(ARBITRUM_GOERLI_TEST_ID, new NetworkInfo("Arbitrum Goerli (Test)", "AGOR", ARBITRUM_GOERLI_TESTNET_RPC_URL, "https://goerli-rollup-explorer.arbitrum.io/tx/",
+                    ARBITRUM_GOERLI_TEST_ID, false));
         }
     };
 

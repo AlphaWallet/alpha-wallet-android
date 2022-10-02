@@ -928,4 +928,5 @@
     <string name="label_swap_via">Intercambiar a través de %s</string>
     <string name="message_no_routes_found_for_the_given_parameters">No se encontraron rutas para los parámetros dados.</string>
     <string name="message_select_one_exchange">Seleccione al menos un intercambio.</string>
+    <string name="deprecated">Obsoleta</string>
 </resources>

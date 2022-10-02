@@ -4,6 +4,8 @@ import static androidx.core.content.ContextCompat.getColorStateList;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
@@ -397,5 +399,22 @@ public class TokenIcon extends ConstraintLayout
                 .into(new DrawableImageViewTarget(icon)).getRequest();
         icon.setVisibility(View.VISIBLE);
         findViewById(R.id.circle).setVisibility(View.VISIBLE);
+    }
+
+    public void setGrayscale(boolean grayscale)
+    {
+        if (grayscale)
+        {
+            ColorMatrix matrix = new ColorMatrix();
+            matrix.setSaturation(0);
+            ColorMatrixColorFilter cf = new ColorMatrixColorFilter(matrix);
+            icon.setColorFilter(cf);
+            icon.setImageAlpha(128);
+        }
+        else
+        {
+            icon.setColorFilter(null);
+            icon.setImageAlpha(255);
+        }
     }
 }

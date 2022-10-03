@@ -1,5 +1,13 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.EXTRA_PRICE;
+import static com.alphawallet.app.C.EXTRA_STATE;
+import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
+import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.C.PRUNE_ACTIVITY;
+import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.token.tools.Convert.getEthString;
+
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -52,17 +60,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.MissingFormatArgumentException;
 
-import timber.log.Timber;
-
-import static com.alphawallet.app.C.EXTRA_PRICE;
-import static com.alphawallet.app.C.EXTRA_STATE;
-import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
-import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.C.PRUNE_ACTIVITY;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
-import static com.alphawallet.token.tools.Convert.getEthString;
-
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 /**
  * Created by James on 21/02/2018.
@@ -114,7 +113,8 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
     private PinAuthenticationCallbackInterface authInterface;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this)
                 .get(SellDetailViewModel.class);
@@ -138,7 +138,7 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
 
         //we should import a token and a list of chosen ids
         list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(this, token, selection, viewModel.getAssetDefinitionService());
+        adapter = new NonFungibleTokenAdapter(this, token, selection, viewModel.getAssetDefinitionService(), viewModel.getCustomSettings());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -246,24 +246,31 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
 
     private void addSellPriceListener()
     {
-        sellPrice.addTextChangedListener(new TextWatcher() {
+        sellPrice.addTextChangedListener(new TextWatcher()
+        {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
 
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                try {
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+                try
+                {
                     int quantity = Integer.parseInt(textQuantity.getText().toString());
                     updateSellPrice(quantity);
-                } catch (NumberFormatException e) {
+                }
+                catch (NumberFormatException e)
+                {
                     //silent fail, just don't update
                 }
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void afterTextChanged(Editable s)
+            {
 
             }
         });
@@ -292,15 +299,18 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
         }
     }
 
-    private boolean isPriceAndQuantityValid() {
+    private boolean isPriceAndQuantityValid()
+    {
         boolean result = true;
         hideErrorMessages();
 
-        if (Integer.parseInt(textQuantity.getText().toString()) <= 0) {
+        if (Integer.parseInt(textQuantity.getText().toString()) <= 0)
+        {
             quantityErrorText.setVisibility(View.VISIBLE);
             result = false;
         }
-        if (sellPrice.getText().toString().isEmpty() || Double.parseDouble(sellPrice.getText().toString()) <= 0) {
+        if (sellPrice.getText().toString().isEmpty() || Double.parseDouble(sellPrice.getText().toString()) <= 0)
+        {
             priceErrorText.setVisibility(View.VISIBLE);
             result = false;
         }
@@ -308,7 +318,8 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
         {
             sellPriceValue = Double.parseDouble(sellPrice.getText().toString());
         }
-        if (!isValidAmount(sellPrice.getText().toString())) {
+        if (!isValidAmount(sellPrice.getText().toString()))
+        {
             priceErrorText.setVisibility(View.VISIBLE);
             result = false;
         }
@@ -340,7 +351,8 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
         RelativeLayout plusButton = findViewById(R.id.layout_quantity_add);
         plusButton.setOnClickListener(v -> {
             int quantity = Integer.parseInt(textQuantity.getText().toString());
-            if ((quantity + 1) <= adapter.getTicketRangeCount()) {
+            if ((quantity + 1) <= adapter.getTicketRangeCount())
+            {
                 quantity++;
                 textQuantity.setText(String.valueOf(quantity));
                 updateSellPrice(quantity);
@@ -351,7 +363,8 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
         RelativeLayout minusButton = findViewById(R.id.layout_quantity_minus);
         minusButton.setOnClickListener(v -> {
             int quantity = Integer.parseInt(textQuantity.getText().toString());
-            if ((quantity - 1) > 0) {
+            if ((quantity - 1) > 0)
+            {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
                 updateSellPrice(quantity);
@@ -363,7 +376,8 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
         selection = token.pruneIDList(ticketIds, 1);
     }
 
-    private void initDatePicker() {
+    private void initDatePicker()
+    {
         String dateFormat = "dd/MM/yyyy";
         Calendar newCalendar = Calendar.getInstance();
         SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat, Locale.ENGLISH);
@@ -380,7 +394,8 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
         expiryDateEditText.setText(dateFormatter.format(tomorrow.getTime()));
     }
 
-    private void initTimePicker() {
+    private void initTimePicker()
+    {
         Calendar newCalendar = Calendar.getInstance();
         timePickerDialog = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
             String time = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
@@ -389,43 +404,54 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
 
         //set for now
         String time = String.format(Locale.getDefault(), "%02d:%02d", Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
-                                    Calendar.getInstance().get(Calendar.MINUTE));
+                Calendar.getInstance().get(Calendar.MINUTE));
         expiryTimeEditText.setText(time);
     }
 
-    private void onEthereumPrice(Double aDouble) {
+    private void onEthereumPrice(Double aDouble)
+    {
         ethToUsd = aDouble;
         //see if there's a non-zero value in the eth field
         updateUSDBalance();
     }
 
-    private void updateUSDBalance() {
-        try {
+    private void updateUSDBalance()
+    {
+        try
+        {
             int quantity = Integer.parseInt(textQuantity.getText().toString());
             double ethPrice = Double.parseDouble(sellPrice.getText().toString());
-            if (quantity > 0 && ethPrice > 0) {
+            if (quantity > 0 && ethPrice > 0)
+            {
                 String fiatText = TickerService.getCurrencyString(ethPrice * ethToUsd * (double) quantity);
                 usdPrice.setText(fiatText);
             }
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e)
+        {
 
         }
     }
 
     private void updateSellPrice(int quantity)
     {
-        if (!sellPrice.getText().toString().isEmpty()) {
-            try {
+        if (!sellPrice.getText().toString().isEmpty())
+        {
+            try
+            {
                 sellPriceValue = Double.parseDouble(sellPrice.getText().toString());
                 totalCostText.setText(getString(R.string.total_cost, getEthString(quantity * sellPriceValue), viewModel.getSymbol()));
                 updateUSDBalance();
-            } catch (NumberFormatException|MissingFormatArgumentException e) {
+            }
+            catch (NumberFormatException | MissingFormatArgumentException e)
+            {
                 //silent fail, just don't update
             }
         }
     }
 
-    private void sellTicketLinkFinal() {
+    private void sellTicketLinkFinal()
+    {
         String expiryDate = expiryDateEditText.getText().toString();
         String expiryTime = expiryTimeEditText.getText().toString();
         String tempDateString = expiryDate + " " + expiryTime;
@@ -433,13 +459,17 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
         Date date;
         String dateString = "";
         long UTCTimeStamp = 0;
-        try {
+        try
+        {
             date = simpleDateFormat.parse(tempDateString);
             dateString = simpleDateFormat.format(date);
             Timber.d("date : %s", dateString);
-            UTCTimeStamp = (date.getTime())/1000;
-        } catch (ParseException e) {
-            Timber.e(e);;
+            UTCTimeStamp = (date.getTime()) / 1000;
+        }
+        catch (ParseException e)
+        {
+            Timber.e(e);
+            ;
         }
 
         //1. validate price
@@ -447,7 +477,8 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
         //2. get quantity
         int quantity = selection.size();
 
-        if (price.doubleValue() > 0.0 && selection != null && quantity > 0) {
+        if (price.doubleValue() > 0.0 && selection != null && quantity > 0)
+        {
             //get the specific ID's, pick from the start of the run
             BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity)); //in wei
             viewModel.generateUniversalLink(token.getTransferListFormat(selection), token.getAddress(), totalValue, UTCTimeStamp);
@@ -456,25 +487,32 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
         KeyboardUtils.hideKeyboard(getCurrentFocus());
     }
 
-    private BigInteger getPriceInWei() {
+    private BigInteger getPriceInWei()
+    {
         //now convert to microWei
-        long microEth = (int)(sellPriceValue * 1000000.0);
+        long microEth = (int) (sellPriceValue * 1000000.0);
         byte[] max = Numeric.hexStringToByteArray("FFFFFFFF");
         BigInteger maxValue = new BigInteger(1, max);
-        if (microEth > maxValue.longValue()) microEth = 0; //check on UI screen if amount is more than we can handle
+        if (microEth > maxValue.longValue())
+            microEth = 0; //check on UI screen if amount is more than we can handle
         //now convert to Wei
         return Convert.toWei(Long.toString(microEth), Convert.Unit.SZABO).toBigInteger();
     }
 
-    boolean isValidAmount(String eth) {
-        try {
+    boolean isValidAmount(String eth)
+    {
+        try
+        {
             return !getPriceInWei().equals(BigInteger.ZERO);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             return false;
         }
     }
 
-    private void linkReady(String universalLink) {
+    private void linkReady(String universalLink)
+    {
         //how many indices are we selling?
         String currencySymbol = viewModel.getNetwork().symbol;
         int quantity = selection.size();
@@ -502,7 +540,8 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
                 sendBroadcastToPrune(); //TODO: implement prune via result codes
             });
 
-    private void sellLinkFinal(String universalLink) {
+    private void sellLinkFinal(String universalLink)
+    {
         //create share intent
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
@@ -513,7 +552,8 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         handler = new Handler();
     }
@@ -526,7 +566,8 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
     }
 
     @Override
-    public void onTokenClick(View view, Token token, List<BigInteger> ids, boolean selected) {
+    public void onTokenClick(View view, Token token, List<BigInteger> ids, boolean selected)
+    {
         Context context = view.getContext();
         //TODO: what action should be performed when clicking on a range?
     }
@@ -537,7 +578,8 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
 
     }
 
-    private void hideErrorMessages() {
+    private void hideErrorMessages()
+    {
         expiryDateErrorText.setVisibility(View.GONE);
         expiryTimeErrorText.setVisibility(View.GONE);
         priceErrorText.setVisibility(View.GONE);

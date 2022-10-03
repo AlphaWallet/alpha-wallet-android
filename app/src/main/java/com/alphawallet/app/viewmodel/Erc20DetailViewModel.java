@@ -18,6 +18,7 @@ import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
@@ -32,7 +33,8 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 @HiltViewModel
-public class Erc20DetailViewModel extends BaseViewModel {
+public class Erc20DetailViewModel extends BaseViewModel
+{
     private final MutableLiveData<ActivityMeta[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
     private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
@@ -42,6 +44,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
+    private final CustomSettings customSettings;
     private final OnRampRepositoryType onRampRepository;
 
     @Nullable
@@ -52,13 +55,14 @@ public class Erc20DetailViewModel extends BaseViewModel {
                                 FetchTransactionsInteract fetchTransactionsInteract,
                                 AssetDefinitionService assetDefinitionService,
                                 TokensService tokensService,
-                                OnRampRepositoryType onRampRepository)
+                                CustomSettings customSettings, OnRampRepositoryType onRampRepository)
     {
         this.myAddressRouter = myAddressRouter;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.onRampRepository = onRampRepository;
+        this.customSettings = customSettings;
     }
 
     public LiveData<XMLDsigDescriptor> sig()
@@ -71,7 +75,10 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return newScriptFound;
     }
 
-    public LiveData<Boolean> scriptUpdateInProgress() { return scriptUpdateInProgress; }
+    public LiveData<Boolean> scriptUpdateInProgress()
+    {
+        return scriptUpdateInProgress;
+    }
 
     public void showMyAddress(Context context, Wallet wallet, Token token)
     {
@@ -96,6 +103,11 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return this.assetDefinitionService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public void showSendToken(Activity act, Wallet wallet, Token token)
@@ -162,7 +174,8 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return intent;
     }
 
-    public OnRampRepositoryType getOnRampRepository() {
+    public OnRampRepositoryType getOnRampRepository()
+    {
         return onRampRepository;
     }
 

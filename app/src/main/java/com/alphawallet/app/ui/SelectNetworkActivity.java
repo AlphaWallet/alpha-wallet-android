@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.adapter.SingleSelectNetworkAdapter;
@@ -24,12 +23,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class SelectNetworkActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback {
+public class SelectNetworkActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback
+{
     private static final int REQUEST_SELECT_ACTIVE_NETWORKS = 2000;
 
     boolean localSelectionMode;
@@ -57,9 +55,12 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
             long selectedChainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
 
             // Previous active network was deselected, get the first item in filtered networks
-            if (selectedChainId == -1) { selectedChainId = viewModel.getSelectedNetwork(); } //try network from settings
+            if (selectedChainId == -1)
+            {
+                selectedChainId = viewModel.getSelectedNetwork();
+            } //try network from settings
             if (selectedChainId == -1
-                || !viewModel.getFilterNetworkList().contains(selectedChainId))
+                    || !viewModel.getFilterNetworkList().contains(selectedChainId))
             {
                 selectedChainId = viewModel.getFilterNetworkList().get(0);
             } //use first network known on list if there's still any kind of issue
@@ -159,7 +160,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (!localSelectionMode && !CustomViewSettings.showAllNetworks())
+        if (!localSelectionMode && !viewModel.getCustomSettings().showAllNetworks())
         {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.menu_filter_network, menu);

@@ -58,7 +58,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
@@ -248,7 +247,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.splashReset().observe(this, this::onRequireInit);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
-        if (CustomViewSettings.hideDappBrowser())
+        if (viewModel.getCustomSettings().hideDappBrowser())
         {
             removeDappBrowser();
         }
@@ -382,15 +381,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         getSupportFragmentManager()
                 .setFragmentResultListener(CHANGED_LOCALE, this, (requestKey, b) ->
-                {
-                    viewModel.restartHomeActivity(getApplicationContext());
-                });
+                        viewModel.restartHomeActivity(getApplicationContext()));
 
         getSupportFragmentManager()
                 .setFragmentResultListener(SETTINGS_INSTANTIATED, this, (k, b) ->
-                {
-                    loadingComplete();
-                });
+                        loadingComplete());
     }
 
     @Override
@@ -692,10 +687,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 cDialog.setCancelable(true);
                 cDialog.setSmallText("Using an old version of Alphawallet. Please update from the Play Store or Alphawallet website.");
                 cDialog.setPrimaryButtonText(R.string.ok);
-                cDialog.setPrimaryButtonListener(v ->
-                {
-                    cDialog.dismiss();
-                });
+                cDialog.setPrimaryButtonListener(v -> cDialog.dismiss());
                 dialog = cDialog;
                 dialog.show();
             }
@@ -730,9 +722,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             aDialog.setIcon(AWalletAlertDialog.ERROR);
             aDialog.setButtonText(R.string.button_ok);
             aDialog.setButtonListener(v ->
-            {
-                aDialog.dismiss();
-            });
+                    aDialog.dismiss());
             dialog = aDialog;
             dialog.show();
         }, 500);
@@ -1181,7 +1171,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private static class ScreenSlidePagerAdapter extends FragmentStateAdapter
+    private class ScreenSlidePagerAdapter extends FragmentStateAdapter
     {
         public ScreenSlidePagerAdapter(@NonNull FragmentActivity fragmentActivity)
         {
@@ -1200,7 +1190,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 case ACTIVITY:
                     return new ActivityFragment();
                 case DAPP_BROWSER:
-                    if (CustomViewSettings.hideDappBrowser())
+                    if (viewModel.getCustomSettings().hideDappBrowser())
                     {
                         return new BaseFragment();
                     }

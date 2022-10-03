@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
+import androidx.annotation.Nullable;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.entity.Wallet;
@@ -26,8 +28,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import androidx.annotation.Nullable;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -40,12 +40,16 @@ public class PriceAlertsService extends Service
 
     @Inject
     TokenLocalSource localSource;
+
     @Inject
     PreferenceRepositoryType preferenceRepository;
+
     @Inject
     TokensService tokensService;
+
     @Inject
     TickerService tickerService;
+
     @Inject
     NotificationService notificationService;
 
@@ -58,6 +62,9 @@ public class PriceAlertsService extends Service
     private Wallet defaultWallet;
     @Inject
     AssetDefinitionService assetDefinitionService;
+
+    @Inject
+    CustomSettings customSettings;
 
     @Nullable
     private Disposable heartBeatTimer;

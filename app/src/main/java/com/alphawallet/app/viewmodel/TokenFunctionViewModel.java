@@ -31,6 +31,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.OpenSeaService;
@@ -90,11 +91,13 @@ import timber.log.Timber;
  * Stormbird in Singapore
  */
 @HiltViewModel
-public class TokenFunctionViewModel extends BaseViewModel {
+public class TokenFunctionViewModel extends BaseViewModel
+{
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
     private final TokensService tokensService;
+    private final CustomSettings customSettings;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
@@ -135,7 +138,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
             CreateTransactionInteract createTransactionInteract,
             GasService gasService,
             TokensService tokensService,
-            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            CustomSettings customSettings, EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
             OpenSeaService openseaService,
@@ -146,6 +149,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
         this.createTransactionInteract = createTransactionInteract;
         this.gasService = gasService;
         this.tokensService = tokensService;
+        this.customSettings = customSettings;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.keyService = keyService;
         this.genericWalletInteract = genericWalletInteract;
@@ -157,6 +161,11 @@ public class TokenFunctionViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public LiveData<Token> insufficientFunds()
@@ -184,7 +193,10 @@ public class TokenFunctionViewModel extends BaseViewModel {
         return newScriptFound;
     }
 
-    public LiveData<Boolean> scriptUpdateInProgress() { return scriptUpdateInProgress; }
+    public LiveData<Boolean> scriptUpdateInProgress()
+    {
+        return scriptUpdateInProgress;
+    }
 
     public MutableLiveData<TransactionData> transactionFinalised()
     {

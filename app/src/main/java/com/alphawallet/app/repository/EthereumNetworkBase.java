@@ -82,7 +82,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -206,11 +205,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             FANTOM_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID, PHI_V2_MAIN_ID,
             PHI_MAIN_ID));
 
+    private static final List<Long> testnetList = new ArrayList<>(Arrays.asList(
+            GOERLI_ID, BINANCE_TEST_ID, HECO_TEST_ID, CRONOS_TEST_ID, OPTIMISM_GOERLI_TEST_ID, KLAYTN_BAOBAB_ID,
+            FANTOM_TEST_ID, IOTEX_TESTNET_ID, FUJI_TEST_ID, POLYGON_TEST_ID, MILKOMEDA_C1_TEST_ID, ARTIS_TAU1_ID,
+            ARBITRUM_GOERLI_TEST_ID, SEPOLIA_TESTNET_ID, AURORA_TESTNET_ID, PALM_TEST_ID,
+            //Deprecated networks
+            ROPSTEN_ID, RINKEBY_ID, KOVAN_ID, OPTIMISTIC_TEST_ID, SOKOL_ID, ARBITRUM_TEST_ID));
+
     private static final List<Long> deprecatedNetworkList = new ArrayList<>(Arrays.asList(
             RINKEBY_ID, ROPSTEN_ID, KOVAN_ID, SOKOL_ID, OPTIMISTIC_TEST_ID, ARBITRUM_TEST_ID));
 
     // for reset built-in network
-    private static final LinkedHashMap<Long, NetworkInfo> builtinNetworkMap = new LinkedHashMap<Long, NetworkInfo>() {
+    private static final LongSparseArray<NetworkInfo> builtinNetworkMap = new LongSparseArray<NetworkInfo>() {
         {
             put(MAINNET_ID, new NetworkInfo(C.ETHEREUM_NETWORK_NAME, C.ETH_SYMBOL,
                     MAINNET_RPC_URL,
@@ -384,7 +390,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     //List of network details. Note, the advantage of using LongSparseArray is efficiency and also
     //the entries are automatically sorted into numerical order
-    private static final LinkedHashMap<Long, NetworkInfo> networkMap = (LinkedHashMap<Long, NetworkInfo>) builtinNetworkMap.clone();
+    private static final LongSparseArray<NetworkInfo> networkMap = builtinNetworkMap.clone();
 
     private static final LongSparseArray<Integer> chainLogos = new LongSparseArray<Integer>() {
         {
@@ -549,7 +555,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static String getGasOracle(long chainId)
     {
-        if (hasGasOracleAPI.contains(chainId) && networkMap.get(chainId) != null)
+        if (hasGasOracleAPI.contains(chainId) && networkMap.indexOfKey(chainId) >= 0)
         {
             return networkMap.get(chainId).etherscanAPI + GAS_API;
         }
@@ -565,9 +571,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             return hasValue.indexOf(chainId);
         }
-        else if (networkMap.get(chainId) != null)
+        else if (networkMap.indexOfKey(chainId) >= 0)
         {
-            return new ArrayList<>(networkMap.keySet()).indexOf(chainId);
+            return networkMap.indexOfKey(chainId);
         }
         else
         {
@@ -628,7 +634,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 List<NetworkInfo> copyList = new ArrayList<>(list);
                 list.clear();
                 for (NetworkInfo n : copyList) {
-                    boolean isCustom = builtinNetworkMap.get(n.chainId) == null;
+                    boolean isCustom = builtinNetworkMap.indexOfKey(n.chainId) == -1;
                     NetworkInfo newInfo = new NetworkInfo(n.name, n.symbol, n.rpcServerUrl, n.etherscanUrl, n.chainId, n.backupNodeUrl, n.etherscanAPI, isCustom);
                     list.add(newInfo);
                 }
@@ -726,23 +732,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
         else
         {
-            Set<Long> keys = networkMap.keySet();
-            for (Long key : keys)
+            for (long networkId : testnetList)
             {
-                NetworkInfo info = networkMap.get(key);
-                if (!hasValue.contains(info.chainId) && !result.contains(info))
-                {
-                    result.add(info);
-                }
+                result.add(networkMap.get(networkId));
             }
-//            for (int i = 0; i < networkMap.size(); i++)
-//            {
-//                NetworkInfo info = networkMap.get(i);
-//                if (!hasValue.contains(info.chainId) && !result.contains(info))
-//                {
-//                    result.add(info);
-//                }
-//            }
         }
     }
 
@@ -753,7 +746,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public String getNameById(long chainId)
     {
-        if (networkMap.get(chainId) != null) return networkMap.get(chainId).name;
+        if (networkMap.indexOfKey(chainId) >= 0) return networkMap.get(chainId).name;
         else return "Unknown: " + chainId;
     }
 
@@ -964,12 +957,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static long getNetworkIdFromName(String name)
     {
         if (!TextUtils.isEmpty(name)) {
-            Set<Long> keys = networkMap.keySet();
-            for (Long key : keys)
-            {
-                NetworkInfo info = networkMap.get(key);
-                if (name.equals(networkMap.get(key).name)) {
-                    return networkMap.get(key).chainId;
+            for (int i = 0; i < networkMap.size(); i++) {
+                if (name.equals(networkMap.valueAt(i).name)) {
+                    return networkMap.valueAt(i).chainId;
                 }
             }
         }

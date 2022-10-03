@@ -89,7 +89,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String MILKOMEDA_C1_TEST_RPC = "https://rpc-devnet-cardano-evm.c1.milkomeda.com";
     public static final String PHI_MAIN_RPC_URL = "https://rpc1.phi.network";
     public static final String PHI_NETWORK_V2_RPC = "https://connect.phi.network";
-    public static final String SEPOLIA_TESTNET_RPC_URL = "https://rpc.sepolia.dev";
+    public static final String SEPOLIA_TESTNET_RPC_URL = "https://rpc.sepolia.org";
     public static final String OPTIMISM_GOERLI_TESTNET_RPC_URL = "https://optimism-goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String ARBITRUM_GOERLI_TESTNET_RPC_URL = "https://arbitrum-goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
 

@@ -304,6 +304,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private void completeTokenScriptFunction(String function)
     {
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        if (functions == null) return;
         action = functions.get(function);
 
         if (action != null && action.function != null) //if no function then it's handled by the token view

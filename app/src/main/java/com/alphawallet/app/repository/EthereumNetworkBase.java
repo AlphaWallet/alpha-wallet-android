@@ -3,6 +3,7 @@ package com.alphawallet.app.repository;
 /* Please don't add import android at this point. Later this file will be shared
  * between projects including non-Android projects */
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_GOERLI_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
@@ -33,6 +34,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISM_GOERLI_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_NETWORK_V2_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_V2_MAIN_ID;
@@ -49,6 +51,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SOKOL_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 
@@ -187,6 +190,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String AURORA_MAINNET_RPC_URL = "https://mainnet.aurora.dev";
     public static final String AURORA_TESTNET_RPC_URL = "https://testnet.aurora.dev";
     public static final String PHI_NETWORK_RPC = "https://rpc1.phi.network";
+    public static final String SEPOLIA_TESTNET_RPC_URL = "https://rpc.sepolia.dev";
+    public static final String OPTIMISM_GOERLI_TESTNET_RPC_URL = "https://optimism-goerli.infura.io/v3/" + keyProvider.getInfuraKey();
+    public static final String ARBITRUM_GOERLI_TESTNET_RPC_URL = "https://arbitrum-goerli.infura.io/v3/" + keyProvider.getInfuraKey();
+    public static final String OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL = "https://goerli.optimism.io";
+    public static final String ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL = "https://goerli-rollup.arbitrum.io/rpc";
 
     //All chains that have fiat/real value (not testnet) must be put here
     //Note: This list also determines the order of display for main net chains in the wallet.
@@ -196,6 +204,16 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             MAINNET_ID, GNOSIS_ID, POLYGON_ID, CLASSIC_ID, POA_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
             FANTOM_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID, PHI_V2_MAIN_ID,
             PHI_MAIN_ID));
+
+    private static final List<Long> testnetList = new ArrayList<>(Arrays.asList(
+            GOERLI_ID, BINANCE_TEST_ID, HECO_TEST_ID, CRONOS_TEST_ID, OPTIMISM_GOERLI_TEST_ID, KLAYTN_BAOBAB_ID,
+            FANTOM_TEST_ID, IOTEX_TESTNET_ID, FUJI_TEST_ID, POLYGON_TEST_ID, MILKOMEDA_C1_TEST_ID, ARTIS_TAU1_ID,
+            ARBITRUM_GOERLI_TEST_ID, SEPOLIA_TESTNET_ID, AURORA_TESTNET_ID, PALM_TEST_ID,
+            //Deprecated networks
+            ROPSTEN_ID, RINKEBY_ID, KOVAN_ID, OPTIMISTIC_TEST_ID, SOKOL_ID, ARBITRUM_TEST_ID));
+
+    private static final List<Long> deprecatedNetworkList = new ArrayList<>(Arrays.asList(
+            RINKEBY_ID, ROPSTEN_ID, KOVAN_ID, SOKOL_ID, OPTIMISTIC_TEST_ID, ARBITRUM_TEST_ID));
 
     // for reset built-in network
     private static final LongSparseArray<NetworkInfo> builtinNetworkMap = new LongSparseArray<NetworkInfo>() {
@@ -220,22 +238,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     ARTIS_SIGMA1_RPC_URL,
                     "https://explorer.sigma1.artis.network/tx/", ARTIS_SIGMA1_ID,
                     ARTIS_SIGMA1_RPC_URL, "https://explorer.sigma1.artis.network/api?"));
-            put(KOVAN_ID, new NetworkInfo(C.KOVAN_NETWORK_NAME, C.ETH_SYMBOL,
-                    KOVAN_RPC_URL,
-                    "https://kovan.etherscan.io/tx/", KOVAN_ID,
-                    KOVAN_FALLBACK_RPC_URL, "https://api-kovan.etherscan.io/api?"));
-            put(ROPSTEN_ID, new NetworkInfo(C.ROPSTEN_NETWORK_NAME, C.ETH_SYMBOL,
-                    ROPSTEN_RPC_URL,
-                    "https://ropsten.etherscan.io/tx/", ROPSTEN_ID,
-                    ROPSTEN_FALLBACK_RPC_URL, "https://api-ropsten.etherscan.io/api?"));
-            put(SOKOL_ID, new NetworkInfo(C.SOKOL_NETWORK_NAME, C.POA_SYMBOL,
-                    SOKOL_RPC_URL,
-                    "https://blockscout.com/poa/sokol/tx/", SOKOL_ID,
-                    SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/api?"));
-            put(RINKEBY_ID, new NetworkInfo(C.RINKEBY_NETWORK_NAME, C.ETH_SYMBOL,
-                    RINKEBY_RPC_URL,
-                    "https://rinkeby.etherscan.io/tx/", RINKEBY_ID,
-                    RINKEBY_FALLBACK_RPC_URL, "https://api-rinkeby.etherscan.io/api?"));
             put(GOERLI_ID, new NetworkInfo(C.GOERLI_NETWORK_NAME, C.GOERLI_SYMBOL,
                     GOERLI_RPC_URL,
                     "https://goerli.etherscan.io/tx/", GOERLI_ID,
@@ -287,10 +289,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     OPTIMISTIC_MAIN_URL,
                     "https://optimistic.etherscan.io/tx/", OPTIMISTIC_MAIN_ID, OPTIMISTIC_MAIN_FALLBACK_URL,
                     "https://api-optimistic.etherscan.io/api?"));
-            put(OPTIMISTIC_TEST_ID, new NetworkInfo(C.OPTIMISTIC_TEST_NETWORK, C.ETH_SYMBOL,
-                    OPTIMISTIC_TEST_URL,
-                    "https://kovan-optimistic.etherscan.io/tx/", OPTIMISTIC_TEST_ID, OPTIMISTIC_TEST_FALLBACK_URL,
-                    "https://api-kovan-optimistic.etherscan.io/api?"));
             put(CRONOS_MAIN_ID, new NetworkInfo(C.CRONOS_MAIN_NETWORK, C.CRONOS_SYMBOL,
                     CRONOS_MAIN_RPC_URL,
                     "https://cronoscan.com/tx/", CRONOS_MAIN_ID, CRONOS_MAIN_RPC_URL,
@@ -303,10 +301,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     ARBITRUM_MAINNET_RPC,
                     "https://arbiscan.io/tx/", ARBITRUM_MAIN_ID, ARBITRUM_FALLBACK_MAINNET_RPC,
                     "https://api.arbiscan.io/api?"));
-            put(ARBITRUM_TEST_ID, new NetworkInfo(C.ARBITRUM_TEST_NETWORK, C.ARBITRUM_TEST_SYMBOL,
-                    ARBITRUM_TESTNET_RPC,
-                    "https://testnet.arbiscan.io/tx/", ARBITRUM_TEST_ID, ARBITRUM_FALLBACK_TESTNET_RPC,
-                    "https://testnet.arbiscan.io/api?")); //no transaction API
             put(PALM_ID, new NetworkInfo(C.PALM_NAME, C.PALM_SYMBOL,
                     PALM_RPC_URL,
                     "https://explorer.palm.io/tx/", PALM_ID, PALM_RPC_FALLBACK_URL,
@@ -315,7 +309,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     PALM_TEST_RPC_URL,
                     "https://explorer.palm-uat.xyz/tx/", PALM_TEST_ID, PALM_TEST_RPC_FALLBACK_URL,
                     "https://explorer.palm-uat.xyz/api?"));
-
             put(KLAYTN_ID, new NetworkInfo(C.KLAYTN_NAME, C.KLAYTN_SYMBOL,
                     USE_KLAYTN_RPC,
                     "https://scope.klaytn.com/tx/", KLAYTN_ID, KLAYTN_RPC,
@@ -338,7 +331,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(AURORA_TESTNET_ID, new NetworkInfo(C.AURORA_TESTNET_NAME, C.ETH_SYMBOL, AURORA_TESTNET_RPC_URL,
                     "https://testnet.aurorascan.dev/tx/", AURORA_TESTNET_ID, "",
                     "https://api-testnet.aurorascan.dev/api?"));
-
             put(MILKOMEDA_C1_ID, new NetworkInfo(C.MILKOMEDA_NAME, C.MILKOMEDA_SYMBOL,
                     MILKOMEDA_C1_RPC,
                     "https://explorer-mainnet-cardano-evm.c1.milkomeda.com/tx/", MILKOMEDA_C1_ID, "",
@@ -355,6 +347,44 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     PHI_NETWORK_V2_RPC,
                     "https://phiscan.com/tx/", PHI_V2_MAIN_ID, "",
                     "https://phiscan.com/api?"));
+            put(SEPOLIA_TESTNET_ID, new NetworkInfo(C.SEPOLIA_TESTNET_NAME, C.SEPOLIA_SYMBOL,
+                    SEPOLIA_TESTNET_RPC_URL,
+                    "https://sepolia.etherscan.io/tx/", SEPOLIA_TESTNET_ID, "",
+                    "https://sepolia.etherscan.io/api?"));
+            put(OPTIMISM_GOERLI_TEST_ID, new NetworkInfo(C.OPTIMISM_GOERLI_TESTNET_NAME, C.OPTIMISM_GOERLI_TEST_SYMBOL,
+                    OPTIMISM_GOERLI_TESTNET_RPC_URL,
+                    "https://blockscout.com/optimism/goerli/tx/", OPTIMISM_GOERLI_TEST_ID, OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL,
+                    "https://blockscout.com/optimism/goerli/api?"));
+            put(ARBITRUM_GOERLI_TEST_ID, new NetworkInfo(C.ARBITRUM_GOERLI_TESTNET_NAME, C.ARBITRUM_SYMBOL,
+                    ARBITRUM_GOERLI_TESTNET_RPC_URL,
+                    "https://goerli-rollup-explorer.arbitrum.io/tx/", ARBITRUM_GOERLI_TEST_ID, ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL,
+                    "https://goerli-rollup-explorer.arbitrum.io/api?"));
+
+            // Deprecated Networks
+            put(ROPSTEN_ID, new NetworkInfo(C.ROPSTEN_NETWORK_NAME, C.ETH_SYMBOL,
+                    ROPSTEN_RPC_URL,
+                    "https://ropsten.etherscan.io/tx/", ROPSTEN_ID,
+                    ROPSTEN_FALLBACK_RPC_URL, "https://api-ropsten.etherscan.io/api?"));
+            put(RINKEBY_ID, new NetworkInfo(C.RINKEBY_NETWORK_NAME, C.ETH_SYMBOL,
+                    RINKEBY_RPC_URL,
+                    "https://rinkeby.etherscan.io/tx/", RINKEBY_ID,
+                    RINKEBY_FALLBACK_RPC_URL, "https://api-rinkeby.etherscan.io/api?"));
+            put(KOVAN_ID, new NetworkInfo(C.KOVAN_NETWORK_NAME, C.ETH_SYMBOL,
+                    KOVAN_RPC_URL,
+                    "https://kovan.etherscan.io/tx/", KOVAN_ID,
+                    KOVAN_FALLBACK_RPC_URL, "https://api-kovan.etherscan.io/api?"));
+            put(SOKOL_ID, new NetworkInfo(C.SOKOL_NETWORK_NAME, C.POA_SYMBOL,
+                    SOKOL_RPC_URL,
+                    "https://blockscout.com/poa/sokol/tx/", SOKOL_ID,
+                    SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/api?"));
+            put(OPTIMISTIC_TEST_ID, new NetworkInfo(C.OPTIMISTIC_TEST_NETWORK, C.ETH_SYMBOL,
+                    OPTIMISTIC_TEST_URL,
+                    "https://kovan-optimistic.etherscan.io/tx/", OPTIMISTIC_TEST_ID, OPTIMISTIC_TEST_FALLBACK_URL,
+                    "https://api-kovan-optimistic.etherscan.io/api?"));
+            put(ARBITRUM_TEST_ID, new NetworkInfo(C.ARBITRUM_TEST_NETWORK, C.ARBITRUM_TEST_SYMBOL,
+                    ARBITRUM_TESTNET_RPC,
+                    "https://testnet.arbiscan.io/tx/", ARBITRUM_TEST_ID, ARBITRUM_FALLBACK_TESTNET_RPC,
+                    "https://testnet.arbiscan.io/api?")); //no transaction API
         }
     };
 
@@ -403,6 +433,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(MILKOMEDA_C1_TEST_ID, R.drawable.ic_milkomeda_test);
             put(PHI_MAIN_ID, R.drawable.ic_phi_network);
             put(PHI_V2_MAIN_ID, R.drawable.ic_phi_network);
+            put(SEPOLIA_TESTNET_ID, R.drawable.ic_sepolia_test);
+            put(OPTIMISM_GOERLI_TEST_ID, R.drawable.ic_optimism_testnet_logo);
+            put(ARBITRUM_GOERLI_TEST_ID, R.drawable.ic_icons_arbitrum_test);
         }
     };
 
@@ -447,6 +480,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(MILKOMEDA_C1_TEST_ID, R.drawable.ic_milkomeda_test);
             put(PHI_MAIN_ID, R.drawable.ic_phi_network);
             put(PHI_V2_MAIN_ID, R.drawable.ic_phi_network);
+            put(SEPOLIA_TESTNET_ID, R.drawable.ic_sepolia_test);
+            put(OPTIMISM_GOERLI_TEST_ID, R.drawable.ic_optimism_testnet_logo);
+            put(ARBITRUM_GOERLI_TEST_ID, R.drawable.ic_icons_arbitrum_test);
         }
     };
 
@@ -491,6 +527,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(MILKOMEDA_C1_TEST_ID, R.color.milkomeda_test);
             put(PHI_MAIN_ID, R.color.phi_network);
             put(PHI_V2_MAIN_ID, R.color.phi_network);
+            put(SEPOLIA_TESTNET_ID, R.color.sepolia);
+            put(OPTIMISM_GOERLI_TEST_ID, R.color.optimistic_test);
+            put(ARBITRUM_GOERLI_TEST_ID, R.color.arbitrum_test);
         }
     };
 
@@ -693,14 +732,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
         else
         {
-            //sorted array
-            for (int i = 0; i < networkMap.size(); i++)
+            for (long networkId : testnetList)
             {
-                NetworkInfo info = networkMap.valueAt(i);
-                if (!hasValue.contains(info.chainId) && !result.contains(info))
-                {
-                    result.add(info);
-                }
+                result.add(networkMap.get(networkId));
             }
         }
     }
@@ -782,7 +816,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public Long getDefaultNetwork(boolean isMainNet)
     {
-        return isMainNet ? CustomViewSettings.primaryChain : RINKEBY_ID;
+        return isMainNet ? CustomViewSettings.primaryChain : GOERLI_ID;
     }
 
     @Override
@@ -1118,4 +1152,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return builtinNetworkMap.get(chainId);
     }
 
+    public static boolean isNetworkDeprecated(long chainId)
+    {
+        return deprecatedNetworkList.contains(chainId);
+    }
 }

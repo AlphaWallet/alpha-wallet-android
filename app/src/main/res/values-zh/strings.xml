@@ -928,4 +928,5 @@
     <string name="label_swap_via">通过 %s 交换</string>
     <string name="message_no_routes_found_for_the_given_parameters">没有找到给定参数的路由。</string>
     <string name="message_select_one_exchange">至少选择一个交易所。</string>
+    <string name="deprecated">已弃用</string>
 </resources>

@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.widget.TokenIcon;
 import com.google.android.material.checkbox.MaterialCheckBox;
@@ -76,6 +77,14 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
             holder.manageView.setOnClickListener(v ->  editListener.onEditNetwork(networkList.get(position).getChainId(), holder.manageView));
             holder.checkbox.setChecked(item.isSelected());
             holder.tokenIcon.bindData(item.getChainId());
+
+            if (EthereumNetworkBase.isNetworkDeprecated(item.getChainId()))
+            {
+                holder.deprecatedIndicator.setVisibility(View.VISIBLE);
+                holder.tokenIcon.setGrayscale(true);
+                holder.name.setAlpha(0.7f);
+                holder.chainId.setAlpha(0.7f);
+            }
         }
     }
 
@@ -99,6 +108,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         View manageView;
         TokenIcon tokenIcon;
         TextView chainId;
+        TextView deprecatedIndicator;
 
         ViewHolder(View view)
         {
@@ -109,6 +119,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
             manageView = view.findViewById(R.id.manage_btn);
             tokenIcon = view.findViewById(R.id.token_icon);
             chainId = view.findViewById(R.id.chain_id);
+            deprecatedIndicator = view.findViewById(R.id.deprecated);
         }
     }
 }

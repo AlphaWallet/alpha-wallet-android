@@ -962,4 +962,5 @@
     <string name="label_swap_via">မှတဆင့်လဲလှယ်ပါ။ %s</string>
     <string name="message_no_routes_found_for_the_given_parameters">ပေးထားသော ကန့်သတ်ဘောင်များအတွက် လမ်းကြောင်းများ ရှာမတွေ့ပါ။</string>
     <string name="message_select_one_exchange">အနည်းဆုံးလဲလှယ်မှုတစ်ခုကို ရွေးပါ။</string>
+    <string name="deprecated">ကန့်ကွက်ထားသည်။</string>
 </resources>

@@ -14,54 +14,68 @@
         android:id="@+id/manage_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/transparent"
-        android:src="@drawable/ic_menu"
-        android:contentDescription="@string/manage_tokens"
         android:layout_gravity="center_vertical"
+        android:background="@color/transparent"
+        android:contentDescription="@string/manage_tokens"
+        android:src="@drawable/ic_menu"
         android:visibility="gone"
-        app:tint="?colorControlNormal"
-        tools:visibility="visible"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?colorControlNormal"
+        tools:visibility="visible" />
 
     <com.alphawallet.app.widget.TokenIcon
         android:id="@+id/token_icon"
         android:layout_width="@dimen/token_icon"
         android:layout_height="@dimen/token_icon"
         android:layout_gravity="center_vertical"
-        android:src="@drawable/ic_ethereum"
         android:layout_marginStart="@dimen/small_12"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@id/manage_btn"/>
+        android:src="@drawable/ic_ethereum"
+        app:layout_constraintStart_toEndOf="@id/manage_btn"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/layout_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/small_12"
         android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/token_icon"
         app:layout_constraintEnd_toStartOf="@id/checkbox"
-        app:layout_constraintHorizontal_bias="0">
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/token_icon"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/name"
+            style="@style/Aw.Typography.Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/Aw.Typography.Title"
             tools:text="Ethereum" />
 
         <TextView
             android:id="@+id/chain_id"
+            style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/Aw.Typography.Sub"
-            tools:text="ChainID: 1"/>
+            android:layout_below="@id/name"
+            tools:text="ChainID: 1" />
 
-    </LinearLayout>
+        <TextView
+            android:id="@+id/deprecated"
+            style="@style/Aw.Typography.Sub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/name"
+            android:layout_marginHorizontal="@dimen/tiny_8"
+            android:layout_toEndOf="@id/chain_id"
+            android:text="@string/deprecated"
+            android:textColor="?colorError"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+    </RelativeLayout>
 
     <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/checkbox"
@@ -69,8 +83,8 @@
         android:layout_height="wrap_content"
         android:clickable="false"
         android:focusable="false"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

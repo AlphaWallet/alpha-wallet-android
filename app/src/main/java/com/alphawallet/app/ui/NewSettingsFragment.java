@@ -37,7 +37,6 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -48,6 +47,8 @@ import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
 import com.google.android.material.card.MaterialCardView;
+
+import org.json.JSONArray;
 
 import java.util.Locale;
 
@@ -101,16 +102,10 @@ public class NewSettingsFragment extends BaseFragment
             });
 
     ActivityResultLauncher<Intent> updateLocale = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                updateLocale(result.getData());
-            });
+            result -> updateLocale(result.getData()));
 
     ActivityResultLauncher<Intent> updateCurrency = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                updateCurrency(result.getData());
-            });
+            result -> updateCurrency(result.getData()));
 
     private NewSettingsViewModel viewModel;
     private LinearLayout walletSettingsLayout;
@@ -323,7 +318,7 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(myAddressSetting, walletIndex++);
 
-        if (CustomViewSettings.canChangeWallets())
+        if (viewModel.getCustomSettings().canChangeWallets())
             walletSettingsLayout.addView(changeWalletSetting, walletIndex++);
 
         walletSettingsLayout.addView(backUpWalletSetting, walletIndex++);
@@ -335,7 +330,8 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
-        if (CustomViewSettings.getLockedChains().size() == 0)
+        JSONArray chainsArray = viewModel.getCustomSettings().getChainsArrayJsonFile("locked_chains");
+        if (chainsArray.length() == 0)
             systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
 
         if (biometricsSetting != null)

@@ -41,7 +41,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.TokenFilter;
@@ -153,15 +152,6 @@ public class WalletFragment extends BaseFragment implements
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
         LocaleUtils.setActiveLocale(getContext()); // Can't be placed before above line
 
-        if (CustomViewSettings.canAddTokens())
-        {
-            toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
-        }
-        else
-        {
-            toolbar(view);
-        }
-
         initViews(view);
 
         initViewModel();
@@ -175,6 +165,15 @@ public class WalletFragment extends BaseFragment implements
         setImportToken();
 
         viewModel.prepare();
+
+        if (viewModel.getCustomSettings().canAddTokens())
+        {
+            toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
+        }
+        else
+        {
+            toolbar(view);
+        }
 
         addressAvatar.setWaiting();
 
@@ -196,8 +195,7 @@ public class WalletFragment extends BaseFragment implements
 
     private void initList()
     {
-        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),
-                tokenManagementLauncher);
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), viewModel.getCustomSettings(),tokenManagementLauncher);
         adapter.setHasStableIds(true);
         setLinearLayoutManager(TokenFilter.ALL.ordinal());
         recyclerView.setAdapter(adapter);
@@ -244,7 +242,7 @@ public class WalletFragment extends BaseFragment implements
 
     private void onDefaultWallet(Wallet wallet)
     {
-        if (CustomViewSettings.showManageTokens())
+        if (viewModel.getCustomSettings().showManageTokens())
         {
             adapter.setWalletAddress(wallet.address);
         }
@@ -412,7 +410,7 @@ public class WalletFragment extends BaseFragment implements
     private void initTabLayout(View view)
     {
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
-        if (CustomViewSettings.hideTabBar())
+        if (viewModel.getCustomSettings().hideTabBar())
         {
             tabLayout.setVisibility(View.GONE);
             return;

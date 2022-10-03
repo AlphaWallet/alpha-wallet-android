@@ -68,7 +68,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.FragmentMessenger;
@@ -85,6 +84,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.QRScanning.QRScanner;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
@@ -156,7 +156,8 @@ import timber.log.Timber;
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
         OnWalletActionListener, URLLoadInterface, ItemClickListener, OnDappHomeNavClickListener, DappBrowserSwipeInterface,
-        SignAuthenticationCallback, ActionSheetCallback, TestNetDialog.TestNetDialogCallback {
+        SignAuthenticationCallback, ActionSheetCallback, TestNetDialog.TestNetDialogCallback
+{
     public static final String SEARCH = "SEARCH";
     public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
     public static final String CURRENT_FRAGMENT = "currentFragment";
@@ -182,7 +183,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private final Handler handler = new Handler(Looper.getMainLooper());
     private ValueCallback<Uri[]> uploadMessage;
     ActivityResultLauncher<String> getContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
-            new ActivityResultCallback<Uri>() {
+            new ActivityResultCallback<Uri>()
+            {
                 @Override
                 public void onActivityResult(Uri uri)
                 {
@@ -333,7 +335,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         LocaleUtils.setActiveLocale(getContext());
         loadOnInit = null;
-        int webViewID = CustomViewSettings.minimiseBrowserURLBar() ? R.layout.fragment_webview_compact : R.layout.fragment_webview;
+        int webViewID = CustomSettings.minimiseBrowserURLBar() ? R.layout.fragment_webview_compact : R.layout.fragment_webview;
         View view = inflater.inflate(webViewID, container, false);
         initViewModel();
         initView(view);
@@ -533,7 +535,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         //If you are wondering about the strange way the menus are inflated - this is required to ensure
         //that the menu text gets created with the correct localisation under every circumstance
         MenuInflater inflater = new MenuInflater(LocaleUtils.getActiveLocaleContext(getContext()));
-        if (CustomViewSettings.minimiseBrowserURLBar())
+        if (CustomSettings.minimiseBrowserURLBar())
         {
             inflater.inflate(R.menu.menu_scan, toolbar.getMenu());
         }
@@ -645,7 +647,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             return false;
         });
 
-        urlTv.addTextChangedListener(new TextWatcher() {
+        urlTv.addTextChangedListener(new TextWatcher()
+        {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
             {
@@ -707,8 +710,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         expandCollapseView(layoutNavigation, false);
 
         disposable = Observable.zip(
-                Observable.interval(600, TimeUnit.MILLISECONDS).take(1),
-                Observable.fromArray(clear), (interval, item) -> item)
+                        Observable.interval(600, TimeUnit.MILLISECONDS).take(1),
+                        Observable.fromArray(clear), (interval, item) -> item)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::postBeginSearchSession);
@@ -738,7 +741,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             int finalWidth = view.getWidth();
             ValueAnimator valueAnimator = slideAnimator(finalWidth, 0, view);
-            valueAnimator.addListener(new Animator.AnimatorListener() {
+            valueAnimator.addListener(new Animator.AnimatorListener()
+            {
                 @Override
                 public void onAnimationStart(Animator animator)
                 {
@@ -997,7 +1001,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         web3.setRpcUrl(viewModel.getNetworkNodeRPC(activeNetwork.chainId));
         web3.setWalletAddress(new Address(wallet.address));
 
-        web3.setWebChromeClient(new WebChromeClient() {
+        web3.setWebChromeClient(new WebChromeClient()
+        {
             @Override
             public void onProgressChanged(WebView webview, int newProgress)
             {
@@ -1067,7 +1072,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             }
         });
 
-        web3.setWebViewClient(new WebViewClient() {
+        web3.setWebViewClient(new WebViewClient()
+        {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url)
             {
@@ -1207,13 +1213,13 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void onEthCall(Web3Call call)
     {
         Single.fromCallable(() -> {
-            //let's make the call
-            Web3j web3j = TokenRepository.getWeb3jService(activeNetwork.chainId);
-            //construct call
-            org.web3j.protocol.core.methods.request.Transaction transaction
-                    = createFunctionCallTransaction(wallet.address, null, null, call.gasLimit, call.to.toString(), call.value, call.payload);
-            return web3j.ethCall(transaction, call.blockParam).send();
-        }).map(EthCall::getValue)
+                    //let's make the call
+                    Web3j web3j = TokenRepository.getWeb3jService(activeNetwork.chainId);
+                    //construct call
+                    org.web3j.protocol.core.methods.request.Transaction transaction
+                            = createFunctionCallTransaction(wallet.address, null, null, call.gasLimit, call.to.toString(), call.value, call.payload);
+                    return web3j.ethCall(transaction, call.blockParam).send();
+                }).map(EthCall::getValue)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> web3.onCallFunctionSuccessful(call.leafPosition, result),
@@ -1333,7 +1339,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void handleSignMessage(Signable message)
     {
-        dAppFunction = new DAppFunction() {
+        dAppFunction = new DAppFunction()
+        {
             @Override
             public void DAppError(Throwable error, Signable message)
             {
@@ -2167,7 +2174,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        final SendTransactionInterface callback = new SendTransactionInterface() {
+        final SendTransactionInterface callback = new SendTransactionInterface()
+        {
             @Override
             public void transactionSuccess(Web3Transaction web3Tx, String hashData)
             {

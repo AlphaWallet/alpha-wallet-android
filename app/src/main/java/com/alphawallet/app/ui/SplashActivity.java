@@ -14,7 +14,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.router.HomeRouter;
@@ -24,8 +23,6 @@ import com.alphawallet.app.util.RootUtil;
 import com.alphawallet.app.viewmodel.SplashViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -38,7 +35,8 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     private String errorMessage;
 
     @Override
-    protected void attachBaseContext(Context base) {
+    protected void attachBaseContext(Context base)
+    {
         super.attachBaseContext(base);
     }
 
@@ -74,7 +72,8 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         onWallets(wallets);
     }
 
-    private void onWallets(Wallet[] wallets) {
+    private void onWallets(Wallet[] wallets)
+    {
         //event chain should look like this:
         //1. check if wallets are empty:
         //      - yes, get either create a new account or take user to wallet page if SHOW_NEW_ACCOUNT_PROMPT is set
@@ -87,24 +86,19 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         {
             splashViewModel.setDefaultBrowser();
             findViewById(R.id.layout_new_wallet).setVisibility(View.VISIBLE);
-            findViewById(R.id.button_create).setOnClickListener(v -> {
-                splashViewModel.createNewWallet(this, this);
-            });
-            findViewById(R.id.button_watch).setOnClickListener(v -> {
-                new ImportWalletRouter().openWatchCreate(this, IMPORT_REQUEST_CODE);
-            });
-            findViewById(R.id.button_import).setOnClickListener(v -> {
-                new ImportWalletRouter().openForResult(this, IMPORT_REQUEST_CODE);
-            });
+            findViewById(R.id.button_create).setOnClickListener(v -> splashViewModel.createNewWallet(this, this));
+            findViewById(R.id.button_watch).setOnClickListener(v -> new ImportWalletRouter().openWatchCreate(this, IMPORT_REQUEST_CODE));
+            findViewById(R.id.button_import).setOnClickListener(v -> new ImportWalletRouter().openForResult(this, IMPORT_REQUEST_CODE));
         }
         else
         {
-            handler.postDelayed(this, CustomViewSettings.startupDelay());
+            handler.postDelayed(this, splashViewModel.getCustomSettings().startupDelay());
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)

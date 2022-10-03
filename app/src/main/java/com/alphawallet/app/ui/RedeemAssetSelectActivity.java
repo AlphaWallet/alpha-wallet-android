@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.Key.TICKET_RANGE;
+
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,7 +11,6 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,9 +30,6 @@ import com.alphawallet.token.entity.TicketRange;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-
-import static com.alphawallet.app.C.Key.TICKET_RANGE;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -62,7 +60,8 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
     private TicketRangeParcel ticketRange;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         viewModel = new ViewModelProvider(this)
@@ -106,7 +105,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
         invalidateOptionsMenu();
 
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(this, token, ticketRange.range.tokenIds, viewModel.getAssetDefinitionService());
+        adapter = new NonFungibleTokenAdapter(this, token, ticketRange.range.tokenIds, viewModel.getAssetDefinitionService(), viewModel.getCustomSettings());
         adapter.addQuantitySelector();
 
         nextButton.setVisibility(View.GONE);
@@ -119,7 +118,8 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -134,19 +134,24 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         final int action_next = R.id.action_next;
         final int action_redeem = R.id.action_redeem;
-        switch (item.getItemId()) {
-            case action_next: {
+        switch (item.getItemId())
+        {
+            case action_next:
+            {
                 onNext();
             }
             break;
-            case action_redeem: {
+            case action_redeem:
+            {
                 onRedeem();
             }
             break;
-            case android.R.id.home: {
+            case android.R.id.home:
+            {
                 finish();
             }
         }
@@ -154,11 +159,13 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
     }
 
-    private void onNext() {
+    private void onNext()
+    {
         //first get range selection
         List<BigInteger> selection = adapter.getSelectedTokenIds(new ArrayList<>());// adapter.getCheckedItem();
         if (selection != null)
@@ -182,7 +189,8 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
     }
 
     @Override
-    public void onTokenClick(View v, Token token, List<BigInteger> ids, boolean selected) {
+    public void onTokenClick(View v, Token token, List<BigInteger> ids, boolean selected)
+    {
         currentMenu = R.menu.menu_redeem;
         invalidateOptionsMenu();
     }

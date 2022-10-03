@@ -50,6 +50,7 @@ import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
@@ -58,10 +59,10 @@ import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportWalletActivity;
 import com.alphawallet.app.ui.SendActivity;
-import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.entity.WCUtils;
 import com.alphawallet.app.widget.EmailPromptView;
@@ -97,7 +98,8 @@ import okhttp3.Request;
 import timber.log.Timber;
 
 @HiltViewModel
-public class HomeViewModel extends BaseViewModel {
+public class HomeViewModel extends BaseViewModel
+{
     private final String TAG = "HVM";
     public static final String ALPHAWALLET_DIR = "AlphaWallet";
 
@@ -109,6 +111,7 @@ public class HomeViewModel extends BaseViewModel {
     private final ImportTokenRouter importTokenRouter;
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
+    private final CustomSettings customSettings;
     private final GenericWalletInteract genericWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final CurrencyRepositoryType currencyRepository;
@@ -134,7 +137,7 @@ public class HomeViewModel extends BaseViewModel {
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
             AssetDefinitionService assetDefinitionService,
-            GenericWalletInteract genericWalletInteract,
+            CustomSettings customSettings, GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
             CurrencyRepositoryType currencyRepository,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -143,11 +146,13 @@ public class HomeViewModel extends BaseViewModel {
             AnalyticsServiceType analyticsService,
             ExternalBrowserRouter externalBrowserRouter,
             OkHttpClient httpClient,
-            RealmManager realmManager) {
+            RealmManager realmManager)
+    {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.localeRepository = localeRepository;
         this.assetDefinitionService = assetDefinitionService;
+        this.customSettings = customSettings;
         this.genericWalletInteract = genericWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.currencyRepository = currencyRepository;
@@ -164,11 +169,13 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     @Override
-    protected void onCleared() {
+    protected void onCleared()
+    {
         super.onCleared();
     }
 
-    public LiveData<Transaction[]> transactions() {
+    public LiveData<Transaction[]> transactions()
+    {
         return transactions;
     }
 
@@ -176,22 +183,25 @@ public class HomeViewModel extends BaseViewModel {
         return backUpMessage;
     }
 
-    public LiveData<Boolean> splashReset() {
+    public LiveData<Boolean> splashReset()
+    {
         return splashActivity;
     }
 
-    public LiveData<Wallet> defaultWallet() {
+    public LiveData<Wallet> defaultWallet()
+    {
         return defaultWallet;
     }
 
-    public void prepare(Activity activity) {
+    public void prepare(Activity activity)
+    {
         progress.postValue(false);
         disposable = genericWalletInteract
                 .find()
                 .subscribe(w -> {
                     onDefaultWallet(w);
                     initWalletConnectSessions(activity, w);
-                    }, this::onError);
+                }, this::onError);
     }
 
     public void onClean()
@@ -204,7 +214,8 @@ public class HomeViewModel extends BaseViewModel {
         defaultWallet.setValue(wallet);
     }
 
-    public void showImportLink(Activity activity, String importData) {
+    public void showImportLink(Activity activity, String importData)
+    {
         disposable = genericWalletInteract
                 .find().toObservable()
                 .filter(wallet -> checkWalletNotEqual(wallet, importData))
@@ -213,31 +224,39 @@ public class HomeViewModel extends BaseViewModel {
                 .subscribe(wallet -> importLink(activity, importData), this::onError);
     }
 
-    private boolean checkWalletNotEqual(Wallet wallet, String importData) {
+    private boolean checkWalletNotEqual(Wallet wallet, String importData)
+    {
         boolean filterPass = false;
 
-        try {
-            if (cryptoFunctions == null) {
+        try
+        {
+            if (cryptoFunctions == null)
+            {
                 cryptoFunctions = new CryptoFunctions();
             }
-            if (parser == null) {
+            if (parser == null)
+            {
                 parser = new ParseMagicLink(cryptoFunctions, EthereumNetworkRepository.extraChains());
             }
 
             MagicLinkData data = parser.parseUniversalLink(importData);
             String linkAddress = parser.getOwnerKey(data);
 
-            if (Utils.isAddressValid(data.contractAddress)) {
+            if (Utils.isAddressValid(data.contractAddress))
+            {
                 filterPass = !wallet.address.equals(linkAddress);
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Timber.tag(TAG).e(e);
         }
 
         return filterPass;
     }
 
-    private void importLink(Activity activity, String importData) {
+    private void importLink(Activity activity, String importData)
+    {
         importTokenRouter.open(activity, importData);
     }
 
@@ -249,7 +268,8 @@ public class HomeViewModel extends BaseViewModel {
         context.startActivity(intent);
     }
 
-    public void getWalletName(Context context) {
+    public void getWalletName(Context context)
+    {
         disposable = fetchWalletsInteract
                 .getWallet(preferenceRepository.getCurrentWalletAddress())
                 .subscribeOn(Schedulers.io())
@@ -291,7 +311,8 @@ public class HomeViewModel extends BaseViewModel {
         }
     }
 
-    public LiveData<String> walletName() {
+    public LiveData<String> walletName()
+    {
         return walletName;
     }
 
@@ -301,11 +322,13 @@ public class HomeViewModel extends BaseViewModel {
                 .subscribe(backUpMessage::postValue).isDisposed();
     }
 
-    public boolean isFindWalletAddressDialogShown() {
+    public boolean isFindWalletAddressDialogShown()
+    {
         return preferenceRepository.isFindWalletAddressDialogShown();
     }
 
-    public void setFindWalletAddressDialogShown(boolean isShown) {
+    public void setFindWalletAddressDialogShown(boolean isShown)
+    {
         preferenceRepository.setFindWalletAddressDialogShown(isShown);
     }
 
@@ -317,6 +340,11 @@ public class HomeViewModel extends BaseViewModel {
     public void setErrorCallback(FragmentMessenger callback)
     {
         assetDefinitionService.setErrorCallback(callback);
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public void handleQRCode(Activity activity, String qrCode)
@@ -344,7 +372,7 @@ public class HomeViewModel extends BaseViewModel {
                     //TODO: Code to generate the function signature will look like the code in generateTransactionFunction
                     break;
                 case URL:
-                    ((HomeActivity)activity).onBrowserWithURL(qrCode);
+                    ((HomeActivity) activity).onBrowserWithURL(qrCode);
                     break;
                 case MAGIC_LINK:
                     showImportLink(activity, qrCode);
@@ -359,13 +387,14 @@ public class HomeViewModel extends BaseViewModel {
             qrCode = null;
         }
 
-        if(qrCode == null)
+        if (qrCode == null)
         {
             Toast.makeText(activity, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void showActionSheet(Activity activity, QRResult qrResult) {
+    private void showActionSheet(Activity activity, QRResult qrResult)
+    {
 
         View.OnClickListener listener = v -> {
             if (v.getId() == R.id.send_to_this_address_action)
@@ -392,7 +421,8 @@ public class HomeViewModel extends BaseViewModel {
 
                 Uri blockChainInfoUrl = info.getEtherscanAddressUri(qrResult.getAddress());
 
-                if (blockChainInfoUrl != Uri.EMPTY) {
+                if (blockChainInfoUrl != Uri.EMPTY)
+                {
                     externalBrowserRouter.open(activity, blockChainInfoUrl);
                 }
             }
@@ -493,20 +523,24 @@ public class HomeViewModel extends BaseViewModel {
         return preferenceRepository.getFullScreenState();
     }
 
-    public void tryToShowRateAppDialog(Activity context) {
+    public void tryToShowRateAppDialog(Activity context)
+    {
         //only if installed from PlayStore (checked within the showRateTheApp method)
         RateApp.showRateTheApp(context, preferenceRepository, false);
     }
 
-    public int getUpdateWarnings() {
+    public int getUpdateWarnings()
+    {
         return preferenceRepository.getUpdateWarningCount();
     }
 
-    public void setUpdateWarningCount(int warns) {
+    public void setUpdateWarningCount(int warns)
+    {
         preferenceRepository.setUpdateWarningCount(warns);
     }
 
-    public void setInstallTime(int time) {
+    public void setInstallTime(int time)
+    {
         preferenceRepository.setInstallTime(time);
     }
 
@@ -525,8 +559,10 @@ public class HomeViewModel extends BaseViewModel {
         return preferenceRepository.getLastFragmentPage();
     }
 
-    public void tryToShowEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable) {
-        if (preferenceRepository.getLaunchCount() == 4) {
+    public void tryToShowEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable)
+    {
+        if (preferenceRepository.getLaunchCount() == 4)
+        {
             EmailPromptView emailPromptView = new EmailPromptView(context, successOverlay, handler, onSuccessRunnable);
             BottomSheetDialog emailPromptDialog = new BottomSheetDialog(context);
             emailPromptDialog.setContentView(emailPromptView);
@@ -539,14 +575,17 @@ public class HomeViewModel extends BaseViewModel {
         }
     }
 
-    public void tryToShowWhatsNewDialog(Context context) {
+    public void tryToShowWhatsNewDialog(Context context)
+    {
         PackageInfo packageInfo;
-        try {
+        try
+        {
             packageInfo = context.getPackageManager()
                     .getPackageInfo(context.getPackageName(), 0);
 
             int versionCode = packageInfo.versionCode;
-            if (preferenceRepository.getLastVersionCode(versionCode) < versionCode) {
+            if (preferenceRepository.getLastVersionCode(versionCode) < versionCode)
+            {
                 // load what's new
                 Request request = new Request.Builder()
                         .header("Accept", "application/vnd.github.v3+json")
@@ -555,40 +594,48 @@ public class HomeViewModel extends BaseViewModel {
                         .build();
 
                 Single.fromCallable(() -> {
-                    try (okhttp3.Response response = httpClient.newCall(request)
-                            .execute()) {
-                        return new Gson().<List<GitHubRelease>>fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>() {
-                        }.getType());
-                    } catch (Exception e) {
-                        Timber.tag(TAG).e(e);
-                    }
-                    return null;
-                }).subscribeOn(Schedulers.io())
+                            try (okhttp3.Response response = httpClient.newCall(request)
+                                    .execute())
+                            {
+                                return new Gson().<List<GitHubRelease>>fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>()
+                                {
+                                }.getType());
+                            }
+                            catch (Exception e)
+                            {
+                                Timber.tag(TAG).e(e);
+                            }
+                            return null;
+                        }).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread()).subscribe((releases) -> {
 
-                    BottomSheetDialog dialog = new BottomSheetDialog(context);
+                            BottomSheetDialog dialog = new BottomSheetDialog(context);
 
-                    WhatsNewView view = new WhatsNewView(context, releases, v -> dialog.dismiss(), true);
-                    dialog.setContentView(view);
-                    dialog.setCancelable(true);
-                    dialog.setCanceledOnTouchOutside(true);
-                    BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
-                    dialog.setOnShowListener(d -> behavior.setPeekHeight(view.getHeight()));
-                    dialog.show();
+                            WhatsNewView view = new WhatsNewView(context, releases, v -> dialog.dismiss(), true);
+                            dialog.setContentView(view);
+                            dialog.setCancelable(true);
+                            dialog.setCanceledOnTouchOutside(true);
+                            BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
+                            dialog.setOnShowListener(d -> behavior.setPeekHeight(view.getHeight()));
+                            dialog.show();
 
-                    preferenceRepository.setLastVersionCode(versionCode);
+                            preferenceRepository.setLastVersionCode(versionCode);
 
-                }).isDisposed();
+                        }).isDisposed();
             }
-        } catch (PackageManager.NameNotFoundException e) {
+        }
+        catch (PackageManager.NameNotFoundException e)
+        {
             Timber.e(e);
         }
 
     }
 
-    private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception {
+    private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception
+    {
         Locale locale;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
             locale = ctx.getResources().getConfiguration().getLocales().get(0);
         }
         else
@@ -665,7 +712,8 @@ public class HomeViewModel extends BaseViewModel {
         currencyRepository.setDefaultCurrency(preferenceRepository.getDefaultCurrency());
     }
 
-    public void sendMsgPumpToWC(Context context) {
+    public void sendMsgPumpToWC(Context context)
+    {
 
         Timber.d("Start WC service");
         WCUtils.startServiceLocal(context, null, WalletConnectActions.MSG_PUMP);
@@ -675,7 +723,7 @@ public class HomeViewModel extends BaseViewModel {
     private void initWalletConnectSessions(Activity activity, Wallet wallet)
     {
         List<WCClient> clientMap = new ArrayList<>();
-        long cutOffTime = System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS*2;
+        long cutOffTime = System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS * 2;
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
             RealmResults<RealmWCSession> items = realm.where(RealmWCSession.class)

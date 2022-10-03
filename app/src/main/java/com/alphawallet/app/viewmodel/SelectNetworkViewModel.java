@@ -7,6 +7,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.SelectNetworkFilterActivity;
 
@@ -17,18 +18,21 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
-public class SelectNetworkViewModel extends BaseViewModel {
+public class SelectNetworkViewModel extends BaseViewModel
+{
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
+    private final CustomSettings customSettings;
     private final PreferenceRepositoryType preferenceRepository;
 
     @Inject
     public SelectNetworkViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                   TokensService tokensService,
-                                  PreferenceRepositoryType preferenceRepository)
+                                  CustomSettings customSettings, PreferenceRepositoryType preferenceRepository)
     {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
+        this.customSettings = customSettings;
         this.preferenceRepository = preferenceRepository;
     }
 
@@ -76,11 +80,20 @@ public class SelectNetworkViewModel extends BaseViewModel {
     public long getSelectedNetwork()
     {
         NetworkInfo browserNetwork = networkRepository.getActiveBrowserNetwork();
-        if (browserNetwork != null) { return browserNetwork.chainId; }
+        if (browserNetwork != null)
+        {
+            return browserNetwork.chainId;
+        }
         else return -1;
     }
 
-    public TokensService getTokensService() {
+    public TokensService getTokensService()
+    {
         return tokensService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 }

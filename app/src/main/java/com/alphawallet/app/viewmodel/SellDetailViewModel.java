@@ -1,24 +1,25 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+import android.content.Context;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import android.content.Context;
 
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
-import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.SellDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.SellDetailActivity;
@@ -38,7 +39,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
  * Created by James on 21/02/2018.
  */
 @HiltViewModel
-public class SellDetailViewModel extends BaseViewModel {
+public class SellDetailViewModel extends BaseViewModel
+{
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Double> ethereumPrice = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
@@ -52,6 +54,7 @@ public class SellDetailViewModel extends BaseViewModel {
     private final SellDetailRouter sellDetailRouter;
     private final KeyService keyService;
     private final AssetDefinitionService assetDefinitionService;
+    private final CustomSettings customSettings;
 
     private byte[] linkMessage;
 
@@ -61,13 +64,15 @@ public class SellDetailViewModel extends BaseViewModel {
                         CreateTransactionInteract createTransactionInteract,
                         SellDetailRouter sellDetailRouter,
                         KeyService keyService,
-                        AssetDefinitionService assetDefinitionService) {
+                        AssetDefinitionService assetDefinitionService, CustomSettings customSettings)
+    {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.tokensService = tokensService;
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;
         this.keyService = keyService;
         this.assetDefinitionService = assetDefinitionService;
+        this.customSettings = customSettings;
     }
 
     private void initParser()
@@ -78,25 +83,38 @@ public class SellDetailViewModel extends BaseViewModel {
         }
     }
 
-    public LiveData<Wallet> defaultWallet() {
+    public LiveData<Wallet> defaultWallet()
+    {
         return defaultWallet;
     }
-    public LiveData<Double> ethereumPrice() { return ethereumPrice; }
-    public LiveData<String> universalLinkReady() { return universalLinkReady; }
+
+    public LiveData<Double> ethereumPrice()
+    {
+        return ethereumPrice;
+    }
+
+    public LiveData<String> universalLinkReady()
+    {
+        return universalLinkReady;
+    }
 
     public String getSymbol()
     {
         return findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId).symbol;
     }
 
-    public TokensService getTokensService() { return tokensService; }
+    public TokensService getTokensService()
+    {
+        return tokensService;
+    }
 
     public NetworkInfo getNetwork()
     {
         return findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId);
     }
 
-    public void prepare(Token token, Wallet wallet) {
+    public void prepare(Token token, Wallet wallet)
+    {
         this.token = token;
         this.defaultWallet.setValue(wallet);
         //now get the ticker
@@ -116,15 +134,20 @@ public class SellDetailViewModel extends BaseViewModel {
     public void generateUniversalLink(List<BigInteger> ticketSendIndexList, String contractAddress, BigInteger price, long expiry)
     {
         initParser();
-        if (ticketSendIndexList == null || ticketSendIndexList.size() == 0) return; //TODO: Display error message
+        if (ticketSendIndexList == null || ticketSendIndexList.size() == 0)
+            return; //TODO: Display error message
 
         int[] indexList = new int[ticketSendIndexList.size()];
-        for (int i = 0; i < ticketSendIndexList.size(); i++) indexList[i] = ticketSendIndexList.get(i).intValue();
+        for (int i = 0; i < ticketSendIndexList.size(); i++)
+            indexList[i] = ticketSendIndexList.get(i).intValue();
 
         SignableBytes tradeBytes = new SignableBytes(parser.getTradeBytes(indexList, contractAddress, price, expiry));
-        try {
+        try
+        {
             linkMessage = ParseMagicLink.generateLeadingLinkBytes(indexList, contractAddress, price, expiry);
-        } catch (SalesOrderMalformed e) {
+        }
+        catch (SalesOrderMalformed e)
+        {
             //TODO: Display appropriate error to user
         }
 
@@ -150,6 +173,11 @@ public class SellDetailViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)

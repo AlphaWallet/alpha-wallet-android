@@ -9,6 +9,7 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.Erc1155AssetListActivity;
@@ -21,22 +22,25 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
-public class NFTAssetsViewModel extends BaseViewModel {
+public class NFTAssetsViewModel extends BaseViewModel
+{
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final OpenSeaService openSeaService;
+    private final CustomSettings customSettings;
 
     @Inject
     public NFTAssetsViewModel(FetchTransactionsInteract fetchTransactionsInteract,
                               AssetDefinitionService assetDefinitionService,
                               TokensService tokensService,
-                              OpenSeaService openSeaService)
+                              OpenSeaService openSeaService, CustomSettings customSettings)
     {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.openSeaService = openSeaService;
+        this.customSettings = customSettings;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -72,5 +76,10 @@ public class NFTAssetsViewModel extends BaseViewModel {
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString());
         return intent;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 }

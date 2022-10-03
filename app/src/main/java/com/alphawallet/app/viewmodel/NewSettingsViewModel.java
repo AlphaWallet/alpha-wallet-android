@@ -1,10 +1,10 @@
 package com.alphawallet.app.viewmodel;
 
 
+import android.content.Context;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-
-import android.content.Context;
 
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.entity.LocaleItem;
@@ -17,6 +17,7 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.util.LocaleUtils;
 
@@ -41,6 +42,7 @@ public class NewSettingsViewModel extends BaseViewModel
     private final LocaleRepositoryType localeRepository;
     private final CurrencyRepositoryType currencyRepository;
     private final TransactionsService transactionsService;
+    private final CustomSettings customSettings;
     private final TickerService tickerService;
 
     @Inject
@@ -51,6 +53,8 @@ public class NewSettingsViewModel extends BaseViewModel
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             CurrencyRepositoryType currencyRepository,
+            TransactionsService transactionsService, CustomSettings customSettings)
+    {
             TransactionsService transactionsService,
             TickerService tickerService)
     {
@@ -61,6 +65,7 @@ public class NewSettingsViewModel extends BaseViewModel
         this.localeRepository = localeRepository;
         this.currencyRepository = currencyRepository;
         this.transactionsService = transactionsService;
+        this.customSettings = customSettings;
         this.tickerService = tickerService;
     }
 
@@ -97,6 +102,11 @@ public class NewSettingsViewModel extends BaseViewModel
         tickerService.updateCurrencyConversion();
         //delete tickers from realm
         return transactionsService.wipeTickerData();
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public String getActiveLocale()

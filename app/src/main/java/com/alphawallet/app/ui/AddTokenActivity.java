@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +24,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
@@ -58,10 +56,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
-import timber.log.Timber;
-
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class AddTokenActivity extends BaseActivity implements AddressReadyCallback, StandardFunctionInterface, TokensAdapterCallback
@@ -88,7 +84,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     private final LongSparseArray<Token> tokenList = new LongSparseArray<>();
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
 
         super.onCreate(savedInstanceState);
 
@@ -122,8 +119,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         lastCheck = "";
 
-        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),
-                null);
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), viewModel.getCustomSettings(), null);
         adapter.setHasStableIds(true);
         adapter.showTestNetTips();
         adapter.setFilterType(TokenFilter.NO_FILTER);
@@ -133,24 +129,29 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         inputAddressView = findViewById(R.id.input_address_view);
         inputAddressView.setAddressCallback(this);
 
-        inputAddressView.getEditText().addTextChangedListener(new TextWatcher() {
+        inputAddressView.getEditText().addTextChangedListener(new TextWatcher()
+        {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
 
             }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
                 //wait until we have an ethereum address
                 String check = inputAddressView.getInputText().toLowerCase().trim();
                 //process the address first
-                if (check.length() > 38) {
+                if (check.length() > 38)
+                {
                     onCheck(check);
                 }
             }
 
             @Override
-            public void afterTextChanged(Editable editable) {
+            public void afterTextChanged(Editable editable)
+            {
 
             }
         });
@@ -160,7 +161,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         setupNetwork(EthereumNetworkRepository.getOverrideToken().chainId);
         viewModel.prepare();
 
-        if ( getIntent().getStringExtra(C.EXTRA_QR_CODE) != null) {
+        if (getIntent().getStringExtra(C.EXTRA_QR_CODE) != null)
+        {
             runOnUiThread(() -> onActivityResult(C.BARCODE_READER_REQUEST_CODE, Activity.RESULT_OK, getIntent()));
         }
     }
@@ -200,7 +202,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu_network, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -226,11 +229,15 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
     }
 
-    private void showProgress(Boolean shouldShowProgress) {
-        if (shouldShowProgress) {
+    private void showProgress(Boolean shouldShowProgress)
+    {
+        if (shouldShowProgress)
+        {
             progressLayout.setVisibility(View.VISIBLE);
             counterLayout.setVisibility(View.VISIBLE);
-        } else {
+        }
+        else
+        {
             progressLayout.setVisibility(View.GONE);
             counterLayout.setVisibility(View.GONE);
         }
@@ -287,7 +294,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
     }
 
-    private void onError(ErrorEnvelope errorEnvelope) {
+    private void onError(ErrorEnvelope errorEnvelope)
+    {
         aDialog = new AWalletAlertDialog(this);
         aDialog.setTitle(R.string.title_dialog_error);
         aDialog.setMessage(R.string.error_add_token);
@@ -326,7 +334,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
     }
 
-    private void onSave() {
+    private void onSave()
+    {
         List<TokenCardMeta> selected = adapter.getSelected();
         List<Token> toSave = new ArrayList<>();
         for (TokenCardMeta tcm : selected)
@@ -374,7 +383,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                 setupNetwork(networkId);
             });
 
-    private void selectNetwork() {
+    private void selectNetwork()
+    {
         Intent intent = new Intent(this, SelectNetworkActivity.class);
         intent.putExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
@@ -382,12 +392,15 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == C.BARCODE_READER_REQUEST_CODE) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == C.BARCODE_READER_REQUEST_CODE)
+        {
             switch (resultCode)
             {
                 case Activity.RESULT_OK:
-                    if (data != null) {
+                    if (data != null)
+                    {
                         String barcode = data.getStringExtra(C.EXTRA_QR_CODE);
                         if (barcode == null) break;
 
@@ -434,7 +447,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                             }
                         }
 
-                        if (extracted_address == null) {
+                        if (extracted_address == null)
+                        {
                             Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -446,11 +460,13 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                     break;
                 default:
                     Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
-                                                "Code: " + resultCode
+                            "Code: " + resultCode
                     ));
                     break;
             }
-        } else {
+        }
+        else
+        {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }

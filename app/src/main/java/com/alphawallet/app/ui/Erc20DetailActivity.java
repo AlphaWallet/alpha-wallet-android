@@ -48,7 +48,6 @@ import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
-import com.bumptech.glide.Glide;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -59,19 +58,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
 @AndroidEntryPoint
 public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface, BuyCryptoInterface
 {
-    Erc20DetailViewModel viewModel;
-
     public static final int HISTORY_LENGTH = 5;
-
+    Erc20DetailViewModel viewModel;
     private String symbol;
     private Wallet wallet;
     private Token token;
@@ -84,29 +78,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private RealmResults<RealmToken> realmTokenUpdates;
 
     private ViewPager2 viewPager;
-
-    private static class DetailPage {
-        private final int tabNameResourceId;
-        private final Fragment fragment;
-
-        DetailPage(int tabNameResourceId, Fragment fragment)
-        {
-            this.tabNameResourceId = tabNameResourceId;
-            this.fragment = fragment;
-        }
-
-        public Pair<String, Fragment> init(Context context, Bundle bundle)
-        {
-            this.fragment.setArguments(bundle);
-            return new Pair<>(context.getString(tabNameResourceId), fragment);
-        }
-    }
-
-    private final DetailPage[] detailPages = new DetailPage[] {
-            new DetailPage(R.string.tab_info, new TokenInfoFragment()),
-            new DetailPage(R.string.tab_activity, new TokenActivityFragment()),
-            new DetailPage(R.string.tab_alert, new TokenAlertsFragment())
-    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -145,25 +116,37 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         bundle.putLong(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         bundle.putParcelable(WALLET, wallet);
 
-        List<Pair<String, Fragment>> pages = getPages(bundle);
+        List<DetailPage> detailPages = new ArrayList<>();
+        detailPages.add(new DetailPage(R.string.tab_info, new TokenInfoFragment()));
+        detailPages.add(new DetailPage(R.string.tab_activity, new TokenActivityFragment()));
+        if (token.hasRealValue())
+        {
+            detailPages.add(new DetailPage(R.string.tab_alert, new TokenAlertsFragment()));
+        }
+
+        List<Pair<String, Fragment>> pages = initPages(detailPages, bundle);
 
         viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(new TabPagerAdapter(this, pages));
-        viewPager.setOffscreenPageLimit(detailPages.length);  // to retain fragments in memory
+        viewPager.setOffscreenPageLimit(detailPages.size());  // to retain fragments in memory
         viewPager.setUserInputEnabled(false);
-        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback()
+        {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels);
             }
 
             @Override
-            public void onPageSelected(int position) {
+            public void onPageSelected(int position)
+            {
                 super.onPageSelected(position);
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
+            public void onPageScrollStateChanged(int state)
+            {
                 super.onPageScrollStateChanged(state);
             }
         });
@@ -179,11 +162,12 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         TabUtils.decorateTabLayout(this, tabLayout);
     }
 
-    private List<Pair<String, Fragment>> getPages(Bundle bundle)
+    private List<Pair<String, Fragment>> initPages(List<DetailPage> detailPages, Bundle bundle)
     {
         List<Pair<String, Fragment>> pages = new ArrayList<>();
-        for (int i = 0; i< detailPages.length; i++) {
-            pages.add(i, detailPages[i].init(this, bundle));
+        for (int i = 0; i < detailPages.size(); i++)
+        {
+            pages.add(i, detailPages.get(i).init(this, bundle));
         }
         return pages;
     }
@@ -265,7 +249,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     {
         if (tokenViewAdapter != null) return;
         tokenView = findViewById(R.id.token_view);
-        tokenView.setLayoutManager(new LinearLayoutManager(this) {
+        tokenView.setLayoutManager(new LinearLayoutManager(this)
+        {
             @Override
             public boolean canScrollVertically()
             {
@@ -514,7 +499,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public void handleGeneratePaymentRequest(Token token) {
+    public void handleGeneratePaymentRequest(Token token)
+    {
         Intent intent = new Intent(this, MyAddressActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
@@ -522,5 +508,23 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         intent.putExtra(KEY_MODE, AddressMode.MODE_POS.ordinal());
         this.startActivity(intent);
+    }
+
+    private static class DetailPage
+    {
+        private final int tabNameResourceId;
+        private final Fragment fragment;
+
+        DetailPage(int tabNameResourceId, Fragment fragment)
+        {
+            this.tabNameResourceId = tabNameResourceId;
+            this.fragment = fragment;
+        }
+
+        public Pair<String, Fragment> init(Context context, Bundle bundle)
+        {
+            this.fragment.setArguments(bundle);
+            return new Pair<>(context.getString(tabNameResourceId), fragment);
+        }
     }
 }

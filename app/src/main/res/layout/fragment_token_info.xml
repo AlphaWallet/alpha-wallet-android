@@ -15,40 +15,33 @@
             android:layout_height="match_parent"
             android:orientation="vertical" />
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:id="@+id/placeholder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_components_charts_graph_stable"
-                android:visibility="invisible" />
+        <LinearLayout
+            android:id="@+id/layout_history"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/standard_16"
+            android:orientation="vertical">
 
             <com.alphawallet.app.ui.widget.entity.HistoryChart
                 android:id="@+id/history_chart"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </FrameLayout>
+                android:layout_height="200dp" />
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tab_layout"
-            style="@style/Aw.Component.ChartTabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" />
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tab_layout"
+                style="@style/Aw.Component.ChartTabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" />
 
-        <View
-            style="@style/Aw.Component.Separator"
-            android:layout_marginStart="@dimen/tiny_8"
-            android:layout_marginTop="@dimen/tiny_8"
-            android:layout_marginEnd="@dimen/tiny_8" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layout_token_info"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical" />
+
     </LinearLayout>
+
 </androidx.core.widget.NestedScrollView>

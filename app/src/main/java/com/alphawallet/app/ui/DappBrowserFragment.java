@@ -1539,7 +1539,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
         else
         {
-            nextUrl = urlTv.getText().toString();// web3.getUrl();// getDefaultDappUrl();
+            nextUrl = urlTv.getText().toString();
         }
 
         if (nextUrl.equalsIgnoreCase(getDefaultDappUrl()))

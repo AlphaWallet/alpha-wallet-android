@@ -1,6 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.util.Utils.isValidUrl;
 
 import android.app.Activity;
 import android.content.Context;
@@ -350,15 +351,50 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return Uri.parse(uriString).getUserInfo();
     }
 
-    public void addCustomChain(WalletAddEthereumChainObject chainObject) {
-        this.ethereumNetworkRepository.saveCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
-                chainObject.nativeCurrency.symbol, "", "", false, -1L);
+    public boolean addCustomChain(WalletAddEthereumChainObject chainObject) {
+        String rpc = extractRpc(chainObject);
+        String blockExplorer = extractBlockExplorer(chainObject);
+        if (rpc == null) return false;
+
+
+        this.ethereumNetworkRepository.saveCustomRPCNetwork(chainObject.chainName, rpc, chainObject.getChainId(),
+                chainObject.nativeCurrency.symbol, blockExplorer, "", false, -1L);
 
         tokensService.createBaseToken(chainObject.getChainId())
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe(w -> { }, e -> { })
                 .isDisposed();
+
+        return true;
+    }
+
+    private String extractBlockExplorer(WalletAddEthereumChainObject chainObject)
+    {
+        for (String thisRpc : chainObject.blockExplorerUrls)
+        {
+            if (isValidUrl(thisRpc)) //ensure RPC doesn't contain malicious code
+            {
+                String retRpc = thisRpc;
+                if (thisRpc.endsWith("/tx"))
+                {
+                    retRpc = thisRpc + "/";
+                }
+                else if (!thisRpc.endsWith("/tx/"))
+                {
+                    if (!thisRpc.endsWith("/"))
+                    {
+                        retRpc = thisRpc + "/";
+                    }
+
+                    retRpc = retRpc + "tx/";
+                }
+
+                return retRpc;
+            }
+        }
+
+        return "";
     }
 
     //NB Chain descriptions can contain WSS socket defs, which might come first.
@@ -366,10 +402,13 @@ public class DappBrowserViewModel extends BaseViewModel  {
     {
         for (String thisRpc : chainObject.rpcUrls)
         {
-            if (thisRpc.toLowerCase().startsWith("http")) { return thisRpc; }
+            if (isValidUrl(thisRpc)) //ensure RPC doesn't contain malicious code
+            {
+                return thisRpc;
+            }
         }
 
-        return "";
+        return null;
     }
 
     public boolean isMainNetsSelected()

@@ -356,7 +356,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
         String blockExplorer = extractBlockExplorer(chainObject);
         if (rpc == null) return false;
 
-
         this.ethereumNetworkRepository.saveCustomRPCNetwork(chainObject.chainName, rpc, chainObject.getChainId(),
                 chainObject.nativeCurrency.symbol, blockExplorer, "", false, -1L);
 

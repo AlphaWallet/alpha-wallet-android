@@ -74,8 +74,7 @@ public class Steps
         selectMenu("Select Active Networks");
         toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
-        click(withSubstring("Rinkeby")); // Deselect
-        click(withSubstring(name)); // Select
+        click(withSubstring(name));
         pressBack();
     }
 

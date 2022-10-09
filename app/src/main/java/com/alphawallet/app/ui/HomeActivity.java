@@ -927,23 +927,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void onInstallIntent(File installFile)
     {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        {
-            String authority = BuildConfig.APPLICATION_ID + ".fileprovider";
-            Uri apkUri = FileProvider.getUriForFile(getApplicationContext(), authority, installFile);
-            Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-            intent.setData(apkUri);
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(intent);
-        }
-        else
-        {
-            Uri apkUri = Uri.fromFile(installFile);
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        }
+        String authority = BuildConfig.APPLICATION_ID + ".fileprovider";
+        Uri apkUri = FileProvider.getUriForFile(getApplicationContext(), authority, installFile);
+        Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+        intent.setData(apkUri);
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(intent);
 
         //Blank install time here so that next time the app runs the install time will be correctly set up
         viewModel.setInstallTime(0);

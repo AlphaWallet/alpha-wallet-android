@@ -6,7 +6,6 @@ import static com.alphawallet.app.repository.SharedPreferenceRepository.DEVICE_L
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.LocaleList;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -115,40 +114,16 @@ public class LocaleUtils {
      * @return String as a Language Locale
      */
     public static String getDeviceSettingsLocale(Context context) {
-        String locale;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        {
-            locale = context.getResources().getConfiguration().getLocales().get(0).getLanguage();
-        }
-        else
-        {
-            locale = context.getResources().getConfiguration().locale.getLanguage();
-        }
-        return locale;
+        return context.getResources().getConfiguration().getLocales().get(0).getLanguage();
     }
 
     private static String getCurrentLanguage()
     {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        {
-            return LocaleList.getDefault().get(0).getLanguage();
-        }
-        else
-        {
-            return Locale.getDefault().getLanguage();
-        }
+        return LocaleList.getDefault().get(0).getLanguage();
     }
 
     private static String getCurrentCountry()
     {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        {
-            return LocaleList.getDefault().get(0).getCountry();
-        }
-        else
-        {
-            return Locale.getDefault().getCountry();
-        }
+        return LocaleList.getDefault().get(0).getCountry();
     }
 }

@@ -12,7 +12,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -58,10 +57,10 @@ import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportWalletActivity;
 import com.alphawallet.app.ui.SendActivity;
-import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.entity.WCUtils;
 import com.alphawallet.app.widget.EmailPromptView;
@@ -587,15 +586,7 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception {
-        Locale locale;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            locale = ctx.getResources().getConfiguration().getLocales().get(0);
-        }
-        else
-        {
-            locale = ctx.getResources().getConfiguration().locale;
-        }
-
+        Locale locale = ctx.getResources().getConfiguration().getLocales().get(0);
         return new TokenDefinition(
                 xmlInputStream, locale, null);
     }

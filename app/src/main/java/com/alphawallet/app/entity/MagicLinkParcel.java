@@ -12,7 +12,9 @@ import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.MessageData;
@@ -106,7 +108,7 @@ public class MagicLinkParcel implements Parcelable
         byte[] data = null;
         try
         {
-            List<BigInteger> tokenElements = new ArrayList<>();
+            List<BigInteger> tokenElements;
             BigInteger expiry = BigInteger.valueOf(order.expiry);
             //convert to signature representation
             Sign.SignatureData sellerSig = CryptoFunctions.sigFromByteArray(order.signature);
@@ -122,9 +124,7 @@ public class MagicLinkParcel implements Parcelable
                     data = TokenRepository.createDropCurrency(order, v, sellerSig.getR(), sellerSig.getS(), recipient);
                     break;
                 default:
-                    for (int ticketIndex : order.indices) {
-                        tokenElements.add(BigInteger.valueOf(ticketIndex));
-                    }
+                    tokenElements = Arrays.stream(order.indices).mapToObj(BigInteger::valueOf).collect(Collectors.toList());
                     data = TokenRepository.createTrade(token, expiry, tokenElements, v, sellerSig.getR(), sellerSig.getS());
                     break;
             }

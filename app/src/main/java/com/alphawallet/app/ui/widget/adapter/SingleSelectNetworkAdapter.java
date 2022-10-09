@@ -27,13 +27,9 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
     {
         this.networkList = data;
 
-        for (NetworkItem item : data)
+        if (data.stream().anyMatch(NetworkItem::isSelected))
         {
-            if (item.isSelected())
-            {
-                hasSelection = true;
-                break;
-            }
+            hasSelection = true;
         }
     }
 

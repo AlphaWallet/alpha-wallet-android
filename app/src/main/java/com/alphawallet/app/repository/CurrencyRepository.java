@@ -50,29 +50,14 @@ public class CurrencyRepository implements CurrencyRepositoryType {
     }
 
     public static CurrencyItem getCurrencyByISO(String currencyIsoCode) {
-        for (CurrencyItem c : CURRENCIES) {
-            if (currencyIsoCode.equals(c.getCode())) {
-                return c;
-            }
-        }
-        return null;
+        return Arrays.stream(CURRENCIES).filter(c -> currencyIsoCode.equals(c.getCode())).findFirst().orElse(null);
     }
 
     public static CurrencyItem getCurrencyByName(String currencyName) {
-        for (CurrencyItem c : CURRENCIES) {
-            if (currencyName.equals(c.getName())) {
-                return c;
-            }
-        }
-        return null;
+        return Arrays.stream(CURRENCIES).filter(c -> currencyName.equals(c.getName())).findFirst().orElse(null);
     }
 
     public static int getFlagByISO(String currencyIsoCode) {
-        for (CurrencyItem c : CURRENCIES) {
-            if (currencyIsoCode.equals(c.getCode())) {
-                return c.getFlag();
-            }
-        }
-        return 0;
+        return Arrays.stream(CURRENCIES).filter(c -> currencyIsoCode.equals(c.getCode())).findFirst().map(CurrencyItem::getFlag).orElse(0);
     }
 }

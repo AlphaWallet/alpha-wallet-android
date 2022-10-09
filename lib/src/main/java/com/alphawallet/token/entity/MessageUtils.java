@@ -4,8 +4,10 @@ import com.alphawallet.token.tools.Numeric;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by JB on 27/08/2020.
@@ -22,15 +24,7 @@ public class MessageUtils
      */
     public static byte[] encodeParams(ProviderTypedData[] rawData)
     {
-        //form the params for hashing
-        StringBuilder sb = new StringBuilder();
-        int len = rawData.length;
-        for (int i = 0; i < len; i++)
-        {
-            sb.append(rawData[i].type).append(" ").append(rawData[i].name);
-        }
-
-        return sb.toString().getBytes();
+        return Arrays.stream(rawData).map(rawDatum -> rawDatum.type + " " + rawDatum.name).collect(Collectors.joining()).getBytes();
     }
 
     /**

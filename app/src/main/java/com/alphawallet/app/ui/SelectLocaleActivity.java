@@ -91,13 +91,7 @@ public class SelectLocaleActivity extends BaseActivity
             this.dataSet = data;
             this.selectedItemId = selectedItemId;
 
-            for (LocaleItem l : data)
-            {
-                if (l.getCode().equals(selectedItemId))
-                {
-                    l.setSelected(true);
-                }
-            }
+            data.stream().filter(l -> l.getCode().equals(selectedItemId)).forEach(l -> l.setSelected(true));
         }
 
         private String getSelectedItemId()

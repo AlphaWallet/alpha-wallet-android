@@ -53,10 +53,13 @@ import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -175,11 +178,10 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     private void gotAllTokens(Token[] tokens)
     {
         List<TokenCardMeta> tokenMetas = new ArrayList<>();
-        for (Token t : tokens)
-        {
+        Arrays.stream(tokens).forEach(t -> {
             tokenMetas.add(new TokenCardMeta(t, CHECK_MARK));
             tokenList.put(t.tokenInfo.chainId, t);
-        }
+        });
         adapter.setTokens(tokenMetas.toArray(new TokenCardMeta[0]));
         onChainScanned(0);
 
@@ -328,12 +330,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private void onSave() {
         List<TokenCardMeta> selected = adapter.getSelected();
-        List<Token> toSave = new ArrayList<>();
-        for (TokenCardMeta tcm : selected)
-        {
-            Token matchingToken = tokenList.get(tcm.getChain());
-            if (matchingToken != null) toSave.add(matchingToken);
-        }
+        List<Token> toSave = selected.stream().map(tcm -> tokenList.get(tcm.getChain())).filter(Objects::nonNull).collect(Collectors.toList());
 
         if (toSave.size() > 0)
         {

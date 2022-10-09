@@ -40,6 +40,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -201,12 +203,7 @@ public class TokensService
     {
         List<Token> tokens = new ArrayList<>();
         if (addr == null) return tokens;
-        for (long chainId : networkFilter)
-        {
-            tokens.add(getToken(chainId, addr));
-        }
-
-        return tokens;
+        return networkFilter.stream().mapToLong(chainId -> chainId).mapToObj(chainId -> getToken(chainId, addr)).collect(Collectors.toList());
     }
 
     public void setCurrentAddress(String newWalletAddr)
@@ -656,13 +653,7 @@ public class TokensService
     private void checkPendingChains()
     {
         long currentTime = System.currentTimeMillis();
-        for (Long chainId : pendingChainMap.keySet())
-        {
-            if (currentTime > pendingChainMap.get(chainId))
-            {
-                pendingChainMap.remove(chainId);
-            }
-        }
+        pendingChainMap.keySet().stream().filter(chainId -> currentTime > pendingChainMap.get(chainId)).forEach(pendingChainMap::remove);
     }
 
     private void onError(Throwable throwable)
@@ -934,7 +925,7 @@ public class TokensService
             blankFiltersForZeroBalance(mainNetActive);
 
             NetworkInfo[] networks = ethereumNetworkRepository.getAllActiveNetworks();
-            for (NetworkInfo info : networks) { baseTokenCheck.add(info.chainId); }
+            Arrays.stream(networks).map(info -> info.chainId).forEach(baseTokenCheck::add);
         }
     }
 

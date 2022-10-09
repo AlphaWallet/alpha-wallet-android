@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import io.realm.Case;
 import io.realm.Realm;
@@ -253,11 +254,7 @@ public class ERC721Token extends Token
         if (lastTxTime > realmToken.getLastTxTime()) return true;
         if (!currentState.equals(balance.toString())) return true;
         //check balances
-        for (NFTAsset a : tokenBalanceAssets.values())
-        {
-            if (!a.needsLoading() && !a.requiresReplacement()) return true;
-        }
-        return false;
+        return tokenBalanceAssets.values().stream().anyMatch(a -> !a.needsLoading() && !a.requiresReplacement());
     }
 
     @Override
@@ -475,15 +472,12 @@ public class ERC721Token extends Token
 
     private void updateRealmForEnumerable(Realm realm, HashSet<BigInteger> currentTokens)
     {
-        HashSet<BigInteger> storedBalance = new HashSet<>();
+        HashSet<BigInteger> storedBalance;
         RealmResults<RealmNFTAsset> results = realm.where(RealmNFTAsset.class)
                 .like("tokenIdAddr", databaseKey(this) + "-*", Case.INSENSITIVE)
                 .findAll();
 
-        for (RealmNFTAsset t : results)
-        {
-            storedBalance.add(new BigInteger(t.getTokenId()));
-        }
+        storedBalance = results.stream().map(t -> new BigInteger(t.getTokenId())).collect(Collectors.toCollection(HashSet::new));
 
         if (!currentTokens.equals(storedBalance))
         {

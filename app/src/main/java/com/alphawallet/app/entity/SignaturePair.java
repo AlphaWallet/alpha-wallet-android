@@ -10,6 +10,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * Created by James on 30/01/2018. Signature Pair refers to the
@@ -174,10 +175,7 @@ public class SignaturePair
             int offset = 65 - signature.length;
             byte[] sigCopy = new byte[65];
             System.arraycopy(signature, 0, sigCopy, offset, 65-offset);
-            for (int i = 0; i < offset; i++)
-            {
-                sigCopy[i] = 0;
-            }
+            IntStream.range(0, offset).forEach(i -> sigCopy[i] = 0);
             signature = sigCopy;
         }
         else if (signature.length > 65)

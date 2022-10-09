@@ -30,11 +30,7 @@ public class UrlFilter extends Filter {
             final String filterPattern = constraint.toString().toLowerCase().trim();
 
             // Filtering logic goes in here
-            for (final String url : originalList) {
-                if (url.toLowerCase().contains(filterPattern)) {
-                    filteredList.add(url);
-                }
-            }
+            originalList.stream().filter(url -> url.toLowerCase().contains(filterPattern)).forEach(url -> filteredList.add(url));
         }
         results.values = filteredList;
         results.count = filteredList.size();

@@ -73,15 +73,8 @@ public class DiscoverDappsFragment extends Fragment implements OnDappClickListen
         try
         {
             List<DApp> myDapps = DappBrowserUtils.getMyDapps(getContext());
-            for (DApp d : myDapps)
-            {
-                if (d.getName().equals(dapp.getName())
-                        && d.getUrl().equals(dapp.getUrl()))
-                {
-                    myDapps.remove(d);
-                    break;
-                }
-            }
+            myDapps.stream().filter(d -> d.getName().equals(dapp.getName())
+                    && d.getUrl().equals(dapp.getUrl())).findFirst().ifPresent(myDapps::remove);
             DappBrowserUtils.saveToPrefs(getContext(), myDapps);
         }
         catch (Exception e)
@@ -96,16 +89,9 @@ public class DiscoverDappsFragment extends Fragment implements OnDappClickListen
 
         try
         {
-            for (DApp d : dapps)
-            {
-                for (DApp myDapp : DappBrowserUtils.getMyDapps(getContext()))
-                {
-                    if (d.getName().equals(myDapp.getName()) && myDapp.isAdded())
-                    {
-                        d.setAdded(true);
-                    }
-                }
-            }
+            dapps.forEach(d -> {
+                DappBrowserUtils.getMyDapps(getContext()).stream().filter(myDapp -> d.getName().equals(myDapp.getName()) && myDapp.isAdded()).forEach(myDapp -> d.setAdded(true));
+            });
         }
         catch (Exception e)
         {

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.IntStream;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -87,10 +88,7 @@ public class NodeStatusAdapter extends RecyclerView.Adapter<NodeStatusAdapter.Vi
 
     private void initStatusCheck()
     {
-        for (NetworkInfo item : networkList)
-        {
-            refreshNodeStatus(item.chainId, null);
-        }
+        networkList.forEach(item -> refreshNodeStatus(item.chainId, null));
     }
 
     private NodeStatus fetchNodeStatus(long chainId)
@@ -117,15 +115,7 @@ public class NodeStatusAdapter extends RecyclerView.Adapter<NodeStatusAdapter.Vi
     private void updateStatus(long chainId, NodeStatus status)
     {
         statusMap.put(chainId, status);
-        int position = 0;
-        for (int i=0; i<networkList.size(); i++)
-        {
-            if (networkList.get(i).chainId == chainId)
-            {
-                position = i;
-                break;
-            }
-        }
+        int position = IntStream.range(0, networkList.size()).filter(i -> networkList.get(i).chainId == chainId).findFirst().orElse(0);
         notifyItemChanged(position);
         Timber.d("updateStatus: chain: %s-%s: %s", chainId, EthereumNetworkBase.getShortChainName(chainId),status);
     }
@@ -153,10 +143,7 @@ public class NodeStatusAdapter extends RecyclerView.Adapter<NodeStatusAdapter.Vi
     {
         try
         {
-            for (Disposable d : disposables)
-            {
-                if (!d.isDisposed()) d.dispose();
-            }
+            disposables.stream().filter(d -> !d.isDisposed()).forEach(Disposable::dispose);
         }
         catch (Exception e)
         {

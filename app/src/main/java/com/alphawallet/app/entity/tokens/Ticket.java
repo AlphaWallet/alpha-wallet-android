@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created by James on 27/01/2018.  It might seem counter intuitive
@@ -85,10 +87,7 @@ public class Ticket extends Token
         //List<BigInteger> idList = Observable.fromArray(idListStr.split(","))
         //       .map(s -> Numeric.toBigInt(s)).toList().blockingGet();
         if (quantity >= idList.size()) return idList;
-        List<BigInteger> pruneList = new ArrayList<>();
-        for (int i = 0; i < quantity; i++) pruneList.add(idList.get(i));
-
-        return pruneList;
+        return IntStream.range(0, quantity).mapToObj(idList::get).collect(Collectors.toList());
     }
 
     @Override
@@ -185,17 +184,12 @@ public class Ticket extends Token
     @Override
     public List<BigInteger> ticketIdStringToIndexList(String userList)
     {
-        List<BigInteger> idList = new ArrayList<>();
+        List<BigInteger> idList;
 
         String[] ids = userList.split(",");
 
-        for (String id : ids)
-        {
-            //remove whitespace
-            String     trim   = id.trim();
-            BigInteger thisId = Numeric.toBigInt(trim);
-            idList.add(thisId);
-        }
+        //remove whitespace
+        idList = Arrays.stream(ids).map(String::trim).map(Numeric::toBigInt).collect(Collectors.toList());
 
         return tokenIdsToTokenIndices(idList);
     }

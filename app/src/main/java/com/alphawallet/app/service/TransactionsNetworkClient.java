@@ -44,10 +44,13 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
@@ -248,10 +251,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         if (updates != null)
         {
-            for (Transaction tx : txList)
-            {
-                updates.put(tx.hash, tx);
-            }
+            txList.forEach(tx -> updates.put(tx.hash, tx));
         }
     }
 
@@ -284,14 +284,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private void getRelatedTransactionList(List<Transaction> txList, EtherscanTransaction[] myTxs, String walletAddress, long chainId)
     {
         txList.clear();
-        for (EtherscanTransaction etx : myTxs)
-        {
-            Transaction tx = etx.createTransaction(walletAddress, chainId);
-            if (tx != null)
-            {
-                txList.add(tx);
-            }
-        }
+        Arrays.stream(myTxs)
+                .map(etx -> etx.createTransaction(walletAddress, chainId))
+                .filter(Objects::nonNull)
+                .forEach(txList::add);
     }
 
     private EtherscanTransaction[] getEtherscanTransactions(String response) throws JSONException
@@ -325,17 +321,15 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         List<CovalentTransaction> cvList = new ArrayList<>();
         try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
         {
-            for (CovalentTransaction ctx : ctxs)
-            {
+            Arrays.stream(ctxs).forEach(ctx -> {
                 RealmTransaction realmTx = instance.where(RealmTransaction.class)
                         .equalTo("hash", ctx.tx_hash)
                         .findFirst();
-
                 if (realmTx == null)
                 {
                     cvList.add(ctx);
                 }
-            }
+            });
         }
 
         return cvList.toArray(new CovalentTransaction[0]);
@@ -623,23 +617,26 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         List<BigInteger> additions = new ArrayList<>();
         List<BigInteger> removals = new ArrayList<>();
 
-        for (EtherscanEvent ev : eventMap.get(contractAddress))
-        {
+        eventMap.get(contractAddress).forEach(ev -> {
             BigInteger tokenId = getTokenId(ev.tokenID);
-
-            if (tokenId.compareTo(new BigInteger("-1")) == 0) continue;
-
+            if (tokenId.compareTo(new BigInteger("-1")) == 0) return;
             if (ev.to.equalsIgnoreCase(walletAddress))
             {
-                if (!additions.contains(tokenId)) { additions.add(tokenId); }
+                if (!additions.contains(tokenId))
+                {
+                    additions.add(tokenId);
+                }
                 removals.remove(tokenId);
             }
             else
             {
-                if (!removals.contains(tokenId)) { removals.add(tokenId); }
+                if (!removals.contains(tokenId))
+                {
+                    removals.add(tokenId);
+                }
                 additions.remove(tokenId);
             }
-        }
+        });
 
         if (additions.size() > 0 && newToken)
         {
@@ -864,11 +861,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     .limit(PAGESIZE)
                     .findAll();
 
-            for (RealmTransaction item : txs)
-            {
-                TransactionMeta tm = new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber());
-                metas.add(tm);
-            }
+            metas = txs.stream().map(item -> new TransactionMeta(item.getHash(), item.getTimeStamp(), item.getTo(), item.getChainId(), item.getBlockNumber())).collect(Collectors.toList());
         }
         catch (Exception e)
         {
@@ -970,18 +963,16 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
         instance.executeTransaction(r -> {
             //write event list
-            for (EtherscanEvent ev : events)
-            {
+            //find tx name
+            //ensure we have fetched the transaction for each hash
+            Arrays.stream(events).forEach(ev -> {
                 boolean scanAsNFT = isNFT || ((ev.tokenDecimal == null || ev.tokenDecimal.length() == 0 || ev.tokenDecimal.equals("0")) && (ev.tokenID != null && ev.tokenID.length() > 0));
                 Transaction tx = scanAsNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
-
-                //find tx name
                 String activityName = tx.getEventName(walletAddress);
                 String valueList = VALUES.replace(TO_TOKEN, ev.to).replace(FROM_TOKEN, ev.from).replace(AMOUNT_TOKEN, scanAsNFT ? ev.tokenID : ev.value); //Etherscan sometimes interprets NFT transfers as FT's
                 storeTransferData(r, tx.hash, valueList, activityName, ev.contractAddress);
-                //ensure we have fetched the transaction for each hash
                 writeTransaction(r, tx, ev.contractAddress, networkInfo.etherscanAPI.contains(COVALENT) ? null : txFetches);
-            }
+            });
         });
 
         fetchRequiredTransactions(networkInfo.chainId, txFetches, walletAddress);
@@ -1050,10 +1041,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      */
     private void fetchRequiredTransactions(long chainId, HashSet<String> txFetches, String walletAddress)
     {
-        for (String txHash : txFetches)
-        {
-            TransactionsService.addTransactionHashFetch(txHash, chainId, walletAddress);
-        }
+        txFetches.forEach(txHash -> TransactionsService.addTransactionHashFetch(txHash, chainId, walletAddress));
     }
 
     /**
@@ -1067,20 +1055,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      */
     private Map<String, List<EtherscanEvent>> getEventMap(EtherscanEvent[] events)
     {
-        Map<String, List<EtherscanEvent>> eventMap = new HashMap<>();
-        for (EtherscanEvent ev : events)
-        {
-            List<EtherscanEvent> thisEventList = eventMap.get(ev.contractAddress);
-            if (thisEventList == null)
-            {
-                thisEventList = new ArrayList<>();
-                eventMap.put(ev.contractAddress, thisEventList);
-            }
-
-            thisEventList.add(ev);
-        }
-
-        return eventMap;
+        return Arrays.stream(events).collect(Collectors.groupingBy(ev -> ev.contractAddress));
     }
 
     private BigInteger getTokenId(String tokenID)

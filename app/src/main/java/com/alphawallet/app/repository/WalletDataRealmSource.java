@@ -13,9 +13,11 @@ import com.alphawallet.app.service.RealmManager;
 import org.web3j.crypto.WalletUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
@@ -46,14 +48,12 @@ public class WalletDataRealmSource {
             {
                 walletList = loadOrCreateKeyRealmDB(realm, keystoreWallets, keyService); //call has action on upgrade to new UX
                 //Add additional - non critical wallet data. This database can be voided for upgrade if required
-                for (Wallet wallet : walletList.values())
-                {
+                walletList.values().forEach(wallet -> {
                     RealmWalletData data = realm.where(RealmWalletData.class)
                             .equalTo("address", wallet.address, Case.INSENSITIVE)
                             .findFirst();
-
                     composeWallet(wallet, data);
-                }
+                });
             }
 
             migrateWalletTypeData(walletList, keyService);
@@ -98,8 +98,7 @@ public class WalletDataRealmSource {
         }
         else //only zero on upgrade from v2.01.3 and lower (pre-HD key)
         {
-            for (Wallet wallet : wallets)
-            {
+            Arrays.stream(wallets).forEach(wallet -> {
                 wallet.authLevel = KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
                 if (testLegacyCipher(wallet, keyService))
                 {
@@ -111,7 +110,7 @@ public class WalletDataRealmSource {
                 }
                 walletList.put(wallet.address.toLowerCase(), wallet);
                 walletUpdates.add(wallet);
-            }
+            });
         }
 
         if (walletUpdates.size() > 0)
@@ -125,9 +124,7 @@ public class WalletDataRealmSource {
 
     private List<String> walletArrayToAddressList(Wallet[] wallets)
     {
-        List<String> walletList = new ArrayList<>();
-        for (Wallet w : wallets) { walletList.add(w.address.toLowerCase()); }
-        return walletList;
+        return Arrays.stream(wallets).map(w -> w.address.toLowerCase()).collect(Collectors.toList());
     }
 
     private void composeWallet(Wallet wallet, RealmWalletData d)
@@ -181,11 +178,10 @@ public class WalletDataRealmSource {
     private void storeWallets(Realm realm, Wallet[] wallets)
     {
         realm.executeTransaction(r -> {
-            for (Wallet wallet : wallets)
-            {
+            Arrays.stream(wallets).forEach(wallet -> {
                 storeKeyData(wallet, r);
                 storeWalletData(wallet, r);
-            }
+            });
         });
     }
 
@@ -548,14 +544,11 @@ public class WalletDataRealmSource {
             {
                 realm.executeTransaction(r -> {
                     //first import data from TypeRealm
-                    for (Wallet w : walletList.values())
-                    {
+                    walletList.values().forEach(w -> {
                         RealmKeyType data = realm.where(RealmKeyType.class)
                                 .equalTo("address", w.address, Case.INSENSITIVE)
                                 .findFirst();
-
-                        if (data == null) continue;
-
+                        if (data == null) return;
                         Wallet walletFromTypeRealm = walletTypeData.get(w.address.toLowerCase());
                         if (walletFromTypeRealm != null)
                         {
@@ -569,17 +562,11 @@ public class WalletDataRealmSource {
                             }
                             r.insertOrUpdate(data);
                         }
-                    }
+                    });
 
                     //now copy across any other records
-                    for (Wallet w : walletTypeData.values())
-                    {
-                        if (walletList.get(w.address.toLowerCase()) == null)
-                        {
-                            //re-introduce this wallet
-                            storeKeyData(w, r);
-                        }
-                    }
+                    //re-introduce this wallet
+                    walletTypeData.values().stream().filter(w -> walletList.get(w.address.toLowerCase()) == null).forEach(w -> storeKeyData(w, r));
                 });
             }
 

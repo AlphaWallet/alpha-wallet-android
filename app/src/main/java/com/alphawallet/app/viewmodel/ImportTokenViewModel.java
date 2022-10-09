@@ -47,8 +47,11 @@ import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
@@ -312,10 +315,7 @@ public class ImportTokenViewModel extends BaseViewModel
                 //TODO: Check if this spawnable is still valid.
                 //      Can we determine if this is the case by inquiring a contract method?
                 currentRange = new TicketRange(importOrder.tokenIds.get(0), importToken.getAddress());
-                for (int i = 1; i < importOrder.tokenIds.size(); i++)
-                {
-                    currentRange.tokenIds.add(importOrder.tokenIds.get(i));
-                }
+                IntStream.range(1, importOrder.tokenIds.size()).forEach(i -> currentRange.tokenIds.add(importOrder.tokenIds.get(i)));
                 importRange.setValue(currentRange);
                 getEthereumTicker(importOrder.chainId);
                 break;
@@ -356,10 +356,7 @@ public class ImportTokenViewModel extends BaseViewModel
                 {
                     availableBalance = newBalance;
                     currentRange = new TicketRange(availableBalance.get(0), importToken.getAddress());
-                    for (int i = 1; i < availableBalance.size(); i++)
-                    {
-                        currentRange.tokenIds.add(availableBalance.get(i));
-                    }
+                    IntStream.range(1, availableBalance.size()).forEach(i -> currentRange.tokenIds.add(availableBalance.get(i)));
                     determineInterface();
                 }
                 getEthereumTicker(importOrder.chainId);
@@ -604,12 +601,7 @@ public class ImportTokenViewModel extends BaseViewModel
 
     private List<Long> getNetworkIds()
     {
-        List<Long> networkIds = new ArrayList<>();
-        for (NetworkInfo networkInfo : ethereumNetworkRepository.getAvailableNetworkList())
-        {
-            networkIds.add(networkInfo.chainId);
-        }
-        return networkIds;
+        return Arrays.stream(ethereumNetworkRepository.getAvailableNetworkList()).map(networkInfo -> networkInfo.chainId).collect(Collectors.toList());
     }
 
     private void testNetworkResult(ContractLocator result)

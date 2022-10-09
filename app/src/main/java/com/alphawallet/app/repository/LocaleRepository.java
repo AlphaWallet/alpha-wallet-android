@@ -56,10 +56,10 @@ public class LocaleRepository implements LocaleRepositoryType {
     @Override
     public ArrayList<LocaleItem> getLocaleList(Context context) {
         ArrayList<LocaleItem> list = new ArrayList<>();
-        for (String locale : LOCALES) {
+        Arrays.stream(LOCALES).forEach(locale -> {
             Locale l = new Locale(locale);
             list.add(new LocaleItem(LocaleUtils.getDisplayLanguage(locale, getActiveLocale()), locale));
-        }
+        });
         return list;
     }
 

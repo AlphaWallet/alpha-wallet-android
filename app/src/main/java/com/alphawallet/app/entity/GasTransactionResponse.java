@@ -6,6 +6,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Map;
+import java.util.stream.IntStream;
 
 public class GasTransactionResponse {
 
@@ -114,10 +115,7 @@ public class GasTransactionResponse {
     {
         arrayResult = new SparseArray<>();
         SparseArray<Float> priceSet = new SparseArray<>();
-        for (String price : result.keySet())
-        {
-            priceSet.put(Integer.valueOf(price), result.get(price));
-        }
+        result.keySet().forEach(price -> priceSet.put(Integer.parseInt(price), result.get(price)));
 
         for (int index = priceSet.size() - 1; index > 0; index--)
         {
@@ -131,12 +129,6 @@ public class GasTransactionResponse {
             }
         }
 
-        for (int index = 0; index < priceSet.size(); index++)
-        {
-            if (priceSet.valueAt(index) != null)
-            {
-                arrayResult.put(priceSet.keyAt(index), priceSet.valueAt(index));
-            }
-        }
+        IntStream.range(0, priceSet.size()).filter(index -> priceSet.valueAt(index) != null).forEach(index -> arrayResult.put(priceSet.keyAt(index), priceSet.valueAt(index)));
     }
 }

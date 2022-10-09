@@ -57,6 +57,7 @@ import org.jetbrains.annotations.NotNull;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Single;
@@ -182,9 +183,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private List<Pair<String, Fragment>> getPages(Bundle bundle)
     {
         List<Pair<String, Fragment>> pages = new ArrayList<>();
-        for (int i = 0; i< detailPages.length; i++) {
-            pages.add(i, detailPages[i].init(this, bundle));
-        }
+        IntStream.range(0, detailPages.length).forEach(i -> pages.add(i, detailPages[i].init(this, bundle)));
         return pages;
     }
 

@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -98,16 +99,7 @@ public class TokenDefinition {
 
     public List<FunctionDefinition> getFunctionData()
     {
-        List<FunctionDefinition> defs = new ArrayList<>();
-        for (Attribute attr : attributes.values())
-        {
-            if (attr.function != null)
-            {
-                defs.add(attr.function);
-            }
-        }
-
-        return defs;
+        return attributes.values().stream().filter(attr -> attr.function != null).map(attr -> attr.function).collect(Collectors.toList());
     }
 
     public Map<String, TSActivityView> getActivityCards() { return activityCards; }

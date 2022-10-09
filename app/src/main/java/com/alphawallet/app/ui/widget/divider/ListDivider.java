@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 
+import java.util.stream.IntStream;
+
 public class ListDivider extends RecyclerView.ItemDecoration {
     private final Drawable mDivider;
 
@@ -24,16 +26,12 @@ public class ListDivider extends RecyclerView.ItemDecoration {
         int right = parent.getWidth() - parent.getPaddingRight();
 
         int childCount = parent.getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = parent.getChildAt(i);
-
+        IntStream.range(0, childCount).mapToObj(parent::getChildAt).forEach(child -> {
             RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
-
             int top = child.getBottom() + params.bottomMargin;
             int bottom = top + mDivider.getIntrinsicHeight();
-
             mDivider.setBounds(left, top, right, bottom);
             mDivider.draw(c);
-        }
+        });
     }
 }

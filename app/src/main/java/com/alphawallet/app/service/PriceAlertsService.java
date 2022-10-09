@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -154,15 +155,7 @@ public class PriceAlertsService extends Service
 
     private List<PriceAlert> getEnabledPriceAlerts()
     {
-        List<PriceAlert> enabledPriceAlerts = new ArrayList<>();
-        for (PriceAlert pa : getPriceAlerts())
-        {
-            if (pa.isEnabled())
-            {
-                enabledPriceAlerts.add(pa);
-            }
-        }
-        return enabledPriceAlerts;
+        return getPriceAlerts().stream().filter(PriceAlert::isEnabled).collect(Collectors.toList());
     }
 
     private List<PriceAlert> getPriceAlerts()

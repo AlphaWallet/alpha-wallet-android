@@ -85,15 +85,8 @@ public class MyDappsFragment extends Fragment implements OnDappClickListener {
         try
         {
             List<DApp> myDapps = DappBrowserUtils.getMyDapps(getContext());
-            for (DApp d : myDapps)
-            {
-                if (d.getName().equals(dapp.getName())
-                        && d.getUrl().equals(dapp.getUrl()))
-                {
-                    myDapps.remove(d);
-                    break;
-                }
-            }
+            myDapps.stream().filter(d -> d.getName().equals(dapp.getName())
+                    && d.getUrl().equals(dapp.getUrl())).findFirst().ifPresent(myDapps::remove);
             DappBrowserUtils.saveToPrefs(getContext(), myDapps);
         }
         catch (Exception e)

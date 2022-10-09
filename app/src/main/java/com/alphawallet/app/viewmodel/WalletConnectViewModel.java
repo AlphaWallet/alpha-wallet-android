@@ -52,8 +52,10 @@ import com.alphawallet.token.tools.Numeric;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -462,17 +464,14 @@ public class WalletConnectViewModel extends BaseViewModel
 
     public ArrayList<SignRecord> getSignRecords(String sessionId)
     {
-        ArrayList<SignRecord> records = new ArrayList<>();
+        ArrayList<SignRecord> records;
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
             RealmResults<RealmWCSignElement> sessionList = realm.where(RealmWCSignElement.class)
                     .equalTo("sessionId", sessionId)
                     .findAll();
 
-            for (RealmWCSignElement s : sessionList)
-            {
-                records.add(new SignRecord(s));
-            }
+            records = sessionList.stream().map(SignRecord::new).collect(Collectors.toCollection(ArrayList::new));
         }
 
         return records;
@@ -480,20 +479,14 @@ public class WalletConnectViewModel extends BaseViewModel
 
     public List<WalletConnectSessionItem> getSessions()
     {
-        List<WalletConnectSessionItem> sessions = new ArrayList<>();
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
             RealmResults<RealmWCSession> items = realm.where(RealmWCSession.class)
                     .sort("lastUsageTime", Sort.DESCENDING)
                     .findAll();
 
-            for (RealmWCSession r : items)
-            {
-                sessions.add(new WalletConnectSessionItem(r));
-            }
+            return items.stream().map(WalletConnectSessionItem::new).collect(Collectors.toList());
         }
-
-        return sessions;
     }
 
     public void removePendingRequest(Activity activity, long id)
@@ -666,15 +659,7 @@ public class WalletConnectViewModel extends BaseViewModel
 
     private String extractRpc(WalletAddEthereumChainObject chainObject)
     {
-        for (String thisRpc : chainObject.rpcUrls)
-        {
-            if (thisRpc.toLowerCase().startsWith("http"))
-            {
-                return thisRpc;
-            }
-        }
-
-        return "";
+        return Arrays.stream(chainObject.rpcUrls).filter(thisRpc -> thisRpc.toLowerCase().startsWith("http")).findFirst().orElse("");
     }
 
     public boolean isChainAdded(long chainId)
@@ -746,15 +731,14 @@ public class WalletConnectViewModel extends BaseViewModel
             {
                 WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
                 // loop & populate sessions which are inactive
-                for (WalletConnectSessionItem item : sessionItems)
-                {
+                // if client is not connected ie: session inactive
+                sessionItems.forEach(item -> {
                     WCClient wcClient = walletConnectService.getClient(item.sessionId);
-                    // if client is not connected ie: session inactive
                     if (wcClient == null || !wcClient.isConnected())
                     {
                         inactiveSessions.add(item.sessionId);
                     }
-                }
+                });
                 callback.call(inactiveSessions);        // return inactive sessions to caller
             }
 

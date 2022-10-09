@@ -8,6 +8,7 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -181,11 +182,7 @@ public class WalletRepository implements WalletRepositoryType
     public boolean keystoreExists(String address)
     {
 		Wallet[] wallets = fetchWallets().blockingGet();
-		for (Wallet w : wallets)
-		{
-			if (w.sameAddress(address)) return true;
-		}
-		return false;
+        return Arrays.stream(wallets).anyMatch(w -> w.sameAddress(address));
     }
 
     @Override

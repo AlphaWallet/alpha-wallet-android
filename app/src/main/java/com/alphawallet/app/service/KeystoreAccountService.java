@@ -201,13 +201,7 @@ public class KeystoreAccountService implements AccountKeystoreService
         File[] contents = keyFolder.listFiles();
         if (contents != null)
         {
-            for (File f : contents)
-            {
-                if (f.getName().contains(cleanedAddr))
-                {
-                    f.delete();
-                }
-            }
+            Arrays.stream(contents).filter(f -> f.getName().contains(cleanedAddr)).forEach(File::delete);
         }
     }
 
@@ -218,8 +212,7 @@ public class KeystoreAccountService implements AccountKeystoreService
             File[] contents = fp.listFiles();
             if (contents != null)
             {
-                for (File child : contents)
-                    deleteRecursive(child);
+                Arrays.stream(contents).forEach(this::deleteRecursive);
             }
         }
 

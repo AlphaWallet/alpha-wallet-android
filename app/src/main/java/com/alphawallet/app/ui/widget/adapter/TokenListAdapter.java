@@ -128,13 +128,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
 
     private List<TokenCardMeta> filterTokens(List<TokenCardMeta> tokens) {
         ArrayList<TokenCardMeta> filteredList = new ArrayList<>();
-        for (TokenCardMeta t : tokens)
-        {
-            if (!t.isEthereum() && !filteredList.contains(t))
-            {
-                filteredList.add(t);
-            }
-        }
+        tokens.stream().filter(t -> !t.isEthereum() && !filteredList.contains(t)).forEach(filteredList::add);
 
         return filteredList;
     }
@@ -236,14 +230,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     }
 
     public boolean isContractPopularToken(String address) {
-        for (UnknownToken unknownToken: unknownTokenList)
-        {
-            if(unknownToken.address.equalsIgnoreCase(address))
-            {
-                return unknownToken.isPopular;
-            }
-        }
-        return false;
+        return unknownTokenList.stream().filter(unknownToken -> unknownToken.address.equalsIgnoreCase(address)).findFirst().filter(unknownToken -> unknownToken.isPopular).isPresent();
     }
 
     @NonNull

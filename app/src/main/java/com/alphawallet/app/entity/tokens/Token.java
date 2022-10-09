@@ -144,10 +144,7 @@ public class Token
         List<BigInteger> uniqueIds = new ArrayList<>();
         if (isNonFungible())
         {
-            for (BigInteger id : getArrayBalance())
-            {
-                if (!uniqueIds.contains(id) && !(this.contractType == ContractType.ERC875 && id.equals(BigInteger.ZERO))) uniqueIds.add(id);
-            }
+            getArrayBalance().stream().filter(id -> !uniqueIds.contains(id) && !(this.contractType == ContractType.ERC875 && id.equals(BigInteger.ZERO))).forEach(uniqueIds::add);
         }
         else
         {

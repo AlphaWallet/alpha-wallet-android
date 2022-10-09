@@ -7,10 +7,14 @@ import com.alphawallet.app.util.Utils;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.IntStream;
+
+import timber.log.Timber;
 
 /**
  * Created by JB on 17/05/2021.
@@ -50,8 +54,7 @@ public class CovalentTransaction
             Map<String, Param> params = new HashMap<>();
             if (decoded == null || decoded.params == null) return params;
 
-            for (int index = 0; index < decoded.params.length; index++)
-            {
+            IntStream.range(0, decoded.params.length).forEach(index -> {
                 String rawLogValue = (index + 1) < raw_log_topics.length ? raw_log_topics[index + 1] : "";
                 LogParam lp = decoded.params[index];
                 Param param = new Param();
@@ -62,9 +65,8 @@ public class CovalentTransaction
                 {
                     param.valueBI = Utils.stringToBigInteger(rawValue);// rawValue.startsWith("0x") ? Numeric.toBigInt(rawValue) : new BigInteger(rawValue);
                 }
-
                 params.put(lp.name, param);
-            }
+            });
 
             return params;
         }
@@ -95,8 +97,7 @@ public class CovalentTransaction
     public static EtherscanTransaction[] toEtherscanTransactions(CovalentTransaction[] transactions, NetworkInfo info)
     {
         List<EtherscanTransaction> converted = new ArrayList<>();
-        for (CovalentTransaction tx : transactions)
-        {
+        Arrays.stream(transactions).forEach(tx -> {
             try
             {
                 Transaction rawTransaction = tx.fetchRawTransaction(info);
@@ -104,9 +105,9 @@ public class CovalentTransaction
             }
             catch (Exception e)
             {
-                //
+                Timber.e(e);
             }
-        }
+        });
 
         return converted.toArray(new EtherscanTransaction[0]);
     }
@@ -114,15 +115,8 @@ public class CovalentTransaction
     public String determineContractAddress()
     {
         if (log_events == null || log_events.length == 0) return "";
-        for (LogEvent le : log_events)
-        {
-            if (le.sender_address != null)
-            {
-                return le.sender_address;
-            }
-        }
+        return Arrays.stream(log_events).filter(le -> le.sender_address != null).findFirst().map(le -> le.sender_address).orElse("");
 
-        return "";
     }
 
     private EtherscanEvent getEtherscanTransferEvent(LogEvent logEvent) throws Exception

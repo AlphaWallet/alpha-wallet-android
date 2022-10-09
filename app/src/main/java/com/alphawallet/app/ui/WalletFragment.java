@@ -75,6 +75,7 @@ import com.google.android.material.tabs.TabLayout;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -556,10 +557,7 @@ public class WalletFragment extends BaseFragment implements
         systemView.showProgress(false);
 
         realmUpdateTime = 0;
-        for (TokenCardMeta tcm : tokens)
-        {
-            if (tcm.lastUpdate > realmUpdateTime) realmUpdateTime = tcm.lastUpdate;
-        }
+        Arrays.stream(tokens).filter(tcm -> tcm.lastUpdate > realmUpdateTime).forEach(tcm -> realmUpdateTime = tcm.lastUpdate);
 
         if (isVisible)
         {

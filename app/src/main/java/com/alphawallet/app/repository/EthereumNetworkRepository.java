@@ -61,17 +61,11 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
 
         if (networkFilters == null || networkFilters.contains(MAINNET_ID))
         {
-            for (UnknownToken unknownToken: knownContract.getMainNet())
-            {
-                popularTokens.put(unknownToken.address.toLowerCase(), new ContractLocator(unknownToken.address, MAINNET_ID));
-            }
+            knownContract.getMainNet().forEach(unknownToken -> popularTokens.put(unknownToken.address.toLowerCase(), new ContractLocator(unknownToken.address, MAINNET_ID)));
         }
         if (networkFilters == null || networkFilters.contains(GNOSIS_ID))
         {
-            for (UnknownToken unknownToken: knownContract.getXDAI())
-            {
-                popularTokens.put(unknownToken.address.toLowerCase(), new ContractLocator(unknownToken.address, GNOSIS_ID));
-            }
+            knownContract.getXDAI().forEach(unknownToken -> popularTokens.put(unknownToken.address.toLowerCase(), new ContractLocator(unknownToken.address, GNOSIS_ID)));
         }
     }
 

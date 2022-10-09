@@ -117,15 +117,7 @@ public class AutoCompleteAddressAdapter extends ArrayAdapter<String>
     private void storeItem(String address)
     {
         ArrayList<String> history = getENSHistoryFromPrefs();
-        boolean foundValue = false;
-        for (String item : history)
-        {
-            if (item.contains(address))
-            {
-                foundValue = true;
-                break;
-            }
-        }
+        boolean foundValue = history.stream().anyMatch(item -> item.contains(address));
 
         if (!foundValue)
         {

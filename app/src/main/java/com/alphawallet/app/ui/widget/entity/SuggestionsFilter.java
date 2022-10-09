@@ -31,11 +31,7 @@ public class SuggestionsFilter extends Filter {
         } else {
             final String filterPattern = constraint.toString().toLowerCase().trim();
 
-            for (final DApp dapp : originalList) {
-                if (dapp.getName().toLowerCase().contains(filterPattern)) {
-                    filteredList.add(dapp);
-                }
-            }
+            originalList.stream().filter(dapp -> dapp.getName().toLowerCase().contains(filterPattern)).forEach(filteredList::add);
         }
         results.values = filteredList;
         results.count = filteredList.size();

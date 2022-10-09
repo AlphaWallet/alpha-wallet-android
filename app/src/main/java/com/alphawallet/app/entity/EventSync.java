@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import io.realm.Realm;
 import timber.log.Timber;
@@ -397,10 +398,7 @@ public class EventSync
         HashSet<BigInteger> sendTokenIds = token.processLogsAndStoreTransferEvents(sentLogs, transferEvent, txHashes, realm);
 
         //register Transaction fetches
-        for (String txHash : txHashes)
-        {
-            TransactionsService.addTransactionHashFetch(txHash, token.tokenInfo.chainId, token.getWallet());
-        }
+        txHashes.forEach(txHash -> TransactionsService.addTransactionHashFetch(txHash, token.tokenInfo.chainId, token.getWallet()));
 
         return new Pair<>(eventCount, new Pair<>(rcvTokenIds, sendTokenIds));
     }
@@ -464,20 +462,8 @@ public class EventSync
             }
             else //array type
             {
-                for (Object val : (ArrayList<?>)ids.getValue())
-                {
-                    if (val instanceof Uint256)
-                    {
-                        _ids.add(((Uint256) val).getValue());
-                    }
-                }
-                for (Object val : (ArrayList<?>)values.getValue())
-                {
-                    if (val instanceof Uint256)
-                    {
-                        _count.add(((Uint256) val).getValue());
-                    }
-                }
+                _ids = ((ArrayList<?>) ids.getValue()).stream().filter(val -> val instanceof Uint256).map(val -> ((Uint256) val).getValue()).collect(Collectors.toList());
+                _count = ((ArrayList<?>) values.getValue()).stream().filter(val -> val instanceof Uint256).map(val -> ((Uint256) val).getValue()).collect(Collectors.toList());
             }
         }
 

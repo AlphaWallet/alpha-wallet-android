@@ -46,6 +46,7 @@ import com.alphawallet.token.entity.Signable;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -364,12 +365,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
     //NB Chain descriptions can contain WSS socket defs, which might come first.
     private String extractRpc(WalletAddEthereumChainObject chainObject)
     {
-        for (String thisRpc : chainObject.rpcUrls)
-        {
-            if (thisRpc.toLowerCase().startsWith("http")) { return thisRpc; }
-        }
+        return Arrays.stream(chainObject.rpcUrls).filter(thisRpc -> thisRpc.toLowerCase().startsWith("http")).findFirst().orElse("");
 
-        return "";
     }
 
     public boolean isMainNetsSelected()

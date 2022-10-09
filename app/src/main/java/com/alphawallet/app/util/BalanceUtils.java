@@ -10,6 +10,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+import java.util.stream.IntStream;
 
 public class BalanceUtils
 {
@@ -46,8 +47,8 @@ public class BalanceUtils
         if (precision > 0)
         {
             sb.append(".");
-            for (int i = 0; i < fixed; i++) sb.append("0");
-            for (int i = 0; i < (precision-fixed); i++) sb.append("#");
+            IntStream.range(0, fixed).mapToObj(i -> "0").forEach(sb::append);
+            IntStream.range(0, (precision - fixed)).mapToObj(i -> "#").forEach(sb::append);
         }
         return sb.toString();
     }

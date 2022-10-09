@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DappBrowserUtils {
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
@@ -41,16 +42,8 @@ public class DappBrowserUtils {
         {
             //don't store custom dapps
             List<DApp> primaryDapps = getPrimarySites(context);
-            Map<String, DApp> dappMap = new HashMap<>();
-            for (DApp d : myDapps)
-            {
-                if (isValidUrl(d.getUrl()))
-                    dappMap.put(d.getUrl(), d);
-            }
-            for (DApp d : primaryDapps)
-            {
-                dappMap.remove(d.getUrl());
-            }
+            Map<String, DApp> dappMap = myDapps.stream().filter(d -> isValidUrl(d.getUrl())).collect(Collectors.toMap(DApp::getUrl, d -> d, (a, b) -> b));
+            primaryDapps.stream().map(DApp::getUrl).forEach(dappMap::remove);
 
             String myDappsJson = new Gson().toJson(dappMap.values());
             storeJsonData(MY_DAPPS_FILE, myDappsJson, context);

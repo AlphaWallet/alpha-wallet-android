@@ -1,5 +1,6 @@
 package com.alphawallet.app.util.das;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,10 +19,7 @@ public class DASBody
         if (result == null || result.data == null || result.data.account_data == null || result.data.account_data.records == null)
             return;
 
-        for (DASRecord record : result.data.account_data.records)
-        {
-            records.put(record.key, record);
-        }
+        Arrays.stream(result.data.account_data.records).forEach(record -> records.put(record.key, record));
     }
 
     public String getEthOwner()

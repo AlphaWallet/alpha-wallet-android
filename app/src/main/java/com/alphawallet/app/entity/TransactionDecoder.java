@@ -500,12 +500,7 @@ public class TransactionDecoder
             buildEndContractSigs();
         }
 
-        for (String sig : endContractSignatures)
-        {
-            if (input.equals(sig)) return true;
-        }
-
-        return false;
+        return endContractSignatures.stream().anyMatch(input::equals);
     }
 
     private static void buildEndContractSigs()

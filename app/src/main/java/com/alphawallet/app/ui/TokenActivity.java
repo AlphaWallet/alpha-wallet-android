@@ -374,11 +374,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             amountDisplay.setAmountFromAssetList(nftAssets);
             TextView eventAmount = findViewById(R.id.event_amount);
             TextView eventAction = findViewById(R.id.event_action);
-            int assetCount = 0;
-            for (NFTAsset asset : nftAssets)
-            {
-                assetCount += asset.getSelectedBalance().intValue();
-            }
+            int assetCount = nftAssets.stream().mapToInt(asset -> asset.getSelectedBalance().intValue()).sum();
 
             String operationName = transferData.getOperationPrefix() + " " + assetCount + " " + token.getSymbol();
 
@@ -622,10 +618,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             if (eventData != null)
             {
                 Map<String, EventResult> resultMap = eventData.getEventResultMap();
-                for (String resultKey : resultMap.keySet())
-                {
-                    TokenScriptResult.addPair(attrs, resultKey, resultMap.get(resultKey).value);
-                }
+                resultMap.keySet().forEach(resultKey -> TokenScriptResult.addPair(attrs, resultKey, resultMap.get(resultKey).value));
             }
         }
         catch (Exception e)

@@ -146,9 +146,7 @@ public class Attestation implements Signable {
 
     public void setSmartcontracts(List<Long> smartcontracts) {
         ASN1EncodableVector seq = new ASN1EncodableVector();
-        for (long current : smartcontracts) {
-            seq.add(new ASN1Integer(current));
-        }
+        smartcontracts.stream().mapToLong(current -> current).mapToObj(ASN1Integer::new).forEach(seq::add);
         this.smartcontracts = new DERSequence(seq);
     }
 

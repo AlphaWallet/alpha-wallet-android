@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import io.reactivex.Single;
 import io.realm.Case;
@@ -691,10 +692,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         }
                     }
 
-                    for (BigInteger tokenId : deleteList)
-                    {
-                        liveMap.remove(tokenId);
-                    }
+                    deleteList.forEach(liveMap::remove);
 
                     //update token balance & visibility
                     setTokenUpdateTime(r, token, liveMap.keySet().size());
@@ -830,13 +828,13 @@ public class TokensRealmSource implements TokenLocalSource {
         finally
         {
             //create metas for any card not previously saved
-            for (Long chainId : rootChainTokenCards)
-            {
-                TokenCardMeta meta = new TokenCardMeta(chainId, wallet.address.toLowerCase(), "0", 0, null, "", "", ContractType.ETHEREUM, TokenGroup.ASSET);
+            rootChainTokenCards.stream()
+                    .map(chainId -> new TokenCardMeta(chainId, wallet.address.toLowerCase(), "0", 0, null, "", "", ContractType.ETHEREUM, TokenGroup.ASSET))
+                    .forEach(meta -> {
                 meta.lastTxUpdate = 0;
                 meta.isEnabled = true;
                 tokenMetas.add(meta);
-            }
+            });
         }
 
         return tokenMetas.toArray(new TokenCardMeta[0]);
@@ -1161,18 +1159,15 @@ public class TokensRealmSource implements TokenLocalSource {
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {
             realm.executeTransaction(r -> {
-                for (String tokenAddress : erc20Tickers.keySet())
-                {
-                    if (writeTickerToRealm(r, erc20Tickers.get(tokenAddress), chainId, tokenAddress))
-                    {
-                        tickerUpdates.add(new ContractAddress(chainId, tokenAddress));
-                    }
-                }
+                erc20Tickers.keySet().stream()
+                        .filter(tokenAddress -> writeTickerToRealm(r, erc20Tickers.get(tokenAddress), chainId, tokenAddress))
+                        .map(tokenAddress -> new ContractAddress(chainId, tokenAddress))
+                        .forEach(tickerUpdates::add);
             });
         }
         catch (Exception e)
         {
-            //
+            Timber.e(e);
         }
 
         updateWalletTokens(tickerUpdates);
@@ -1232,17 +1227,14 @@ public class TokensRealmSource implements TokenLocalSource {
     public Single<List<String>> getTickerUpdateList(List<Long> networkFilter)
     {
         return Single.fromCallable(() -> {
-            List<String> tickerContracts = new ArrayList<>();
+            List<String> tickerContracts;
             try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
             {
                 RealmResults<RealmTokenTicker> realmItems = realm.where(RealmTokenTicker.class)
                         .greaterThan("updatedTime", System.currentTimeMillis() - 5*DateUtils.MINUTE_IN_MILLIS)
                         .findAll();
 
-                for (RealmTokenTicker ticker : realmItems)
-                {
-                    if (networkFilter.contains(ticker.getChain())) tickerContracts.add(ticker.getContract());
-                }
+                tickerContracts = realmItems.stream().filter(ticker -> networkFilter.contains(ticker.getChain())).map(RealmTokenTicker::getContract).collect(Collectors.toList());
             }
 
             return tickerContracts;

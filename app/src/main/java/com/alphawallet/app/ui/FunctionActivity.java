@@ -350,17 +350,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         //fetch any user-input params needed for native transaction
         if (action.function.tx != null)
         {
-            for (TokenscriptElement e : action.function.tx.args.values())
-            {
-                checkTokenScriptElement(cb, action, e);
-            }
+            action.function.tx.args.values().forEach(e -> checkTokenScriptElement(cb, action, e));
         }
 
         //fetch user-input params for transaction
-        for (MethodArg arg : action.function.parameters)
-        {
-            checkTokenScriptElement(cb, action, arg.element);
-        }
+        action.function.parameters.forEach(arg -> checkTokenScriptElement(cb, action, arg.element));
 
         //check if action can be completed
         completeAction();

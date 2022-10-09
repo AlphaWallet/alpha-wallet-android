@@ -10,8 +10,10 @@ import com.alphawallet.token.entity.ContractAddress;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -58,15 +60,12 @@ public class TokensMappingRepository {
             {
                 TokensMapping[] tokensMapping = new Gson().fromJson(response.body().string(), new TypeToken<TokensMapping[]>() {}.getType());
 
-                for (TokensMapping thisMapping : tokensMapping)
-                {
+                //insert mirrored token with pointer to base token (eg DAI on Arbitrum).
+                Arrays.stream(tokensMapping).forEach(thisMapping -> {
                     ContractAddress baseAddress = thisMapping.getContracts().get(0);
                     baseMappings.put(baseAddress.getAddressKey(), thisMapping.getGroup()); //insert base mapping (eg DAI on mainnet) along with token type
-                    for (int i = 1; i < thisMapping.getContracts().size(); i++)
-                    {
-                        sourceMap.put(thisMapping.getContracts().get(i).getAddressKey(), baseAddress); //insert mirrored token with pointer to base token (eg DAI on Arbitrum).
-                    }
-                }
+                    IntStream.range(1, thisMapping.getContracts().size()).forEach(i -> sourceMap.put(thisMapping.getContracts().get(i).getAddressKey(), baseAddress));
+                });
             }
             catch (Exception e)
             {

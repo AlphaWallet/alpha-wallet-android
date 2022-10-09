@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ERC721Ticket extends Token
 {
@@ -61,12 +63,7 @@ public class ERC721Ticket extends Token
 
     @Override
     public Map<BigInteger, NFTAsset> getTokenAssets() {
-        Map<BigInteger, NFTAsset> assets = new HashMap<>();
-        for (BigInteger tokenId : balanceArray)
-        {
-            assets.put(tokenId, new NFTAsset(tokenId));
-        }
-        return assets;
+        return balanceArray.stream().collect(Collectors.toMap(tokenId -> tokenId, NFTAsset::new, (a, b) -> b));
     }
 
     /**
@@ -83,10 +80,7 @@ public class ERC721Ticket extends Token
         //List<BigInteger> idList = Observable.fromArray(idListStr.split(","))
         //       .map(s -> Numeric.toBigInt(s)).toList().blockingGet();
         if (quantity >= idList.size()) return idList;
-        List<BigInteger> pruneList = new ArrayList<>();
-        for (int i = 0; i < quantity; i++) pruneList.add(idList.get(i));
-
-        return pruneList;
+        return IntStream.range(0, quantity).mapToObj(idList::get).collect(Collectors.toList());
     }
 
     @Override
@@ -171,7 +165,7 @@ public class ERC721Ticket extends Token
     public List<BigInteger> getNonZeroArrayBalance()
     {
         List<BigInteger> nonZeroValues = new ArrayList<>();
-        for (BigInteger value : balanceArray) if (value.compareTo(BigInteger.ZERO) != 0 && !nonZeroValues.contains(value)) nonZeroValues.add(value);
+        balanceArray.stream().filter(value -> value.compareTo(BigInteger.ZERO) != 0 && !nonZeroValues.contains(value)).collect(Collectors.toList());
         return nonZeroValues;
     }
 

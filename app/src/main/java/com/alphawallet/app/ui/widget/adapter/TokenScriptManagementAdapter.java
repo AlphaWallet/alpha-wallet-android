@@ -150,14 +150,10 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
         message.append(context.getString(R.string.origin_token_title));
         if (tokenLocator != null)
         {
-            for (long chainId : tokenLocator.addresses.keySet())
-            {
+            tokenLocator.addresses.keySet().forEach(chainId -> {
                 String chainName = MagicLinkInfo.getNetworkNameById(chainId);
-                for (String address : tokenLocator.addresses.get(chainId))
-                {
-                    message.append(context.getString(R.string.tokenscript_contract_line, chainName, address));
-                }
-            }
+                tokenLocator.addresses.get(chainId).stream().map(address -> context.getString(R.string.tokenscript_contract_line, chainName, address)).forEach(message::append);
+            });
         }
         dialog.setMessage(message);
         dialog.setButtonText(R.string.ok);

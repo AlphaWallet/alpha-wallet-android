@@ -19,6 +19,7 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.KeyService;
 
 import java.io.File;
+import java.util.Arrays;
 
 import javax.inject.Inject;
 
@@ -26,6 +27,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Completable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 @HiltViewModel
 public class SplashViewModel extends ViewModel
@@ -117,18 +119,17 @@ public class SplashViewModel extends ViewModel
         try
         {
             File[] files = ctx.getFilesDir().listFiles();
-            for (File file : files)
-            {
+            Arrays.stream(files).forEach(file -> {
                 String fileName = file.getName();
                 if (fileName.startsWith(LEGACY_AUX_DB_PREFIX) || fileName.equals(LEGACY_CERTIFICATE_DB))
                 {
                     deleteRecursive(file);
                 }
-            }
+            });
         }
         catch (Exception e)
         {
-            //
+            Timber.e(e);
         }
     }
 
@@ -139,8 +140,7 @@ public class SplashViewModel extends ViewModel
             File[] contents = fp.listFiles();
             if (contents != null)
             {
-                for (File child : contents)
-                    deleteRecursive(child);
+                Arrays.stream(contents).forEach(this::deleteRecursive);
             }
         }
 

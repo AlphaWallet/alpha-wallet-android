@@ -31,6 +31,7 @@ import org.web3j.utils.Numeric;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -319,10 +320,7 @@ public class TransactionsService
     {
         List<Long> pendingChains = new ArrayList<>();
         Transaction[] pendingTransactions = fetchPendingTransactions();
-        for (Transaction tx : pendingTransactions)
-        {
-            if (!pendingChains.contains(tx.chainId)) pendingChains.add(tx.chainId);
-        }
+        Arrays.stream(pendingTransactions).filter(tx -> !pendingChains.contains(tx.chainId)).forEach(tx -> pendingChains.add(tx.chainId));
 
         return pendingChains;
     }

@@ -9,6 +9,7 @@ import com.google.gson.annotations.SerializedName;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class OpenSeaAsset
 {
@@ -290,10 +291,7 @@ public class OpenSeaAsset
         {
             result.append("0.");
             int diff = decimals - totalPrice.length();
-            for (int i = 0; i < diff; i++)
-            {
-                result.append("0");
-            }
+            IntStream.range(0, diff).mapToObj(i -> "0").forEach(result::append);
 
             for (int i = 0; i < totalPrice.length(); i++)
             {

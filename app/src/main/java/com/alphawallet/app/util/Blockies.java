@@ -9,6 +9,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 public class Blockies {
     private static final int size = 8;
@@ -124,9 +125,7 @@ public class Blockies {
     }
 
     private static void seedRand(String seed) {
-        for (int i = 0; i < Blockies.randSeed.length; i++) {
-            Blockies.randSeed[i] = 0;
-        }
+        IntStream.range(0, Blockies.randSeed.length).forEach(i -> Blockies.randSeed[i] = 0);
         for (int i = 0; i < seed.length(); i++) {
             long test = Blockies.randSeed[i % 4] << 5;
             if (test > Integer.MAX_VALUE << 1 || test < Integer.MIN_VALUE << 1)
@@ -136,8 +135,7 @@ public class Blockies {
             Blockies.randSeed[i % 4] = (test2 + Character.codePointAt(seed, i));
         }
 
-        for (int i = 0; i < Blockies.randSeed.length; i++)
-            Blockies.randSeed[i] = (int) Blockies.randSeed[i];
+        IntStream.range(0, Blockies.randSeed.length).forEach(i -> Blockies.randSeed[i] = (int) Blockies.randSeed[i]);
     }
 
     private static int toRGB(float h, float s, float l) {

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import io.reactivex.disposables.Disposable;
 
@@ -129,25 +130,15 @@ public class NFTAsset implements Parcelable
         int attrCount = in.readInt();
         int tokenIdCount = in.readInt();
 
-        for (int i = 0; i < assetCount; i++)
-        {
-            assetMap.put(in.readString(), in.readString());
-        }
-
-        for (int i = 0; i < attrCount; i++)
-        {
-            attributeMap.put(in.readString(), in.readString());
-        }
+        IntStream.range(0, assetCount).forEach(i -> assetMap.put(in.readString(), in.readString()));
+        IntStream.range(0, attrCount).forEach(i -> attributeMap.put(in.readString(), in.readString()));
 
         if (tokenIdCount > 0)
         {
             tokenIdList = new ArrayList<>();
         }
 
-        for (int i = 0; i < tokenIdCount; i++)
-        {
-            tokenIdList.add(new BigInteger(in.readString()));
-        }
+        IntStream.range(0, tokenIdCount).forEach(i -> tokenIdList.add(new BigInteger(in.readString())));
     }
 
     public String getAssetValue(String key)
@@ -177,15 +168,7 @@ public class NFTAsset implements Parcelable
 
     public String getImage()
     {
-        for (String key : IMAGE_DESIGNATORS)
-        {
-            if (assetMap.containsKey(key))
-            {
-                return Utils.parseIPFS(assetMap.get(key));
-            }
-        }
-
-        return "";
+        return Arrays.stream(IMAGE_DESIGNATORS).filter(assetMap::containsKey).findFirst().map(key -> Utils.parseIPFS(assetMap.get(key))).orElse("");
     }
 
     public String getThumbnail()
@@ -196,15 +179,8 @@ public class NFTAsset implements Parcelable
             return svgOverride;
         }
 
-        for (String key : IMAGE_THUMBNAIL_DESIGNATORS)
-        {
-            if (assetMap.containsKey(key))
-            {
-                return Utils.parseIPFS(assetMap.get(key));
-            }
-        }
+        return Arrays.stream(IMAGE_THUMBNAIL_DESIGNATORS).filter(assetMap::containsKey).findFirst().map(key -> Utils.parseIPFS(assetMap.get(key))).orElse("");
 
-        return "";
     }
 
     public String getBackgroundColor()
@@ -301,15 +277,8 @@ public class NFTAsset implements Parcelable
      */
     private String getSVGOverride()
     {
-        for (String key : SVG_OVERRIDE)
-        {
-            if (assetMap.containsKey(key) && assetMap.get(key).toLowerCase().endsWith("svg"))
-            {
-                return Utils.parseIPFS(assetMap.get(key));
-            }
-        }
+        return Arrays.stream(SVG_OVERRIDE).filter(key -> assetMap.containsKey(key) && assetMap.get(key).toLowerCase().endsWith("svg")).findFirst().map(key -> Utils.parseIPFS(assetMap.get(key))).orElse("");
 
-        return "";
     }
 
     public String jsonMetaData()
@@ -350,24 +319,19 @@ public class NFTAsset implements Parcelable
         dest.writeInt(attributeMap.size());
         dest.writeInt(tokenIdList != null ? tokenIdList.size() : 0);
 
-        for (String key : assetMap.keySet())
-        {
+        assetMap.keySet().forEach(key -> {
             dest.writeString(key);
             dest.writeString(assetMap.get(key));
-        }
+        });
 
-        for (String key : attributeMap.keySet())
-        {
+        attributeMap.keySet().forEach(key -> {
             dest.writeString(key);
             dest.writeString(attributeMap.get(key));
-        }
+        });
 
         if (tokenIdList != null)
         {
-            for (BigInteger tokenId : tokenIdList)
-            {
-                dest.writeString(tokenId.toString());
-            }
+            tokenIdList.stream().map(BigInteger::toString).forEach(dest::writeString);
         }
     }
 
@@ -458,11 +422,10 @@ public class NFTAsset implements Parcelable
     {
         if (oldAsset != null)
         {
-            for (String param : oldAsset.assetMap.keySet()) //add anything that the old asset had, which new one doesn't (if it's still required)
-            {
-                if (assetMap.get(param) == null && DESIRED_PARAMS.contains(param))
-                    attributeMap.put(param, oldAsset.assetMap.get(param));
-            }
+            //add anything that the old asset had, which new one doesn't (if it's still required)
+            oldAsset.assetMap.keySet().stream()
+                    .filter(param -> assetMap.get(param) == null && DESIRED_PARAMS.contains(param))
+                    .forEach(param -> attributeMap.put(param, oldAsset.assetMap.get(param)));
 
             if (oldAsset.getBalance().compareTo(BigDecimal.ZERO) > 0)
             {

@@ -6,6 +6,7 @@ import org.xml.sax.SAXException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by JB on 20/03/2020 for namedType in ASN.X included in TokenScript. It's used for events & attestations.
@@ -64,16 +65,7 @@ public class NamedType
 
     public List<String> getArgNames(boolean indexed)
     {
-        List<String> argNameIndexedList = new ArrayList<>();
-        for (SequenceElement se : sequence)
-        {
-            if (se.indexed == indexed)
-            {
-                argNameIndexedList.add(se.name);
-            }
-        }
-
-        return argNameIndexedList;
+        return sequence.stream().filter(se -> se.indexed == indexed).map(se -> se.name).collect(Collectors.toList());
     }
 
     int getTopicIndex(String filterTopic)

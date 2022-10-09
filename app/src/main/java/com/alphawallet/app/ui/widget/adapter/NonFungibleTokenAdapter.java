@@ -41,6 +41,8 @@ import org.jetbrains.annotations.NotNull;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -195,10 +197,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         items.clear();
         assetCount = selection.size();
 
-        for (int i = 0; i < selection.size(); i++)
-        {
-            items.add(new NFTSortedItem(selection.get(i), i+1));
-        }
+        IntStream.range(0, selection.size()).mapToObj(i -> new NFTSortedItem(selection.get(i), i + 1)).forEach(items::add);
 
         items.endBatchedUpdates();
     }
@@ -212,13 +211,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
 
     protected List<TicketRangeElement> generateSortedList(AssetDefinitionService assetService, Token token, List<BigInteger> idList)
     {
-        List<TicketRangeElement> sortedList = new ArrayList<>();
-        for (BigInteger v : idList)
-        {
-            if (v.compareTo(BigInteger.ZERO) == 0) continue;
-            TicketRangeElement e = new TicketRangeElement(assetService, token, v);
-            sortedList.add(e);
-        }
+        List<TicketRangeElement> sortedList = idList.stream().filter(v -> v.compareTo(BigInteger.ZERO) != 0).map(v -> new TicketRangeElement(assetService, token, v)).collect(Collectors.toList());
         TicketRangeElement.sortElements(sortedList);
         return sortedList;
     }
@@ -325,7 +318,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
             if (si.isItemChecked())
             {
                 List<BigInteger> rangeIds = si.getTokenIds();
-                for (BigInteger tokenId : rangeIds) if (!tokenIds.contains(tokenId)) tokenIds.add(tokenId);
+                rangeIds.stream().filter(tokenId -> !tokenIds.contains(tokenId)).forEach(tokenIds::add);
             }
         }
 
@@ -361,12 +354,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     {
         int quantity = getSelectedQuantity();
         if (quantity > selection.size()) quantity = selection.size();
-        List<BigInteger> subSelection = new ArrayList<>();
-
-        for (int i = 0; i < quantity; i++)
-        {
-            subSelection.add(selection.get(i));
-        }
+        List<BigInteger> subSelection = IntStream.range(0, quantity).mapToObj(selection::get).collect(Collectors.toList());
 
         return new TicketRange(subSelection, token.getAddress(), false);
     }

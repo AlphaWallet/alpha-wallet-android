@@ -231,13 +231,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
     public void onDestroy()
     {
         //clear all loaders
-        for (Pair<BigInteger, NFTAsset> assetPair : displayData)
-        {
-            if (assetPair.second != null && assetPair.second.metaDataLoader != null && !assetPair.second.metaDataLoader.isDisposed())
-            {
-                assetPair.second.metaDataLoader.dispose();
-            }
-        }
+        displayData.stream().filter(assetPair -> assetPair.second != null && assetPair.second.metaDataLoader != null && !assetPair.second.metaDataLoader.isDisposed()).forEach(assetPair -> assetPair.second.metaDataLoader.dispose());
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

@@ -155,9 +155,7 @@ public class JsInjectorClient {
                 .get()
                 .url(httpUrl);
         Set<String> keys = headers.keySet();
-        for (String key : keys) {
-            requestBuilder.addHeader(key, headers.get(key));
-        }
+        keys.forEach(key -> requestBuilder.addHeader(key, headers.get(key)));
         return requestBuilder.build();
     }
 

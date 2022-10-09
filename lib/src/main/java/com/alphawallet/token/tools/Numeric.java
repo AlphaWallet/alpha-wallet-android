@@ -3,6 +3,8 @@ package com.alphawallet.token.tools;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * <p>Message codec functions.</p>
@@ -96,11 +98,10 @@ public final class Numeric {
             throw new UnsupportedOperationException("Value cannot be negative");
         }
 
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < (size - length); i++) sb.append("0");
+        String sb = IntStream.range(0, (size - length)).mapToObj(i -> "0").collect(Collectors.joining());
 
         if (length < size) {
-            result = sb.toString() + result;
+            result = sb + result;
         }
 
         if (withPrefix) {

@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.xml.crypto.AlgorithmMethod;
@@ -149,11 +151,7 @@ public class XMLDSigVerifier {
 
         X509TrustManager tm = (X509TrustManager) tmf.getTrustManagers()[0];
         CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
-        Set<TrustAnchor> anch = new HashSet<>();
-        for (X509Certificate cert : tm.getAcceptedIssuers())
-        {
-            anch.add(new TrustAnchor(cert, null));
-        }
+        Set<TrustAnchor> anch = Arrays.stream(tm.getAcceptedIssuers()).map(cert -> new TrustAnchor(cert, null)).collect(Collectors.toSet());
         PKIXParameters params = new PKIXParameters(anch);
         Security.setProperty("ocsp.enable", "true");
         params.setRevocationEnabled(true);

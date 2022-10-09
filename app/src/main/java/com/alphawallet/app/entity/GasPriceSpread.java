@@ -14,8 +14,11 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.IntStream;
 
 /**
  * Created by JB on 20/01/2022.
@@ -42,14 +45,7 @@ public class GasPriceSpread implements Parcelable
 
     public GasSpeed2 getQuickestGasSpeed()
     {
-        for (TXSpeed txs : TXSpeed.values())
-        {
-            GasSpeed2 gs = fees.get(txs);
-            if (gs != null) return gs;
-        }
-
-        //Should not reach this
-        return null;
+        return Arrays.stream(TXSpeed.values()).map(fees::get).filter(Objects::nonNull).findFirst().orElse(null);
     }
 
     public GasSpeed2 getSlowestGasSpeed()
@@ -246,16 +242,15 @@ public class GasPriceSpread implements Parcelable
         fees.put(TXSpeed.SLOW, new GasSpeed2(ctx.getString(R.string.speed_slow), SLOW_SECONDS, new EIP1559FeeOracleResult(result.get(result.size()-1))));
 
         //now de-duplicate
-        for (TXSpeed txs : TXSpeed.values())
-        {
+        Arrays.stream(TXSpeed.values()).forEach(txs -> {
             GasSpeed2 gs = fees.get(txs);
-            if (txs == TXSpeed.STANDARD || gs == null) continue;
+            if (txs == TXSpeed.STANDARD || gs == null) return;
             if (gs.gasPrice.maxPriorityFeePerGas.equals(fees.get(TXSpeed.STANDARD).gasPrice.maxPriorityFeePerGas)
-                && gs.gasPrice.maxFeePerGas.equals(fees.get(TXSpeed.STANDARD).gasPrice.maxFeePerGas))
+                    && gs.gasPrice.maxFeePerGas.equals(fees.get(TXSpeed.STANDARD).gasPrice.maxFeePerGas))
             {
                 fees.remove(txs);
             }
-        }
+        });
     }
 
     public void setCustom(BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas, long fastSeconds)
@@ -279,12 +274,10 @@ public class GasPriceSpread implements Parcelable
         speedIndex = TXSpeed.values()[feeIndex];
         hasLockedGas = in.readByte() == 1;
 
-        for (int i = 0; i < feeCount; i++)
-        {
-            int entry = in.readInt();
+        IntStream.range(0, feeCount).map(i -> in.readInt()).forEach(entry -> {
             GasSpeed2 r = in.readParcelable(GasSpeed2.class.getClassLoader());
             fees.put(TXSpeed.values()[entry], r);
-        }
+        });
     }
 
     public static final Creator<GasPriceSpread> CREATOR = new Creator<GasPriceSpread>() {

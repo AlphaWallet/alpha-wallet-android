@@ -8,6 +8,7 @@ import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.NumericType;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.alphawallet.token.entity.BadContract;
 
@@ -53,15 +55,10 @@ public class TransactionHandler
 
     public List<BigInteger> getBalanceArray(String address, String contractAddress) throws Exception
     {
-        List<BigInteger> result = new ArrayList<>();
         org.web3j.abi.datatypes.Function function = balanceOfArray(address);
         List<Uint256> indices = callSmartContractFunctionArray(function, contractAddress, address);
         if (indices == null) throw new BadContract();
-        for (Uint256 val : indices)
-        {
-            result.add(val.getValue());
-        }
-        return result;
+        return indices.stream().map(NumericType::getValue).collect(Collectors.toList());
     }
 
     public String getNameOnly(String address)

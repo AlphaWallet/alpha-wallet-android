@@ -51,10 +51,7 @@ public class StyledStringBuilder extends SpannableStringBuilder
 
     public void applyStyles()
     {
-        for (SpanType s : spanners)
-        {
-            setSpan(s.style != null ? s.style : s.styleColour, s.begin, s.end, Spanned.SPAN_POINT_POINT);
-        }
+        spanners.forEach(s -> setSpan(s.style != null ? s.style : s.styleColour, s.begin, s.end, Spanned.SPAN_POINT_POINT));
     }
 
     private static class SpanType

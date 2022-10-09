@@ -50,7 +50,6 @@ public class LogInterceptor implements Interceptor {
 		logBuilder.append("\n=============== Headers ===============\n");
 		for (int i = headers.size() - 1; i > -1; i--) {
 			logBuilder.append(headers.name(i)).append(" : ").append(headers.get(headers.name(i))).append("\n");
-
 		}
 		logBuilder.append("\n=============== END Headers ===============\n");
 

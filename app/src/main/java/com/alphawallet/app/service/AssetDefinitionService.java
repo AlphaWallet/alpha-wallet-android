@@ -322,11 +322,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             if (realmCert != null) realmCert.deleteFromRealm();
 
             //now delete all associated event data; script event descriptions may have changed
-            for (RealmTokenScriptData script : hashInstances)
-            {
-                deleteEventDataForScript(script);
-            }
-
+            hashInstances.forEach(this::deleteEventDataForScript);
             hashInstances.deleteAllFromRealm();
         });
     }
@@ -1934,12 +1930,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             TSSelection selection = action.exclude != null ? td.getSelection(action.exclude) : null;
             if (selection != null)
             {
-                List<String> attrNames = selection.getRequiredAttrs();
-                for (String attrName : attrNames)
-                {
-                    if (!requiredAttrs.contains(attrName))
-                        requiredAttrs.add(attrName);
-                }
+                selection.getRequiredAttrs().stream()
+                        .filter(attrName -> !requiredAttrs.contains(attrName))
+                        .forEach(requiredAttrs::add);
             }
         }
 
@@ -2016,10 +2009,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     notificationService.DisplayNotification("Definition Updated", file.getName(),
                             NotificationCompat.PRIORITY_MAX);
                     List<ContractLocator> originContracts = getOriginContracts(tokenDefinition);
-                    for (ContractLocator cl : originContracts)
-                    {
-                        tokensService.addUnknownTokenToCheck(new ContractAddress(cl.chainId, cl.address));
-                    }
+                    originContracts.stream().map(cl -> new ContractAddress(cl.chainId, cl.address)).forEach(tokensService::addUnknownTokenToCheck);
                 }
             }
         };

@@ -46,8 +46,11 @@ import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -568,19 +571,15 @@ public class BackupKeyActivity extends BaseActivity implements
 
     private void jumbleList()
     {
-        List<Integer> numberList = new ArrayList<>();
-        for (int i = 0; i < mnemonicArray.length; i++)
-            numberList.add(i);
+        List<Integer> numberList = IntStream.range(0, mnemonicArray.length).boxed().collect(Collectors.toList());
 
-        for (int i = 0; i < mnemonicArray.length; i++)
-        {
-            int random = (int) (Math.random() * (double) numberList.size());
+        IntStream.range(0, mnemonicArray.length).map(i -> (int) (Math.random() * (double) numberList.size())).forEach(random -> {
             int mnemonicIndex = numberList.get(random);
             numberList.remove(random); //remove this index
             TextView tv = generateSeedWordTextView(mnemonicArray[mnemonicIndex]);
             tv.setOnClickListener(view -> onWordClick(tv));
             layoutWordHolder.addView(tv);
-        }
+        });
     }
 
     private void onWordClick(TextView tv)
@@ -720,10 +719,7 @@ public class BackupKeyActivity extends BaseActivity implements
         if (mnemonicArray == null) return;
         layoutWordHolder.setFlexDirection(FlexDirection.ROW);
 
-        for (String word : mnemonicArray)
-        {
-            layoutWordHolder.addView(generateSeedWordTextView(word));
-        }
+        Arrays.stream(mnemonicArray).forEach(word -> layoutWordHolder.addView(generateSeedWordTextView(word)));
     }
 
     @Override

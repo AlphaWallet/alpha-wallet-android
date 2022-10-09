@@ -23,6 +23,7 @@ import com.alphawallet.app.widget.TestNetDialog;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -75,11 +76,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
                 setTitle(getString(R.string.select_dappbrowser_network));
 
                 hideSwitches();
-                List<NetworkInfo> filteredNetworks = new ArrayList<>();
-                for (Long chainId : viewModel.getFilterNetworkList())
-                {
-                    filteredNetworks.add(viewModel.getNetworkByChain(chainId));
-                }
+                List<NetworkInfo> filteredNetworks = viewModel.getFilterNetworkList().stream().map(chainId -> viewModel.getNetworkByChain(chainId)).collect(Collectors.toList());
 
                 setupList(selectedChainId, filteredNetworks);
             }

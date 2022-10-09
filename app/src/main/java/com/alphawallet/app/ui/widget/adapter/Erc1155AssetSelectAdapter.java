@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155AssetSelectAdapter.ViewHolder> implements NonFungibleAdapterInterface
 {
@@ -141,15 +142,10 @@ public class Erc1155AssetSelectAdapter extends RecyclerView.Adapter<Erc1155Asset
 
     public ArrayList<NFTAsset> getSelectedAssets()
     {
-        ArrayList<NFTAsset> selectedAssets = new ArrayList<>();
-
-        for (Pair<BigInteger, NFTAsset> asset : actualData) {
-            if (asset.second.isSelected()) {
-                selectedAssets.add(asset.second);
-            }
-        }
-
-        return selectedAssets;
+        return actualData.stream()
+                .filter(asset -> asset.second.isSelected())
+                .map(asset -> asset.second)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public List<BigInteger> getSelectedTokenIds()

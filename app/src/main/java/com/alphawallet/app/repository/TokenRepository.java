@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -504,11 +505,8 @@ public class TokenRepository implements TokenRepositoryType {
     private Single<Token[]> updateBalances(Wallet wallet, Token[] tokens)
     {
         return Single.fromCallable(() -> {
-            for (Token t : tokens)
-            {
-                //get balance of any token here
-                if (t.isERC721() || t.isERC20()) t.balance = checkUint256Balance(wallet, t.tokenInfo.chainId, t.getAddress());
-            }
+            //get balance of any token here
+            Arrays.stream(tokens).filter(t -> t.isERC721() || t.isERC20()).forEach(t -> t.balance = checkUint256Balance(wallet, t.tokenInfo.chainId, t.getAddress()));
             return tokens;
         });
     }
@@ -627,10 +625,7 @@ public class TokenRepository implements TokenRepositoryType {
             if (indices != null)
             {
                 result.clear();
-                for (Type val : indices)
-                {
-                    result.add((BigInteger)val.getValue());
-                }
+                indices.stream().map(val -> (BigInteger) val.getValue()).forEach(result::add);
             }
         }
         catch (StringIndexOutOfBoundsException e)
@@ -653,10 +648,7 @@ public class TokenRepository implements TokenRepositoryType {
             if (tokenIds != null)
             {
                 result.clear();
-                for (Type val : tokenIds)
-                {
-                    result.add((BigInteger)val.getValue());
-                }
+                tokenIds.stream().map(val -> (BigInteger) val.getValue()).forEach(result::add);
             }
         }
         catch (StringIndexOutOfBoundsException e)
@@ -1092,11 +1084,8 @@ public class TokenRepository implements TokenRepositoryType {
     private Single<Token[]> checkTokenData(Token[] tokens)
     {
         return Single.fromCallable(() -> {
-            for (int i = 0; i < tokens.length; i++)
-            {
-                tokens[i] = updateTokenNameIfRequired(tokens[i])
-                        .onErrorReturnItem(tokens[i]).blockingGet();
-            }
+            IntStream.range(0, tokens.length).forEach(i -> tokens[i] = updateTokenNameIfRequired(tokens[i])
+                    .onErrorReturnItem(tokens[i]).blockingGet());
 
             return tokens;
         });
@@ -1303,11 +1292,6 @@ public class TokenRepository implements TokenRepositoryType {
     {
         //Screen discovery token out
         String[] ignoreContracts = { "0x8c0edb69ebf038ba0c7a4873e40fc09725064c2e" };
-        for (String addr : ignoreContracts)
-        {
-            if (t.tokenInfo.address.equalsIgnoreCase(addr)) return true;
-        }
-
-        return false;
+        return Arrays.stream(ignoreContracts).anyMatch(t.tokenInfo.address::equalsIgnoreCase);
     }
 }

@@ -66,21 +66,12 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
     }
 
     public void addSuggestions(List<DApp> dapps) {
-        for (DApp d : dapps) {
-            if (!suggestions.contains(d)) {
-                suggestions.add(d);
-            }
-        }
+        dapps.stream().filter(d -> !suggestions.contains(d)).forEach(suggestions::add);
         notifyDataSetChanged();
     }
 
     public void removeSuggestion(DApp dapp) {
-        for (DApp d : suggestions) {
-            if (d.getName().equals(dapp.getName()) && d.getUrl().equals(dapp.getUrl())) {
-                suggestions.remove(d);
-                break;
-            }
-        }
+        suggestions.stream().filter(d -> d.getName().equals(dapp.getName()) && d.getUrl().equals(dapp.getUrl())).findFirst().ifPresent(suggestions::remove);
     }
 
     @Override

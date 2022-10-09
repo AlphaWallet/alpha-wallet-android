@@ -24,6 +24,7 @@ import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -134,13 +135,7 @@ public class WalletConnectService extends Service
 
     private void disconnectCurrentSessions()
     {
-        for (WCClient client : clientMap.values())
-        {
-            if (client.isConnected())
-            {
-                client.killSession();
-            }
-        }
+        clientMap.values().stream().filter(WCClient::isConnected).forEach(WCClient::killSession);
     }
 
     private void disconnectSession(String sessionId)
@@ -159,14 +154,7 @@ public class WalletConnectService extends Service
     //executed a pending request, remove from the queue
     public void removePendingRequest(long id)
     {
-        for (WCRequest rq : signRequests)
-        {
-            if (rq.id == id)
-            {
-                signRequests.remove(rq);
-                break;
-            }
-        }
+        signRequests.stream().filter(rq -> rq.id == id).findFirst().ifPresent(signRequests::remove);
     }
 
     public class LocalBinder extends Binder
@@ -211,15 +199,14 @@ public class WalletConnectService extends Service
 
     public void addClients(List<WCClient> clientList)
     {
-        for (WCClient client : clientList)
-        {
+        clientList.forEach(client -> {
             String sessionId = client.sessionId();
             if (sessionId != null && clientMap.get(sessionId) == null)
             {
                 Timber.d("WC: Add client: %s", sessionId);
                 putClient(sessionId, client);
             }
-        }
+        });
     }
 
     private void rejectRequest(Intent intent)
@@ -447,12 +434,7 @@ public class WalletConnectService extends Service
 
     private boolean queueHasNoErrors()
     {
-        for (WCRequest rq : signRequests.toArray(new WCRequest[0]))
-        {
-            if (rq.type == SignType.FAILURE) return false;
-        }
-
-        return true;
+        return Arrays.stream(signRequests.toArray(new WCRequest[0])).noneMatch(rq -> rq.type == SignType.FAILURE);
     }
 
     private void switchChain(Intent intent)

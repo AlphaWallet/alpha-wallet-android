@@ -616,14 +616,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 this.mapToTestNet = cn.mapToTestNet;
                 checkCustomNetworkSetting();
 
-                for (NetworkInfo info : list) {
+                list.forEach(info -> {
                     networkMap.put(info.chainId, info);
                     Boolean value = mapToTestNet.get(info.chainId);
                     boolean isTestnet = value != null && value;
-                    if (!isTestnet && !hasValue.contains(info.chainId)) {
+                    if (!isTestnet && !hasValue.contains(info.chainId))
+                    {
                         hasValue.add(info.chainId);
                     }
-                }
+                });
             }
         }
 
@@ -631,11 +632,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             if (list.size() > 0 && !list.get(0).isCustom) { //need to update the list
                 List<NetworkInfo> copyList = new ArrayList<>(list);
                 list.clear();
-                for (NetworkInfo n : copyList) {
+                copyList.forEach(n -> {
                     boolean isCustom = builtinNetworkMap.indexOfKey(n.chainId) == -1;
                     NetworkInfo newInfo = new NetworkInfo(n.name, n.symbol, n.rpcServerUrl, n.etherscanUrl, n.chainId, n.backupNodeUrl, n.etherscanAPI, isCustom);
                     list.add(newInfo);
-                }
+                });
                 //record back
                 preferences.setCustomRPCNetworks(new Gson().toJson(this));
             }
@@ -685,14 +686,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
         private void removeNetwork(long chainId)
         {
-            for (NetworkInfo in : list)
-            {
-                if (in.chainId == chainId)
-                {
-                    list.remove(in);
-                    break;
-                }
-            }
+            list.stream().filter(in -> in.chainId == chainId).findFirst().ifPresent(in -> list.remove(in));
             hasValue.remove(chainId);
             mapToTestNet.remove(chainId);
             networkMap.remove(chainId);
@@ -712,33 +706,26 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     private void addNetworks(NetworkInfo[] networks, List<NetworkInfo> result, boolean withValue)
     {
-        for (NetworkInfo network : networks)
-        {
-            if (EthereumNetworkRepository.hasRealValue(network.chainId) == withValue
-                    && !result.contains(network)) result.add(network);
-        }
+        Arrays.stream(networks).filter(network -> EthereumNetworkRepository.hasRealValue(network.chainId) == withValue
+                && !result.contains(network)).forEach(result::add);
     }
 
     private void addNetworks(List<NetworkInfo> result, boolean withValue)
     {
+        List<Long> list;
         if (withValue)
         {
-            for (long networkId : hasValue)
-            {
-                result.add(networkMap.get(networkId));
-            }
+            list = EthereumNetworkBase.hasValue;
         }
         else
         {
-            for (long networkId : testnetList)
-            {
-                result.add(networkMap.get(networkId));
-            }
+            list = testnetList;
         }
+        list.stream().mapToLong(networkId -> networkId).mapToObj(networkMap::get).forEach(result::add);
     }
 
     public static String getChainOverrideAddress(long chainId) {
-        return addressOverride.containsKey(chainId) ? addressOverride.get(chainId) : "";
+        return addressOverride.getOrDefault(chainId, "");
     }
 
     @Override
@@ -794,14 +781,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         List<Long> storedIds = Utils.longListToArray(filterList);
         List<Long> selectedIds = new ArrayList<>();
 
-        for (Long networkId : storedIds)
-        {
-            if (hasRealValue(networkId) == isMainNet)
-            {
-                NetworkInfo check = networkMap.get(networkId);
-                if (check != null) selectedIds.add(networkId);
-            }
-        }
+        storedIds.stream().filter(networkId -> hasRealValue(networkId) == isMainNet).forEach(networkId -> {
+            NetworkInfo check = networkMap.get(networkId);
+            if (check != null) selectedIds.add(networkId);
+        });
 
         if (selectedIds.size() == 0)
         {
@@ -830,10 +813,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         if (networkInfo != null)
         {
             preferences.setActiveBrowserNetwork(networkInfo.chainId);
-            for (OnNetworkChangeListener listener : onNetworkChangedListeners)
-            {
-                listener.onNetworkChanged(networkInfo);
-            }
+            onNetworkChangedListeners.forEach(listener -> listener.onNetworkChanged(networkInfo));
         }
         else
         {

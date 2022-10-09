@@ -38,10 +38,12 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.ens.AWEnsResolver;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -195,22 +197,17 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     {
         progress.postValue(false);
 
-        for (Wallet w : items)
-        {
+        Arrays.stream(items).forEach(w -> {
             w.balanceSymbol = currentNetwork.symbol;
             Wallet mapW = walletBalances.get(w.address.toLowerCase());
             if (mapW != null)
             {
                 w.balance = mapW.balance;
             }
-        }
+        });
         wallets.postValue(items);
 
-        for (Wallet w : items)
-        {
-            if (w.type == WalletType.WATCH) continue;
-            syncFromDBOnly(w, true);
-        }
+        Arrays.stream(items).filter(w -> w.type != WalletType.WATCH).forEach(w -> syncFromDBOnly(w, true));
 
         disposable = fetchWalletsInteract.fetch().subscribe(this::startBalanceUpdateTimer);
     }
@@ -229,14 +226,10 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         if (!ethereumNetworkRepository.isMainNetSelected()) return;
 
         walletUpdate.clear();
-        for (Wallet w : items)
-        {
-            if (w.type != WalletType.WATCH)
-            {
-                walletUpdate.put(w.address, w);
-                syncCallback.syncStarted(w.address, null);
-            }
-        }
+        Arrays.stream(items).filter(w -> w.type != WalletType.WATCH).forEach(w -> {
+            walletUpdate.put(w.address, w);
+            syncCallback.syncStarted(w.address, null);
+        });
 
         int counter = 0;
 
@@ -406,18 +399,9 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private void updateAllWallets(Wallet[] wallets, TokenUpdateType updateType)
     {
         disposable = Single.fromCallable(() -> {
-            //fetch all wallets in one go
-            Map<String, Token[]> walletTokenMap = new HashMap<>();
-            for (Wallet wallet : wallets)
-            {
-                Token[] walletTokens = tokensService.syncChainBalances(wallet.address.toLowerCase(), updateType).blockingGet();
-                if (walletTokens.length > 0)
-                {
-                    walletTokenMap.put(walletTokens[0].getWallet(), walletTokens);
-                }
-            }
-            return walletTokenMap;
-        }).subscribeOn(Schedulers.io())
+                    //fetch all wallets in one go
+                    return Arrays.stream(wallets).map(wallet -> tokensService.syncChainBalances(wallet.address.toLowerCase(), updateType).blockingGet()).filter(walletTokens -> walletTokens.length > 0).collect(Collectors.toMap(walletTokens -> walletTokens[0].getWallet(), walletTokens -> walletTokens, (a, b) -> b));
+                }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(baseTokens::postValue, e -> {});
     }
@@ -504,15 +488,9 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
 
     public void onDestroy()
     {
-        for (TokensService svs : walletServices.values())
-        {
-            svs.stopUpdateCycle();
-        }
+        walletServices.values().forEach(TokensService::stopUpdateCycle);
 
-        for (Disposable d : currentWalletUpdates.values())
-        {
-            if (!d.isDisposed()) d.dispose();
-        }
+        currentWalletUpdates.values().stream().filter(d -> !d.isDisposed()).forEach(Disposable::dispose);
 
         walletServices.clear();
         currentWalletUpdates.clear();

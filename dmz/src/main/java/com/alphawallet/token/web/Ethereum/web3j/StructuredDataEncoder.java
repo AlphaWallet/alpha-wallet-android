@@ -138,12 +138,7 @@ public class StructuredDataEncoder {
         Collections.sort(depsAsList);
         depsAsList.add(0, primaryType);
 
-        StringBuilder result = new StringBuilder();
-        for (String structName : depsAsList) {
-            result.append(encodeStruct(structName));
-        }
-
-        return result.toString();
+        return depsAsList.stream().map(this::encodeStruct).collect(Collectors.joining());
     }
 
     public byte[] typeHash(String primaryType) {

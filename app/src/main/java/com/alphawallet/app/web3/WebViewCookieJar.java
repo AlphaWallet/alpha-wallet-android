@@ -5,8 +5,10 @@ import android.text.TextUtils;
 import android.webkit.CookieManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
@@ -27,9 +29,7 @@ public class WebViewCookieJar implements CookieJar {
     public void saveFromResponse(@NonNull HttpUrl url, @NonNull List<Cookie> cookies) {
         if (webViewCookieManager != null) {
             String urlString = url.toString();
-            for (Cookie cookie : cookies) {
-                webViewCookieManager.setCookie(urlString, cookie.toString());
-            }
+            cookies.forEach(cookie -> webViewCookieManager.setCookie(urlString, cookie.toString()));
         }
     }
 
@@ -40,11 +40,7 @@ public class WebViewCookieJar implements CookieJar {
             String cookiesString = webViewCookieManager.getCookie(urlString);
             if (cookiesString != null && !TextUtils.isEmpty(cookiesString)) {
                 String[] cookieHeaders = cookiesString.split(";");
-                List<Cookie> cookies = new ArrayList<>();
-                for (String cookieHeader : cookieHeaders) {
-                    cookies.add(Cookie.parse(url, cookieHeader));
-                }
-                return cookies;
+                return Arrays.stream(cookieHeaders).map(cookieHeader -> Cookie.parse(url, cookieHeader)).collect(Collectors.toList());
             }
         }
         return Collections.emptyList();

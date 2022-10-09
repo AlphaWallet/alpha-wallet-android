@@ -67,6 +67,7 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Arrays;
 import java.util.Enumeration;
 
 import javax.crypto.Cipher;
@@ -1278,14 +1279,13 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         File[] contents = context.getFilesDir().listFiles();
         if (contents != null)
         {
-            for (File f : contents)
-            {
+            Arrays.stream(contents).forEach(f -> {
                 String fileName = f.getName().toLowerCase();
                 if (fileName.contains(cleanedAddr.toLowerCase()))
                 {
                     deleteRecursive(f);
                 }
-            }
+            });
         }
     }
 
@@ -1297,13 +1297,9 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         File[] contents = keyFolder.listFiles();
         if (contents != null)
         {
-            for (File f : contents)
-            {
-                if (f.getName().contains(cleanedAddr))
-                {
-                    f.delete();
-                }
-            }
+            Arrays.stream(contents)
+                    .filter(f -> f.getName().contains(cleanedAddr))
+                    .forEach(File::delete);
         }
     }
 
@@ -1314,8 +1310,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             File[] contents = fp.listFiles();
             if (contents != null)
             {
-                for (File child : contents)
-                    deleteRecursive(child);
+                Arrays.stream(contents).forEach(this::deleteRecursive);
             }
         }
 

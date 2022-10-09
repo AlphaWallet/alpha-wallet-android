@@ -294,10 +294,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
             removalObjects.add(items.get(items.size()-1));
         }
 
-        for (SortedItem sortedItem : removalObjects)
-        {
-            items.remove(sortedItem);
-        }
+        removalObjects.forEach(items::remove);
     }
 
     public void updateItems(List<ContractLocator> tokenContracts)

@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.IntStream;
 
 import io.realm.Realm;
 import timber.log.Timber;
@@ -230,11 +231,10 @@ public class ERC1155Token extends Token
         {
             List<Uint256> idList = new ArrayList<>(transferData.size());
             List<Uint256> amounts = new ArrayList<>(transferData.size());
-            for (int i = 0; i < transferData.size(); i++)
-            {
+            IntStream.range(0, transferData.size()).forEach(i -> {
                 idList.add(new Uint256(transferData.get(i).first));
                 amounts.add(new Uint256(transferData.get(i).second.getSelectedBalance().toBigInteger()));
-            }
+            });
 
             params = Arrays.asList(new Address(getWallet()), new Address(to), new DynamicArray<>(Uint256.class, idList),
                     new DynamicArray<>(Uint256.class, amounts), new DynamicBytes(new byte[0]));
@@ -362,13 +362,9 @@ public class ERC1155Token extends Token
             }
         }
 
-        for (BigInteger tokenId : assets.keySet())
+        if (assets.keySet().stream().anyMatch(tokenId -> !assetMap.containsKey(tokenId)))
         {
-            if (!assetMap.containsKey(tokenId))
-            {
-                assetsUnchanged = false;
-                break;
-            }
+            assetsUnchanged = false;
         }
 
         return assetsUnchanged;
@@ -451,15 +447,7 @@ public class ERC1155Token extends Token
     {
         String currentState = realmToken.getBalance();
         if (currentState == null || !currentState.equals(getBalanceRaw().toString())) return true;
-        //check balances
-        for (NFTAsset a : assets.values())
-        {
-            if (!a.needsLoading() && !a.requiresReplacement())
-            {
-                return true;
-            }
-        }
-        return false;
+        return assets.values().stream().anyMatch(a -> !a.needsLoading() && !a.requiresReplacement());
     }
 
     @Override

@@ -8,6 +8,7 @@ import static com.alphawallet.app.entity.ContractType.ERC875_LEGACY;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * Created by James on 2/02/2018.
@@ -47,8 +48,7 @@ public class FunctionData
         contractType.add(t);
         hasSig  = hasSignature;
 
-        for (int i = 0; i < temp.size(); i++)//String arg : data.args)
-        {
+        IntStream.range(0, temp.size()).forEach(i -> {
             String arg = temp.get(i);
             if (arg.contains("[]") || arg.equals("string") || arg.equals("bytes"))
             {
@@ -57,7 +57,7 @@ public class FunctionData
                 String argPlaceholder = "nodata";
                 this.args.set(i, argPlaceholder);
             }
-        }
+        });
     }
 
     public void addType(ContractType type)

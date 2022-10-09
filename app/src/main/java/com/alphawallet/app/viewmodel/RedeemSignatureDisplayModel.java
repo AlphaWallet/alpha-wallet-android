@@ -314,11 +314,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     }
 
     private void markUsedIndicies(List<Uint16> burnList) {
-        for (Uint16 indexVal : burnList)
-        {
-            Integer index = indexVal.getValue().intValue();
-            tickets.remove(index);
-        }
+        burnList.stream().map(indexVal -> indexVal.getValue().intValue()).forEach(tickets::remove);
     }
 
     private void onSaved()

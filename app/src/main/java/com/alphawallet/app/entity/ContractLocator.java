@@ -9,6 +9,7 @@ import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.token.entity.ContractInfo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -52,26 +53,18 @@ public class ContractLocator implements Parcelable
         return TokensRealmSource.databaseKey(chainId, address).equalsIgnoreCase(token.tokenId);
     }
 
-    /* replace this with a one-liner use of stream when we up our minSdkVersion to 24 */
-    public static ContractLocator[] fromAddresses(String[] addresses, long chainID) {
-        ContractLocator[] retval = new ContractLocator[addresses.length];
-        for (int i=0; i<addresses.length; i++) {
-            retval[i] = new ContractLocator(addresses[i], chainID);
-        }
-        return retval;
+    public static ContractLocator[] fromAddresses(String[] addresses, long chainID)
+    {
+        return Arrays.stream(addresses).map(s -> new ContractLocator(s, chainID)).toArray(ContractLocator[]::new);
     }
 
     public static List<ContractLocator> fromContractInfo(ContractInfo cInfo)
     {
         // public Map<Integer, List<String>> addresses = new HashMap<>();
         List<ContractLocator> retVal = new ArrayList<>();
-        for (long chainId : cInfo.addresses.keySet())
-        {
-            for (String addr : cInfo.addresses.get(chainId))
-            {
-                retVal.add(new ContractLocator(addr, chainId));
-            }
-        }
+        cInfo.addresses.keySet().forEach(chainId -> {
+            cInfo.addresses.get(chainId).stream().map(addr -> new ContractLocator(addr, chainId)).forEach(retVal::add);
+        });
 
         return retVal;
     }

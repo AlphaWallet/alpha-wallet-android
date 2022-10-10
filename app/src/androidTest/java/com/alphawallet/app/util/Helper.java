@@ -1,5 +1,6 @@
 package com.alphawallet.app.util;
 
+import static android.content.Context.INPUT_METHOD_SERVICE;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.isDialog;
@@ -10,8 +11,10 @@ import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 
+import android.content.Context;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.test.espresso.PerformException;
 import androidx.test.espresso.UiController;
@@ -217,5 +220,12 @@ public class Helper
                 wait(1);
             }
         }
+    }
+
+    public static boolean isSoftKeyboardShown(Context context)
+    {
+        InputMethodManager imm =
+                (InputMethodManager) context.getSystemService(INPUT_METHOD_SERVICE);
+        return imm.isAcceptingText();
     }
 }

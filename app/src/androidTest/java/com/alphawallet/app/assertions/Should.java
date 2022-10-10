@@ -30,6 +30,11 @@ public class Should
         onView(isRoot()).perform(waitUntil(not(withSubstring(text)), TIMEOUT_IN_SECONDS));
     }
 
+    public static void shouldNotSee(int id)
+    {
+        onView(isRoot()).perform(waitUntil(not(withId(id)), TIMEOUT_IN_SECONDS));
+    }
+
     public static void shouldSee(int id)
     {
         onView(isRoot()).perform(waitUntil(withId(id), 10 * 60));

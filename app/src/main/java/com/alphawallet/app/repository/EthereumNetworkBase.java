@@ -211,7 +211,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             ROPSTEN_ID, RINKEBY_ID, KOVAN_ID, OPTIMISTIC_TEST_ID, SOKOL_ID, ARBITRUM_TEST_ID));
 
     private static final List<Long> deprecatedNetworkList = new ArrayList<>(Arrays.asList(
-            RINKEBY_ID, ROPSTEN_ID, KOVAN_ID, SOKOL_ID, OPTIMISTIC_TEST_ID, ARBITRUM_TEST_ID));
+            ROPSTEN_ID, RINKEBY_ID, KOVAN_ID, OPTIMISTIC_TEST_ID, SOKOL_ID, ARBITRUM_TEST_ID));
 
     // for reset built-in network
     private static final LongSparseArray<NetworkInfo> builtinNetworkMap = new LongSparseArray<NetworkInfo>() {
@@ -620,8 +620,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     networkMap.put(info.chainId, info);
                     Boolean value = mapToTestNet.get(info.chainId);
                     boolean isTestnet = value != null && value;
-                    if (!isTestnet && !hasValue.contains(info.chainId)) {
+                    if (!isTestnet && !hasValue.contains(info.chainId))
+                    {
                         hasValue.add(info.chainId);
+                    }
+                    else if (isTestnet && !testnetList.contains(info.chainId))
+                    {
+                        testnetList.add(info.chainId);
                     }
                 }
             }
@@ -657,11 +662,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             removeNetwork(oldChainId);
             list.add(info);
-
-            if (!isTestnet) {
+            if (!isTestnet)
+            {
                 hasValue.add(info.chainId);
             }
-
+            else
+            {
+                testnetList.add(info.chainId);
+            }
             mapToTestNet.put(info.chainId, isTestnet);
             networkMap.put(info.chainId, info);
         }
@@ -669,8 +677,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         private void addNetwork(NetworkInfo info, boolean isTestnet)
         {
             list.add(info);
-            if (!isTestnet) {
+            if (!isTestnet)
+            {
                 hasValue.add(info.chainId);
+            }
+            else
+            {
+                testnetList.add(info.chainId);
             }
             mapToTestNet.put(info.chainId, isTestnet);
             networkMap.put(info.chainId, info);
@@ -725,14 +738,36 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             for (long networkId : hasValue)
             {
-                result.add(networkMap.get(networkId));
+                if (!deprecatedNetworkList.contains(networkId))
+                {
+                    result.add(networkMap.get(networkId));
+                }
+            }
+
+            for (long networkId : hasValue)
+            {
+                if (deprecatedNetworkList.contains(networkId))
+                {
+                    result.add(networkMap.get(networkId));
+                }
             }
         }
         else
         {
             for (long networkId : testnetList)
             {
-                result.add(networkMap.get(networkId));
+                if (!deprecatedNetworkList.contains(networkId))
+                {
+                    result.add(networkMap.get(networkId));
+                }
+            }
+
+            for (long networkId : testnetList)
+            {
+                if (deprecatedNetworkList.contains(networkId))
+                {
+                    result.add(networkMap.get(networkId));
+                }
             }
         }
     }

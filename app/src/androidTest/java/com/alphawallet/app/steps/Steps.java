@@ -22,6 +22,8 @@ import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
+import android.view.KeyEvent;
+
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.action.ViewActions;
 
@@ -54,6 +56,7 @@ public class Steps
     {
         Helper.wait(5);
         pressBack();
+        Helper.wait(2);
     }
 
     public static void visit(String urlString)
@@ -74,8 +77,29 @@ public class Steps
         selectMenu("Select Active Networks");
         toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
-        click(withSubstring(name));
+        do
+        {
+            try
+            {
+                click(withSubstring(name));
+                break;
+            }
+            catch (Exception e)
+            {
+                scrollDown();
+            }
+        }
+        while (true);
         pressBack();
+    }
+
+    private static void scrollDown()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            onView(withId(R.id.test_list)).perform(ViewActions.pressKey(KeyEvent.KEYCODE_DPAD_DOWN));
+            Helper.wait(1);
+        }
     }
 
     public static void selectMenu(String text)

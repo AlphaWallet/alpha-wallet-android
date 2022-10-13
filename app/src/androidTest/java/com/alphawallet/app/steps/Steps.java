@@ -1,6 +1,7 @@
 package com.alphawallet.app.steps;
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.replaceText;
@@ -23,6 +24,7 @@ import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.action.ViewActions;
 
@@ -269,5 +271,10 @@ public class Steps
         clickListItem(R.id.list, withText(currency));
         Helper.wait(1);
         pressBack();
+    }
+
+    public static void openOptionsMenu()
+    {
+        openActionBarOverflowOrOptionsMenu(ApplicationProvider.getApplicationContext());
     }
 }

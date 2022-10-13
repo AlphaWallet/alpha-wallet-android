@@ -5,14 +5,12 @@ import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.steps.Steps.gotoWalletPage;
 import static com.alphawallet.app.steps.Steps.selectCurrency;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class CurrencyTest extends BaseE2ETest
 {
 
     @Test
-    @Ignore
     public void should_switch_currency()
     {
         createNewWallet();

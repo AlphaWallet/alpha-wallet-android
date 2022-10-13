@@ -15,6 +15,7 @@ import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.util.LocaleUtils;
 
@@ -38,6 +39,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final LocaleRepositoryType localeRepository;
     private final CurrencyRepositoryType currencyRepository;
     private final TransactionsService transactionsService;
+    private final TickerService tickerService;
 
     @Inject
     NewSettingsViewModel(
@@ -47,7 +49,8 @@ public class NewSettingsViewModel extends BaseViewModel {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             CurrencyRepositoryType currencyRepository,
-            TransactionsService transactionsService) {
+            TransactionsService transactionsService,
+            TickerService tickerService) {
         this.genericWalletInteract = genericWalletInteract;
         this.myAddressRouter = myAddressRouter;
         this.manageWalletsRouter = manageWalletsRouter;
@@ -55,6 +58,7 @@ public class NewSettingsViewModel extends BaseViewModel {
         this.localeRepository = localeRepository;
         this.currencyRepository = currencyRepository;
         this.transactionsService = transactionsService;
+        this.tickerService = tickerService;
     }
 
     public ArrayList<LocaleItem> getLocaleList(Context context) {
@@ -81,6 +85,7 @@ public class NewSettingsViewModel extends BaseViewModel {
 
     public Single<Boolean> updateCurrency(String currencyCode){
         currencyRepository.setDefaultCurrency(currencyCode);
+        tickerService.updateCurrencyConversion();
         //delete tickers from realm
         return transactionsService.wipeTickerData();
     }

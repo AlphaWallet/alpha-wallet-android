@@ -29,10 +29,8 @@ import org.junit.runner.RunWith;
 public abstract class BaseE2ETest
 {
     @Rule
-    public TestRule watcher = new TestWatcher()
-    {
-        protected void starting(Description description)
-        {
+    public TestRule watcher = new TestWatcher() {
+        protected void starting(Description description) {
             setFailureHandler(new CustomFailureHandler(description.getMethodName(), getInstrumentation().getTargetContext()));
         }
     };
@@ -46,8 +44,7 @@ public abstract class BaseE2ETest
     {
         UiDevice device = UiDevice.getInstance(getInstrumentation());
         UiObject waitButton = device.findObject(new UiSelector().textContains("wait"));
-        if (waitButton.exists())
-        {
+        if (waitButton.exists()) {
             waitButton.click();
         }
     }

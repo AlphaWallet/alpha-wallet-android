@@ -118,7 +118,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest
 
         onView(allOf(withId(R.id.edit_text))).perform(replaceText(doorContractAddress));
 
-        onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 30));
+        onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 300));
 
         click(withId(R.id.select_token));
 

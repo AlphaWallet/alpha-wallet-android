@@ -25,10 +25,10 @@ public class DappBrowserTest extends BaseE2ETest
         shouldSee("Ethereum");
         Helper.wait(5);
         SnapshotUtil.take("1");
-        selectTestNet("Görli");
+        selectTestNet("Klaytn Baobab");
         navigateToBrowser();
         Helper.wait(3);
         pressBack();
-        shouldSee("Görli");
+        shouldSee("Klaytn Baobab");
     }
 }

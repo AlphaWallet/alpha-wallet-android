@@ -74,7 +74,7 @@ public class Steps
         selectMenu("Select Active Networks");
         toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
-        click(withSubstring("Rinkeby")); // Deselect
+        click(withSubstring("Görli")); // Deselect
         click(withSubstring(name)); // Select
         pressBack();
     }
@@ -111,6 +111,7 @@ public class Steps
     private static void ensureBalanceFetched()
     {
         shouldSee("Ganache");
+        shouldSee("Klaytn Baobab");
         shouldNotSee("0 ETH");
     }
 

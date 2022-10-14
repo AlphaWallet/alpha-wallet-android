@@ -45,7 +45,8 @@ public class Steps
 
     public static void closeSecurityWarning()
     {
-        if (isDeviceRooted()) {
+        if (isDeviceRooted())
+        {
             click(withText(R.string.ok));
         }
     }
@@ -85,18 +86,21 @@ public class Steps
         selectActiveNetworks.perform(scrollTo(), ViewActions.click());
     }
 
-    public static void assertBalanceIs(String balanceStr) {
+    public static void assertBalanceIs(String balanceStr)
+    {
         Should.shouldSee(balanceStr);
     }
 
-    public static void ensureTransactionConfirmed() {
+    public static void ensureTransactionConfirmed()
+    {
 //        onView(withText(R.string.rate_no_thanks)).perform(click());
         click(withId(R.string.action_show_tx_details));
         onView(isRoot()).perform(waitUntil(withSubstring("Sent"), 30 * 60));
         pressBack();
     }
 
-    public static void sendBalanceTo(String receiverAddress, String amountStr) {
+    public static void sendBalanceTo(String receiverAddress, String amountStr)
+    {
         click(withId(R.id.nav_wallet_text));
         ensureBalanceFetched();
         click(withSubstring("ETH"));
@@ -115,13 +119,15 @@ public class Steps
         shouldNotSee("0 ETH");
     }
 
-    public static void switchToWallet(String address) {
+    public static void switchToWallet(String address)
+    {
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
         onView(withSubstring(address.substring(0, 6))).perform(ViewActions.click());
     }
 
-    public static String getWalletAddress() {
+    public static String getWalletAddress()
+    {
         gotoSettingsPage();
         click(withText("Show My Wallet Address"));
         GetTextAction getTextAction = new GetTextAction();
@@ -130,7 +136,8 @@ public class Steps
         return getTextAction.getText().toString().replace(" ", ""); // The address show on 2 lines so there is a blank space
     }
 
-    public static void importWalletFromSettingsPage(String text) {
+    public static void importWalletFromSettingsPage(String text)
+    {
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
         click(withId(R.id.action_add));
@@ -139,11 +146,14 @@ public class Steps
         int textId;
         int buttonId;
         boolean isPrivateKey = text.startsWith("0x");
-        if (isPrivateKey) {
+        if (isPrivateKey)
+        {
             click(withText("Private key"));
             textId = R.id.input_private_key;
             buttonId = R.id.import_action_pk;
-        } else {
+        }
+        else
+        {
             textId = R.id.input_seed;
             buttonId = R.id.import_action;
         }
@@ -153,7 +163,8 @@ public class Steps
         closeSelectNetworkPage();
     }
 
-    public static void importPKWalletFromFrontPage(String privateKey) {
+    public static void importPKWalletFromFrontPage(String privateKey)
+    {
         click(withText("I already have a Wallet"));
         click(withText("Private key"));
         Helper.wait(1);
@@ -163,7 +174,8 @@ public class Steps
         Helper.wait(5);
     }
 
-    public static void importKSWalletFromFrontPage(String keystore, String password) {
+    public static void importKSWalletFromFrontPage(String keystore, String password)
+    {
         click(withText("I already have a Wallet"));
         click(withText("Keystore"));
         Helper.wait(1);
@@ -175,7 +187,8 @@ public class Steps
         Helper.wait(5);
     }
 
-    public static void importKSWalletFromSettingsPage(String keystore, String password) {
+    public static void importKSWalletFromSettingsPage(String keystore, String password)
+    {
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
         click(withId(R.id.action_add));
@@ -197,11 +210,13 @@ public class Steps
         click(withId(R.id.nav_wallet_text));
     }
 
-    public static void gotoSettingsPage() {
+    public static void gotoSettingsPage()
+    {
         click(withId(R.id.nav_settings_text));
     }
 
-    public static void toggleSwitch(int id) {
+    public static void toggleSwitch(int id)
+    {
         onView(allOf(withId(R.id.switch_material), isDescendantOfA(withId(id)))).perform(ViewActions.click());
     }
 

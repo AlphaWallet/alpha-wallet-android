@@ -17,12 +17,11 @@ import static com.alphawallet.app.assertions.Should.shouldNotSee;
 import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.util.EthUtils.GANACHE_URL;
 import static com.alphawallet.app.util.Helper.click;
+import static com.alphawallet.app.util.Helper.clickListItem;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
-
-import android.view.KeyEvent;
 
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.action.ViewActions;
@@ -54,9 +53,9 @@ public class Steps
 
     public static void closeSelectNetworkPage()
     {
-        Helper.wait(5);
+        waitUntil(withText("Select Active Networks"));
         pressBack();
-        Helper.wait(2);
+        Helper.wait(1);
     }
 
     public static void visit(String urlString)
@@ -77,29 +76,9 @@ public class Steps
         selectMenu("Select Active Networks");
         toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
-        do
-        {
-            try
-            {
-                click(withSubstring(name));
-                break;
-            }
-            catch (Exception e)
-            {
-                scrollDown();
-            }
-        }
-        while (true);
+        Helper.wait(1);
+        clickListItem(R.id.test_list, withSubstring(name));
         pressBack();
-    }
-
-    private static void scrollDown()
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            onView(withId(R.id.test_list)).perform(ViewActions.pressKey(KeyEvent.KEYCODE_DPAD_DOWN));
-            Helper.wait(1);
-        }
     }
 
     public static void selectMenu(String text)
@@ -266,15 +245,8 @@ public class Steps
         gotoSettingsPage();
         selectMenu("Change Currency");
         Helper.wait(1);
-        try
-        {
-            click(withText(currency));
-        }
-        catch (Exception e)
-        {
-            onView(withId(R.id.list)).perform(ViewActions.swipeUp());
-            click(withText(currency));
-        }
+        clickListItem(R.id.list, withText(currency));
+        Helper.wait(1);
         pressBack();
     }
 }

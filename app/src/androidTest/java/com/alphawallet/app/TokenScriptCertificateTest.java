@@ -14,6 +14,7 @@ import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.steps.Steps.switchToWallet;
 import static com.alphawallet.app.util.EthUtils.GANACHE_URL;
 import static com.alphawallet.app.util.Helper.click;
+import static com.alphawallet.app.util.Helper.clickListItem;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -131,7 +132,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest
         Helper.wait(1);
 
         //Select token
-        click(withSubstring("OFFIC"));
+        clickListItem(R.id.list, withSubstring("OFFIC"));
 
         //Wait for cert to resolve
         //Helper.wait(8);

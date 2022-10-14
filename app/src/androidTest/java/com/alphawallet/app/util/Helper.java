@@ -1,11 +1,13 @@
 package com.alphawallet.app.util;
 
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static org.hamcrest.core.AllOf.allOf;
+
+import android.view.KeyEvent;
 import android.view.View;
-
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-
-import java.util.concurrent.TimeoutException;
 
 import androidx.test.espresso.PerformException;
 import androidx.test.espresso.UiController;
@@ -14,11 +16,10 @@ import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static org.hamcrest.core.AllOf.allOf;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
+
+import java.util.concurrent.TimeoutException;
 
 public class Helper {
     private static final int DEFAULT_TIMEOUT_IN_SECONDS = 10;
@@ -95,6 +96,11 @@ public class Helper {
         });
     }
 
+    public static void click(Matcher<View> matcher, int timeoutInSeconds) {
+        onView(isRoot()).perform(Helper.waitUntil(Matchers.allOf(matcher, isDisplayed()), timeoutInSeconds));
+        onView(matcher).perform(ViewActions.click(doNothing())); // if click executed as long press, do nothing and retry clicking
+    }
+
     public static void click(Matcher<View> matcher) {
 //        Helper.wait(1); //slight pause
         onView(isRoot()).perform(Helper.waitUntil(Matchers.allOf(matcher, isDisplayed())));
@@ -117,5 +123,28 @@ public class Helper {
             public void perform(UiController uiController, View view) {
             }
         };
+    }
+
+    public static void clickListItem(int list, Matcher matcher)
+    {
+        for (int i = 0; i < 50; i++)
+        {
+            try
+            {
+                click(matcher, 0);
+                return;
+            }
+            catch (Exception e)
+            {
+                scrollDown(list);
+            }
+        }
+        throw new RuntimeException("Can not find " + matcher.toString());
+    }
+
+    private static void scrollDown(int list)
+    {
+        onView(withId(list)).perform(ViewActions.pressKey(KeyEvent.KEYCODE_DPAD_DOWN));
+        Helper.wait(1);
     }
 }

@@ -819,7 +819,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress)
     {
-        return Single.fromCallable(() -> {
+        return Single.fromCallable(() ->
+        {
             try
             {
                 EthGetTransactionCount ethGetTransactionCount = web3j
@@ -1095,7 +1096,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public Single<Token[]> getBlankOverrideTokens(Wallet wallet)
     {
-        return Single.fromCallable(() -> {
+        return Single.fromCallable(() ->
+        {
             if (getBlankOverrideToken() == null)
             {
                 return new Token[0];

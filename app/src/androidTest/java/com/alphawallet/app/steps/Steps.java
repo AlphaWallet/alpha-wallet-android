@@ -54,11 +54,9 @@ public class Steps
 
     public static void closeSelectNetworkPage()
     {
-
-//        waitUntil(withText("Select Active Networks"));
-        Helper.wait(3);
+        waitUntil(withSubstring("Mainnet"));
         pressBack();
-        Helper.wait(1);
+        waitUntil(withId(R.id.nav_settings_text));
     }
 
     public static void visit(String urlString)
@@ -163,6 +161,7 @@ public class Steps
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(textId)))))).perform(replaceText(text));
         Helper.wait(2); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis
         click(withId(buttonId));
+        Helper.wait(10);
         closeSelectNetworkPage();
     }
 

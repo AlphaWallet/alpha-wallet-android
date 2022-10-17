@@ -54,7 +54,9 @@ public class Steps
 
     public static void closeSelectNetworkPage()
     {
-        waitUntil(withText("Select Active Networks"));
+
+//        waitUntil(withText("Select Active Networks"));
+        Helper.wait(3);
         pressBack();
         Helper.wait(1);
     }

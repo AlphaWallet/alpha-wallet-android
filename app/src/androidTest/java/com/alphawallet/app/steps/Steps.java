@@ -78,6 +78,7 @@ public class Steps
         toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
         Helper.wait(1);
+        clickListItem(R.id.test_list, withSubstring("Görli"));
         clickListItem(R.id.test_list, withSubstring(name));
         pressBack();
     }
@@ -161,7 +162,7 @@ public class Steps
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(textId)))))).perform(replaceText(text));
         Helper.wait(2); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis
         click(withId(buttonId));
-        Helper.wait(10);
+        Helper.wait(15);
         closeSelectNetworkPage();
     }
 

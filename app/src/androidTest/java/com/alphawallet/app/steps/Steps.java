@@ -75,7 +75,7 @@ public class Steps
         toggleSwitch(R.id.mainnet_header);
         click(withText(R.string.action_enable_testnet));
         click(withSubstring("Görli")); // Deselect
-        click(withSubstring(name)); // Select
+        click(withSubstring("Klaytn Baobab")); // Select
         pressBack();
     }
 
@@ -111,7 +111,6 @@ public class Steps
     private static void ensureBalanceFetched()
     {
         shouldSee("Ganache");
-        shouldSee("Klaytn Baobab");
         shouldNotSee("0 ETH");
     }
 

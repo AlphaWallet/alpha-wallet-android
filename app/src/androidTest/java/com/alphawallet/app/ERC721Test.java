@@ -104,7 +104,7 @@ public class ERC721Test extends BaseE2ETest
         assertThat(getWalletAddress(), equalTo(ownerAddress));
 
         addNewNetwork("Ganache");
-        selectTestNet("Klaytn Baobab");
+        selectTestNet("Ganache");
 
         //Ensure we're on the wallet page
         switchToWallet(ownerAddress);
@@ -120,7 +120,7 @@ public class ERC721Test extends BaseE2ETest
 
         onView(allOf(withId(R.id.edit_text))).perform(replaceText(doorContractAddress));
 
-//        onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 30));
+        onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 30));
 
 //        click(withId(R.id.select_token));
 
@@ -146,20 +146,13 @@ public class ERC721Test extends BaseE2ETest
         click(withSubstring("Next"));
         Helper.wait(1);
 
-//        click(withSubstring("Ganache"));
-//        onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());
-    /*    shouldSee("Klaytn Baobab");
-        Helper.wait(1);
-
-        shouldSee("Send");
-        Helper.wait(1);*/
         //Swipe up
-       /* onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());
+        onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());
 
         Helper.wait(1);
 
         //Select token
-        click(withSubstring("USDC"));
+        click(withSubstring("OFFIC"));
 
         //Wait for cert to resolve
         //Helper.wait(8);
@@ -169,8 +162,8 @@ public class ERC721Test extends BaseE2ETest
         click(withId(R.id.image_lock));
 
         shouldSee("Smart Token Labs");
-        shouldSee("USDC");
-        shouldSee("Contract Owner"); */// Note this may fail once we pull owner() from contract, test will need to be changed to contract owner, which for this test is: 0xA20efc4B9537d27acfD052003e311f762620642D
+        shouldSee("ECDSA");
+        shouldSee("Contract Owner"); // Note this may fail once we pull owner() from contract, test will need to be changed to contract owner, which for this test is: 0xA20efc4B9537d27acfD052003e311f762620642D
     }
 }
 

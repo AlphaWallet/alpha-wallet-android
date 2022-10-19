@@ -15,7 +15,6 @@ import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.assertions.Should.shouldNotSee;
 import static com.alphawallet.app.assertions.Should.shouldSee;
-import static com.alphawallet.app.util.EthUtils.GANACHE_URL;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickListItem;
 import static com.alphawallet.app.util.Helper.waitUntil;
@@ -37,6 +36,8 @@ import com.alphawallet.app.util.Helper;
  */
 public class Steps
 {
+    public static final String GANACHE_URL = "http://10.0.2.2:8545/";
+
     public static void createNewWallet()
     {
         click(withId(R.id.button_create));
@@ -223,16 +224,16 @@ public class Steps
         onView(allOf(withId(R.id.switch_material), isDescendantOfA(withId(id)))).perform(ViewActions.click());
     }
 
-    public static void addNewNetwork(String name)
+    public static void addNewNetwork(String name, String url)
     {
         selectMenu("Select Active Networks");
         click(withId(R.id.action_add));
         input(R.id.input_network_name, name);
-        input(R.id.input_network_rpc_url, GANACHE_URL);
+        input(R.id.input_network_rpc_url, url);
         input(R.id.input_network_chain_id, "2");
         input(R.id.input_network_symbol, "ETH");
-        input(R.id.input_network_explorer_api, GANACHE_URL);
-        input(R.id.input_network_block_explorer_url, GANACHE_URL);
+        input(R.id.input_network_explorer_api, url);
+        input(R.id.input_network_block_explorer_url, url);
         onView(withId(R.id.network_input_scroll)).perform(swipeUp());
         Helper.wait(1);
         click(withId(R.id.checkbox_testnet));

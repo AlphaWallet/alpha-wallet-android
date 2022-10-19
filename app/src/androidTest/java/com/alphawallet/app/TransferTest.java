@@ -1,5 +1,6 @@
 package com.alphawallet.app;
 
+import static com.alphawallet.app.steps.Steps.GANACHE_URL;
 import static com.alphawallet.app.steps.Steps.addNewNetwork;
 import static com.alphawallet.app.steps.Steps.assertBalanceIs;
 import static com.alphawallet.app.steps.Steps.createNewWallet;
@@ -46,7 +47,7 @@ public class TransferTest extends BaseE2ETest {
         importWalletFromSettingsPage(privateKey);
         assertThat(getWalletAddress(), equalTo(existedWalletAddress));
 
-        addNewNetwork("Ganache");
+        addNewNetwork("Ganache", GANACHE_URL);
         selectTestNet("Ganache");
         sendBalanceTo(newWalletAddress, "0.001");
         ensureTransactionConfirmed();

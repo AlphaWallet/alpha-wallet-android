@@ -32,8 +32,6 @@ import okhttp3.OkHttpClient;
  */
 public abstract class EthUtils
 {
-    public static final String GANACHE_URL = "http://10.0.2.2:8545/";
-
     public static Web3j buildWeb3j(String url)
     {
         OkHttpClient client = new OkHttpClient.Builder()
@@ -47,7 +45,8 @@ public abstract class EthUtils
         return Web3j.build(svs);
     }
 
-    public static String calculateContractAddress(String account, long nonce){
+    public static String calculateContractAddress(String account, long nonce)
+    {
         byte[] addressAsBytes = org.web3j.utils.Numeric.hexStringToByteArray(account);
         byte[] calculatedAddressAsBytes =
                 Hash.sha3(RlpEncoder.encode(

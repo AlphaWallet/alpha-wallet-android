@@ -7,12 +7,12 @@ import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static com.alphawallet.app.assertions.Should.shouldSee;
+import static com.alphawallet.app.steps.Steps.GANACHE_URL;
 import static com.alphawallet.app.steps.Steps.addNewNetwork;
 import static com.alphawallet.app.steps.Steps.getWalletAddress;
 import static com.alphawallet.app.steps.Steps.importPKWalletFromFrontPage;
 import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.steps.Steps.switchToWallet;
-import static com.alphawallet.app.util.EthUtils.GANACHE_URL;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickListItem;
 import static com.alphawallet.app.util.Helper.waitUntil;
@@ -103,7 +103,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest
 
         assertThat(getWalletAddress(), equalTo(ownerAddress));
 
-        addNewNetwork("Ganache");
+        addNewNetwork("Ganache", GANACHE_URL);
         selectTestNet("Ganache");
 
         //Ensure we're on the wallet page

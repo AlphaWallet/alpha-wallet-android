@@ -32,7 +32,7 @@ import okhttp3.OkHttpClient;
  */
 public abstract class EthUtils
 {
-    public static final String GANACHE_URL = "http://10.0.2.2:8545";
+    public static final String GANACHE_URL = "http://10.0.2.2:8545/";
 
     public static Web3j buildWeb3j(String url)
     {

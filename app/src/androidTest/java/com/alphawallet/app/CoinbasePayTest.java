@@ -10,7 +10,8 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-public class CoinbasePayTest extends BaseE2ETest {
+public class CoinbasePayTest extends BaseE2ETest
+{
     @Test
     public void should_see_coinbase_pay_window()
     {

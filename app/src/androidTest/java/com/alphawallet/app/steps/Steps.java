@@ -174,7 +174,7 @@ public class Steps
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_private_key)))))).perform(replaceText(privateKey));
         Helper.wait(1); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis
         click(withId(R.id.import_action_pk));
-        Helper.wait(5);
+        Helper.wait(15);
     }
 
     public static void importKSWalletFromFrontPage(String keystore, String password)

@@ -2,13 +2,11 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.text.TextUtils;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ServiceErrorException;
-import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -18,9 +16,13 @@ import com.mixpanel.android.mpmetrics.MixpanelAPI;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Iterator;
 import java.util.Objects;
 
-public class AnalyticsService<T> implements AnalyticsServiceType<T> {
+import timber.log.Timber;
+
+public class AnalyticsService<T> implements AnalyticsServiceType<T>
+{
 
     private final MixpanelAPI mixpanelAPI;
     private final FirebaseAnalytics firebaseAnalytics;
@@ -29,6 +31,19 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
     {
         mixpanelAPI = MixpanelAPI.getInstance(context, KeyProviderFactory.get().getAnalyticsKey());
         firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+    }
+
+    public static Bundle jsonToBundle(JSONObject jsonObject) throws JSONException
+    {
+        Bundle bundle = new Bundle();
+        Iterator iter = jsonObject.keys();
+        while (iter.hasNext())
+        {
+            String key = (String) iter.next();
+            String value = jsonObject.getString(key);
+            bundle.putString(key, value);
+        }
+        return bundle;
     }
 
     @Override
@@ -42,51 +57,28 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
     public void track(String eventName, T event)
     {
         AnalyticsProperties analyticsProperties = (AnalyticsProperties) event;
-
         trackFirebase(analyticsProperties, eventName);
         trackMixpanel(analyticsProperties, eventName);
     }
 
     private void trackFirebase(AnalyticsProperties analyticsProperties, String eventName)
     {
-        Bundle props = new Bundle();
-        if(!TextUtils.isEmpty(analyticsProperties.getWalletType()))
+        Bundle props;
+        try
         {
-            props.putString(C.AN_WALLET_TYPE, analyticsProperties.getWalletType());
+            props = jsonToBundle(analyticsProperties.get());
+            props.putString(C.APP_NAME, BuildConfig.APPLICATION_ID);
+            firebaseAnalytics.logEvent(eventName, props);
         }
-
-        if(!TextUtils.isEmpty(analyticsProperties.getData()))
+        catch (JSONException e)
         {
-            props.putString(C.AN_USE_GAS, analyticsProperties.getData());
+            Timber.e(e);
         }
-
-        props.putString(C.APP_NAME, BuildConfig.APPLICATION_ID);
-
-        firebaseAnalytics.logEvent(eventName, props);
     }
 
     private void trackMixpanel(AnalyticsProperties analyticsProperties, String eventName)
     {
-        try
-        {
-            JSONObject props = new JSONObject();
-
-            if (!TextUtils.isEmpty(analyticsProperties.getWalletType()))
-            {
-                props.put(C.AN_WALLET_TYPE, analyticsProperties.getWalletType());
-            }
-
-            if (!TextUtils.isEmpty(analyticsProperties.getData()))
-            {
-                props.put(C.AN_USE_GAS, analyticsProperties.getData());
-            }
-
-            mixpanelAPI.track(eventName, props);
-        }
-        catch(JSONException e)
-        {
-            //Something went wrong
-        }
+        mixpanelAPI.track(eventName, analyticsProperties.get());
     }
 
     @Override

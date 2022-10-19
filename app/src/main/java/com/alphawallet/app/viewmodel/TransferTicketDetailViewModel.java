@@ -9,11 +9,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DisplayState;
-import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionData;
@@ -38,8 +36,6 @@ import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.SignableBytes;
 import com.alphawallet.token.tools.ParseMagicLink;
 
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -56,7 +52,8 @@ import io.reactivex.schedulers.Schedulers;
  * Created by James on 21/02/2018.
  */
 @HiltViewModel
-public class TransferTicketDetailViewModel extends BaseViewModel {
+public class TransferTicketDetailViewModel extends BaseViewModel
+{
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
@@ -69,7 +66,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final GasService gasService;
-    private final AnalyticsServiceType analyticsService;
     private final TokensService tokensService;
 
     private ParseMagicLink parser;
@@ -85,29 +81,43 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   AssetDefinitionService assetDefinitionService,
                                   GasService gasService,
                                   AnalyticsServiceType analyticsService,
-                                  TokensService tokensService) {
+                                  TokensService tokensService)
+    {
         this.genericWalletInteract = genericWalletInteract;
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.gasService = gasService;
-        this.analyticsService = analyticsService;
         this.tokensService = tokensService;
+        setAnalyticsService(analyticsService);
     }
 
     public MutableLiveData<TransactionData> transactionFinalised()
     {
         return transactionFinalised;
     }
-    public MutableLiveData<Throwable> transactionError() { return transactionError; }
+
+    public MutableLiveData<Throwable> transactionError()
+    {
+        return transactionError;
+    }
 
     public LiveData<Wallet> defaultWallet()
     {
         return defaultWallet;
     }
-    public LiveData<String> newTransaction() { return newTransaction; }
-    public LiveData<String> universalLinkReady() { return universalLinkReady; }
+
+    public LiveData<String> newTransaction()
+    {
+        return newTransaction;
+    }
+
+    public LiveData<String> universalLinkReady()
+    {
+        return universalLinkReady;
+    }
+
     private void initParser()
     {
         if (parser == null)
@@ -126,13 +136,14 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         gasService.startGasPriceCycle(token.tokenInfo.chainId);
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(Wallet wallet)
+    {
         defaultWallet.setValue(wallet);
     }
 
     public Wallet getWallet()
     {
-       return defaultWallet.getValue();
+        return defaultWallet.getValue();
     }
 
     public void setWallet(Wallet wallet)
@@ -210,7 +221,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         {
             final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
             disposable = createTransactionInteract.create(defaultWallet.getValue(), token.getAddress(),
-                    BigInteger.ZERO, gasService.getGasPrice(), new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS), data, token.tokenInfo.chainId)
+                            BigInteger.ZERO, gasService.getGasPrice(), new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS), data, token.tokenInfo.chainId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(newTransaction::postValue, this::onError);
@@ -289,21 +300,15 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                         transactionError::postValue);
     }
 
-    public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId, long chainId) {
+    public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId, long chainId)
+    {
         Token token = tokensService.getToken(chainId, contractAddress);
         List<BigInteger> tokenIds = token.stringHexToBigIntegerList(tokenId);
         return TokenRepository.createERC721TransferFunction(to, token, tokenIds);
     }
 
-    public void actionSheetConfirm(String mode)
+    public TokensService getTokenService()
     {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(mode);
-
-        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
-    }
-
-    public TokensService getTokenService() {
         return tokensService;
     }
 

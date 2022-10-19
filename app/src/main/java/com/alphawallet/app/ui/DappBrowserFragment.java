@@ -67,6 +67,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DApp;
@@ -321,6 +323,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
         else
         {
+            viewModel.track(Analytics.Navigation.BROWSER);
             web3.setWebLoadCallback(this);
         }
 
@@ -1683,6 +1686,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private boolean loadUrl(String urlText)
     {
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_URL, urlText);
+        viewModel.track(Analytics.Action.LOAD_URL, props);
+
         detachFragments();
         addToBackStack(DAPP_BROWSER);
         cancelSearchSession();
@@ -2201,7 +2208,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void notifyConfirm(String mode)
     {
-        if (getActivity() != null) ((HomeActivity) getActivity()).useActionSheet(mode);
+        if (getActivity() != null) ((HomeActivity) getActivity()).trackActionSheetUsage(mode);
     }
 
     @Override

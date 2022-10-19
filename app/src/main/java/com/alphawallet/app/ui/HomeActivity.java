@@ -53,7 +53,9 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
@@ -1053,9 +1055,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    public void useActionSheet(String mode)
+    public void trackActionSheetUsage(String mode)
     {
-        viewModel.actionSheetConfirm(mode);
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        viewModel.track(Analytics.Action.USE_ACTION_SHEET, props);
     }
 
     private void hideSystemUI()

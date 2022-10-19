@@ -39,6 +39,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
@@ -97,36 +98,10 @@ public class WalletFragment extends BaseFragment implements
 {
     public static final String SEARCH_FRAGMENT = "w_search";
     private static final String TAG = "WFRAG";
-    final ActivityResultLauncher<Intent> tokenManagementLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                if (result.getData() == null) return;
-                ArrayList<ContractLocator> tokenData = result.getData().getParcelableArrayListExtra(ADDED_TOKEN);
-                Bundle b = new Bundle();
-                b.putParcelableArrayList(C.ADDED_TOKEN, tokenData);
-                getParentFragmentManager().setFragmentResult(C.ADDED_TOKEN, b);
-            });
     private final Handler handler = new Handler(Looper.getMainLooper());
     private WalletViewModel viewModel;
     private SystemView systemView;
     private TokensAdapter adapter;
-    ActivityResultLauncher<Intent> handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                String keyBackup = null;
-                boolean noLockScreen = false;
-                Intent data = result.getData();
-                if (data != null) keyBackup = data.getStringExtra("Key");
-                if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
-                if (result.getResultCode() == RESULT_OK)
-                {
-                    ((HomeActivity) getActivity()).backupWalletSuccess(keyBackup);
-                }
-                else
-                {
-                    ((HomeActivity) getActivity()).backupWalletFail(keyBackup, noLockScreen);
-                }
-            });
     private UserAvatar addressAvatar;
     private View selectedToken;
     private String importFileName;
@@ -138,12 +113,9 @@ public class WalletFragment extends BaseFragment implements
     private RealmResults<RealmToken> realmUpdates;
     private LargeTitleView largeTitleView;
     private long realmUpdateTime;
-    private ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                //send instruction to restart tokenService
-                getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
-            });
+    private ActivityResultLauncher<Intent> networkSettingsHandler;
+    private ActivityResultLauncher<Intent> handleBackupClick;
+    private ActivityResultLauncher<Intent> tokenManagementLauncher;
 
     @Nullable
     @Override
@@ -161,6 +133,8 @@ public class WalletFragment extends BaseFragment implements
         {
             toolbar(view);
         }
+
+        initResultLaunchers();
 
         initViews(view);
 
@@ -192,6 +166,44 @@ public class WalletFragment extends BaseFragment implements
                 });
 
         return view;
+    }
+
+    private void initResultLaunchers()
+    {
+        tokenManagementLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result ->
+                {
+                    if (result.getData() == null) return;
+                    ArrayList<ContractLocator> tokenData = result.getData().getParcelableArrayListExtra(ADDED_TOKEN);
+                    Bundle b = new Bundle();
+                    b.putParcelableArrayList(C.ADDED_TOKEN, tokenData);
+                    getParentFragmentManager().setFragmentResult(C.ADDED_TOKEN, b);
+                });
+
+        networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result ->
+                {
+                    //send instruction to restart tokenService
+                    getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
+                });
+
+        handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result ->
+                {
+                    String keyBackup = null;
+                    boolean noLockScreen = false;
+                    Intent data = result.getData();
+                    if (data != null) keyBackup = data.getStringExtra("Key");
+                    if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
+                    if (result.getResultCode() == RESULT_OK)
+                    {
+                        ((HomeActivity) getActivity()).backupWalletSuccess(keyBackup);
+                    }
+                    else
+                    {
+                        ((HomeActivity) getActivity()).backupWalletFail(keyBackup, noLockScreen);
+                    }
+                });
     }
 
     private void initList()
@@ -539,9 +551,13 @@ public class WalletFragment extends BaseFragment implements
         {
             requireActivity().recreate();
         }
-        else if (largeTitleView != null)
+        else
         {
-            largeTitleView.setVisibility(viewModel.getTokensService().isMainNetActive() ? View.VISIBLE : View.GONE); //show or hide Fiat summary
+            viewModel.track(Analytics.Navigation.WALLET);
+            if (largeTitleView != null)
+            {
+                largeTitleView.setVisibility(viewModel.getTokensService().isMainNetActive() ? View.VISIBLE : View.GONE); //show or hide Fiat summary
+            }
         }
     }
 

@@ -30,6 +30,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -1250,7 +1252,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void notifyConfirm(String mode)
     {
-        viewModel.actionSheetConfirm(mode);
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        props.put(Analytics.PROPS_FROM_WALLET_CONNECT, true);
+        viewModel.track(Analytics.Action.USE_ACTION_SHEET, props);
     }
 
     @Override

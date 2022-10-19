@@ -18,6 +18,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -352,6 +354,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     protected void onResume()
     {
         super.onResume();
+        viewModel.track(Analytics.Navigation.TOKEN_SWAP);
+
         if (settingsDialog != null)
         {
             settingsDialog.setSwapProviders(viewModel.getPreferredSwapProviders());
@@ -617,6 +621,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         successDialog.setTitle(R.string.transaction_succeeded);
         successDialog.setMessage(transactionData.txHash);
         successDialog.show();
+
+        viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_SUCCESSFUL);
     }
 
     private void txError(Throwable throwable)
@@ -625,6 +631,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         errorDialog.setTitle(R.string.error_transaction_failed);
         errorDialog.setMessage(throwable.getMessage());
         errorDialog.show();
+
+        viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED);
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -711,7 +719,10 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     @Override
     public void notifyConfirm(String mode)
     {
-
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        props.put(Analytics.PROPS_FROM_WALLET_CONNECT, true);
+        viewModel.track(Analytics.Action.USE_ACTION_SHEET, props);
     }
 
     @Override

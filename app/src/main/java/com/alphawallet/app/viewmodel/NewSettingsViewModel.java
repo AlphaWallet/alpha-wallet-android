@@ -17,6 +17,7 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.util.LocaleUtils;
 
@@ -52,7 +53,8 @@ public class NewSettingsViewModel extends BaseViewModel
             LocaleRepositoryType localeRepository,
             CurrencyRepositoryType currencyRepository,
             TransactionsService transactionsService,
-            TickerService tickerService)
+            TickerService tickerService,
+            AnalyticsServiceType analyticsService)
     {
         this.genericWalletInteract = genericWalletInteract;
         this.myAddressRouter = myAddressRouter;
@@ -62,6 +64,7 @@ public class NewSettingsViewModel extends BaseViewModel
         this.currencyRepository = currencyRepository;
         this.transactionsService = transactionsService;
         this.tickerService = tickerService;
+        setAnalyticsService(analyticsService);
     }
 
     public ArrayList<LocaleItem> getLocaleList(Context context)

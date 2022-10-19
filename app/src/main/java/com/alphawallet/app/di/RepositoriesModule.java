@@ -115,8 +115,8 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	OnRampRepositoryType provideOnRampRepository(@ApplicationContext Context context, AnalyticsServiceType analyticsServiceType) {
-		return new OnRampRepository(context, analyticsServiceType);
+	OnRampRepositoryType provideOnRampRepository(@ApplicationContext Context context) {
+		return new OnRampRepository(context);
 	}
 
     @Singleton

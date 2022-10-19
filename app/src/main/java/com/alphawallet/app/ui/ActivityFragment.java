@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.TransactionMeta;
@@ -257,6 +258,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         }
         else
         {
+            viewModel.track(Analytics.Navigation.ACTIVITY);
             viewModel.prepare();
         }
 

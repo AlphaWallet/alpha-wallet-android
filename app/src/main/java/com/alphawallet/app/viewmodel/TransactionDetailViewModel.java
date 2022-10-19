@@ -66,7 +66,6 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private final KeyService keyService;
     private final TokensService tokenService;
     private final GasService gasService;
-    private final AnalyticsServiceType analyticsService;
 
     private final MutableLiveData<BigInteger> latestBlock = new MutableLiveData<>();
     private final MutableLiveData<Transaction> latestTx = new MutableLiveData<>();
@@ -107,7 +106,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
         this.keyService = keyService;
         this.gasService = gasService;
         this.createTransactionInteract = createTransactionInteract;
-        this.analyticsService = analyticsService;
+        setAnalyticsService(analyticsService);
     }
 
     public MutableLiveData<TransactionData> transactionFinalised()
@@ -302,13 +301,5 @@ public class TransactionDetailViewModel extends BaseViewModel {
                 .createWithSig(wallet, finalTx, chainId)
                 .subscribe(transactionFinalised::postValue,
                         transactionError::postValue);
-    }
-
-    public void actionSheetConfirm(String mode)
-    {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(mode);
-
-        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }
 }

@@ -4,13 +4,14 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.app.Activity;
 
+import androidx.core.util.Pair;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ImportWalletCallback;
+import com.alphawallet.app.entity.ImportWalletType;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.ImportWalletInteract;
@@ -40,24 +41,23 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     private final ImportWalletInteract importWalletInteract;
     private final KeyService keyService;
     private final AWEnsResolver ensResolver;
-    private final AnalyticsServiceType analyticsService;
 
-    private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
+    private final MutableLiveData<Pair<Wallet, ImportWalletType>> wallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> badSeed = new MutableLiveData<>();
     private final MutableLiveData<String> watchExists = new MutableLiveData<>();
-    private String importWalletType = "";
 
     @Inject
     ImportWalletViewModel(ImportWalletInteract importWalletInteract, KeyService keyService,
-                          AnalyticsServiceType analyticsService) {
+                          AnalyticsServiceType analyticsService)
+    {
         this.importWalletInteract = importWalletInteract;
         this.keyService = keyService;
         this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), keyService.getContext());
-        this.analyticsService = analyticsService;
+        setAnalyticsService(analyticsService);
     }
 
-    public void onKeystore(String keystore, String password, String newPassword, KeyService.AuthenticationLevel level) {
-        importWalletType = C.AN_KEYSTORE;
+    public void onKeystore(String keystore, String password, String newPassword, KeyService.AuthenticationLevel level)
+    {
         progress.postValue(true);
 
         importWalletInteract
@@ -65,18 +65,37 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
                 .flatMap(wallet -> importWalletInteract.storeKeystoreWallet(wallet, level, ensResolver))
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onWallet, this::onError).isDisposed();
+                .subscribe(w -> onWallet(w, ImportWalletType.KEYSTORE), this::onError).isDisposed();
     }
 
-    public void onPrivateKey(String privateKey, String newPassword, KeyService.AuthenticationLevel level) {
-        importWalletType = C.AN_PRIVATE_KEY;
+    public void onPrivateKey(String privateKey, String newPassword, KeyService.AuthenticationLevel level)
+    {
         progress.postValue(true);
         importWalletInteract
                 .importPrivateKey(privateKey, newPassword)
                 .flatMap(wallet -> importWalletInteract.storeKeystoreWallet(wallet, level, ensResolver))
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onWallet, this::onError).isDisposed();
+                .subscribe(w -> onWallet(w, ImportWalletType.PRIVATE_KEY), this::onError).isDisposed();
+    }
+
+    public void onSeed(String walletAddress, KeyService.AuthenticationLevel level)
+    {
+        if (walletAddress == null)
+        {
+            progress.postValue(false);
+            Timber.e("ERROR");
+            badSeed.postValue(true);
+        }
+        else
+        {
+            progress.postValue(true);
+            //begin key storage process
+            disposable = importWalletInteract.storeHDWallet(walletAddress, level, ensResolver)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(w -> onWallet(w, ImportWalletType.SEED_PHRASE), this::onError); //signal to UI wallet import complete
+        }
     }
 
     @Override
@@ -94,43 +113,33 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
         disposable = importWalletInteract.storeWatchWallet(address, ensResolver)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(wallet::postValue, this::onError); //signal to UI wallet import complete
+                .subscribe(w -> onWallet(w, ImportWalletType.WATCH), this::onError); //signal to UI wallet import complete
     }
 
-    public LiveData<Wallet> wallet() {
+    public LiveData<Pair<Wallet, ImportWalletType>> wallet()
+    {
         return wallet;
     }
-    public LiveData<Boolean> badSeed() { return badSeed; }
-    public LiveData<String> watchExists() { return watchExists; }
 
-    private void onWallet(Wallet wallet) {
-        progress.postValue(false);
-        this.wallet.postValue(wallet);
-        track();
-    }
-
-    public void onError(Throwable throwable) {
-        error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
-    }
-
-    public void onSeed(String walletAddress, KeyService.AuthenticationLevel level)
+    public LiveData<Boolean> badSeed()
     {
-        importWalletType = C.AN_SEED_PHRASE;
-        if (walletAddress == null)
-        {
-            progress.postValue(false);
-            Timber.e("ERROR");
-            badSeed.postValue(true);
-        }
-        else
-        {
-            progress.postValue(true);
-            //begin key storage process
-            disposable = importWalletInteract.storeHDWallet(walletAddress, level, ensResolver)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onWallet, this::onError); //signal to UI wallet import complete
-        }
+        return badSeed;
+    }
+
+    public LiveData<String> watchExists()
+    {
+        return watchExists;
+    }
+
+    private void onWallet(Wallet wallet, ImportWalletType type)
+    {
+        progress.postValue(false);
+        this.wallet.postValue(new Pair<>(wallet, type));
+    }
+
+    public void onError(Throwable throwable)
+    {
+        error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
     }
 
 //    public void getAuthorisation(String walletAddress, Activity activity, SignAuthenticationCallback callback)
@@ -184,13 +193,5 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     public void failedAuthentication(Operation taskCode)
     {
         keyService.failedAuthentication(taskCode);
-    }
-
-    public void track()
-    {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setWalletType(importWalletType);
-
-        analyticsService.track(C.AN_IMPORT_WALLET, analyticsProperties);
     }
 }

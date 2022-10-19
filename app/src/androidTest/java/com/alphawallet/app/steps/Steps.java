@@ -111,7 +111,7 @@ public class Steps
         onView(withHint("0")).perform(replaceText(amountStr));
         onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));
         click(withId(R.string.action_next));
-        Helper.wait(5);
+        Helper.wait(10);
         click(withId(R.string.action_confirm));
     }
 

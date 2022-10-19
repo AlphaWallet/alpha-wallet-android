@@ -23,7 +23,7 @@ import java.util.concurrent.TimeoutException;
 
 public class Helper
 {
-    private static final int DEFAULT_TIMEOUT_IN_SECONDS = 10;
+    private static final int DEFAULT_TIMEOUT_IN_SECONDS = 30;
 
     public static ViewAction waitUntil(final int viewId, final Matcher<View> matcher)
     {

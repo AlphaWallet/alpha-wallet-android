@@ -11,7 +11,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ImportWalletCallback;
-import com.alphawallet.app.entity.ImportWalletType;
+import com.alphawallet.app.entity.analytics.ImportWalletType;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.ImportWalletInteract;

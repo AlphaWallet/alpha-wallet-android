@@ -30,9 +30,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.bumptech.glide.Glide;
@@ -194,8 +195,9 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     private void openQrScanner()
     {
-        Intent intent = new Intent(this, QRScanner.class);
+        Intent intent = new Intent(this, QRScannerActivity.class);
         intent.putExtra("wallet", wallet);
+        intent.putExtra(QrScanSource.KEY, QrScanSource.WALLET_CONNECT.getValue());
         intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
         startActivity(intent);
     }

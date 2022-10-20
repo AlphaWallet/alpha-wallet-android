@@ -21,6 +21,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
@@ -40,7 +41,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.NameThisWalletActivity;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.widget.WalletFragmentActionsView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -290,8 +291,9 @@ public class WalletViewModel extends BaseViewModel
 
     public void showQRCodeScanning(Activity activity)
     {
-        Intent intent = new Intent(activity, QRScanner.class);
+        Intent intent = new Intent(activity, QRScannerActivity.class);
         intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
+        intent.putExtra(QrScanSource.KEY, QrScanSource.WALLET_SCREEN.getValue());
         activity.startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
     }
 

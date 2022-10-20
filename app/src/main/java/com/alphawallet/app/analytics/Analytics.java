@@ -9,6 +9,7 @@ public class Analytics
     public static final String PROPS_ACTION_SHEET_MODE = "action_sheet_mode";
     public static final String PROPS_FROM_WALLET_CONNECT = "from_wallet_connect";
     public static final String PROPS_URL = "url";
+    public static final String PROPS_QR_SCAN_SOURCE = "qr_scan_source";
 
     public enum Navigation
     {
@@ -18,14 +19,15 @@ public class Analytics
         SETTINGS("Screen: Settings"),
         IMPORT_WALLET("Screen: Import Wallet"),
         COINBASE_PAY("Screen: Buy with Coinbase Pay"),
+        WALLET_CONNECT("Screen: Wallet Connect"),
 
         ACTION_SHEET_CONFIRMATION("Screen: Txn Confirmation"),
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION("Screen: Txn Confirmation"),
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_SUCCESSFUL("Screen: Txn Confirmation Successful"),
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED("Screen: Txn Confirmation Failed"),
-        TOKEN_SWAP("Screen: Token Swap");
+        TOKEN_SWAP("Screen: Token Swap"),
 
-//        SCAN_QR_CODE("Screen: QR Code Scanner"),
+        SCAN_QR_CODE("Screen: QR Code Scanner");
 //        ON_RAMP("Screen: Fiat On-Ramp"),
 //        ON_UNISWAP("Screen: Uniswap"),
 //        ON_XDAI_BRIDGE("Screen: xDai Bridge"),
@@ -69,14 +71,15 @@ public class Analytics
 
     public enum Action
     {
-        USE_ACTION_SHEET("Action: Use ActionSheet"),
-        IMPORT_WALLET("Action: Import Wallet"),
-        USE_GAS_WIDGET("Action: Use Gas Widget"),
-        LOAD_URL("Action: Load URL");
+        USE_ACTION_SHEET("Use ActionSheet"),
+        IMPORT_WALLET("Import Wallet"),
+        USE_GAS_WIDGET("Use Gas Widget"),
+        LOAD_URL("Load URL"),
 
 //        CANCELS_TRANSACTION_IN_ACTION_SHEET("Txn Confirmation Cancelled"),
-//        CANCEL_SCAN_QR_CODE("Scan QR Code Cancelled"),
-//        COMPLETE_SCAN_QR_CODE("Scan QR Code Completed"),
+        SCAN_QR_CODE_CANCELLED("Scan QR Code Cancelled"),
+        SCAN_QR_CODE_ERROR("Scan QR Code Error"),
+        SCAN_QR_CODE_SUCCESS("Scan QR Code Completed");
 //        RELOAD_BROWSER("Reload Browser"),
 //        SHARE_URL("Share URL"),
 //        ADD_DAPP("Add Dapp"),
@@ -105,7 +108,7 @@ public class Analytics
 
         Action(String actionName)
         {
-            this.actionName = actionName;
+            this.actionName = "Action: " + actionName;
         }
 
         public String getValue()

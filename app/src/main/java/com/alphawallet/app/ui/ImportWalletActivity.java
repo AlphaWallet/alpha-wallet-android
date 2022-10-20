@@ -28,14 +28,15 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ImportWalletCallback;
-import com.alphawallet.app.entity.ImportWalletType;
+import com.alphawallet.app.entity.analytics.ImportWalletType;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.entity.cryptokeys.KeyEncodingType;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.OnImportKeystoreListener;
 import com.alphawallet.app.ui.widget.OnImportPrivateKeyListener;
 import com.alphawallet.app.ui.widget.OnImportSeedListener;
@@ -313,7 +314,8 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         }
         else if (item.getItemId() == R.id.action_scan)
         {
-            Intent intent = new Intent(this, QRScanner.class);
+            Intent intent = new Intent(this, QRScannerActivity.class);
+            intent.putExtra(QrScanSource.KEY, QrScanSource.IMPORT_WALLET_SCREEN.getValue());
             getQRCode.launch(intent);
         }
 
@@ -494,7 +496,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
                     }
                 }
                 break;
-            case QRScanner.DENY_PERMISSION:
+            case QRScannerActivity.DENY_PERMISSION:
                 showCameraDenied();
                 break;
             default:

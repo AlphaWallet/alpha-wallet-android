@@ -24,6 +24,7 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
@@ -36,7 +37,7 @@ import com.alphawallet.app.ui.AddEditDappActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
@@ -203,7 +204,8 @@ public class DappBrowserViewModel extends BaseViewModel
 
     public void startScan(Activity activity)
     {
-        Intent intent = new Intent(activity, QRScanner.class);
+        Intent intent = new Intent(activity, QRScannerActivity.class);
+        intent.putExtra(QrScanSource.KEY, QrScanSource.BROWSER_SCREEN.getValue());
         activity.startActivityForResult(intent, HomeActivity.DAPP_BARCODE_READER_REQUEST_CODE);
     }
 

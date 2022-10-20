@@ -1,5 +1,10 @@
 package com.alphawallet.app.ui.QRScanning;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.os.Build.VERSION.SDK_INT;
+import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.FULL_SCREEN_STATE;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
@@ -24,12 +29,17 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
+import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
+import com.alphawallet.app.viewmodel.QrScannerViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -49,22 +59,24 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.os.Build.VERSION.SDK_INT;
-import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-import static com.alphawallet.app.repository.SharedPreferenceRepository.FULL_SCREEN_STATE;
-
 /**
  * Created by JB on 12/09/2021.
  */
-public class QRScanner extends BaseActivity
+@AndroidEntryPoint
+public class QRScannerActivity extends BaseActivity
 {
+    public static final int RC_HANDLE_IMAGE_PICKUP = 3;
+    public static final int DENY_PERMISSION = 1;
+    public static final int WALLET_CONNECT = 2;
+    private static final int RC_HANDLE_CAMERA_PERM = 2;
+    private QrScannerViewModel viewModel;
     private DecoratedBarcodeView barcodeView;
     private BeepManager beepManager;
     private String lastText;
@@ -74,11 +86,7 @@ public class QRScanner extends BaseActivity
     private TextView myAddressButton;
     private TextView browseButton;
     private boolean torchOn = false;
-
-    private static final int RC_HANDLE_CAMERA_PERM = 2;
-    public static final int RC_HANDLE_IMAGE_PICKUP = 3;
-    public static final int DENY_PERMISSION = 1;
-    public static final int WALLET_CONNECT = 2;
+    private ActivityResultLauncher<String> getQRImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -102,6 +110,25 @@ public class QRScanner extends BaseActivity
         {
             requestCameraPermission();
         }
+
+        initResultLaunchers();
+
+        initViewModel();
+    }
+
+    private void initResultLaunchers()
+    {
+        getQRImage = registerForActivityResult(new ActivityResultContracts.GetContent(),
+                uri -> disposable = concertAndHandle(uri)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onSuccess, this::onError));
+    }
+
+    private void initViewModel()
+    {
+        viewModel = new ViewModelProvider(this)
+                .get(QrScannerViewModel.class);
     }
 
     private void initView()
@@ -113,6 +140,31 @@ public class QRScanner extends BaseActivity
         Collection<BarcodeFormat> formats = Arrays.asList(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39, BarcodeFormat.AZTEC);
         barcodeView.getBarcodeView().setDecoderFactory(new DefaultDecoderFactory(formats));
         barcodeView.initializeFromIntent(getIntent());
+        BarcodeCallback callback = new BarcodeCallback()
+        {
+            @Override
+            public void barcodeResult(BarcodeResult result)
+            {
+                if (result.getText() == null || result.getText().equals(lastText))
+                {
+                    // Prevent duplicate scans
+                    return;
+                }
+
+                lastText = result.getText();
+                barcodeView.setStatusText(result.getText());
+
+                beepManager.playBeepSoundAndVibrate();
+
+                //send result
+                handleQRCode(result.getText());
+            }
+
+            @Override
+            public void possibleResultPoints(List<ResultPoint> resultPoints)
+            {
+            }
+        };
         barcodeView.decodeContinuous(callback);
         barcodeView.setStatusText("");
 
@@ -127,7 +179,8 @@ public class QRScanner extends BaseActivity
         setupButtons();
     }
 
-    private void setupToolbar() {
+    private void setupToolbar()
+    {
         toolbar();
         setTitle(getString(R.string.action_scan_dapp));
         enableDisplayHomeAsUp(R.drawable.ic_close);
@@ -140,12 +193,12 @@ public class QRScanner extends BaseActivity
             {
                 if (!torchOn)
                 {
-                    flashButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_flash_off, 0,0);
+                    flashButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_flash_off, 0, 0);
                     barcodeView.setTorchOn();
                 }
                 else
                 {
-                    flashButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_flash, 0,0);
+                    flashButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_flash, 0, 0);
                     barcodeView.setTorchOff();
                 }
                 torchOn = !torchOn;
@@ -177,50 +230,22 @@ public class QRScanner extends BaseActivity
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
+        String source = getIntent().getStringExtra(QrScanSource.KEY);
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_QR_SCAN_SOURCE, source);
+        viewModel.track(Analytics.Navigation.SCAN_QR_CODE, props);
         if (barcodeView != null) barcodeView.resume();
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         super.onPause();
         if (barcodeView != null) barcodeView.pause();
     }
-
-    private final BarcodeCallback callback = new BarcodeCallback()
-    {
-        @Override
-        public void barcodeResult(BarcodeResult result)
-        {
-            if (result.getText() == null || result.getText().equals(lastText))
-            {
-                // Prevent duplicate scans
-                return;
-            }
-
-            lastText = result.getText();
-            barcodeView.setStatusText(result.getText());
-
-            beepManager.playBeepSoundAndVibrate();
-
-            //send result
-            handleQRCode(result.getText());
-        }
-
-        @Override
-        public void possibleResultPoints(List<ResultPoint> resultPoints)
-        {
-        }
-    };
-
-    ActivityResultLauncher<String> getQRImage = registerForActivityResult(new ActivityResultContracts.GetContent(),
-            uri -> {
-                disposable = concertAndHandle(uri)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onSuccess, this::onError);
-            });
 
     private void onError(Throwable throwable)
     {
@@ -296,7 +321,7 @@ public class QRScanner extends BaseActivity
     // Handles the requesting of the camera permission.
     private void requestCameraPermission()
     {
-       Timber.tag("QR SCanner").w("Camera permission is not granted. Requesting permission");
+        Timber.tag("QR SCanner").w("Camera permission is not granted. Requesting permission");
 
         final String[] permissions = new String[]{Manifest.permission.CAMERA};
         ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM); //always ask for permission to scan
@@ -344,6 +369,8 @@ public class QRScanner extends BaseActivity
 
     private void displayErrorDialog(String title, String errorMessage)
     {
+        viewModel.track(Analytics.Action.SCAN_QR_CODE_ERROR);
+
         AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
         aDialog.setTitle(title);
         aDialog.setMessage(errorMessage);
@@ -368,13 +395,15 @@ public class QRScanner extends BaseActivity
     @Override
     public void onBackPressed()
     {
+        viewModel.track(Analytics.Action.SCAN_QR_CODE_CANCELLED);
         Intent intent = new Intent();
         setResult(Activity.RESULT_CANCELED, intent);
         finish();
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
         return barcodeView.onKeyDown(keyCode, event) || super.onKeyDown(keyCode, event);
     }
 
@@ -395,6 +424,8 @@ public class QRScanner extends BaseActivity
         }
         else
         {
+            viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS);
+
             Intent intent = new Intent();
             intent.putExtra(C.EXTRA_QR_CODE, qrCode);
             setResult(Activity.RESULT_OK, intent);

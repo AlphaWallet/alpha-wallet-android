@@ -25,7 +25,8 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.entity.analytics.QrScanSource;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.ui.widget.entity.BoxStatus;
@@ -189,7 +190,8 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         {
             //QR Scanner
             scanQrIcon.setOnClickListener(v -> {
-                Intent intent = new Intent(context, QRScanner.class);
+                Intent intent = new Intent(context, QRScannerActivity.class);
+                intent.putExtra(QrScanSource.KEY, QrScanSource.ADDRESS_TEXT_FIELD.getValue());
                 intent.putExtra(C.EXTRA_CHAIN_ID, chainOverride);
                 ((Activity) context).startActivityForResult(intent, C.BARCODE_READER_REQUEST_CODE);
             });

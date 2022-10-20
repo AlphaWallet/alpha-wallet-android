@@ -29,8 +29,10 @@ import org.junit.runner.RunWith;
 public abstract class BaseE2ETest
 {
     @Rule
-    public TestRule watcher = new TestWatcher() {
-        protected void starting(Description description) {
+    public TestRule watcher = new TestWatcher()
+    {
+        protected void starting(Description description)
+        {
             setFailureHandler(new CustomFailureHandler(description.getMethodName(), getInstrumentation().getTargetContext()));
         }
     };
@@ -39,19 +41,20 @@ public abstract class BaseE2ETest
     public ActivityScenarioRule<SplashActivity> activityScenarioRule
             = new ActivityScenarioRule<>(SplashActivity.class);
 
-    @BeforeClass
-    public static void dismissANRSystemDialog() throws UiObjectNotFoundException
+    @Before
+    public void setUp() throws UiObjectNotFoundException
+    {
+        dismissANRSystemDialog();
+        closeSecurityWarning();
+    }
+
+    private void dismissANRSystemDialog() throws UiObjectNotFoundException
     {
         UiDevice device = UiDevice.getInstance(getInstrumentation());
         UiObject waitButton = device.findObject(new UiSelector().textContains("wait"));
-        if (waitButton.exists()) {
+        if (waitButton.exists())
+        {
             waitButton.click();
         }
-    }
-
-    @Before
-    public void setUp()
-    {
-        closeSecurityWarning();
     }
 }

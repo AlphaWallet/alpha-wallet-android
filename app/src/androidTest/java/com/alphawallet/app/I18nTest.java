@@ -2,9 +2,9 @@ package com.alphawallet.app;
 
 import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.steps.Steps.gotoSettingsPage;
 import static com.alphawallet.app.steps.Steps.selectMenu;
-import static com.alphawallet.app.steps.Steps.watchWalletWithENS;
 import static com.alphawallet.app.util.Helper.click;
 
 import org.junit.Test;
@@ -15,7 +15,7 @@ public class I18nTest extends BaseE2ETest
     @Test
     public void should_switch_language()
     {
-        watchWalletWithENS("vitalik.eth");
+        createNewWallet();
         gotoSettingsPage();
 
         selectMenu("Change Language");

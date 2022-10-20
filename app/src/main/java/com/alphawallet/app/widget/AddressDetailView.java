@@ -57,7 +57,8 @@ public class AddressDetailView extends LinearLayout
 
     public void setupAddress(String address, String ensName, Token destToken)
     {
-        String destStr = (!TextUtils.isEmpty(ensName) ? ensName + " | " : "") + Utils.formatAddress(address);
+        boolean hasEns = !TextUtils.isEmpty(ensName);
+        String destStr = (hasEns ? ensName + " | " : "") + (hasEns ? Utils.formatAddress(address) : address);
         textAddressSummary.setText(destStr);
         userAvatar.bind(new Wallet(address), wallet -> { /*NOP, here to enable lookup of ENS avatar*/ });
         textFullAddress.setText(address);

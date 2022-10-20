@@ -184,7 +184,8 @@ public class Helper
 
     private static void waitUntilDismissed(String title)
     {
-        while (true) {
+        while (true)
+        {
             try
             {
                 onView(withSubstring(title)).inRoot(isDialog()).check(matches(not(ViewMatchers.isDisplayed())));
@@ -204,7 +205,8 @@ public class Helper
 
     private static void waitUntilShown(String title)
     {
-        while (true) {
+        while (true)
+        {
             try
             {
                 onView(withSubstring(title)).inRoot(isDialog()).check(matches(ViewMatchers.isDisplayed()));

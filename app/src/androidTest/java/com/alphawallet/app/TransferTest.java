@@ -10,8 +10,6 @@ import static com.alphawallet.app.steps.Steps.importWalletFromSettingsPage;
 import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.steps.Steps.sendBalanceTo;
 import static com.alphawallet.app.steps.Steps.switchToWallet;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 import android.os.Build;
@@ -45,14 +43,11 @@ public class TransferTest extends BaseE2ETest
         }
 
         String privateKey = array[0];
-        String existedWalletAddress = array[1];
 
         createNewWallet();
         String newWalletAddress = getWalletAddress();
 
         importWalletFromSettingsPage(privateKey);
-        assertThat(getWalletAddress(), equalTo(existedWalletAddress));
-
         addNewNetwork("Ganache", GANACHE_URL);
         selectTestNet("Ganache");
         sendBalanceTo(newWalletAddress, "0.001");

@@ -17,6 +17,7 @@ import static com.alphawallet.app.assertions.Should.shouldNotSee;
 import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickListItem;
+import static com.alphawallet.app.util.Helper.waitForLoadingComplete;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
 import static org.hamcrest.Matchers.allOf;
@@ -55,9 +56,9 @@ public class Steps
 
     public static void closeSelectNetworkPage()
     {
-        waitUntil(withSubstring("Mainnet"));
         pressBack();
-        waitUntil(withId(R.id.nav_settings_text));
+        Helper.wait(1);
+        shouldSee(R.id.nav_settings_text);
     }
 
     public static void visit(String urlString)
@@ -163,7 +164,8 @@ public class Steps
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(textId)))))).perform(replaceText(text));
         Helper.wait(2); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis
         click(withId(buttonId));
-        Helper.wait(15);
+        waitForLoadingComplete("Handling");
+        waitUntil(withSubstring(""));
         closeSelectNetworkPage();
     }
 

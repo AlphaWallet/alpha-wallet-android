@@ -1,9 +1,13 @@
 package com.alphawallet.app.util;
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 
 import android.view.KeyEvent;
@@ -13,6 +17,7 @@ import androidx.test.espresso.PerformException;
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
@@ -65,7 +70,6 @@ public class Helper
 
                 do
                 {
-
                     for (View child : TreeIterables.breadthFirstViewTraversal(view.getRootView()))
                     {
                         if (matcher.matches(child))
@@ -170,5 +174,46 @@ public class Helper
     {
         onView(withId(list)).perform(ViewActions.pressKey(KeyEvent.KEYCODE_DPAD_DOWN));
         Helper.wait(1);
+    }
+
+    public static void waitForLoadingComplete(String title)
+    {
+        waitUntilShown(title);
+        waitUntilDismissed(title);
+    }
+
+    private static void waitUntilDismissed(String title)
+    {
+        while (true) {
+            try
+            {
+                onView(withSubstring(title)).inRoot(isDialog()).check(matches(not(ViewMatchers.isDisplayed())));
+            }
+            catch (Error e)
+            {
+                // Dialog still showing
+                wait(1);
+            }
+            catch (Exception e)
+            {
+                // Dialog dismissed
+                break;
+            }
+        }
+    }
+
+    private static void waitUntilShown(String title)
+    {
+        while (true) {
+            try
+            {
+                onView(withSubstring(title)).inRoot(isDialog()).check(matches(ViewMatchers.isDisplayed()));
+                break;
+            }
+            catch (Error | Exception e)
+            {
+                wait(1);
+            }
+        }
     }
 }

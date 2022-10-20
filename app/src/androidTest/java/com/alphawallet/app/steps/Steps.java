@@ -228,6 +228,7 @@ public class Steps
 
     public static void addNewNetwork(String name, String url)
     {
+        gotoSettingsPage();
         selectMenu("Select Active Networks");
         click(withId(R.id.action_add));
         input(R.id.input_network_name, name);

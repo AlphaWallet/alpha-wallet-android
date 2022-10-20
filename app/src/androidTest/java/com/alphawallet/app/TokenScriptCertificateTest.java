@@ -131,11 +131,11 @@ public class TokenScriptCertificateTest extends BaseE2ETest
         onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());
 
         //Select token
-        click(withSubstring("OFFIC"), 60);
+        click(withSubstring("OFFIC"), 120);
 
         //Wait for cert to resolve
         //click certificate
-        click(withId(R.id.image_lock), 120);
+        click(withId(R.id.image_lock), 180);
 
         shouldSee("Smart Token Labs");
         shouldSee("ECDSA");

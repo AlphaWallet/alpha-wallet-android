@@ -441,7 +441,7 @@ public class TokensService
     public void setupFilter(boolean userUpdated)
     {
         networkFilter.clear();
-        ArrayList<Long> lockedChains = customSettings.getChainsFromJsonFile("locked_chains");
+        ArrayList<Long> lockedChains = customSettings.getChainsFromJsonFile();
         if (lockedChains.size() > 0)
         {
             networkFilter.addAll(lockedChains);
@@ -1026,7 +1026,7 @@ public class TokensService
             }
         }
 
-        ArrayList<Long> getLockedChains = customSettings.getChainsFromJsonFile("locked_chains");
+        ArrayList<Long> getLockedChains = customSettings.getChainsFromJsonFile();
         for (Long lockedChain : getLockedChains)
         {
             if (!networkFilter.contains(lockedChain)) networkFilter.add(lockedChain);
@@ -1076,7 +1076,7 @@ public class TokensService
         mainNetActive = ethereumNetworkRepository.isMainNetSelected();
         final String wallet = currentAddress;
         //ensure locked tokens are displaying
-        ArrayList<TokenInfo> lockedTokens = customSettings.getLockedTokensFromJsonFile("locked_tokens");
+        ArrayList<TokenInfo> lockedTokens = customSettings.getLockedTokensFromJsonFile();
         Observable.fromIterable(lockedTokens)
                 .forEach(info -> addToken(info, wallet)
                         .flatMapCompletable(token -> enableToken(wallet, token))

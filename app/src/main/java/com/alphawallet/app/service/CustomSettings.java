@@ -19,27 +19,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class CustomSettings
 {
     public final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
     public static final long primaryChain = MAINNET_ID;
     private final Context context;
+    ConcurrentLinkedQueue<Long> loadLockedCachedChains = new ConcurrentLinkedQueue<>();
+    ConcurrentLinkedQueue<Long> loadExclusiveCachedChains = new ConcurrentLinkedQueue<>();
+    ConcurrentLinkedQueue<TokenInfo> loadLockedTokens = new ConcurrentLinkedQueue<>();
 
     public CustomSettings(Context ctx)
     {
         context = ctx;
     }
 
-    //TODO: Cache locked chains & Tokens in an ConcurrentLinkedQueue / ConcurrentHashMap
-    //    : The approach I would take is to have a 'load' function which first checks if there's already
-    //    : data in the two cache mappings, if there's not then check the 'loaded' flag. If that is
-    //    : set false then load and populate the Queue/Map
-    //    : then, just use the mappings from there. Add a call to the load function each time you use the data.
-    //    : Android can memory scavenge those mappings at any time if the wallet is paged out,
-    //    : Then they'll be empty when the wallet is paged back in.
-
-    public ArrayList<Long> getChainsFromJsonFile(String chainName) //<-- TODO: chainName is redundant
+    public ArrayList<Long> loadChains(String chainName)
     {
         ArrayList<Long> chains = new ArrayList<>();
         try
@@ -57,43 +53,15 @@ public class CustomSettings
                         Long chain = chainObject.getLong("chain");
                         chains.add(chain);
                     }
-                }
-            }
-        }
-        catch (JSONException err)
-        {
-            err.printStackTrace();
-        }
-        return chains;
-    }
-
-    public ArrayList<TokenInfo> getLockedTokensFromJsonFile(String chainName) //<-- TODO: chainName is redundant
-    {
-        ArrayList<TokenInfo> chains = new ArrayList<>();
-        try
-        {
-            String lockedTokens = loadJSONStringFromAsset();
-            if (lockedTokens != null)
-            {
-                JSONObject customSettingsJsonObject = new JSONObject(lockedTokens);
-                JSONArray chainsArray = customSettingsJsonObject.getJSONArray(chainName);
-                if (chainsArray.length() > 0)
-                {
-                    for (int i = 0; i < chainsArray.length(); i++)
+                    if (chainName.equals("locked_chains"))
                     {
-                        //TODO: use GSON class array load (see "private EtherscanTransaction[] getEtherscanTransactions" for how-to)
-                        //    : this will need a static class within this class
-                        //    : you can then traverse (for x : y) that list and have cleaner code
-                        //    : esp if you add a getTokenInfo from that static internal class.
-                        JSONObject chainObject = chainsArray.getJSONObject(i);
-                        String tokenAddress = chainObject.getString("tokenAddress");
-                        String tokenName = chainObject.getString("tokenName");
-                        String tokenSymbol = chainObject.getString("tokenSymbol");
-                        int tokenDecimals = chainObject.getInt("tokenDecimals");
-                        boolean isEnabled = chainObject.getBoolean("isEnabled");
-                        long chainId = chainObject.getLong("chainId");
-                        TokenInfo tokenInfo = new TokenInfo(tokenAddress, tokenName, tokenSymbol, tokenDecimals, isEnabled, chainId);
-                        chains.add(tokenInfo);
+                        loadLockedCachedChains.clear();
+                        loadLockedCachedChains.addAll(chains);
+                    }
+                    else
+                    {
+                        loadExclusiveCachedChains.clear();
+                        loadExclusiveCachedChains.addAll(chains);
                     }
                 }
             }
@@ -106,15 +74,73 @@ public class CustomSettings
         return chains;
     }
 
+    //TODO: Cache locked chains & Tokens in an ConcurrentLinkedQueue / ConcurrentHashMap
+    //    : The approach I would take is to have a 'load' function which first checks if there's already
+    //    : data in the two cache mappings, if there's not then check the 'loaded' flag. If that is
+    //    : set false then load and populate the Queue/Map
+    //    : then, just use the mappings from there. Add a call to the load function each time you use the data.
+    //    : Android can memory scavenge those mappings at any time if the wallet is paged out,
+    //    : Then they'll be empty when the wallet is paged back in.
 
-    public JSONArray getChainsArrayJsonFile(String chainName) //<--- TODO: Redundant
+    public ArrayList<Long> getChainsFromJsonFile() //<-- TODO: chainName is redundant
+    {
+        ArrayList<Long> chains = new ArrayList<>();
+        if (loadLockedCachedChains.size() > 0)
+        {
+            chains.addAll(loadLockedCachedChains);
+        }
+        else
+        {
+            chains.addAll(loadChains("locked_chains"));
+        }
+        return chains;
+    }
+
+    public ArrayList<TokenInfo> getLockedTokensFromJsonFile() //<-- TODO: chainName is redundant
+    {
+        ArrayList<TokenInfo> chains = new ArrayList<>();
+        Gson gson = new Gson();
+        try
+        {
+            String lockedTokens = loadJSONStringFromAsset();
+            if (lockedTokens != null)
+            {
+                JSONObject customSettingsJsonObject = new JSONObject(lockedTokens);
+                JSONArray chainsArray = customSettingsJsonObject.getJSONArray("locked_tokens");
+                if (chainsArray.length() > 0)
+                {
+                    for (int i = 0; i < chainsArray.length(); i++)
+                    {
+                        //TODO: use GSON class array load (see "private EtherscanTransaction[] getEtherscanTransactions" for how-to)
+                        //    : this will need a static class within this class
+                        //    : you can then traverse (for x : y) that list and have cleaner code
+                        //    : esp if you add a getTokenInfo from that static internal class.
+
+                        JSONObject chainObject = chainsArray.getJSONObject(i);
+                        TokenInfo[] lockedTokenInfo = gson.fromJson(chainObject.toString(), TokenInfo[].class);
+                        for (TokenInfo tokenInfo : lockedTokenInfo)
+                        {
+                            chains.add(tokenInfo);
+                        }
+                    }
+                }
+            }
+        }
+        catch (JSONException err)
+        {
+            err.printStackTrace();
+        }
+        return chains;
+    }
+
+    public JSONArray getChainsArrayJsonFile() //<--- TODO: Redundant
     {
         JSONArray chainsArray = new JSONArray();
         try
         {
             String lockedChains = loadJSONStringFromAsset();
             JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
-            chainsArray = customSettingsJsonObject.getJSONArray(chainName);
+            chainsArray = customSettingsJsonObject.getJSONArray("locked_chains");
         }
         catch (JSONException err)
         {
@@ -164,7 +190,15 @@ public class CustomSettings
     //TODO: Caching
     public Boolean alwaysShow(long chainId)
     {
-        ArrayList<Long> exclusiveChains = getChainsFromJsonFile("exclusive_chains");
+        ArrayList<Long> exclusiveChains = new ArrayList<>();
+        if (loadExclusiveCachedChains.size() > 0)
+        {
+            exclusiveChains.addAll(loadExclusiveCachedChains);
+        }
+        else
+        {
+            exclusiveChains.addAll(loadChains("exclusive_chains"));
+        }
         return exclusiveChains.contains(chainId);
     }
 
@@ -179,12 +213,23 @@ public class CustomSettings
     //TODO: Caching
     public Boolean isLockedToken(long chainId, String contractAddress)
     {
-        ArrayList<TokenInfo> lockedTokens = getLockedTokensFromJsonFile("locked_tokens");
-        for (TokenInfo tInfo : lockedTokens)
+
+        if (loadLockedTokens.size() > 0)
         {
-            if (tInfo.chainId == chainId && tInfo.address.equalsIgnoreCase(contractAddress))
-                return true;
+            return true;
         }
+        else
+        {
+            ArrayList<TokenInfo> lockedTokens = getLockedTokensFromJsonFile();
+            loadLockedTokens.clear();
+            loadLockedTokens.addAll(lockedTokens);
+            for (TokenInfo tInfo : lockedTokens)
+            {
+                if (tInfo.chainId == chainId && tInfo.address.equalsIgnoreCase(contractAddress))
+                    return true;
+            }
+        }
+
         return false;
     }
 

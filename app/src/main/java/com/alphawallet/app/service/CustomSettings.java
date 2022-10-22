@@ -109,19 +109,14 @@ public class CustomSettings
                 JSONArray chainsArray = customSettingsJsonObject.getJSONArray("locked_tokens");
                 if (chainsArray.length() > 0)
                 {
-                    for (int i = 0; i < chainsArray.length(); i++)
+                    //TODO: use GSON class array load (see "private EtherscanTransaction[] getEtherscanTransactions" for how-to)
+                    //    : this will need a static class within this class
+                    //    : you can then traverse (for x : y) that list and have cleaner code
+                    //    : esp if you add a getTokenInfo from that static internal class.
+                    TokenInfo[] lockedTokenInfo = gson.fromJson(chainsArray.toString(), TokenInfo[].class);
+                    for (TokenInfo tokenInfo : lockedTokenInfo)
                     {
-                        //TODO: use GSON class array load (see "private EtherscanTransaction[] getEtherscanTransactions" for how-to)
-                        //    : this will need a static class within this class
-                        //    : you can then traverse (for x : y) that list and have cleaner code
-                        //    : esp if you add a getTokenInfo from that static internal class.
-
-                        JSONObject chainObject = chainsArray.getJSONObject(i);
-                        TokenInfo[] lockedTokenInfo = gson.fromJson(chainObject.toString(), TokenInfo[].class);
-                        for (TokenInfo tokenInfo : lockedTokenInfo)
-                        {
-                            chains.add(tokenInfo);
-                        }
+                        chains.add(tokenInfo);
                     }
                 }
             }

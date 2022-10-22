@@ -330,7 +330,7 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
-        JSONArray chainsArray = viewModel.getCustomSettings().getChainsArrayJsonFile("locked_chains");
+        JSONArray chainsArray = viewModel.getCustomSettings().getChainsArrayJsonFile();
         if (chainsArray.length() == 0)
             systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
 

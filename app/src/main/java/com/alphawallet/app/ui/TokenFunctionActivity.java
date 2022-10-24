@@ -309,7 +309,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
             confirmationDialogProps = new AnalyticsProperties();
             confirmationDialogProps.put(Analytics.PROPS_ACTION_SHEET_SOURCE, ActionSheetSource.TOKENSCRIPT.getValue());
-            viewModel.track(Analytics.Navigation.ACTION_SHEET_CONFIRMATION, confirmationDialogProps);
+            viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION, confirmationDialogProps);
         }
     }
 

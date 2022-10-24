@@ -13,6 +13,7 @@ public class Analytics
     public static final String PROPS_QR_SCAN_SOURCE = "qr_scan_source";
     public static final String PROPS_ACTION_SHEET_SOURCE = "action_sheet_source";
     public static final String PROPS_ACTION_SHEET_MODE = "action_sheet_mode";
+    public static final String PROPS_ACTION_SHEET_CONTEXT = "action_sheet_context";
     public static final String PROPS_SWAP_FROM_TOKEN = "from_token";
     public static final String PROPS_SWAP_TO_TOKEN = "to_token";
     public static final String PROPS_ERROR_MESSAGE = "error_message";
@@ -25,9 +26,10 @@ public class Analytics
         SETTINGS("Screen: Settings"),
         IMPORT_WALLET("Screen: Import Wallet"),
         COINBASE_PAY("Screen: Buy with Coinbase Pay"),
-        WALLET_CONNECT("Screen: Wallet Connect"),
+        WALLET_CONNECT_SESSION_DETAIL("Screen: Wallet Connect Session Detail"),
+        WALLET_CONNECT_SESSIONS("Screen: Wallet Connect Sessions"),
 
-        ACTION_SHEET_CONFIRMATION("Screen: Txn Confirmation"),
+        ACTION_SHEET("Screen: ActionSheet"),
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION("Screen: Txn Confirmation"),
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_SUCCESSFUL("Screen: Txn Confirmation Successful"),
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED("Screen: Txn Confirmation Failed"),
@@ -84,7 +86,25 @@ public class Analytics
         ACTION_SHEET_CANCELLED("ActionSheet Cancelled"),
         SCAN_QR_CODE_SUCCESS("Scan QR Code Completed"),
         SCAN_QR_CODE_CANCELLED("Scan QR Code Cancelled"),
-        SCAN_QR_CODE_ERROR("Scan QR Code Error");
+        SCAN_QR_CODE_ERROR("Scan QR Code Error"),
+
+        WALLET_CONNECT_SESSION_REQUEST("WalletConnect - Session Request"),
+        WALLET_CONNECT_SESSION_APPROVED("WalletConnect - Session Approved"),
+        WALLET_CONNECT_SESSION_REJECTED("WalletConnect - Session Rejected"),
+        WALLET_CONNECT_SIGN_MESSAGE_REQUEST("WalletConnect - Sign Message Request"),
+        WALLET_CONNECT_SIGN_TRANSACTION_REQUEST("WalletConnect - Sign Transaction Request"),
+        WALLET_CONNECT_SEND_TRANSACTION_REQUEST("WalletConnect - Send Transaction Request"),
+        WALLET_CONNECT_SWITCH_NETWORK_REQUEST("WalletConnect - Switch Network Request"),
+        WALLET_CONNECT_TRANSACTION_SUCCESS("WalletConnect - Transaction Success"),
+        WALLET_CONNECT_TRANSACTION_CANCELLED("WalletConnect - Transaction Cancelled");
+
+//        WALLET_CONNECT_CANCEL("WalletConnect Cancel"),
+//        WALLET_CONNECT_DISCONNECT("WalletConnect Disconnect"),
+//        WALLET_CONNECT_SWITCH_NETWORK("WalletConnect Switch Network"),
+//        WALLET_CONNECT_CONNECTION_TIMEOUT("WalletConnect Connection Timeout"),
+//        WALLET_CONNECT_CONNECTION_FAILED("WalletConnect Connection Failed"),
+
+
 //        CANCELS_TRANSACTION_IN_ACTION_SHEET("Txn Confirmation Cancelled"),
 //        RELOAD_BROWSER("Reload Browser"),
 //        SHARE_URL("Share URL"),
@@ -94,12 +114,7 @@ public class Analytics
 //        CANCEL_SIGN_MESSAGE_REQUEST("Cancel Sign Message Request"),
 //        SWITCHED_SERVER("Switch Server Completed"),
 //        CANCELS_SWITCH_SERVER("Switch Server Cancelled"),
-//        WALLET_CONNECT_CONNECT("WalletConnect Connect"),
-//        WALLET_CONNECT_CANCEL("WalletConnect Cancel"),
-//        WALLET_CONNECT_DISCONNECT("WalletConnect Disconnect"),
-//        WALLET_CONNECT_SWITCH_NETWORK("WalletConnect Switch Network"),
-//        WALLET_CONNECT_CONNECTION_TIMEOUT("WalletConnect Connection Timeout"),
-//        WALLET_CONNECT_CONNECTION_FAILED("WalletConnect Connection Failed"),
+
 //        CLEAR_BROWSER_CACHE("Clear Browser Cache"),
 //        PING_INFURA("Ping Infura"),
 //        RECTIFY_SEND_TRANSACTION_ERROR_IN_ACTION_SHEET("Rectify Send Txn Error"),

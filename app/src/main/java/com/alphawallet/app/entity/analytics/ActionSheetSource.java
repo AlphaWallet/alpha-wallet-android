@@ -2,7 +2,7 @@ package com.alphawallet.app.entity.analytics;
 
 public enum ActionSheetSource
 {
-    WALLET_CONNECT("Wallet Connect"),
+    WALLET_CONNECT("WalletConnect"),
     SWAP("Swap"),
     SEND_FUNGIBLE("Send Fungible"),
     SEND_NFT("Send NFT"),

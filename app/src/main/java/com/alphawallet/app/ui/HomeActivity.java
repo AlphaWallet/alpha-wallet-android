@@ -1055,13 +1055,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    public void trackActionSheetUsage(String mode)
-    {
-        AnalyticsProperties props = new AnalyticsProperties();
-        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
-        viewModel.track(Analytics.Action.USE_ACTION_SHEET, props);
-    }
-
     private void hideSystemUI()
     {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);

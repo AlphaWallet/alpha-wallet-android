@@ -39,6 +39,7 @@ import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.analytics.ActionSheetSource;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -1254,8 +1255,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     {
         AnalyticsProperties props = new AnalyticsProperties();
         props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
-        props.put(Analytics.PROPS_FROM_WALLET_CONNECT, true);
-        viewModel.track(Analytics.Action.USE_ACTION_SHEET, props);
+        props.put(Analytics.PROPS_ACTION_SHEET_SOURCE, ActionSheetSource.WALLET_CONNECT.getValue());
+        viewModel.track(Analytics.Action.ACTION_SHEET_COMPLETED, props);
     }
 
     @Override

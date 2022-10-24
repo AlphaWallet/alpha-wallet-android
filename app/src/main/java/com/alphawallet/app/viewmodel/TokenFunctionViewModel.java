@@ -715,7 +715,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         AnalyticsProperties props = new AnalyticsProperties();
         props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
-        track(Analytics.Action.USE_ACTION_SHEET, props);
+        track(Analytics.Action.ACTION_SHEET_COMPLETED, props);
     }
 
     public Single<Intent> showTransferSelectCount(Context ctx, Token token, BigInteger tokenId)

@@ -151,6 +151,13 @@ public class BaseViewModel extends ViewModel
         trackEventWithProps(event.getValue(), props);
     }
 
+    public void trackError(String message)
+    {
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ERROR_MESSAGE, message);
+        trackEventWithProps(Analytics.ERROR, props);
+    }
+
     private void trackEvent(String event)
     {
         if (analyticsService != null)

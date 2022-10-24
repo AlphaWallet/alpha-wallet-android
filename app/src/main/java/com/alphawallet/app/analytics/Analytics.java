@@ -2,14 +2,20 @@ package com.alphawallet.app.analytics;
 
 public class Analytics
 {
+    public static final String ERROR = "Error";
+
     // Properties
     public static final String PROPS_IMPORT_WALLET_TYPE = "import_wallet_type";
     public static final String PROPS_WALLET_TYPE = "wallet_type";
     public static final String PROPS_GAS_SPEED = "gas_speed";
-    public static final String PROPS_ACTION_SHEET_MODE = "action_sheet_mode";
     public static final String PROPS_FROM_WALLET_CONNECT = "from_wallet_connect";
     public static final String PROPS_URL = "url";
     public static final String PROPS_QR_SCAN_SOURCE = "qr_scan_source";
+    public static final String PROPS_ACTION_SHEET_SOURCE = "action_sheet_source";
+    public static final String PROPS_ACTION_SHEET_MODE = "action_sheet_mode";
+    public static final String PROPS_SWAP_FROM_TOKEN = "from_token";
+    public static final String PROPS_SWAP_TO_TOKEN = "to_token";
+    public static final String PROPS_ERROR_MESSAGE = "error_message";
 
     public enum Navigation
     {
@@ -71,15 +77,15 @@ public class Analytics
 
     public enum Action
     {
-        USE_ACTION_SHEET("Use ActionSheet"),
         IMPORT_WALLET("Import Wallet"),
         USE_GAS_WIDGET("Use Gas Widget"),
         LOAD_URL("Load URL"),
-
-//        CANCELS_TRANSACTION_IN_ACTION_SHEET("Txn Confirmation Cancelled"),
+        ACTION_SHEET_COMPLETED("ActionSheet Completed"),
+        ACTION_SHEET_CANCELLED("ActionSheet Cancelled"),
+        SCAN_QR_CODE_SUCCESS("Scan QR Code Completed"),
         SCAN_QR_CODE_CANCELLED("Scan QR Code Cancelled"),
-        SCAN_QR_CODE_ERROR("Scan QR Code Error"),
-        SCAN_QR_CODE_SUCCESS("Scan QR Code Completed");
+        SCAN_QR_CODE_ERROR("Scan QR Code Error");
+//        CANCELS_TRANSACTION_IN_ACTION_SHEET("Txn Confirmation Cancelled"),
 //        RELOAD_BROWSER("Reload Browser"),
 //        SHARE_URL("Share URL"),
 //        ADD_DAPP("Add Dapp"),
@@ -115,5 +121,5 @@ public class Analytics
         {
             return actionName;
         }
-    }
+        }
 }

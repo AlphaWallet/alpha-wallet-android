@@ -25,6 +25,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.analytics.ActionSheetSource;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
 import com.alphawallet.app.entity.lifi.Quote;
@@ -88,6 +89,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private ActivityResultLauncher<Intent> selectSwapProviderLauncher;
     private ActivityResultLauncher<Intent> gasSettingsLauncher;
     private ActivityResultLauncher<Intent> getRoutesLauncher;
+    private AnalyticsProperties confirmationDialogProps;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -293,6 +295,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         {
             confirmationDialog.show();
             confirmationDialog.fullExpand();
+            viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION, confirmationDialogProps);
         }
     }
 
@@ -308,6 +311,11 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             confDialog.setURL(quote.swapProvider.name);
             confDialog.setCanceledOnTouchOutside(false);
             confDialog.setGasEstimate(Numeric.toBigInt(quote.transactionRequest.gasLimit));
+
+            confirmationDialogProps = new AnalyticsProperties();
+            confirmationDialogProps.put(Analytics.PROPS_ACTION_SHEET_SOURCE, ActionSheetSource.SWAP.getValue());
+            confirmationDialogProps.put(Analytics.PROPS_SWAP_FROM_TOKEN, quote.action.fromToken.symbol);
+            confirmationDialogProps.put(Analytics.PROPS_SWAP_TO_TOKEN, quote.action.toToken.symbol);
         }
         catch (Exception e)
         {
@@ -632,7 +640,9 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         errorDialog.setMessage(throwable.getMessage());
         errorDialog.show();
 
-        viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED);
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ERROR_MESSAGE, throwable.getMessage());
+        viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED, props);
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -656,6 +666,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 });
                 errorDialog.setSecondaryButton(R.string.action_cancel, v -> errorDialog.dismiss());
                 errorDialog.show();
+                viewModel.trackError(errorEnvelope.message);
                 break;
             case C.ErrorCode.SWAP_QUOTE_ERROR:
                 errorDialog = new AWalletAlertDialog(this);
@@ -667,6 +678,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 });
                 errorDialog.setSecondaryButton(R.string.action_cancel, v -> errorDialog.dismiss());
                 errorDialog.show();
+                viewModel.trackError(errorEnvelope.message);
                 break;
             default:
                 errorDialog = new AWalletAlertDialog(this);
@@ -674,6 +686,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 errorDialog.setMessage(errorEnvelope.message);
                 errorDialog.setButton(R.string.action_cancel, v -> errorDialog.dismiss());
                 errorDialog.show();
+                viewModel.trackError(errorEnvelope.message);
                 break;
         }
     }
@@ -713,16 +726,17 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     @Override
     public void dismissed(String txHash, long callbackId, boolean actionCompleted)
     {
-
+        if (!actionCompleted && TextUtils.isEmpty(txHash))
+        {
+            viewModel.track(Analytics.Action.ACTION_SHEET_CANCELLED, confirmationDialogProps);
+        }
     }
 
     @Override
     public void notifyConfirm(String mode)
     {
-        AnalyticsProperties props = new AnalyticsProperties();
-        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
-        props.put(Analytics.PROPS_FROM_WALLET_CONNECT, true);
-        viewModel.track(Analytics.Action.USE_ACTION_SHEET, props);
+        confirmationDialogProps.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        viewModel.track(Analytics.Action.ACTION_SHEET_COMPLETED, confirmationDialogProps);
     }
 
     @Override

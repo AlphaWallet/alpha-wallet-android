@@ -1,7 +1,7 @@
 package com.alphawallet.app.ui.widget.entity;
 
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.app.widget.ActionSheetMode;
+import com.alphawallet.app.entity.analytics.ActionSheetMode;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

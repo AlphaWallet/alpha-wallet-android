@@ -23,6 +23,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
@@ -516,7 +517,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 break;
         }
 
-        actionSheetCallback.notifyConfirm(mode.toString());
+        actionSheetCallback.notifyConfirm(mode.getValue());
     }
 
     private BigDecimal getTransactionAmount()

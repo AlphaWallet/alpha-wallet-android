@@ -8,12 +8,10 @@ public class Analytics
     public static final String PROPS_IMPORT_WALLET_TYPE = "import_wallet_type";
     public static final String PROPS_WALLET_TYPE = "wallet_type";
     public static final String PROPS_GAS_SPEED = "gas_speed";
-    public static final String PROPS_FROM_WALLET_CONNECT = "from_wallet_connect";
     public static final String PROPS_URL = "url";
     public static final String PROPS_QR_SCAN_SOURCE = "qr_scan_source";
     public static final String PROPS_ACTION_SHEET_SOURCE = "action_sheet_source";
     public static final String PROPS_ACTION_SHEET_MODE = "action_sheet_mode";
-    public static final String PROPS_ACTION_SHEET_CONTEXT = "action_sheet_context";
     public static final String PROPS_SWAP_FROM_TOKEN = "from_token";
     public static final String PROPS_SWAP_TO_TOKEN = "to_token";
     public static final String PROPS_ERROR_MESSAGE = "error_message";
@@ -24,6 +22,18 @@ public class Analytics
         ACTIVITY("Screen: Activity"),
         BROWSER("Screen: Browser"),
         SETTINGS("Screen: Settings"),
+        MY_ADDRESS("Screen: My Wallet Address"),
+        MY_WALLETS("Screen: My Wallets"),
+        BACK_UP_WALLET("Screen: Back Up Wallet"),
+        SHOW_SEED_PHRASE("Screen: Show Seed Phrase"),
+        NAME_WALLET("Screen: Name Wallet"),
+        SELECT_NETWORKS("Screen: Select Networks"),
+        CHANGE_LANGUAGE("Screen: Change Language"),
+        CHANGE_CURRENCY("Screen: Change Currency"),
+        SETTINGS_DARK_MODE("Screen: Settings - Dark Mode"),
+        SETTINGS_ADVANCED("Screen: Settings - Advanced"),
+        SETTINGS_SUPPORT("Screen: Settings - Support"),
+
         IMPORT_WALLET("Screen: Import Wallet"),
         COINBASE_PAY("Screen: Buy with Coinbase Pay"),
         WALLET_CONNECT_SESSION_DETAIL("Screen: Wallet Connect Session Detail"),
@@ -34,8 +44,11 @@ public class Analytics
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_SUCCESSFUL("Screen: Txn Confirmation Successful"),
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED("Screen: Txn Confirmation Failed"),
         TOKEN_SWAP("Screen: Token Swap"),
+        //        SIGN_MESSAGE_REQUEST("Screen: Sign Message Request"),
 
         SCAN_QR_CODE("Screen: QR Code Scanner");
+
+
 //        ON_RAMP("Screen: Fiat On-Ramp"),
 //        ON_UNISWAP("Screen: Uniswap"),
 //        ON_XDAI_BRIDGE("Screen: xDai Bridge"),
@@ -49,8 +62,6 @@ public class Analytics
 //        SHOW_DAPPS("Screen: Dapps"),
 //        SHOW_HISTORY("Screen: Dapp History"),
 //        TAP_BROWSER_MORE("Screen: Browser More Options"),
-//        SIGN_MESSAGE_REQUEST("Screen: Sign Message Request"),
-//        WALLET_CONNECT("Screen: WalletConnect"),
 //        DEEP_LINK("Screen: DeepLink"),
 //        FAQ("Screen: FAQ"),
 //        DISCORD("Screen: Discord"),
@@ -91,21 +102,18 @@ public class Analytics
         WALLET_CONNECT_SESSION_REQUEST("WalletConnect - Session Request"),
         WALLET_CONNECT_SESSION_APPROVED("WalletConnect - Session Approved"),
         WALLET_CONNECT_SESSION_REJECTED("WalletConnect - Session Rejected"),
+        WALLET_CONNECT_SESSION_ENDED("WalletConnect - Session Ended"),
         WALLET_CONNECT_SIGN_MESSAGE_REQUEST("WalletConnect - Sign Message Request"),
         WALLET_CONNECT_SIGN_TRANSACTION_REQUEST("WalletConnect - Sign Transaction Request"),
         WALLET_CONNECT_SEND_TRANSACTION_REQUEST("WalletConnect - Send Transaction Request"),
         WALLET_CONNECT_SWITCH_NETWORK_REQUEST("WalletConnect - Switch Network Request"),
         WALLET_CONNECT_TRANSACTION_SUCCESS("WalletConnect - Transaction Success"),
+        WALLET_CONNECT_TRANSACTION_FAILED("WalletConnect - Transaction Failed"),
         WALLET_CONNECT_TRANSACTION_CANCELLED("WalletConnect - Transaction Cancelled");
-
 //        WALLET_CONNECT_CANCEL("WalletConnect Cancel"),
-//        WALLET_CONNECT_DISCONNECT("WalletConnect Disconnect"),
-//        WALLET_CONNECT_SWITCH_NETWORK("WalletConnect Switch Network"),
 //        WALLET_CONNECT_CONNECTION_TIMEOUT("WalletConnect Connection Timeout"),
 //        WALLET_CONNECT_CONNECTION_FAILED("WalletConnect Connection Failed"),
 
-
-//        CANCELS_TRANSACTION_IN_ACTION_SHEET("Txn Confirmation Cancelled"),
 //        RELOAD_BROWSER("Reload Browser"),
 //        SHARE_URL("Share URL"),
 //        ADD_DAPP("Add Dapp"),
@@ -129,12 +137,12 @@ public class Analytics
 
         Action(String actionName)
         {
-            this.actionName = "Action: " + actionName;
+            this.actionName = actionName;
         }
 
         public String getValue()
         {
             return actionName;
         }
-        }
+    }
 }

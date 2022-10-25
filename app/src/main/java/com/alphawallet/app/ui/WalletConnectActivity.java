@@ -824,7 +824,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         dialog.setCancelable(false);
         dialog.show();
 
-        viewModel.trackError(throwable.getMessage());
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ERROR_MESSAGE, throwable.getMessage());
+        viewModel.track(Analytics.Action.WALLET_CONNECT_TRANSACTION_FAILED, props);
     }
 
     private void doSignMessage(final Signable signable)
@@ -973,6 +975,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         Timber.tag(TAG).d(": Terminate Session: %s", getSessionId());
         if (client != null && session != null && client.isConnected())
         {
+            viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_ENDED);
             client.killSession();
             viewModel.disconnectSession(this, client.sessionId());
             handler.postDelayed(this::finish, 5000);
@@ -1224,8 +1227,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 confirmationDialog.dismiss();
                 viewModel.rejectRequest(getApplication(), getSessionId(), lastId, getString(R.string.message_authentication_failed));
                 requestId = 0;
-
-                viewModel.trackError(getString(R.string.message_authentication_failed));
             }
         };
 
@@ -1247,7 +1248,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 dialog.setButtonListener(v -> dialog.dismiss());
                 dialog.show();
 
-                viewModel.trackError(throwable.getMessage());
+                AnalyticsProperties props = new AnalyticsProperties();
+                props.put(Analytics.PROPS_ERROR_MESSAGE, throwable.getMessage());
+                viewModel.track(Analytics.Action.WALLET_CONNECT_TRANSACTION_FAILED, props);
             });
         }
     }

@@ -516,8 +516,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 }
                 break;
         }
-
-        actionSheetCallback.notifyConfirm(mode.getValue());
     }
 
     private BigDecimal getTransactionAmount()
@@ -564,6 +562,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 {
                     confirmationWidget.startProgressCycle(1);
                     signCallback.gotAuthorisationForSigning(gotAuth, signWidget.getSignable());
+                    actionSheetCallback.notifyConfirm(mode.getValue());
                 }
                 else
                 {
@@ -692,6 +691,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 confirmationWidget.startProgressCycle(4);
                 //send the transaction
                 actionSheetCallback.signTransaction(formTransaction());
+                actionSheetCallback.notifyConfirm(mode.getValue());
             }
 
             @Override
@@ -786,6 +786,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 confirmationWidget.startProgressCycle(4);
                 //send the transaction
                 actionSheetCallback.sendTransaction(formTransaction());
+                actionSheetCallback.notifyConfirm(mode.getValue());
             }
 
             @Override

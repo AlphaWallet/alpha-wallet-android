@@ -25,7 +25,7 @@ public class CustomNetworkViewModel extends BaseViewModel
         setAnalyticsService(analyticsService);
     }
 
-    public void saveNetwork(String name, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId)
+    public void saveNetwork(boolean isEditMode, String name, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId)
     {
         this.ethereumNetworkRepository.saveCustomRPCNetwork(name, rpcUrl, chainId, symbol, blockExplorerUrl, explorerApiUrl, isTestnet, oldChainId);
         AnalyticsProperties props = new AnalyticsProperties();
@@ -34,7 +34,7 @@ public class CustomNetworkViewModel extends BaseViewModel
         props.put(Analytics.PROPS_CUSTOM_NETWORK_CHAIN_ID, chainId);
         props.put(Analytics.PROPS_CUSTOM_NETWORK_SYMBOL, symbol);
         props.put(Analytics.PROPS_CUSTOM_NETWORK_IS_TESTNET, isTestnet);
-        track(Analytics.Action.ADD_CUSTOM_CHAIN, props);
+        track(isEditMode? Analytics.Action.EDIT_CUSTOM_CHAIN : Analytics.Action.ADD_CUSTOM_CHAIN, props);
     }
 
     public NetworkInfo getNetworkInfo(long chainId)

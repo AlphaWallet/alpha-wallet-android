@@ -108,6 +108,7 @@ public class Analytics
         SCAN_QR_CODE_ERROR("Scan QR Code Error"),
 
         ADD_CUSTOM_CHAIN("Add Custom Chain"),
+        EDIT_CUSTOM_CHAIN("Edit Custom Chain"),
 
         WALLET_CONNECT_SESSION_REQUEST("WalletConnect - Session Request"),
         WALLET_CONNECT_SESSION_APPROVED("WalletConnect - Session Approved"),
@@ -121,24 +122,28 @@ public class Analytics
         WALLET_CONNECT_TRANSACTION_FAILED("WalletConnect - Transaction Failed"),
         WALLET_CONNECT_TRANSACTION_CANCELLED("WalletConnect - Transaction Cancelled"),
         WALLET_CONNECT_CONNECTION_TIMEOUT("WalletConnect - Connection Timeout");
+
 //        WALLET_CONNECT_CANCEL("WalletConnect Cancel"),
 //        WALLET_CONNECT_CONNECTION_FAILED("WalletConnect Connection Failed"),
 
-//        RELOAD_BROWSER("Reload Browser"),
-//        SHARE_URL("Share URL"),
-//        ADD_DAPP("Add Dapp"),
-//        ENTER_URL("Enter URL"),
+
 //        SIGN_MESSAGE_REQUEST("Sign Message Request"),
 //        CANCEL_SIGN_MESSAGE_REQUEST("Cancel Sign Message Request"),
 //        SWITCHED_SERVER("Switch Server Completed"),
 //        CANCELS_SWITCH_SERVER("Switch Server Cancelled"),
+        //        RECTIFY_SEND_TRANSACTION_ERROR_IN_ACTION_SHEET("Rectify Send Txn Error"),
+
 
 //        CLEAR_BROWSER_CACHE("Clear Browser Cache"),
+        //        SHARE_URL("Share URL"),
+//        ADD_DAPP("Add Dapp"),
+//        ENTER_URL("Enter URL"),
+        //        RELOAD_BROWSER("Reload Browser"),
+
+
 //        PING_INFURA("Ping Infura"),
-//        RECTIFY_SEND_TRANSACTION_ERROR_IN_ACTION_SHEET("Rectify Send Txn Error"),
 //        NAME_WALLET("Name Wallet"),
 //        FIRST_WALLET_ACTION("First Wallet Action"),
-//        EDIT_CUSTOM_CHAIN("Edit Custom Chain"),
 //        SUBSCRIBE_TO_EMAIL_NEWSLETTER("Subscribe Email Newsletter"),
 //        TAP_SAFARI_EXTENSION_REWRITTEN_URL("Tap Safari Extension Rewritten URL");
 

@@ -40,6 +40,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
     private InputView blockExplorerApiUrl;
     private MaterialCheckBox testNetCheckBox;
     private long chainId;
+    private boolean isEditMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -81,7 +82,7 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
         initViewModel();
 
         chainId = getIntent().getLongExtra(CHAIN_ID, -1);
-        boolean isEditMode = chainId >= 0;
+        isEditMode = chainId >= 0;
 
         if (isEditMode)
         {
@@ -226,7 +227,9 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
 
         if (validateInputs())
         {
-            viewModel.saveNetwork(nameInputView.getText().toString(),
+            viewModel.saveNetwork(
+                    isEditMode,
+                    nameInputView.getText().toString(),
                     rpcUrlInputView.getText().toString(),
                     Long.parseLong(chainIdInputView.getText().toString()),
                     symbolInputView.getText().toString(),

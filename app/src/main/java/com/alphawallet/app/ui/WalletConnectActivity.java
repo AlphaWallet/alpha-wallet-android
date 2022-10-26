@@ -647,6 +647,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         });
         dialog.setCancelable(false);
         dialog.show();
+
+        viewModel.trackError(getString(R.string.invalid_walletconnect_session));
     }
 
     private void initWalletConnectPeerMeta()
@@ -1026,6 +1028,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 });
                 dialog.setCancelable(false);
                 dialog.show();
+
+                viewModel.track(Analytics.Action.WALLET_CONNECT_CONNECTION_TIMEOUT);
             });
         }
     }
@@ -1046,6 +1050,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 });
                 dialog.setCancelable(false);
                 dialog.show();
+
+                viewModel.trackError(message);
             });
         }
     }
@@ -1062,6 +1068,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 dialog.setButton(R.string.action_cancel, v -> dialog.dismiss());
                 dialog.setCancelable(false);
                 dialog.show();
+
+                viewModel.trackError(message);
             });
         }
     }
@@ -1118,6 +1126,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 });
                 dialog.setCancelable(false);
                 dialog.show();
+
+                viewModel.trackError(message);
             });
         }
     }

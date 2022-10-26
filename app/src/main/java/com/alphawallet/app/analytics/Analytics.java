@@ -109,9 +109,9 @@ public class Analytics
         WALLET_CONNECT_SWITCH_NETWORK_REQUEST("WalletConnect - Switch Network Request"),
         WALLET_CONNECT_TRANSACTION_SUCCESS("WalletConnect - Transaction Success"),
         WALLET_CONNECT_TRANSACTION_FAILED("WalletConnect - Transaction Failed"),
-        WALLET_CONNECT_TRANSACTION_CANCELLED("WalletConnect - Transaction Cancelled");
+        WALLET_CONNECT_TRANSACTION_CANCELLED("WalletConnect - Transaction Cancelled"),
+        WALLET_CONNECT_CONNECTION_TIMEOUT("WalletConnect - Connection Timeout");
 //        WALLET_CONNECT_CANCEL("WalletConnect Cancel"),
-//        WALLET_CONNECT_CONNECTION_TIMEOUT("WalletConnect Connection Timeout"),
 //        WALLET_CONNECT_CONNECTION_FAILED("WalletConnect Connection Failed"),
 
 //        RELOAD_BROWSER("Reload Browser"),

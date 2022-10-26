@@ -626,6 +626,7 @@ public class Transaction implements Parcelable
 
     public String getDestination(Token token)
     {
+        if (token == null) return "";
         if (hasInput())
         {
             decodeTransactionInput(token.getWallet());

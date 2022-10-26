@@ -125,6 +125,10 @@ public class TokenScriptFile extends File
             String rand = String.valueOf(new Random(System.currentTimeMillis()).nextInt());
             sb.append(rand); //never matches
         }
+        catch (Exception e)
+        {
+            Timber.w(e);
+        }
 
         //return complete hash
         return sb.toString();

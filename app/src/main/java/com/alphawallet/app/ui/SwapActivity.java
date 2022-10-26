@@ -665,7 +665,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 });
                 errorDialog.setSecondaryButton(R.string.action_cancel, v -> errorDialog.dismiss());
                 errorDialog.show();
-                viewModel.trackError(errorEnvelope.message);
+                viewModel.trackError(Analytics.Error.TOKEN_SWAP, errorEnvelope.message);
                 break;
             case C.ErrorCode.SWAP_QUOTE_ERROR:
                 errorDialog = new AWalletAlertDialog(this);
@@ -677,7 +677,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 });
                 errorDialog.setSecondaryButton(R.string.action_cancel, v -> errorDialog.dismiss());
                 errorDialog.show();
-                viewModel.trackError(errorEnvelope.message);
+                viewModel.trackError(Analytics.Error.TOKEN_SWAP, errorEnvelope.message);
                 break;
             default:
                 errorDialog = new AWalletAlertDialog(this);
@@ -685,7 +685,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                 errorDialog.setMessage(errorEnvelope.message);
                 errorDialog.setButton(R.string.action_cancel, v -> errorDialog.dismiss());
                 errorDialog.show();
-                viewModel.trackError(errorEnvelope.message);
+                viewModel.trackError(Analytics.Error.TOKEN_SWAP, errorEnvelope.message);
                 break;
         }
     }

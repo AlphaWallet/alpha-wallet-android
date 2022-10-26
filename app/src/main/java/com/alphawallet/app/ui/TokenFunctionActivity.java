@@ -126,7 +126,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         throwable.getStackTrace();
         Timber.d("ERROR: %s", throwable.getMessage());
 
-        viewModel.trackError(throwable.getMessage());
+        viewModel.trackError(Analytics.Error.TOKEN_SCRIPT, throwable.getMessage());
     }
 
     private void onWalletUpdate(Wallet w)
@@ -347,7 +347,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
 
-        viewModel.trackError(getString(R.string.error_insufficient_funds));
+        viewModel.trackError(Analytics.Error.TOKEN_SCRIPT, getString(R.string.error_insufficient_funds));
     }
 
     private void estimateError(final Web3Transaction w3tx)

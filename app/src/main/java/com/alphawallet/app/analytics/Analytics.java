@@ -2,8 +2,6 @@ package com.alphawallet.app.analytics;
 
 public class Analytics
 {
-    public static final String ERROR = "Error";
-
     // Properties
     public static final String PROPS_IMPORT_WALLET_TYPE = "import_wallet_type";
     public static final String PROPS_WALLET_TYPE = "wallet_type";
@@ -124,27 +122,37 @@ public class Analytics
         WALLET_CONNECT_CONNECTION_TIMEOUT("WalletConnect - Connection Timeout");
 
 //        WALLET_CONNECT_CANCEL("WalletConnect Cancel"),
+//
 //        WALLET_CONNECT_CONNECTION_FAILED("WalletConnect Connection Failed"),
-
-
+//
 //        SIGN_MESSAGE_REQUEST("Sign Message Request"),
+//
 //        CANCEL_SIGN_MESSAGE_REQUEST("Cancel Sign Message Request"),
+//
 //        SWITCHED_SERVER("Switch Server Completed"),
+//
 //        CANCELS_SWITCH_SERVER("Switch Server Cancelled"),
-        //        RECTIFY_SEND_TRANSACTION_ERROR_IN_ACTION_SHEET("Rectify Send Txn Error"),
-
-
+//
+//        RECTIFY_SEND_TRANSACTION_ERROR_IN_ACTION_SHEET("Rectify Send Txn Error"),
+//
 //        CLEAR_BROWSER_CACHE("Clear Browser Cache"),
-        //        SHARE_URL("Share URL"),
+//
+//        SHARE_URL("Share URL"),
+//
 //        ADD_DAPP("Add Dapp"),
+//
 //        ENTER_URL("Enter URL"),
-        //        RELOAD_BROWSER("Reload Browser"),
-
-
+//
+//        RELOAD_BROWSER("Reload Browser"),
+//
 //        PING_INFURA("Ping Infura"),
+//
 //        NAME_WALLET("Name Wallet"),
+//
 //        FIRST_WALLET_ACTION("First Wallet Action"),
+//
 //        SUBSCRIBE_TO_EMAIL_NEWSLETTER("Subscribe Email Newsletter"),
+//
 //        TAP_SAFARI_EXTENSION_REWRITTEN_URL("Tap Safari Extension Rewritten URL");
 
         private final String actionName;
@@ -157,6 +165,25 @@ public class Analytics
         public String getValue()
         {
             return actionName;
+        }
+    }
+
+    public enum Error
+    {
+        TOKEN_SWAP("Token Swap"),
+        TOKEN_SCRIPT("TokenScript"),
+        WALLET_CONNECT("WalletConnect");
+
+        private final String source;
+
+        Error(String source)
+        {
+            this.source = source;
+        }
+
+        public String getValue()
+        {
+            return "Error: " + source;
         }
     }
 }

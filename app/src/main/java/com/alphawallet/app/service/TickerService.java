@@ -10,6 +10,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CRONOS_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
@@ -19,7 +20,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_V2_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 import android.text.TextUtils;
@@ -80,7 +80,7 @@ public class TickerService
 {
     private static final int UPDATE_TICKER_CYCLE = 5; //5 Minutes
     private static final String MEDIANIZER = "0x729D19f657BD0614b4985Cf1D82531c67569197B";
-    private static final String MARKET_ORACLE_CONTRACT = "0xf155a7eb4a2993c8cf08a76bca137ee9ac0a01d8";
+    private static final String MARKET_ORACLE_CONTRACT = "0xc1f9fBB5b028606D9F693319D2A6512B8fb01088";
     private static final String CONTRACT_ADDR = "[CONTRACT_ADDR]";
     private static final String CHAIN_IDS = "[CHAIN_ID]";
     private static final String CURRENCY_TOKEN = "[CURRENCY]";
@@ -228,7 +228,7 @@ public class TickerService
         currentConversionRate = conversionRate;
         return Single.fromCallable(() -> {
             int tickerSize = 0;
-            final Web3j web3j = TokenRepository.getWeb3jService(RINKEBY_ID);
+            final Web3j web3j = TokenRepository.getWeb3jService(GOERLI_ID);
             //fetch current tickers
             Function function = getTickers();
             String responseValue = callSmartContractFunction(web3j, function, MARKET_ORACLE_CONTRACT);

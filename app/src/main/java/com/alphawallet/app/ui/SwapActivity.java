@@ -630,7 +630,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         successDialog.setMessage(transactionData.txHash);
         successDialog.show();
 
-        viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_SUCCESSFUL);
+        viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_SUCCESSFUL, confirmationDialogProps);
     }
 
     private void txError(Throwable throwable)
@@ -640,9 +640,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         errorDialog.setMessage(throwable.getMessage());
         errorDialog.show();
 
-        AnalyticsProperties props = new AnalyticsProperties();
-        props.put(Analytics.PROPS_ERROR_MESSAGE, throwable.getMessage());
-        viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED, props);
+        confirmationDialogProps.put(Analytics.PROPS_ERROR_MESSAGE, throwable.getMessage());
+        viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED, confirmationDialogProps);
     }
 
     private void onError(ErrorEnvelope errorEnvelope)

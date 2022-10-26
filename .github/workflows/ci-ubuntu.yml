@@ -1,4 +1,4 @@
-name: Unit test(MacOS)
+name: Unit test(Ubuntu)
 on:
   push:
     branches:
@@ -6,7 +6,7 @@ on:
   pull_request:
 jobs:
   test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
@@ -15,7 +15,6 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
-          architecture: arm64
 
       - name: Run unit tests
         run: sh ./build.sh

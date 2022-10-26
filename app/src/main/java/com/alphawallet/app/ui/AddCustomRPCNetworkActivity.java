@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import static java.util.Collections.singletonList;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
@@ -10,6 +12,7 @@ import android.webkit.URLUtil;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.viewmodel.CustomNetworkViewModel;
@@ -22,16 +25,13 @@ import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
-import static java.util.Collections.singletonList;
-
 @AndroidEntryPoint
 public class AddCustomRPCNetworkActivity extends BaseActivity implements StandardFunctionInterface
 {
 
     public static final String CHAIN_ID = "chain_id";
-
+    private final Handler handler = new Handler();
     private CustomNetworkViewModel viewModel;
-
     private InputView nameInputView;
     private InputView rpcUrlInputView;
     private InputView chainIdInputView;
@@ -39,8 +39,6 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
     private InputView blockExplorerUrlInputView;
     private InputView blockExplorerApiUrl;
     private MaterialCheckBox testNetCheckBox;
-
-    private final Handler handler = new Handler();
     private long chainId;
 
     @Override
@@ -107,6 +105,13 @@ public class AddCustomRPCNetworkActivity extends BaseActivity implements Standar
         {
             addFunctionBar(singletonList(R.string.action_add_network));
         }
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        viewModel.track(Analytics.Navigation.ADD_CUSTOM_NETWORK);
     }
 
     private void addFunctionBar(List<Integer> functionResources)

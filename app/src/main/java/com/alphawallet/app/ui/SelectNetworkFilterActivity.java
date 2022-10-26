@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.ui.widget.adapter.MultiSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
@@ -63,6 +64,8 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
     protected void onResume() {
         super.onResume();
         setupFilterList();
+
+        viewModel.track(Analytics.Navigation.SELECT_NETWORKS);
     }
 
     void setupList()

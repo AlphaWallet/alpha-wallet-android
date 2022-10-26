@@ -1,8 +1,11 @@
 package com.alphawallet.app.viewmodel;
 
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.service.AnalyticsServiceType;
 
 import javax.inject.Inject;
 
@@ -15,20 +18,32 @@ public class CustomNetworkViewModel extends BaseViewModel
 
     @Inject
     CustomNetworkViewModel(
-            EthereumNetworkRepositoryType ethereumNetworkRepository)
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            AnalyticsServiceType analyticsService)
     {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        setAnalyticsService(analyticsService);
     }
 
-    public void saveNetwork(String name, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId) {
+    public void saveNetwork(String name, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId)
+    {
         this.ethereumNetworkRepository.saveCustomRPCNetwork(name, rpcUrl, chainId, symbol, blockExplorerUrl, explorerApiUrl, isTestnet, oldChainId);
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_CUSTOM_NETWORK_NAME, name);
+        props.put(Analytics.PROPS_CUSTOM_NETWORK_RPC_URL, rpcUrl);
+        props.put(Analytics.PROPS_CUSTOM_NETWORK_CHAIN_ID, chainId);
+        props.put(Analytics.PROPS_CUSTOM_NETWORK_SYMBOL, symbol);
+        props.put(Analytics.PROPS_CUSTOM_NETWORK_IS_TESTNET, isTestnet);
+        track(Analytics.Action.ADD_CUSTOM_CHAIN, props);
     }
 
-    public NetworkInfo getNetworkInfo(long chainId) {
+    public NetworkInfo getNetworkInfo(long chainId)
+    {
         return this.ethereumNetworkRepository.getNetworkByChain(chainId);
     }
 
-    public boolean isTestNetwork(NetworkInfo network) {
+    public boolean isTestNetwork(NetworkInfo network)
+    {
         return !EthereumNetworkRepository.hasRealValue(network.chainId);
     }
 

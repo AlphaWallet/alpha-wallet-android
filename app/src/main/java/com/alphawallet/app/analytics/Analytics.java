@@ -16,6 +16,12 @@ public class Analytics
     public static final String PROPS_SWAP_TO_TOKEN = "to_token";
     public static final String PROPS_ERROR_MESSAGE = "error_message";
 
+    public static final String PROPS_CUSTOM_NETWORK_NAME = "network_name";
+    public static final String PROPS_CUSTOM_NETWORK_RPC_URL = "rpc_url";
+    public static final String PROPS_CUSTOM_NETWORK_CHAIN_ID = "chain_id";
+    public static final String PROPS_CUSTOM_NETWORK_SYMBOL = "symbol";
+    public static final String PROPS_CUSTOM_NETWORK_IS_TESTNET = "is_testnet";
+
     public enum Navigation
     {
         WALLET("Screen: Wallet"),
@@ -33,6 +39,8 @@ public class Analytics
         SETTINGS_DARK_MODE("Screen: Settings - Dark Mode"),
         SETTINGS_ADVANCED("Screen: Settings - Advanced"),
         SETTINGS_SUPPORT("Screen: Settings - Support"),
+
+        ADD_CUSTOM_NETWORK("Screen: Add Custom Network"),
 
         IMPORT_WALLET("Screen: Import Wallet"),
         COINBASE_PAY("Screen: Buy with Coinbase Pay"),
@@ -99,6 +107,8 @@ public class Analytics
         SCAN_QR_CODE_CANCELLED("Scan QR Code Cancelled"),
         SCAN_QR_CODE_ERROR("Scan QR Code Error"),
 
+        ADD_CUSTOM_CHAIN("Add Custom Chain"),
+
         WALLET_CONNECT_SESSION_REQUEST("WalletConnect - Session Request"),
         WALLET_CONNECT_SESSION_APPROVED("WalletConnect - Session Approved"),
         WALLET_CONNECT_SESSION_REJECTED("WalletConnect - Session Rejected"),
@@ -128,7 +138,6 @@ public class Analytics
 //        RECTIFY_SEND_TRANSACTION_ERROR_IN_ACTION_SHEET("Rectify Send Txn Error"),
 //        NAME_WALLET("Name Wallet"),
 //        FIRST_WALLET_ACTION("First Wallet Action"),
-//        ADD_CUSTOM_CHAIN("Add Custom Chain"),
 //        EDIT_CUSTOM_CHAIN("Edit Custom Chain"),
 //        SUBSCRIBE_TO_EMAIL_NEWSLETTER("Subscribe Email Newsletter"),
 //        TAP_SAFARI_EXTENSION_REWRITTEN_URL("Tap Safari Extension Rewritten URL");

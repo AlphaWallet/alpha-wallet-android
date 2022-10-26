@@ -24,6 +24,8 @@ import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
+import com.alphawallet.app.R;
+
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 
@@ -227,5 +229,43 @@ public class Helper
         InputMethodManager imm =
                 (InputMethodManager) context.getSystemService(INPUT_METHOD_SERVICE);
         return imm.isAcceptingText();
+    }
+
+    public static void waitUntilLoaded()
+    {
+        waitStart();
+        waitComplete();
+    }
+
+    private static void waitComplete()
+    {
+        for (int i = 0; i < DEFAULT_TIMEOUT_IN_SECONDS; i++)
+        {
+            try
+            {
+                onView(withId(R.id.progressBar)).check(matches(not(isDisplayed())));
+                break;
+            }
+            catch (Error | Exception e)
+            {
+                Helper.wait(1);
+            }
+        }
+    }
+
+    private static void waitStart()
+    {
+        for (int i = 0; i < DEFAULT_TIMEOUT_IN_SECONDS; i++)
+        {
+            try
+            {
+                onView(withId(R.id.progressBar)).check(matches(isDisplayed()));
+                break;
+            }
+            catch (Error | Exception e)
+            {
+                Helper.wait(1);
+            }
+        }
     }
 }

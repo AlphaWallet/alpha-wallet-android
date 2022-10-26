@@ -1,6 +1,5 @@
 package com.alphawallet.app;
 
-import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.click;
@@ -18,19 +17,17 @@ import static com.alphawallet.app.steps.Steps.navigateToBrowser;
 import static com.alphawallet.app.steps.Steps.openOptionsMenu;
 import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.util.Helper.click;
-import static com.alphawallet.app.util.Helper.clickListItem;
+import static com.alphawallet.app.util.Helper.waitUntilLoaded;
 import static junit.framework.TestCase.assertTrue;
 
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
 
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.espresso.action.ViewActions;
-import androidx.test.espresso.matcher.RootMatchers;
 
-import com.alphawallet.app.steps.Steps;
 import com.alphawallet.app.util.Helper;
 
 import org.junit.Before;
@@ -39,7 +36,7 @@ import org.junit.Test;
 public class DappBrowserTest extends BaseE2ETest
 {
     private static final String DEFAULT_HOME_PAGE = "https://alphawallet.com/browser/";
-    private static final String URL_DAPP = "https://app.1inch.io";
+    private static final String URL_DAPP = "https://app.1inch.io/";
 
     @Override
     @Before
@@ -54,10 +51,10 @@ public class DappBrowserTest extends BaseE2ETest
     public void should_switch_network()
     {
         shouldSee("Ethereum");
-        Helper.wait(5);
+        waitUntilLoaded();
         selectTestNet("Görli");
         navigateToBrowser();
-        Helper.wait(3);
+        waitUntilLoaded();
         pressBack();
         shouldSee("Görli");
     }
@@ -67,37 +64,36 @@ public class DappBrowserTest extends BaseE2ETest
     {
         onView(withId(R.id.url_tv)).perform(click());
         click(withId(R.id.clear_url));
-        onView(withId(R.id.url_tv)).perform(pressKey(KeyEvent.KEYCODE_R));
-        onView(withId(R.id.url_tv)).perform(pressKey(KeyEvent.KEYCODE_A));
+        onView(withId(R.id.url_tv)).perform(pressKey(KeyEvent.KEYCODE_R), pressKey(KeyEvent.KEYCODE_A));
         Helper.wait(2);
-        onView(withId(R.id.url_tv)).perform(pressKey(KeyEvent.KEYCODE_DPAD_DOWN));
-        Helper.wait(2);
+        onView(withId(R.id.url_tv)).perform(pressKey(KeyEvent.KEYCODE_TAB), pressKey(KeyEvent.KEYCODE_DPAD_DOWN));
+        waitUntilLoaded();
         onView(withId(R.id.url_tv)).perform(pressKey(KeyEvent.KEYCODE_ENTER));
-        assertUrlIs("https://make.rare.claims");
+        assertUrlContains("alphawallet.app.entity.DApp@");
     }
 
     @Test
     public void should_navigate_forward_or_backward()
     {
-        onView(withId(R.id.url_tv)).perform(replaceText(URL_DAPP));
-        onView(withId(R.id.url_tv)).perform(pressKey(KeyEvent.KEYCODE_SLASH), pressImeActionButton());
-        Helper.wait(5);
-        assertUrlIs(URL_DAPP);
-        onView(withId(R.id.back)).perform(click());
-        Helper.wait(5);
-        assertUrlIs(DEFAULT_HOME_PAGE);
-        onView(withId(R.id.next)).perform(click());
-        Helper.wait(5);
-        assertUrlIs(URL_DAPP);
+        visit(URL_DAPP);
+        assertUrlContains(URL_DAPP);
+        Helper.wait(2);
+        click(withId(R.id.back));
+        waitUntilLoaded();
+        assertUrlContains(DEFAULT_HOME_PAGE);
+        Helper.wait(2);
+        click(withId(R.id.next));
+        waitUntilLoaded();
+        assertUrlContains(URL_DAPP);
     }
 
     @Test
     public void should_clear_url_and_show_keyboard()
     {
-        assertUrlIs(DEFAULT_HOME_PAGE);
+        assertUrlContains(DEFAULT_HOME_PAGE);
         onView(withId(R.id.url_tv)).perform(click());
         click(withId(R.id.clear_url));
-        assertUrlIs("");
+        assertUrlContains("");
         assertTrue(Helper.isSoftKeyboardShown(ApplicationProvider.getApplicationContext()));
     }
 
@@ -116,16 +112,14 @@ public class DappBrowserTest extends BaseE2ETest
     @Test
     public void should_set_homepage()
     {
-        click(withId(R.id.home));
-        assertUrlIs(DEFAULT_HOME_PAGE);
         visit(URL_DAPP);
-
+        waitUntilLoaded();
         openOptionsMenu();
         click(withText("Set as Home Page"));
-        onView(withId(R.id.back)).perform(click());
+        Helper.wait(2);
         click(withId(R.id.home));
-        Helper.wait(3);
-        assertUrlIs(URL_DAPP);
+        waitUntilLoaded();
+        assertUrlContains(URL_DAPP);
     }
 
     @NonNull
@@ -133,10 +127,11 @@ public class DappBrowserTest extends BaseE2ETest
     {
         navigateToBrowser();
         onView(withId(R.id.url_tv)).perform(replaceText(url), pressImeActionButton());
+        waitUntilLoaded();
     }
 
     @NonNull
-    private void assertUrlIs(String expectedUrl)
+    private void assertUrlContains(String expectedUrl)
     {
         onView(withId(R.id.url_tv)).check(matches(withSubstring(expectedUrl)));
     }

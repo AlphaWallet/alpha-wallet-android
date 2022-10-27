@@ -92,8 +92,7 @@ import timber.log.Timber;
  * Created by James on 21/02/2018.
  */
 @AndroidEntryPoint
-public class TransferTicketDetailActivity extends BaseActivity
-        implements TokensAdapterCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
+public class TransferTicketDetailActivity extends BaseActivity implements TokensAdapterCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {
     private static final int SEND_INTENT_REQUEST_CODE = 2;
 

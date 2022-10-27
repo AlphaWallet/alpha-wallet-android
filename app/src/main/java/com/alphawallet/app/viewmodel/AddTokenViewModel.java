@@ -37,7 +37,6 @@ import io.reactivex.schedulers.Schedulers;
 @HiltViewModel
 public class AddTokenViewModel extends BaseViewModel
 {
-
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Long> switchNetwork = new MutableLiveData<>();
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();

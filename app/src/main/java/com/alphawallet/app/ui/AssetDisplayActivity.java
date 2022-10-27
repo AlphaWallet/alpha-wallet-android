@@ -1,5 +1,8 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -52,35 +55,30 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-
 /**
  * Created by James on 22/01/2018.
  */
 
 /**
- *
  * This Activity shows the view-iconified breakdown for Non Fungible tokens
  * There's now some new timings here due to the way webView interacts with the Adapter listView
- *
+ * <p>
  * If there's an asset definition for this NFT, we need to know the final height of the rendered webview before we start drawing the webviews on the adapter.
  * When a webview renders it first opens at 0 height, then springs open to a primary layout which is usually larger than required. Miliseconds later it collapses to the correct height.
  * Since a listview will usually respond to either the zero height or the primary layout height it is almost always renders incorrectly in a listview.
- *
+ * <p>
  * What we do is make a (checked) assumption - all webviews on a ticket run will be the same height.
  * First render the first ticket in a drawing layer underneath the listview. Wait for rendering to finish; this will be the second layout update (see the layoutlistener)
  * We also need to ensure the view will time-out waiting to render and proceed as best it can without any pre-calculated height.
- *
+ * <p>
  * After the height has been established we start the adapter and create all the views with the height pre-set to the calculated value.
  * Now everything renders correctly!
- *
+ * <p>
  * Note that we need to pre-calculate both the view-iconified and views. If these are the same then an optimisation skips the normal view.
- *
  */
 @AndroidEntryPoint
 public class AssetDisplayActivity extends BaseActivity implements StandardFunctionInterface, PageReadyCallback,
-                                                                    Runnable, ActionSheetCallback
+        Runnable, ActionSheetCallback
 {
     private static final int TOKEN_SIZING_DELAY = 3000; //3 seconds until timeout waiting for tokenview size calculation
 
@@ -171,7 +169,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         viewModel.getAssetDefinitionService().fetchViewHeight(token.tokenInfo.chainId, token.getAddress())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::viewHeight, error -> { viewHeight(0); })
+                .subscribe(this::viewHeight, error -> {viewHeight(0);})
                 .isDisposed();
     }
 
@@ -206,8 +204,8 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         //first see if we need this - is iconified equal to non iconified?
         if (token.getArrayBalance().size() > 0)
         {
-            BigInteger  tokenId = token.getArrayBalance().get(0);
-            TicketRange data    = new TicketRange(tokenId, token.getAddress());
+            BigInteger tokenId = token.getArrayBalance().get(0);
+            TicketRange data = new TicketRange(tokenId, token.getAddress());
             testView.renderTokenscriptView(token, data, viewModel.getAssetDefinitionService(), true);
             testView.setOnReadyCallback(this);
         }
@@ -219,6 +217,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
     /**
      * Received Signature data either cached from AssetDefinitionService or from the API call
+     *
      * @param sigData
      */
     private void onSigData(XMLDsigDescriptor sigData)
@@ -263,14 +262,17 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu_show_contract, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_show_contract) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == R.id.action_show_contract)
+        {
             viewModel.showContractInfo(this, token);
         }
         return super.onOptionsItemSelected(item);
@@ -381,6 +383,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
     /**
      * Final return path
+     *
      * @param transactionData
      */
     private void txWritten(TransactionData transactionData)
@@ -411,7 +414,8 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         testView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
             itemViewHeight = bottom - top;
             checkVal++;
-            if (checkVal == 3) addRunCall(0); //received the third webview render update - this is always the final size we want, but sometimes there's only 1 or 2 updates
+            if (checkVal == 3)
+                addRunCall(0); //received the third webview render update - this is always the final size we want, but sometimes there's only 1 or 2 updates
             else addRunCall(400);//wait another 400ms for the second view update
         });
     }
@@ -439,7 +443,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         handler.removeCallbacks(this);
         progressView.setVisibility(View.GONE);
-        adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), this,viewModel.getCustomSettings());
+        adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), this, viewModel.getCustomSettings());
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter, token.getArrayBalance());
         functionBar.setWalletType(wallet.type);
         tokenView.setAdapter(adapter);
@@ -452,7 +456,8 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
     private void errorInsufficientFunds(Token currency)
     {
-        if (dialog != null && dialog.isShowing()) {
+        if (dialog != null && dialog.isShowing())
+        {
             dialog.dismiss();
         }
 
@@ -467,7 +472,8 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
     private void errorInvalidAddress(String address)
     {
-        if (dialog != null && dialog.isShowing()) {
+        if (dialog != null && dialog.isShowing())
+        {
             dialog.dismiss();
         }
         dialog = new AWalletAlertDialog(this);

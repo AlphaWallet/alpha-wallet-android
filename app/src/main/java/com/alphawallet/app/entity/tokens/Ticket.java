@@ -41,14 +41,16 @@ public class Ticket extends Token
     private final List<BigInteger> balanceArray;
     private boolean isMatchedInXML = false;
 
-    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type) {
+    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type)
+    {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = balances;
         balance = balanceArray != null ? BigDecimal.valueOf(balanceArray.size()) : BigDecimal.ZERO;
         group = TokenGroup.NFT;
     }
 
-    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName, ContractType type) {
+    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName, ContractType type)
+    {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = stringHexToBigIntegerList(balances);
         balance = BigDecimal.valueOf(balanceArray.size());
@@ -56,17 +58,20 @@ public class Ticket extends Token
     }
 
     @Override
-    public String getStringBalanceForUI(int scale) {
+    public String getStringBalanceForUI(int scale)
+    {
         return String.valueOf(getTokenCount());
     }
 
     @Override
-    public boolean hasPositiveBalance() {
+    public boolean hasPositiveBalance()
+    {
         return (getTokenCount() > 0);
     }
 
     @Override
-    public String getFullBalance() {
+    public String getFullBalance()
+    {
         if (balanceArray == null) return "no tokens";
         else return Utils.bigIntListToString(balanceArray, true);
     }
@@ -94,15 +99,14 @@ public class Ticket extends Token
     @Override
     public int getTokenCount()
     {
-        int count = 0;
-        if (balanceArray != null)
+        if (balanceArray == null)
         {
-            for (BigInteger id : balanceArray)
-            {
-                if (id.compareTo(BigInteger.ZERO) != 0) count++;
-            }
+            return 0;
         }
-        return count;
+
+        return (int) balanceArray.stream()
+                .filter(id -> id.compareTo(BigInteger.ZERO) != 0)
+                .count();
     }
 
     @Override
@@ -139,6 +143,7 @@ public class Ticket extends Token
 
     /**
      * Convert a list of TicketID's into an Index list corresponding to those indices
+     *
      * @param ticketIds
      * @return
      */
@@ -179,6 +184,7 @@ public class Ticket extends Token
 
     /**
      * Convert a String list of ticket IDs into a list of ticket indices
+     *
      * @param userList
      * @return
      */
@@ -192,7 +198,7 @@ public class Ticket extends Token
         for (String id : ids)
         {
             //remove whitespace
-            String     trim   = id.trim();
+            String trim = id.trim();
             BigInteger thisId = Numeric.toBigInt(trim);
             idList.add(thisId);
         }
@@ -228,7 +234,8 @@ public class Ticket extends Token
                 }
             }
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             indexList = null;
         }
 
@@ -288,7 +295,8 @@ public class Ticket extends Token
     }
 
     @Override
-    public boolean isToken() {
+    public boolean isToken()
+    {
         return false;
     }
 
@@ -299,13 +307,18 @@ public class Ticket extends Token
     }
 
     @Override
-    public List<BigInteger> getArrayBalance() { return balanceArray; }
+    public List<BigInteger> getArrayBalance()
+    {
+        return balanceArray;
+    }
 
     @Override
     public List<BigInteger> getNonZeroArrayBalance()
     {
         List<BigInteger> nonZeroValues = new ArrayList<>();
-        for (BigInteger value : balanceArray) if (value.compareTo(BigInteger.ZERO) != 0 && !nonZeroValues.contains(value)) nonZeroValues.add(value);
+        for (BigInteger value : balanceArray)
+            if (value.compareTo(BigInteger.ZERO) != 0 && !nonZeroValues.contains(value))
+                nonZeroValues.add(value);
         return nonZeroValues;
     }
 
@@ -316,10 +329,21 @@ public class Ticket extends Token
     }
 
     @Override
-    public boolean isERC875() { return true; }
-    public boolean isNonFungible() { return true; }
+    public boolean isERC875()
+    {
+        return true;
+    }
+
+    public boolean isNonFungible()
+    {
+        return true;
+    }
+
     @Override
-    public boolean hasGroupedTransfer() { return true; }
+    public boolean hasGroupedTransfer()
+    {
+        return true;
+    }
 
     @Override
     public boolean groupWithToken(TicketRange currentGroupingRange, TicketRangeElement newElement, long currentGroupTime)
@@ -333,6 +357,7 @@ public class Ticket extends Token
     /**
      * This function should return a String list of IDs suitable for submission to the token's transfer function
      * For ERC875 it is a list of indices, so convert this list of TokenIDs to indices
+     *
      * @param CSVstringIdList
      * @return
      */
@@ -346,6 +371,7 @@ public class Ticket extends Token
     /**
      * This function takes a list of tokenIds, and returns a BigInteger list suitable for this token's transfer function
      * For ERC875 it is a list of indices, so convert this list of TokenIDs to indices
+     *
      * @param tokenIds
      * @return
      */

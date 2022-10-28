@@ -29,6 +29,7 @@ public class CustomSettings
     ConcurrentLinkedQueue<Long> loadLockedCachedChains = new ConcurrentLinkedQueue<>();
     ConcurrentLinkedQueue<Long> loadExclusiveCachedChains = new ConcurrentLinkedQueue<>();
     ConcurrentLinkedQueue<TokenInfo> loadLockedTokens = new ConcurrentLinkedQueue<>();
+    public String getJsonString = "";
 
     public CustomSettings(Context ctx)
     {
@@ -165,22 +166,27 @@ public class CustomSettings
         return darkModeValue;
     }
 
+    // Function Use:  Universal function to check if Json is already loaded or not. If it is already loaded then we will return the value directly from the variable else we will load the json data from asset.
     public String loadJSONStringFromAsset()
     {
-        String returnString;
         try
         {
-            Reader reader = new InputStreamReader(context.getAssets().open(CUSTOM_SETTINGS_FILENAME));
-            JsonElement json = new Gson().fromJson(reader, JsonElement.class);
-            returnString = json.toString();
+            if (getJsonString.isEmpty())
+            {
+                Reader reader = new InputStreamReader(context.getAssets().open(CUSTOM_SETTINGS_FILENAME));
+                JsonElement json = new Gson().fromJson(reader, JsonElement.class);
+                getJsonString = json.toString();
+            }
         }
         catch (IOException ex)
         {
             ex.printStackTrace();
             return null;
         }
-        return returnString;
+
+        return getJsonString;
     }
+
 
     //TODO: Caching
     public Boolean alwaysShow(long chainId)

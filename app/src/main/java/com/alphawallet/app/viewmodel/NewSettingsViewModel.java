@@ -53,9 +53,8 @@ public class NewSettingsViewModel extends BaseViewModel
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             CurrencyRepositoryType currencyRepository,
-            TransactionsService transactionsService, CustomSettings customSettings)
-    {
             TransactionsService transactionsService,
+            CustomSettings customSettings,
             TickerService tickerService)
     {
         this.genericWalletInteract = genericWalletInteract;

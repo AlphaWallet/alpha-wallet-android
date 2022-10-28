@@ -1,4 +1,4 @@
-name: Unit test(MacOS)
+name: Unit test(Ubuntu)
 on:
   push:
     branches:
@@ -6,7 +6,7 @@ on:
   pull_request:
 jobs:
   test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
@@ -15,7 +15,6 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
-          architecture: arm64
 
       - name: Run unit tests
         run: sh ./build.sh
@@ -29,6 +28,6 @@ jobs:
 
       - name: Upload coverage reports to Codecov
         run: |
-          curl -Os https://uploader.codecov.io/latest/macos/codecov
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
           chmod +x codecov
           ./codecov

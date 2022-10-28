@@ -35,7 +35,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -310,7 +309,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         tivNetwork.setValue(token.getNetworkName());
 
-        tivContractAddress.setValue(Utils.formatAddress(token.tokenInfo.address));
+        tivContractAddress.setCopyableValue(token.tokenInfo.address);
     }
 
     private void loadAssetFromMetadata(NFTAsset asset)

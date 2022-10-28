@@ -123,7 +123,6 @@ public class HomeViewModel extends BaseViewModel {
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
 
-    private final MutableLiveData<File> installIntent = new MutableLiveData<>();
     private final MutableLiveData<String> walletName = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> splashActivity = new MutableLiveData<>();
@@ -171,10 +170,6 @@ public class HomeViewModel extends BaseViewModel {
 
     public LiveData<Transaction[]> transactions() {
         return transactions;
-    }
-
-    public LiveData<File> installIntent() {
-        return installIntent;
     }
 
     public LiveData<String> backUpMessage() {

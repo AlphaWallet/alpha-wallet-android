@@ -34,6 +34,8 @@
             android:layout_marginHorizontal="@dimen/small_12"
             android:layout_weight="3.5"
             android:gravity="start"
+            android:lines="2"
+            android:maxLines="2"
             tools:text="pablo.eth | 0x123456...0421" />
 
         <ImageView

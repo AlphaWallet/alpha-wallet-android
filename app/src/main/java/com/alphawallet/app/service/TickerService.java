@@ -78,7 +78,7 @@ import timber.log.Timber;
 
 public class TickerService
 {
-    private static final int UPDATE_TICKER_CYCLE = 1; //5 Minutes
+    private static final int UPDATE_TICKER_CYCLE = 5; //5 Minutes
     private static final String MEDIANIZER = "0x729D19f657BD0614b4985Cf1D82531c67569197B";
     private static final String MARKET_ORACLE_CONTRACT = "0xdAcAf435f241B1a062B021abEED9CA2F76F22F8D";
     private static final String CONTRACT_ADDR = "[CONTRACT_ADDR]";
@@ -229,7 +229,7 @@ public class TickerService
         return Single.fromCallable(() -> {
             int tickerSize = 0;
             final Web3j web3j = TokenRepository.getWeb3jService(POLYGON_TEST_ID);
-            //fetch current tickerscd
+            //fetch current tickers
             Function function = getTickers();
             String responseValue = callSmartContractFunction(web3j, function, MARKET_ORACLE_CONTRACT);
             List<Type> responseValues = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());

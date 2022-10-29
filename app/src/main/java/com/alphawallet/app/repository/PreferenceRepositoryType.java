@@ -62,6 +62,8 @@ public interface PreferenceRepositoryType {
     void setHasSetNetworkFilters();
     boolean hasSetNetworkFilters();
     void blankHasSetNetworkFilters();
+    void cancelAPI23Notification();
+    boolean hasCancelledAPI23Notification();
 
     void commit();
 

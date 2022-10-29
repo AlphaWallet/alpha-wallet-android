@@ -757,7 +757,7 @@ public class WalletFragment extends BaseFragment implements
     {
         if (menuItem.getItemId() == R.id.action_my_wallet)
         {
-            viewModel.showMyAddress(getContext());
+            viewModel.showMyAddress(requireContext());
         }
         if (menuItem.getItemId() == R.id.action_scan)
         {
@@ -769,13 +769,12 @@ public class WalletFragment extends BaseFragment implements
     private void initNotificationView(View view)
     {
         NotificationView notificationView = view.findViewById(R.id.notification);
-        boolean hasShownWarning = viewModel.isMarshMallowWarningShown();
 
-        if (!hasShownWarning && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M)
+        if (!viewModel.isMarshMallowWarningShown() && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M)
         {
-            notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
-            notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
-            notificationView.setPrimaryButtonText(getContext().getString(R.string.hide_notification));
+            notificationView.setTitle(requireContext().getString(R.string.title_version_support_warning));
+            notificationView.setMessage(requireContext().getString(R.string.message_version_support_warning));
+            notificationView.setPrimaryButtonText(requireContext().getString(R.string.hide_notification));
             notificationView.setPrimaryButtonListener(() ->
             {
                 notificationView.setVisibility(View.GONE);

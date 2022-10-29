@@ -1,9 +1,10 @@
 package com.alphawallet.app.viewmodel;
 
 
+import android.content.Context;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-
 import android.content.Context;
 
 import com.alphawallet.app.entity.CurrencyItem;
@@ -173,8 +174,13 @@ public class NewSettingsViewModel extends BaseViewModel
         genericWalletInteract.setIsDismissed(walletAddr, isDismissed);
     }
 
-    public void setMarshMallowWarning(boolean shown)
+    public boolean hasShownAPI23Notification()
     {
-        preferenceRepository.setMarshMallowWarning(shown);
+        return preferenceRepository.hasCancelledAPI23Notification();
+    }
+
+    public void cancelAPI23Notification()
+    {
+        preferenceRepository.cancelAPI23Notification();
     }
 }

@@ -176,7 +176,7 @@ public class NewSettingsFragment extends BaseFragment
     private void initNotificationView(View view)
     {
         notificationView = view.findViewById(R.id.notification);
-        if (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M)
+        if (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M && !viewModel.hasShownAPI23Notification())
         {
             notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
             notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
@@ -184,7 +184,7 @@ public class NewSettingsFragment extends BaseFragment
             notificationView.setPrimaryButtonListener(() ->
             {
                 notificationView.setVisibility(View.GONE);
-                viewModel.setMarshMallowWarning(true);
+                viewModel.cancelAPI23Notification();
             });
         }
         else

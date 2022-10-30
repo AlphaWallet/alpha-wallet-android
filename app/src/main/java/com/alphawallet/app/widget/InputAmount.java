@@ -1,8 +1,5 @@
 package com.alphawallet.app.widget;
 
-import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
@@ -46,6 +43,9 @@ import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmQuery;
 import timber.log.Timber;
+
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 
 /**
  * Created by JB on 10/11/2020.
@@ -387,8 +387,8 @@ public class InputAmount extends LinearLayout
             if (token.isEthereum() && token.hasPositiveBalance())
             {
                 RealmGasSpread gasSpread = tokensService.getTickerRealmInstance().where(RealmGasSpread.class)
-                        .equalTo("chainId", token.tokenInfo.chainId)
-                        .findFirst();
+                            .equalTo("chainId", token.tokenInfo.chainId)
+                            .findFirst();
 
                 if (gasSpread != null && gasSpread.getGasPrice().compareTo(BigInteger.ZERO) > 0)
                 {

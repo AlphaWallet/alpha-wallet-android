@@ -928,4 +928,18 @@
     <string name="help_question7">Politique de confidentialité</string>
     <string name="help_question8">Conditions d\'utilisation</string>
     <string name="connected_wallets">Portefeuilles connectés</string>
+    <string name="asset_rarity">Rareté</string>
+    <string name="preferred_exchanges">Échanges préférés</string>
+    <string name="info_gas_fee">Frais de gaz: %s</string>
+    <string name="message_fetching_routes">Récupération d\'itinéraires</string>
+    <string name="title_select_route">Sélectionnez l\'itinéraire</string>
+    <string name="title_select_exchanges">Sélectionnez les échanges</string>
+    <string name="label_available_routes">Nouvelles routes dans %s</string>
+    <string name="label_amount_to_swap">Montant à échanger</string>
+    <string name="label_provider_website">Site Web du fournisseur</string>
+    <string name="header_quote_details">Détails du devis</string>
+    <string name="label_swap_via">Échange via %s</string>
+    <string name="message_no_routes_found_for_the_given_parameters">Aucune route trouvée pour les paramètres donnés.</string>
+    <string name="message_select_one_exchange">Sélectionnez au moins un échange.</string>
+    <string name="deprecated">Obsolète</string>
 </resources>

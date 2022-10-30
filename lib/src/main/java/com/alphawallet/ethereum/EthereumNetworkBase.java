@@ -47,6 +47,9 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final long MILKOMEDA_C1_TEST_ID = 200101;
     public static final long PHI_MAIN_ID = 4181;
     public static final long PHI_V2_MAIN_ID = 144;
+    public static final long SEPOLIA_TESTNET_ID = 11155111;
+    public static final long OPTIMISM_GOERLI_TEST_ID = 420;
+    public static final long ARBITRUM_GOERLI_TEST_ID = 421613;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -62,7 +65,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
     public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
     public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed.binance.org";
-    public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
+    public static final String HECO_RPC_URL = "https://http-mainnet.hecochain.com";
     public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
     public static final String AVALANCHE_RPC_URL = "https://api.avax.network/ext/bc/C/rpc";
     public static final String FUJI_TEST_RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc";
@@ -70,8 +73,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String FANTOM_TEST_RPC_URL = "https://rpc.testnet.fantom.network";
     public static final String MATIC_RPC_URL = "https://matic-mainnet.chainstacklabs.com";
     public static final String MUMBAI_TEST_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
-    public static final String OPTIMISTIC_MAIN_URL = "https://mainnet.optimism.io";
-    public static final String OPTIMISTIC_TEST_URL = "https://kovan.optimism.io";
+    public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";
+    public static final String OPTIMISTIC_TEST_FALLBACK_URL = "https://kovan.optimism.io";
     public static final String CRONOS_MAIN_RPC_URL = "https://evm.cronos.org";
     public static final String CRONOS_TEST_URL = "https://evm-t3.cronos.org";
     public static final String ARBITRUM_RPC_URL = "https://arbitrum-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -86,6 +89,11 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String MILKOMEDA_C1_TEST_RPC = "https://rpc-devnet-cardano-evm.c1.milkomeda.com";
     public static final String PHI_MAIN_RPC_URL = "https://rpc1.phi.network";
     public static final String PHI_NETWORK_V2_RPC = "https://connect.phi.network";
+    public static final String SEPOLIA_TESTNET_RPC_URL = "https://rpc.sepolia.org";
+    public static final String OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL = "https://goerli.optimism.io";
+    public static final String ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL = "https://goerli-rollup.arbitrum.io/rpc";
+    public static final String IOTEX_MAINNET_RPC_URL = "https://babel-api.mainnet.iotex.io";
+    public static final String IOTEX_TESTNET_RPC_URL = "https://babel-api.testnet.iotex.io";
 
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>() {
         {
@@ -135,9 +143,9 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
             put(POLYGON_TEST_ID, new NetworkInfo("Mumbai (Test)", "POLY", MUMBAI_TEST_RPC_URL, "https://mumbai.polygonscan.com/tx/",
                     POLYGON_TEST_ID, false));
 
-            put(OPTIMISTIC_MAIN_ID, new NetworkInfo("Optimistic","ETH", OPTIMISTIC_MAIN_URL, "https://optimistic.etherscan.io/tx/",
+            put(OPTIMISTIC_MAIN_ID, new NetworkInfo("Optimistic","ETH", OPTIMISTIC_MAIN_FALLBACK_URL, "https://optimistic.etherscan.io/tx/",
                     OPTIMISTIC_MAIN_ID, false));
-            put(OPTIMISTIC_TEST_ID, new NetworkInfo("Optimistic (Test)", "ETH", OPTIMISTIC_TEST_URL, "https://kovan-optimistic.etherscan.io/tx/",
+            put(OPTIMISTIC_TEST_ID, new NetworkInfo("Optimistic (Test)", "ETH", OPTIMISTIC_TEST_FALLBACK_URL, "https://kovan-optimistic.etherscan.io/tx/",
                     OPTIMISTIC_TEST_ID, false));
             put(CRONOS_MAIN_ID, new NetworkInfo("Cronos (Beta)", "CRO", CRONOS_MAIN_RPC_URL, "https://cronoscan.com/tx", CRONOS_MAIN_ID, false));
             put(CRONOS_TEST_ID, new NetworkInfo("Cronos (Test)", "tCRO", CRONOS_TEST_URL, "https://testnet.cronoscan.com/tx/", CRONOS_TEST_ID, false));
@@ -168,6 +176,16 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     PHI_MAIN_ID, false));
             put(PHI_V2_MAIN_ID, new NetworkInfo("PHI v2", "\u03d5", PHI_NETWORK_V2_RPC, "https://phiscan.com/tx/",
                     PHI_V2_MAIN_ID, false));
+            put(SEPOLIA_TESTNET_ID, new NetworkInfo("Sepolia (Test)", "ETH", SEPOLIA_TESTNET_RPC_URL, "https://sepolia.etherscan.io/tx/",
+                    SEPOLIA_TESTNET_ID, false));
+            put(OPTIMISM_GOERLI_TEST_ID, new NetworkInfo("Optimism Goerli (Test)", "ETH", OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL, "https://blockscout.com/optimism/goerli/tx/",
+                    OPTIMISM_GOERLI_TEST_ID, false));
+            put(ARBITRUM_GOERLI_TEST_ID, new NetworkInfo("Arbitrum Goerli (Test)", "AGOR", OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL, "https://goerli-rollup-explorer.arbitrum.io/tx/",
+                    ARBITRUM_GOERLI_TEST_ID, false));
+            put(IOTEX_MAINNET_ID, new NetworkInfo("IoTeX","IOTX", IOTEX_MAINNET_RPC_URL, "https://iotexscan.io/tx/",
+                    IOTEX_MAINNET_ID, false));
+            put(IOTEX_TESTNET_ID, new NetworkInfo("IoTeX (Test)","IOTX", IOTEX_TESTNET_RPC_URL, "https://testnet.iotexscan.io/tx/",
+                    IOTEX_TESTNET_ID, false));
         }
     };
 

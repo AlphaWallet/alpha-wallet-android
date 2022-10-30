@@ -39,7 +39,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -52,7 +51,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
@@ -87,7 +85,6 @@ import com.github.florent37.tutoshowcase.TutoShowcase;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
-import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.List;
@@ -242,7 +239,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         dissableDisplayHomeAsUp();
 
         viewModel.error().observe(this, this::onError);
-        viewModel.installIntent().observe(this, this::onInstallIntent);
         viewModel.walletName().observe(this, this::onWalletName);
         viewModel.backUpMessage().observe(this, this::onBackup);
         viewModel.splashReset().observe(this, this::onRequireInit);
@@ -278,6 +274,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         else
         {
             //TODO: Check we are using latest version on github, since we're using a downloaded/manually installed version
+            //TODO: Also add a build exclusion so this code only appears if it's a noAnalytics build.
             //First check that this the package name is "io.stormbird.wallet" - it could be a fork
         }
 
@@ -923,31 +920,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 //Can't get here
                 break;
         }
-    }
-
-    private void onInstallIntent(File installFile)
-    {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        {
-            String authority = BuildConfig.APPLICATION_ID + ".fileprovider";
-            Uri apkUri = FileProvider.getUriForFile(getApplicationContext(), authority, installFile);
-            Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-            intent.setData(apkUri);
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(intent);
-        }
-        else
-        {
-            Uri apkUri = Uri.fromFile(installFile);
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        }
-
-        //Blank install time here so that next time the app runs the install time will be correctly set up
-        viewModel.setInstallTime(0);
-        finish();
     }
 
     @Override

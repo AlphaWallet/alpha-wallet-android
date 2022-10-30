@@ -35,7 +35,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -90,6 +89,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private TokenInfoView tivLastSale;
     private TokenInfoView tivAveragePrice;
     private TokenInfoView tivFloorPrice;
+    private TokenInfoView tivRarityData;
     private Animation rotation;
     private ActivityResultLauncher<Intent> handleTransactionSuccess;
     private ActivityResultLauncher<Intent> getGasSettings;
@@ -196,6 +196,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         tivLastSale = findViewById(R.id.last_sale);
         tivAveragePrice = findViewById(R.id.average_price);
         tivFloorPrice = findViewById(R.id.floor_price);
+        tivRarityData = findViewById(R.id.rarity);
 
         rotation = AnimationUtils.loadAnimation(this, R.anim.rotate_refresh);
         rotation.setRepeatCount(Animation.INFINITE);
@@ -308,7 +309,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         tivNetwork.setValue(token.getNetworkName());
 
-        tivContractAddress.setValue(Utils.formatAddress(token.tokenInfo.address));
+        tivContractAddress.setCopyableValue(token.tokenInfo.address);
     }
 
     private void loadAssetFromMetadata(NFTAsset asset)
@@ -405,6 +406,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         else
         {
             nftAttributeLayout.bind(token, openSeaAsset.traits, 0);
+        }
+
+        if (openSeaAsset.rarity != null && openSeaAsset.rarity.rank > 0)
+        {
+            tivRarityData.setValue("#" + openSeaAsset.rarity.rank);
         }
 
         if (openSeaAsset.owner != null

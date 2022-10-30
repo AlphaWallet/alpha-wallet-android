@@ -120,6 +120,13 @@
                 custom:tokenInfoLabel="@string/asset_total_supply" />
 
             <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/rarity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/asset_rarity" />
+
+            <com.alphawallet.app.widget.TokenInfoView
                 android:id="@+id/num_owners"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

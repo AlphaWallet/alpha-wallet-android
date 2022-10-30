@@ -932,7 +932,8 @@
     <string name="label_slippage">Slippage</string>
     <string name="action_open_settings">Open Settings</string>
     <string name="message_no_connections_found">No connections found for this chain.</string>
-    <string name="label_fees">Fees</string>
+    <string name="label_gas_fees">Gas Fee</string>
+    <string name="label_other_fees">Other Fees</string>
     <string name="label_current_price">Current Price</string>
     <string name="label_minimum_received">Minimum Received</string>
     <string name="label_balance">Balance: </string>
@@ -988,4 +989,18 @@
     <string name="vertical_pipe">|</string>
     <string name="eth" translatable="false">ETH</string>
     <string name="zero" translatable="false">0</string>
+    <string name="asset_rarity">Rarity</string>
+    <string name="preferred_exchanges">Preferred Exchanges</string>
+    <string name="info_gas_fee">Gas Fee: %s</string>
+    <string name="message_fetching_routes">Fetching Routes</string>
+    <string name="title_select_route">Select Route</string>
+    <string name="title_select_exchanges">Select Exchanges</string>
+    <string name="label_available_routes">New Routes in %s</string>
+    <string name="label_amount_to_swap">Amount To Swap</string>
+    <string name="label_provider_website">Provider Website</string>
+    <string name="header_quote_details">Quote Details</string>
+    <string name="label_swap_via">Swap via %s</string>
+    <string name="message_no_routes_found_for_the_given_parameters">No routes found for the given parameters.</string>
+    <string name="message_select_one_exchange">Select at least one exchange.</string>
+    <string name="deprecated">Deprecated</string>
 </resources>

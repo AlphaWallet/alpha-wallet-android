@@ -915,4 +915,18 @@
     <string name="help_question7">Política de privacidad</string>
     <string name="help_question8">Términos de servicio</string>
     <string name="connected_wallets">Billeteras conectadas</string>
+    <string name="asset_rarity">Rareza</string>
+    <string name="preferred_exchanges">Intercambios preferidos</string>
+    <string name="info_gas_fee">Tarifa de gasolina: %s</string>
+    <string name="message_fetching_routes">Fetching Routes</string>
+    <string name="title_select_route">Obtención de rutas</string>
+    <string name="title_select_exchanges">Seleccionar intercambios</string>
+    <string name="label_available_routes">Nuevas rutas en %s</string>
+    <string name="label_amount_to_swap">Cantidad a intercambiar</string>
+    <string name="label_provider_website">Sitio web del proveedor</string>
+    <string name="header_quote_details">Detalles de cotización</string>
+    <string name="label_swap_via">Intercambiar a través de %s</string>
+    <string name="message_no_routes_found_for_the_given_parameters">No se encontraron rutas para los parámetros dados.</string>
+    <string name="message_select_one_exchange">Seleccione al menos un intercambio.</string>
+    <string name="deprecated">Obsoleta</string>
 </resources>

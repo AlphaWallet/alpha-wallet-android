@@ -928,4 +928,18 @@
     <string name="help_question7">Kebijakan pribadi</string>
     <string name="help_question8">Ketentuan Layanan</string>
     <string name="connected_wallets">Dompet yang terhubung</string>
+    <string name="asset_rarity">Keanehan</string>
+    <string name="preferred_exchanges">Pertukaran Pilihan</string>
+    <string name="info_gas_fee">Pertukaran Pilihan: %s</string>
+    <string name="message_fetching_routes">Mengambil Rute</string>
+    <string name="title_select_route">Pilih Rute</string>
+    <string name="title_select_exchanges">Pilih Pertukaran</string>
+    <string name="label_available_routes">Rute Baru di %s</string>
+    <string name="label_amount_to_swap">Jumlah Untuk Tukar</string>
+    <string name="label_provider_website">Provider Website</string>
+    <string name="header_quote_details">Detail Kutipan</string>
+    <string name="label_swap_via">Tukar melalui %s</string>
+    <string name="message_no_routes_found_for_the_given_parameters">Tidak ada rute yang ditemukan untuk parameter yang diberikan.</string>
+    <string name="message_select_one_exchange">Pilih setidaknya satu bursa.</string>
+    <string name="deprecated">Tidak digunakan lagi</string>
 </resources>

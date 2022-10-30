@@ -88,6 +88,10 @@ public class OpenSeaAsset
     @Expose
     public LastSale lastSale;
 
+    @SerializedName("rarity_data")
+    @Expose
+    public Rarity rarity;
+
     public static class Collection
     {
         @SerializedName("stats")

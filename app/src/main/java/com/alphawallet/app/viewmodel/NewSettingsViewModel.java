@@ -1,10 +1,10 @@
 package com.alphawallet.app.viewmodel;
 
 
-import android.content.Context;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
+import android.content.Context;
 
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.entity.LocaleItem;
@@ -16,6 +16,7 @@ import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.util.LocaleUtils;
 
@@ -27,7 +28,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 
 @HiltViewModel
-public class NewSettingsViewModel extends BaseViewModel {
+public class NewSettingsViewModel extends BaseViewModel
+{
 
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
@@ -39,6 +41,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final LocaleRepositoryType localeRepository;
     private final CurrencyRepositoryType currencyRepository;
     private final TransactionsService transactionsService;
+    private final TickerService tickerService;
 
     @Inject
     NewSettingsViewModel(
@@ -48,7 +51,9 @@ public class NewSettingsViewModel extends BaseViewModel {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             CurrencyRepositoryType currencyRepository,
-            TransactionsService transactionsService) {
+            TransactionsService transactionsService,
+            TickerService tickerService)
+    {
         this.genericWalletInteract = genericWalletInteract;
         this.myAddressRouter = myAddressRouter;
         this.manageWalletsRouter = manageWalletsRouter;
@@ -56,32 +61,40 @@ public class NewSettingsViewModel extends BaseViewModel {
         this.localeRepository = localeRepository;
         this.currencyRepository = currencyRepository;
         this.transactionsService = transactionsService;
+        this.tickerService = tickerService;
     }
 
-    public ArrayList<LocaleItem> getLocaleList(Context context) {
+    public ArrayList<LocaleItem> getLocaleList(Context context)
+    {
         return localeRepository.getLocaleList(context);
     }
 
-    public void setLocale(Context activity) {
+    public void setLocale(Context activity)
+    {
         String currentLocale = localeRepository.getActiveLocale();
         LocaleUtils.setLocale(activity, currentLocale);
     }
 
-    public void updateLocale(String newLocale, Context context) {
+    public void updateLocale(String newLocale, Context context)
+    {
         localeRepository.setUserPreferenceLocale(newLocale);
         localeRepository.setLocale(context, newLocale);
     }
 
-    public String getDefaultCurrency(){
+    public String getDefaultCurrency()
+    {
         return currencyRepository.getDefaultCurrency();
     }
 
-    public ArrayList<CurrencyItem> getCurrencyList() {
+    public ArrayList<CurrencyItem> getCurrencyList()
+    {
         return currencyRepository.getCurrencyList();
     }
 
-    public Single<Boolean> updateCurrency(String currencyCode){
+    public Single<Boolean> updateCurrency(String currencyCode)
+    {
         currencyRepository.setDefaultCurrency(currencyCode);
+        tickerService.updateCurrencyConversion();
         //delete tickers from realm
         return transactionsService.wipeTickerData();
     }
@@ -91,7 +104,8 @@ public class NewSettingsViewModel extends BaseViewModel {
         return localeRepository.getActiveLocale();
     }
 
-    public void showManageWallets(Context context, boolean clearStack) {
+    public void showManageWallets(Context context, boolean clearStack)
+    {
         manageWalletsRouter.open(context, clearStack);
     }
 
@@ -99,32 +113,42 @@ public class NewSettingsViewModel extends BaseViewModel {
     {
         return preferenceRepository.getNotificationsState();
     }
+
     public void setNotificationState(boolean notificationState)
     {
         preferenceRepository.setNotificationState(notificationState);
     }
 
     @Override
-    protected void onCleared() {
+    protected void onCleared()
+    {
         super.onCleared();
     }
 
-    public LiveData<Wallet> defaultWallet() {
+    public LiveData<Wallet> defaultWallet()
+    {
         return defaultWallet;
     }
 
-    public LiveData<Transaction[]> transactions() {
+    public LiveData<Transaction[]> transactions()
+    {
         return transactions;
     }
-    public LiveData<String> backUpMessage() { return backUpMessage; }
 
-    public void prepare() {
+    public LiveData<String> backUpMessage()
+    {
+        return backUpMessage;
+    }
+
+    public void prepare()
+    {
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(Wallet wallet)
+    {
         defaultWallet.setValue(wallet);
 
         TestWalletBackup();
@@ -139,7 +163,8 @@ public class NewSettingsViewModel extends BaseViewModel {
         }
     }
 
-    public void showMyAddress(Context context) {
+    public void showMyAddress(Context context)
+    {
         myAddressRouter.open(context, defaultWallet.getValue());
     }
 

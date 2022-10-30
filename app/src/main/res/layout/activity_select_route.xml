@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_simple_toolbar" />
+
+    <View
+        android:id="@+id/separator"
+        style="@style/Aw.Component.Separator" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/Aw.Typography.Sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/standard_16"
+                android:layout_marginBottom="@dimen/tiny_8"
+                android:paddingHorizontal="@dimen/standard_16"
+                android:text="@string/label_amount_to_swap" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/standard_16">
+
+                <TextView
+                    android:id="@+id/from_amount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/tiny_8"
+                    tools:text="1.000000" />
+
+                <com.alphawallet.app.widget.AddressIcon
+                    android:id="@+id/from_token_icon"
+                    android:layout_width="@dimen/token_icon_small"
+                    android:layout_height="@dimen/token_icon_small"
+                    android:layout_marginEnd="@dimen/mini_4" />
+
+                <TextView
+                    android:id="@+id/from_symbol"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="BNB" />
+
+            </LinearLayout>
+
+            <TextView
+                style="@style/Aw.Typography.Sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/standard_16"
+                android:layout_marginBottom="@dimen/tiny_8"
+                android:paddingHorizontal="@dimen/standard_16"
+                android:text="@string/label_current_price" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/standard_16">
+
+                <TextView
+                    android:id="@+id/current_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/tiny_8"
+                    tools:text="1.000000" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/text_countdown"
+                    style="@style/Aw.Typography.Sub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/standard_16"
+                    android:layout_marginTop="@dimen/standard_16"
+                    android:layout_marginEnd="@dimen/tiny_8"
+                    android:layout_marginBottom="@dimen/tiny_8"
+                    tools:text="@string/label_available_routes" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_no_routes_found"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="@dimen/optimal_30"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/standard_16"
+                    android:gravity="center"
+                    android:text="@string/message_no_routes_found_for_the_given_parameters" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_select_exchanges"
+                    style="@style/Aw.Component.Button.Primary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/cozy_20"
+                    android:text="@string/title_select_exchanges" />
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/list_routes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/tiny_8" />
+
+        </LinearLayout>
+        
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

@@ -12,6 +12,8 @@ import com.alphawallet.app.repository.OnRampRepository;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
+import com.alphawallet.app.repository.SwapRepository;
+import com.alphawallet.app.repository.SwapRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokenRepositoryType;
@@ -116,6 +118,12 @@ public class RepositoriesModule {
 	OnRampRepositoryType provideOnRampRepository(@ApplicationContext Context context, AnalyticsServiceType analyticsServiceType) {
 		return new OnRampRepository(context, analyticsServiceType);
 	}
+
+    @Singleton
+    @Provides
+    SwapRepositoryType provideSwapRepository(@ApplicationContext Context context) {
+        return new SwapRepository(context);
+    }
 
     @Singleton
     @Provides

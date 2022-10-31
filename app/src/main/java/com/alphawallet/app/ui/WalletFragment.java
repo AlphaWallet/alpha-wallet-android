@@ -532,6 +532,7 @@ public class WalletFragment extends BaseFragment implements
         buyEthOptionsView.setOnBuyWithRampListener(v -> {
             Intent intent = viewModel.getBuyIntent(getCurrentWallet().address);
             ((HomeActivity) getActivity()).onActivityResult(C.TOKEN_SEND_ACTIVITY, RESULT_OK, intent);
+            viewModel.track(Analytics.Action.BUY_WITH_RAMP);
             buyEthDialog.dismiss();
         });
         buyEthOptionsView.setOnBuyWithCoinbasePayListener(v -> {

@@ -137,6 +137,8 @@ public class Analytics
         WALLET_CONNECT_TRANSACTION_CANCELLED("WalletConnect - Transaction Cancelled"),
         WALLET_CONNECT_CONNECTION_TIMEOUT("WalletConnect - Connection Timeout"),
 
+        BUY_WITH_RAMP("Buy with Ramp Clicked"),
+
 //        SUPPORT_REDDIT("Clicked Reddit Link"),
 //        SUPPORT_FACEBOOK("Clicked Facebook Link"),
 

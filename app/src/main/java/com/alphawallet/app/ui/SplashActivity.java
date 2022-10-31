@@ -13,10 +13,13 @@ import android.view.View;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.analytics.FirstWalletAction;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.KeyService;
@@ -25,14 +28,12 @@ import com.alphawallet.app.viewmodel.SplashViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class SplashActivity extends BaseActivity implements CreateWalletCallbackInterface, Runnable
 {
-    SplashViewModel splashViewModel;
+    private SplashViewModel viewModel;
 
     private Handler handler = new Handler(Looper.getMainLooper());
     private String errorMessage;
@@ -48,15 +49,15 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         super.onCreate(savedInstanceState);
 
         //detect previous launch
-        splashViewModel = new ViewModelProvider(this)
+        viewModel = new ViewModelProvider(this)
                 .get(SplashViewModel.class);
 
-        splashViewModel.cleanAuxData(getApplicationContext());
+        viewModel.cleanAuxData(getApplicationContext());
 
         setContentView(R.layout.activity_splash);
-        splashViewModel.wallets().observe(this, this::onWallets);
-        splashViewModel.createWallet().observe(this, this::onWalletCreate);
-        splashViewModel.fetchWallets();
+        viewModel.wallets().observe(this, this::onWallets);
+        viewModel.createWallet().observe(this, this::onWalletCreate);
+        viewModel.fetchWallets();
 
         checkRoot();
     }
@@ -85,15 +86,21 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         //      - no - proceed to home activity
         if (wallets.length == 0)
         {
-            splashViewModel.setDefaultBrowser();
+            viewModel.setDefaultBrowser();
             findViewById(R.id.layout_new_wallet).setVisibility(View.VISIBLE);
             findViewById(R.id.button_create).setOnClickListener(v -> {
-                splashViewModel.createNewWallet(this, this);
+                AnalyticsProperties props = new AnalyticsProperties();
+                props.put(FirstWalletAction.KEY, FirstWalletAction.CREATE_WALLET.getValue());
+                viewModel.track(Analytics.Action.FIRST_WALLET_ACTION, props);
+                viewModel.createNewWallet(this, this);
             });
             findViewById(R.id.button_watch).setOnClickListener(v -> {
                 new ImportWalletRouter().openWatchCreate(this, IMPORT_REQUEST_CODE);
             });
             findViewById(R.id.button_import).setOnClickListener(v -> {
+                AnalyticsProperties props = new AnalyticsProperties();
+                props.put(FirstWalletAction.KEY, FirstWalletAction.IMPORT_WALLET.getValue());
+                viewModel.track(Analytics.Action.FIRST_WALLET_ACTION, props);
                 new ImportWalletRouter().openForResult(this, IMPORT_REQUEST_CODE);
             });
         }
@@ -112,23 +119,23 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             Operation taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
             if (resultCode == RESULT_OK)
             {
-                splashViewModel.completeAuthentication(taskCode);
+                viewModel.completeAuthentication(taskCode);
             }
             else
             {
-                splashViewModel.failedAuthentication(taskCode);
+                viewModel.failedAuthentication(taskCode);
             }
         }
         else if (requestCode == IMPORT_REQUEST_CODE)
         {
-            splashViewModel.fetchWallets();
+            viewModel.fetchWallets();
         }
     }
 
     @Override
     public void HDKeyCreated(String address, Context ctx, KeyService.AuthenticationLevel level)
     {
-        splashViewModel.StoreHDKey(address, level);
+        viewModel.StoreHDKey(address, level);
     }
 
     @Override

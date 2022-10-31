@@ -85,6 +85,7 @@ public class Analytics
 
     public enum Action
     {
+        FIRST_WALLET_ACTION("First Wallet Action"),
         IMPORT_WALLET("Import Wallet"),
         USE_GAS_WIDGET("Use Gas Widget"),
         LOAD_URL("Load URL"),
@@ -122,7 +123,6 @@ public class Analytics
         DEEP_LINK("Deep Link Opened"),
         DEEP_LINK_API_V1("Deep Link (API V1) Opened");
 
-
 //        WALLET_CONNECT_CANCEL("WalletConnect Cancel"),
 //        WALLET_CONNECT_CONNECTION_FAILED("WalletConnect Connection Failed"),
 //        SIGN_MESSAGE_REQUEST("Sign Message Request"),
@@ -133,7 +133,6 @@ public class Analytics
 //        ENTER_URL("Enter URL"),
 //        PING_INFURA("Ping Infura"),
 //        NAME_WALLET("Name Wallet"),
-//        FIRST_WALLET_ACTION("First Wallet Action"),
 //        SUBSCRIBE_TO_EMAIL_NEWSLETTER("Subscribe Email Newsletter"),
 //        TAP_SAFARI_EXTENSION_REWRITTEN_URL("Tap Safari Extension Rewritten URL");
 //        SUPPORT_FACEBOOK("Clicked Facebook Link"),

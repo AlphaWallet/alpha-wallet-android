@@ -51,7 +51,6 @@ public class Analytics
         ADD_DAPP("Screen: Add to My Dapps"),
         EDIT_DAPP("Screen: Edit Dapp"),
         BROWSER_HISTORY("Screen: Dapp Browser History"),
-
         SCAN_QR_CODE("Screen: QR Code Scanner");
 
 //        SIGN_MESSAGE_REQUEST("Screen: Sign Message Request"),
@@ -66,7 +65,6 @@ public class Analytics
 //        FALLBACK("Screen: <Fallback>"),
 //        SWITCH_SERVERS("Screen: Switch Servers"),
 //        TAP_BROWSER_MORE("Screen: Browser More Options"),
-//        DEEP_LINK("Screen: DeepLink"),
 //        EXPLORER("Screen: Explorer"),
 //        OPEN_SHORTCUT("Screen: Shortcut"),
 //        OPEN_HELP_URL("Screen: Help URL"),
@@ -120,7 +118,10 @@ public class Analytics
         SUPPORT_EMAIL("Clicked Email Link"),
         SUPPORT_TWITTER("Clicked Twitter Link"),
         SUPPORT_GITHUB("Clicked Github Link"),
-        SUPPORT_FAQ("Clicked FAQ Link");
+        SUPPORT_FAQ("Clicked FAQ Link"),
+        DEEP_LINK("Deep Link Opened"),
+        DEEP_LINK_API_V1("Deep Link (API V1) Opened");
+
 
 //        WALLET_CONNECT_CANCEL("WalletConnect Cancel"),
 //        WALLET_CONNECT_CONNECTION_FAILED("WalletConnect Connection Failed"),

@@ -1096,6 +1096,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 {
                     Intent intent = new Intent(this, ApiV1Activity.class);
                     intent.putExtra(C.Key.API_V1_REQUEST_URL, importData);
+                    viewModel.track(Analytics.Action.DEEP_LINK_API_V1);
                     startActivity(intent);
                     return;
                 }
@@ -1107,6 +1108,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     String link = importData.substring(directLinkIndex + AW_MAGICLINK_DIRECT.length());
                     if (getSupportFragmentManager().getFragments().size() >= DAPP_BROWSER.ordinal())
                     {
+                        viewModel.track(Analytics.Action.DEEP_LINK);
                         showPage(DAPP_BROWSER);
                         if (!dappFrag.isDetached()) dappFrag.loadDirect(link);
                     }

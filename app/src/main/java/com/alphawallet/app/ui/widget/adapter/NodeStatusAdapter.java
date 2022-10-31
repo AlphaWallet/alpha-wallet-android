@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.IntStream;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -117,15 +118,9 @@ public class NodeStatusAdapter extends RecyclerView.Adapter<NodeStatusAdapter.Vi
     private void updateStatus(long chainId, NodeStatus status)
     {
         statusMap.put(chainId, status);
-        int position = 0;
-        for (int i=0; i<networkList.size(); i++)
-        {
-            if (networkList.get(i).chainId == chainId)
-            {
-                position = i;
-                break;
-            }
-        }
+        int position = IntStream.range(0, networkList.size())
+                .filter(i -> networkList.get(i).chainId == chainId)
+                .findFirst().orElse(0);
         notifyItemChanged(position);
         Timber.d("updateStatus: chain: %s-%s: %s", chainId, EthereumNetworkBase.getShortChainName(chainId),status);
     }

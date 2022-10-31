@@ -1,5 +1,10 @@
 package com.alphawallet.app.ui.QRScanning;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.os.Build.VERSION.SDK_INT;
+import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.FULL_SCREEN_STATE;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
@@ -14,7 +19,6 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -55,11 +59,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.os.Build.VERSION.SDK_INT;
-import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-import static com.alphawallet.app.repository.SharedPreferenceRepository.FULL_SCREEN_STATE;
-
 /**
  * Created by JB on 12/09/2021.
  */
@@ -84,12 +83,6 @@ public class QRScanner extends BaseActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N)
-        {
-            Toast.makeText(this, R.string.toast_qr_scanning_requires_api_24, Toast.LENGTH_SHORT).show();
-            finish();
-        }
 
         hideSystemUI();
 

@@ -15,14 +15,14 @@ import com.alphawallet.app.entity.FragmentMessenger;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickListener,
-        BackupTokenCallback
-{
+        BackupTokenCallback {
     private Toolbar toolbar;
     private TextView toolbarTitle;
 
@@ -30,6 +30,7 @@ public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickLis
         toolbar = view.findViewById(R.id.toolbar);
         toolbarTitle = toolbar.findViewById(R.id.toolbar_title);
     }
+
     protected void toolbar(View view) {
         if (view != null) initToolbar(view);
     }
@@ -85,32 +86,70 @@ public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickLis
         return false;
     }
 
-    public void comeIntoFocus()
-    {
+    public void comeIntoFocus() {
         //
     }
 
-    public void leaveFocus()
-    {
+    public void leaveFocus() {
         //
     }
 
-    public void softKeyboardVisible() { }
-    public void softKeyboardGone() { }
-    public void onItemClick(String url) { }
-    public void signalUpdate(int updateVersion) { }
-    public void backupSeedSuccess(boolean hasNoLock) { }
-    public void storeWalletBackupTime(String backedUpKey) { }
-    public void resetTokens() { }
-    public void resetTransactions() { }
-    public void gotCameraAccess(@NotNull String[] permissions, int[] grantResults) { }
-    public void gotGeoAccess(@NotNull String[] permissions, int[] grantResults) { }
-    public void gotFileAccess(@NotNull String[] permissions, int[] grantResults) { }
-    public void handleQRCode(int resultCode, Intent data, FragmentMessenger messenger) { }
-    public void pinAuthorisation(boolean gotAuth) { }
-    public void switchNetworkAndLoadUrl(long chainId, String url) { }
-    public void scrollToTop() { }
-    public void addedToken(List<ContractLocator> tokenContracts) { }
-    public void setImportFilename(String fName) { }
-    public void backPressed() { }
+    protected boolean hasPermissionGranted(@NotNull String[] permissions, int[] grantResults, String permission) {
+        int index = Arrays.asList(permissions).indexOf(permission);
+        return index != -1 && grantResults[index] != -1;
+    }
+
+    public void softKeyboardVisible() {
+    }
+
+    public void softKeyboardGone() {
+    }
+
+    public void onItemClick(String url) {
+    }
+
+    public void signalUpdate(int updateVersion) {
+    }
+
+    public void backupSeedSuccess(boolean hasNoLock) {
+    }
+
+    public void storeWalletBackupTime(String backedUpKey) {
+    }
+
+    public void resetTokens() {
+    }
+
+    public void resetTransactions() {
+    }
+
+    public void gotCameraAccess(@NotNull String[] permissions, int[] grantResults) {
+    }
+
+    public void gotGeoAccess(@NotNull String[] permissions, int[] grantResults) {
+    }
+
+    public void gotFileAccess(@NotNull String[] permissions, int[] grantResults) {
+    }
+
+    public void handleQRCode(int resultCode, Intent data, FragmentMessenger messenger) {
+    }
+
+    public void pinAuthorisation(boolean gotAuth) {
+    }
+
+    public void switchNetworkAndLoadUrl(long chainId, String url) {
+    }
+
+    public void scrollToTop() {
+    }
+
+    public void addedToken(List<ContractLocator> tokenContracts) {
+    }
+
+    public void setImportFilename(String fName) {
+    }
+
+    public void backPressed() {
+    }
 }

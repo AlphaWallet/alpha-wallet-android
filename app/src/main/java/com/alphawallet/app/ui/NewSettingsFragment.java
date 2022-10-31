@@ -16,7 +16,6 @@ import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -176,21 +175,7 @@ public class NewSettingsFragment extends BaseFragment
     private void initNotificationView(View view)
     {
         notificationView = view.findViewById(R.id.notification);
-        if (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M)
-        {
-            notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
-            notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
-            notificationView.setPrimaryButtonText(getContext().getString(R.string.hide_notification));
-            notificationView.setPrimaryButtonListener(() ->
-            {
-                notificationView.setVisibility(View.GONE);
-                viewModel.setMarshMallowWarning(true);
-            });
-        }
-        else
-        {
-            notificationView.setVisibility(View.GONE);
-        }
+        notificationView.setVisibility(View.GONE);
     }
 
     @Override

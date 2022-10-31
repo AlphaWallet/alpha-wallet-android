@@ -19,7 +19,7 @@ import timber.log.Timber;
 
 /**
  * Created by James on 2/02/2018.
- *
+ * <p>
  * TransactionDecoder currently only decode a transaction input in the
  * string format, which is strictly a string starting with "0x" and
  * with an even number of hex digits followed. (Probably should be
@@ -468,17 +468,13 @@ public class TransactionDecoder
 
     public int[] getIndices(TransactionInput data)
     {
-        int[] indices = null;
-        if (data != null && data.arrayValues != null)
+        if (data == null || data.arrayValues == null)
         {
-            indices = new int[data.arrayValues.size()];
-            for (int i = 0; i < data.arrayValues.size(); i++)
-            {
-                indices[i] = data.arrayValues.get(i).intValue();
-            }
+            return null;
         }
-
-        return indices;
+        return data.arrayValues.stream()
+                .mapToInt(BigInteger::intValue)
+                .toArray();
     }
 
     public static String buildMethodId(String methodSignature)

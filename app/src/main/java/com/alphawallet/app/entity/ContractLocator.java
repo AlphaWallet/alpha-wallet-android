@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity;
 
+import static java.util.stream.Collectors.toList;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -9,6 +11,7 @@ import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.token.entity.ContractInfo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -44,7 +47,7 @@ public class ContractLocator implements Parcelable
 
     public boolean equals(Token token)
     {
-        return (token != null && address != null && chainId == token.tokenInfo.chainId && address.equalsIgnoreCase(token.getAddress()) );
+        return (token != null && address != null && chainId == token.tokenInfo.chainId && address.equalsIgnoreCase(token.getAddress()));
     }
 
     public boolean equals(TokenCardMeta token)
@@ -52,13 +55,12 @@ public class ContractLocator implements Parcelable
         return TokensRealmSource.databaseKey(chainId, address).equalsIgnoreCase(token.tokenId);
     }
 
-    /* replace this with a one-liner use of stream when we up our minSdkVersion to 24 */
-    public static ContractLocator[] fromAddresses(String[] addresses, long chainID) {
-        ContractLocator[] retval = new ContractLocator[addresses.length];
-        for (int i=0; i<addresses.length; i++) {
-            retval[i] = new ContractLocator(addresses[i], chainID);
-        }
-        return retval;
+    public static ContractLocator[] fromAddresses(String[] addresses, long chainID)
+    {
+        return Arrays.stream(addresses)
+                .map(address -> new ContractLocator(address, chainID))
+                .collect(toList())
+                .toArray(new ContractLocator[]{});
     }
 
     public static List<ContractLocator> fromContractInfo(ContractInfo cInfo)
@@ -76,14 +78,17 @@ public class ContractLocator implements Parcelable
         return retVal;
     }
 
-    public static final Creator<ContractLocator> CREATOR = new Creator<ContractLocator>() {
+    public static final Creator<ContractLocator> CREATOR = new Creator<ContractLocator>()
+    {
         @Override
-        public ContractLocator createFromParcel(Parcel in) {
+        public ContractLocator createFromParcel(Parcel in)
+        {
             return new ContractLocator(in);
         }
 
         @Override
-        public ContractLocator[] newArray(int size) {
+        public ContractLocator[] newArray(int size)
+        {
             return new ContractLocator[size];
         }
     };

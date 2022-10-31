@@ -140,7 +140,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SignatureException;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Observable;
@@ -156,7 +158,8 @@ import timber.log.Timber;
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
         OnWalletActionListener, URLLoadInterface, ItemClickListener, OnDappHomeNavClickListener, DappBrowserSwipeInterface,
-        SignAuthenticationCallback, ActionSheetCallback, TestNetDialog.TestNetDialogCallback {
+        SignAuthenticationCallback, ActionSheetCallback, TestNetDialog.TestNetDialogCallback
+{
     public static final String SEARCH = "SEARCH";
     public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
     public static final String CURRENT_FRAGMENT = "currentFragment";
@@ -182,7 +185,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private final Handler handler = new Handler(Looper.getMainLooper());
     private ValueCallback<Uri[]> uploadMessage;
     ActivityResultLauncher<String> getContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
-            new ActivityResultCallback<Uri>() {
+            new ActivityResultCallback<Uri>()
+            {
                 @Override
                 public void onActivityResult(Uri uri)
                 {
@@ -645,7 +649,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             return false;
         });
 
-        urlTv.addTextChangedListener(new TextWatcher() {
+        urlTv.addTextChangedListener(new TextWatcher()
+        {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
             {
@@ -707,8 +712,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         expandCollapseView(layoutNavigation, false);
 
         disposable = Observable.zip(
-                Observable.interval(600, TimeUnit.MILLISECONDS).take(1),
-                Observable.fromArray(clear), (interval, item) -> item)
+                        Observable.interval(600, TimeUnit.MILLISECONDS).take(1),
+                        Observable.fromArray(clear), (interval, item) -> item)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::postBeginSearchSession);
@@ -738,7 +743,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             int finalWidth = view.getWidth();
             ValueAnimator valueAnimator = slideAnimator(finalWidth, 0, view);
-            valueAnimator.addListener(new Animator.AnimatorListener() {
+            valueAnimator.addListener(new Animator.AnimatorListener()
+            {
                 @Override
                 public void onAnimationStart(Animator animator)
                 {
@@ -997,7 +1003,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         web3.setRpcUrl(viewModel.getNetworkNodeRPC(activeNetwork.chainId));
         web3.setWalletAddress(new Address(wallet.address));
 
-        web3.setWebChromeClient(new WebChromeClient() {
+        web3.setWebChromeClient(new WebChromeClient()
+        {
             @Override
             public void onProgressChanged(WebView webview, int newProgress)
             {
@@ -1067,7 +1074,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             }
         });
 
-        web3.setWebViewClient(new WebViewClient() {
+        web3.setWebViewClient(new WebViewClient()
+        {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url)
             {
@@ -1207,13 +1215,13 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void onEthCall(Web3Call call)
     {
         Single.fromCallable(() -> {
-            //let's make the call
-            Web3j web3j = TokenRepository.getWeb3jService(activeNetwork.chainId);
-            //construct call
-            org.web3j.protocol.core.methods.request.Transaction transaction
-                    = createFunctionCallTransaction(wallet.address, null, null, call.gasLimit, call.to.toString(), call.value, call.payload);
-            return web3j.ethCall(transaction, call.blockParam).send();
-        }).map(EthCall::getValue)
+                    //let's make the call
+                    Web3j web3j = TokenRepository.getWeb3jService(activeNetwork.chainId);
+                    //construct call
+                    org.web3j.protocol.core.methods.request.Transaction transaction
+                            = createFunctionCallTransaction(wallet.address, null, null, call.gasLimit, call.to.toString(), call.value, call.payload);
+                    return web3j.ethCall(transaction, call.blockParam).send();
+                }).map(EthCall::getValue)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> web3.onCallFunctionSuccessful(call.leafPosition, result),
@@ -1333,7 +1341,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void handleSignMessage(Signable message)
     {
-        dAppFunction = new DAppFunction() {
+        dAppFunction = new DAppFunction()
+        {
             @Override
             public void DAppError(Throwable error, Signable message)
             {
@@ -1941,32 +1950,22 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void gotCameraAccess(@NotNull String[] permissions, int[] grantResults)
     {
-        boolean cameraAccess = false;
-        for (int i = 0; i < permissions.length; i++)
+        boolean cameraAccess = hasPermissionGranted(permissions, grantResults, Manifest.permission.CAMERA);
+        if (cameraAccess)
         {
-            if (permissions[i].equals(Manifest.permission.CAMERA) && grantResults[i] != -1)
-            {
-                cameraAccess = true;
-                if (requestCallback != null)
-                    requestCallback.grant(requestCallback.getResources()); //now we can grant permission
-            }
+            if (requestCallback != null)
+                requestCallback.grant(requestCallback.getResources());
         }
-        if (!cameraAccess)
+        else
+        {
             Toast.makeText(getContext(), "Permission not given", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     public void gotGeoAccess(@NotNull String[] permissions, int[] grantResults)
     {
-        boolean geoAccess = false;
-        for (int i = 0; i < permissions.length; i++)
-        {
-            if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION) && grantResults[i] != -1)
-            {
-                geoAccess = true;
-                break;
-            }
-        }
+        boolean geoAccess = hasPermissionGranted(permissions, grantResults, Manifest.permission.ACCESS_FINE_LOCATION);
         if (!geoAccess)
             Toast.makeText(getContext(), "Permission not given", Toast.LENGTH_SHORT).show();
         if (geoCallback != null && geoOrigin != null)
@@ -1976,16 +1975,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void gotFileAccess(@NotNull String[] permissions, int[] grantResults)
     {
-        boolean fileAccess = false;
-        for (int i = 0; i < permissions.length; i++)
-        {
-            if (permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE) && grantResults[i] != -1)
-            {
-                fileAccess = true;
-                break;
-            }
-        }
-
+        boolean fileAccess = hasPermissionGranted(permissions, grantResults, Manifest.permission.READ_EXTERNAL_STORAGE);
         if (fileAccess) requestUpload();
     }
 
@@ -2167,7 +2157,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        final SendTransactionInterface callback = new SendTransactionInterface() {
+        final SendTransactionInterface callback = new SendTransactionInterface()
+        {
             @Override
             public void transactionSuccess(Web3Transaction web3Tx, String hashData)
             {

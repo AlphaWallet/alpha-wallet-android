@@ -25,6 +25,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 public class Helper
 {
@@ -70,12 +71,10 @@ public class Helper
 
                 do
                 {
-                    for (View child : TreeIterables.breadthFirstViewTraversal(view.getRootView()))
+                    Iterable<View> views = TreeIterables.breadthFirstViewTraversal(view.getRootView());
+                    if (Stream.of(views).anyMatch(matcher::matches))
                     {
-                        if (matcher.matches(child))
-                        {
-                            return;
-                        }
+                        return;
                     }
 
                     uiController.loopMainThreadForAtLeast(50);

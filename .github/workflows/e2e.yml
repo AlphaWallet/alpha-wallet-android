@@ -7,7 +7,7 @@ on:
 jobs:
   test:
     runs-on: self-hosted
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       matrix:
         api-level: [30]
@@ -31,7 +31,7 @@ jobs:
           profile: Nexus 6
           channel: canary
           disable-animations: true
-          force-avd-creation: false
+          force-avd-creation: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: ./e2e.sh --CI
 

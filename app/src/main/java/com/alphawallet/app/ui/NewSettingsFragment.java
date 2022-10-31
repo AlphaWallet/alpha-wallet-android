@@ -43,6 +43,7 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
@@ -412,14 +413,10 @@ public class NewSettingsFragment extends BaseFragment
         this.wallet = wallet;
         if (wallet.address != null)
         {
-            if (!wallet.ENSname.isEmpty())
-            {
-                changeWalletSetting.setSubtitle(wallet.ENSname + " | " + wallet.address);
-            }
-            else
-            {
-                changeWalletSetting.setSubtitle(wallet.address);
-            }
+            String walletAddressDisplay = wallet.ENSname.isEmpty() ? wallet.address
+                    : wallet.ENSname + " | " + Utils.formatAddress(wallet.address);
+
+            changeWalletSetting.setSubtitle(walletAddressDisplay);
         }
 
         switch (wallet.authLevel)

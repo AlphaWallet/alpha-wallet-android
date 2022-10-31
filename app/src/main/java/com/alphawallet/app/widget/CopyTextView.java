@@ -14,8 +14,8 @@ import android.widget.Toast;
 import com.alphawallet.app.R;
 import com.google.android.material.button.MaterialButton;
 
-public class CopyTextView extends LinearLayout {
-
+public class CopyTextView extends LinearLayout
+{
     public static final String KEY_ADDRESS = "key_address";
 
     private final Context context;
@@ -23,6 +23,7 @@ public class CopyTextView extends LinearLayout {
 
     private int textResId;
     private int gravity;
+    private int lines;
     private boolean showToast;
     private boolean boldFont;
     private boolean removePadding;
@@ -56,6 +57,7 @@ public class CopyTextView extends LinearLayout {
             boldFont = a.getBoolean(R.styleable.CopyTextView_bold, false);
             removePadding = a.getBoolean(R.styleable.CopyTextView_removePadding, false);
             marginRight = a.getDimension(R.styleable.CopyTextView_marginRight, 0.0f);
+            lines = a.getInt(R.styleable.CopyTextView_lines, 1);
         }
         finally
         {
@@ -65,7 +67,17 @@ public class CopyTextView extends LinearLayout {
 
     private void bindViews()
     {
-        button = findViewById(R.id.button);
+        if (lines == 2)
+        {
+            button = findViewById(R.id.button_address);
+            findViewById(R.id.button).setVisibility(View.GONE);
+            button.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            button = findViewById(R.id.button);
+        }
+
         setText(getContext().getString(textResId));
         button.setOnClickListener(v -> copyToClipboard());
     }
@@ -98,6 +110,8 @@ public class CopyTextView extends LinearLayout {
         }
 
         if (showToast)
+        {
             Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
+        }
     }
 }

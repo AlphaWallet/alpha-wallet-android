@@ -19,10 +19,6 @@ public class CurrencyTest extends BaseE2ETest
         gotoWalletPage();
         shouldSee("¥");
 
-        selectCurrency("KRW");
-        gotoWalletPage();
-        shouldSee("₩");
-
         selectCurrency("IDR");
         gotoWalletPage();
         shouldSee("Rp");

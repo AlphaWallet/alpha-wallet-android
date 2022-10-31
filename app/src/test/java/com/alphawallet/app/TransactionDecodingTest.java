@@ -94,7 +94,7 @@ public class TransactionDecodingTest
                     default:
                         break;
                 }
-                stringBuilder.append(transactionInput.buildFunctionCallText()).append("\n");
+                stringBuilder.append(transactionInput.buildFunctionCallText()).append(System.lineSeparator());
             }
         }
         assertThat(stringBuilder.toString(), equalTo(getBaseline()));

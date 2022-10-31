@@ -80,22 +80,21 @@
         <module name="LeftCurly">
             <property name="option" value="nl" />
             <property name="tokens" value="ANNOTATION_DEF, CLASS_DEF, CTOR_DEF, ENUM_CONSTANT_DEF, ENUM_DEF,
-                    INTERFACE_DEF, LAMBDA, LITERAL_CASE, LITERAL_CATCH, LITERAL_DEFAULT,
+                    INTERFACE_DEF, LITERAL_CASE, LITERAL_CATCH, LITERAL_DEFAULT,
                     LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF,
                     LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, METHOD_DEF,
-                    OBJBLOCK, STATIC_INIT, RECORD_DEF, COMPACT_CTOR_DEF" />
+                    STATIC_INIT, OBJBLOCK, RECORD_DEF, COMPACT_CTOR_DEF" />
         </module>
         <module name="RightCurly">
             <property name="id" value="RightCurlySame" />
-            <property name="tokens" value="LITERAL_CATCH, LITERAL_FINALLY, LITERAL_ELSE,
-                            LITERAL_DO" />
+            <property name="tokens" value="LITERAL_FINALLY, LITERAL_ELSE" />
         </module>
         <module name="RightCurly">
             <property name="id" value="RightCurlyAlone" />
             <property name="option" value="alone" />
-            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_TRY, LITERAL_IF, LITERAL_WHILE, STATIC_INIT,
+            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_TRY, LITERAL_CATCH, LITERAL_IF, LITERAL_WHILE, STATIC_INIT,
                             INSTANCE_INIT, ANNOTATION_DEF, ENUM_DEF, INTERFACE_DEF, RECORD_DEF,
-                            COMPACT_CTOR_DEF" />
+                            COMPACT_CTOR_DEF, LITERAL_DO" />
         </module>
         <!--        <module name="SuppressionXpathSingleFilter">-->
         <!--            &lt;!&ndash; suppresion is required till https://github.com/checkstyle/checkstyle/issues/7541 &ndash;&gt;-->

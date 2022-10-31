@@ -31,13 +31,18 @@ startGanache &
 
 ./gradlew :app:uninstallAll :app:connectedNoAnalyticsDebugAndroidTest -x lint -PdisablePreDex
 
-if [ "$?" != "0" ]; then
-  adb pull /storage/emulated/0/DCIM/ output
-  if [ "$1" != "--CI" ]; then
-    open output/DCIM/*.png
-  fi
-
-  exit 1
+if [ "$?" == "0" ]; then
+  stopGanache
+  exit 0
 fi
 
+adb pull /storage/emulated/0/DCIM/ output
+if [ "$1" != "--CI" ]; then
+  open output/DCIM/*.png
+fi
+
+# Copy test report
+cp -r app/build/reports/androidTests/connected/flavors/noAnalytics/ output/html
+
 stopGanache
+exit 1

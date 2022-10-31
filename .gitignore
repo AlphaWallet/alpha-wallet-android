@@ -73,3 +73,4 @@ fastlane/.google-play-key.json
 DCIM/
 vendor/
 .project
+output/

@@ -132,7 +132,6 @@ public class Analytics
 //        RECTIFY_SEND_TRANSACTION_ERROR_IN_ACTION_SHEET("Rectify Send Txn Error"),
 //        ENTER_URL("Enter URL"),
 //        PING_INFURA("Ping Infura"),
-//        NAME_WALLET("Name Wallet"),
 //        SUBSCRIBE_TO_EMAIL_NEWSLETTER("Subscribe Email Newsletter"),
 //        TAP_SAFARI_EXTENSION_REWRITTEN_URL("Tap Safari Extension Rewritten URL");
 //        SUPPORT_FACEBOOK("Clicked Facebook Link"),

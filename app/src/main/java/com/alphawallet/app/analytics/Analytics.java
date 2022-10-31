@@ -51,6 +51,9 @@ public class Analytics
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED("Screen: Txn Confirmation Failed"),
         TOKEN_SWAP("Screen: Token Swap"),
 
+        ADD_DAPP("Screen: Add to My Dapps"),
+        EDIT_DAPP("Screen: Edit Dapp"),
+
 //        SIGN_MESSAGE_REQUEST("Screen: Sign Message Request"),
 
 //        ON_RAMP("Screen: Fiat On-Ramp"),
@@ -146,12 +149,13 @@ public class Analytics
 //        CANCELS_SWITCH_SERVER("Switch Server Cancelled"),
 //        RECTIFY_SEND_TRANSACTION_ERROR_IN_ACTION_SHEET("Rectify Send Txn Error"),
 
-//        BROWSER ANALYTICS
-//        CLEAR_BROWSER_CACHE("Clear Browser Cache"),
-//        SHARE_URL("Share URL"),
-//        ADD_DAPP("Add Dapp"),
-//        ENTER_URL("Enter URL"),
-//        RELOAD_BROWSER("Reload Browser"),
+        //        BROWSER ANALYTICS
+        CLEAR_BROWSER_CACHE("Clear Browser Cache"),
+        SHARE_URL("Share URL"),
+        DAPP_ADDED("Dapp Added"),
+        DAPP_EDITED("Dapp Edited"),
+        RELOAD_BROWSER("Reload Browser"),
+        //        ENTER_URL("Enter URL"),
 
 //        PING_INFURA("Ping Infura"),
 //

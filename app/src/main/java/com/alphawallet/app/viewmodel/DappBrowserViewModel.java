@@ -16,6 +16,7 @@ import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -187,6 +188,7 @@ public class DappBrowserViewModel extends BaseViewModel
 
     public void share(Context context, String url)
     {
+        track(Analytics.Action.SHARE_URL);
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_TEXT, url);
@@ -200,6 +202,7 @@ public class DappBrowserViewModel extends BaseViewModel
         webView.clearCache(true);
         Toast.makeText(context, context.getString(R.string.toast_browser_cache_cleared),
                 Toast.LENGTH_SHORT).show();
+        track(Analytics.Action.CLEAR_BROWSER_CACHE);
     }
 
     public void startScan(Activity activity)

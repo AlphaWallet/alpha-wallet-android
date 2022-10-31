@@ -1722,6 +1722,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             //ensure focus isn't on the keyboard
             KeyboardUtils.hideKeyboard(urlTv);
             web3.requestFocus();
+
+            AnalyticsProperties props = new AnalyticsProperties();
+            props.put(Analytics.PROPS_URL, urlText);
+            viewModel.track(Analytics.Action.LOAD_URL, props);
         }
     }
 
@@ -1735,6 +1739,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             }
             web3.resetView();
             web3.reload();
+
+            viewModel.track(Analytics.Action.RELOAD_BROWSER);
         }
     }
 

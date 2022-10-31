@@ -37,67 +37,40 @@ public class Analytics
         SETTINGS_DARK_MODE("Screen: Settings - Dark Mode"),
         SETTINGS_ADVANCED("Screen: Settings - Advanced"),
         SETTINGS_SUPPORT("Screen: Settings - Support"),
-
         ADD_CUSTOM_NETWORK("Screen: Add Custom Network"),
-
         IMPORT_WALLET("Screen: Import Wallet"),
         COINBASE_PAY("Screen: Buy with Coinbase Pay"),
         WALLET_CONNECT_SESSION_DETAIL("Screen: Wallet Connect Session Detail"),
         WALLET_CONNECT_SESSIONS("Screen: Wallet Connect Sessions"),
-
         ACTION_SHEET("Screen: ActionSheet"),
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION("Screen: Txn Confirmation"),
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_SUCCESSFUL("Screen: Txn Confirmation Successful"),
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED("Screen: Txn Confirmation Failed"),
         TOKEN_SWAP("Screen: Token Swap"),
-
         MY_DAPPS("Screen: My Dapps"),
         ADD_DAPP("Screen: Add to My Dapps"),
         EDIT_DAPP("Screen: Edit Dapp"),
-
-//        SIGN_MESSAGE_REQUEST("Screen: Sign Message Request"),
-
-//        ON_RAMP("Screen: Fiat On-Ramp"),
-//
-//        ON_UNISWAP("Screen: Uniswap"),
-//
-//        ON_XDAI_BRIDGE("Screen: xDai Bridge"),
-//
-//        ON_HONEYSWAP("Screen: Honeyswap"),
-//
-//        ON_ONEINCH("Screen: Oneinch"),
-//
-//        ON_CARTHAGE("Screen: Carthage"),
-//
-//        ON_ARBITRUM_BRIDGE("Screen: Arbitrum Bridge"),
-//
-//        ON_QUICK_SWAP("Screen: QuickSwap"),
-//
-//        FALLBACK("Screen: <Fallback>"),
-//
-//        SWITCH_SERVERS("Screen: Switch Servers"),
-//
-//        SHOW_DAPPS("Screen: Dapps"),
-//
-//        SHOW_HISTORY("Screen: Dapp History"),
-//
-//        TAP_BROWSER_MORE("Screen: Browser More Options"),
-//
-//        DEEP_LINK("Screen: DeepLink"),
-//
-//        FAQ("Screen: FAQ"),
-//
-
-//
-//        EXPLORER("Screen: Explorer"),
-//
-//        OPEN_SHORTCUT("Screen: Shortcut"),
-//
-//        OPEN_HELP_URL("Screen: Help URL"),
-//
-//        BLOCKSCAN_CHAT("Screen: Blockscan Chat");
+        BROWSER_HISTORY("Screen: Dapp Browser History"),
 
         SCAN_QR_CODE("Screen: QR Code Scanner");
+
+//        SIGN_MESSAGE_REQUEST("Screen: Sign Message Request"),
+//        ON_RAMP("Screen: Fiat On-Ramp"),
+//        ON_UNISWAP("Screen: Uniswap"),
+//        ON_XDAI_BRIDGE("Screen: xDai Bridge"),
+//        ON_HONEYSWAP("Screen: Honeyswap"),
+//        ON_ONEINCH("Screen: Oneinch"),
+//        ON_CARTHAGE("Screen: Carthage"),
+//        ON_ARBITRUM_BRIDGE("Screen: Arbitrum Bridge"),
+//        ON_QUICK_SWAP("Screen: QuickSwap"),
+//        FALLBACK("Screen: <Fallback>"),
+//        SWITCH_SERVERS("Screen: Switch Servers"),
+//        TAP_BROWSER_MORE("Screen: Browser More Options"),
+//        DEEP_LINK("Screen: DeepLink"),
+//        EXPLORER("Screen: Explorer"),
+//        OPEN_SHORTCUT("Screen: Shortcut"),
+//        OPEN_HELP_URL("Screen: Help URL"),
+//        BLOCKSCAN_CHAT("Screen: Blockscan Chat");
 
         private final String screenName;
 
@@ -136,46 +109,34 @@ public class Analytics
         WALLET_CONNECT_TRANSACTION_FAILED("WalletConnect - Transaction Failed"),
         WALLET_CONNECT_TRANSACTION_CANCELLED("WalletConnect - Transaction Cancelled"),
         WALLET_CONNECT_CONNECTION_TIMEOUT("WalletConnect - Connection Timeout"),
-
         BUY_WITH_RAMP("Buy with Ramp Clicked"),
-
-//        SUPPORT_REDDIT("Clicked Reddit Link"),
-//        SUPPORT_FACEBOOK("Clicked Facebook Link"),
-
-//        WALLET_CONNECT_CANCEL("WalletConnect Cancel"),
-//        WALLET_CONNECT_CONNECTION_FAILED("WalletConnect Connection Failed"),
-
-//        SIGN_MESSAGE_REQUEST("Sign Message Request"),
-//        CANCEL_SIGN_MESSAGE_REQUEST("Cancel Sign Message Request"),
-
-//        SWITCHED_SERVER("Switch Server Completed"),
-//        CANCELS_SWITCH_SERVER("Switch Server Cancelled"),
-//        RECTIFY_SEND_TRANSACTION_ERROR_IN_ACTION_SHEET("Rectify Send Txn Error"),
-
-        //        BROWSER ANALYTICS
         CLEAR_BROWSER_CACHE("Clear Browser Cache"),
         SHARE_URL("Share URL"),
         DAPP_ADDED("Dapp Added"),
         DAPP_EDITED("Dapp Edited"),
         RELOAD_BROWSER("Reload Browser"),
-        //        ENTER_URL("Enter URL"),
-
-//        PING_INFURA("Ping Infura"),
-//
-//        NAME_WALLET("Name Wallet"),
-//
-//        FIRST_WALLET_ACTION("First Wallet Action"),
-//
-//        SUBSCRIBE_TO_EMAIL_NEWSLETTER("Subscribe Email Newsletter"),
-//
-//        TAP_SAFARI_EXTENSION_REWRITTEN_URL("Tap Safari Extension Rewritten URL");
-
         SUPPORT_TELEGRAM("Clicked Telegram Customer Support Link"),
         SUPPORT_DISCORD("Clicked Discord Link"),
         SUPPORT_EMAIL("Clicked Email Link"),
         SUPPORT_TWITTER("Clicked Twitter Link"),
         SUPPORT_GITHUB("Clicked Github Link"),
         SUPPORT_FAQ("Clicked FAQ Link");
+
+//        WALLET_CONNECT_CANCEL("WalletConnect Cancel"),
+//        WALLET_CONNECT_CONNECTION_FAILED("WalletConnect Connection Failed"),
+//        SIGN_MESSAGE_REQUEST("Sign Message Request"),
+//        CANCEL_SIGN_MESSAGE_REQUEST("Cancel Sign Message Request"),
+//        SWITCHED_SERVER("Switch Server Completed"),
+//        CANCELS_SWITCH_SERVER("Switch Server Cancelled"),
+//        RECTIFY_SEND_TRANSACTION_ERROR_IN_ACTION_SHEET("Rectify Send Txn Error"),
+//        ENTER_URL("Enter URL"),
+//        PING_INFURA("Ping Infura"),
+//        NAME_WALLET("Name Wallet"),
+//        FIRST_WALLET_ACTION("First Wallet Action"),
+//        SUBSCRIBE_TO_EMAIL_NEWSLETTER("Subscribe Email Newsletter"),
+//        TAP_SAFARI_EXTENSION_REWRITTEN_URL("Tap Safari Extension Rewritten URL");
+//        SUPPORT_FACEBOOK("Clicked Facebook Link"),
+//        SUPPORT_REDDIT("Clicked Reddit Link"),
 
         private final String actionName;
 

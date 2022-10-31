@@ -51,6 +51,7 @@ public class Analytics
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED("Screen: Txn Confirmation Failed"),
         TOKEN_SWAP("Screen: Token Swap"),
 
+        MY_DAPPS("Screen: My Dapps"),
         ADD_DAPP("Screen: Add to My Dapps"),
         EDIT_DAPP("Screen: Edit Dapp"),
 

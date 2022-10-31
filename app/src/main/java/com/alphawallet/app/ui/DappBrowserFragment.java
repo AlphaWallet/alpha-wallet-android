@@ -1688,7 +1688,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private boolean loadUrl(String urlText)
     {
         AnalyticsProperties props = new AnalyticsProperties();
-        props.put(Analytics.PROPS_URL, props);
+        props.put(Analytics.PROPS_URL, urlText);
         viewModel.track(Analytics.Action.LOAD_URL, props);
 
         detachFragments();
@@ -1724,7 +1724,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             web3.requestFocus();
 
             AnalyticsProperties props = new AnalyticsProperties();
-            props.put(Analytics.PROPS_URL, props);
+            props.put(Analytics.PROPS_URL, urlText);
             viewModel.track(Analytics.Action.LOAD_URL, props);
         }
     }

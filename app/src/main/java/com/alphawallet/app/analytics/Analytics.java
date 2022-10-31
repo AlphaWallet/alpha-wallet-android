@@ -50,36 +50,50 @@ public class Analytics
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_SUCCESSFUL("Screen: Txn Confirmation Successful"),
         ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED("Screen: Txn Confirmation Failed"),
         TOKEN_SWAP("Screen: Token Swap"),
-        //        SIGN_MESSAGE_REQUEST("Screen: Sign Message Request"),
 
-        SCAN_QR_CODE("Screen: QR Code Scanner");
-
+//        SIGN_MESSAGE_REQUEST("Screen: Sign Message Request"),
 
 //        ON_RAMP("Screen: Fiat On-Ramp"),
+//
 //        ON_UNISWAP("Screen: Uniswap"),
+//
 //        ON_XDAI_BRIDGE("Screen: xDai Bridge"),
+//
 //        ON_HONEYSWAP("Screen: Honeyswap"),
+//
 //        ON_ONEINCH("Screen: Oneinch"),
+//
 //        ON_CARTHAGE("Screen: Carthage"),
+//
 //        ON_ARBITRUM_BRIDGE("Screen: Arbitrum Bridge"),
+//
 //        ON_QUICK_SWAP("Screen: QuickSwap"),
+//
 //        FALLBACK("Screen: <Fallback>"),
+//
 //        SWITCH_SERVERS("Screen: Switch Servers"),
+//
 //        SHOW_DAPPS("Screen: Dapps"),
+//
 //        SHOW_HISTORY("Screen: Dapp History"),
+//
 //        TAP_BROWSER_MORE("Screen: Browser More Options"),
+//
 //        DEEP_LINK("Screen: DeepLink"),
+//
 //        FAQ("Screen: FAQ"),
-//        DISCORD("Screen: Discord"),
-//        TELEGRAM_CUSTOMER_SUPPORT("Screen: Telegram: Customer Support"),
-//        TWITTER("Screen: Twitter"),
-//        REDDIT("Screen: Reddit"),
-//        FACEBOOK("Screen: Facebook"),
-//        GITHUB("Screen: Github"),
+//
+
+//
 //        EXPLORER("Screen: Explorer"),
+//
 //        OPEN_SHORTCUT("Screen: Shortcut"),
+//
 //        OPEN_HELP_URL("Screen: Help URL"),
+//
 //        BLOCKSCAN_CHAT("Screen: Blockscan Chat");
+
+        SCAN_QR_CODE("Screen: QR Code Scanner");
 
         private final String screenName;
 
@@ -104,10 +118,8 @@ public class Analytics
         SCAN_QR_CODE_SUCCESS("Scan QR Code Completed"),
         SCAN_QR_CODE_CANCELLED("Scan QR Code Cancelled"),
         SCAN_QR_CODE_ERROR("Scan QR Code Error"),
-
         ADD_CUSTOM_CHAIN("Add Custom Chain"),
         EDIT_CUSTOM_CHAIN("Edit Custom Chain"),
-
         WALLET_CONNECT_SESSION_REQUEST("WalletConnect - Session Request"),
         WALLET_CONNECT_SESSION_APPROVED("WalletConnect - Session Approved"),
         WALLET_CONNECT_SESSION_REJECTED("WalletConnect - Session Rejected"),
@@ -119,32 +131,28 @@ public class Analytics
         WALLET_CONNECT_TRANSACTION_SUCCESS("WalletConnect - Transaction Success"),
         WALLET_CONNECT_TRANSACTION_FAILED("WalletConnect - Transaction Failed"),
         WALLET_CONNECT_TRANSACTION_CANCELLED("WalletConnect - Transaction Cancelled"),
-        WALLET_CONNECT_CONNECTION_TIMEOUT("WalletConnect - Connection Timeout");
+        WALLET_CONNECT_CONNECTION_TIMEOUT("WalletConnect - Connection Timeout"),
+
+//        SUPPORT_REDDIT("Clicked Reddit Link"),
+//        SUPPORT_FACEBOOK("Clicked Facebook Link"),
 
 //        WALLET_CONNECT_CANCEL("WalletConnect Cancel"),
-//
 //        WALLET_CONNECT_CONNECTION_FAILED("WalletConnect Connection Failed"),
-//
+
 //        SIGN_MESSAGE_REQUEST("Sign Message Request"),
-//
 //        CANCEL_SIGN_MESSAGE_REQUEST("Cancel Sign Message Request"),
-//
+
 //        SWITCHED_SERVER("Switch Server Completed"),
-//
 //        CANCELS_SWITCH_SERVER("Switch Server Cancelled"),
-//
 //        RECTIFY_SEND_TRANSACTION_ERROR_IN_ACTION_SHEET("Rectify Send Txn Error"),
-//
+
+//        BROWSER ANALYTICS
 //        CLEAR_BROWSER_CACHE("Clear Browser Cache"),
-//
 //        SHARE_URL("Share URL"),
-//
 //        ADD_DAPP("Add Dapp"),
-//
 //        ENTER_URL("Enter URL"),
-//
 //        RELOAD_BROWSER("Reload Browser"),
-//
+
 //        PING_INFURA("Ping Infura"),
 //
 //        NAME_WALLET("Name Wallet"),
@@ -154,6 +162,13 @@ public class Analytics
 //        SUBSCRIBE_TO_EMAIL_NEWSLETTER("Subscribe Email Newsletter"),
 //
 //        TAP_SAFARI_EXTENSION_REWRITTEN_URL("Tap Safari Extension Rewritten URL");
+
+        SUPPORT_TELEGRAM("Clicked Telegram Customer Support Link"),
+        SUPPORT_DISCORD("Clicked Discord Link"),
+        SUPPORT_EMAIL("Clicked Email Link"),
+        SUPPORT_TWITTER("Clicked Twitter Link"),
+        SUPPORT_GITHUB("Clicked Github Link"),
+        SUPPORT_FAQ("Clicked FAQ Link");
 
         private final String actionName;
 

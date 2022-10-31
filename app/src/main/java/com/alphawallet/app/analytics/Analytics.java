@@ -22,53 +22,53 @@ public class Analytics
 
     public enum Navigation
     {
-        WALLET("Screen: Wallet"),
-        ACTIVITY("Screen: Activity"),
-        BROWSER("Screen: Browser"),
-        SETTINGS("Screen: Settings"),
-        MY_ADDRESS("Screen: My Wallet Address"),
-        MY_WALLETS("Screen: My Wallets"),
-        BACK_UP_WALLET("Screen: Back Up Wallet"),
-        SHOW_SEED_PHRASE("Screen: Show Seed Phrase"),
-        NAME_WALLET("Screen: Name Wallet"),
-        SELECT_NETWORKS("Screen: Select Networks"),
-        CHANGE_LANGUAGE("Screen: Change Language"),
-        CHANGE_CURRENCY("Screen: Change Currency"),
-        SETTINGS_DARK_MODE("Screen: Settings - Dark Mode"),
-        SETTINGS_ADVANCED("Screen: Settings - Advanced"),
-        SETTINGS_SUPPORT("Screen: Settings - Support"),
-        ADD_CUSTOM_NETWORK("Screen: Add Custom Network"),
-        IMPORT_WALLET("Screen: Import Wallet"),
-        COINBASE_PAY("Screen: Buy with Coinbase Pay"),
-        WALLET_CONNECT_SESSION_DETAIL("Screen: Wallet Connect Session Detail"),
-        WALLET_CONNECT_SESSIONS("Screen: Wallet Connect Sessions"),
-        ACTION_SHEET("Screen: ActionSheet"),
-        ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION("Screen: Txn Confirmation"),
-        ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_SUCCESSFUL("Screen: Txn Confirmation Successful"),
-        ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED("Screen: Txn Confirmation Failed"),
-        TOKEN_SWAP("Screen: Token Swap"),
-        MY_DAPPS("Screen: My Dapps"),
-        ADD_DAPP("Screen: Add to My Dapps"),
-        EDIT_DAPP("Screen: Edit Dapp"),
-        BROWSER_HISTORY("Screen: Dapp Browser History"),
-        SCAN_QR_CODE("Screen: QR Code Scanner");
+        WALLET("Wallet"),
+        ACTIVITY("Activity"),
+        BROWSER("Browser"),
+        SETTINGS("Settings"),
+        MY_ADDRESS("My Wallet Address"),
+        MY_WALLETS("My Wallets"),
+        BACK_UP_WALLET("Back Up Wallet"),
+        SHOW_SEED_PHRASE("Show Seed Phrase"),
+        NAME_WALLET("Name Wallet"),
+        SELECT_NETWORKS("Select Networks"),
+        CHANGE_LANGUAGE("Change Language"),
+        CHANGE_CURRENCY("Change Currency"),
+        SETTINGS_DARK_MODE("Settings - Dark Mode"),
+        SETTINGS_ADVANCED("Settings - Advanced"),
+        SETTINGS_SUPPORT("Settings - Support"),
+        ADD_CUSTOM_NETWORK("Add Custom Network"),
+        IMPORT_WALLET("Import Wallet"),
+        COINBASE_PAY("Buy with Coinbase Pay"),
+        WALLET_CONNECT_SESSION_DETAIL("Wallet Connect Session Detail"),
+        WALLET_CONNECT_SESSIONS("Wallet Connect Sessions"),
+        ACTION_SHEET("ActionSheet"),
+        ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION("ActionSheet - Txn Confirmation"),
+        ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_SUCCESSFUL("Txn Confirmation Successful"),
+        ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED("Txn Confirmation Failed"),
+        TOKEN_SWAP("Token Swap"),
+        MY_DAPPS("My Dapps"),
+        ADD_DAPP("Add to My Dapps"),
+        EDIT_DAPP("Edit Dapp"),
+        BROWSER_HISTORY("Dapp Browser History"),
+        SCAN_QR_CODE("QR Code Scanner");
 
-//        SIGN_MESSAGE_REQUEST("Screen: Sign Message Request"),
-//        ON_RAMP("Screen: Fiat On-Ramp"),
-//        ON_UNISWAP("Screen: Uniswap"),
-//        ON_XDAI_BRIDGE("Screen: xDai Bridge"),
-//        ON_HONEYSWAP("Screen: Honeyswap"),
-//        ON_ONEINCH("Screen: Oneinch"),
-//        ON_CARTHAGE("Screen: Carthage"),
-//        ON_ARBITRUM_BRIDGE("Screen: Arbitrum Bridge"),
-//        ON_QUICK_SWAP("Screen: QuickSwap"),
-//        FALLBACK("Screen: <Fallback>"),
-//        SWITCH_SERVERS("Screen: Switch Servers"),
-//        TAP_BROWSER_MORE("Screen: Browser More Options"),
-//        EXPLORER("Screen: Explorer"),
-//        OPEN_SHORTCUT("Screen: Shortcut"),
-//        OPEN_HELP_URL("Screen: Help URL"),
-//        BLOCKSCAN_CHAT("Screen: Blockscan Chat");
+//        SIGN_MESSAGE_REQUEST("Sign Message Request"),
+//        ON_RAMP("Fiat On-Ramp"),
+//        ON_UNISWAP("Uniswap"),
+//        ON_XDAI_BRIDGE("xDai Bridge"),
+//        ON_HONEYSWAP("Honeyswap"),
+//        ON_ONEINCH("Oneinch"),
+//        ON_CARTHAGE("Carthage"),
+//        ON_ARBITRUM_BRIDGE("Arbitrum Bridge"),
+//        ON_QUICK_SWAP("QuickSwap"),
+//        FALLBACK("<Fallback>"),
+//        SWITCH_SERVERS("Switch Servers"),
+//        TAP_BROWSER_MORE("Browser More Options"),
+//        EXPLORER("Explorer"),
+//        OPEN_SHORTCUT("Shortcut"),
+//        OPEN_HELP_URL("Help URL"),
+//        BLOCKSCAN_CHAT("Blockscan Chat");
 
         private final String screenName;
 
@@ -79,7 +79,7 @@ public class Analytics
 
         public String getValue()
         {
-            return screenName;
+            return "Screen: " + screenName;
         }
     }
 

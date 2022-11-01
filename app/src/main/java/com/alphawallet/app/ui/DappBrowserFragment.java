@@ -41,7 +41,6 @@ import android.view.inputmethod.EditorInfo;
 import android.webkit.ConsoleMessage;
 import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
-import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
@@ -1447,7 +1446,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             confirmationDialog.dismiss();
     }
 
-    //Display error
     private void displayError(int title, int text)
     {
         if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();

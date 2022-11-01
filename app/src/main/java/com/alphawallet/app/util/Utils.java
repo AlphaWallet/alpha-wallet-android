@@ -20,7 +20,6 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
-import android.util.Patterns;
 import android.util.TypedValue;
 import android.webkit.URLUtil;
 
@@ -31,6 +30,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.util.pattern.Patterns;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;

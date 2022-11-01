@@ -351,7 +351,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return Uri.parse(uriString).getUserInfo();
     }
 
-    public boolean addCustomChain(WalletAddEthereumChainObject chainObject) {
+    public boolean addCustomChain(WalletAddEthereumChainObject chainObject)
+    {
         String rpc = extractRpc(chainObject);
         String blockExplorer = extractBlockExplorer(chainObject);
         if (rpc == null) return false;
@@ -362,7 +363,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         tokensService.createBaseToken(chainObject.getChainId())
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe(w -> { }, e -> { })
+                .subscribe(w -> {}, e -> {})
                 .isDisposed();
 
         return true;

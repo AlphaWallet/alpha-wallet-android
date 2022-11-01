@@ -84,22 +84,16 @@ public class BaseViewModel extends ViewModel
 
     protected void onError(Throwable throwable)
     {
-        Timber.tag("TAG").d(throwable, "Err");
+        Timber.e(throwable);
         if (throwable instanceof ServiceException)
         {
             error.postValue(((ServiceException) throwable).error);
         }
         else
         {
-            String message = throwable.getMessage();
-            if (TextUtils.isEmpty(message))
-            {
-                error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, null, throwable));
-            }
-            else
-            {
-                error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, message, throwable));
-            }
+            String message = TextUtils.isEmpty(throwable.getMessage()) ?
+                    "Unknown Error" : throwable.getMessage();
+            error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, message, throwable));
         }
     }
 

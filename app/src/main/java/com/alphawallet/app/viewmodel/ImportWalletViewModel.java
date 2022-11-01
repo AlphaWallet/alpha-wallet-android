@@ -83,8 +83,8 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     {
         if (walletAddress == null)
         {
+            Timber.e("walletAddress is null");
             progress.postValue(false);
-            Timber.e("ERROR");
             badSeed.postValue(true);
         }
         else

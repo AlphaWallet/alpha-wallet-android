@@ -29,7 +29,7 @@
     "lint-staged": "^13.0.3"
   },
   "lint-staged": {
-    "**/*.{java,xml,json}": [
+    "**/*.{java,xml,json,yml,md}": [
       "npx ec"
     ]
   }

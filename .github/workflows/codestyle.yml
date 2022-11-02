@@ -4,11 +4,7 @@ on:
 jobs:
   lint:
     name: Check
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:

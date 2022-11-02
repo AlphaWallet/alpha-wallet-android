@@ -3,6 +3,7 @@ package com.alphawallet.app.repository;
 /* Please don't add import android at this point. Later this file will be shared
  * between projects including non-Android projects */
 
+import static com.alphawallet.app.util.Utils.isValidUrl;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_GOERLI_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
@@ -26,6 +27,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_TEST_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FUJI_TEST_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_RPC_URL;
@@ -41,31 +43,30 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KOVAN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISM_GOERLI_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_FALLBACK_URL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_FALLBACK_URL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_MAIN_RPC_URL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_NETWORK_V2_RPC;
-import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_V2_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_TEST_RPC;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISM_GOERLI_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_FALLBACK_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_FALLBACK_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_MAIN_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_NETWORK_V2_RPC;
+import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_V2_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SOKOL_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_RPC_URL;
 
 import android.text.TextUtils;
@@ -622,6 +623,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
                 for (NetworkInfo info : list)
                 {
+                    if (!isValidUrl(info.rpcServerUrl)) //ensure RPC doesn't contain malicious code
+                    {
+                        continue;
+                    }
+
                     networkMap.put(info.chainId, info);
                     Boolean value = mapToTestNet.get(info.chainId);
                     boolean isTestnet = value != null && value;

@@ -1,13 +1,14 @@
 {
   "name": "alpha-wallet-android",
   "version": "1.0.0",
-  "description": "Each module has its own README. Please click the name of the module to go to the corrisponding README file.",
+  "description": "Open source Ethereum wallet",
   "main": "gulpfile.js",
   "directories": {
     "lib": "lib"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -21,5 +22,15 @@
   "homepage": "https://github.com/AlphaWallet/alpha-wallet-android#readme",
   "dependencies": {
     "normalize.css": "^8.0.0"
+  },
+  "devDependencies": {
+    "editorconfig-checker": "4.0.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.0.3"
+  },
+  "lint-staged": {
+    "**/*.{java,xml,json}": [
+      "npx ec"
+    ]
   }
 }

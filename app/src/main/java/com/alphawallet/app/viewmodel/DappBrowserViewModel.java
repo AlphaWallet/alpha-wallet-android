@@ -377,7 +377,7 @@ public class DappBrowserViewModel extends BaseViewModel
         return Uri.parse(uriString).getUserInfo();
     }
 
-    public boolean addCustomChain(WalletAddEthereumChainObject chainObject)
+    public void addCustomChain(WalletAddEthereumChainObject chainObject)
     {
         String rpc = extractRpc(chainObject);
         if (rpc == null) return false;

@@ -28,7 +28,7 @@ public class EthereumNetworkBaseTest
     public void should_construct_infura_url_when_getNodeURLByNetworkId_given_production_key()
     {
         assertThat(EthereumNetworkBase.getNodeURLByNetworkId(1L), equalTo("https://mainnet.infura.io/v3/fake-key-for-testing"));
-        assertThat(EthereumNetworkBase.getNodeURLByNetworkId(3L), equalTo("https://ropsten.infura.io/v3/fake-key-for-testing"));
+        assertThat(EthereumNetworkBase.getNodeURLByNetworkId(3L), equalTo("https://rpc.ankr.com/eth_ropsten"));
     }
 
     @Test

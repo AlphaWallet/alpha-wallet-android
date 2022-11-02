@@ -25,3 +25,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./gradlew report -PgithubPullRequestId=$PR_NUMBER -PgithubToken=$GITHUB_TOKEN
+

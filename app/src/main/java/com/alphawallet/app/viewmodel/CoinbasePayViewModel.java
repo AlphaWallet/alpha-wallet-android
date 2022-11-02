@@ -4,8 +4,6 @@ package com.alphawallet.app.viewmodel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.alphawallet.app.C;
-import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.coinbasepay.DestinationWallet;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -24,7 +22,6 @@ public class CoinbasePayViewModel extends BaseViewModel
 {
     private final GenericWalletInteract genericWalletInteract;
     private final CoinbasePayRepositoryType coinbasePayRepository;
-    private final AnalyticsServiceType analyticsService;
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<byte[]> signature = new MutableLiveData<>();
 
@@ -37,7 +34,7 @@ public class CoinbasePayViewModel extends BaseViewModel
     {
         this.genericWalletInteract = genericWalletInteract;
         this.coinbasePayRepository = coinbasePayRepository;
-        this.analyticsService = analyticsService;
+        setAnalyticsService(analyticsService);
     }
 
     public LiveData<Wallet> defaultWallet()
@@ -60,9 +57,6 @@ public class CoinbasePayViewModel extends BaseViewModel
 
     public String getUri(DestinationWallet.Type type, String address, List<String> list)
     {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(type.toString() + ": " + list.get(0));
-        analyticsService.track(C.AN_USE_COINBASE_PAY, analyticsProperties);
         return coinbasePayRepository.getUri(type, address, list);
     }
 }

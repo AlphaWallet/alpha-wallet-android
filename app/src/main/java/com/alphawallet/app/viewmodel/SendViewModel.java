@@ -52,7 +52,6 @@ public class SendViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final KeyService keyService;
     private final CreateTransactionInteract createTransactionInteract;
-    private final AnalyticsServiceType analyticsService;
 
     @Inject
     public SendViewModel(MyAddressRouter myAddressRouter,
@@ -73,7 +72,7 @@ public class SendViewModel extends BaseViewModel {
         this.assetDefinitionService = assetDefinitionService;
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
-        this.analyticsService = analyticsService;
+        setAnalyticsService(analyticsService);
     }
 
     public MutableLiveData<TransactionData> transactionFinalised()
@@ -169,13 +168,5 @@ public class SendViewModel extends BaseViewModel {
                 .createWithSig(wallet, finalTx, chainId)
                 .subscribe(transactionFinalised::postValue,
                         transactionError::postValue);
-    }
-
-    public void actionSheetConfirm(String mode)
-    {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(mode);
-
-        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }
 }

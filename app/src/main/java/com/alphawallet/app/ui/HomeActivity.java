@@ -53,7 +53,9 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
@@ -1053,11 +1055,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    public void useActionSheet(String mode)
-    {
-        viewModel.actionSheetConfirm(mode);
-    }
-
     private void hideSystemUI()
     {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
@@ -1099,6 +1096,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 {
                     Intent intent = new Intent(this, ApiV1Activity.class);
                     intent.putExtra(C.Key.API_V1_REQUEST_URL, importData);
+                    viewModel.track(Analytics.Action.DEEP_LINK_API_V1);
                     startActivity(intent);
                     return;
                 }
@@ -1110,6 +1108,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     String link = importData.substring(directLinkIndex + AW_MAGICLINK_DIRECT.length());
                     if (getSupportFragmentManager().getFragments().size() >= DAPP_BROWSER.ordinal())
                     {
+                        viewModel.track(Analytics.Action.DEEP_LINK);
                         showPage(DAPP_BROWSER);
                         if (!dappFrag.isDetached()) dappFrag.loadDirect(link);
                     }

@@ -67,6 +67,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DApp;
@@ -80,13 +82,14 @@ import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.analytics.ActionSheetSource;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.WalletConnectService;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
 import com.alphawallet.app.ui.widget.adapter.DappBrowserSuggestionsAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -321,6 +324,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
         else
         {
+            viewModel.track(Analytics.Navigation.BROWSER);
             web3.setWebLoadCallback(this);
         }
 
@@ -1708,6 +1712,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private boolean loadUrl(String urlText)
     {
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_URL, urlText);
+        viewModel.track(Analytics.Action.LOAD_URL, props);
+
         detachFragments();
         addToBackStack(DAPP_BROWSER);
         cancelSearchSession();
@@ -1739,6 +1747,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             //ensure focus isn't on the keyboard
             KeyboardUtils.hideKeyboard(urlTv);
             web3.requestFocus();
+
+            AnalyticsProperties props = new AnalyticsProperties();
+            props.put(Analytics.PROPS_URL, urlText);
+            viewModel.track(Analytics.Action.LOAD_URL, props);
         }
     }
 
@@ -1752,6 +1764,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             }
             web3.resetView();
             web3.reload();
+
+            viewModel.track(Analytics.Action.RELOAD_BROWSER);
         }
     }
 
@@ -1834,10 +1848,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                         }
                     }
                     break;
-                case QRScanner.DENY_PERMISSION:
+                case QRScannerActivity.DENY_PERMISSION:
                     showCameraDenied();
                     break;
-                case QRScanner.WALLET_CONNECT:
+                case QRScannerActivity.WALLET_CONNECT:
                     return;
                 default:
                     break;
@@ -2226,7 +2240,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void notifyConfirm(String mode)
     {
-        if (getActivity() != null) ((HomeActivity) getActivity()).useActionSheet(mode);
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        props.put(Analytics.PROPS_ACTION_SHEET_SOURCE, ActionSheetSource.BROWSER);
+        viewModel.track(Analytics.Action.ACTION_SHEET_COMPLETED, props);
     }
 
     @Override

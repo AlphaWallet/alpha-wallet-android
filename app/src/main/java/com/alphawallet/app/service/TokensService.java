@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
@@ -1098,9 +1099,8 @@ public class TokensService
         if (analyticsService != null)
         {
             AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-            analyticsProperties.setData(gasSpeed);
-
-            analyticsService.track(C.AN_USE_GAS, analyticsProperties);
+            analyticsProperties.put(Analytics.PROPS_GAS_SPEED, gasSpeed);
+            analyticsService.track(Analytics.Action.USE_GAS_WIDGET.getValue(), analyticsProperties);
         }
     }
 

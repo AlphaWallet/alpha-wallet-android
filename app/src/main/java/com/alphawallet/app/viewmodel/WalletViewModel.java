@@ -1,7 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
 import static com.alphawallet.app.C.EXTRA_ADDRESS;
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.widget.CopyTextView.KEY_ADDRESS;
 
 import android.app.Activity;
@@ -22,6 +21,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
@@ -36,11 +36,12 @@ import com.alphawallet.app.router.CoinbasePayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.NameThisWalletActivity;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.widget.WalletFragmentActionsView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -50,7 +51,6 @@ import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -81,9 +81,9 @@ public class WalletViewModel extends BaseViewModel
     private final CoinbasePayRouter coinbasePayRouter;
     private final ManageWalletsRouter manageWalletsRouter;
     private final RealmManager realmManager;
+    private final OnRampRepositoryType onRampRepository;
     private long lastBackupCheck = 0;
     private BottomSheetDialog dialog;
-    private final OnRampRepositoryType onRampRepository;
 
     @Inject
     WalletViewModel(
@@ -98,7 +98,8 @@ public class WalletViewModel extends BaseViewModel
             ManageWalletsRouter manageWalletsRouter,
             PreferenceRepositoryType preferenceRepository,
             RealmManager realmManager,
-            OnRampRepositoryType onRampRepository)
+            OnRampRepositoryType onRampRepository,
+            AnalyticsServiceType analyticsService)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
@@ -112,21 +113,42 @@ public class WalletViewModel extends BaseViewModel
         this.preferenceRepository = preferenceRepository;
         this.realmManager = realmManager;
         this.onRampRepository = onRampRepository;
+        setAnalyticsService(analyticsService);
     }
 
-    public LiveData<TokenCardMeta[]> tokens() {
+    public LiveData<TokenCardMeta[]> tokens()
+    {
         return tokens;
     }
-    public LiveData<Wallet> defaultWallet() { return defaultWallet; }
-    public LiveData<GenericWalletInteract.BackupLevel> backupEvent() { return backupEvent; }
-    public LiveData<Pair<Double, Double>> onFiatValues() { return fiatValues; }
 
-    public String getWalletAddr() { return defaultWallet.getValue() != null ? defaultWallet.getValue().address : ""; }
-    public WalletType getWalletType() { return defaultWallet.getValue() != null ? defaultWallet.getValue().type : WalletType.KEYSTORE; }
+    public LiveData<Wallet> defaultWallet()
+    {
+        return defaultWallet;
+    }
+
+    public LiveData<GenericWalletInteract.BackupLevel> backupEvent()
+    {
+        return backupEvent;
+    }
+
+    public LiveData<Pair<Double, Double>> onFiatValues()
+    {
+        return fiatValues;
+    }
+
+    public String getWalletAddr()
+    {
+        return defaultWallet.getValue() != null ? defaultWallet.getValue().address : "";
+    }
+
+    public WalletType getWalletType()
+    {
+        return defaultWallet.getValue() != null ? defaultWallet.getValue().type : WalletType.KEYSTORE;
+    }
 
     public void prepare()
     {
-        lastBackupCheck = System.currentTimeMillis() - BALANCE_BACKUP_CHECK_INTERVAL + 5*DateUtils.SECOND_IN_MILLIS;
+        lastBackupCheck = System.currentTimeMillis() - BALANCE_BACKUP_CHECK_INTERVAL + 5 * DateUtils.SECOND_IN_MILLIS;
         //load the activity meta list
         disposable = genericWalletInteract
                 .find()
@@ -216,7 +238,8 @@ public class WalletViewModel extends BaseViewModel
         genericWalletInteract.updateWarningTime(walletAddr);
     }
 
-    public void setTokenEnabled(Token token, boolean enabled) {
+    public void setTokenEnabled(Token token, boolean enabled)
+    {
         changeTokenEnableInteract.setEnable(defaultWallet.getValue(), token, enabled);
         token.tokenInfo.isEnabled = enabled;
     }
@@ -234,7 +257,8 @@ public class WalletViewModel extends BaseViewModel
             dialog.dismiss();
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText(KEY_ADDRESS, Keys.toChecksumAddress(getWalletAddr()));
-            if (clipboard != null) {
+            if (clipboard != null)
+            {
                 clipboard.setPrimaryClip(clip);
             }
 
@@ -265,9 +289,11 @@ public class WalletViewModel extends BaseViewModel
         dialog.show();
     }
 
-    public void showQRCodeScanning(Activity activity) {
-        Intent intent = new Intent(activity, QRScanner.class);
+    public void showQRCodeScanning(Activity activity)
+    {
+        Intent intent = new Intent(activity, QRScannerActivity.class);
         intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
+        intent.putExtra(QrScanSource.KEY, QrScanSource.WALLET_SCREEN.getValue());
         activity.startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
     }
 
@@ -321,7 +347,8 @@ public class WalletViewModel extends BaseViewModel
 
     public void checkBackup(double fiatValue)
     {
-        if (TextUtils.isEmpty(getWalletAddr()) || System.currentTimeMillis() < (lastBackupCheck + BALANCE_BACKUP_CHECK_INTERVAL)) return;
+        if (TextUtils.isEmpty(getWalletAddr()) || System.currentTimeMillis() < (lastBackupCheck + BALANCE_BACKUP_CHECK_INTERVAL))
+            return;
         lastBackupCheck = System.currentTimeMillis();
         double walletUSDValue = tokensService.convertToUSD(fiatValue);
 
@@ -381,20 +408,23 @@ public class WalletViewModel extends BaseViewModel
         manageWalletsRouter.open(context, clearStack);
     }
 
-    public boolean isMarshMallowWarningShown() {
+    public boolean isMarshMallowWarningShown()
+    {
         return preferenceRepository.isMarshMallowWarningShown();
     }
 
-    public void setMarshMallowWarning(boolean shown) {
+    public void setMarshMallowWarning(boolean shown)
+    {
         preferenceRepository.setMarshMallowWarning(shown);
     }
 
     public void saveAvatar(Wallet wallet)
     {
-        genericWalletInteract.updateWalletItem(wallet, WalletItem.ENS_AVATAR, () -> { });
+        genericWalletInteract.updateWalletItem(wallet, WalletItem.ENS_AVATAR, () -> {});
     }
 
-    public Intent getBuyIntent(String address) {
+    public Intent getBuyIntent(String address)
+    {
         Intent intent = new Intent();
         intent.putExtra(C.DAPP_URL_LOAD, onRampRepository.getUri(address, null));
         return intent;

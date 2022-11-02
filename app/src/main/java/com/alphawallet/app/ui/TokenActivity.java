@@ -56,7 +56,7 @@ import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
-import com.alphawallet.app.widget.ActionSheetMode;
+import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.app.widget.AmountDisplayWidget;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.EventDetailWidget;

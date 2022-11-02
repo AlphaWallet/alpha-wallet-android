@@ -17,6 +17,7 @@ import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -25,9 +26,11 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
@@ -36,7 +39,7 @@ import com.alphawallet.app.ui.AddEditDappActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
@@ -61,7 +64,8 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 @HiltViewModel
-public class DappBrowserViewModel extends BaseViewModel  {
+public class DappBrowserViewModel extends BaseViewModel
+{
     private static final int BALANCE_CHECK_INTERVAL_SECONDS = 20;
 
     private final MutableLiveData<NetworkInfo> activeNetwork = new MutableLiveData<>();
@@ -85,7 +89,9 @@ public class DappBrowserViewModel extends BaseViewModel  {
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
-            GasService gasService) {
+            GasService gasService,
+            AnalyticsServiceType analyticsService)
+    {
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
@@ -93,21 +99,26 @@ public class DappBrowserViewModel extends BaseViewModel  {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.keyService = keyService;
         this.gasService = gasService;
+        setAnalyticsService(analyticsService);
     }
 
-    public AssetDefinitionService getAssetDefinitionService() {
+    public AssetDefinitionService getAssetDefinitionService()
+    {
         return assetDefinitionService;
     }
 
-    public LiveData<NetworkInfo> activeNetwork() {
+    public LiveData<NetworkInfo> activeNetwork()
+    {
         return activeNetwork;
     }
 
-    public LiveData<Wallet> defaultWallet() {
+    public LiveData<Wallet> defaultWallet()
+    {
         return defaultWallet;
     }
 
-    public void findWallet() {
+    public void findWallet()
+    {
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -123,7 +134,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
         activeNetwork.postValue(ethereumNetworkRepository.getActiveBrowserNetwork());
     }
 
-    private void onDefaultWallet(final Wallet wallet) {
+    private void onDefaultWallet(final Wallet wallet)
+    {
         defaultWallet.setValue(wallet);
     }
 
@@ -135,34 +147,39 @@ public class DappBrowserViewModel extends BaseViewModel  {
             disposable = tokensService.getChainBalance(wallet.address.toLowerCase(), info.chainId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
-                    .subscribe(w -> { }, e -> { });
+                    .subscribe(w -> {}, e -> {});
         }
     }
 
-    public void signMessage(Signable message, DAppFunction dAppFunction) {
+    public void signMessage(Signable message, DAppFunction dAppFunction)
+    {
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), message,
-                getActiveNetwork().chainId)
+                        getActiveNetwork().chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
                         error -> dAppFunction.DAppError(error, message));
     }
 
-    public void setLastUrl(Context context, String url) {
+    public void setLastUrl(Context context, String url)
+    {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit().putString(C.DAPP_LASTURL_KEY, url).apply();
     }
 
-    public void setHomePage(Context context, String url) {
+    public void setHomePage(Context context, String url)
+    {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit().putString(C.DAPP_HOMEPAGE_KEY, url).apply();
     }
 
-    public String getHomePage(Context context) {
+    public String getHomePage(Context context)
+    {
         return PreferenceManager.getDefaultSharedPreferences(context).getString(C.DAPP_HOMEPAGE_KEY, null);
     }
 
-    public void addToMyDapps(Context context, String title, String url) {
+    public void addToMyDapps(Context context, String title, String url)
+    {
         Intent intent = new Intent(context, AddEditDappActivity.class);
         DApp dapp = new DApp(title, url);
         intent.putExtra(AddEditDappActivity.KEY_DAPP, dapp);
@@ -170,7 +187,9 @@ public class DappBrowserViewModel extends BaseViewModel  {
         context.startActivity(intent);
     }
 
-    public void share(Context context, String url) {
+    public void share(Context context, String url)
+    {
+        track(Analytics.Action.SHARE_URL);
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_TEXT, url);
@@ -178,19 +197,24 @@ public class DappBrowserViewModel extends BaseViewModel  {
         context.startActivity(intent);
     }
 
-    public void onClearBrowserCacheClicked(Context context) {
+    public void onClearBrowserCacheClicked(Context context)
+    {
         WebView webView = new WebView(context);
         webView.clearCache(true);
         Toast.makeText(context, context.getString(R.string.toast_browser_cache_cleared),
                 Toast.LENGTH_SHORT).show();
+        track(Analytics.Action.CLEAR_BROWSER_CACHE);
     }
 
-    public void startScan(Activity activity) {
-        Intent intent = new Intent(activity, QRScanner.class);
+    public void startScan(Activity activity)
+    {
+        Intent intent = new Intent(activity, QRScannerActivity.class);
+        intent.putExtra(QrScanSource.KEY, QrScanSource.BROWSER_SCREEN.getValue());
         activity.startActivityForResult(intent, HomeActivity.DAPP_BARCODE_READER_REQUEST_CODE);
     }
 
-    public List<DApp> getDappsMasterList(Context context) {
+    public List<DApp> getDappsMasterList(Context context)
+    {
         return DappBrowserUtils.getDappsList(context);
     }
 
@@ -277,7 +301,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public void onDestroy()
     {
-        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
+        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed())
+            balanceTimerDisposable.dispose();
         gasService.stopGasPriceCycle();
     }
 
@@ -302,7 +327,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public void stopBalanceUpdate()
     {
-        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
+        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed())
+            balanceTimerDisposable.dispose();
         balanceTimerDisposable = null;
         gasService.stopGasPriceCycle();
     }
@@ -354,11 +380,10 @@ public class DappBrowserViewModel extends BaseViewModel  {
     public boolean addCustomChain(WalletAddEthereumChainObject chainObject)
     {
         String rpc = extractRpc(chainObject);
-        String blockExplorer = extractBlockExplorer(chainObject);
         if (rpc == null) return false;
-
+        
         this.ethereumNetworkRepository.saveCustomRPCNetwork(chainObject.chainName, rpc, chainObject.getChainId(),
-                chainObject.nativeCurrency.symbol, blockExplorer, "", false, -1L);
+                chainObject.nativeCurrency.symbol, extractBlockExplorer(chainObject), "", false, -1L);
 
         tokensService.createBaseToken(chainObject.getChainId())
                 .subscribeOn(Schedulers.io())
@@ -416,6 +441,11 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return ethereumNetworkRepository.isMainNetSelected();
     }
 
+    public void setMainNetsSelected(boolean isMainNet)
+    {
+        ethereumNetworkRepository.setActiveMainnet(isMainNet);
+    }
+
     public void addNetworkToFilters(NetworkInfo info)
     {
         List<Long> filters = ethereumNetworkRepository.getFilterNetworkList();
@@ -426,10 +456,5 @@ public class DappBrowserViewModel extends BaseViewModel  {
         }
 
         tokensService.setupFilter(true);
-    }
-
-    public void setMainNetsSelected(boolean isMainNet)
-    {
-        ethereumNetworkRepository.setActiveMainnet(isMainNet);
     }
 }

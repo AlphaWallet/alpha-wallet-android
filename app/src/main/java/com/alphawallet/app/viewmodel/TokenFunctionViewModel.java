@@ -13,6 +13,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.Operation;
@@ -90,7 +91,8 @@ import timber.log.Timber;
  * Stormbird in Singapore
  */
 @HiltViewModel
-public class TokenFunctionViewModel extends BaseViewModel {
+public class TokenFunctionViewModel extends BaseViewModel
+{
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
@@ -100,7 +102,6 @@ public class TokenFunctionViewModel extends BaseViewModel {
     private final GenericWalletInteract genericWalletInteract;
     private final OpenSeaService openseaService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
-    private final AnalyticsServiceType analyticsService;
     private final MutableLiveData<Token> insufficientFunds = new MutableLiveData<>();
     private final MutableLiveData<String> invalidAddress = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
@@ -151,7 +152,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.analyticsService = analyticsService;
+        setAnalyticsService(analyticsService);
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -184,7 +185,10 @@ public class TokenFunctionViewModel extends BaseViewModel {
         return newScriptFound;
     }
 
-    public LiveData<Boolean> scriptUpdateInProgress() { return scriptUpdateInProgress; }
+    public LiveData<Boolean> scriptUpdateInProgress()
+    {
+        return scriptUpdateInProgress;
+    }
 
     public MutableLiveData<TransactionData> transactionFinalised()
     {
@@ -709,10 +713,9 @@ public class TokenFunctionViewModel extends BaseViewModel {
 
     public void actionSheetConfirm(String mode)
     {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(mode);
-
-        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        track(Analytics.Action.ACTION_SHEET_COMPLETED, props);
     }
 
     public Single<Intent> showTransferSelectCount(Context ctx, Token token, BigInteger tokenId)

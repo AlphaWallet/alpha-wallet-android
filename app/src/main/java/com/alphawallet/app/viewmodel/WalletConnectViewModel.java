@@ -81,7 +81,6 @@ public class WalletConnectViewModel extends BaseViewModel
     private final RealmManager realmManager;
     private final GasService gasService;
     private final TokensService tokensService;
-    private final AnalyticsServiceType analyticsService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     private final HashMap<String, WCClient> clientBuffer = new HashMap<>();
@@ -111,8 +110,8 @@ public class WalletConnectViewModel extends BaseViewModel
         this.realmManager = realmManager;
         this.gasService = gasService;
         this.tokensService = tokensService;
-        this.analyticsService = analyticsService;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        setAnalyticsService(analyticsService);
         prepareDisposable = null;
         disposable = genericWalletInteract
                 .find()
@@ -609,14 +608,6 @@ public class WalletConnectViewModel extends BaseViewModel
             info = findDefaultNetworkInteract.getNetworkInfo(MAINNET_ID);
         }
         return info.symbol;
-    }
-
-    public void actionSheetConfirm(String mode)
-    {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData("(WC)" + mode); //disambiguate signs/sends etc through WC
-
-        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }
 
     public void prepareIfRequired()

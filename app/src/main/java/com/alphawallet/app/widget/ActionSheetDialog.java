@@ -23,6 +23,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
@@ -515,8 +516,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 }
                 break;
         }
-
-        actionSheetCallback.notifyConfirm(mode.toString());
     }
 
     private BigDecimal getTransactionAmount()
@@ -563,6 +562,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 {
                     confirmationWidget.startProgressCycle(1);
                     signCallback.gotAuthorisationForSigning(gotAuth, signWidget.getSignable());
+                    actionSheetCallback.notifyConfirm(mode.getValue());
                 }
                 else
                 {
@@ -691,6 +691,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 confirmationWidget.startProgressCycle(4);
                 //send the transaction
                 actionSheetCallback.signTransaction(formTransaction());
+                actionSheetCallback.notifyConfirm(mode.getValue());
             }
 
             @Override
@@ -785,6 +786,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                 confirmationWidget.startProgressCycle(4);
                 //send the transaction
                 actionSheetCallback.sendTransaction(formTransaction());
+                actionSheetCallback.notifyConfirm(mode.getValue());
             }
 
             @Override

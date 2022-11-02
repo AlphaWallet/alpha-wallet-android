@@ -4,8 +4,5 @@
     android:shape="ring"
     android:thicknessRatio="1"
     android:useLevel="false">
-    <gradient
-        android:endColor="?colorSurface"
-        android:gradientRadius="8dp"
-        android:type="radial" />
+    <solid android:color="?colorSurface" />
 </shape>

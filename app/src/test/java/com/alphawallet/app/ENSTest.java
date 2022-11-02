@@ -5,10 +5,12 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.web3j.ens.Contracts;
+import com.alphawallet.app.web3j.ens.EnsResolutionException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -103,16 +105,46 @@ public class ENSTest
 
     @Test
     public void testNameHash() {
-        assertEquals(
-                nameHash(""),
-                ("0x0000000000000000000000000000000000000000000000000000000000000000"));
+        try
+        {
+            assertEquals(
+                    nameHash(""),
+                    ("0x0000000000000000000000000000000000000000000000000000000000000000"));
 
-        assertEquals(
-                nameHash("eth"),
-                ("0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae"));
+            assertEquals(
+                    nameHash("eth"),
+                    ("0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae"));
 
-        assertEquals(
-                nameHash("foo.eth"),
-                ("0xde9b09fd7c5f901e23a3f19fecc54828e9c848539801e86591bd9801b019f84f"));
+            assertEquals(
+                    nameHash("foo.eth"),
+                    ("0xde9b09fd7c5f901e23a3f19fecc54828e9c848539801e86591bd9801b019f84f"));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testNPE()
+    {
+        try
+        {
+            String test = nameHash(null);
+            System.out.println("Should have triggered exception");
+            fail();
+        }
+        catch (EnsResolutionException e)
+        {
+            System.out.println("Correctly got the exception");
+            e.printStackTrace();
+        }
+        catch (Exception e)
+        {
+            //should be ENSResolutionException
+            System.out.println("Should be EnsResoltionException");
+            fail();
+        }
     }
 }

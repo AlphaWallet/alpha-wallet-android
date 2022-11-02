@@ -631,6 +631,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         // Both these are required, the onFocus listener is required to respond to the first click.
         urlTv.setOnFocusChangeListener((v, hasFocus) -> {
             //see if we have focus flag
+            loadOnInit = null;
+            loadUrlAfterReload = null;
             if (hasFocus && focusFlag && getActivity() != null) openURLInputView();
         });
 
@@ -1238,8 +1240,14 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             // show add custom chain dialog
             addCustomChainDialog = new AddEthereumChainPrompt(getContext(), chainObj, chainObject -> {
-                viewModel.addCustomChain(chainObject);
-                loadNewNetwork(chainObj.getChainId());
+                if (viewModel.addCustomChain(chainObject))
+                {
+                    loadNewNetwork(chainObj.getChainId());
+                }
+                else
+                {
+                    displayError(R.string.error_invalid_url, 0);
+                }
                 addCustomChainDialog.dismiss();
             });
             addCustomChainDialog.show();
@@ -1438,6 +1446,23 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             confirmationDialog.dismiss();
     }
 
+    private void displayError(int title, int text)
+    {
+        if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
+        resultDialog = new AWalletAlertDialog(requireContext());
+        resultDialog.setIcon(ERROR);
+        resultDialog.setTitle(title);
+        if (text != 0) resultDialog.setMessage(text);
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.show();
+
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+            confirmationDialog.dismiss();
+    }
+
     private void showWalletWatch()
     {
         if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
@@ -1539,7 +1564,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
         else
         {
-            nextUrl = urlTv.getText().toString();// web3.getUrl();// getDefaultDappUrl();
+            nextUrl = urlTv.getText().toString();
         }
 
         if (nextUrl.equalsIgnoreCase(getDefaultDappUrl()))

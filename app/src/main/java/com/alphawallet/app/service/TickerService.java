@@ -16,6 +16,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_V2_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
@@ -434,6 +435,10 @@ public class TickerService
             ethTickers.put(ARBITRUM_MAIN_ID, ticker);
             ethTickers.put(OPTIMISTIC_MAIN_ID, ticker);
         }
+        else if (chainId == PHI_V2_MAIN_ID)
+        {
+            ethTickers.put(PHI_MAIN_ID, ticker);
+        }
     }
 
     private void addToTokenTickers(BigInteger tickerInfo, long tickerTime)
@@ -527,6 +532,7 @@ public class TickerService
                         System.currentTimeMillis());
 
                 ethTickers.put(PHI_V2_MAIN_ID, phiTicker);
+                ethTickers.put(PHI_MAIN_ID, phiTicker);
                 return tickerCount + 1;
             }
         }

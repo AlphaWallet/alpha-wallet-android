@@ -7,6 +7,8 @@ import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.util.Helper.click;
 
+import com.alphawallet.app.util.Helper;
+
 import org.junit.Test;
 
 public class SwapTest extends BaseE2ETest
@@ -20,7 +22,10 @@ public class SwapTest extends BaseE2ETest
         click(withText("Swap"));
         shouldSee("Select Exchanges");
         click(withText("DODO"));
+        Helper.wait(3);
         pressBack();
-        shouldSee("Swap");
+        Helper.wait(3);
+        click(withId(R.id.action_settings));
+        shouldSee("Settings");
     }
 }

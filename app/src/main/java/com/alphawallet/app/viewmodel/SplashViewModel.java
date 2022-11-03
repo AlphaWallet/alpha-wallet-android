@@ -16,6 +16,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.KeyService;
 
 import java.io.File;
@@ -36,6 +37,7 @@ public class SplashViewModel extends ViewModel
     private final FetchWalletsInteract fetchWalletsInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final KeyService keyService;
+    private final CustomSettings customSettings;
 
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private final MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
@@ -43,13 +45,16 @@ public class SplashViewModel extends ViewModel
     @Inject
     SplashViewModel(FetchWalletsInteract fetchWalletsInteract,
                     PreferenceRepositoryType preferenceRepository,
-                    KeyService keyService) {
+                    KeyService keyService,
+                    CustomSettings customSettings)
+    {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.preferenceRepository = preferenceRepository;
         this.keyService = keyService;
 
         // increase launch count
 //        this.preferenceRepository.incrementLaunchCount();
+        this.customSettings = customSettings;
     }
 
     public void fetchWallets()
@@ -158,5 +163,10 @@ public class SplashViewModel extends ViewModel
 
     public void setInstallTime(long time) {
         preferenceRepository.setInstallTime(time);
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 }

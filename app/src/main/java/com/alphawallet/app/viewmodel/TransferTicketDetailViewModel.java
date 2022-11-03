@@ -13,7 +13,6 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DisplayState;
-import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionData;
@@ -28,6 +27,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
@@ -37,8 +37,6 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.SignableBytes;
 import com.alphawallet.token.tools.ParseMagicLink;
-
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -68,6 +66,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
+    private final CustomSettings customSettings;
     private final GasService gasService;
     private final AnalyticsServiceType analyticsService;
     private final TokensService tokensService;
@@ -83,14 +82,17 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   CreateTransactionInteract createTransactionInteract,
                                   FetchTransactionsInteract fetchTransactionsInteract,
                                   AssetDefinitionService assetDefinitionService,
+                                  CustomSettings customSettings,
                                   GasService gasService,
                                   AnalyticsServiceType analyticsService,
-                                  TokensService tokensService) {
+                                  TokensService tokensService)
+    {
         this.genericWalletInteract = genericWalletInteract;
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
+        this.customSettings = customSettings;
         this.gasService = gasService;
         this.analyticsService = analyticsService;
         this.tokensService = tokensService;
@@ -241,6 +243,11 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public void stopGasSettingsFetch()

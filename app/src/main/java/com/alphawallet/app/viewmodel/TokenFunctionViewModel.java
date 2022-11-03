@@ -31,6 +31,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.OpenSeaService;
@@ -99,6 +100,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
     private final OpenSeaService openseaService;
+    private final CustomSettings customSettings;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AnalyticsServiceType analyticsService;
     private final MutableLiveData<Token> insufficientFunds = new MutableLiveData<>();
@@ -139,7 +141,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
             OpenSeaService openseaService,
-            FetchTransactionsInteract fetchTransactionsInteract,
+            CustomSettings customSettings, FetchTransactionsInteract fetchTransactionsInteract,
             AnalyticsServiceType analyticsService)
     {
         this.assetDefinitionService = assetDefinitionService;
@@ -150,6 +152,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
         this.keyService = keyService;
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
+        this.customSettings = customSettings;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.analyticsService = analyticsService;
     }
@@ -568,6 +571,11 @@ public class TokenFunctionViewModel extends BaseViewModel {
     public OpenSeaService getOpenseaService()
     {
         return openseaService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public void updateTokenScriptViewSize(Token token, int itemViewHeight)

@@ -59,6 +59,9 @@ public class PriceAlertsService extends Service
     @Inject
     AssetDefinitionService assetDefinitionService;
 
+    @Inject
+    CustomSettings customSettings;
+
     @Nullable
     private Disposable heartBeatTimer;
 

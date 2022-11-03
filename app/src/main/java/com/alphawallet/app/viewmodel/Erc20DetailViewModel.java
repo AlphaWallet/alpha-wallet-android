@@ -18,6 +18,7 @@ import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
@@ -42,6 +43,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
+    private final CustomSettings customSettings;
     private final OnRampRepositoryType onRampRepository;
 
     @Nullable
@@ -52,12 +54,13 @@ public class Erc20DetailViewModel extends BaseViewModel {
                                 FetchTransactionsInteract fetchTransactionsInteract,
                                 AssetDefinitionService assetDefinitionService,
                                 TokensService tokensService,
-                                OnRampRepositoryType onRampRepository)
+                                CustomSettings customSettings, OnRampRepositoryType onRampRepository)
     {
         this.myAddressRouter = myAddressRouter;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
+        this.customSettings = customSettings;
         this.onRampRepository = onRampRepository;
     }
 
@@ -86,6 +89,11 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public TokensService getTokensService()
     {
         return tokensService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public FetchTransactionsInteract getTransactionsInteract()

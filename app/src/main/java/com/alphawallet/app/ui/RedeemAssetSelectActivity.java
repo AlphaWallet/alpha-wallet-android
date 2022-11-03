@@ -106,7 +106,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
         invalidateOptionsMenu();
 
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(this, token, ticketRange.range.tokenIds, viewModel.getAssetDefinitionService());
+        adapter = new NonFungibleTokenAdapter(this, token, ticketRange.range.tokenIds, viewModel.getAssetDefinitionService(),viewModel.getCustomSettings());
         adapter.addQuantitySelector();
 
         nextButton.setVisibility(View.GONE);

@@ -26,6 +26,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
@@ -67,6 +68,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel
     private final AssetDefinitionService assetDefinitionService;
     private final GasService gasService;
     private final TokensService tokensService;
+    private final CustomSettings customSettings;
 
     private ParseMagicLink parser;
     private Token token;
@@ -81,7 +83,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel
                                   AssetDefinitionService assetDefinitionService,
                                   GasService gasService,
                                   AnalyticsServiceType analyticsService,
-                                  TokensService tokensService)
+                                  TokensService tokensService,
+                                  CustomSettings customSettings)
     {
         this.genericWalletInteract = genericWalletInteract;
         this.keyService = keyService;
@@ -90,6 +93,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel
         this.assetDefinitionService = assetDefinitionService;
         this.gasService = gasService;
         this.tokensService = tokensService;
+        this.customSettings = customSettings;
         setAnalyticsService(analyticsService);
     }
 
@@ -310,6 +314,11 @@ public class TransferTicketDetailViewModel extends BaseViewModel
     public TokensService getTokenService()
     {
         return tokensService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public void openTransferState(Context context, Token token, String ticketIds, DisplayState transferStatus)

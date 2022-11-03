@@ -30,6 +30,7 @@ import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AnalyticsService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.IPFSService;
 import com.alphawallet.app.service.IPFSServiceType;
@@ -260,6 +261,13 @@ public class RepositoriesModule
                                                             AlphaWalletService alphaService)
     {
         return new AssetDefinitionService(ipfsService, ctx, notificationService, realmManager, tokensService, tls, alphaService);
+    }
+
+    @Singleton
+    @Provides
+    CustomSettings provideCustomSettings(@ApplicationContext Context context)
+    {
+        return new CustomSettings(context);
     }
 
     @Singleton

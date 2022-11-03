@@ -33,6 +33,7 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
@@ -66,6 +67,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final ImportWalletRouter importWalletRouter;
     private final HomeRouter homeRouter;
     private final TokensService tokensService;
+    private final CustomSettings customSettings;
     private final AWEnsResolver ensResolver;
     private final AssetDefinitionService assetService;
     private final PreferenceRepositoryType preferenceRepository;
@@ -109,7 +111,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
             HomeRouter homeRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             KeyService keyService,
-            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            CustomSettings customSettings, EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenRepositoryType tokenRepository,
             TickerService tickerService,
             AssetDefinitionService assetService,
@@ -123,12 +125,13 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         this.homeRouter = homeRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.keyService = keyService;
+        this.customSettings = customSettings;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
         this.tickerService = tickerService;
         this.assetService = assetService;
         this.preferenceRepository = preferenceRepository;
-        this.tokensService = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null);
+        this.tokensService = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null, this.customSettings);
 
         ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
         syncCallback = null;
@@ -283,7 +286,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private Single<Wallet> startWalletSync(Wallet wallet)
     {
         return Single.fromCallable(() -> {
-            TokensService svs = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null);
+            TokensService svs = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null, customSettings);
             svs.setCurrentAddress(wallet.address.toLowerCase());
             svs.startUpdateCycle();
             svs.setCompletionCallback(this, 2);
@@ -500,6 +503,11 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     public void stopUpdates()
     {
         assetService.stopEventListener();
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public void onDestroy()

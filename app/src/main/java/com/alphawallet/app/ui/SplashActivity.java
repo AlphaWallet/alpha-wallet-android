@@ -16,7 +16,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.analytics.FirstWalletAction;
@@ -106,7 +105,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         }
         else
         {
-            handler.postDelayed(this, CustomViewSettings.startupDelay());
+            handler.postDelayed(this, viewModel.getCustomSettings().startupDelay());
         }
     }
 

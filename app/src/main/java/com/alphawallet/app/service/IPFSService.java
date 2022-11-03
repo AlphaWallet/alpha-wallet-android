@@ -14,11 +14,11 @@ import okhttp3.Response;
 /**
  * Created by JB on 3/11/2022.
  */
-public class IPFSService
+public class IPFSService implements IPFSServiceType
 {
     private final OkHttpClient client;
 
-    public IPFSService()
+    public IPFSService(OkHttpClient okHttpClient)
     {
         this.client = new OkHttpClient.Builder()
                 //.connectTimeout(C.CONNECT_TIMEOUT*2, TimeUnit.SECONDS)
@@ -61,7 +61,7 @@ public class IPFSService
     {
         if (TextUtils.isEmpty(request)) return null;
 
-        if (Utils.isIPFS(request)) //note that URL might contain IPFS //TODO: Update URL Pattern for raw IPFS (see isValidUrl) and refactor
+        if (Utils.isIPFS(request)) //note that URL might contain IPFS, but not pass 'isValidUrl' //TODO: Update URL Pattern for raw IPFS (see isValidUrl) and refactor
         {
             return getFromIPFS(request);
         }
@@ -104,7 +104,6 @@ public class IPFSService
 
         return r;
     }
-
 
     private void addHeaders(Request.Builder bld, String[] headers) throws IOException
     {

@@ -1047,13 +1047,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    private Pair<String, Boolean> downloadScript(String Uri, long currentFileTime) throws PackageManager.NameNotFoundException, IOException
+    private Pair<String, Boolean> downloadScript(String Uri, long currentFileTime)
     {
         boolean isIPFS = Utils.isIPFS(Uri);
         if (TextUtils.isEmpty(Uri)) return new Pair<>("", false);
-
-        //convert uri if using IPFS:
-        //Uri = Utils.parseIPFS(Uri);
 
         try (Response resp = ipfsService.performIO(Uri, getHeaders(currentFileTime)))
         {

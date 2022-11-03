@@ -32,6 +32,7 @@ import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.IPFSService;
+import com.alphawallet.app.service.IPFSServiceType;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
 import com.alphawallet.app.service.NotificationService;
@@ -188,8 +189,8 @@ public class RepositoriesModule {
 
     @Singleton
     @Provides
-    IPFSService provideIPFSService() {
-        return new IPFSService();
+    IPFSServiceType provideIPFSService(OkHttpClient client) {
+        return new IPFSService(client);
     }
 
 	@Singleton

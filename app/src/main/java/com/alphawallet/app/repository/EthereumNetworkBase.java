@@ -3,6 +3,7 @@ package com.alphawallet.app.repository;
 /* Please don't add import android at this point. Later this file will be shared
  * between projects including non-Android projects */
 
+import static com.alphawallet.app.util.Utils.isValidUrl;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_GOERLI_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
@@ -622,6 +623,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
                 for (NetworkInfo info : list)
                 {
+                    if (!isValidUrl(info.rpcServerUrl)) //ensure RPC doesn't contain malicious code
+                    {
+                        continue;
+                    }
+
                     networkMap.put(info.chainId, info);
                     Boolean value = mapToTestNet.get(info.chainId);
                     boolean isTestnet = value != null && value;

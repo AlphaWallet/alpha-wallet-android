@@ -41,7 +41,6 @@ import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
@@ -340,7 +339,7 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(myAddressSetting, walletIndex++);
 
-        if (CustomSettings.canChangeWallets())
+        if (viewModel.getCustomSettings().canChangeWallets())
             walletSettingsLayout.addView(changeWalletSetting, walletIndex++);
 
         walletSettingsLayout.addView(backUpWalletSetting, walletIndex++);
@@ -352,7 +351,7 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
-        JSONArray chainsArray = CustomSettings.getChainsArrayJsonFile();
+        JSONArray chainsArray = viewModel.getCustomSettings().getChainsArrayJsonFile();
         if (chainsArray.length() == 0)
             systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
 

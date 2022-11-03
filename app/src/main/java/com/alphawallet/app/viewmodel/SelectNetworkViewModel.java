@@ -22,6 +22,7 @@ public class SelectNetworkViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
     private final PreferenceRepositoryType preferenceRepository;
+    private final CustomSettings customSettings;
 
     @Inject
     public SelectNetworkViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
@@ -32,6 +33,7 @@ public class SelectNetworkViewModel extends BaseViewModel {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
         this.preferenceRepository = preferenceRepository;
+        this.customSettings = customSettings;
     }
 
     public NetworkInfo[] getNetworkList()
@@ -84,5 +86,10 @@ public class SelectNetworkViewModel extends BaseViewModel {
 
     public TokensService getTokensService() {
         return tokensService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 }

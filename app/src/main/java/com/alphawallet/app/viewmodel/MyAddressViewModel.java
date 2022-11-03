@@ -15,6 +15,7 @@ public class MyAddressViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokensService tokenService;
     private final AssetDefinitionService assetDefinitionService;
+    private final CustomSettings customSettings;
 
     @Inject
     MyAddressViewModel(
@@ -24,6 +25,7 @@ public class MyAddressViewModel extends BaseViewModel {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenService = tokensService;
         this.assetDefinitionService = assetDefinitionService;
+        this.customSettings = customSettings;
     }
 
     public TokensService getTokenService() {
@@ -43,4 +45,8 @@ public class MyAddressViewModel extends BaseViewModel {
         return assetDefinitionService;
     }
 
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
+    }
 }

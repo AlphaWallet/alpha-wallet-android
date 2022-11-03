@@ -49,7 +49,6 @@ import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
@@ -188,7 +187,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(null, token, selection, viewModel.getAssetDefinitionService());
+        adapter = new NonFungibleTokenAdapter(null, token, selection, viewModel.getAssetDefinitionService(), viewModel.getCustomSettings());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -339,7 +338,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         switch (transferStatus)
         {
             case CHOOSE_QUANTITY:
-                if (CustomSettings.hasDirectTransfer())
+                if (viewModel.getCustomSettings().hasDirectTransfer())
                 {
                     newState = DisplayState.PICK_TRANSFER_METHOD;
                 }

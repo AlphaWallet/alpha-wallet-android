@@ -66,9 +66,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     private boolean isGrid;
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
-                                   OpenSeaService opensea, Activity activity)
+                                   OpenSeaService opensea, Activity activity, CustomSettings customSettings)
     {
-        super(tokenClickListener, service);
+        super(tokenClickListener, service, customSettings);
         assetCount = 0;
         token = t;
         clickThrough = true;
@@ -78,9 +78,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
-                                   OpenSeaService opensea, Activity activity, boolean isGrid)
+                                   OpenSeaService opensea, Activity activity, boolean isGrid, CustomSettings customSettings)
     {
-        super(tokenClickListener, service);
+        super(tokenClickListener, service, customSettings);
         assetCount = 0;
         token = t;
         clickThrough = true;
@@ -91,9 +91,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, List<BigInteger> tokenSelection,
-                                   AssetDefinitionService service)
+                                   AssetDefinitionService service, CustomSettings customSettings)
     {
-        super(tokenClickListener, service);
+        super(tokenClickListener, service, customSettings);
         assetCount = 0;
         token = t;
         clickThrough = false;
@@ -103,9 +103,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, ArrayList<Pair<BigInteger, NFTAsset>> assetSelection,
-                                   AssetDefinitionService service)
+                                   AssetDefinitionService service, CustomSettings customSettings)
     {
-        super(tokenClickListener, service);
+        super(tokenClickListener, service, customSettings);
         assetCount = 0;
         token = t;
         clickThrough = false;

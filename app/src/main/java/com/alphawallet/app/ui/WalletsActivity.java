@@ -29,7 +29,6 @@ import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.widget.adapter.WalletsSummaryAdapter;
@@ -228,7 +227,7 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (CustomSettings.canChangeWallets())
+        if (viewModel.getCustomSettings().canChangeWallets())
             getMenuInflater().inflate(R.menu.menu_add, menu);
         return super.onCreateOptionsMenu(menu);
     }

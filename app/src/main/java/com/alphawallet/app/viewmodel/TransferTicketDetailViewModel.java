@@ -68,6 +68,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel
     private final AssetDefinitionService assetDefinitionService;
     private final GasService gasService;
     private final TokensService tokensService;
+    private final CustomSettings customSettings;
 
     private ParseMagicLink parser;
     private Token token;
@@ -92,6 +93,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel
         this.assetDefinitionService = assetDefinitionService;
         this.gasService = gasService;
         this.tokensService = tokensService;
+        this.customSettings = customSettings;
         setAnalyticsService(analyticsService);
     }
 
@@ -312,6 +314,11 @@ public class TransferTicketDetailViewModel extends BaseViewModel
     public TokensService getTokenService()
     {
         return tokensService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public void openTransferState(Context context, Token token, String ticketIds, DisplayState transferStatus)

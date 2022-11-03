@@ -27,6 +27,7 @@ public class NFTAssetsViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
     private final OpenSeaService openSeaService;
+    private final CustomSettings customSettings;
 
     @Inject
     public NFTAssetsViewModel(FetchTransactionsInteract fetchTransactionsInteract,
@@ -39,11 +40,17 @@ public class NFTAssetsViewModel extends BaseViewModel {
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.openSeaService = openSeaService;
+        this.customSettings = customSettings;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public OpenSeaService getOpenseaService()

@@ -49,6 +49,7 @@ import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
@@ -108,6 +109,7 @@ public class HomeViewModel extends BaseViewModel {
     private final ImportTokenRouter importTokenRouter;
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
+    private final CustomSettings customSettings;
     private final GenericWalletInteract genericWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final CurrencyRepositoryType currencyRepository;
@@ -132,7 +134,7 @@ public class HomeViewModel extends BaseViewModel {
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
             AssetDefinitionService assetDefinitionService,
-            GenericWalletInteract genericWalletInteract,
+            CustomSettings customSettings, GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
             CurrencyRepositoryType currencyRepository,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -147,6 +149,7 @@ public class HomeViewModel extends BaseViewModel {
         this.importTokenRouter = importTokenRouter;
         this.localeRepository = localeRepository;
         this.assetDefinitionService = assetDefinitionService;
+        this.customSettings = customSettings;
         this.genericWalletInteract = genericWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.currencyRepository = currencyRepository;
@@ -314,6 +317,11 @@ public class HomeViewModel extends BaseViewModel {
     public void setErrorCallback(FragmentMessenger callback)
     {
         assetDefinitionService.setErrorCallback(callback);
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public void handleQRCode(Activity activity, String qrCode)

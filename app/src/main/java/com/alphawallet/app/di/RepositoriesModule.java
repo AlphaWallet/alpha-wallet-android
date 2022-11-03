@@ -182,6 +182,9 @@ public class RepositoriesModule
     TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository)
     {
         return new TokensRealmSource(realmManager, ethereumNetworkRepository);
+    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, CustomSettings customSettings)
+    {
+        return new TokensRealmSource(realmManager, ethereumNetworkRepository, customSettings);
     }
 
     @Singleton
@@ -200,6 +203,17 @@ public class RepositoriesModule
                                         AnalyticsServiceType analyticsService)
     {
         return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService);
+    }
+    @Singleton
+    @Provides
+    TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
+                                       TokenRepositoryType tokenRepository,
+                                       TickerService tickerService,
+                                       OpenSeaService openseaService,
+                                       AnalyticsServiceType analyticsService,
+                                       CustomSettings customSettings)
+    {
+        return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService, customSettings);
     }
 
     @Singleton

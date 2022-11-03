@@ -49,6 +49,7 @@ public class SellDetailViewModel extends BaseViewModel {
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final TokensService tokensService;
+    private final CustomSettings customSettings;
     private final CreateTransactionInteract createTransactionInteract;
     private final SellDetailRouter sellDetailRouter;
     private final KeyService keyService;
@@ -67,6 +68,7 @@ public class SellDetailViewModel extends BaseViewModel {
     {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.tokensService = tokensService;
+        this.customSettings = customSettings;
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;
         this.keyService = keyService;
@@ -153,6 +155,11 @@ public class SellDetailViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)

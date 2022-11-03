@@ -67,7 +67,6 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
@@ -245,7 +244,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.splashReset().observe(this, this::onRequireInit);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
-        if (CustomSettings.hideDappBrowser())
+        if (viewModel.getCustomSettings().hideDappBrowser())
         {
             removeDappBrowser();
         }
@@ -1170,7 +1169,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 case ACTIVITY:
                     return new ActivityFragment();
                 case DAPP_BROWSER:
-                    if (CustomSettings.hideDappBrowser())
+                    if (viewModel.getCustomSettings().hideDappBrowser())
                     {
                         return new BaseFragment();
                     }

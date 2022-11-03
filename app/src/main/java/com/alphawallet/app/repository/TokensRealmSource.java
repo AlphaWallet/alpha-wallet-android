@@ -62,10 +62,12 @@ public class TokensRealmSource implements TokenLocalSource {
 
     private final RealmManager realmManager;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final CustomSettings customSettings;
 
-    public TokensRealmSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository) {
+    public TokensRealmSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, CustomSettings customSettings) {
         this.realmManager = realmManager;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.customSettings = customSettings;
     }
 
     @Override
@@ -472,7 +474,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 }
 
                 if (!realmToken.isVisibilityChanged() && realmToken.isEnabled() && newBalance != null && newBalance.equals("0")
-                        && !(token.isEthereum() && CustomSettings.alwaysShow(token.tokenInfo.chainId)))
+                        && !(token.isEthereum() && customSettings.alwaysShow(token.tokenInfo.chainId)))
                 {
                     realm.executeTransaction(r -> {
                         realmToken.setEnabled(false);
@@ -481,7 +483,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 }
                 else if ((!realmToken.isVisibilityChanged() && !realmToken.isEnabled()) &&
                         (token.balance.compareTo(BigDecimal.ZERO) > 0 ||
-                                (token.isEthereum() && CustomSettings.alwaysShow(token.tokenInfo.chainId) && !realmToken.isEnabled()))) // enable if base token should be showing
+                                (token.isEthereum() && customSettings.alwaysShow(token.tokenInfo.chainId) && !realmToken.isEnabled()))) // enable if base token should be showing
                 {
                     realm.executeTransaction(r -> {
                         realmToken.setEnabled(true);
@@ -492,7 +494,7 @@ public class TokensRealmSource implements TokenLocalSource {
             else
             {
                 balanceChanged = true;
-                if (token.isEthereum() && CustomSettings.alwaysShow(token.tokenInfo.chainId))
+                if (token.isEthereum() && customSettings.alwaysShow(token.tokenInfo.chainId))
                     token.tokenInfo.isEnabled = true;
                 //write token
                 realm.executeTransaction(r -> {

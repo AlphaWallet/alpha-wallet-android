@@ -30,6 +30,7 @@ import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AnalyticsService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
@@ -165,8 +166,9 @@ public class RepositoriesModule {
 
     @Singleton
     @Provides
-    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository) {
-	    return new TokensRealmSource(realmManager, ethereumNetworkRepository);
+    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, CustomSettings customSettings)
+    {
+        return new TokensRealmSource(realmManager, ethereumNetworkRepository, customSettings);
     }
 
 	@Singleton
@@ -175,15 +177,17 @@ public class RepositoriesModule {
 		return new WalletDataRealmSource(realmManager);
 	}
 
-	@Singleton
-	@Provides
-	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
-									   TokenRepositoryType tokenRepository,
-									   TickerService tickerService,
-									   OpenSeaService openseaService,
-									   AnalyticsServiceType analyticsService) {
-		return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService);
-	}
+    @Singleton
+    @Provides
+    TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
+                                       TokenRepositoryType tokenRepository,
+                                       TickerService tickerService,
+                                       OpenSeaService openseaService,
+                                       AnalyticsServiceType analyticsService,
+                                       CustomSettings customSettings)
+    {
+        return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService, customSettings);
+    }
 
 	@Singleton
 	@Provides
@@ -236,6 +240,13 @@ public class RepositoriesModule {
 														 AlphaWalletService alphaService) {
 		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, tokensService, tls, trt, alphaService);
 	}
+
+    @Singleton
+    @Provides
+    CustomSettings provideCustomSettings(@ApplicationContext Context context)
+    {
+        return new CustomSettings(context);
+    }
 
 	@Singleton
 	@Provides

@@ -1,24 +1,25 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+import android.content.Context;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import android.content.Context;
 
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
-import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.SellDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.SellDetailActivity;
@@ -48,6 +49,7 @@ public class SellDetailViewModel extends BaseViewModel {
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final TokensService tokensService;
+    private final CustomSettings customSettings;
     private final CreateTransactionInteract createTransactionInteract;
     private final SellDetailRouter sellDetailRouter;
     private final KeyService keyService;
@@ -58,12 +60,15 @@ public class SellDetailViewModel extends BaseViewModel {
     @Inject
     SellDetailViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
                         TokensService tokensService,
+                        CustomSettings customSettings,
                         CreateTransactionInteract createTransactionInteract,
                         SellDetailRouter sellDetailRouter,
                         KeyService keyService,
-                        AssetDefinitionService assetDefinitionService) {
+                        AssetDefinitionService assetDefinitionService)
+    {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.tokensService = tokensService;
+        this.customSettings = customSettings;
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;
         this.keyService = keyService;
@@ -150,6 +155,11 @@ public class SellDetailViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)

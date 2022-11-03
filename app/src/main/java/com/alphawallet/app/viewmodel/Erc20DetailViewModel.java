@@ -19,6 +19,7 @@ import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
@@ -43,6 +44,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
+    private final CustomSettings customSettings;
     private final OnRampRepositoryType onRampRepository;
 
     @Nullable
@@ -54,13 +56,15 @@ public class Erc20DetailViewModel extends BaseViewModel {
                                 AssetDefinitionService assetDefinitionService,
                                 TokensService tokensService,
                                 OnRampRepositoryType onRampRepository,
-                                AnalyticsServiceType analyticsService)
+                                AnalyticsServiceType analyticsService,
+                                CustomSettings customSettings)
     {
         this.myAddressRouter = myAddressRouter;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.onRampRepository = onRampRepository;
+        this.customSettings = customSettings;
         setAnalyticsService(analyticsService);
     }
 
@@ -99,6 +103,11 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return this.assetDefinitionService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public void showSendToken(Activity act, Wallet wallet, Token token)

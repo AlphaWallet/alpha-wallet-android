@@ -1,5 +1,8 @@
 package com.alphawallet.app.widget;
 
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
@@ -13,7 +16,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -21,6 +23,7 @@ import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
@@ -40,9 +43,6 @@ import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmQuery;
 import timber.log.Timber;
-
-import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 
 /**
  * Created by JB on 10/11/2020.
@@ -89,7 +89,7 @@ public class InputAmount extends LinearLayout
         availableAmount = findViewById(R.id.text_available);
         allFunds = findViewById(R.id.text_all_funds);
         gasFetch = findViewById(R.id.gas_fetch_progress);
-        showingCrypto = !CustomViewSettings.inputAmountFiatDefault();
+        showingCrypto = !CustomSettings.inputAmountFiatDefault();
         amountReady = false;
 
         setupAttrs(context, attrs);

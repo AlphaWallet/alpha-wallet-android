@@ -16,6 +16,7 @@ import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.TransactionsService;
@@ -43,6 +44,7 @@ public class NewSettingsViewModel extends BaseViewModel
     private final CurrencyRepositoryType currencyRepository;
     private final TransactionsService transactionsService;
     private final TickerService tickerService;
+    private final CustomSettings customSettings;
 
     @Inject
     NewSettingsViewModel(
@@ -54,7 +56,8 @@ public class NewSettingsViewModel extends BaseViewModel
             CurrencyRepositoryType currencyRepository,
             TransactionsService transactionsService,
             TickerService tickerService,
-            AnalyticsServiceType analyticsService)
+            AnalyticsServiceType analyticsService,
+            CustomSettings customSettings)
     {
         this.genericWalletInteract = genericWalletInteract;
         this.myAddressRouter = myAddressRouter;
@@ -64,6 +67,7 @@ public class NewSettingsViewModel extends BaseViewModel
         this.currencyRepository = currencyRepository;
         this.transactionsService = transactionsService;
         this.tickerService = tickerService;
+        this.customSettings = customSettings;
         setAnalyticsService(analyticsService);
     }
 
@@ -179,5 +183,10 @@ public class NewSettingsViewModel extends BaseViewModel
     public void setMarshMallowWarning(boolean shown)
     {
         preferenceRepository.setMarshMallowWarning(shown);
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 }

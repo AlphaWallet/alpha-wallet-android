@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.Key.TICKET_RANGE;
+
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,7 +11,6 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,9 +30,6 @@ import com.alphawallet.token.entity.TicketRange;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-
-import static com.alphawallet.app.C.Key.TICKET_RANGE;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -106,7 +104,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
         invalidateOptionsMenu();
 
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(this, token, ticketRange.range.tokenIds, viewModel.getAssetDefinitionService());
+        adapter = new NonFungibleTokenAdapter(this, token, ticketRange.range.tokenIds, viewModel.getAssetDefinitionService(), viewModel.getCustomSettings());
         adapter.addQuantitySelector();
 
         nextButton.setVisibility(View.GONE);

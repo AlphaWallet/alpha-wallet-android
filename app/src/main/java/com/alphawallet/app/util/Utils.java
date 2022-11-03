@@ -834,30 +834,35 @@ public class Utils
 
     private static final String IPFS_PREFIX = "ipfs://";
     private static final String IPFS_DESIGNATOR = "/ipfs/";
-    private static final String IPFS_INFURA_RESOLVER = "https://alphawallet.infura-ipfs.io";
-    private static final String IPFS_IO_RESOLVER = "https://ipfs.io";
+    public static final String IPFS_INFURA_RESOLVER = "https://alphawallet.infura-ipfs.io";
+    public static final String IPFS_IO_RESOLVER = "https://ipfs.io";
 
     public static boolean isIPFS(String url)
     {
-        return url.contains(IPFS_DESIGNATOR) || url.startsWith(IPFS_PREFIX);
+        return url.contains(IPFS_DESIGNATOR) || url.startsWith(IPFS_PREFIX) || shouldBeIPFS(url);
     }
 
     public static String parseIPFS(String URL)
+    {
+        return resolveIPFS(URL, IPFS_INFURA_RESOLVER);
+    }
+
+    public static String resolveIPFS(String URL, String resolver)
     {
         if (TextUtils.isEmpty(URL)) return URL;
         String parsed = URL;
         int ipfsIndex = URL.lastIndexOf(IPFS_DESIGNATOR);
         if (ipfsIndex >= 0)
         {
-            parsed = IPFS_INFURA_RESOLVER + URL.substring(ipfsIndex);
+            parsed = resolver + URL.substring(ipfsIndex);
         }
         else if (URL.startsWith(IPFS_PREFIX))
         {
-            parsed = IPFS_INFURA_RESOLVER + IPFS_DESIGNATOR + URL.substring(IPFS_PREFIX.length());
+            parsed = resolver + IPFS_DESIGNATOR + URL.substring(IPFS_PREFIX.length());
         }
         else if (shouldBeIPFS(URL)) //have seen some NFTs designating only the IPFS hash
         {
-            parsed = IPFS_INFURA_RESOLVER + IPFS_DESIGNATOR + URL;
+            parsed = resolver + IPFS_DESIGNATOR + URL;
         }
 
         return parsed;

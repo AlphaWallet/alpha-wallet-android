@@ -31,6 +31,7 @@ import com.alphawallet.app.service.AnalyticsService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.IPFSService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
 import com.alphawallet.app.service.NotificationService;
@@ -185,6 +186,12 @@ public class RepositoriesModule {
 		return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService);
 	}
 
+    @Singleton
+    @Provides
+    IPFSService provideIPFSService() {
+        return new IPFSService();
+    }
+
 	@Singleton
 	@Provides
 	TransactionsService provideTransactionsService(TokensService tokensService,
@@ -231,10 +238,10 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-    AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, @ApplicationContext Context ctx, NotificationService notificationService, RealmManager realmManager,
-														 TokensService tokensService, TokenLocalSource tls, TransactionRepositoryType trt,
-														 AlphaWalletService alphaService) {
-		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, tokensService, tls, trt, alphaService);
+    AssetDefinitionService provideAssetDefinitionService(IPFSService ipfsService, @ApplicationContext Context ctx, NotificationService notificationService, RealmManager realmManager,
+                                                         TokensService tokensService, TokenLocalSource tls,
+                                                         AlphaWalletService alphaService) {
+		return new AssetDefinitionService(ipfsService, ctx, notificationService, realmManager, tokensService, tls, alphaService);
 	}
 
 	@Singleton

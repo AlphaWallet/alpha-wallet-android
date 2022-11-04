@@ -1748,9 +1748,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             oos.writeObject(CURRENT_FRAGMENT);
             oos.writeObject(currentFragment);
             oos.writeObject(CURRENT_URL);
-//            String uurl = urlTv.getText().toString();
-            String uurl2 = web3.getUrl();
-//            oos.writeObject(urlTv.getText().toString());
+            oos.writeObject(addressBar.getUrl());
         }
         return bos;
     }

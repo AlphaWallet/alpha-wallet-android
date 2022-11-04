@@ -41,6 +41,8 @@ import com.bumptech.glide.request.target.Target;
 
 import java.nio.charset.StandardCharsets;
 
+import timber.log.Timber;
+
 /**
  * Created by JB on 30/05/2021.
  */
@@ -145,14 +147,15 @@ public class NFTImageView extends RelativeLayout
         image.setVisibility(View.VISIBLE);
         webLayout.setVisibility(View.GONE);
 
-        if (!TextUtils.isEmpty(backgroundColor))
+        try
         {
             int color = Color.parseColor("#" + backgroundColor);
             ColorStateList sl = ColorStateList.valueOf(color);
             holdingView.setBackgroundTintList(sl);
         }
-        else
+        catch (Exception e)
         {
+            Timber.w(e);
             holdingView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent));
         }
 

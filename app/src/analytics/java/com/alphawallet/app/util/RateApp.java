@@ -9,11 +9,11 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
-import com.google.android.play.core.tasks.Task;
 
 public class RateApp {
     // should be shown on 5th run or after the first transaction (afterTransaction == true)

@@ -59,83 +59,93 @@ import okhttp3.OkHttpClient;
 
 @Module
 @InstallIn(SingletonComponent.class)
-public class RepositoriesModule {
-	@Singleton
-	@Provides
-	PreferenceRepositoryType providePreferenceRepository(@ApplicationContext Context context) {
-		return new SharedPreferenceRepository(context);
-	}
-
-	@Singleton
-	@Provides
-    AccountKeystoreService provideAccountKeyStoreService(@ApplicationContext Context context, KeyService keyService) {
-        File file = new File(context.getFilesDir(), KEYSTORE_FOLDER);
-		return new KeystoreAccountService(file, context.getFilesDir(), keyService);
-	}
-
-	@Singleton
+public class RepositoriesModule
+{
+    @Singleton
     @Provides
-	TickerService provideTickerService(OkHttpClient httpClient, PreferenceRepositoryType sharedPrefs, TokenLocalSource localSource) {
-		return new TickerService(httpClient, sharedPrefs, localSource);
+    PreferenceRepositoryType providePreferenceRepository(@ApplicationContext Context context)
+    {
+        return new SharedPreferenceRepository(context);
     }
 
-	@Singleton
-	@Provides
-	EthereumNetworkRepositoryType provideEthereumNetworkRepository(
+    @Singleton
+    @Provides
+    AccountKeystoreService provideAccountKeyStoreService(@ApplicationContext Context context, KeyService keyService)
+    {
+        File file = new File(context.getFilesDir(), KEYSTORE_FOLDER);
+        return new KeystoreAccountService(file, context.getFilesDir(), keyService);
+    }
+
+    @Singleton
+    @Provides
+    TickerService provideTickerService(OkHttpClient httpClient, PreferenceRepositoryType sharedPrefs, TokenLocalSource localSource)
+    {
+        return new TickerService(httpClient, sharedPrefs, localSource);
+    }
+
+    @Singleton
+    @Provides
+    EthereumNetworkRepositoryType provideEthereumNetworkRepository(
             PreferenceRepositoryType preferenceRepository,
-			@ApplicationContext Context context
-            )
+            @ApplicationContext Context context
+    )
     {
         return new EthereumNetworkRepository(preferenceRepository, context);
     }
 
-	@Singleton
-	@Provides
+    @Singleton
+    @Provides
     WalletRepositoryType provideWalletRepository(
-			PreferenceRepositoryType preferenceRepositoryType,
-			AccountKeystoreService accountKeystoreService,
-			EthereumNetworkRepositoryType networkRepository,
-			WalletDataRealmSource walletDataRealmSource,
-			KeyService keyService) {
-		return new WalletRepository(
-		        preferenceRepositoryType, accountKeystoreService, networkRepository, walletDataRealmSource, keyService);
-	}
-
-	@Singleton
-	@Provides
-	TransactionRepositoryType provideTransactionRepository(
-			EthereumNetworkRepositoryType networkRepository,
-			AccountKeystoreService accountKeystoreService,
-            TransactionLocalSource inDiskCache,
-			TransactionsService transactionsService) {
-		return new TransactionRepository(
-				networkRepository,
-				accountKeystoreService,
-				inDiskCache,
-				transactionsService);
-	}
-
-	@Singleton
-	@Provides
-	OnRampRepositoryType provideOnRampRepository(@ApplicationContext Context context) {
-		return new OnRampRepository(context);
-	}
+            PreferenceRepositoryType preferenceRepositoryType,
+            AccountKeystoreService accountKeystoreService,
+            EthereumNetworkRepositoryType networkRepository,
+            WalletDataRealmSource walletDataRealmSource,
+            KeyService keyService)
+    {
+        return new WalletRepository(
+                preferenceRepositoryType, accountKeystoreService, networkRepository, walletDataRealmSource, keyService);
+    }
 
     @Singleton
     @Provides
-    SwapRepositoryType provideSwapRepository(@ApplicationContext Context context) {
+    TransactionRepositoryType provideTransactionRepository(
+            EthereumNetworkRepositoryType networkRepository,
+            AccountKeystoreService accountKeystoreService,
+            TransactionLocalSource inDiskCache,
+            TransactionsService transactionsService)
+    {
+        return new TransactionRepository(
+                networkRepository,
+                accountKeystoreService,
+                inDiskCache,
+                transactionsService);
+    }
+
+    @Singleton
+    @Provides
+    OnRampRepositoryType provideOnRampRepository(@ApplicationContext Context context)
+    {
+        return new OnRampRepository(context);
+    }
+
+    @Singleton
+    @Provides
+    SwapRepositoryType provideSwapRepository(@ApplicationContext Context context)
+    {
         return new SwapRepository(context);
     }
 
     @Singleton
     @Provides
-    CoinbasePayRepositoryType provideCoinbasePayRepository() {
+    CoinbasePayRepositoryType provideCoinbasePayRepository()
+    {
         return new CoinbasePayRepository();
     }
 
-	@Singleton
+    @Singleton
     @Provides
-    TransactionLocalSource provideTransactionInDiskCache(RealmManager realmManager) {
+    TransactionLocalSource provideTransactionInDiskCache(RealmManager realmManager)
+    {
         return new TransactionsRealmCache(realmManager);
     }
 
@@ -149,43 +159,47 @@ public class RepositoriesModule {
         return new TransactionsNetworkClient(httpClient, gson, realmManager);
     }
 
-	@Singleton
+    @Singleton
     @Provides
     TokenRepositoryType provideTokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource tokenLocalSource,
-			OkHttpClient httpClient,
-			@ApplicationContext Context context,
-			TickerService tickerService) {
-	    return new TokenRepository(
-	            ethereumNetworkRepository,
-				tokenLocalSource,
-				httpClient,
-				context,
-				tickerService);
+            OkHttpClient httpClient,
+            @ApplicationContext Context context,
+            TickerService tickerService)
+    {
+        return new TokenRepository(
+                ethereumNetworkRepository,
+                tokenLocalSource,
+                httpClient,
+                context,
+                tickerService);
     }
 
     @Singleton
     @Provides
-    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository) {
-	    return new TokensRealmSource(realmManager, ethereumNetworkRepository);
+    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository)
+    {
+        return new TokensRealmSource(realmManager, ethereumNetworkRepository);
     }
 
-	@Singleton
-	@Provides
-	WalletDataRealmSource provideRealmWalletDataSource(RealmManager realmManager) {
-		return new WalletDataRealmSource(realmManager);
-	}
+    @Singleton
+    @Provides
+    WalletDataRealmSource provideRealmWalletDataSource(RealmManager realmManager)
+    {
+        return new WalletDataRealmSource(realmManager);
+    }
 
-	@Singleton
-	@Provides
-	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
-									   TokenRepositoryType tokenRepository,
-									   TickerService tickerService,
-									   OpenSeaService openseaService,
-									   AnalyticsServiceType analyticsService) {
-		return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService);
-	}
+    @Singleton
+    @Provides
+    TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
+                                       TokenRepositoryType tokenRepository,
+                                       TickerService tickerService,
+                                       OpenSeaService openseaService,
+                                       AnalyticsServiceType analyticsService)
+    {
+        return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService);
+    }
 
     @Singleton
     @Provides
@@ -194,14 +208,15 @@ public class RepositoriesModule {
         return new IPFSService(client);
     }
 
-	@Singleton
-	@Provides
-	TransactionsService provideTransactionsService(TokensService tokensService,
-												   EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
-												   TransactionsNetworkClientType transactionsNetworkClientType,
-												   TransactionLocalSource transactionLocalSource) {
-		return new TransactionsService(tokensService, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource);
-	}
+    @Singleton
+    @Provides
+    TransactionsService provideTransactionsService(TokensService tokensService,
+                                                   EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
+                                                   TransactionsNetworkClientType transactionsNetworkClientType,
+                                                   TransactionLocalSource transactionLocalSource)
+    {
+        return new TransactionsService(tokensService, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource);
+    }
 
     @Singleton
     @Provides
@@ -212,49 +227,56 @@ public class RepositoriesModule {
         return new GasService(ethereumNetworkRepository, client, realmManager);
     }
 
-	@Singleton
-	@Provides
-	OpenSeaService provideOpenseaService() {
-		return new OpenSeaService();
-	}
+    @Singleton
+    @Provides
+    OpenSeaService provideOpenseaService()
+    {
+        return new OpenSeaService();
+    }
 
-	@Singleton
-	@Provides
-	SwapService provideSwapService() {
-		return new SwapService();
-	}
+    @Singleton
+    @Provides
+    SwapService provideSwapService()
+    {
+        return new SwapService();
+    }
 
-	@Singleton
-	@Provides
+    @Singleton
+    @Provides
     AlphaWalletService provideFeemasterService(OkHttpClient okHttpClient,
                                                TransactionRepositoryType transactionRepository,
-                                               Gson gson) {
-		return new AlphaWalletService(okHttpClient, transactionRepository, gson);
-	}
+                                               Gson gson)
+    {
+        return new AlphaWalletService(okHttpClient, transactionRepository, gson);
+    }
 
-	@Singleton
-	@Provides
-    NotificationService provideNotificationService(@ApplicationContext Context ctx) {
-		return new NotificationService(ctx);
-	}
+    @Singleton
+    @Provides
+    NotificationService provideNotificationService(@ApplicationContext Context ctx)
+    {
+        return new NotificationService(ctx);
+    }
 
-	@Singleton
-	@Provides
+    @Singleton
+    @Provides
     AssetDefinitionService provideAssetDefinitionService(IPFSServiceType ipfsService, @ApplicationContext Context ctx, NotificationService notificationService, RealmManager realmManager,
                                                          TokensService tokensService, TokenLocalSource tls,
-                                                         AlphaWalletService alphaService) {
-		return new AssetDefinitionService(ipfsService, ctx, notificationService, realmManager, tokensService, tls, alphaService);
-	}
+                                                         AlphaWalletService alphaService)
+    {
+        return new AssetDefinitionService(ipfsService, ctx, notificationService, realmManager, tokensService, tls, alphaService);
+    }
 
-	@Singleton
-	@Provides
-	KeyService provideKeyService(@ApplicationContext Context ctx, AnalyticsServiceType analyticsService) {
-		return new KeyService(ctx, analyticsService);
-	}
+    @Singleton
+    @Provides
+    KeyService provideKeyService(@ApplicationContext Context ctx, AnalyticsServiceType analyticsService)
+    {
+        return new KeyService(ctx, analyticsService);
+    }
 
-	@Singleton
-	@Provides
-	AnalyticsServiceType provideAnalyticsService(@ApplicationContext Context ctx) {
-		return new AnalyticsService(ctx);
-	}
+    @Singleton
+    @Provides
+    AnalyticsServiceType provideAnalyticsService(@ApplicationContext Context ctx)
+    {
+        return new AnalyticsService(ctx);
+    }
 }

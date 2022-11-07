@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui.widget.adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,11 +8,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.lifi.SwapProvider;
-import com.alphawallet.app.widget.AddressIcon;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.List;
@@ -19,9 +22,11 @@ import java.util.List;
 public class SwapProviderAdapter extends RecyclerView.Adapter<SwapProviderAdapter.ViewHolder>
 {
     private final List<SwapProvider> data;
+    private final Context context;
 
-    public SwapProviderAdapter(List<SwapProvider> data)
+    public SwapProviderAdapter(Context context, List<SwapProvider> data)
     {
+        this.context = context;
         this.data = data;
     }
 
@@ -45,7 +50,11 @@ public class SwapProviderAdapter extends RecyclerView.Adapter<SwapProviderAdapte
 
             holder.subtitle.setText(item.url);
 
-            holder.icon.bindData(item.logoURI, -1, "", "");
+            Glide.with(context)
+                    .load(item.logoURI)
+                    .placeholder(R.drawable.ic_logo)
+                    .circleCrop()
+                    .into(new DrawableImageViewTarget(holder.icon));
 
             holder.layout.setOnClickListener(v -> holder.checkBox.setChecked(!item.isChecked));
 
@@ -69,7 +78,7 @@ public class SwapProviderAdapter extends RecyclerView.Adapter<SwapProviderAdapte
     static class ViewHolder extends RecyclerView.ViewHolder
     {
         RelativeLayout layout;
-        AddressIcon icon;
+        AppCompatImageView icon;
         TextView title;
         TextView subtitle;
         MaterialCheckBox checkBox;

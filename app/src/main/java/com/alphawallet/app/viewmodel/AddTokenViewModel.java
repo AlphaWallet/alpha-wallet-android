@@ -314,4 +314,9 @@ public class AddTokenViewModel extends BaseViewModel {
     {
         return customSettings;
     }
+
+    public EthereumNetworkRepositoryType ethereumNetworkRepositoryType()
+    {
+        return ethereumNetworkRepository;
+    }
 }

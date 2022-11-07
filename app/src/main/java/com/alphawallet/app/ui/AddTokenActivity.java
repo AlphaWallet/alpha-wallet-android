@@ -44,6 +44,7 @@ import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.AddTokenViewModel;
+import com.alphawallet.app.widget.AWBottomSheetDialog;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
@@ -56,9 +57,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import timber.log.Timber;
-
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class AddTokenActivity extends BaseActivity implements AddressReadyCallback, StandardFunctionInterface, TokensAdapterCallback
@@ -81,7 +81,10 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     private TokensAdapter adapter;
     private RecyclerView recyclerView;
 
+    private boolean mainNetActive = true;
+
     private AWalletAlertDialog aDialog;
+    private AWBottomSheetDialog dialog;
     private final LongSparseArray<Token> tokenList = new LongSparseArray<>();
 
     @Override
@@ -298,7 +301,15 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     @Override
     public void handleClick(String action, int id)
     {
-        onSave();
+        mainNetActive = viewModel.ethereumNetworkRepositoryType().isMainNetSelected();
+        if (mainNetActive)
+        {
+            onSave();
+        }
+        else
+        {
+            dialog.show();
+        }
     }
 
     private void onCheck(String address)
@@ -322,7 +333,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
     }
 
-    private void onSave() {
+    private void onSave()
+    {
         List<TokenCardMeta> selected = adapter.getSelected();
         List<Token> toSave = new ArrayList<>();
         for (TokenCardMeta tcm : selected)
@@ -340,6 +352,48 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         {
             finish();
         }
+    }
+
+
+   /* private void showDialog(View view)
+    {
+        if (dialog == null)
+        {
+            dialog = createDialog();
+        }
+
+        if (!dialog.isShowing())
+        {
+            dialog.show();
+        }
+    }*/
+
+    private AWBottomSheetDialog createDialog()
+    {
+        AWBottomSheetDialog dialog = new AWBottomSheetDialog(this, new AWBottomSheetDialog.Callback()
+        {
+            @Override
+            public void onClosed()
+            {
+
+            }
+
+            @Override
+            public void onConfirmed()
+            {
+
+            }
+
+            @Override
+            public void onCancelled()
+            {
+
+            }
+        });
+        dialog.setTitle(getString(R.string.title_dialog_where_are_tokens));
+        dialog.setContent(getString(R.string.content_dialog_where_are_tokens));
+        dialog.setConfirmButton(getString(R.string.button_switch_to_mainnet));
+        return dialog;
     }
 
     private void onNoContractFound(Boolean noContract)

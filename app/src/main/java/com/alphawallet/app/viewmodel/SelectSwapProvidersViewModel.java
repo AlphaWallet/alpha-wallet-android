@@ -63,6 +63,9 @@ public class SelectSwapProvidersViewModel extends BaseViewModel
                     provider.isChecked = true;
                 }
             }
+        } else {
+            Timber.w("No Swap Providers found.");
+            swapProviders = new ArrayList<>();
         }
         else
         {

@@ -74,3 +74,4 @@ DCIM/
 vendor/
 .project
 output/
+node_modules/

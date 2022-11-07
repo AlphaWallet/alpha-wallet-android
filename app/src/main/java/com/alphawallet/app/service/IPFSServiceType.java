@@ -1,8 +1,8 @@
 package com.alphawallet.app.service;
 
-import java.io.IOException;
+import com.alphawallet.app.entity.QueryResponse;
 
-import okhttp3.Response;
+import java.io.IOException;
 
 /**
  * Created by JB on 4/11/2022.
@@ -10,6 +10,5 @@ import okhttp3.Response;
 public interface IPFSServiceType
 {
     String getContent(String request);
-    Response performIO(String request) throws Exception;
-    Response performIO(String request, String[] headers) throws IOException;
+    QueryResponse performIO(String request, String[] headers) throws IOException;
 }

@@ -110,9 +110,10 @@ public class Utils
 
     public static boolean isValidUrl(String url)
     {
+        if (TextUtils.isEmpty(url)) return false;
         Pattern p = Patterns.WEB_URL;
         Matcher m = p.matcher(url.toLowerCase());
-        return m.matches();
+        return m.matches() || isIPFS(url);
     }
 
     public static boolean isAlNum(String testStr)

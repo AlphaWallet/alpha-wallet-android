@@ -189,7 +189,8 @@ public class RepositoriesModule {
 
     @Singleton
     @Provides
-    IPFSServiceType provideIPFSService(OkHttpClient client) {
+    IPFSServiceType provideIPFSService(OkHttpClient client)
+    {
         return new IPFSService(client);
     }
 
@@ -239,7 +240,7 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-    AssetDefinitionService provideAssetDefinitionService(IPFSService ipfsService, @ApplicationContext Context ctx, NotificationService notificationService, RealmManager realmManager,
+    AssetDefinitionService provideAssetDefinitionService(IPFSServiceType ipfsService, @ApplicationContext Context ctx, NotificationService notificationService, RealmManager realmManager,
                                                          TokensService tokensService, TokenLocalSource tls,
                                                          AlphaWalletService alphaService) {
 		return new AssetDefinitionService(ipfsService, ctx, notificationService, realmManager, tokensService, tls, alphaService);

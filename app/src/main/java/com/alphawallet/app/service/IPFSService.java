@@ -2,10 +2,12 @@ package com.alphawallet.app.service;
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.entity.QueryResponse;
+import com.alphawallet.app.entity.tokenscript.TestScript;
 import com.alphawallet.app.util.Utils;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.net.SocketTimeoutException;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -20,26 +22,18 @@ public class IPFSService implements IPFSServiceType
 
     public IPFSService(OkHttpClient okHttpClient)
     {
-        this.client = new OkHttpClient.Builder()
-                //.connectTimeout(C.CONNECT_TIMEOUT*2, TimeUnit.SECONDS)
-                //.readTimeout(C.READ_TIMEOUT*2, TimeUnit.SECONDS)
-                //.writeTimeout(C.WRITE_TIMEOUT*2, TimeUnit.SECONDS)
-                .connectTimeout(500, TimeUnit.MILLISECONDS)
-                .readTimeout(500, TimeUnit.MILLISECONDS)
-                .writeTimeout(1, TimeUnit.MILLISECONDS)
-                .retryOnConnectionFailure(false)
-                .build();
+        this.client = okHttpClient;
     }
 
     public String getContent(String request)
     {
-        try (Response response = performIO(request))
+        try
         {
+            QueryResponse response = performIO(request, null);
+
             if (response.isSuccessful())
             {
-                String resp = response.body().string();
-                System.out.println("YOLESS: TEXT: " + resp);
-                return resp; //response.body().string();
+                return response.body;
             }
             else
             {
@@ -48,34 +42,25 @@ public class IPFSService implements IPFSServiceType
         }
         catch (Exception e)
         {
-            return null;
+            return "";
         }
     }
 
-    public Response performIO(String request) throws Exception
+    public QueryResponse performIO(String request, String[] headers) throws IOException
     {
-        return performIO(request, null);
-    }
+        if (!Utils.isValidUrl(request)) throw new IOException("URL not valid");
 
-    public Response performIO(String request, String[] headers) throws IOException
-    {
-        if (TextUtils.isEmpty(request)) return null;
-
-        if (Utils.isIPFS(request)) //note that URL might contain IPFS, but not pass 'isValidUrl' //TODO: Update URL Pattern for raw IPFS (see isValidUrl) and refactor
+        if (Utils.isIPFS(request)) //note that URL might contain IPFS, but not pass 'isValidUrl'
         {
             return getFromIPFS(request);
         }
-        else if (Utils.isValidUrl(request))
+        else
         {
             return get(request, headers);
         }
-        else
-        {
-            return new Response.Builder().build();
-        }
     }
 
-    private Response get(String request, String[] headers) throws IOException
+    private QueryResponse get(String request, String[] headers) throws IOException
     {
         Request.Builder bld = new Request.Builder()
                 .url(request)
@@ -83,24 +68,28 @@ public class IPFSService implements IPFSServiceType
 
         if (headers != null) addHeaders(bld, headers);
 
-        return client.newCall(bld.build()).execute();
+        Response response = client.newCall(bld.build()).execute();
+        return new QueryResponse(response.code(), response.body().string());
     }
 
-    private Response getFromIPFS(String request) throws IOException
+    private QueryResponse getFromIPFS(String request) throws IOException
     {
+        if (isTestCode(request)) return loadTestCode();
+
         //try Infura first
         String tryIPFS = Utils.resolveIPFS(request, Utils.IPFS_IO_RESOLVER);
         //attempt to load content
-        Response r = get(tryIPFS, null);
-        System.out.println("YOLESS: Test ipfs " + tryIPFS);
-        if (!r.isSuccessful())
+        QueryResponse r;
+        try
         {
-            tryIPFS = Utils.resolveIPFS(request, Utils.IPFS_INFURA_RESOLVER);
-            System.out.println("YOLESS: Nope ipfs " + tryIPFS);
             r = get(tryIPFS, null);
         }
-
-        System.out.println("YOLESS: Test ipfs " + (r.isSuccessful() ? "yep" : "nope"));
+        catch (SocketTimeoutException e)
+        {
+            //timeout, try second node. Any other failure simply throw back to calling function
+            tryIPFS = Utils.resolveIPFS(request, Utils.IPFS_INFURA_RESOLVER);
+            r = get(tryIPFS, null); //if this throws it will be picked up by calling function
+        }
 
         return r;
     }
@@ -124,5 +113,17 @@ public class IPFSService implements IPFSServiceType
                 name = null;
             }
         }
+    }
+
+    //For testing
+    private boolean isTestCode(String request)
+    {
+        return (!TextUtils.isEmpty(request) && request.endsWith("QmXXLFBeSjXAwAhbo1344wJSjLgoUrfUK9LE57oVubaRRp"));
+    }
+
+    private QueryResponse loadTestCode()
+    {
+        //restore the TokenScript for the certificate test
+        return new QueryResponse(200, TestScript.testScriptXXLF);
     }
 }

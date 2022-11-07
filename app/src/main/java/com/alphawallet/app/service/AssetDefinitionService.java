@@ -25,6 +25,7 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.FragmentMessenger;
+import com.alphawallet.app.entity.QueryResponse;
 import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -111,7 +112,6 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 import io.realm.exceptions.RealmException;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
-import okhttp3.Response;
 import timber.log.Timber;
 
 
@@ -133,7 +133,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private static final String EIP5169_KEY_OWNER = "Contract Owner"; //TODO Source this from the contract via owner()
 
     private final Context context;
-    private final IPFSService ipfsService;
+    private final IPFSServiceType ipfsService;
 
     private final Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
     private FileObserver fileObserver;                     //Observer which scans the override directory waiting for file change
@@ -159,7 +159,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      *  ^^ The "service" part of AssetDefinitionService is the keyword here.
      *  This is shorthand in the project to indicate this is a singleton that other classes inject.
      *  This is the design pattern of the app. See class RepositoriesModule for constructors which are called at App init only */
-    public AssetDefinitionService(IPFSService ipfsSvs, Context ctx, NotificationService svs,
+    public AssetDefinitionService(IPFSServiceType ipfsSvs, Context ctx, NotificationService svs,
                                   RealmManager rm, TokensService tokensService,
                                   TokenLocalSource trs, AlphaWalletService alphaService)
     {
@@ -1050,17 +1050,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private Pair<String, Boolean> downloadScript(String Uri, long currentFileTime)
     {
         boolean isIPFS = Utils.isIPFS(Uri);
-        if (TextUtils.isEmpty(Uri)) return new Pair<>("", false);
 
-        try (Response resp = ipfsService.performIO(Uri, getHeaders(currentFileTime)))
+        try
         {
-            switch (resp.code())
+            QueryResponse response = ipfsService.performIO(Uri, getHeaders(currentFileTime));
+            switch (response.code)
             {
                 default:
                 case HttpURLConnection.HTTP_NOT_MODIFIED:
                     break;
                 case HttpURLConnection.HTTP_OK:
-                    return new Pair<>(resp.body().string(), isIPFS);
+                    return new Pair<>(response.body, isIPFS);
             }
         }
         catch (Exception e)

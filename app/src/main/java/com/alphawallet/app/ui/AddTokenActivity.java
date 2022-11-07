@@ -301,15 +301,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     @Override
     public void handleClick(String action, int id)
     {
-        mainNetActive = viewModel.ethereumNetworkRepositoryType().isMainNetSelected();
-        if (mainNetActive)
-        {
             onSave();
-        }
-        else
-        {
-            dialog.show();
-        }
     }
 
     private void onCheck(String address)
@@ -335,27 +327,35 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private void onSave()
     {
-        List<TokenCardMeta> selected = adapter.getSelected();
-        List<Token> toSave = new ArrayList<>();
-        for (TokenCardMeta tcm : selected)
+        mainNetActive = viewModel.ethereumNetworkRepositoryType().isMainNetSelected();
+        if (mainNetActive)
         {
-            Token matchingToken = tokenList.get(tcm.getChain());
-            if (matchingToken != null) toSave.add(matchingToken);
-        }
+            List<TokenCardMeta> selected = adapter.getSelected();
+            List<Token> toSave = new ArrayList<>();
+            for (TokenCardMeta tcm : selected)
+            {
+                Token matchingToken = tokenList.get(tcm.getChain());
+                if (matchingToken != null) toSave.add(matchingToken);
+            }
 
-        if (toSave.size() > 0)
-        {
-            viewModel.saveTokens(toSave);
-            onSaved(toSave.get(0));
+            if (toSave.size() > 0)
+            {
+                viewModel.saveTokens(toSave);
+                onSaved(toSave.get(0));
+            }
+            else
+            {
+                finish();
+            }
         }
         else
         {
-            finish();
+
         }
     }
 
 
-   /* private void showDialog(View view)
+    private void showDialog(View view)
     {
         if (dialog == null)
         {
@@ -366,7 +366,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         {
             dialog.show();
         }
-    }*/
+    }
 
     private AWBottomSheetDialog createDialog()
     {

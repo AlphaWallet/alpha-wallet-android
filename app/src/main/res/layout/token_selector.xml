@@ -124,6 +124,7 @@
             style="@style/Aw.Typography.Control"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:enabled="false"
             android:gravity="end"
             android:lines="1"
             android:text="@string/seekbar_max"

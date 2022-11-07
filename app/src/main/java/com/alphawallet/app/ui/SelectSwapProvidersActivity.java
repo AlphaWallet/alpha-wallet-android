@@ -47,7 +47,7 @@ public class SelectSwapProvidersActivity extends BaseActivity
     {
         RecyclerView recyclerView = findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new SwapProviderAdapter(viewModel.getSwapProviders());
+        adapter = new SwapProviderAdapter(this, viewModel.getSwapProviders());
         recyclerView.setAdapter(adapter);
     }
 

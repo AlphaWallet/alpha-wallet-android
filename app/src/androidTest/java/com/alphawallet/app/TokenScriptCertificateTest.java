@@ -147,8 +147,8 @@ public class TokenScriptCertificateTest extends BaseE2ETest
 
         shouldSee("Smart Token Labs");
         shouldSee("ECDSA");
-        shouldSee("Contract Owner"); // Note this may fail once we pull owner() from contract,
-                                         // test will need to be changed to contract owner,
-                                         // which for this test is: 0xA20efc4B9537d27acfD052003e311f762620642D
+        shouldSee("Contract Owner");    // Note this may fail once we pull owner() from contract,
+                                            // test will need to be changed to contract owner,
+                                            // which for this test is: 0xA20efc4B9537d27acfD052003e311f762620642D
     }
 }

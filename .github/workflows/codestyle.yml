@@ -22,7 +22,7 @@ jobs:
       - name: Check all changed files
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            npx ec "$file" >> format-error.txt
+            npx ec "$file" >> format-error.txt || true
           done
           if [[ -s "format-error.txt" ]]; then
             exit 1

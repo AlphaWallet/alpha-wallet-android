@@ -30,6 +30,7 @@ public class CustomSettings
     ConcurrentLinkedQueue<Long> loadExclusiveCachedChains = new ConcurrentLinkedQueue<>();
     ConcurrentLinkedQueue<TokenInfo> loadLockedTokens = new ConcurrentLinkedQueue<>();
     public String getJsonString = "";
+    public Boolean loaded = false;
 
     public CustomSettings(Context ctx)
     {
@@ -126,6 +127,9 @@ public class CustomSettings
         {
             err.printStackTrace();
         }
+
+        loadLockedTokens.clear();
+        loadLockedTokens.addAll(chains);
         return chains;
     }
 
@@ -208,7 +212,16 @@ public class CustomSettings
     //    : You'll need to check if the list is empty and if so flag a 'loaded', so we don't spam this list
     public Boolean tokenCanBeDisplayed(TokenCardMeta token)
     {
-        return token.type == ContractType.ETHEREUM || token.isEnabled || isLockedToken(token.getChain(), token.getAddress());
+       final ArrayList<TokenInfo> lockedTokens = getLockedTokensFromJsonFile();
+        if (loadLockedTokens.size() > 0)
+        {
+            return lockedTokens.addAll(loadLockedTokens);
+        }
+        else
+        {
+            return token.type == ContractType.ETHEREUM || token.isEnabled || isLockedToken(token.getChain(), token.getAddress());
+        }
+
     }
 
     //TODO: Caching
@@ -217,11 +230,11 @@ public class CustomSettings
 
         if (loadLockedTokens.size() > 0)
         {
-            return true;
+            return  true;
         }
         else
         {
-            ArrayList<TokenInfo> lockedTokens = getLockedTokensFromJsonFile();
+           final ArrayList<TokenInfo> lockedTokens = getLockedTokensFromJsonFile();
             loadLockedTokens.clear();
             loadLockedTokens.addAll(lockedTokens);
             for (TokenInfo tInfo : lockedTokens)

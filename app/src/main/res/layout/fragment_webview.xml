@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:custom="http://schemas.android.com/tools">
+    android:layout_height="match_parent">
 
-    <include layout="@layout/layout_url_bar_full" />
+    <com.alphawallet.app.widget.AddressBar
+        android:id="@+id/address_bar_widget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <View
         android:id="@+id/separator"
         style="@style/Aw.Component.Separator"
-        android:layout_below="@id/address_bar" />
+        android:layout_below="@id/address_bar_widget" />
 
     <ProgressBar
         android:id="@+id/progressBar"

@@ -1,5 +1,6 @@
 package com.alphawallet.app.util;
 
+import static android.content.Context.INPUT_METHOD_SERVICE;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.isDialog;
@@ -10,8 +11,10 @@ import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 
+import android.content.Context;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.test.espresso.PerformException;
 import androidx.test.espresso.UiController;
@@ -20,6 +23,8 @@ import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
+
+import com.alphawallet.app.R;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -215,6 +220,51 @@ public class Helper
             catch (Error | Exception e)
             {
                 wait(1);
+            }
+        }
+    }
+
+    public static boolean isSoftKeyboardShown(Context context)
+    {
+        InputMethodManager imm =
+                (InputMethodManager) context.getSystemService(INPUT_METHOD_SERVICE);
+        return imm.isAcceptingText();
+    }
+
+    public static void waitUntilLoaded()
+    {
+        waitStart();
+        waitComplete();
+    }
+
+    private static void waitComplete()
+    {
+        for (int i = 0; i < DEFAULT_TIMEOUT_IN_SECONDS; i++)
+        {
+            try
+            {
+                onView(withId(R.id.progressBar)).check(matches(not(isDisplayed())));
+                break;
+            }
+            catch (Error | Exception e)
+            {
+                Helper.wait(1);
+            }
+        }
+    }
+
+    private static void waitStart()
+    {
+        for (int i = 0; i < DEFAULT_TIMEOUT_IN_SECONDS; i++)
+        {
+            try
+            {
+                onView(withId(R.id.progressBar)).check(matches(isDisplayed()));
+                break;
+            }
+            catch (Error | Exception e)
+            {
+                Helper.wait(1);
             }
         }
     }

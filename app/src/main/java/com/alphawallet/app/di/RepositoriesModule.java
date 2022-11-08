@@ -192,11 +192,11 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
-                                       TokenRepositoryType tokenRepository,
-                                       TickerService tickerService,
-                                       OpenSeaService openseaService,
-                                       AnalyticsServiceType analyticsService)
+    TokensService provideTokensServices(EthereumNetworkRepositoryType ethereumNetworkRepository,
+                                        TokenRepositoryType tokenRepository,
+                                        TickerService tickerService,
+                                        OpenSeaService openseaService,
+                                        AnalyticsServiceType analyticsService)
     {
         return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService);
     }

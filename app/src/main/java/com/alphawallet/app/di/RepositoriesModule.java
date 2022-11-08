@@ -220,9 +220,7 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    GasService provideGasServices(EthereumNetworkRepositoryType ethereumNetworkRepository,
-                                  OkHttpClient client,
-                                  RealmManager realmManager)
+    GasService provideGasService(EthereumNetworkRepositoryType ethereumNetworkRepository, OkHttpClient client, RealmManager realmManager)
     {
         return new GasService(ethereumNetworkRepository, client, realmManager);
     }
@@ -243,9 +241,7 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    AlphaWalletService provideFeemasterService(OkHttpClient okHttpClient,
-                                               TransactionRepositoryType transactionRepository,
-                                               Gson gson)
+    AlphaWalletService provideFeemasterService(OkHttpClient okHttpClient, TransactionRepositoryType transactionRepository, Gson gson)
     {
         return new AlphaWalletService(okHttpClient, transactionRepository, gson);
     }
@@ -259,9 +255,9 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    AssetDefinitionService provideAssetDefinitionService(IPFSServiceType ipfsService, @ApplicationContext Context ctx, NotificationService notificationService, RealmManager realmManager,
-                                                         TokensService tokensService, TokenLocalSource tls,
-                                                         AlphaWalletService alphaService)
+    AssetDefinitionService provideAssetDefinitionServices(IPFSServiceType ipfsService, @ApplicationContext Context ctx, NotificationService notificationService, RealmManager realmManager,
+                                                          TokensService tokensService, TokenLocalSource tls,
+                                                          AlphaWalletService alphaService)
     {
         return new AssetDefinitionService(ipfsService, ctx, notificationService, realmManager, tokensService, tls, alphaService);
     }

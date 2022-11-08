@@ -255,9 +255,9 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    AssetDefinitionService provideAssetDefinitionServices(IPFSServiceType ipfsService, @ApplicationContext Context ctx, NotificationService notificationService, RealmManager realmManager,
-                                                          TokensService tokensService, TokenLocalSource tls,
-                                                          AlphaWalletService alphaService)
+    AssetDefinitionService provideAssetDefinitionServices (IPFSServiceType ipfsService, @ApplicationContext Context ctx, NotificationService notificationService, RealmManager realmManager,
+                                                           TokensService tokensService, TokenLocalSource tls,
+                                                           AlphaWalletService alphaService)
     {
         return new AssetDefinitionService(ipfsService, ctx, notificationService, realmManager, tokensService, tls, alphaService);
     }

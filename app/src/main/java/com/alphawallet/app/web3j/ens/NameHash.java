@@ -12,6 +12,7 @@
  */
 package com.alphawallet.app.web3j.ens;
 
+import android.text.TextUtils;
 import org.web3j.crypto.Hash;
 import org.web3j.utils.Numeric;
 
@@ -76,9 +77,13 @@ public class NameHash
      */
     public static String normalise(String ensName)
     {
+        if (TextUtils.isEmpty(ensName))
+        {
+            return "";
+        }
         try
         {
-            return IDN.toASCII(ensName, IDN.USE_STD3_ASCII_RULES).toLowerCase(Locale.ROOT); //java.lang.NullPointerException: Attempt to invoke virtual method 'char[] java.lang.String.toCharArray()' on a null object reference
+            return IDN.toASCII(ensName, IDN.USE_STD3_ASCII_RULES).toLowerCase(Locale.ROOT);
         }
         catch (Exception e)
         {
@@ -110,6 +115,10 @@ public class NameHash
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         for (String part : parts)
         {
+            if (TextUtils.isEmpty(part))
+            {
+                break;
+            }
             byte[] bytes = toUtf8Bytes("_" + normalise(part));
             if (bytes == null)
             {

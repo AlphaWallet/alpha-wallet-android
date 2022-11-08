@@ -22,6 +22,23 @@ jobs:
       - name: Check all changed files
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            npx ec "$file"
+            npx ec -no-color "$file" >> format-error.txt || true
           done
-
+          if [[ -s "format-error.txt" ]]; then
+            exit 1
+          else
+            exit 0
+          fi
+      - name: Collect results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: format-error
+          path: format-error.txt
+      - name: comment PR
+        if: ${{ failure() }}
+        uses: machine-learning-apps/pr-comment@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path: format-error.txt

@@ -12,6 +12,7 @@ import java.net.SocketTimeoutException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import timber.log.Timber;
 
 /**
  * Created by JB on 3/11/2022.
@@ -25,11 +26,11 @@ public class IPFSService implements IPFSServiceType
         this.client = okHttpClient;
     }
 
-    public String getContent(String request)
+    public String getContent(String url)
     {
         try
         {
-            QueryResponse response = performIO(request, null);
+            QueryResponse response = performIO(url, null);
 
             if (response.isSuccessful())
             {
@@ -37,33 +38,34 @@ public class IPFSService implements IPFSServiceType
             }
             else
             {
-                return null;
+                return "";
             }
         }
         catch (Exception e)
         {
+            Timber.w(e);
             return "";
         }
     }
 
-    public QueryResponse performIO(String request, String[] headers) throws IOException
+    public QueryResponse performIO(String url, String[] headers) throws IOException
     {
-        if (!Utils.isValidUrl(request)) throw new IOException("URL not valid");
+        if (!Utils.isValidUrl(url)) throw new IOException("URL not valid");
 
-        if (Utils.isIPFS(request)) //note that URL might contain IPFS, but not pass 'isValidUrl'
+        if (Utils.isIPFS(url)) //note that URL might contain IPFS, but not pass 'isValidUrl'
         {
-            return getFromIPFS(request);
+            return getFromIPFS(url);
         }
         else
         {
-            return get(request, headers);
+            return get(url, headers);
         }
     }
 
-    private QueryResponse get(String request, String[] headers) throws IOException
+    private QueryResponse get(String url, String[] headers) throws IOException
     {
         Request.Builder bld = new Request.Builder()
-                .url(request)
+                .url(url)
                 .get();
 
         if (headers != null) addHeaders(bld, headers);
@@ -72,12 +74,12 @@ public class IPFSService implements IPFSServiceType
         return new QueryResponse(response.code(), response.body().string());
     }
 
-    private QueryResponse getFromIPFS(String request) throws IOException
+    private QueryResponse getFromIPFS(String url) throws IOException
     {
-        if (isTestCode(request)) return loadTestCode();
+        if (isTestCode(url)) return loadTestCode();
 
         //try Infura first
-        String tryIPFS = Utils.resolveIPFS(request, Utils.IPFS_IO_RESOLVER);
+        String tryIPFS = Utils.resolveIPFS(url, Utils.IPFS_IO_RESOLVER);
         //attempt to load content
         QueryResponse r;
         try
@@ -87,7 +89,7 @@ public class IPFSService implements IPFSServiceType
         catch (SocketTimeoutException e)
         {
             //timeout, try second node. Any other failure simply throw back to calling function
-            tryIPFS = Utils.resolveIPFS(request, Utils.IPFS_INFURA_RESOLVER);
+            tryIPFS = Utils.resolveIPFS(url, Utils.IPFS_INFURA_RESOLVER);
             r = get(tryIPFS, null); //if this throws it will be picked up by calling function
         }
 
@@ -116,9 +118,9 @@ public class IPFSService implements IPFSServiceType
     }
 
     //For testing
-    private boolean isTestCode(String request)
+    private boolean isTestCode(String url)
     {
-        return (!TextUtils.isEmpty(request) && request.endsWith("QmXXLFBeSjXAwAhbo1344wJSjLgoUrfUK9LE57oVubaRRp"));
+        return (!TextUtils.isEmpty(url) && url.endsWith("QmXXLFBeSjXAwAhbo1344wJSjLgoUrfUK9LE57oVubaRRp"));
     }
 
     private QueryResponse loadTestCode()

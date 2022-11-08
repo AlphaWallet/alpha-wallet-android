@@ -9,6 +9,6 @@ import java.io.IOException;
  */
 public interface IPFSServiceType
 {
-    String getContent(String request);
-    QueryResponse performIO(String request, String[] headers) throws IOException;
+    String getContent(String url);
+    QueryResponse performIO(String url, String[] headers) throws IOException;
 }

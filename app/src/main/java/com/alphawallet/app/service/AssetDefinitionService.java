@@ -159,9 +159,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      *  ^^ The "service" part of AssetDefinitionService is the keyword here.
      *  This is shorthand in the project to indicate this is a singleton that other classes inject.
      *  This is the design pattern of the app. See class RepositoriesModule for constructors which are called at App init only */
-    public AssetDefinitionService(IPFSServiceType ipfsSvs, Context ctx, NotificationService svs,
-                                  RealmManager rm, TokensService tokensService,
-                                  TokenLocalSource trs, AlphaWalletService alphaService)
+    public AssetDefinitionService  (IPFSServiceType ipfsSvs, Context ctx, NotificationService svs,
+                                    RealmManager rm, TokensService tokensService,
+                                    TokenLocalSource trs, AlphaWalletService alphaService)
     {
         context = ctx;
         ipfsService = ipfsSvs;
@@ -1084,7 +1084,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         String OSVersion = String.valueOf(Build.VERSION.RELEASE);
 
         return new String[] {
-         "Accept", "text/xml; charset=UTF-8",
+                "Accept", "text/xml; charset=UTF-8",
                 "X-Client-Name", "AlphaWallet",
                 "X-Client-Version", appVersion,
                 "X-Platform-Name", "Android",
@@ -1460,8 +1460,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private void storeEventValue(String walletAddress, EventDefinition ev, EthLog.LogResult log, Attribute attr,
-                                 String selectVal)
+    private void storeEventValue   (String walletAddress, EventDefinition ev, EthLog.LogResult log, Attribute attr,
+                                    String selectVal)
     {
         //store result
         BigInteger tokenId = EventUtils.getTokenId(ev, log);
@@ -1878,7 +1878,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return denialMessage;
     }
 
-    private Map<String, TokenScriptResult.Attribute> getAttributeResultsForTokenIds(Map<BigInteger, Map<String, TokenScriptResult.Attribute>> attrResults, List<String> requiredAttributeNames, BigInteger tokenId)
+    private Map<String, TokenScriptResult.Attribute> getAttributeResultsForTokenIds(Map<BigInteger, Map<String, TokenScriptResult.Attribute>> attrResults, List<String> requiredAttributeNames,
+                                                                                    BigInteger tokenId)
     {
         Map<String, TokenScriptResult.Attribute> results = new HashMap<>();
         if (!attrResults.containsKey(tokenId)) return results; //check values

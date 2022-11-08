@@ -623,8 +623,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return tokenDecimal;
     }
 
-    private void writeAssets(Map<String, List<EtherscanEvent>> eventMap, Token token, String walletAddress,
-                             String contractAddress, TokensService svs, boolean newToken)
+    private void writeAssets (Map<String, List<EtherscanEvent>> eventMap, Token token, String walletAddress,
+                              String contractAddress, TokensService svs, boolean newToken)
     {
         List<BigInteger> additions = new ArrayList<>();
         List<BigInteger> removals = new ArrayList<>();
@@ -714,7 +714,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         else if (networkInfo.chainId == AURORA_MAINNET_ID || networkInfo.chainId == AURORA_TESTNET_ID)
         {
-          return AURORASCAN_API_KEY;
+            return AURORASCAN_API_KEY;
         }
         else
         {
@@ -725,7 +725,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private EtherscanTransaction[] readCovalentTransactions(TokensService svs, String accountAddress, NetworkInfo networkInfo, boolean ascending, int page, int pageSize) throws JSONException
     {
         String covalent = "" + networkInfo.chainId + "/address/" + accountAddress.toLowerCase() + "/transactions_v2/?";
-        String args = "block-signed-at-asc=" + (ascending ? "true" : "false") + "&page-number=" + (page - 1) + "&page-size=" + pageSize + "&key=" + keyProvider.getCovalentKey(); //read logs to get all the transfers
+        String args = "block-signed-at-asc=" + (ascending ? "true" : "false") + "&page-number=" + (page - 1) + "&page-size=" +
+                pageSize + "&key=" + keyProvider.getCovalentKey(); //read logs to get all the transfers
         String fullUrl = networkInfo.etherscanAPI.replace(COVALENT, covalent);
         String result = null;
 
@@ -969,8 +970,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void writeEvents(Realm instance, EtherscanEvent[] events, String walletAddress,
-                             @NonNull NetworkInfo networkInfo, final boolean isNFT) throws Exception
+    private void writeEvents (Realm instance, EtherscanEvent[] events, String walletAddress,
+                              @NonNull NetworkInfo networkInfo, final boolean isNFT) throws Exception
     {
         String TO_TOKEN = "[TO_ADDRESS]";
         String FROM_TOKEN = "[FROM_ADDRESS]";
@@ -983,12 +984,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             //write event list
             for (EtherscanEvent ev : events)
             {
-                boolean scanAsNFT = isNFT || ((ev.tokenDecimal == null || ev.tokenDecimal.length() == 0 || ev.tokenDecimal.equals("0")) && (ev.tokenID != null && ev.tokenID.length() > 0));
+                boolean scanAsNFT = isNFT || ((ev.tokenDecimal == null || ev.tokenDecimal.length() == 0 || ev.tokenDecimal.equals("0")) &&
+                        (ev.tokenID != null && ev.tokenID.length() > 0));
                 Transaction tx = scanAsNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
 
                 //find tx name
                 String activityName = tx.getEventName(walletAddress);
-                String valueList = VALUES.replace(TO_TOKEN, ev.to).replace(FROM_TOKEN, ev.from).replace(AMOUNT_TOKEN, scanAsNFT ? ev.tokenID : ev.value); //Etherscan sometimes interprets NFT transfers as FT's
+                //Etherscan sometimes interprets NFT transfers as FT's
+                String valueList = VALUES.replace(TO_TOKEN, ev.to).replace(FROM_TOKEN, ev.from).replace(AMOUNT_TOKEN, scanAsNFT ? ev.tokenID : ev.value);
                 storeTransferData(r, tx.hash, valueList, activityName, ev.contractAddress);
                 //ensure we have fetched the transaction for each hash
                 writeTransaction(r, tx, ev.contractAddress, networkInfo.etherscanAPI.contains(COVALENT) ? null : txFetches);

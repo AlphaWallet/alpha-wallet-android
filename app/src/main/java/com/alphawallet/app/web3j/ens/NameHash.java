@@ -83,7 +83,7 @@ public class NameHash
         }
         try
         {
-            return IDN.toASCII(ensName, IDN.USE_STD3_ASCII_RULES).toLowerCase(Locale.ROOT); //java.lang.NullPointerException: Attempt to invoke virtual method 'char[] java.lang.String.toCharArray()' on a null object reference
+            return IDN.toASCII(ensName, IDN.USE_STD3_ASCII_RULES).toLowerCase(Locale.ROOT);
         }
         catch (Exception e)
         {

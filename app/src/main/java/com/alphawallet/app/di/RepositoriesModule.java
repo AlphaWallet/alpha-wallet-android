@@ -220,9 +220,9 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    GasService provideGasService(EthereumNetworkRepositoryType ethereumNetworkRepository,
-                                 OkHttpClient client,
-                                 RealmManager realmManager)
+    GasService provideGasServices(EthereumNetworkRepositoryType ethereumNetworkRepository,
+                                  OkHttpClient client,
+                                  RealmManager realmManager)
     {
         return new GasService(ethereumNetworkRepository, client, realmManager);
     }

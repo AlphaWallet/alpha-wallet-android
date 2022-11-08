@@ -9,6 +9,7 @@ import static com.alphawallet.app.steps.Steps.importWalletFromSettingsPage;
 import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.steps.Steps.sendBalanceTo;
 import static com.alphawallet.app.steps.Steps.switchToWallet;
+import static com.alphawallet.app.util.EthUtils.GANACHE_URL;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
@@ -46,7 +47,7 @@ public class TransferTest extends BaseE2ETest {
         importWalletFromSettingsPage(privateKey);
         assertThat(getWalletAddress(), equalTo(existedWalletAddress));
 
-        addNewNetwork("Ganache");
+        addNewNetwork("Ganache", GANACHE_URL);
         selectTestNet("Ganache");
         sendBalanceTo(newWalletAddress, "0.001");
         ensureTransactionConfirmed();

@@ -42,9 +42,11 @@ import java.util.Map;
  */
 public class TokenScriptCertificateTest extends BaseE2ETest
 {
-    private final String doorContractAddress;
+    private String doorContractAddress;
     private final String contractOwnerPk = "0x69c22d654be7fe75e31fbe26cb56c93ec91144fab67cb71529c8081971635069";
     private final Web3j web3j;
+
+    private final boolean useMumbai = false; //for local testing
 
     private static final Map<String, String[]> WALLETS_ON_GANACHE = new HashMap<String, String[]>()
     {{
@@ -81,6 +83,12 @@ public class TokenScriptCertificateTest extends BaseE2ETest
 
         //Always use zero nonce for determining the contract address
         doorContractAddress = EthUtils.calculateContractAddress(deployCredentials.getAddress(), 0L);
+
+        if (useMumbai)
+        {
+            //If using Mumbai for this test:
+            doorContractAddress = "0xA0343dfd68FcD7F18153b8AB87936c5A9C1Da20e";
+        }
     }
 
     @Test
@@ -100,8 +108,8 @@ public class TokenScriptCertificateTest extends BaseE2ETest
 
         assertThat(getWalletAddress(), equalTo(ownerAddress));
 
-        addNewNetwork("Ganache");
-        selectTestNet("Ganache");
+        addNewNetwork("Ganache", GANACHE_URL);
+        selectTestNet(useMumbai ? "Mumbai" : "Ganache");
 
         //Ensure we're on the wallet page
         switchToWallet(ownerAddress);
@@ -117,7 +125,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest
 
         onView(allOf(withId(R.id.edit_text))).perform(replaceText(doorContractAddress));
 
-        onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 30));
+        onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 300));
 
         click(withId(R.id.select_token));
 
@@ -142,6 +150,8 @@ public class TokenScriptCertificateTest extends BaseE2ETest
 
         shouldSee("Smart Token Labs");
         shouldSee("ECDSA");
-        shouldSee("Contract Owner"); // Note this may fail once we pull owner() from contract, test will need to be changed to contract owner, which for this test is: 0xA20efc4B9537d27acfD052003e311f762620642D
+        shouldSee("Contract Owner");    // Note this may fail once we pull owner() from contract,
+                                            // test will need to be changed to contract owner,
+                                            // which for this test is: 0xA20efc4B9537d27acfD052003e311f762620642D
     }
 }

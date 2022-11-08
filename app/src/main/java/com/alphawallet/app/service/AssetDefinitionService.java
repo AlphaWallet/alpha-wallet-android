@@ -25,6 +25,7 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.FragmentMessenger;
+import com.alphawallet.app.entity.QueryResponse;
 import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -36,7 +37,6 @@ import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmCertificateData;
 import com.alphawallet.app.repository.entity.RealmTokenScriptData;
@@ -112,8 +112,6 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 import io.realm.exceptions.RealmException;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import timber.log.Timber;
 
 
@@ -135,7 +133,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private static final String EIP5169_KEY_OWNER = "Contract Owner"; //TODO Source this from the contract via owner()
 
     private final Context context;
-    private final OkHttpClient okHttpClient;
+    private final IPFSServiceType ipfsService;
 
     private final Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
     private FileObserver fileObserver;                     //Observer which scans the override directory waiting for file change
@@ -145,7 +143,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final TokensService tokensService;
     private final TokenLocalSource tokenLocalSource;
     private final AlphaWalletService alphaWalletService;
-    private final TransactionRepositoryType transactionRepository;
     private TokenDefinition cachedDefinition = null;
     private final ConcurrentHashMap<String, EventDefinition> eventList = new ConcurrentHashMap<>(); //List of events built during file load
     private final Semaphore assetLoadingLock;  // used to block if someone calls getAssetDefinitionASync() while loading
@@ -158,17 +155,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     @Nullable
     private Disposable checkEventDisposable;
 
-    /* Designed with the assmuption that only a single instance of this class at any given time
+    /* Designed with the assumption that only a single instance of this class at any given time
      *  ^^ The "service" part of AssetDefinitionService is the keyword here.
      *  This is shorthand in the project to indicate this is a singleton that other classes inject.
      *  This is the design pattern of the app. See class RepositoriesModule for constructors which are called at App init only */
-    public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs,
-                                  RealmManager rm, TokensService tokensService,
-                                  TokenLocalSource trs, TransactionRepositoryType trt,
-                                  AlphaWalletService alphaService)
+    public AssetDefinitionService  (IPFSServiceType ipfsSvs, Context ctx, NotificationService svs,
+                                    RealmManager rm, TokensService tokensService,
+                                    TokenLocalSource trs, AlphaWalletService alphaService)
     {
         context = ctx;
-        okHttpClient = client;
+        ipfsService = ipfsSvs;
         assetChecked = new ConcurrentHashMap<>();
         notificationService = svs;
         realmManager = rm;
@@ -178,7 +174,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
         }; //no overridden functions
         tokenLocalSource = trs;
-        transactionRepository = trt;
         assetLoadingLock = new Semaphore(1);
         eventConnection = new Semaphore(1);
         //deleteAllEventData();
@@ -1052,62 +1047,50 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    private Pair<String, Boolean> downloadScript(String Uri, long currentFileTime) throws PackageManager.NameNotFoundException
+    private Pair<String, Boolean> downloadScript(String Uri, long currentFileTime)
     {
-        boolean isIPFS = false;
-        if (TextUtils.isEmpty(Uri)) return new Pair<>("", false);
+        boolean isIPFS = Utils.isIPFS(Uri);
+
+        try
+        {
+            QueryResponse response = ipfsService.performIO(Uri, getHeaders(currentFileTime));
+            switch (response.code)
+            {
+                default:
+                case HttpURLConnection.HTTP_NOT_MODIFIED:
+                    break;
+                case HttpURLConnection.HTTP_OK:
+                    return new Pair<>(response.body, isIPFS);
+            }
+        }
+        catch (Exception e)
+        {
+            Timber.w(e);
+        }
+
+        return new Pair<>("", false);
+    }
+
+    private String[] getHeaders(long currentFileTime) throws PackageManager.NameNotFoundException
+    {
         SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         String dateFormat = format.format(new Date(currentFileTime));
 
-        //convert uri if using IPFS:
-        Uri = Utils.parseIPFS(Uri);
-
-        //prepare Android headers
         PackageManager manager = context.getPackageManager();
         PackageInfo info = manager.getPackageInfo(
                 context.getPackageName(), 0);
         String appVersion = info.versionName;
         String OSVersion = String.valueOf(Build.VERSION.RELEASE);
 
-        Request.Builder bld = new Request.Builder()
-                .url(Uri)
-                .get();
-
-        if (!Uri.toLowerCase().contains("ipfs.io"))
-        {
-            bld.addHeader("Accept", "text/xml; charset=UTF-8")
-                    .addHeader("X-Client-Name", "AlphaWallet")
-                    .addHeader("X-Client-Version", appVersion)
-                    .addHeader("X-Platform-Name", "Android")
-                    .addHeader("X-Platform-Version", OSVersion)
-                    .addHeader("If-Modified-Since", dateFormat);
-        }
-        else
-        {
-            isIPFS = true;
-        }
-
-        Request request = bld.build();
-
-        try (okhttp3.Response response = okHttpClient.newCall(request)
-                .execute())
-        {
-            switch (response.code())
-            {
-                default:
-                case HttpURLConnection.HTTP_NOT_MODIFIED:
-                    break;
-                case HttpURLConnection.HTTP_OK:
-                    return new Pair<>(response.body().string(), isIPFS);
-            }
-        }
-        catch (Exception e)
-        {
-            Timber.e(e);
-        }
-
-        return new Pair<>("", false);
+        return new String[] {
+                "Accept", "text/xml; charset=UTF-8",
+                "X-Client-Name", "AlphaWallet",
+                "X-Client-Version", appVersion,
+                "X-Platform-Name", "Android",
+                "X-Platform-Version", OSVersion,
+                "If-Modified-Since", dateFormat
+        };
     }
 
     private boolean definitionIsOutOfDate(TokenDefinition td)
@@ -1477,8 +1460,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private void storeEventValue(String walletAddress, EventDefinition ev, EthLog.LogResult log, Attribute attr,
-                                 String selectVal)
+    private void storeEventValue   (String walletAddress, EventDefinition ev, EthLog.LogResult log, Attribute attr,
+                                    String selectVal)
     {
         //store result
         BigInteger tokenId = EventUtils.getTokenId(ev, log);
@@ -1895,7 +1878,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return denialMessage;
     }
 
-    private Map<String, TokenScriptResult.Attribute> getAttributeResultsForTokenIds(Map<BigInteger, Map<String, TokenScriptResult.Attribute>> attrResults, List<String> requiredAttributeNames, BigInteger tokenId)
+    private Map<String, TokenScriptResult.Attribute> getAttributeResultsForTokenIds(Map<BigInteger, Map<String, TokenScriptResult.Attribute>> attrResults, List<String> requiredAttributeNames,
+                                                                                    BigInteger tokenId)
     {
         Map<String, TokenScriptResult.Attribute> results = new HashMap<>();
         if (!attrResults.containsKey(tokenId)) return results; //check values

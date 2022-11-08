@@ -15,7 +15,7 @@ dependencies {
     implementation files('..\\app\\libs\\core-4.8.8-android.jar')
     implementation files('..\\app\\libs\\crypto-4.8.8-android.jar')
     implementation files('..\\app\\libs\\utils-4.8.8-android.jar')
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.62'
     // https://mvnrepository.com/artifact/com.github.cliftonlabs/json-simple
     implementation group: 'com.github.cliftonlabs', name: 'json-simple', version: '3.1.0'

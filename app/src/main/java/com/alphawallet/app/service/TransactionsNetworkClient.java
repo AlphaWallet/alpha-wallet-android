@@ -623,8 +623,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return tokenDecimal;
     }
 
-    private void writeAssets (Map<String, List<EtherscanEvent>> eventMap, Token token, String walletAddress,
-                              String contractAddress, TokensService svs, boolean newToken)
+    private void writeAssets   (Map<String, List<EtherscanEvent>> eventMap, Token token, String walletAddress,
+                                String contractAddress, TokensService svs, boolean newToken)
     {
         List<BigInteger> additions = new ArrayList<>();
         List<BigInteger> removals = new ArrayList<>();
@@ -970,8 +970,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void writeEvents (Realm instance, EtherscanEvent[] events, String walletAddress,
-                              @NonNull NetworkInfo networkInfo, final boolean isNFT) throws Exception
+    private void writeEvents   (Realm instance, EtherscanEvent[] events, String walletAddress,
+                                @NonNull NetworkInfo networkInfo, final boolean isNFT) throws Exception
     {
         String TO_TOKEN = "[TO_ADDRESS]";
         String FROM_TOKEN = "[FROM_ADDRESS]";

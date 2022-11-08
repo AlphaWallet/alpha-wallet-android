@@ -35,4 +35,10 @@ jobs:
         with:
           name: format-error
           path: format-error.txt
-
+      - name: comment PR
+        if: ${{ failure() }}
+        uses: machine-learning-apps/pr-comment@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path: format-error.txt

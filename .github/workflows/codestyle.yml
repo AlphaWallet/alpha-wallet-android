@@ -22,6 +22,17 @@ jobs:
       - name: Check all changed files
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            npx ec "$file"
+            npx ec "$file" >> build/format-error.txt
           done
+          if [[ -s "build/format-error.txt" ]]; then
+            exit 1
+          else
+            exit 0
+          fi
+      - name: Collect results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: format-error
+          path: build/format-error.txt
 

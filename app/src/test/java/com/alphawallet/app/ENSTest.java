@@ -9,7 +9,9 @@ import static org.junit.Assert.assertEquals;
 import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.web3j.ens.Contracts;
+import com.alphawallet.app.web3j.ens.EnsResolutionException;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.web3j.protocol.Web3j;
@@ -101,8 +103,11 @@ public class ENSTest
                 ("vitalik.eth"));
     }
 
+
+
     @Test
-    public void testNameHash() {
+    public void testNameHash()
+    {
         assertEquals(
                 nameHash(""),
                 ("0x0000000000000000000000000000000000000000000000000000000000000000"));
@@ -114,5 +119,18 @@ public class ENSTest
         assertEquals(
                 nameHash("foo.eth"),
                 ("0xde9b09fd7c5f901e23a3f19fecc54828e9c848539801e86591bd9801b019f84f"));
+    }
+
+    @Test
+    public void testNPE()
+    {
+        Assert.assertThrows(EnsResolutionException.class,
+                this::nameHashNPE);
+    }
+
+    private void nameHashNPE() throws EnsResolutionException
+    {
+        String test = nameHash(null);
+        System.out.println("Should have triggered exception");
     }
 }

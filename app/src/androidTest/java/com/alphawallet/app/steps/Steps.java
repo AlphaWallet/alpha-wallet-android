@@ -190,7 +190,7 @@ public class Steps
         click(withText("Continue"));
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_password)))))).perform(replaceText(password));
         click(withText("Continue"));
-        Helper.wait(5);
+        Helper.wait(15);
     }
 
     public static void importKSWalletFromSettingsPage(String keystore, String password)

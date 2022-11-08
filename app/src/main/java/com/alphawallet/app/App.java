@@ -37,7 +37,8 @@ public class App extends Application
             Timber.plant(new ReleaseTree());
         }
 
-        int defaultTheme = PreferenceManager.getDefaultSharedPreferences(this).getInt("theme", C.THEME_AUTO);
+        int defaultTheme = PreferenceManager.getDefaultSharedPreferences(this)
+                .getInt("theme", C.THEME_AUTO);
 
         if (defaultTheme == C.THEME_LIGHT)
         {

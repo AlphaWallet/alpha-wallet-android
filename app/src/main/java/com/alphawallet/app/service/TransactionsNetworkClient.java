@@ -34,6 +34,7 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 import com.google.gson.Gson;
 
@@ -423,6 +424,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             fullUrl = sb.toString();
 
+            if (!Utils.isValidUrl(fullUrl))
+            {
+                return new EtherscanTransaction[0];
+            }
+
             Request request = new Request.Builder()
                     .url(fullUrl)
                     .get()
@@ -663,6 +669,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 "&address=" + walletAddress +
                 "&page=1&offset=" + TRANSFER_RESULT_MAX +
                 "&sort=asc" + getNetworkAPIToken(networkInfo);
+
+        if (!Utils.isValidUrl(fullUrl))
+        {
+            return "0";
+        }
 
         Request request = new Request.Builder()
                 .url(fullUrl)

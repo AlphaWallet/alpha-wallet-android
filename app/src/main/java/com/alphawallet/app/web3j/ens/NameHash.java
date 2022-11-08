@@ -12,6 +12,11 @@
  */
 package com.alphawallet.app.web3j.ens;
 
+import android.text.TextUtils;
+
+import org.web3j.crypto.Hash;
+import org.web3j.utils.Numeric;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.IDN;
@@ -19,31 +24,38 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Locale;
 
-import org.web3j.crypto.Hash;
-import org.web3j.utils.Numeric;
-
 /** ENS name hash implementation. */
-public class NameHash {
+public class NameHash
+{
 
     private static final byte[] EMPTY = new byte[32];
 
-    public static byte[] nameHashAsBytes(String ensName) {
+    public static byte[] nameHashAsBytes(String ensName)
+    {
         return Numeric.hexStringToByteArray(nameHash(ensName));
     }
 
-    public static String nameHash(String ensName) {
+    public static String nameHash(String ensName)
+    {
         String normalisedEnsName = normalise(ensName);
         return Numeric.toHexString(nameHash(normalisedEnsName.split("\\.")));
     }
 
-    private static byte[] nameHash(String[] labels) {
-        if (labels.length == 0 || labels[0].equals("")) {
+    private static byte[] nameHash(String[] labels)
+    {
+        if (labels.length == 0 || labels[0].equals(""))
+        {
             return EMPTY;
-        } else {
+        }
+        else
+        {
             String[] tail;
-            if (labels.length == 1) {
-                tail = new String[] {};
-            } else {
+            if (labels.length == 1)
+            {
+                tail = new String[]{};
+            }
+            else
+            {
                 tail = Arrays.copyOfRange(labels, 1, labels.length);
             }
 
@@ -65,16 +77,26 @@ public class NameHash {
      * @return normalised ens name
      * @throws EnsResolutionException if the name cannot be normalised
      */
-    public static String normalise(String ensName) {
-        try {
+    public static String normalise(String ensName)
+    {
+        if (TextUtils.isEmpty(ensName))
+        {
+            return "";
+        }
+        try
+        {
             return IDN.toASCII(ensName, IDN.USE_STD3_ASCII_RULES).toLowerCase(Locale.ROOT);
-        } catch (IllegalArgumentException e) {
+        }
+        catch (IllegalArgumentException e)
+        {
             throw new EnsResolutionException("Invalid ENS name provided: " + ensName);
         }
     }
 
-    public static byte[] toUtf8Bytes(String string) {
-        if (string == null || string.isEmpty()) {
+    public static byte[] toUtf8Bytes(String string)
+    {
+        if (string == null || string.isEmpty())
+        {
             return null;
         }
         return string.getBytes(StandardCharsets.UTF_8);
@@ -88,13 +110,20 @@ public class NameHash {
      * @return Encoded name in Hex format.
      * @throws IOException
      */
-    public static String dnsEncode(String name) throws IOException {
+    public static String dnsEncode(String name) throws IOException
+    {
         String[] parts = name.split("\\.");
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        for (String part : parts) {
+        for (String part : parts)
+        {
+            if (TextUtils.isEmpty(part))
+            {
+                break;
+            }
             byte[] bytes = toUtf8Bytes("_" + normalise(part));
-            if (bytes == null) {
+            if (bytes == null)
+            {
                 break;
             }
             bytes[0] = (byte) (bytes.length - 1);

@@ -18,4 +18,6 @@ jobs:
           checkstyle_config: '.github/checkstyle-rules.xml'
           reporter: 'github-pr-review'
           filter_mode: 'file'
-          tool_name: 'testtool'
+          fail_on_error: true
+          level: 'error'
+          tool_name: 'CheckStyle'

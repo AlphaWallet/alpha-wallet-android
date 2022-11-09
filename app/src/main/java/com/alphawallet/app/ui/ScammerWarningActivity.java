@@ -77,15 +77,20 @@ public class ScammerWarningActivity extends BaseActivity
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
-    private void lockOrientation() {
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+    private void lockOrientation()
+    {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+        {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        } else {
+        }
+        else
+        {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
     }
 
-    private void setShowSeedPhraseSplash() {
+    private void setShowSeedPhraseSplash()
+    {
         setContentView(R.layout.activity_show_seed);
         initViews();
         functionButtonBar.setPrimaryButtonText(R.string.show_seed_phrase);
@@ -94,14 +99,16 @@ public class ScammerWarningActivity extends BaseActivity
         });
     }
 
-    private void openBackupKeyActivity() {
+    private void openBackupKeyActivity()
+    {
         Intent intent = new Intent(this, BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);
         intent.putExtra("STATE", SHOW_SEED_PHRASE_SINGLE);
         startActivity(intent);
     }
 
-    private void initViews() {
+    private void initViews()
+    {
         functionButtonBar = findViewById(R.id.layoutButtons);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         toolbar();

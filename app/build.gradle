@@ -85,7 +85,7 @@ android {
         }
     }
     defaultConfig {
-        versionCode 211
+        versionCode 212
         versionName "3.60.1"
 
         applicationId "io.stormbird.wallet"
@@ -132,7 +132,7 @@ android {
             Below code is used to include analytics only when Flavor is "No Analytics"
             This is due to China release where Google services should not be included
              */
-            apply plugin: 'com.google.gms.google-services'
+            //apply plugin: 'com.google.gms.google-services'
             apply plugin: 'com.google.firebase.crashlytics'
         }
         noAnalytics {
@@ -351,9 +351,12 @@ dependencies {
 
     implementation 'androidx.work:work-runtime:2.7.1'
 
-    analyticsImplementation 'com.google.firebase:firebase-analytics:21.1.1'
+    implementation platform('com.google.firebase:firebase-bom:28.1.0')
+    //analyticsImplementation 'com.google.firebase:firebase-analytics'
+    analyticsImplementation 'com.google.firebase:firebase-crashlytics'
+    //analyticsImplementation 'com.google.firebase:firebase-analytics:21.1.1'
     analyticsImplementation 'com.mixpanel.android:mixpanel-android:5.8.4'
-    analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.2.13'
+    //analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.2.13'
 }
 
 // WARNING WARNING WARNING

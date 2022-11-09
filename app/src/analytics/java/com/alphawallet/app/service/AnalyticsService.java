@@ -8,27 +8,22 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ServiceErrorException;
-import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.mixpanel.android.mpmetrics.MixpanelAPI;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Objects;
-
 public class AnalyticsService<T> implements AnalyticsServiceType<T> {
 
     private final MixpanelAPI mixpanelAPI;
-    private final FirebaseAnalytics firebaseAnalytics;
+    //private final FirebaseAnalytics firebaseAnalytics;
 
     public AnalyticsService(Context context)
     {
         mixpanelAPI = MixpanelAPI.getInstance(context, KeyProviderFactory.get().getAnalyticsKey());
-        firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+        //firebaseAnalytics = FirebaseAnalytics.getInstance(context);
     }
 
     @Override
@@ -62,7 +57,7 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
 
         props.putString(C.APP_NAME, BuildConfig.APPLICATION_ID);
 
-        firebaseAnalytics.logEvent(eventName, props);
+        //firebaseAnalytics.logEvent(eventName, props);
     }
 
     private void trackMixpanel(AnalyticsProperties analyticsProperties, String eventName)
@@ -92,17 +87,17 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
     @Override
     public void identify(String uuid)
     {
-        firebaseAnalytics.setUserId(uuid);
+        //firebaseAnalytics.setUserId(uuid);
         mixpanelAPI.identify(uuid);
         mixpanelAPI.getPeople().identify(uuid);
-        FirebaseInstanceId.getInstance().getInstanceId()
+        /*FirebaseInstanceId.getInstance().getInstanceId()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful())
                     {
                         String token = Objects.requireNonNull(task.getResult()).getToken();
                         mixpanelAPI.getPeople().setPushRegistrationId(token);
                     }
-                });
+                });*/
     }
 
     @Override

@@ -16,5 +16,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           checkstyle_config: '.github/checkstyle-rules.xml'
-          reporter: 'github-pr-check'
+          reporter: 'github-pr-review'
+          filter_mode: 'file'
           tool_name: 'testtool'

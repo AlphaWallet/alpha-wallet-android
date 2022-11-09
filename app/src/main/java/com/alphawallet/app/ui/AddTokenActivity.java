@@ -58,6 +58,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import timber.log.Timber;
 
 @AndroidEntryPoint
@@ -80,6 +81,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private TokensAdapter adapter;
     private RecyclerView recyclerView;
+    private FunctionButtonBar functionBar;
+    private TokensAdapterCallback tokenAdapterCallback;
 
     private boolean mainNetActive = true;
 
@@ -104,7 +107,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
 
 
-        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
+        functionBar = findViewById(R.id.layoutButtons);
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_save)));
         functionBar.revealButtons();
 
@@ -381,7 +384,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             @Override
             public void onConfirmed()
             {
-
+                tokenAdapterCallback.onSwitchClicked();
             }
 
             @Override

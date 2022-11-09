@@ -1,6 +1,8 @@
 package com.alphawallet.app.util;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RatingBar;
@@ -9,11 +11,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.play.core.review.ReviewInfo;
-import com.google.android.play.core.review.ReviewManager;
-import com.google.android.play.core.review.ReviewManagerFactory;
 
 public class RateApp {
     // should be shown on 5th run or after the first transaction (afterTransaction == true)
@@ -38,9 +36,7 @@ public class RateApp {
                             preferenceRepository.setRateAppShown();
                         }
                     })
-                    .setNegativeButton(R.string.rate_no_thanks, (dialogInterface, i) -> {
-                        preferenceRepository.setRateAppShown();
-                    });
+                    .setNegativeButton(R.string.rate_no_thanks, (dialogInterface, i) -> preferenceRepository.setRateAppShown());
 
             AlertDialog dialog = builder.show();
             ratingBar.setOnRatingBarChangeListener((rb, rating, fromUser) -> {
@@ -53,18 +49,12 @@ public class RateApp {
         }
     }
 
-    private static void startRateFlow(Activity context, PreferenceRepositoryType preferenceRepository) {
-        ReviewManager manager = ReviewManagerFactory.create(context);
-        Task<ReviewInfo> request = manager.requestReviewFlow();
-        request.addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                ReviewInfo reviewInfo = task.getResult();
-                Task<Void> flow = manager.launchReviewFlow(context, reviewInfo);
-                flow.addOnCompleteListener(flowTask -> {
-
-                });
-            }
-        });
+    private static void startRateFlow(Activity activity, PreferenceRepositoryType preferenceRepository) {
+        //simply take them to play store for now, until the current situation with play store libraries not being allowed is resolved
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=" + activity.getPackageName()));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        activity.startActivity(intent);
         // save rate ui shown
         preferenceRepository.setRateAppShown();
     }

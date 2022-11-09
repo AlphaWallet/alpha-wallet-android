@@ -5,15 +5,11 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.alphawallet.app.entity.FragmentMessenger;
-import com.google.android.gms.tasks.Task;
-import com.google.android.play.core.appupdate.AppUpdateInfo;
-import com.google.android.play.core.appupdate.AppUpdateManager;
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
-import com.google.android.play.core.install.model.UpdateAvailability;
 
 public class UpdateUtils {
+    //Pull update check for now
     public static void checkForUpdates(Activity context, FragmentMessenger messenger) {
-        AppUpdateManager appUpdateManager = AppUpdateManagerFactory.create(context);
+        /*AppUpdateManager appUpdateManager = AppUpdateManagerFactory.create(context);
 
         Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
 
@@ -22,7 +18,7 @@ public class UpdateUtils {
             {
                 messenger.updateReady(appUpdateInfo.availableVersionCode());
             }
-        });
+        });*/
     }
 
     public static void pushUpdateDialog(Activity activity)

@@ -55,7 +55,7 @@ public class SelectSwapProvidersViewModel extends BaseViewModel
 
         if (swapProviders != null)
         {
-            Set<String> preferredProviders =  preferenceRepository.getSelectedSwapProviders();
+            Set<String> preferredProviders = preferenceRepository.getSelectedSwapProviders();
             for (SwapProvider provider : swapProviders)
             {
                 if (preferredProviders.contains(provider.key))
@@ -63,7 +63,9 @@ public class SelectSwapProvidersViewModel extends BaseViewModel
                     provider.isChecked = true;
                 }
             }
-        } else {
+        }
+        else
+        {
             Timber.w("No Swap Providers found.");
             swapProviders = new ArrayList<>();
         }

@@ -61,7 +61,8 @@ import static com.alphawallet.app.entity.BackupState.UPGRADE_KEY_SECURITY;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class ScammerWarningActivity extends BaseActivity {
+public class ScammerWarningActivity extends BaseActivity
+{
     private FunctionButtonBar functionButtonBar;
     private Wallet wallet;
 

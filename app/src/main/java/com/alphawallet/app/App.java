@@ -10,6 +10,7 @@ import android.content.Context;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.util.ReleaseTree;
 
 import dagger.hilt.android.HiltAndroidApp;
@@ -27,7 +28,7 @@ public class App extends Application
     {
         super.onCreate();
         Realm.init(this);
-
+        CustomSettings.init(this);
         if (BuildConfig.DEBUG)
         {
             Timber.plant(new Timber.DebugTree());

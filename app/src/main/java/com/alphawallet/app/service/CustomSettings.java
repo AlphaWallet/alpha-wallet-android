@@ -25,12 +25,17 @@ public class CustomSettings
 {
     public static final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
     public static final long primaryChain = MAINNET_ID;
-    private static Context context = null;
+    private static Context context;
     private static final ConcurrentLinkedQueue<Long> loadLockedCachedChains = new ConcurrentLinkedQueue<>();
     private static final ConcurrentLinkedQueue<Long> loadExclusiveCachedChains = new ConcurrentLinkedQueue<>();
     private static final ConcurrentLinkedQueue<TokenInfo> loadLockedTokens = new ConcurrentLinkedQueue<>();
     public static String getJsonString = "";
     public Boolean loaded = false;
+
+    public static void init(Context ctx)
+    {
+        context = ctx;
+    }
 
     public CustomSettings(Context ctx)
     {

@@ -419,6 +419,7 @@
     <string name="search_or_type_web_address">Tìm kiếm hoặc nhập địa chỉ web</string>
     <string name="network">Networks</string>
     <string name="select_active_networks">Chọn mạng đang hoạt động</string>
+    <string name="title_enabled_networks">Mạng được kích hoạt (%s)</string>
     <string name="collectibles">Bộ sưu tầm</string>
     <string name="token_function">Token Function</string>
     <string name="channel_description">Kênh thông báo Alphawallet</string>

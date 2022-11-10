@@ -407,6 +407,7 @@
     <string name="search_or_type_web_address">Busca o escribe una dirección web</string>
     <string name="network">Redes</string>
     <string name="select_active_networks">Seleccionar redes activas</string>
+    <string name="title_enabled_networks">Redes habilitadas (%s)</string>
     <string name="collectibles">Coleccionables</string>
     <string name="token_function">Función del token</string>
     <string name="channel_description">Canal de notificación de AlphaWallet</string>

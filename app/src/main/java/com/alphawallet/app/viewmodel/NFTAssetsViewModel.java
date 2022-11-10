@@ -9,7 +9,6 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.Erc1155AssetListActivity;
@@ -32,8 +31,7 @@ public class NFTAssetsViewModel extends BaseViewModel {
     public NFTAssetsViewModel(FetchTransactionsInteract fetchTransactionsInteract,
                               AssetDefinitionService assetDefinitionService,
                               TokensService tokensService,
-                              OpenSeaService openSeaService,
-                              CustomSettings customSettings)
+                              OpenSeaService openSeaService)
     {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;

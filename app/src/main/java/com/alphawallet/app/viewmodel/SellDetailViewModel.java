@@ -19,7 +19,6 @@ import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.SellDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.SellDetailActivity;
@@ -59,7 +58,6 @@ public class SellDetailViewModel extends BaseViewModel {
     @Inject
     SellDetailViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
                         TokensService tokensService,
-                        CustomSettings customSettings,
                         CreateTransactionInteract createTransactionInteract,
                         SellDetailRouter sellDetailRouter,
                         KeyService keyService,

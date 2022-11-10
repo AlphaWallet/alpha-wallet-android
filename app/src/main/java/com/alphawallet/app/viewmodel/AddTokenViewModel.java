@@ -17,7 +17,6 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.SendActivity;
@@ -78,8 +77,7 @@ public class AddTokenViewModel extends BaseViewModel {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService,
-            CustomSettings customSettings)
+            TokensService tokensService)
     {
         this.genericWalletInteract = genericWalletInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;

@@ -38,7 +38,6 @@ import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.NameThisWalletActivity;
@@ -100,7 +99,7 @@ public class WalletViewModel extends BaseViewModel
             PreferenceRepositoryType preferenceRepository,
             RealmManager realmManager,
             OnRampRepositoryType onRampRepository,
-            AnalyticsServiceType analyticsService, CustomSettings customSettings)
+            AnalyticsServiceType analyticsService)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;

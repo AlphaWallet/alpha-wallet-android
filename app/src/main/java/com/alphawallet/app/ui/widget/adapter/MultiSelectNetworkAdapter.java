@@ -19,21 +19,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectNetworkAdapter.ViewHolder> {
+public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectNetworkAdapter.ViewHolder>
+{
     private final List<NetworkItem> networkList;
+    private final Callback callback;
     private boolean hasClicked = false;
 
-    public interface EditNetworkListener {
-        void onEditNetwork(long chainId, View parent);
-    }
-
-    private final EditNetworkListener editListener;
-
-
-    public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks, EditNetworkListener editNetworkListener)
+    public MultiSelectNetworkAdapter(List<NetworkItem> selectedNetworks, Callback callback)
     {
         networkList = selectedNetworks;
-        editListener = editNetworkListener;
+        this.callback = callback;
     }
 
     public Long[] getSelectedItems()
@@ -60,7 +55,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(buttonTypeId, parent, false);
 
-        return new MultiSelectNetworkAdapter.ViewHolder(itemView);
+        return new ViewHolder(itemView);
     }
 
     @Override
@@ -74,7 +69,7 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
             holder.chainId.setText(holder.itemLayout.getContext().getString(R.string.chain_id, item.getChainId()));
             holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
             holder.manageView.setVisibility(View.VISIBLE);
-            holder.manageView.setOnClickListener(v ->  editListener.onEditNetwork(networkList.get(position).getChainId(), holder.manageView));
+            holder.manageView.setOnClickListener(v -> callback.onEditSelected(networkList.get(position).getChainId(), holder.manageView));
             holder.checkbox.setChecked(item.isSelected());
             holder.tokenIcon.bindData(item.getChainId());
 
@@ -88,11 +83,17 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         }
     }
 
+    public int getSelectedItemCount()
+    {
+        return getSelectedItems().length;
+    }
+
     private void clickListener(final MultiSelectNetworkAdapter.ViewHolder holder, final int position)
     {
         networkList.get(position).setSelected(!networkList.get(position).isSelected());
         holder.checkbox.setChecked(networkList.get(position).isSelected());
         hasClicked = true;
+        callback.onCheckChanged(networkList.get(position).getChainId(), getSelectedItemCount());
     }
 
     @Override
@@ -101,7 +102,15 @@ public class MultiSelectNetworkAdapter extends RecyclerView.Adapter<MultiSelectN
         return networkList.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public interface Callback
+    {
+        void onEditSelected(long chainId, View parent);
+
+        void onCheckChanged(long chainId, int count);
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder
+    {
         MaterialCheckBox checkbox;
         TextView name;
         View itemLayout;

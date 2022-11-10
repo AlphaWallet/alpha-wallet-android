@@ -417,6 +417,7 @@
     <string name="search_or_type_web_address">Cari atau ketik alamat situs jaringan</string>
     <string name="network">Jaringan</string>
     <string name="select_active_networks">Pilih Jaringan Aktif</string>
+    <string name="title_enabled_networks">Jaringan yang Diaktifkan (%s)</string>
     <string name="collectibles">Barang Koleksi</string>
     <string name="token_function">Fungsi Token</string>
     <string name="channel_description">Saluran pemberitahuan Alphawallet</string>

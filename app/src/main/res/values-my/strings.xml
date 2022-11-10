@@ -424,6 +424,7 @@
     <string name="search_or_type_web_address">ဝက်ဘ်လိပ်စာကိုရိုက်ထည့်ရှာဖွေပါ</string>
     <string name="network">ကွန်ရက်</string>
     <string name="select_active_networks">အသက်ဝင်နေသောကွန်ရက်များကိုရွေးချယ်ပါ</string>
+    <string name="title_enabled_networks">ကွန်ရက်များကို ဖွင့်ထားသည်။ (%s)</string>
     <string name="collectibles">စုဆောင်ထားသောအရများ</string>
     <string name="token_function">တိုကင်လုပ်ငန်းစဥ်များ</string>
     <string name="channel_description">Alphawallet အသိပေးစာလမ်းကြောင်းများ</string>

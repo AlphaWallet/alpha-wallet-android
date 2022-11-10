@@ -8,13 +8,12 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AlphaWallet/alpha-wallet-android.git"
   },
-  "author": "",
+  "author": "Smart Token Labs",
   "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/AlphaWallet/alpha-wallet-android/issues"
@@ -22,15 +21,5 @@
   "homepage": "https://github.com/AlphaWallet/alpha-wallet-android#readme",
   "dependencies": {
     "normalize.css": "^8.0.0"
-  },
-  "devDependencies": {
-    "editorconfig-checker": "4.0.0",
-    "husky": "^8.0.0",
-    "lint-staged": "^13.0.3"
-  },
-  "lint-staged": {
-    "**/*": [
-      "npx ec"
-    ]
   }
 }

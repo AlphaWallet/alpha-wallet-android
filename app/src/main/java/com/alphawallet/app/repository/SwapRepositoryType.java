@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface SwapRepositoryType
 {
-    public List<SwapProvider> getProviders();
+    List<SwapProvider> getProviders();
 }

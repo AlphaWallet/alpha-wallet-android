@@ -37,6 +37,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
@@ -119,7 +120,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         lastCheck = "";
 
-        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), viewModel.getCustomSettings(),null);
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),null);
         adapter.setHasStableIds(true);
         adapter.showTestNetTips();
         adapter.setFilterType(TokenFilter.NO_FILTER);

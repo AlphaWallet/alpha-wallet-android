@@ -23,13 +23,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class CustomSettings
 {
-    public final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
+    public static final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
     public static final long primaryChain = MAINNET_ID;
-    private final Context context;
-    ConcurrentLinkedQueue<Long> loadLockedCachedChains = new ConcurrentLinkedQueue<>();
-    ConcurrentLinkedQueue<Long> loadExclusiveCachedChains = new ConcurrentLinkedQueue<>();
-    ConcurrentLinkedQueue<TokenInfo> loadLockedTokens = new ConcurrentLinkedQueue<>();
-    public String getJsonString = "";
+    private static Context context = null;
+    private static final ConcurrentLinkedQueue<Long> loadLockedCachedChains = new ConcurrentLinkedQueue<>();
+    private static final ConcurrentLinkedQueue<Long> loadExclusiveCachedChains = new ConcurrentLinkedQueue<>();
+    private static final ConcurrentLinkedQueue<TokenInfo> loadLockedTokens = new ConcurrentLinkedQueue<>();
+    public static String getJsonString = "";
     public Boolean loaded = false;
 
     public CustomSettings(Context ctx)
@@ -37,7 +37,7 @@ public class CustomSettings
         context = ctx;
     }
 
-    public ArrayList<Long> loadChains(String chainName)
+    public static ArrayList<Long> loadChains(String chainName)
     {
         ArrayList<Long> chains = new ArrayList<>();
         try
@@ -84,7 +84,7 @@ public class CustomSettings
     //    : Android can memory scavenge those mappings at any time if the wallet is paged out,
     //    : Then they'll be empty when the wallet is paged back in.
 
-    public ArrayList<Long> getChainsFromJsonFile() //<-- TODO: chainName is redundant
+    public static ArrayList<Long> getChainsFromJsonFile() //<-- TODO: chainName is redundant
     {
         ArrayList<Long> chains = new ArrayList<>();
         if (loadLockedCachedChains.size() > 0)
@@ -98,7 +98,7 @@ public class CustomSettings
         return chains;
     }
 
-    public ArrayList<TokenInfo> getLockedTokensFromJsonFile() //<-- TODO: chainName is redundant
+    public static ArrayList<TokenInfo> getLockedTokensFromJsonFile() //<-- TODO: chainName is redundant
     {
         ArrayList<TokenInfo> chains = new ArrayList<>();
         Gson gson = new Gson();
@@ -133,7 +133,7 @@ public class CustomSettings
         return chains;
     }
 
-    public JSONArray getChainsArrayJsonFile() //<--- TODO: Redundant
+    public static JSONArray getChainsArrayJsonFile() //<--- TODO: Redundant
     {
         JSONArray chainsArray = new JSONArray();
         try
@@ -171,7 +171,7 @@ public class CustomSettings
     }
 
     // Function Use:  Universal function to check if Json is already loaded or not. If it is already loaded then we will return the value directly from the variable else we will load the json data from asset.
-    public String loadJSONStringFromAsset()
+    public static String loadJSONStringFromAsset()
     {
         try
         {
@@ -193,7 +193,7 @@ public class CustomSettings
 
 
     //TODO: Caching
-    public Boolean alwaysShow(long chainId)
+    public static Boolean alwaysShow(long chainId)
     {
         ArrayList<Long> exclusiveChains = new ArrayList<>();
         if (loadExclusiveCachedChains.size() > 0)
@@ -210,7 +210,7 @@ public class CustomSettings
     //TODO: Requires caching, since this will be called very frequently
     //    : Use a (final) mapping of locked tokens, from a load.
     //    : You'll need to check if the list is empty and if so flag a 'loaded', so we don't spam this list
-    public Boolean tokenCanBeDisplayed(TokenCardMeta token)
+    public static Boolean tokenCanBeDisplayed(TokenCardMeta token)
     {
        final ArrayList<TokenInfo> lockedTokens = getLockedTokensFromJsonFile();
         if (loadLockedTokens.size() > 0)
@@ -225,7 +225,7 @@ public class CustomSettings
     }
 
     //TODO: Caching
-    public Boolean isLockedToken(long chainId, String contractAddress)
+    public static Boolean isLockedToken(long chainId, String contractAddress)
     {
 
         if (loadLockedTokens.size() > 0)
@@ -257,7 +257,7 @@ public class CustomSettings
         return true;
     }
 
-    public long startupDelay()
+    public static long startupDelay()
     {
         return 0;
     }
@@ -268,37 +268,37 @@ public class CustomSettings
     }
 
     //Switch off dapp browser
-    public boolean hideDappBrowser()
+    public static boolean hideDappBrowser()
     {
         return false;
     }
 
     //Hides the filter tab bar at the top of the wallet screen (ALL/CURRENCY/COLLECTIBLES)
-    public boolean hideTabBar()
+    public static boolean hideTabBar()
     {
         return false;
     }
 
     //Use to switch off direct transfer, only use magiclink transfer
-    public boolean hasDirectTransfer()
+    public static boolean hasDirectTransfer()
     {
         return true;
     }
 
     //Allow multiple wallets (true) or single wallet mode (false)
-    public boolean canChangeWallets()
+    public static boolean canChangeWallets()
     {
         return true;
     }
 
     //Hide EIP681 generation (Payment request, generates a QR code another wallet user can scan to have all payment fields filled in)
-    public boolean hideEIP681()
+    public static boolean hideEIP681()
     {
         return false;
     }
 
     //In main wallet menu, if wallet allows adding new tokens
-    public boolean canAddTokens()
+    public static boolean canAddTokens()
     {
         return true;
     }
@@ -312,13 +312,13 @@ public class CustomSettings
     }
 
     //Allow showing token management view
-    public boolean showManageTokens()
+    public static boolean showManageTokens()
     {
         return true;
     }
 
     //Show all networks in Select Network screen. Set to `true` to show only filtered networks.
-    public boolean showAllNetworks()
+    public static boolean showAllNetworks()
     {
         return false;
     }

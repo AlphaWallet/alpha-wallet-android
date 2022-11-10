@@ -26,6 +26,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
 import com.alphawallet.app.util.KeyboardUtils;
@@ -138,7 +139,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (viewModel.getCustomSettings().hideEIP681()) return super.onCreateOptionsMenu(menu);
+        if (CustomSettings.hideEIP681()) return super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_receive, menu);
 
         switch (currentMode)

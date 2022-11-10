@@ -44,7 +44,6 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
-    private final CustomSettings customSettings;
     private final OnRampRepositoryType onRampRepository;
 
     @Nullable
@@ -64,7 +63,6 @@ public class Erc20DetailViewModel extends BaseViewModel {
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.onRampRepository = onRampRepository;
-        this.customSettings = customSettings;
         setAnalyticsService(analyticsService);
     }
 
@@ -103,11 +101,6 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return this.assetDefinitionService;
-    }
-
-    public CustomSettings getCustomSettings()
-    {
-        return customSettings;
     }
 
     public void showSendToken(Activity act, Wallet wallet, Token token)

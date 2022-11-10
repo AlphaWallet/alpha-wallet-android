@@ -68,7 +68,6 @@ public class SearchActivity extends BaseActivity implements SearchToolbarCallbac
                 this,
                 viewModel.getAssetDefinitionService(),
                 viewModel.getTokensService(),
-                viewModel.getCustomSettings(),
                 null);
         adapter.setHasStableIds(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

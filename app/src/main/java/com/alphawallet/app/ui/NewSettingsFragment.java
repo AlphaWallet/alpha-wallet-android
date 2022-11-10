@@ -340,7 +340,11 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(myAddressSetting, walletIndex++);
 
+<<<<<<< HEAD
         if (CustomSettings.canChangeWallets())
+=======
+        if (viewModel.getCustomSettings().canChangeWallets())
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
             walletSettingsLayout.addView(changeWalletSetting, walletIndex++);
 
         walletSettingsLayout.addView(backUpWalletSetting, walletIndex++);
@@ -352,7 +356,11 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
+<<<<<<< HEAD
         JSONArray chainsArray = CustomSettings.getChainsArrayJsonFile();
+=======
+        JSONArray chainsArray = viewModel.getCustomSettings().getChainsArrayJsonFile();
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
         if (chainsArray.length() == 0)
             systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
 

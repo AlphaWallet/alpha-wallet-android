@@ -228,7 +228,11 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
+<<<<<<< HEAD
         if (CustomSettings.canChangeWallets())
+=======
+        if (viewModel.getCustomSettings().canChangeWallets())
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
             getMenuInflater().inflate(R.menu.menu_add, menu);
         return super.onCreateOptionsMenu(menu);
     }

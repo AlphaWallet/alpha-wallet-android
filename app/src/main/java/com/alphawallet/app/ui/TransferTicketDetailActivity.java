@@ -188,7 +188,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(null, token, selection, viewModel.getAssetDefinitionService());
+        adapter = new NonFungibleTokenAdapter(null, token, selection, viewModel.getAssetDefinitionService(), viewModel.getCustomSettings());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -339,7 +339,11 @@ public class TransferTicketDetailActivity extends BaseActivity
         switch (transferStatus)
         {
             case CHOOSE_QUANTITY:
+<<<<<<< HEAD
                 if (CustomSettings.hasDirectTransfer())
+=======
+                if (viewModel.getCustomSettings().hasDirectTransfer())
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
                 {
                     newState = DisplayState.PICK_TRANSFER_METHOD;
                 }

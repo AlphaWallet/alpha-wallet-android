@@ -141,7 +141,11 @@ public class WalletFragment extends BaseFragment implements
 
         viewModel.prepare();
 
+<<<<<<< HEAD
         if (CustomSettings.canAddTokens())
+=======
+        if (viewModel.getCustomSettings().canAddTokens())
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
         {
             toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
         }
@@ -208,7 +212,11 @@ public class WalletFragment extends BaseFragment implements
 
     private void initList()
     {
+<<<<<<< HEAD
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), tokenManagementLauncher);
+=======
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), viewModel.getCustomSettings(), tokenManagementLauncher);
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
         adapter.setHasStableIds(true);
         setLinearLayoutManager(TokenFilter.ALL.ordinal());
         recyclerView.setAdapter(adapter);
@@ -255,7 +263,11 @@ public class WalletFragment extends BaseFragment implements
 
     private void onDefaultWallet(Wallet wallet)
     {
+<<<<<<< HEAD
         if (CustomSettings.showManageTokens())
+=======
+        if (viewModel.getCustomSettings().showManageTokens())
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
         {
             adapter.setWalletAddress(wallet.address);
         }
@@ -423,7 +435,11 @@ public class WalletFragment extends BaseFragment implements
     private void initTabLayout(View view)
     {
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
+<<<<<<< HEAD
         if (CustomSettings.hideTabBar())
+=======
+        if (viewModel.getCustomSettings().hideTabBar())
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
         {
             tabLayout.setVisibility(View.GONE);
             return;

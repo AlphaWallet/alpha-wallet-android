@@ -120,7 +120,11 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         lastCheck = "";
 
+<<<<<<< HEAD
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),null);
+=======
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), viewModel.getCustomSettings(),null);
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
         adapter.setHasStableIds(true);
         adapter.showTestNetTips();
         adapter.setFilterType(TokenFilter.NO_FILTER);

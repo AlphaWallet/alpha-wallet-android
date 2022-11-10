@@ -441,7 +441,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         handler.removeCallbacks(this);
         progressView.setVisibility(View.GONE);
-        adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), this);
+        adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), this, viewModel.getCustomSettings());
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter, token.getArrayBalance());
         functionBar.setWalletType(wallet.type);
         tokenView.setAdapter(adapter);

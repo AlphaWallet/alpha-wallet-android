@@ -52,6 +52,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private TokenFilter filterType = TokenFilter.ALL;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
+    private final CustomSettings customSettings;
     private final ActivityResultLauncher<Intent> managementLauncher;
     private ContractLocator scrollToken; // designates a token that should be scrolled to
 
@@ -102,20 +103,30 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
 
+<<<<<<< HEAD
     public TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, TokensService tService, ActivityResultLauncher<Intent> launcher)
+=======
+    public TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, TokensService tService, CustomSettings customSettings, ActivityResultLauncher<Intent> launcher)
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
     {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = tService;
+        this.customSettings = customSettings;
         this.managementLauncher = launcher;
 
         new TokensMappingRepository(aService.getTokenLocalSource());
     }
 
+<<<<<<< HEAD
     protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService)
+=======
+    protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, CustomSettings customSettings)
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
     {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
+        this.customSettings = customSettings;
         this.tokensService = null;
 
         new TokensMappingRepository(aService.getTokenLocalSource());
@@ -371,7 +382,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         if (token == null) return false;
         //Add token to display list if it's the base currency, or if it has balance
+<<<<<<< HEAD
         boolean allowThroughFilter = CustomSettings.tokenCanBeDisplayed(token);
+=======
+        boolean allowThroughFilter = customSettings.tokenCanBeDisplayed(token);
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
         allowThroughFilter = checkTokenValue(token, allowThroughFilter);
 
         switch (filterType)

@@ -139,7 +139,11 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
+<<<<<<< HEAD
         if (CustomSettings.hideEIP681()) return super.onCreateOptionsMenu(menu);
+=======
+        if (viewModel.getCustomSettings().hideEIP681()) return super.onCreateOptionsMenu(menu);
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
         getMenuInflater().inflate(R.menu.menu_receive, menu);
 
         switch (currentMode)

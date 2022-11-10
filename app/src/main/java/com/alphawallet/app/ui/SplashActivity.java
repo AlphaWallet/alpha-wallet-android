@@ -106,7 +106,11 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         }
         else
         {
+<<<<<<< HEAD
             handler.postDelayed(this, CustomSettings.startupDelay());
+=======
+            handler.postDelayed(this, viewModel.getCustomSettings().startupDelay());
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
         }
     }
 

@@ -66,9 +66,15 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     private boolean isGrid;
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
+<<<<<<< HEAD
                                    OpenSeaService opensea, Activity activity)
     {
         super(tokenClickListener, service);
+=======
+                                   OpenSeaService opensea, Activity activity, CustomSettings customSettings)
+    {
+        super(tokenClickListener, service, customSettings);
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
         assetCount = 0;
         token = t;
         clickThrough = true;
@@ -78,9 +84,15 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
+<<<<<<< HEAD
                                    OpenSeaService opensea, Activity activity, boolean isGrid)
     {
         super(tokenClickListener, service);
+=======
+                                   OpenSeaService opensea, Activity activity, boolean isGrid, CustomSettings customSettings)
+    {
+        super(tokenClickListener, service, customSettings);
+>>>>>>> ff7cdb6e8 (- Did all the changes for json customisation to achieve 2758 ticket.)
         assetCount = 0;
         token = t;
         clickThrough = true;
@@ -91,9 +103,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, List<BigInteger> tokenSelection,
-                                   AssetDefinitionService service)
+                                   AssetDefinitionService service, CustomSettings customSettings)
     {
-        super(tokenClickListener, service);
+        super(tokenClickListener, service, customSettings);
         assetCount = 0;
         token = t;
         clickThrough = false;
@@ -103,9 +115,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, ArrayList<Pair<BigInteger, NFTAsset>> assetSelection,
-                                   AssetDefinitionService service)
+                                   AssetDefinitionService service, CustomSettings customSettings)
     {
-        super(tokenClickListener, service);
+        super(tokenClickListener, service, customSettings);
         assetCount = 0;
         token = t;
         clickThrough = false;

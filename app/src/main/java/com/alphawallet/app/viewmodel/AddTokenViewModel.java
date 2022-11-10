@@ -52,6 +52,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
+    private final CustomSettings customSettings;
 
     private boolean foundNetwork;
     private int networkCount;
@@ -86,6 +87,7 @@ public class AddTokenViewModel extends BaseViewModel {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
+        this.customSettings = customSettings;
     }
 
     public void saveTokens(List<Token> toSave)
@@ -306,5 +308,10 @@ public class AddTokenViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 }

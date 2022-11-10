@@ -302,7 +302,7 @@ public abstract class C {
     public static final String PREF_UNIQUE_ID = "unique_id";
     public static final String APP_NAME = "PACKAGE_NAME";
 
-    public static final String ALPHAWALLET_LOGO_URI = "https://alphawallet.com/wp-content/themes/alphawallet/img/alphawallet-logo.svg";
+    public static final String ALPHAWALLET_LOGO_URI = "https://alphawallet.com/wp-content/themes/alphawallet/img/logo-horizontal-new.svg";
 
     // Theme/Dark Mode
     public static final int THEME_LIGHT = 0;

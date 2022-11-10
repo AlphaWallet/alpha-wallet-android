@@ -52,6 +52,7 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
@@ -140,7 +141,7 @@ public class WalletFragment extends BaseFragment implements
 
         viewModel.prepare();
 
-        if (viewModel.getCustomSettings().canAddTokens())
+        if (CustomSettings.canAddTokens())
         {
             toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
         }
@@ -207,7 +208,7 @@ public class WalletFragment extends BaseFragment implements
 
     private void initList()
     {
-        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), viewModel.getCustomSettings(), tokenManagementLauncher);
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), tokenManagementLauncher);
         adapter.setHasStableIds(true);
         setLinearLayoutManager(TokenFilter.ALL.ordinal());
         recyclerView.setAdapter(adapter);
@@ -254,7 +255,7 @@ public class WalletFragment extends BaseFragment implements
 
     private void onDefaultWallet(Wallet wallet)
     {
-        if (viewModel.getCustomSettings().showManageTokens())
+        if (CustomSettings.showManageTokens())
         {
             adapter.setWalletAddress(wallet.address);
         }
@@ -422,7 +423,7 @@ public class WalletFragment extends BaseFragment implements
     private void initTabLayout(View view)
     {
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
-        if (viewModel.getCustomSettings().hideTabBar())
+        if (CustomSettings.hideTabBar())
         {
             tabLayout.setVisibility(View.GONE);
             return;

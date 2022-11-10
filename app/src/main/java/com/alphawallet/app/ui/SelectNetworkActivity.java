@@ -14,6 +14,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.ui.widget.adapter.SingleSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
@@ -156,7 +157,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (!localSelectionMode && !viewModel.getCustomSettings().showAllNetworks())
+        if (!localSelectionMode && !CustomSettings.showAllNetworks())
         {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.menu_filter_network, menu);

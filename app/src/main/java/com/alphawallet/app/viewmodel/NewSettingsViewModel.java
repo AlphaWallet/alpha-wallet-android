@@ -44,8 +44,6 @@ public class NewSettingsViewModel extends BaseViewModel
     private final CurrencyRepositoryType currencyRepository;
     private final TransactionsService transactionsService;
     private final TickerService tickerService;
-    private final CustomSettings customSettings;
-
     @Inject
     NewSettingsViewModel(
             GenericWalletInteract genericWalletInteract,
@@ -67,7 +65,6 @@ public class NewSettingsViewModel extends BaseViewModel
         this.currencyRepository = currencyRepository;
         this.transactionsService = transactionsService;
         this.tickerService = tickerService;
-        this.customSettings = customSettings;
         setAnalyticsService(analyticsService);
     }
 
@@ -183,10 +180,5 @@ public class NewSettingsViewModel extends BaseViewModel
     public void setMarshMallowWarning(boolean shown)
     {
         preferenceRepository.setMarshMallowWarning(shown);
-    }
-
-    public CustomSettings getCustomSettings()
-    {
-        return customSettings;
     }
 }

@@ -24,7 +24,6 @@ public class RedeemAssetSelectViewModel extends BaseViewModel {
     private final RedeemSignatureDisplayRouter redeemSignatureDisplayRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
-    private final CustomSettings customSettings;
     private final GenericWalletInteract genericWalletInteract;
 
     @Inject
@@ -38,7 +37,6 @@ public class RedeemAssetSelectViewModel extends BaseViewModel {
         this.redeemSignatureDisplayRouter = redeemSignatureDisplayRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
-        this.customSettings = customSettings;
         this.genericWalletInteract = genericWalletInteract;
     }
 
@@ -62,8 +60,4 @@ public class RedeemAssetSelectViewModel extends BaseViewModel {
         return assetDefinitionService;
     }
 
-    public CustomSettings getCustomSettings()
-    {
-        return customSettings;
-    }
 }

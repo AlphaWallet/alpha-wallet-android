@@ -130,7 +130,7 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
 
-        NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(null, token, assetSelection, viewModel.getAssetDefinitionService(), viewModel.getCustomSettings());
+        NonFungibleTokenAdapter adapter = new NonFungibleTokenAdapter(null, token, assetSelection, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 

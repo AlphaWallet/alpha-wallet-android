@@ -72,7 +72,6 @@ public class TokensService
     private final TickerService tickerService;
     private final OpenSeaService openseaService;
     private final AnalyticsServiceType<AnalyticsProperties> analyticsService;
-    private final CustomSettings customSettings;
     private final List<Long> networkFilter;
     private ContractLocator focusToken;
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
@@ -109,15 +108,14 @@ public class TokensService
                          TokenRepositoryType tokenRepository,
                          TickerService tickerService,
                          OpenSeaService openseaService,
-                         AnalyticsServiceType<AnalyticsProperties> analyticsService,
-                         CustomSettings customSettings)
+                         AnalyticsServiceType<AnalyticsProperties> analyticsService
+                        )
     {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
         this.tickerService = tickerService;
         this.openseaService = openseaService;
         this.analyticsService = analyticsService;
-        this.customSettings = customSettings;
         networkFilter = new ArrayList<>();
         setupFilter(ethereumNetworkRepository.hasSetNetworkFilters());
         focusToken = null;
@@ -403,7 +401,7 @@ public class TokensService
     public void setupFilter(boolean userUpdated)
     {
         networkFilter.clear();
-        ArrayList<Long> lockedChains = customSettings.getChainsFromJsonFile();
+        ArrayList<Long> lockedChains = CustomSettings.getChainsFromJsonFile();
         if (lockedChains.size() > 0)
         {
             networkFilter.addAll(lockedChains);
@@ -963,7 +961,7 @@ public class TokensService
             }
         }
 
-        ArrayList<Long> getLockedChains = customSettings.getChainsFromJsonFile();
+        ArrayList<Long> getLockedChains = CustomSettings.getChainsFromJsonFile();
         for (Long lockedChain : getLockedChains)
         {
             if (!networkFilter.contains(lockedChain)) networkFilter.add(lockedChain);
@@ -1009,7 +1007,7 @@ public class TokensService
         mainNetActive = ethereumNetworkRepository.isMainNetSelected();
         final String wallet = currentAddress;
         //ensure locked tokens are displaying
-        ArrayList<TokenInfo> lockedTokens = customSettings.getLockedTokensFromJsonFile();
+        ArrayList<TokenInfo> lockedTokens = CustomSettings.getLockedTokensFromJsonFile();
         Observable.fromIterable(lockedTokens)
                 .forEach(info -> addToken(info, wallet)
                         .flatMapCompletable(token -> enableToken(wallet, token))

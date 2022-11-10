@@ -98,7 +98,6 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
     private final TokensService tokensService;
-    private final CustomSettings customSettings;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
@@ -155,18 +154,12 @@ public class TokenFunctionViewModel extends BaseViewModel
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.customSettings = customSettings;
         setAnalyticsService(analyticsService);
     }
 
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
-    }
-
-    public CustomSettings getCustomSettings()
-    {
-        return customSettings;
     }
 
     public LiveData<Token> insufficientFunds()

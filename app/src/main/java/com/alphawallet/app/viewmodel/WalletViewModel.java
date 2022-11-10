@@ -76,7 +76,6 @@ public class WalletViewModel extends BaseViewModel
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
-    private final CustomSettings customSettings;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final MyAddressRouter myAddressRouter;
@@ -115,7 +114,6 @@ public class WalletViewModel extends BaseViewModel
         this.preferenceRepository = preferenceRepository;
         this.realmManager = realmManager;
         this.onRampRepository = onRampRepository;
-        this.customSettings = customSettings;
         setAnalyticsService(analyticsService);
     }
 
@@ -211,11 +209,6 @@ public class WalletViewModel extends BaseViewModel
     public TokensService getTokensService()
     {
         return tokensService;
-    }
-
-    public CustomSettings getCustomSettings()
-    {
-        return customSettings;
     }
 
     public Token getTokenFromService(@NotNull Token token)

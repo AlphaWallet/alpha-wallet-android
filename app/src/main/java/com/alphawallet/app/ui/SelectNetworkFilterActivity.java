@@ -1,11 +1,9 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.ui.AddCustomRPCNetworkActivity.CHAIN_ID;
+
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -15,13 +13,10 @@ import android.widget.PopupWindow;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
-import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.ui.widget.adapter.MultiSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
-import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.viewmodel.SelectNetworkFilterViewModel;
 import com.alphawallet.app.widget.TestNetDialog;
 import com.alphawallet.ethereum.NetworkInfo;
@@ -30,41 +25,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
-
-import static com.alphawallet.app.ui.AddCustomRPCNetworkActivity.CHAIN_ID;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback {
+public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback
+{
     private SelectNetworkFilterViewModel viewModel;
-
     private MultiSelectNetworkAdapter mainNetAdapter;
     private MultiSelectNetworkAdapter testNetAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-
         super.onCreate(savedInstanceState);
-
-        setTitle(getString(R.string.select_active_networks));
-
         viewModel = new ViewModelProvider(this)
                 .get(SelectNetworkFilterViewModel.class);
-
         setupList();
-
         initTestNetDialog(this);
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         setupFilterList();
-
         viewModel.track(Analytics.Navigation.SELECT_NETWORKS);
     }
 
@@ -77,6 +61,10 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
 
         CompoundButton.OnCheckedChangeListener mainnetListener = (compoundButton, checked) -> {
             testnetSwitch.setChecked(!checked);
+            if (checked)
+            {
+                updateTitle(mainNetAdapter.getSelectedItemCount());
+            }
         };
 
         CompoundButton.OnCheckedChangeListener testnetListener = (compoundButton, checked) ->
@@ -90,6 +78,11 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
             if (checked)
             {
                 testnetDialog.show();
+                updateTitle(testNetAdapter.getSelectedItemCount());
+            }
+            else
+            {
+                updateTitle(mainNetAdapter.getSelectedItemCount());
             }
         };
 
@@ -106,9 +99,11 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         List<NetworkItem> mainNetList = viewModel.getNetworkList(true);
         List<NetworkItem> testNetList = viewModel.getNetworkList(false);
 
-        MultiSelectNetworkAdapter.EditNetworkListener editNetworkListener = new MultiSelectNetworkAdapter.EditNetworkListener() {
+        MultiSelectNetworkAdapter.Callback callback = new MultiSelectNetworkAdapter.Callback()
+        {
 
-            private void showPopup(View view, long chainId) {
+            private void showPopup(View view, long chainId)
+            {
                 LayoutInflater inflater = LayoutInflater.from(SelectNetworkFilterActivity.this);
                 View popupView = inflater.inflate(R.layout.popup_view_delete_network, null);
 
@@ -124,14 +119,17 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
                 });
 
                 NetworkInfo network = viewModel.getNetworkByChain(chainId);
-                if (network.isCustom) {
+                if (network.isCustom)
+                {
                     popupView.findViewById(R.id.popup_delete).setOnClickListener(v -> {
                         // delete network
                         viewModel.removeCustomNetwork(chainId);
                         popupWindow.dismiss();
                         setupFilterList();
                     });
-                } else {
+                }
+                else
+                {
                     popupView.findViewById(R.id.popup_delete).setVisibility(View.GONE);
                 }
 
@@ -144,16 +142,30 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
             }
 
             @Override
-            public void onEditNetwork(long chainId, View parent) {
+            public void onEditSelected(long chainId, View parent)
+            {
                 showPopup(parent, chainId);
+            }
+
+            @Override
+            public void onCheckChanged(long chainId, int count)
+            {
+                updateTitle(count);
             }
         };
 
-        mainNetAdapter = new MultiSelectNetworkAdapter(mainNetList, editNetworkListener);
+        mainNetAdapter = new MultiSelectNetworkAdapter(mainNetList, callback);
         mainnetRecyclerView.setAdapter(mainNetAdapter);
 
-        testNetAdapter = new MultiSelectNetworkAdapter(testNetList, editNetworkListener);
+        testNetAdapter = new MultiSelectNetworkAdapter(testNetList, callback);
         testnetRecyclerView.setAdapter(testNetAdapter);
+
+        updateTitle(viewModel.mainNetActive() ? mainNetAdapter.getSelectedItemCount() : testNetAdapter.getSelectedItemCount());
+    }
+
+    private void updateTitle(int count)
+    {
+        setTitle(getString(R.string.title_enabled_networks, String.valueOf(count)));
     }
 
     @Override

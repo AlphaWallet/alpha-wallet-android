@@ -407,6 +407,7 @@
     <string name="search_or_type_web_address">搜索或键入网址</string>
     <string name="network">网络</string>
     <string name="select_active_networks">设置启用的区块链</string>
+    <string name="title_enabled_networks">启用网络 (%s)</string>
     <string name="collectibles">收藏品</string>
     <string name="token_function">通证功能</string>
     <string name="channel_description">Alphawallet 通知渠道</string>

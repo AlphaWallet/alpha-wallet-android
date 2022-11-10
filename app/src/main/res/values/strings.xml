@@ -443,6 +443,7 @@
     <string name="search_or_type_web_address">Search or type web address</string>
     <string name="network">Networks</string>
     <string name="select_active_networks">Select Active Networks</string>
+    <string name="title_enabled_networks">Enabled Networks (%s)</string>
     <string name="collectibles">Collectibles</string>
     <string name="token_function">Token Function</string>
     <string name="channel_description">Alphawallet notification channel</string>

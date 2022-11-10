@@ -416,6 +416,7 @@
     <string name="search_or_type_web_address">Chercher ou taper une adresse web</string>
     <string name="network">Réseaux</string>
     <string name="select_active_networks">Selectionner Réseaux Actifs</string>
+    <string name="title_enabled_networks">Réseaux Activés (%s)</string>
     <string name="collectibles">Objects de Collections</string>
     <string name="token_function">Fonctions du Token</string>
     <string name="channel_description">Chaine de notifications Alphawallet</string>

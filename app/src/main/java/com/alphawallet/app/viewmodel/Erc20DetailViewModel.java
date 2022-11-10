@@ -19,7 +19,6 @@ import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
@@ -55,8 +54,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
                                 AssetDefinitionService assetDefinitionService,
                                 TokensService tokensService,
                                 OnRampRepositoryType onRampRepository,
-                                AnalyticsServiceType analyticsService,
-                                CustomSettings customSettings)
+                                AnalyticsServiceType analyticsService)
     {
         this.myAddressRouter = myAddressRouter;
         this.fetchTransactionsInteract = fetchTransactionsInteract;

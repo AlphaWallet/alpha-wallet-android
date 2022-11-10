@@ -7,7 +7,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.RedeemSignatureDisplayRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.token.entity.TicketRange;
@@ -31,7 +30,6 @@ public class RedeemAssetSelectViewModel extends BaseViewModel {
             RedeemSignatureDisplayRouter redeemSignatureDisplayRouter,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
-            CustomSettings customSettings,
             GenericWalletInteract genericWalletInteract)
     {
         this.redeemSignatureDisplayRouter = redeemSignatureDisplayRouter;

@@ -3,7 +3,6 @@ package com.alphawallet.app.viewmodel;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 
 import javax.inject.Inject;
@@ -20,7 +19,7 @@ public class MyAddressViewModel extends BaseViewModel {
     MyAddressViewModel(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokensService tokensService,
-            AssetDefinitionService assetDefinitionService, CustomSettings customSettings) {
+            AssetDefinitionService assetDefinitionService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenService = tokensService;
         this.assetDefinitionService = assetDefinitionService;

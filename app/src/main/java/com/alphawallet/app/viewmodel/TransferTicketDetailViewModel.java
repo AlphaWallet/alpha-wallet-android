@@ -26,7 +26,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
@@ -82,8 +81,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel
                                   AssetDefinitionService assetDefinitionService,
                                   GasService gasService,
                                   AnalyticsServiceType analyticsService,
-                                  TokensService tokensService,
-                                  CustomSettings customSettings)
+                                  TokensService tokensService)
     {
         this.genericWalletInteract = genericWalletInteract;
         this.keyService = keyService;

@@ -33,7 +33,6 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
@@ -109,8 +108,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
             ImportWalletRouter importWalletRouter,
             HomeRouter homeRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            KeyService keyService,
-            CustomSettings customSettings, EthereumNetworkRepositoryType ethereumNetworkRepository,
+            KeyService keyService, EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenRepositoryType tokenRepository,
             TickerService tickerService,
             AssetDefinitionService assetService,

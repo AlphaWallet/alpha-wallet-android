@@ -1,11 +1,16 @@
 package com.alphawallet.app.widget;
 
+import android.webkit.WebBackForwardList;
+
 public interface AddressBarListener
 {
     boolean onLoad(String urlText);
+
     void onClear();
 
-    void loadNext();
+    WebBackForwardList loadNext();
 
-    void loadPrevious();
+    WebBackForwardList loadPrevious();
+
+    WebBackForwardList onHomePagePressed();
 }

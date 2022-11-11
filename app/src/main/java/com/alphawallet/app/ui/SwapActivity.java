@@ -25,6 +25,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetSource;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
@@ -241,7 +242,14 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             @Override
             public void onAmountChanged(String amount)
             {
-                getAvailableRoutes();
+                if (TextUtils.isEmpty(selectedRouteProvider))
+                {
+                    getAvailableRoutes();
+                }
+                else
+                {
+                    getQuote();
+                }
             }
 
             @Override
@@ -333,6 +341,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         destTokenDialog.setSelectedToken(token.address);
 
+        selectedRouteProvider = "";
+
         getAvailableRoutes();
     }
 
@@ -354,6 +364,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         sourceTokenDialog.setSelectedToken(token.address);
 
         sourceToken = token;
+
+        selectedRouteProvider = "";
 
         getAvailableRoutes();
     }
@@ -543,6 +555,11 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     {
         if (!TextUtils.isEmpty(selectedRouteProvider))
         {
+            if (errorDialog != null && errorDialog.isShowing())
+            {
+                errorDialog.dismiss();
+            }
+
             viewModel.getQuote(
                     sourceSelector.getToken(),
                     destSelector.getToken(),
@@ -713,7 +730,19 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     @Override
     public void getAuthorisation(SignAuthenticationCallback callback)
     {
-        viewModel.getAuthentication(this, wallet, callback);
+        if (wallet.type != WalletType.WATCH)
+        {
+            viewModel.getAuthentication(this, wallet, callback);
+        }
+        else
+        {
+            confirmationDialog.dismiss();
+            errorDialog = new AWalletAlertDialog(this);
+            errorDialog.setTitle(R.string.title_dialog_error);
+            errorDialog.setMessage(getString(R.string.error_message_watch_only_wallet));
+            errorDialog.setButton(R.string.dialog_ok, v -> errorDialog.dismiss());
+            errorDialog.show();
+        }
     }
 
     @Override

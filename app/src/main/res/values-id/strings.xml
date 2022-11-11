@@ -943,4 +943,5 @@
     <string name="message_no_routes_found_for_the_given_parameters">Tidak ada rute yang ditemukan untuk parameter yang diberikan.</string>
     <string name="message_select_one_exchange">Pilih setidaknya satu bursa.</string>
     <string name="deprecated">Tidak digunakan lagi</string>
+    <string name="error_message_watch_only_wallet">Tidak dapat melakukan tindakan pada dompet khusus jam tangan ini.</string>
 </resources>

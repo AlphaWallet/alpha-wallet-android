@@ -110,3 +110,23 @@
 
 # These classes are duplicated between android.jar and core-lambda-stubs.jar.
 -dontnote java.lang.invoke.**
+
+-keepclasseswithmembernames,includedescriptorclasses class * {
+    native <methods>;
+}
+
+#trust wallet
+-keep class wallet.core.jni.** { *; }
+-keep class wallet.core.jni.proto.** { *; }
+-keep class org.web3j.** { *; }
+
+#entities, jsInterface & listeners
+-keep class com.alphawallet.token.** { *; }
+-keep class com.alphawallet.app.walletconnect.** { *; }
+-keep class com.alphawallet.app.web3.** { *; }
+-keep class com.alphawallet.app.web3j.** { *; }
+-keep class com.alphawallet.app.entity.** { *; }
+
+-repackageclasses
+#-dontobfuscate
+#-printconfiguration ../full-r8-config.txt

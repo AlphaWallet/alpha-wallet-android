@@ -85,7 +85,7 @@ android {
         }
     }
     defaultConfig {
-        versionCode 212
+        versionCode 214
         versionName "3.60.1"
 
         applicationId "io.stormbird.wallet"
@@ -164,7 +164,7 @@ android {
                 signingConfig signingConfigs.release
             }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            }
+        }
     }
     packagingOptions {
         exclude 'META-INF/NOTICE' // will not include NOTICE file
@@ -351,7 +351,7 @@ dependencies {
 
     implementation 'androidx.work:work-runtime:2.7.1'
 
-    implementation platform('com.google.firebase:firebase-bom:28.1.0')
+    analyticsImplementation platform('com.google.firebase:firebase-bom:28.1.0')
     //analyticsImplementation 'com.google.firebase:firebase-analytics'
     analyticsImplementation 'com.google.firebase:firebase-crashlytics'
     //analyticsImplementation 'com.google.firebase:firebase-analytics:21.1.1'

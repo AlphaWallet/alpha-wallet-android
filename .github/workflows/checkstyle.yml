@@ -17,7 +17,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           checkstyle_config: '.github/checkstyle-rules.xml'
           reporter: 'github-pr-review'
-          filter_mode: 'file'
+#          filter_mode: 'file' # https://github.com/nikitasavinov/checkstyle-action
           fail_on_error: true
           level: 'error'
           tool_name: 'CheckStyle'

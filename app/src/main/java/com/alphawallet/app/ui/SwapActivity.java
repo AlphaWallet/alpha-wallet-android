@@ -241,7 +241,14 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             @Override
             public void onAmountChanged(String amount)
             {
-                getAvailableRoutes();
+                if (TextUtils.isEmpty(selectedRouteProvider))
+                {
+                    getAvailableRoutes();
+                }
+                else
+                {
+                    getQuote();
+                }
             }
 
             @Override
@@ -333,6 +340,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
         destTokenDialog.setSelectedToken(token.address);
 
+        selectedRouteProvider = "";
+
         getAvailableRoutes();
     }
 
@@ -354,6 +363,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         sourceTokenDialog.setSelectedToken(token.address);
 
         sourceToken = token;
+
+        selectedRouteProvider = "";
 
         getAvailableRoutes();
     }

@@ -964,4 +964,5 @@
     <string name="message_no_routes_found_for_the_given_parameters">ပေးထားသော ကန့်သတ်ဘောင်များအတွက် လမ်းကြောင်းများ ရှာမတွေ့ပါ။</string>
     <string name="message_select_one_exchange">အနည်းဆုံးလဲလှယ်မှုတစ်ခုကို ရွေးပါ။</string>
     <string name="deprecated">ကန့်ကွက်ထားသည်။</string>
+    <string name="error_message_watch_only_wallet">ဤ Watch-only ပိုက်ဆံအိတ်တွင် လုပ်ဆောင်ချက်ကို မလုပ်ဆောင်နိုင်ပါ။</string>
 </resources>

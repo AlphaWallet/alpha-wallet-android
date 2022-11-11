@@ -943,4 +943,5 @@
     <string name="message_no_routes_found_for_the_given_parameters">Không tìm thấy các tuyến đường cho các thông số đã cho.</string>
     <string name="message_select_one_exchange">Chọn ít nhất một sàn giao dịch.</string>
     <string name="deprecated">Không được chấp nhận</string>
+    <string name="error_message_watch_only_wallet">Không thể thực hiện hành động trên ví Chỉ xem này.</string>
 </resources>

@@ -67,8 +67,8 @@ public class RouteAdapter extends RecyclerView.Adapter<RouteAdapter.ViewHolder>
             if (step.estimate.feeCosts != null)
             {
                 holder.fees.setVisibility(step.estimate.feeCosts.isEmpty() ? View.GONE : View.VISIBLE);
+                holder.fees.setText(SwapUtils.getOtherFees(step.estimate.feeCosts));
             }
-            holder.fees.setText(SwapUtils.getOtherFees(step.estimate.feeCosts));
             holder.layout.setOnClickListener(v -> listener.onRouteSelected(step.swapProvider.key));
         }
     }

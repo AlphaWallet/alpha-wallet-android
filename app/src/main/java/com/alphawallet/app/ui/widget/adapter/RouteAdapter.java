@@ -64,10 +64,14 @@ public class RouteAdapter extends RecyclerView.Adapter<RouteAdapter.ViewHolder>
             holder.icon.bindData(step.action.toToken.logoURI, step.action.toToken.chainId, step.action.toToken.address, step.action.toToken.symbol);
 //            holder.symbol.setText(step.action.toToken.symbol);
             holder.gas.setText(context.getString(R.string.info_gas_fee, SwapUtils.getTotalGasFees(step.estimate.gasCosts)));
-            if (step.estimate.feeCosts != null)
+            if (step.estimate.feeCosts != null && step.estimate.feeCosts.isEmpty())
             {
-                holder.fees.setVisibility(step.estimate.feeCosts.isEmpty() ? View.GONE : View.VISIBLE);
+                holder.fees.setVisibility(View.VISIBLE);
                 holder.fees.setText(SwapUtils.getOtherFees(step.estimate.feeCosts));
+            }
+            else
+            {
+                holder.fees.setVisibility(View.GONE);
             }
             holder.layout.setOnClickListener(v -> listener.onRouteSelected(step.swapProvider.key));
         }

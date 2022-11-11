@@ -18,12 +18,19 @@ public class SwapUtils
 
     public static String getTotalGasFees(ArrayList<GasCost> gasCosts)
     {
-        StringBuilder gas = new StringBuilder();
-        for (GasCost gc : gasCosts)
+        if (gasCosts != null)
         {
-            gas.append(SwapUtils.getGasFee(gc)).append(System.lineSeparator());
+            StringBuilder gas = new StringBuilder();
+            for (GasCost gc : gasCosts)
+            {
+                gas.append(SwapUtils.getGasFee(gc)).append(System.lineSeparator());
+            }
+            return gas.toString().trim();
         }
-        return gas.toString().trim();
+        else
+        {
+            return "";
+        }
     }
 
     public static String getGasFee(GasCost gasCost)
@@ -35,14 +42,21 @@ public class SwapUtils
 
     public static String getOtherFees(ArrayList<FeeCost> feeCosts)
     {
-        StringBuilder fees = new StringBuilder();
-        for (FeeCost fc : feeCosts)
+        if (feeCosts != null)
         {
-            fees.append(fc.name);
-            fees.append(": ");
-            fees.append(SwapUtils.getFee(fc)).append(System.lineSeparator());
+            StringBuilder fees = new StringBuilder();
+            for (FeeCost fc : feeCosts)
+            {
+                fees.append(fc.name);
+                fees.append(": ");
+                fees.append(SwapUtils.getFee(fc)).append(System.lineSeparator());
+            }
+            return fees.toString().trim();
         }
-        return fees.toString().trim();
+        else
+        {
+            return "";
+        }
     }
 
     public static String getFee(FeeCost feeCost)

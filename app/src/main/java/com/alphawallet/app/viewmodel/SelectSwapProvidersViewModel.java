@@ -1,7 +1,5 @@
 package com.alphawallet.app.viewmodel;
 
-import android.content.Context;
-
 import com.alphawallet.app.entity.lifi.SwapProvider;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.SwapRepositoryType;
@@ -31,7 +29,7 @@ public class SelectSwapProvidersViewModel extends BaseViewModel
         this.swapRepository = swapRepository;
     }
 
-    public Set<String> getPreferredExchanges(Context context)
+    public Set<String> getPreferredExchanges()
     {
         Set<String> exchanges = preferenceRepository.getSelectedSwapProviders();
         if (exchanges.isEmpty())
@@ -63,11 +61,6 @@ public class SelectSwapProvidersViewModel extends BaseViewModel
                     provider.isChecked = true;
                 }
             }
-        }
-        else
-        {
-            Timber.w("No Swap Providers found.");
-            swapProviders = new ArrayList<>();
         }
         else
         {

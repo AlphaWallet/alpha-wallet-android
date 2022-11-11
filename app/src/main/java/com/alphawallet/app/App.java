@@ -10,10 +10,10 @@ import android.content.Context;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 
+import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.util.ReleaseTree;
 
 import dagger.hilt.android.HiltAndroidApp;
-import io.reactivex.functions.Consumer;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.realm.Realm;
 import timber.log.Timber;
@@ -27,7 +27,7 @@ public class App extends Application
     {
         super.onCreate();
         Realm.init(this);
-
+        CustomViewSettings.init(this);
         if (BuildConfig.DEBUG)
         {
             Timber.plant(new Timber.DebugTree());

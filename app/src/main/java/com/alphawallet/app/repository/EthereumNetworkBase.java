@@ -1058,11 +1058,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return null;
     }
 
-    public static List<Long> addDefaultNetworks()
-    {
-        return CustomViewSettings.alwaysVisibleChains;
-    }
-
     public static ContractLocator getOverrideToken()
     {
         return new ContractLocator("", CustomViewSettings.primaryChain, ContractType.ETHEREUM);

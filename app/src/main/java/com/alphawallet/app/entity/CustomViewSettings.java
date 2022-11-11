@@ -10,95 +10,260 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class CustomViewSettings
 {
+    public static final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
     public static final long primaryChain = MAINNET_ID;
-    private static final String primaryChainName = C.ETHEREUM_NETWORK_NAME;
+    private static Context context;
+    private static final ConcurrentLinkedQueue<Long> loadLockedCachedChains = new ConcurrentLinkedQueue<>();
+    private static final ConcurrentLinkedQueue<Long> loadExclusiveCachedChains = new ConcurrentLinkedQueue<>();
+    private static final ConcurrentLinkedQueue<TokenInfo> loadLockedTokens = new ConcurrentLinkedQueue<>();
+    public static String getJsonString = "";
+    public Boolean loaded = false;
 
-    //You can use the settings in this file to customise the wallet appearance
-
-    //IF you want to re-order the the way chains appear in the wallet, see this line in EthereumNetworkBase:
-    //private static final List<Long> hasValue = new ArrayList<>(Arrays.asList( ...
-    //... and read the comment above it
-
-    //Ensures certain tokens are always visible, even if zero balance (see also 'showZeroBalance()' below).
-    //See also lockedChains. You can also lock the chains that are displayed on.
-    //If you leave the locked chains empty, the token will appear if the chain is selected
-    private static final List<TokenInfo> lockedTokens = Arrays.asList(
-            // new TokenInfo(String TokenAddress, String TokenName, String TokenSymbol, int TokenDecimals, boolean isEnabled, long ChainId)
-            //new TokenInfo("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "USD Coin", "USDC", 6, true, EthereumNetworkBase.MAINNET_ID),
-            //new TokenInfo("0x6C8c6b02E7b2BE14d4fA6022Dfd6d75921D90E4E", "Compound BAT", "CBAT", 8, true, EthereumNetworkBase.MAINNET_ID)
-    );
-
-    //List of chains that wallet can show
-    //If blank, enable the user filter select dialog, if there are any entries here, the select network dialog is disabled
-    //Note: you should always enable the chainId corresponding to the chainIDs in the lockedTokens.
-    private static final List<Long> lockedChains = Arrays.asList(
-            //EthereumNetworkBase.MAINNET_ID //EG only show Main, xdai, classic and two testnets. Don't allow user to select any others
-            //EthereumNetworkBase.XDAI_ID,
-            //EthereumNetworkBase.RINKEBY_ID, //You can mix testnets and mainnets, but probably shouldn't as it may result in people getting scammed
-            //EthereumNetworkBase.GOERLI_ID
-    );
-
-    public static final List<Long> alwaysVisibleChains = Arrays.asList(
-            EthereumNetworkBase.MAINNET_ID
-    );
-
-    public static boolean alwaysShow(long chainId)
+    public static void init(Context ctx)
     {
-        return alwaysVisibleChains.contains(chainId);
+        context = ctx;
     }
 
-    //TODO: Wallet can only show the above tokens
-    private static final boolean onlyShowTheseTokens = true;
-
-    public static List<TokenInfo> getLockedTokens()
+    public CustomViewSettings(Context ctx)
     {
-        return lockedTokens;
+        context = ctx;
     }
 
-    public static List<Long> getLockedChains()
+    public static ArrayList<Long> loadChains(String chainName)
     {
-        return lockedChains;
-    }
-
-    //TODO: Not yet implemented; code will probably live in TokensService & TokenRealmSource
-    public static boolean onlyShowLockedTokens()
-    {
-        return onlyShowTheseTokens;
-    }
-
-    //Does main wallet page show tokens with zero balance? NB: any 'Locked' tokens above will always be shown
-    public static boolean showZeroBalance() { return false; }
-
-    public static boolean tokenCanBeDisplayed(TokenCardMeta token)
-    {
-        return token.type == ContractType.ETHEREUM || token.isEnabled || isLockedToken(token.getChain(), token.getAddress());
-    }
-
-    private static boolean isLockedToken(long chainId, String contractAddress)
-    {
-        for (TokenInfo tInfo : lockedTokens)
+        ArrayList<Long> chains = new ArrayList<>();
+        try
         {
-            if (tInfo.chainId == chainId && tInfo.address.equalsIgnoreCase(contractAddress)) return true;
+            String lockedChains = loadJSONStringFromAsset();
+            if (lockedChains != null)
+            {
+                JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
+                JSONArray chainsArray = customSettingsJsonObject.getJSONArray(chainName);
+                if (chainsArray.length() > 0)
+                {
+                    for (int i = 0; i < chainsArray.length(); i++)
+                    {
+                        JSONObject chainObject = chainsArray.getJSONObject(i);
+                        Long chain = chainObject.getLong("chain");
+                        chains.add(chain);
+                    }
+                    if (chainName.equals("locked_chains"))
+                    {
+                        loadLockedCachedChains.clear();
+                        loadLockedCachedChains.addAll(chains);
+                    }
+                    else
+                    {
+                        loadExclusiveCachedChains.clear();
+                        loadExclusiveCachedChains.addAll(chains);
+                    }
+                }
+            }
+        }
+        catch (JSONException err)
+        {
+            err.printStackTrace();
+        }
+
+        return chains;
+    }
+
+    //TODO: Cache locked chains & Tokens in an ConcurrentLinkedQueue / ConcurrentHashMap
+    //    : The approach I would take is to have a 'load' function which first checks if there's already
+    //    : data in the two cache mappings, if there's not then check the 'loaded' flag. If that is
+    //    : set false then load and populate the Queue/Map
+    //    : then, just use the mappings from there. Add a call to the load function each time you use the data.
+    //    : Android can memory scavenge those mappings at any time if the wallet is paged out,
+    //    : Then they'll be empty when the wallet is paged back in.
+
+    public static ArrayList<Long> getChainsFromJsonFile() //<-- TODO: chainName is redundant
+    {
+        ArrayList<Long> chains = new ArrayList<>();
+        if (loadLockedCachedChains.size() > 0)
+        {
+            chains.addAll(loadLockedCachedChains);
+        }
+        else
+        {
+            chains.addAll(loadChains("locked_chains"));
+        }
+        return chains;
+    }
+
+    public static ArrayList<TokenInfo> getLockedTokensFromJsonFile() //<-- TODO: chainName is redundant
+    {
+        ArrayList<TokenInfo> chains = new ArrayList<>();
+        Gson gson = new Gson();
+        try
+        {
+            String lockedTokens = loadJSONStringFromAsset();
+            if (lockedTokens != null)
+            {
+                JSONObject customSettingsJsonObject = new JSONObject(lockedTokens);
+                JSONArray chainsArray = customSettingsJsonObject.getJSONArray("locked_tokens");
+                if (chainsArray.length() > 0)
+                {
+                    //TODO: use GSON class array load (see "private EtherscanTransaction[] getEtherscanTransactions" for how-to)
+                    //    : this will need a static class within this class
+                    //    : you can then traverse (for x : y) that list and have cleaner code
+                    //    : esp if you add a getTokenInfo from that static internal class.
+                    TokenInfo[] lockedTokenInfo = gson.fromJson(chainsArray.toString(), TokenInfo[].class);
+                    for (TokenInfo tokenInfo : lockedTokenInfo)
+                    {
+                        chains.add(tokenInfo);
+                    }
+                }
+            }
+        }
+        catch (JSONException err)
+        {
+            err.printStackTrace();
+        }
+
+        loadLockedTokens.clear();
+        loadLockedTokens.addAll(chains);
+        return chains;
+    }
+
+    public static JSONArray getChainsArrayJsonFile() //<--- TODO: Redundant
+    {
+        JSONArray chainsArray = new JSONArray();
+        try
+        {
+            String lockedChains = loadJSONStringFromAsset();
+            JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
+            chainsArray = customSettingsJsonObject.getJSONArray("locked_chains");
+        }
+        catch (JSONException err)
+        {
+            err.printStackTrace();
+        }
+
+        return chainsArray;
+    }
+
+    //TODO: Doesn't need caching (no action)
+    public Boolean getDarkModeValueFromJsonFile(String chainName)
+    {
+        boolean darkModeValue = false;
+        try
+        {
+            String darkMode = loadJSONStringFromAsset();
+            if (darkMode != null)
+            {
+                JSONObject customSettingsJsonObject = new JSONObject(darkMode);
+                darkModeValue = customSettingsJsonObject.getBoolean(chainName);
+            }
+        }
+        catch (JSONException err)
+        {
+            err.printStackTrace();
+        }
+        return darkModeValue;
+    }
+
+    // Function Use:  Universal function to check if Json is already loaded or not. If it is already loaded then we will return the value directly from the variable else we will load the json data from asset.
+    public static String loadJSONStringFromAsset()
+    {
+        try
+        {
+            if (getJsonString.isEmpty())
+            {
+                Reader reader = new InputStreamReader(context.getAssets().open(CUSTOM_SETTINGS_FILENAME));
+                JsonElement json = new Gson().fromJson(reader, JsonElement.class);
+                getJsonString = json.toString();
+            }
+        }
+        catch (IOException ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+
+        return getJsonString;
+    }
+
+
+    //TODO: Caching
+    public static Boolean alwaysShow(long chainId)
+    {
+        ArrayList<Long> exclusiveChains = new ArrayList<>();
+        if (loadExclusiveCachedChains.size() > 0)
+        {
+            exclusiveChains.addAll(loadExclusiveCachedChains);
+        }
+        else
+        {
+            exclusiveChains.addAll(loadChains("exclusive_chains"));
+        }
+        return exclusiveChains.contains(chainId);
+    }
+
+    //TODO: Requires caching, since this will be called very frequently
+    //    : Use a (final) mapping of locked tokens, from a load.
+    //    : You'll need to check if the list is empty and if so flag a 'loaded', so we don't spam this list
+    public static Boolean tokenCanBeDisplayed(TokenCardMeta token)
+    {
+        final ArrayList<TokenInfo> lockedTokens = getLockedTokensFromJsonFile();
+        if (loadLockedTokens.size() > 0)
+        {
+            return lockedTokens.addAll(loadLockedTokens);
+        }
+        else
+        {
+            return token.type == ContractType.ETHEREUM || token.isEnabled || isLockedToken(token.getChain(), token.getAddress());
+        }
+
+    }
+
+    //TODO: Caching
+    public static Boolean isLockedToken(long chainId, String contractAddress)
+    {
+
+        if (loadLockedTokens.size() > 0)
+        {
+            return  true;
+        }
+        else
+        {
+            final ArrayList<TokenInfo> lockedTokens = getLockedTokensFromJsonFile();
+            loadLockedTokens.clear();
+            loadLockedTokens.addAll(lockedTokens);
+            for (TokenInfo tInfo : lockedTokens)
+            {
+                if (tInfo.chainId == chainId && tInfo.address.equalsIgnoreCase(contractAddress))
+                    return true;
+            }
         }
 
         return false;
     }
 
-    public static ContractType checkKnownTokens(TokenInfo tokenInfo)
+    public ContractType checkKnownTokens(TokenInfo tokenInfo)
     {
         return ContractType.OTHER;
     }
 
-    public static boolean showContractAddress(Token token)
+    public boolean showContractAddress(Token token)
     {
         return true;
     }
@@ -108,7 +273,7 @@ public class CustomViewSettings
         return 0;
     }
 
-    public static int getImageOverride()
+    public int getImageOverride()
     {
         return 0;
     }
@@ -138,25 +303,46 @@ public class CustomViewSettings
     }
 
     //Hide EIP681 generation (Payment request, generates a QR code another wallet user can scan to have all payment fields filled in)
-    public static boolean hideEIP681() { return false; }
+    public static boolean hideEIP681()
+    {
+        return false;
+    }
 
     //In main wallet menu, if wallet allows adding new tokens
-    public static boolean canAddTokens() { return true; }
+    public static boolean canAddTokens()
+    {
+        return true;
+    }
 
     //Implement minimal dappbrowser with no URL bar. You may want this if you want your browser to point to a specific website and only
     // allow navigation within that website
     // use this setting in conjunction with changing DEFAULT_HOMEPAGE in class EthereumNetworkBase
-    public static boolean minimiseBrowserURLBar() { return false; }
+    public static boolean minimiseBrowserURLBar()
+    {
+        return false;
+    }
 
     //Allow showing token management view
-    public static boolean showManageTokens() { return true; }
+    public static boolean showManageTokens()
+    {
+        return true;
+    }
 
     //Show all networks in Select Network screen. Set to `true` to show only filtered networks.
-    public static boolean showAllNetworks() { return false; }
+    public static boolean showAllNetworks()
+    {
+        return false;
+    }
 
-    public static String getDecimalFormat() { return "0.####E0"; }
+    public String getDecimalFormat()
+    {
+        return "0.####E0";
+    }
 
-    public static int getDecimalPlaces() { return 5; }
+    public int getDecimalPlaces()
+    {
+        return 5;
+    }
 
     //set if the Input Amount defaults to Fiat or Crypto
     public static boolean inputAmountFiatDefault()

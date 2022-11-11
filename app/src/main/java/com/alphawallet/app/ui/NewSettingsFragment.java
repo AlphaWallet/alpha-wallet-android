@@ -50,6 +50,8 @@ import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
 import com.google.android.material.card.MaterialCardView;
 
+import org.json.JSONArray;
+
 import java.util.Locale;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -350,7 +352,8 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
-        if (CustomViewSettings.getLockedChains().size() == 0)
+        JSONArray chainsArray = CustomViewSettings.getChainsArrayJsonFile();
+        if (chainsArray.length() == 0)
             systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
 
         if (biometricsSetting != null)

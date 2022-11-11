@@ -341,15 +341,24 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             }
 
             @Override
-            public void loadNext()
+            public WebBackForwardList loadNext()
             {
                 goToNextPage();
+                return web3.copyBackForwardList();
             }
 
             @Override
-            public void loadPrevious()
+            public WebBackForwardList loadPrevious()
             {
                 backPressed();
+                return web3.copyBackForwardList();
+            }
+
+            @Override
+            public WebBackForwardList onHomePagePressed()
+            {
+                homePressed();
+                return web3.copyBackForwardList();
             }
         });
 
@@ -417,8 +426,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             resetDappBrowser();
         }
-
-        addressBar.updateNavigationButtons(web3.copyBackForwardList());
     }
 
     @Override
@@ -536,9 +543,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         swipeRefreshLayout.setRefreshInterface(this);
 
         toolbar = view.findViewById(R.id.address_bar);
-
-        View home = view.findViewById(R.id.home);
-        if (home != null) home.setOnClickListener(v -> homePressed());
 
         //If you are wondering about the strange way the menus are inflated - this is required to ensure
         //that the menu text gets created with the correct localisation under every circumstance
@@ -1323,37 +1327,27 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         }
         else if (web3.canGoBack())
         {
-            loadSessionUrl(-1);
+            setUrlText(getSessionUrl(-1));
             web3.goBack();
             detachFragments();
         }
         else if (!web3.getUrl().equalsIgnoreCase(getDefaultDappUrl()))
         {
-            //load homepage
-            homePressed = true;
-            web3.resetView();
-            web3.loadUrl(getDefaultDappUrl());
-            setUrlText(getDefaultDappUrl());
+            homePressed();
+            addressBar.updateNavigationButtons(web3.copyBackForwardList());
         }
-        addressBar.updateNavigationButtons(web3.copyBackForwardList());
     }
 
     private void goToNextPage()
     {
         if (web3.canGoForward())
         {
-            loadSessionUrl(1);
+            setUrlText(getSessionUrl(1));
             web3.goForward();
-            addressBar.updateNavigationButtons(web3.copyBackForwardList());
         }
     }
 
-    /**
-     * Browse to relative entry with sanity check on value
-     *
-     * @param relative relative addition or subtraction of browsing index
-     */
-    private void loadSessionUrl(int relative)
+    private String getSessionUrl(int relative)
     {
         WebBackForwardList sessionHistory = web3.copyBackForwardList();
         int newIndex = sessionHistory.getCurrentIndex() + relative;
@@ -1362,9 +1356,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             WebHistoryItem newItem = sessionHistory.getItemAtIndex(newIndex);
             if (newItem != null)
             {
-                setUrlText(newItem.getUrl());
+                return newItem.getUrl();
             }
         }
+
+        return "";
     }
 
     @Override

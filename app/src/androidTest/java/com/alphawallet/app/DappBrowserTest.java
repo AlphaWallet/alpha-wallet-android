@@ -35,8 +35,8 @@ import org.junit.Test;
 
 public class DappBrowserTest extends BaseE2ETest
 {
-    private static final String DEFAULT_HOME_PAGE = "https://alphawallet.com/browser/";
-    private static final String URL_DAPP = "https://app.1inch.io/";
+    private static final String DEFAULT_HOME_PAGE = "https://courses.cs.washington.edu/courses/cse373/99sp/assignments/hw2/test1.html";
+    private static final String URL_DAPP = "http://web.simmons.edu/~grovesd/comm244/notes/week3/html-test-page.html";
 
     @Override
     @Before
@@ -51,11 +51,10 @@ public class DappBrowserTest extends BaseE2ETest
     public void should_switch_network()
     {
         shouldSee("Ethereum");
-        waitUntilLoaded();
         selectTestNet("Görli");
         navigateToBrowser();
-        waitUntilLoaded();
         pressBack();
+        waitUntilLoaded();
         shouldSee("Görli");
     }
 
@@ -70,6 +69,17 @@ public class DappBrowserTest extends BaseE2ETest
         waitUntilLoaded();
         onView(withId(R.id.url_tv)).perform(pressKey(KeyEvent.KEYCODE_ENTER));
         assertUrlContains("alphawallet.app.entity.DApp@");
+    }
+
+    @Test
+    public void should_go_back_when_press_back_button_on_phone()
+    {
+        visit(URL_DAPP);
+        assertUrlContains(URL_DAPP);
+        Helper.wait(2);
+        pressBack();
+        waitUntilLoaded();
+        assertUrlContains(DEFAULT_HOME_PAGE);
     }
 
     @Test
@@ -115,6 +125,7 @@ public class DappBrowserTest extends BaseE2ETest
         visit(URL_DAPP);
         waitUntilLoaded();
         openOptionsMenu();
+        Helper.wait(1);
         click(withText("Set as Home Page"));
         Helper.wait(2);
         click(withId(R.id.home));

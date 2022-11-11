@@ -16,7 +16,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
@@ -45,6 +44,7 @@ public class AddressBar extends MaterialToolbar
     private View layoutNavigation;
     private ImageView back;
     private ImageView next;
+    private ImageView home;
 
     @Nullable
     private Disposable disposable;
@@ -125,6 +125,13 @@ public class AddressBar extends MaterialToolbar
     private void initView()
     {
         urlTv = findViewById(R.id.url_tv);
+        home = findViewById(R.id.home);
+        if (home != null) home.setOnClickListener(v -> {
+            disableNavigationButtons();
+            WebBackForwardList backForwardList = listener.onHomePagePressed();
+            updateNavigationButtons(backForwardList);
+        });
+
         btnClear = findViewById(R.id.clear_url);
         btnClear.setOnClickListener(v -> {
             clearAddressBar();
@@ -132,10 +139,18 @@ public class AddressBar extends MaterialToolbar
 
         layoutNavigation = findViewById(R.id.layout_navigator);
         back = findViewById(R.id.back);
-        back.setOnClickListener(v -> listener.loadPrevious());
+        back.setOnClickListener(v -> {
+            disableNavigationButtons();
+            WebBackForwardList backForwardList = listener.loadPrevious();
+            updateNavigationButtons(backForwardList);
+        });
 
         next = findViewById(R.id.next);
-        next.setOnClickListener(v -> listener.loadNext());
+        next.setOnClickListener(v -> {
+            disableNavigationButtons();
+            WebBackForwardList backForwardList = listener.loadNext();
+            updateNavigationButtons(backForwardList);
+        });
     }
 
     private void clearAddressBar()
@@ -304,25 +319,21 @@ public class AddressBar extends MaterialToolbar
         boolean isLast = backForwardList.getCurrentIndex() + 1 > backForwardList.getSize() - 1;
         if (isLast)
         {
-            next.setEnabled(false);
-            next.setAlpha(0.3f);
+            disableButton(next);
         }
         else
         {
-            next.setEnabled(true);
-            next.setAlpha(1.0f);
+            enableButton(next);
         }
 
-
-        if (!isOnHomePage())
+        boolean isFirst = backForwardList.getCurrentIndex() == 0;
+        if (isFirst)
         {
-            back.setEnabled(true);
-            back.setAlpha(1.0f);
+            disableButton(back);
         }
         else
         {
-            back.setEnabled(false);
-            back.setAlpha(0.3f);
+            enableButton(back);
         }
     }
 
@@ -334,5 +345,23 @@ public class AddressBar extends MaterialToolbar
     public String getUrl()
     {
         return urlTv.getText().toString();
+    }
+
+    private void disableNavigationButtons()
+    {
+        disableButton(back);
+        disableButton(next);
+    }
+
+    private void enableButton(ImageView button)
+    {
+        button.setEnabled(true);
+        button.setAlpha(1.0f);
+    }
+
+    private void disableButton(ImageView button)
+    {
+        button.setEnabled(false);
+        button.setAlpha(0.3f);
     }
 }

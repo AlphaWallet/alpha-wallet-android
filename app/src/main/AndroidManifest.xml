@@ -77,12 +77,12 @@
                 <data android:mimeType="text/xml" />
                 <data android:mimeType="text/tsml" />
                 <data android:host="*" />
-                <data android:pathPattern=".*\\.tsml" />
-                <data android:pathPattern=".*\\..*\\.tsml" />
-                <data android:pathPattern=".*\\..*\\..*\\.tsml" />
-                <data android:pathPattern=".*\\.xml" />
-                <data android:pathPattern=".*\\..*\\.xml" />
-                <data android:pathPattern=".*\\..*\\..*\\.xml" />
+                <data android:pathPattern="/.*\\.tsml" />
+                <data android:pathPattern="/.*\\..*\\.tsml" />
+                <data android:pathPattern="/.*\\..*\\..*\\.tsml" />
+                <data android:pathPattern="/.*\\.xml" />
+                <data android:pathPattern="/.*\\..*\\.xml" />
+                <data android:pathPattern="/.*\\..*\\..*\\.xml" />
             </intent-filter>
         </activity>
 

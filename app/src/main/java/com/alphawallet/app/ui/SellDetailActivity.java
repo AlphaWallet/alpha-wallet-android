@@ -138,7 +138,7 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
 
         //we should import a token and a list of chosen ids
         list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(this, token, selection, viewModel.getAssetDefinitionService());
+        adapter = new NonFungibleTokenAdapter(this, token, selection, viewModel.getAssetDefinitionService(), this);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 

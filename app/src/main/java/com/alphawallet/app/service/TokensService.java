@@ -3,6 +3,7 @@ package com.alphawallet.app.service;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Pair;
@@ -10,12 +11,10 @@ import android.util.Pair;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.C;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
@@ -105,12 +104,16 @@ public class TokensService
     private Disposable openSeaQueryDisposable;
 
     private static boolean done = false;
+    CustomSettings customSettings;
 
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
                          TokenRepositoryType tokenRepository,
                          TickerService tickerService,
                          OpenSeaService openseaService,
-                         AnalyticsServiceType<AnalyticsProperties> analyticsService) {
+                         AnalyticsServiceType<AnalyticsProperties> analyticsService,
+                         Context context)
+    {
+        customSettings = new CustomSettings(context);
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
         this.tickerService = tickerService;
@@ -401,9 +404,10 @@ public class TokensService
     public void setupFilter(boolean userUpdated)
     {
         networkFilter.clear();
-        if (CustomViewSettings.getLockedChains().size() > 0)
+        ArrayList<Long> lockedChains = customSettings.getChainsFromJsonFile();
+        if (lockedChains.size() > 0)
         {
-            networkFilter.addAll(CustomViewSettings.getLockedChains());
+            networkFilter.addAll(lockedChains);
         }
         else
         {
@@ -960,7 +964,8 @@ public class TokensService
             }
         }
 
-        for (Long lockedChain : CustomViewSettings.getLockedChains())
+        ArrayList<Long> getLockedChains = customSettings.getChainsFromJsonFile();
+        for (Long lockedChain : getLockedChains)
         {
             if (!networkFilter.contains(lockedChain)) networkFilter.add(lockedChain);
         }
@@ -1005,7 +1010,14 @@ public class TokensService
         mainNetActive = ethereumNetworkRepository.isMainNetSelected();
         final String wallet = currentAddress;
         //ensure locked tokens are displaying
-        Observable.fromIterable(CustomViewSettings.getLockedTokens())
+        ConcurrentHashMap<String, TokenInfo> tokenInfoConcurrentHashMap = customSettings.getLockedTokensFromJsonFile();;
+        ArrayList<TokenInfo> lockedTokens = new ArrayList<>();
+        for(int i=0; i< tokenInfoConcurrentHashMap.size(); i++)
+        {
+            lockedTokens.add(tokenInfoConcurrentHashMap.get(String.valueOf(i)));
+        }
+
+        Observable.fromIterable(lockedTokens)
                 .forEach(info -> addToken(info, wallet)
                         .flatMapCompletable(token -> enableToken(wallet, token))
                         .subscribeOn(Schedulers.io())

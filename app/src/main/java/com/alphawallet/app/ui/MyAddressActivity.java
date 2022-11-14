@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -19,17 +21,17 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AddressMode;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.EIP681Request;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
-import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRUtils;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.InputAmount;
@@ -43,8 +45,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 @AndroidEntryPoint
 public class MyAddressActivity extends BaseActivity implements AmountReadyCallback
@@ -68,6 +68,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private CopyTextView copyAddress;
     private CopyTextView copyWalletName;
     private ProgressBar ensFetchProgressBar;
+    private CustomSettings customSettings;
 
     private InputAmount amountInput;
 
@@ -115,6 +116,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private void initViewModel() {
         viewModel = new ViewModelProvider(this)
                 .get(MyAddressViewModel.class);
+        customSettings = new CustomSettings(this);
     }
 
     @Override
@@ -139,7 +141,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (CustomViewSettings.hideEIP681()) return super.onCreateOptionsMenu(menu);
+        if (customSettings.hideEIP681()) return super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_receive, menu);
 
         switch (currentMode)

@@ -42,7 +42,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.TokenFilter;
@@ -53,6 +52,7 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
@@ -117,6 +117,8 @@ public class WalletFragment extends BaseFragment implements
     private ActivityResultLauncher<Intent> handleBackupClick;
     private ActivityResultLauncher<Intent> tokenManagementLauncher;
 
+    private CustomSettings customSettings;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
@@ -124,16 +126,7 @@ public class WalletFragment extends BaseFragment implements
 
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
         LocaleUtils.setActiveLocale(getContext()); // Can't be placed before above line
-
-        if (CustomViewSettings.canAddTokens())
-        {
-            toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
-        }
-        else
-        {
-            toolbar(view);
-        }
-
+        customSettings = new CustomSettings(getContext());
         initResultLaunchers();
 
         initViews(view);
@@ -149,6 +142,15 @@ public class WalletFragment extends BaseFragment implements
         setImportToken();
 
         viewModel.prepare();
+
+        if (customSettings.canAddTokens())
+        {
+            toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
+        }
+        else
+        {
+            toolbar(view);
+        }
 
         addressAvatar.setWaiting();
 
@@ -209,7 +211,7 @@ public class WalletFragment extends BaseFragment implements
     private void initList()
     {
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),
-                tokenManagementLauncher);
+                tokenManagementLauncher, getContext());
         adapter.setHasStableIds(true);
         setLinearLayoutManager(TokenFilter.ALL.ordinal());
         recyclerView.setAdapter(adapter);
@@ -256,7 +258,7 @@ public class WalletFragment extends BaseFragment implements
 
     private void onDefaultWallet(Wallet wallet)
     {
-        if (CustomViewSettings.showManageTokens())
+        if (customSettings.showManageTokens())
         {
             adapter.setWalletAddress(wallet.address);
         }
@@ -424,7 +426,7 @@ public class WalletFragment extends BaseFragment implements
     private void initTabLayout(View view)
     {
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
-        if (CustomViewSettings.hideTabBar())
+        if (customSettings.hideTabBar())
         {
             tabLayout.setVisibility(View.GONE);
             return;

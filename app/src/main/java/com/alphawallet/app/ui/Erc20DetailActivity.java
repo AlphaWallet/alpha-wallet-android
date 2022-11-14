@@ -40,6 +40,7 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.router.SwapRouter;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
@@ -85,6 +86,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private RealmResults<RealmToken> realmTokenUpdates;
 
     private ViewPager2 viewPager;
+    private CustomSettings customSettings;
 
     private static class DetailPage {
         private final int tabNameResourceId;
@@ -210,6 +212,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             viewModel.newScriptFound().observe(this, this::onNewScript);
             viewModel.sig().observe(this, this::onSignature);
             viewModel.scriptUpdateInProgress().observe(this, this::startScriptDownload);
+            customSettings = new CustomSettings(this);
 //            findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE); //Samoa TODO: restore certificate toolbar
         }
     }
@@ -273,7 +276,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 return false;
             }
         });
-        tokenViewAdapter = new TokensAdapter(null, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), null);
+        tokenViewAdapter = new TokensAdapter(null, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), null, this);
         tokenViewAdapter.updateToken(tokenMeta, true);
         tokenView.setAdapter(tokenViewAdapter);
         setTokenListener();

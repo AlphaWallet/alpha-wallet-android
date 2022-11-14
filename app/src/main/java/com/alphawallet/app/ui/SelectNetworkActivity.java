@@ -12,9 +12,9 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.ui.widget.adapter.SingleSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
@@ -23,8 +23,6 @@ import com.alphawallet.app.widget.TestNetDialog;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -36,6 +34,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     private SelectNetworkViewModel viewModel;
     private SingleSelectNetworkAdapter mainNetAdapter;
     private SingleSelectNetworkAdapter testNetAdapter;
+    private CustomSettings customSettings;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -45,7 +44,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
 
         viewModel = new ViewModelProvider(this)
                 .get(SelectNetworkViewModel.class);
-
+        customSettings = new CustomSettings(this);
         prepare(getIntent());
     }
 
@@ -159,7 +158,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (!localSelectionMode && !CustomViewSettings.showAllNetworks())
+        if (!localSelectionMode && !customSettings.showAllNetworks())
         {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.menu_filter_network, menu);

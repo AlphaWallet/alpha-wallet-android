@@ -62,7 +62,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.FragmentMessenger;
@@ -80,6 +79,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
@@ -267,13 +267,14 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     // This thread stays in operation until a new page load is complete.
     private String loadUrlAfterReload;
     private DAppFunction dAppFunction;
+    private CustomSettings customSettings;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
         LocaleUtils.setActiveLocale(getContext());
         super.onCreate(savedInstanceState);
-
+        customSettings = new CustomSettings(getContext());
         getChildFragmentManager()
                 .setFragmentResultListener(DAPP_CLICK, this, (requestKey, bundle) -> {
                     DApp dapp = bundle.getParcelable(DAPP_CLICK);
@@ -317,7 +318,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         LocaleUtils.setActiveLocale(getContext());
         loadOnInit = null;
-        int webViewID = CustomViewSettings.minimiseBrowserURLBar() ? R.layout.fragment_webview_compact : R.layout.fragment_webview;
+        int webViewID = customSettings.minimiseBrowserURLBar() ? R.layout.fragment_webview_compact : R.layout.fragment_webview;
         View view = inflater.inflate(webViewID, container, false);
         initViewModel();
         initView(view);
@@ -547,7 +548,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         //If you are wondering about the strange way the menus are inflated - this is required to ensure
         //that the menu text gets created with the correct localisation under every circumstance
         MenuInflater inflater = new MenuInflater(LocaleUtils.getActiveLocaleContext(getContext()));
-        if (CustomViewSettings.minimiseBrowserURLBar())
+        if (customSettings.minimiseBrowserURLBar())
         {
             inflater.inflate(R.menu.menu_scan, toolbar.getMenu());
         }

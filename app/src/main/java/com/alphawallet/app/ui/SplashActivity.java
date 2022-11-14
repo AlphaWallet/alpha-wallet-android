@@ -16,12 +16,12 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.analytics.FirstWalletAction;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.RootUtil;
 import com.alphawallet.app.viewmodel.SplashViewModel;
@@ -37,6 +37,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
 
     private Handler handler = new Handler(Looper.getMainLooper());
     private String errorMessage;
+    private CustomSettings customSettings;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -58,7 +59,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         viewModel.wallets().observe(this, this::onWallets);
         viewModel.createWallet().observe(this, this::onWalletCreate);
         viewModel.fetchWallets();
-
+        customSettings = new CustomSettings(this);
         checkRoot();
     }
 
@@ -106,7 +107,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         }
         else
         {
-            handler.postDelayed(this, CustomViewSettings.startupDelay());
+            handler.postDelayed(this, customSettings.startupDelay());
         }
     }
 

@@ -41,7 +41,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -50,6 +49,7 @@ import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
@@ -105,6 +105,7 @@ public class TransferTicketDetailActivity extends BaseActivity
     private FunctionButtonBar functionBar;
     private Token token;
     private NonFungibleTokenAdapter adapter;
+    private CustomSettings customSettings;
     private TextView validUntil;
     private TextView textQuantity;
     private String ticketIds;
@@ -188,7 +189,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(null, token, selection, viewModel.getAssetDefinitionService());
+        adapter = new NonFungibleTokenAdapter(null, token, selection, viewModel.getAssetDefinitionService(), this);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -268,6 +269,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.universalLinkReady().observe(this, this::linkReady);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
+        customSettings = new CustomSettings(this);
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
@@ -339,7 +341,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         switch (transferStatus)
         {
             case CHOOSE_QUANTITY:
-                if (CustomViewSettings.hasDirectTransfer())
+                if (customSettings.hasDirectTransfer())
                 {
                     newState = DisplayState.PICK_TRANSFER_METHOD;
                 }

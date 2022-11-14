@@ -58,7 +58,6 @@ import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
@@ -69,6 +68,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
@@ -122,6 +122,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private boolean isForeground;
     private volatile boolean tokenClicked = false;
     private String openLink;
+
+    private CustomSettings customSettings;
 
     public HomeActivity()
     {
@@ -207,11 +209,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.setWalletStartup();
         viewModel.setCurrencyAndLocale(this);
         viewModel.tryToShowWhatsNewDialog(this);
+        customSettings = new CustomSettings(this);
         setContentView(R.layout.activity_home);
 
         initViews();
         toolbar();
-
         viewPager = findViewById(R.id.view_pager);
         viewPager.setUserInputEnabled(false);      // i think this replicates lockPages(true)
         viewPager.setAdapter(pager2Adapter);
@@ -246,7 +248,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.splashReset().observe(this, this::onRequireInit);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
-        if (CustomViewSettings.hideDappBrowser())
+        if (customSettings.hideDappBrowser())
         {
             removeDappBrowser();
         }
@@ -1152,7 +1154,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private static class ScreenSlidePagerAdapter extends FragmentStateAdapter
+    private class ScreenSlidePagerAdapter extends FragmentStateAdapter
     {
         public ScreenSlidePagerAdapter(@NonNull FragmentActivity fragmentActivity)
         {
@@ -1171,7 +1173,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 case ACTIVITY:
                     return new ActivityFragment();
                 case DAPP_BROWSER:
-                    if (CustomViewSettings.hideDappBrowser())
+                    if (customSettings.hideDappBrowser())
                     {
                         return new BaseFragment();
                     }

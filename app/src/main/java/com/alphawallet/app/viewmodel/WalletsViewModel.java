@@ -87,6 +87,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final Map<String, Wallet> walletUpdate = new ConcurrentHashMap<>();
     private final Map<String, Disposable> currentWalletUpdates = new ConcurrentHashMap<>();
     private SyncCallback syncCallback;
+    private Context context;
 
     @Nullable
     private Disposable balanceTimerDisposable;
@@ -128,10 +129,12 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         this.tickerService = tickerService;
         this.assetService = assetService;
         this.preferenceRepository = preferenceRepository;
-        this.tokensService = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null);
+        this.context = context;
+        this.tokensService = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null, context);
 
         ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
         syncCallback = null;
+
     }
 
     public LiveData<Wallet[]> wallets()
@@ -283,7 +286,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private Single<Wallet> startWalletSync(Wallet wallet)
     {
         return Single.fromCallable(() -> {
-            TokensService svs = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null);
+            TokensService svs = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null, context);
             svs.setCurrentAddress(wallet.address.toLowerCase());
             svs.startUpdateCycle();
             svs.setCompletionCallback(this, 2);

@@ -38,10 +38,10 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.BackupOperationType;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
@@ -49,6 +49,8 @@ import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
 import com.google.android.material.card.MaterialCardView;
+
+import org.json.JSONArray;
 
 import java.util.Locale;
 
@@ -91,6 +93,7 @@ public class NewSettingsFragment extends BaseFragment
     private ActivityResultLauncher<Intent> advancedSettingsHandler;
     private ActivityResultLauncher<Intent> updateLocale;
     private ActivityResultLauncher<Intent> updateCurrency;
+    private CustomSettings customSettings;
 
     @Nullable
     @Override
@@ -121,7 +124,6 @@ public class NewSettingsFragment extends BaseFragment
         initResultLaunchers();
 
         getParentFragmentManager().setFragmentResult(SETTINGS_INSTANTIATED, new Bundle());
-
         return view;
     }
 
@@ -186,6 +188,7 @@ public class NewSettingsFragment extends BaseFragment
                 .get(NewSettingsViewModel.class);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.backUpMessage().observe(getViewLifecycleOwner(), this::backupWarning);
+        customSettings = new CustomSettings(getContext());
     }
 
     private void initNotificationView(View view)
@@ -338,7 +341,7 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(myAddressSetting, walletIndex++);
 
-        if (CustomViewSettings.canChangeWallets())
+        if (customSettings.canChangeWallets())
             walletSettingsLayout.addView(changeWalletSetting, walletIndex++);
 
         walletSettingsLayout.addView(backUpWalletSetting, walletIndex++);
@@ -350,7 +353,8 @@ public class NewSettingsFragment extends BaseFragment
 
         walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
-        if (CustomViewSettings.getLockedChains().size() == 0)
+        JSONArray chainsArray = customSettings.getChainsArrayJsonFile();
+        if (chainsArray.length() == 0)
             systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
 
         if (biometricsSetting != null)

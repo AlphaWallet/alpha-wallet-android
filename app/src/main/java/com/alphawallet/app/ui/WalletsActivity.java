@@ -21,7 +21,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SyncCallback;
@@ -30,6 +29,7 @@ import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.widget.adapter.WalletsSummaryAdapter;
@@ -60,6 +60,7 @@ public class WalletsActivity extends BaseActivity implements
     private final Handler handler = new Handler();
     private final long balanceChain = EthereumNetworkRepository.getOverrideToken().chainId;
     private WalletsViewModel viewModel;
+    private CustomSettings customSettings;
     private RecyclerView list;
     private SystemView systemView;
     private Dialog dialog;
@@ -131,6 +132,7 @@ public class WalletsActivity extends BaseActivity implements
             viewModel.baseTokens().observe(this, this::updateBaseTokens);
         }
         viewModel.onPrepare(balanceChain, this);
+        customSettings = new CustomSettings(this);
         initViews(); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
     }
 
@@ -228,7 +230,7 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (CustomViewSettings.canChangeWallets()) getMenuInflater().inflate(R.menu.menu_add, menu);
+        if (customSettings.canChangeWallets()) getMenuInflater().inflate(R.menu.menu_add, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

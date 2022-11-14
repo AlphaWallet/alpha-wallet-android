@@ -154,8 +154,16 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     {
         return createWalletError;
     }
-    public LiveData<Boolean> noWalletsError() { return noWalletsError; }
-    public LiveData<Map<String, Token[]>> baseTokens() { return baseTokens; }
+
+    public LiveData<Boolean> noWalletsError()
+    {
+        return noWalletsError;
+    }
+
+    public LiveData<Map<String, Token[]>> baseTokens()
+    {
+        return baseTokens;
+    }
 
     public void setDefaultWallet(Wallet wallet, boolean isNewWallet)
     {
@@ -222,7 +230,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         return startWalletSync(w)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::sendUnsyncedValue, e -> { });
+                .subscribe(this::sendUnsyncedValue, e -> {});
     }
 
     private void startFullWalletSync(Wallet[] items)
@@ -314,8 +322,14 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(value -> {
-                    if (syncCount == 1) { syncCallback.syncCompleted(service.getCurrentAddress().toLowerCase(), value); }
-                    else { syncCallback.syncUpdate(service.getCurrentAddress().toLowerCase(), value); }
+                    if (syncCount == 1)
+                    {
+                        syncCallback.syncCompleted(service.getCurrentAddress().toLowerCase(), value);
+                    }
+                    else
+                    {
+                        syncCallback.syncUpdate(service.getCurrentAddress().toLowerCase(), value);
+                    }
                 }).isDisposed();
     }
 
@@ -341,10 +355,13 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                 .flatMap(Observable::fromArray)
                 .forEach(wallet -> ensCheck = ensResolver.reverseResolveEns(wallet.address)
                         .onErrorReturnItem(wallet.ENSname != null ? wallet.ENSname : "")
-                        .map(ensName -> { wallet.ENSname = ensName; return wallet;})
+                        .map(ensName -> {
+                            wallet.ENSname = ensName;
+                            return wallet;
+                        })
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(w -> fetchWalletsInteract.updateWalletData(w, () -> { }), this::onError));
+                        .subscribe(w -> fetchWalletsInteract.updateWalletData(w, () -> {}), this::onError));
 
         //now load the current wallets from database
         disposable = fetchWalletsInteract

@@ -65,7 +65,8 @@ public class TokensRealmSource implements TokenLocalSource {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final CustomSettings customSettings;
 
-    public TokensRealmSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, Context context) {
+    public TokensRealmSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, Context context)
+    {
         this.realmManager = realmManager;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.customSettings = new CustomSettings(context);

@@ -14,6 +14,7 @@ import static org.hamcrest.core.AllOf.allOf;
 import android.content.Context;
 import android.view.KeyEvent;
 import android.view.View;
+
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.test.espresso.PerformException;
@@ -24,6 +25,10 @@ import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
+
+import java.util.concurrent.TimeoutException;
 import com.alphawallet.app.R;
 
 import org.hamcrest.Matcher;

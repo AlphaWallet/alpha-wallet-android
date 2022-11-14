@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <uses-feature
         android:name="android.hardware.fingerprint"
@@ -22,7 +23,8 @@
         android:name=".App"
         android:allowBackup="false"
         android:extractNativeLibs="true"
-        android:hardwareAccelerated="true"
+        android:hardwareAccelerated="false"
+        android:largeHeap="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:launchMode="singleTask"
@@ -112,10 +114,16 @@
             android:name=".service.WalletConnectService"
             android:enabled="true" />
 
+        <service
+            android:name=".service.WalletConnectV2Service"
+            android:enabled="true">
+        </service>
+
         <activity
             android:name=".ui.NameThisWalletActivity"
             android:label="@string/name_this_wallet"
             android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".ui.ImportWalletActivity"
             android:label="@string/title_import"
@@ -300,6 +308,7 @@
 
         <activity
             android:name=".ui.QRScanning.QRScannerActivity"
+            android:hardwareAccelerated="true"
             android:label="@string/qr_scanner" />
 
         <activity

@@ -42,8 +42,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start"
-                tools:text="Message:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337" />
-
+                tools:text="Message:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337"
+                android:textSize="@dimen/sp12"/>
         </ScrollView>
 
         <TextView

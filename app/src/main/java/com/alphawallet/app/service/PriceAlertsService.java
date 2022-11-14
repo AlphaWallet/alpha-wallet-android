@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
+import androidx.annotation.Nullable;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.entity.Wallet;
@@ -25,8 +27,6 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-
-import androidx.annotation.Nullable;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Observable;

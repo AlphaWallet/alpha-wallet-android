@@ -215,7 +215,7 @@ public class Utils
                 return R.string.dialog_title_sign_personal_message;
             case SIGN_TYPED_DATA:
             case SIGN_TYPED_DATA_V3:
-            case SIGN_TYPES_DATA_V4:
+            case SIGN_TYPED_DATA_V4:
                 return R.string.dialog_title_sign_typed_message;
         }
     }
@@ -891,7 +891,17 @@ public class Utils
         {
             Timber.tag("READ_JS_TAG").d(ex, "Ex");
         }
-        return new String(buffer);
+
+        try
+        {
+            Timber.tag("READ_JS_TAG").d("HeapSize:%s", Runtime.getRuntime().freeMemory());
+            return new String(buffer);
+        }
+        catch (Exception e)
+        {
+            Timber.tag("READ_JS_TAG").d(e, "Ex");
+        }
+        return "";
     }
 
     public static long timeUntil(long eventInMillis)

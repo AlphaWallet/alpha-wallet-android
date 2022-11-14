@@ -41,12 +41,14 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.BackupOperationType;
+import com.alphawallet.app.entity.BackupTokenCallback;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
@@ -64,6 +66,7 @@ import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.widget.BuyEthOptionsView;
 import com.alphawallet.app.widget.LargeTitleView;
 import com.alphawallet.app.widget.NotificationView;
@@ -76,7 +79,10 @@ import com.google.android.material.tabs.TabLayout;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -113,9 +119,18 @@ public class WalletFragment extends BaseFragment implements
     private RealmResults<RealmToken> realmUpdates;
     private LargeTitleView largeTitleView;
     private long realmUpdateTime;
-    private ActivityResultLauncher<Intent> networkSettingsHandler;
     private ActivityResultLauncher<Intent> handleBackupClick;
     private ActivityResultLauncher<Intent> tokenManagementLauncher;
+
+    @Inject
+    AWWalletConnectClient awWalletConnectClient;
+
+    private ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result ->
+            {
+                //send instruction to restart tokenService
+                getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
+            });
 
     @Nullable
     @Override
@@ -234,6 +249,9 @@ public class WalletFragment extends BaseFragment implements
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
         viewModel.getTokensService().startWalletSync(this);
+        viewModel.activeWalletConnectSessions().observe(getViewLifecycleOwner(), walletConnectSessionItems -> {
+            adapter.showActiveWalletConnectSessions(walletConnectSessionItems);
+        });
     }
 
     private void initViews(@NonNull View view)
@@ -390,6 +408,7 @@ public class WalletFragment extends BaseFragment implements
             adapter.clear();
             viewModel.prepare();
             viewModel.notifyRefresh();
+            awWalletConnectClient.updateNotification();
         });
     }
 
@@ -582,6 +601,15 @@ public class WalletFragment extends BaseFragment implements
         {
             setRealmListener(realmUpdateTime);
         }
+
+        if (currentTabPos.equals(TokenFilter.ALL))
+        {
+            awWalletConnectClient.updateNotification();
+        }
+        else
+        {
+            adapter.showActiveWalletConnectSessions(Collections.emptyList());
+        }
     }
 
     /**
@@ -737,7 +765,7 @@ public class WalletFragment extends BaseFragment implements
         handler.post(() ->
         {
             if (viewModel != null) viewModel.setKeyWarningDismissTime(wallet.address);
-            if (adapter != null) adapter.removeBackupWarning();
+            if (adapter != null) adapter.removeItem(WarningHolder.VIEW_TYPE);
         });
     }
 
@@ -747,7 +775,7 @@ public class WalletFragment extends BaseFragment implements
         handler.post(() ->
         {
             if (viewModel != null) viewModel.setKeyBackupTime(backedUpKey);
-            if (adapter != null) adapter.removeBackupWarning();
+            if (adapter != null) adapter.removeItem(WarningHolder.VIEW_TYPE);
         });
     }
 

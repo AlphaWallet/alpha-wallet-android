@@ -46,6 +46,7 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.WCEthereumSignMessage;
@@ -75,6 +76,8 @@ import org.web3j.utils.Numeric;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -130,6 +133,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private String signData;
     private WCEthereumSignMessage.WCSignType signType;
     private long chainIdOverride;
+
+    @Inject
+    AWWalletConnectClient awWalletConnectClient;
+
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getData() == null) return;
@@ -980,6 +987,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_ENDED);
             client.killSession();
             viewModel.disconnectSession(this, client.sessionId());
+            awWalletConnectClient.updateNotification();
             handler.postDelayed(this::finish, 5000);
         }
         else
@@ -1321,7 +1329,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         };
 
-        viewModel.signTransaction(getBaseContext(), tx, dappFunction, peerUrl.getText().toString(), viewModel.getChainId(getSessionId()));
+        viewModel.signTransaction(getBaseContext(), tx, dappFunction, peerUrl.getText().toString(), viewModel.getChainId(getSessionId()), viewModel.defaultWallet().getValue());
         if (fromDappBrowser) switchToDappBrowser();
     }
 

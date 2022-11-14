@@ -24,9 +24,12 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
+import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.CreateTransactionInteract;
+import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.repository.entity.RealmWCSession;
@@ -37,6 +40,7 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.WalletConnectService;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.GetClientCallback;
@@ -50,6 +54,7 @@ import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,7 +69,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import timber.log.Timber;
 
 @HiltViewModel
@@ -77,7 +81,9 @@ public class WalletConnectViewModel extends BaseViewModel
     private final KeyService keyService;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GenericWalletInteract genericWalletInteract;
+    private final FetchWalletsInteract fetchWalletsInteract;
     private final CreateTransactionInteract createTransactionInteract;
+    private final WalletConnectInteract walletConnectInteract;
     private final RealmManager realmManager;
     private final GasService gasService;
     private final TokensService tokensService;
@@ -90,28 +96,35 @@ public class WalletConnectViewModel extends BaseViewModel
     @Nullable
     private Disposable prepareDisposable;
 
+    private final AWWalletConnectClient awWalletConnectClient;
+
     private static final String TAG = "WCClientVM";
 
     @Inject
     WalletConnectViewModel(KeyService keyService,
                            FindDefaultNetworkInteract findDefaultNetworkInteract,
-                           CreateTransactionInteract createTransactionInteract,
+                           FetchWalletsInteract fetchWalletsInteract, CreateTransactionInteract createTransactionInteract,
                            GenericWalletInteract genericWalletInteract,
-                           RealmManager realmManager,
+                           WalletConnectInteract walletConnectInteract, RealmManager realmManager,
                            GasService gasService,
                            TokensService tokensService,
                            AnalyticsServiceType analyticsService,
-                           EthereumNetworkRepositoryType ethereumNetworkRepository)
+                           EthereumNetworkRepositoryType ethereumNetworkRepository,
+                           AWWalletConnectClient awWalletConnectClient
+    )
     {
         this.keyService = keyService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.fetchWalletsInteract = fetchWalletsInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.genericWalletInteract = genericWalletInteract;
+        this.walletConnectInteract = walletConnectInteract;
         this.realmManager = realmManager;
         this.gasService = gasService;
         this.tokensService = tokensService;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         setAnalyticsService(analyticsService);
+        this.awWalletConnectClient = awWalletConnectClient;
         prepareDisposable = null;
         disposable = genericWalletInteract
                 .find()
@@ -205,7 +218,7 @@ public class WalletConnectViewModel extends BaseViewModel
                         error -> dAppFunction.DAppError(error, message));
     }
 
-    public void signTransaction(Context ctx, Web3Transaction w3tx, DAppFunction dAppFunction, String requesterURL, long chainId)
+    public void signTransaction(Context ctx, Web3Transaction w3tx, DAppFunction dAppFunction, String requesterURL, long chainId, Wallet fromWallet)
     {
         resetSignDialog();
         EthereumMessage etm = new EthereumMessage(w3tx.getFormattedTransaction(ctx, chainId, getNetworkSymbol(chainId)).toString(),
@@ -213,7 +226,7 @@ public class WalletConnectViewModel extends BaseViewModel
 
         if (w3tx.isConstructor())
         {
-            disposable = createTransactionInteract.signTransaction(defaultWallet.getValue(), w3tx, chainId)
+            disposable = createTransactionInteract.signTransaction(fromWallet, w3tx, chainId)
                     .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
@@ -221,7 +234,7 @@ public class WalletConnectViewModel extends BaseViewModel
         }
         else
         {
-            disposable = createTransactionInteract.signTransaction(defaultWallet.getValue(), w3tx, chainId)
+            disposable = createTransactionInteract.signTransaction(fromWallet, w3tx, chainId)
                     .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
@@ -229,22 +242,32 @@ public class WalletConnectViewModel extends BaseViewModel
         }
     }
 
-    public void sendTransaction(final Web3Transaction finalTx, long chainId, SendTransactionInterface callback)
+    public void sendTransaction(final Web3Transaction finalTx, Wallet wallet, long chainId, SendTransactionInterface callback)
     {
         if (finalTx.isConstructor())
         {
             disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                    .createWithSig(wallet, finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.signature),
                             error -> callback.transactionError(finalTx.leafPosition, error));
         }
         else
         {
             disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), finalTx, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                    .createWithSig(wallet, finalTx, chainId)
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.signature),
                             error -> callback.transactionError(finalTx.leafPosition, error));
         }
+    }
+
+    public void sendTransaction(final Web3Transaction finalTx, long chainId, SendTransactionInterface callback)
+    {
+        sendTransaction(finalTx, defaultWallet.getValue(), chainId, callback);
+    }
+
+    public Single<BigInteger> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount, BigInteger defaultLimit)
+    {
+        return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet, defaultLimit);
     }
 
     public Single<BigInteger> calculateGasEstimate(Wallet wallet, Web3Transaction transaction, long chainId)
@@ -407,20 +430,37 @@ public class WalletConnectViewModel extends BaseViewModel
         }
     }
 
-    public void deleteSession(String sessionId)
+    public void deleteSession(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
     {
-        Timber.d("deleteSession: %s", sessionId);
+        if (session instanceof WalletConnectV2SessionItem)
+        {
+            deleteSessionV2(session, callback);
+        } else
+        {
+            deleteSessionV1(session, callback);
+        }
+    }
+
+    private void deleteSessionV2(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
+    {
+        awWalletConnectClient.disconnect(session.sessionId, callback);
+    }
+
+    private void deleteSessionV1(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
+    {
+        Timber.d("deleteSession: %s", session.sessionId);
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
             realm.executeTransactionAsync(r -> {
                 RealmWCSession sessionAux = r.where(RealmWCSession.class)
-                        .equalTo("sessionId", sessionId)
+                        .equalTo("sessionId", session.sessionId)
                         .findFirst();
 
                 if (sessionAux != null)
                 {
                     sessionAux.deleteFromRealm();
                 }
+                callback.onSessionDisconnected();
             });
         }
     }
@@ -479,20 +519,7 @@ public class WalletConnectViewModel extends BaseViewModel
 
     public List<WalletConnectSessionItem> getSessions()
     {
-        List<WalletConnectSessionItem> sessions = new ArrayList<>();
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            RealmResults<RealmWCSession> items = realm.where(RealmWCSession.class)
-                    .sort("lastUsageTime", Sort.DESCENDING)
-                    .findAll();
-
-            for (RealmWCSession r : items)
-            {
-                sessions.add(new WalletConnectSessionItem(r));
-            }
-        }
-
-        return sessions;
+        return walletConnectInteract.getSessions();
     }
 
     public void removePendingRequest(Activity activity, long id)
@@ -547,6 +574,7 @@ public class WalletConnectViewModel extends BaseViewModel
             {
                 WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
                 walletConnectService.putClient(sessionId, client);
+                awWalletConnectClient.updateNotification();
             }
 
             @Override
@@ -676,6 +704,11 @@ public class WalletConnectViewModel extends BaseViewModel
     public TokensService getTokenService()
     {
         return tokensService;
+    }
+
+    public Wallet findWallet(String address)
+    {
+        return fetchWalletsInteract.getWallet(address).blockingGet();
     }
 
     public void endSession(String sessionId)

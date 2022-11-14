@@ -3,17 +3,13 @@ package com.alphawallet.app.ui.widget.adapter;
 import android.content.Intent;
 import android.view.ViewGroup;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SortedList;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.repository.TokensMappingRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -28,6 +24,7 @@ import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TestNetTipsItem;
 import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
 import com.alphawallet.app.ui.widget.entity.TotalBalanceSortedItem;
+import com.alphawallet.app.ui.widget.entity.WalletConnectSessionSortedItem;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.entity.WarningSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
@@ -40,11 +37,17 @@ import com.alphawallet.app.ui.widget.holder.TestNetTipsHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
+import com.alphawallet.app.ui.widget.holder.WalletConnectSessionHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final String TAG = "TKNADAPTER";
@@ -180,6 +183,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 holder = new WarningHolder(R.layout.item_warning, parent);
                 break;
 
+            case WalletConnectSessionHolder.VIEW_TYPE:
+                holder = new WalletConnectSessionHolder(R.layout.item_wallet_connect_sessions, parent);
+                break;
+
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, null, assetService, false);
                 break;
@@ -262,19 +269,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void addWarning(WarningData data)
     {
         items.add(new WarningSortedItem(data, 1));
-    }
-
-    public void removeBackupWarning()
-    {
-        for (int i = 0; i < items.size(); i++)
-        {
-            if (items.get(i).viewType == WarningHolder.VIEW_TYPE)
-            {
-                items.removeItemAt(i);
-                notifyItemRemoved(i);
-                break;
-            }
-        }
     }
 
     public void setTokens(TokenCardMeta[] tokens)
@@ -573,5 +567,29 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
 
         return selected;
+    }
+
+    public void showActiveWalletConnectSessions(List<WalletConnectSessionItem> sessions)
+    {
+        if (sessions.isEmpty())
+        {
+            removeItem(WalletConnectSessionHolder.VIEW_TYPE);
+        } else
+        {
+            items.add(new WalletConnectSessionSortedItem(sessions, 2));
+        }
+    }
+
+    public void removeItem(int viewType)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i).viewType == viewType)
+            {
+                items.removeItemAt(i);
+                notifyItemRemoved(i);
+                break;
+            }
+        }
     }
 }

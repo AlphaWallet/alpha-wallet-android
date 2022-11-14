@@ -268,7 +268,6 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                         break;
                 }
                 break;
-
             case C.COMPLETED_TRANSACTION:
                 Intent i = new Intent();
                 i.putExtra(C.EXTRA_TXHASH, data.getStringExtra(C.EXTRA_TXHASH));

@@ -1,7 +1,11 @@
 package com.alphawallet.app.di;
 
+import android.content.Context;
+
 import com.alphawallet.app.C;
+import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.service.RealmManager;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.google.gson.Gson;
 
 import java.util.concurrent.TimeUnit;
@@ -11,6 +15,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import okhttp3.OkHttpClient;
 
@@ -41,4 +46,10 @@ public class ToolsModule {
     RealmManager provideRealmManager() {
 	    return new RealmManager();
     }
+
+    @Singleton
+	@Provides
+	AWWalletConnectClient provideAWWalletConnectClient(@ApplicationContext Context context, WalletConnectInteract walletConnectInteract) {
+		return new AWWalletConnectClient(context, walletConnectInteract);
+	}
 }

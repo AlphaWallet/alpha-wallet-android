@@ -3,6 +3,7 @@ package com.alphawallet.app.repository;
 import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
 import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Pair;
@@ -64,10 +65,10 @@ public class TokensRealmSource implements TokenLocalSource {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final CustomSettings customSettings;
 
-    public TokensRealmSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, CustomSettings customSettings) {
+    public TokensRealmSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, Context context) {
         this.realmManager = realmManager;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
-        this.customSettings = customSettings;
+        this.customSettings = new CustomSettings(context);
     }
 
     @Override

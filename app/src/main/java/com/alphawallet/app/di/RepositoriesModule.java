@@ -179,9 +179,9 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, CustomSettings customSettings)
+    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, @ApplicationContext Context context)
     {
-        return new TokensRealmSource(realmManager, ethereumNetworkRepository, customSettings);
+        return new TokensRealmSource(realmManager, ethereumNetworkRepository, context);
     }
 
     @Singleton

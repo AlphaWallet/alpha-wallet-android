@@ -102,9 +102,9 @@ public class CustomSettings
         return chains;
     }
 
-    public ConcurrentHashMap<String,TokenInfo> getLockedTokensFromJsonFile() //<-- TODO: chainName is redundant
+    public ConcurrentHashMap<String, TokenInfo> getLockedTokensFromJsonFile() //<-- TODO: chainName is redundant
     {
-        ConcurrentHashMap<String,TokenInfo> chains = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, TokenInfo> chains = new ConcurrentHashMap<>();
         Gson gson = new Gson();
         try
         {
@@ -121,7 +121,7 @@ public class CustomSettings
                     //    : you can then traverse (for x : y) that list and have cleaner code
                     //    : esp if you add a getTokenInfo from that static internal class.
                     TokenInfo[] lockedTokenInfo = gson.fromJson(chainsArray.toString(), TokenInfo[].class);
-                    int i= 0;
+                    int i = 0;
                     for (TokenInfo tokenInfo : lockedTokenInfo)
                     {
                         chains.put(String.valueOf(i), tokenInfo);
@@ -234,13 +234,13 @@ public class CustomSettings
     {
         if (loadLockedTokens.size() > 0)
         {
-            return  true;
+            return true;
         }
         else
         {
-           final ConcurrentHashMap<String, TokenInfo> lockedTokens = getLockedTokensFromJsonFile();
-           Map<String, TokenInfo> mapping = loadLockedTokens.get(chainId);
-           return mapping.containsKey(contractAddress.toLowerCase(Locale.ROOT));
+            final ConcurrentHashMap<String, TokenInfo> lockedTokens = getLockedTokensFromJsonFile();
+            Map<String, TokenInfo> mapping = loadLockedTokens.get(chainId);
+            return mapping.containsKey(contractAddress.toLowerCase(Locale.ROOT));
         }
     }
 
@@ -251,7 +251,7 @@ public class CustomSettings
 
     public boolean showContractAddress(Token token)
     {
-        return getBooleanValueFromJson(false,"isShowContractAddress");
+        return getBooleanValueFromJson(false, "isShowContractAddress");
     }
 
     public long startupDelay()
@@ -275,14 +275,15 @@ public class CustomSettings
 
     public int getImageOverride()
     {
-        return getIntegerValueFromJson(0,"imageOverride");
+        return getIntegerValueFromJson(0, "imageOverride");
     }
-    
+
     //Switch off dapp browser
     public boolean hideDappBrowser()
     {
-        return getBooleanValueFromJson(false,"isHideDappBrowser");
+        return getBooleanValueFromJson(false, "isHideDappBrowser");
     }
+
     //Hides the filter tab bar at the top of the wallet screen (ALL/CURRENCY/COLLECTIBLES)
     public boolean hideTabBar()
     {
@@ -292,7 +293,7 @@ public class CustomSettings
     //Use to switch off direct transfer, only use magiclink transfer
     public boolean hasDirectTransfer()
     {
-        return getBooleanValueFromJson(true,"isHasDirectTransfer");
+        return getBooleanValueFromJson(true, "isHasDirectTransfer");
     }
 
     //Allow multiple wallets (true) or single wallet mode (false)
@@ -304,13 +305,13 @@ public class CustomSettings
     //Hide EIP681 generation (Payment request, generates a QR code another wallet user can scan to have all payment fields filled in)
     public boolean hideEIP681()
     {
-        return getBooleanValueFromJson(false,"isHideEIP681");
+        return getBooleanValueFromJson(false, "isHideEIP681");
     }
 
     //In main wallet menu, if wallet allows adding new tokens
     public boolean canAddTokens()
     {
-        return getBooleanValueFromJson(true,"isCanAddTokens");
+        return getBooleanValueFromJson(true, "isCanAddTokens");
     }
 
     //Implement minimal dappbrowser with no URL bar. You may want this if you want your browser to point to a specific website and only
@@ -318,7 +319,7 @@ public class CustomSettings
     // use this setting in conjunction with changing DEFAULT_HOMEPAGE in class EthereumNetworkBase
     public boolean minimiseBrowserURLBar()
     {
-        return getBooleanValueFromJson(false,"isMinimiseBrowserURLBar");
+        return getBooleanValueFromJson(false, "isMinimiseBrowserURLBar");
     }
 
     //Allow showing token management view
@@ -330,7 +331,7 @@ public class CustomSettings
     //Show all networks in Select Network screen. Set to `true` to show only filtered networks.
     public boolean showAllNetworks()
     {
-        return getBooleanValueFromJson(false,"isShowAllNetworks");
+        return getBooleanValueFromJson(false, "isShowAllNetworks");
     }
 
     public String getDecimalFormat()
@@ -340,17 +341,18 @@ public class CustomSettings
 
     public int getDecimalPlaces()
     {
-        return getIntegerValueFromJson(5,"getDecimalPlaces");
+        return getIntegerValueFromJson(5, "getDecimalPlaces");
     }
 
     //set if the Input Amount defaults to Fiat or Crypto
     public boolean inputAmountFiatDefault()
     {
-        return getBooleanValueFromJson(false,"isInputAmountFiatDefault");
+        return getBooleanValueFromJson(false, "isInputAmountFiatDefault");
     }
 
     //Common function for returning the boolean value
-    public boolean getBooleanValueFromJson(boolean variableName, String jsonString){
+    public boolean getBooleanValueFromJson(boolean variableName, String jsonString)
+    {
         try
         {
             String isHideDappBrowser = loadJSONStringFromAsset();

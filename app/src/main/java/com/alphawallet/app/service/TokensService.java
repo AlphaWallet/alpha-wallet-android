@@ -1010,9 +1010,10 @@ public class TokensService
         mainNetActive = ethereumNetworkRepository.isMainNetSelected();
         final String wallet = currentAddress;
         //ensure locked tokens are displaying
-        ConcurrentHashMap<String, TokenInfo> tokenInfoConcurrentHashMap = customSettings.getLockedTokensFromJsonFile();;
+        ConcurrentHashMap<String, TokenInfo> tokenInfoConcurrentHashMap = customSettings.getLockedTokensFromJsonFile();
+
         ArrayList<TokenInfo> lockedTokens = new ArrayList<>();
-        for(int i=0; i< tokenInfoConcurrentHashMap.size(); i++)
+        for (int i = 0; i < tokenInfoConcurrentHashMap.size(); i++)
         {
             lockedTokens.add(tokenInfoConcurrentHashMap.get(String.valueOf(i)));
         }
@@ -1023,7 +1024,7 @@ public class TokensService
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe())
-                        .isDisposed();
+                .isDisposed();
     }
 
     private Completable enableToken(String walletAddr, Token token)

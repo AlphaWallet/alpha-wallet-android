@@ -87,7 +87,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final Map<String, Wallet> walletUpdate = new ConcurrentHashMap<>();
     private final Map<String, Disposable> currentWalletUpdates = new ConcurrentHashMap<>();
     private SyncCallback syncCallback;
-    private Context context;
 
     @Nullable
     private Disposable balanceTimerDisposable;
@@ -129,7 +128,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         this.tickerService = tickerService;
         this.assetService = assetService;
         this.preferenceRepository = preferenceRepository;
-        this.context = context;
         this.tokensService = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null, context);
 
         ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
@@ -258,16 +256,16 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(value ->
-                        {
-                            if (complete)
-                            {
-                                syncCallback.syncCompleted(wallet.address.toLowerCase(), value);
-                            }
-                            else
-                            {
-                                syncCallback.syncStarted(wallet.address.toLowerCase(), value);
-                            }
-                        }).isDisposed();
+                {
+                    if (complete)
+                    {
+                        syncCallback.syncCompleted(wallet.address.toLowerCase(), value);
+                    }
+                    else
+                    {
+                        syncCallback.syncStarted(wallet.address.toLowerCase(), value);
+                    }
+                }).isDisposed();
     }
 
     private void sendUnsyncedValue(Wallet wallet)
@@ -286,11 +284,10 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private Single<Wallet> startWalletSync(Wallet wallet)
     {
         return Single.fromCallable(() -> {
-            TokensService svs = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null, context);
-            svs.setCurrentAddress(wallet.address.toLowerCase());
-            svs.startUpdateCycle();
-            svs.setCompletionCallback(this, 2);
-            walletServices.put(wallet.address.toLowerCase(), svs);
+            tokensService.setCurrentAddress(wallet.address.toLowerCase());
+            tokensService.startUpdateCycle();
+            tokensService.setCompletionCallback(this, 2);
+            walletServices.put(wallet.address.toLowerCase(), tokensService);
             return wallet;
         });
     }
@@ -318,7 +315,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(value -> {
                     if (syncCount == 1) { syncCallback.syncCompleted(service.getCurrentAddress().toLowerCase(), value); }
-                        else { syncCallback.syncUpdate(service.getCurrentAddress().toLowerCase(), value); }
+                    else { syncCallback.syncUpdate(service.getCurrentAddress().toLowerCase(), value); }
                 }).isDisposed();
     }
 
@@ -343,7 +340,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         ensWrappingCheck = fetchWalletsInteract.fetch().toObservable()
                 .flatMap(Observable::fromArray)
                 .forEach(wallet -> ensCheck = ensResolver.reverseResolveEns(wallet.address)
-                                                    .onErrorReturnItem(wallet.ENSname != null ? wallet.ENSname : "")
+                        .onErrorReturnItem(wallet.ENSname != null ? wallet.ENSname : "")
                         .map(ensName -> { wallet.ENSname = ensName; return wallet;})
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -409,18 +406,18 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private void updateAllWallets(Wallet[] wallets, TokenUpdateType updateType)
     {
         disposable = Single.fromCallable(() -> {
-            //fetch all wallets in one go
-            Map<String, Token[]> walletTokenMap = new HashMap<>();
-            for (Wallet wallet : wallets)
-            {
-                Token[] walletTokens = tokensService.syncChainBalances(wallet.address.toLowerCase(), updateType).blockingGet();
-                if (walletTokens.length > 0)
-                {
-                    walletTokenMap.put(walletTokens[0].getWallet(), walletTokens);
-                }
-            }
-            return walletTokenMap;
-        }).subscribeOn(Schedulers.io())
+                    //fetch all wallets in one go
+                    Map<String, Token[]> walletTokenMap = new HashMap<>();
+                    for (Wallet wallet : wallets)
+                    {
+                        Token[] walletTokens = tokensService.syncChainBalances(wallet.address.toLowerCase(), updateType).blockingGet();
+                        if (walletTokens.length > 0)
+                        {
+                            walletTokenMap.put(walletTokens[0].getWallet(), walletTokens);
+                        }
+                    }
+                    return walletTokenMap;
+                }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(baseTokens::postValue, e -> {});
     }
@@ -521,3 +518,4 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         currentWalletUpdates.clear();
     }
 }
+

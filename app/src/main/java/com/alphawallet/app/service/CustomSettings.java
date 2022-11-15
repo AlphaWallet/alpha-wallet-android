@@ -44,10 +44,6 @@ public class CustomSettings
 
     public static CustomSettings getDefaultInstance()
     {
-        if(_defaultInstance == null)
-        {
-            // throw new exception
-        }
         return _defaultInstance;
     }
 

@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.SortedList;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
@@ -18,6 +17,7 @@ import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.repository.TokensMappingRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.ChainItem;

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
+import com.alphawallet.app.C;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.C;
@@ -210,4 +211,3 @@ public class PriceAlertsService extends Service
         return getString(R.string.price_alert_indicator_below);
     }
 }
-

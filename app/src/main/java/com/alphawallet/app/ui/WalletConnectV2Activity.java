@@ -84,13 +84,16 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         if (!TextUtils.isEmpty(url))
         {
             progressBar.setVisibility(View.VISIBLE);
-            new Handler().postDelayed(() -> awWalletConnectClient.pair(url, (msg) -> {
-                if (!TextUtils.isEmpty(msg))
+            awWalletConnectClient.pair(url, (msg) -> {
+                if (TextUtils.isEmpty(msg))
                 {
-                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-                    finish();
+                    return;
                 }
-            }), 3000);
+                new Handler().post(() -> {
+                    Toast.makeText(WalletConnectV2Activity.this, msg, Toast.LENGTH_SHORT).show();
+                    finish();
+                });
+            });
             return;
         }
 
@@ -123,7 +126,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
         viewModel.wallets().observe(this, this::onWalletsFetched);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-        
+
         selectNetworkFilterViewModel = new ViewModelProvider(this)
                 .get(SelectNetworkFilterViewModel.class);
     }

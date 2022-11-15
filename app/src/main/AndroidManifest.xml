@@ -120,6 +120,15 @@
         </service>
 
         <activity
+            android:name=".ui.WalletConnectV2Activity"
+            android:launchMode="singleTop"
+            android:label="WalletConnectV2" />
+
+        <activity
+            android:name=".ui.WalletConnectNotificationActivity"
+            android:label="WalletConnectV2" />
+
+        <activity
             android:name=".ui.NameThisWalletActivity"
             android:label="@string/name_this_wallet"
             android:windowSoftInputMode="adjustResize" />

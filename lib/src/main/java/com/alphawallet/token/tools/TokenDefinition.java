@@ -66,6 +66,7 @@ public class TokenDefinition {
     public String holdingToken = null;
     private int actionCount;
 
+    public static final String TOKENSCRIPT_MINIMUM_SCHEMA = "2020/06";
     public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2022/09";
     public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
     public static final String TOKENSCRIPT_NAMESPACE = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
@@ -668,6 +669,30 @@ public class TokenDefinition {
                 }
             }
         }
+    }
+
+    public boolean isSchemaLessThanMinimum(){
+
+        if (nameSpace != null)
+            return false;
+
+        int dateIndex = nameSpace.indexOf(TOKENSCRIPT_BASE_URL) + TOKENSCRIPT_BASE_URL.length();
+        int lastSeparator = nameSpace.lastIndexOf("/");
+        if ((lastSeparator - dateIndex) == 7)
+        {
+            try
+            {
+                DateFormat format = new SimpleDateFormat("yyyy/MM", Locale.ENGLISH);
+                Date thisDate = format.parse(nameSpace.substring(dateIndex, lastSeparator));
+                Date schemaDate = format.parse(TOKENSCRIPT_MINIMUM_SCHEMA);
+
+                return thisDate.before(schemaDate);
+            } catch (Exception e){
+                return true;
+            }
+        }
+
+        return true;
     }
 
     private void extractCard(Element card) throws Exception

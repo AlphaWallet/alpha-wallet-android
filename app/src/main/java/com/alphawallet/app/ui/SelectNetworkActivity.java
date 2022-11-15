@@ -44,7 +44,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
 
         viewModel = new ViewModelProvider(this)
                 .get(SelectNetworkViewModel.class);
-        customSettings = new CustomSettings(this);
+        customSettings = CustomSettings.getDefaultInstance();
         prepare(getIntent());
     }
 

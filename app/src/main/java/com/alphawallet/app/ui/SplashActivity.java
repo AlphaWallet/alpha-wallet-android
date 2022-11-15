@@ -59,7 +59,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         viewModel.wallets().observe(this, this::onWallets);
         viewModel.createWallet().observe(this, this::onWalletCreate);
         viewModel.fetchWallets();
-        customSettings = new CustomSettings(this);
+        customSettings = CustomSettings.getDefaultInstance();
         checkRoot();
     }
 

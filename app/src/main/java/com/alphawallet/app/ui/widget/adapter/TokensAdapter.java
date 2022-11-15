@@ -111,7 +111,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.assetService = aService;
         this.tokensService = tService;
         this.managementLauncher = launcher;
-        this.customSettings = new CustomSettings(context);
+        this.customSettings = CustomSettings.getDefaultInstance();
         new TokensMappingRepository(aService.getTokenLocalSource());
     }
 
@@ -120,7 +120,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = null;
-        this.customSettings = new CustomSettings(context);
+        this.customSettings = CustomSettings.getDefaultInstance();
         new TokensMappingRepository(aService.getTokenLocalSource());
         this.managementLauncher = null;
     }

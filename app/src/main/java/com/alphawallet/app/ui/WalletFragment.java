@@ -126,7 +126,7 @@ public class WalletFragment extends BaseFragment implements
 
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
         LocaleUtils.setActiveLocale(getContext()); // Can't be placed before above line
-        customSettings = new CustomSettings(getContext());
+        customSettings = CustomSettings.getDefaultInstance();
         initResultLaunchers();
 
         initViews(view);

@@ -113,7 +113,7 @@ public class TokensService
                          AnalyticsServiceType<AnalyticsProperties> analyticsService,
                          Context context)
     {
-        customSettings = new CustomSettings(context);
+        customSettings = CustomSettings.getDefaultInstance();
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
         this.tickerService = tickerService;

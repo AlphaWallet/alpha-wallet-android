@@ -274,7 +274,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         LocaleUtils.setActiveLocale(getContext());
         super.onCreate(savedInstanceState);
-        customSettings = new CustomSettings(getContext());
+        customSettings = CustomSettings.getDefaultInstance();
         getChildFragmentManager()
                 .setFragmentResultListener(DAPP_CLICK, this, (requestKey, bundle) -> {
                     DApp dapp = bundle.getParcelable(DAPP_CLICK);

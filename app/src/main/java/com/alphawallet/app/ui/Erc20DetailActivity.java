@@ -212,7 +212,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             viewModel.newScriptFound().observe(this, this::onNewScript);
             viewModel.sig().observe(this, this::onSignature);
             viewModel.scriptUpdateInProgress().observe(this, this::startScriptDownload);
-            customSettings = new CustomSettings(this);
+            customSettings = CustomSettings.getDefaultInstance();
 //            findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE); //Samoa TODO: restore certificate toolbar
         }
     }

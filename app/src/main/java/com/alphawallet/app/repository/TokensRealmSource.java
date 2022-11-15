@@ -69,7 +69,7 @@ public class TokensRealmSource implements TokenLocalSource {
     {
         this.realmManager = realmManager;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
-        this.customSettings = new CustomSettings(context);
+        this.customSettings = CustomSettings.getDefaultInstance();
     }
 
     @Override

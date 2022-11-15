@@ -116,7 +116,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private void initViewModel() {
         viewModel = new ViewModelProvider(this)
                 .get(MyAddressViewModel.class);
-        customSettings = new CustomSettings(this);
+        customSettings = CustomSettings.getDefaultInstance();
     }
 
     @Override

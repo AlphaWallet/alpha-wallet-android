@@ -55,7 +55,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
-import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
@@ -122,7 +121,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private boolean isForeground;
     private volatile boolean tokenClicked = false;
     private String openLink;
-
     private CustomSettings customSettings;
 
     public HomeActivity()
@@ -209,7 +207,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.setWalletStartup();
         viewModel.setCurrencyAndLocale(this);
         viewModel.tryToShowWhatsNewDialog(this);
-        customSettings = new CustomSettings(this);
+        customSettings = CustomSettings.getDefaultInstance();
         setContentView(R.layout.activity_home);
 
         initViews();

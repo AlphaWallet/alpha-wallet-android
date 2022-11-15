@@ -188,7 +188,7 @@ public class NewSettingsFragment extends BaseFragment
                 .get(NewSettingsViewModel.class);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.backUpMessage().observe(getViewLifecycleOwner(), this::backupWarning);
-        customSettings = new CustomSettings(getContext());
+        customSettings = CustomSettings.getDefaultInstance();
     }
 
     private void initNotificationView(View view)

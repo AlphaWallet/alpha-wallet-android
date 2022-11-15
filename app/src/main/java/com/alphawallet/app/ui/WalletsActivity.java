@@ -132,7 +132,7 @@ public class WalletsActivity extends BaseActivity implements
             viewModel.baseTokens().observe(this, this::updateBaseTokens);
         }
         viewModel.onPrepare(balanceChain, this);
-        customSettings = new CustomSettings(this);
+        customSettings = CustomSettings.getDefaultInstance();
         initViews(); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
     }
 

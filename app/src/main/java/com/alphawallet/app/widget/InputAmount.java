@@ -82,7 +82,7 @@ public class InputAmount extends LinearLayout
         this.context = context;
         inflate(context, R.layout.item_input_amount, this);
 
-        customSettings = new CustomSettings(context);
+        customSettings = CustomSettings.getDefaultInstance();
         editText = findViewById(R.id.amount_entry);
         symbolText = findViewById(R.id.text_token_symbol);
         icon = findViewById(R.id.token_icon);

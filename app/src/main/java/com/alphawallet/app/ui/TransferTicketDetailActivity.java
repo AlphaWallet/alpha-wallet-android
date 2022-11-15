@@ -269,7 +269,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         viewModel.universalLinkReady().observe(this, this::linkReady);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
-        customSettings = new CustomSettings(this);
+        customSettings = CustomSettings.getDefaultInstance();
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine

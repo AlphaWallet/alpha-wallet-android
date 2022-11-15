@@ -266,9 +266,9 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    CustomSettings provideCustomSettings(@ApplicationContext Context context)
+    CustomSettings provideCustomSettings()
     {
-        return new CustomSettings(context);
+        return CustomSettings.getDefaultInstance();
     }
 
     @Singleton

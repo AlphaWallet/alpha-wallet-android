@@ -29,16 +29,31 @@ public class CustomSettings
 {
     public final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
     public static final long primaryChain = MAINNET_ID;
-    private Context context;
+    private final Context context;
     ConcurrentLinkedQueue<Long> loadLockedCachedChains = new ConcurrentLinkedQueue<>();
     ConcurrentLinkedQueue<Long> loadExclusiveCachedChains = new ConcurrentLinkedQueue<>();
     private final LongSparseArray<Map<String, TokenInfo>> loadLockedTokens = new LongSparseArray<>();
     public String getJsonString = "";
     public Boolean loaded = false;
+    private static CustomSettings _defaultInstance;
 
-    public CustomSettings(Context context)
+    private CustomSettings(Context context)
     {
         this.context = context;
+    }
+
+    public static CustomSettings getDefaultInstance()
+    {
+        if(_defaultInstance == null)
+        {
+            // throw new exception
+        }
+        return _defaultInstance;
+    }
+
+    public static void init(Context context)
+    {
+        _defaultInstance = new CustomSettings(context);
     }
 
     public ArrayList<Long> loadChains(String chainName)

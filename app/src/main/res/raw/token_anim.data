@@ -20,7 +20,7 @@
     </head>
     <body>
         <div class="imgbox">
-        <video class="center-fit" controls autoplay name="media">
+        <video class="center-fit" controls autoplay name="media" loop>
             <source src="[URL]" type="[MIME]">
         </video>
         </div>

@@ -31,6 +31,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.OpenSeaService;
@@ -95,6 +96,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
     private final TokensService tokensService;
+    private final CustomSettings customSettings;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
@@ -139,7 +141,8 @@ public class TokenFunctionViewModel extends BaseViewModel
             GenericWalletInteract genericWalletInteract,
             OpenSeaService openseaService,
             FetchTransactionsInteract fetchTransactionsInteract,
-            AnalyticsServiceType analyticsService)
+            AnalyticsServiceType analyticsService,
+            CustomSettings customSettings)
     {
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
@@ -150,12 +153,18 @@ public class TokenFunctionViewModel extends BaseViewModel
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        this.customSettings = customSettings;
         setAnalyticsService(analyticsService);
     }
 
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public LiveData<Token> insufficientFunds()

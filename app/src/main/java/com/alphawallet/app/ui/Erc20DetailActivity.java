@@ -49,7 +49,6 @@ import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
-import com.bumptech.glide.Glide;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -60,9 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -273,7 +269,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 return false;
             }
         });
-        tokenViewAdapter = new TokensAdapter(null, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), null);
+        tokenViewAdapter = new TokensAdapter(null, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), viewModel.getCustomSettings(), null);
         tokenViewAdapter.updateToken(tokenMeta, true);
         tokenView.setAdapter(tokenViewAdapter);
         setTokenListener();

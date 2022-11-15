@@ -391,7 +391,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             //check for out-of-date script in the secure (downloaded) zone
-            if (isInSecureZone(file) && !td.nameSpace.equals(TokenDefinition.TOKENSCRIPT_NAMESPACE))
+            if (isInSecureZone(file) && td.isSchemaLessThanMinimum())
             {
                 //delete this file and check downloads for update
                 removeFile(file.getAbsolutePath());
@@ -1409,7 +1409,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             if (result != null && result.exists())
             {
                 TokenDefinition td = getTokenDefinition(result);
-                if (definitionIsOutOfDate(td))
+                if (td.isSchemaLessThanMinimum())
                 {
                     removeFile(result.getAbsolutePath());
                     assetChecked.put(address, 0L);
@@ -1496,11 +1496,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 "X-Platform-Version", OSVersion,
                 "If-Modified-Since", dateFormat
         };
-    }
-
-    private boolean definitionIsOutOfDate(TokenDefinition td)
-    {
-        return td != null && !td.nameSpace.equals(TokenDefinition.TOKENSCRIPT_NAMESPACE);
     }
 
     private void finishLoading()

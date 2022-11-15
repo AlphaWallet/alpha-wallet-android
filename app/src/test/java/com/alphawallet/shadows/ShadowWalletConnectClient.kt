@@ -1,8 +1,8 @@
 package com.alphawallet.shadows
 
+import com.walletconnect.android.internal.common.exception.WalletConnectException
 import com.walletconnect.sign.client.Sign
 import com.walletconnect.sign.client.SignClient
-import com.walletconnect.sign.core.exceptions.client.WalletConnectException
 import org.robolectric.annotation.Implementation
 import org.robolectric.annotation.Implements
 

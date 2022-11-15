@@ -114,12 +114,10 @@ public abstract class BaseActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        switch (item.getItemId())
+        if (item.getItemId() == android.R.id.home)
         {
-            case android.R.id.home:
-                onBackPressed();
-                finish();
-                break;
+            onBackPressed();
+            finish();
         }
         return true;
     }

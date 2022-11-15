@@ -38,6 +38,7 @@ import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.NameThisWalletActivity;
@@ -84,6 +85,7 @@ public class WalletViewModel extends BaseViewModel
     private final OnRampRepositoryType onRampRepository;
     private long lastBackupCheck = 0;
     private BottomSheetDialog dialog;
+    private final CustomSettings customSettings;
 
     @Inject
     WalletViewModel(
@@ -99,7 +101,8 @@ public class WalletViewModel extends BaseViewModel
             PreferenceRepositoryType preferenceRepository,
             RealmManager realmManager,
             OnRampRepositoryType onRampRepository,
-            AnalyticsServiceType analyticsService)
+            AnalyticsServiceType analyticsService,
+            CustomSettings customSettings)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
@@ -113,6 +116,7 @@ public class WalletViewModel extends BaseViewModel
         this.preferenceRepository = preferenceRepository;
         this.realmManager = realmManager;
         this.onRampRepository = onRampRepository;
+        this.customSettings = customSettings;
         setAnalyticsService(analyticsService);
     }
 
@@ -208,6 +212,11 @@ public class WalletViewModel extends BaseViewModel
     public TokensService getTokensService()
     {
         return tokensService;
+    }
+
+    public CustomSettings getCustomSettings()
+    {
+        return customSettings;
     }
 
     public Token getTokenFromService(@NotNull Token token)

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.entity.Wallet;
@@ -58,6 +59,9 @@ public class PriceAlertsService extends Service
     private Wallet defaultWallet;
     @Inject
     AssetDefinitionService assetDefinitionService;
+
+    @Inject
+    CustomSettings customSettings;
 
     @Nullable
     private Disposable heartBeatTimer;

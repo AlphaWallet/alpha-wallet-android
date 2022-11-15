@@ -1,3 +1,5 @@
+@file:Suppress("UnusedPrivateMember")
+
 package com.alphawallet.shadows
 
 import com.walletconnect.android.internal.common.exception.WalletConnectException

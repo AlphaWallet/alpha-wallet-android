@@ -29,6 +29,7 @@ import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.walletconnect.android.Core;
 import com.walletconnect.sign.client.Sign;
 
 import java.util.Collections;
@@ -56,9 +57,9 @@ public class SignMethodDialog extends BottomSheetDialog
     private SignMethodDialogViewModel viewModel;
     private final Signable signable;
     private SignDataWidget signDataWidget;
-    private final Sign.Model.AppMetaData metaData;
+    private final Core.Model.AppMetaData metaData;
 
-    public SignMethodDialog(@NonNull Activity activity, Sign.Model.SessionRequest sessionRequest, BaseRequest request, Sign.Model.AppMetaData metaData)
+    public SignMethodDialog(@NonNull Activity activity, Sign.Model.SessionRequest sessionRequest, BaseRequest request, Core.Model.AppMetaData metaData)
     {
         super(activity);
         this.activity = activity;

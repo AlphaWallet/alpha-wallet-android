@@ -276,7 +276,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                             }
                         }
                         break;
-                    case QRScanner.DENY_PERMISSION:
+                    case QRScannerActivity.DENY_PERMISSION:
                         showCameraDenied();
                         break;
                     default:

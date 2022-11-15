@@ -41,7 +41,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -188,7 +187,7 @@ public class TransferTicketDetailActivity extends BaseActivity
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(null, token, selection, viewModel.getAssetDefinitionService());
+        adapter = new NonFungibleTokenAdapter(null, token, selection, viewModel.getAssetDefinitionService(), viewModel.getCustomSettings());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -339,7 +338,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         switch (transferStatus)
         {
             case CHOOSE_QUANTITY:
-                if (CustomViewSettings.hasDirectTransfer())
+                if (viewModel.getCustomSettings().hasDirectTransfer())
                 {
                     newState = DisplayState.PICK_TRANSFER_METHOD;
                 }

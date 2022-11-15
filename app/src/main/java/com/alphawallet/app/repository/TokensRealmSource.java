@@ -8,7 +8,6 @@ import android.text.format.DateUtils;
 import android.util.Pair;
 
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -25,6 +24,7 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenMapping;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
@@ -62,10 +62,13 @@ public class TokensRealmSource implements TokenLocalSource {
 
     private final RealmManager realmManager;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final CustomSettings customSettings;
 
-    public TokensRealmSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository) {
+    public TokensRealmSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, CustomSettings customSettings)
+    {
         this.realmManager = realmManager;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.customSettings = customSettings;
     }
 
     @Override
@@ -472,7 +475,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 }
 
                 if (!realmToken.isVisibilityChanged() && realmToken.isEnabled() && newBalance != null && newBalance.equals("0")
-                    && !(token.isEthereum() && CustomViewSettings.alwaysShow(token.tokenInfo.chainId)))
+                    && !(token.isEthereum() && customSettings.alwaysShow(token.tokenInfo.chainId)))
                 {
                     realm.executeTransaction(r -> {
                         realmToken.setEnabled(false);
@@ -481,7 +484,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 }
                 else if ((!realmToken.isVisibilityChanged() && !realmToken.isEnabled()) &&
                         (token.balance.compareTo(BigDecimal.ZERO) > 0 ||
-                                (token.isEthereum() && CustomViewSettings.alwaysShow(token.tokenInfo.chainId) && !realmToken.isEnabled()))) // enable if base token should be showing
+                                (token.isEthereum() && customSettings.alwaysShow(token.tokenInfo.chainId) && !realmToken.isEnabled()))) // enable if base token should be showing
                 {
                     realm.executeTransaction(r -> {
                         realmToken.setEnabled(true);
@@ -492,7 +495,7 @@ public class TokensRealmSource implements TokenLocalSource {
             else
             {
                 balanceChanged = true;
-                if (token.isEthereum() && CustomViewSettings.alwaysShow(token.tokenInfo.chainId)) token.tokenInfo.isEnabled = true;
+                if (token.isEthereum() && customSettings.alwaysShow(token.tokenInfo.chainId)) token.tokenInfo.isEnabled = true;
                 //write token
                 realm.executeTransaction(r -> {
                     token.balance = balance;

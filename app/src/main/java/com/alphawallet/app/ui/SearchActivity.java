@@ -64,11 +64,7 @@ public class SearchActivity extends BaseActivity implements SearchToolbarCallbac
 
     private void initList()
     {
-        adapter = new TokensAdapter(
-                this,
-                viewModel.getAssetDefinitionService(),
-                viewModel.getTokensService(),
-                null);
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), viewModel.getCustomSettings(), null);
         adapter.setHasStableIds(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);

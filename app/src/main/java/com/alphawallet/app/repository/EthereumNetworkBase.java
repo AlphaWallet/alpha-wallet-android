@@ -72,11 +72,11 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ChainSpec;
 import com.google.gson.Gson;
@@ -850,7 +850,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public Long getDefaultNetwork(boolean isMainNet)
     {
-        return isMainNet ? CustomViewSettings.primaryChain : GOERLI_ID;
+        return isMainNet ? CustomSettings.primaryChain : GOERLI_ID;
     }
 
     @Override
@@ -1039,14 +1039,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return null;
     }
 
-    public static List<Long> addDefaultNetworks()
-    {
-        return CustomViewSettings.alwaysVisibleChains;
-    }
-
     public static ContractLocator getOverrideToken()
     {
-        return new ContractLocator("", CustomViewSettings.primaryChain, ContractType.ETHEREUM);
+        return new ContractLocator("", CustomSettings.primaryChain, ContractType.ETHEREUM);
     }
 
     @Override

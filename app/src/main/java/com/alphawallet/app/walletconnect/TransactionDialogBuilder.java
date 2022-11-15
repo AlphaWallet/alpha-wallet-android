@@ -84,8 +84,7 @@ public class TransactionDialogBuilder extends DialogFragment
         final Web3Transaction w3Tx = new Web3Transaction(wcTx, 0);
         Wallet fromWallet = viewModel.findWallet(wcTx.getFrom());
         Token token = viewModel.getTokensService().getTokenOrBase(WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), w3Tx.recipient.toString());
-        actionSheetDialog = new ActionSheetDialog(activity, w3Tx, token, "",
-                w3Tx.recipient.toString(), viewModel.getTokensService(), new ActionSheetCallback()
+        actionSheetDialog = new ActionSheetDialog(activity, w3Tx, token, "", w3Tx.recipient.toString(), viewModel.getTokensService(), new ActionSheetCallback()
         {
             @Override
             public void getAuthorisation(SignAuthenticationCallback callback)

@@ -84,8 +84,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         dest.writeStringList(methods);
     }
 
-    public static final Parcelable.Creator<WalletConnectV2SessionItem> CREATOR
-            = new Parcelable.Creator<>()
+    public static final Parcelable.Creator<WalletConnectV2SessionItem> CREATOR = new Parcelable.Creator<>()
     {
         public WalletConnectV2SessionItem createFromParcel(Parcel in)
         {

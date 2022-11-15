@@ -380,11 +380,14 @@ public class QRScannerActivity extends BaseActivity
     private void startWalletConnect(String qrCode)
     {
         Intent intent;
-        if (WalletConnectHelper.isWalletConnectV1(qrCode)) {
+        if (WalletConnectHelper.isWalletConnectV1(qrCode))
+        {
             intent = new Intent(this, WalletConnectActivity.class);
             intent.putExtra("qrCode", qrCode);
             intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
-        } else {
+        }
+        else
+        {
             intent = new Intent(this, WalletConnectV2Activity.class);
             intent.putExtra("url", qrCode);
         }

@@ -67,7 +67,8 @@ public class SignMethodDialogViewModel extends BaseViewModel
                             .delay(5, TimeUnit.SECONDS) // The WC connection shutdown when show biometric, when back to foreground, it will open new connection, so need delay to wait the connection opened
                             .subscribe(signatureFromKey -> onSuccess(signatureFromKey, sessionRequest), SignMethodDialogViewModel.this::onError);
                 }
-                else {
+                else
+                {
                     Toast.makeText(activity, activity.getString(R.string.error_while_signing_transaction), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -91,7 +92,8 @@ public class SignMethodDialogViewModel extends BaseViewModel
         {
             String result = Numeric.toHexString(signatureFromKey.signature);
             awWalletConnectClient.approve(sessionRequest, result);
-        } else
+        }
+        else
         {
             Timber.i("sign fail: %s", signatureFromKey.failMessage);
             awWalletConnectClient.reject(sessionRequest, signatureFromKey.failMessage);

@@ -347,6 +347,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             }
         }
     }
+
     public static Intent newIntent(Context context, WalletConnectSessionItem session)
     {
         Intent intent;

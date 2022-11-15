@@ -435,7 +435,8 @@ public class WalletConnectViewModel extends BaseViewModel
         if (session instanceof WalletConnectV2SessionItem)
         {
             deleteSessionV2(session, callback);
-        } else
+        }
+        else
         {
             deleteSessionV1(session, callback);
         }

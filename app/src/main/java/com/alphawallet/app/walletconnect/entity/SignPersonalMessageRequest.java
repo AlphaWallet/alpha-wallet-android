@@ -12,7 +12,8 @@ public class SignPersonalMessageRequest extends BaseRequest
     }
 
     @Override
-    public Signable getSignable() {
+    public Signable getSignable()
+    {
         return new EthereumMessage(getMessage(), "", 0, SignMessageType.SIGN_PERSONAL_MESSAGE);
     }
 

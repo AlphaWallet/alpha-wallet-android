@@ -11,11 +11,14 @@ import java.util.List;
 public class WCMethodChecker
 {
     private static final List<String> methods;
+
     static
     {
         Gson gson = new Gson();
         String json = gson.toJson(WCMethod.values());
-        Type type = new TypeToken<List<String>>() {}.getType();
+        Type type = new TypeToken<List<String>>()
+        {
+        }.getType();
         methods = gson.fromJson(json, type);
     }
 

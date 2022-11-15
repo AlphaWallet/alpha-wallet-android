@@ -888,6 +888,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     }
 }
 
-interface OnGasSelectedCallback {
+interface OnGasSelectedCallback
+{
     void onSelected();
 }

@@ -87,7 +87,8 @@ public class SignMethodDialog extends BottomSheetDialog
         if (icons.isEmpty())
         {
             logo.setImageResource(R.drawable.ic_coin_eth_small);
-        } else
+        }
+        else
         {
             Glide.with(activity)
                     .load(icons.get(0))
@@ -124,7 +125,8 @@ public class SignMethodDialog extends BottomSheetDialog
                 || signable.getMessageType() == SignMessageType.SIGN_MESSAGE)
         {
             message.setText(Hex.hexToUtf8(signable.getMessage()));
-        } else
+        }
+        else
         {
             message.setVisibility(View.GONE);
             signDataWidget.setVisibility(View.VISIBLE);
@@ -176,7 +178,8 @@ public class SignMethodDialog extends BottomSheetDialog
         if (!wallet.address.equals(walletAddress) || wallet.watchOnly())
         {
             Toast.makeText(getContext(), activity.getString(R.string.wc_wallet_not_match), Toast.LENGTH_SHORT).show();
-        } else
+        }
+        else
         {
             functionBar.setPrimaryButtonWaiting();
             viewModel.sign(activity, wallet, sessionRequest, signable);

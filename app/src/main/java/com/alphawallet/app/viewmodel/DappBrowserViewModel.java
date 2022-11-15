@@ -342,7 +342,8 @@ public class DappBrowserViewModel extends BaseViewModel
         if (WalletConnectHelper.isWalletConnectV1(url))
         {
             intent = getIntentOfWalletConnectV1(context, url, activeNetwork);
-        } else
+        }
+        else
         {
             intent = getIntentOfWalletConnectV2(context, url);
         }

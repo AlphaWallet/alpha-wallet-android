@@ -11,6 +11,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import androidx.annotation.Nullable;
+
 import dagger.hilt.android.AndroidEntryPoint;
 
 /**
@@ -40,7 +41,8 @@ public class WalletConnectNotificationActivity extends BaseActivity
         if (sessions.size() == 1)
         {
             intent = WalletConnectSessionActivity.newIntent(getApplicationContext(), sessions.get(0));
-        } else
+        }
+        else
         {
             intent = new Intent(getApplicationContext(), WalletConnectSessionActivity.class);
         }

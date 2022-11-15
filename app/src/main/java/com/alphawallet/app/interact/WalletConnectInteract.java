@@ -50,7 +50,8 @@ public class WalletConnectInteract
         return result;
     }
 
-    public void fetchSessions(Context context, SessionFetchCallback sessionFetchCallback) {
+    public void fetchSessions(Context context, SessionFetchCallback sessionFetchCallback)
+    {
         ServiceConnection connection = new ServiceConnection()
         {
             @Override
@@ -122,7 +123,8 @@ public class WalletConnectInteract
         return result;
     }
 
-    public interface SessionFetchCallback {
+    public interface SessionFetchCallback
+    {
         void onFetched(List<WalletConnectSessionItem> sessions);
     }
 }

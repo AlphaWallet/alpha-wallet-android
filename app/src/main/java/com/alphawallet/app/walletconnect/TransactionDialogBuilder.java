@@ -135,7 +135,7 @@ public class TransactionDialogBuilder extends DialogFragment
         actionSheetDialog.waitForEstimate();
 
         viewModel.calculateGasEstimate(fromWallet, Numeric.hexStringToByteArray(w3Tx.payload),
-                WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), w3Tx.recipient.toString(), new BigDecimal(w3Tx.value), w3Tx.gasLimit)
+                        WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), w3Tx.recipient.toString(), new BigDecimal(w3Tx.value), w3Tx.gasLimit)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(actionSheetDialog::setGasEstimate,

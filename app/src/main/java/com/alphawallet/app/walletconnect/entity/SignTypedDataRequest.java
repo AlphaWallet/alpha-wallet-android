@@ -16,7 +16,8 @@ public class SignTypedDataRequest extends BaseRequest
         return params.get(0);
     }
 
-    public Signable getSignable() {
+    public Signable getSignable()
+    {
         return new EthereumTypedMessage(getMessage(), "", 0, new CryptoFunctions());
     }
 }

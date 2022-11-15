@@ -15,6 +15,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
     public List<String> chains = new ArrayList<>();
     public List<String> wallets = new ArrayList<>();
     public List<String> methods = new ArrayList<>();
+
     public WalletConnectV2SessionItem(Sign.Model.Session s)
     {
         super();
@@ -44,7 +45,9 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         in.readStringList(methods);
     }
 
-    public WalletConnectV2SessionItem() {}
+    public WalletConnectV2SessionItem()
+    {
+    }
 
     public static WalletConnectV2SessionItem from(Sign.Model.SessionProposal sessionProposal)
     {

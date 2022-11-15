@@ -157,7 +157,8 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         if (session.icon == null)
         {
             icon.setImageResource(R.drawable.ic_coin_eth_small);
-        } else
+        }
+        else
         {
             Glide.with(this)
                     .load(session.icon)
@@ -171,7 +172,8 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         if (session.settled)
         {
             walletAdapter = new WalletAdapter(this, findWallets(session.wallets));
-        } else
+        }
+        else
         {
             walletAdapter = new WalletAdapter(this, viewModel.wallets().getValue(), viewModel.defaultWallet().getValue());
         }
@@ -189,7 +191,8 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
                     endSessionDialog();
                 }
             }, Collections.singletonList(R.string.action_end_session));
-        } else
+        }
+        else
         {
             functionBar.setupFunctions(new StandardFunctionInterface()
             {
@@ -199,7 +202,8 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
                     if (actionId == R.string.dialog_approve)
                     {
                         approve(AWWalletConnectClient.sessionProposal);
-                    } else
+                    }
+                    else
                     {
                         reject(AWWalletConnectClient.sessionProposal);
                     }
@@ -295,7 +299,9 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         if (disabledNetworks.isEmpty())
         {
             awWalletConnectClient.approve(sessionProposal, getSelectedAccounts(), this);
-        } else {
+        }
+        else
+        {
             showDialog(disabledNetworks);
         }
     }

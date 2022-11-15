@@ -35,11 +35,13 @@ public class EthereumTypedMessage implements Signable
             try
             {
                 parseV1(messageData, cryptoFunctions);
-            } catch (JsonSyntaxException e)
+            }
+            catch (JsonSyntaxException e)
             {
                 parseV3(messageData, cryptoFunctions);
             }
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             this.userMessage = "";
             messageType = SignMessageType.SIGN_ERROR;

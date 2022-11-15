@@ -61,7 +61,8 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
         {
             holder.walletName.setVisibility(View.GONE);
             holder.walletAddressSeparator.setVisibility(View.GONE);
-        } else
+        }
+        else
         {
             holder.walletName.setText(wallet.ENSname);
         }
@@ -76,7 +77,9 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
         if (readOnly)
         {
             holder.checkbox.setVisibility(View.GONE);
-        } else {
+        }
+        else
+        {
             if (wallet.address.equals(defaultWallet.address))
             {
                 holder.checkbox.setChecked(true);
@@ -106,7 +109,8 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
         return selectedWallets;
     }
 
-    static class ViewHolder {
+    static class ViewHolder
+    {
         View container;
         TextView walletName;
         TextView walletAddress;

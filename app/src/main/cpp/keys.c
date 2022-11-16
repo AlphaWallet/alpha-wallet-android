@@ -182,3 +182,13 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getOpenSeaKey( JNIEnv* en
     return (*env)->NewStringUTF(env, key);
 #endif
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getWalletConnectProjectId( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, walletConnectProjectId);
+#else
+    return (*env)->NewStringUTF(env, WALLETCONNECT_PROJECT_ID);
+#endif
+}

@@ -24,6 +24,8 @@ import com.alphawallet.app.entity.walletconnect.NamespaceParser;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.WalletConnectInteract;
+import com.alphawallet.app.repository.KeyProvider;
+import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.service.WalletConnectV2Service;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
@@ -56,6 +58,7 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
     public static SignMethodDialogViewModel viewModel;
     private final Context context;
     private final MutableLiveData<List<WalletConnectSessionItem>> sessionItemMutableLiveData = new MutableLiveData<>(Collections.emptyList());
+    private final KeyProvider keyProvider = KeyProviderFactory.get();
 
     public AWWalletConnectClient(Context context, WalletConnectInteract walletConnectInteract)
     {
@@ -285,7 +288,7 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
     public void init(Application application)
     {
         Core.Model.AppMetaData appMetaData = getAppMetaData(application);
-        String relayServer = String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, BuildConfig.WALLETCONNECT_PROJECT_ID);
+        String relayServer = String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, keyProvider.getWalletConnectProjectId());
         CoreClient coreClient = CoreClient.INSTANCE;
         coreClient.initialize(appMetaData, relayServer, ConnectionType.AUTOMATIC, application, null);
 

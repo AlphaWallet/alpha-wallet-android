@@ -15,4 +15,5 @@ public interface KeyProvider
     String getOpenSeaKey();
     String getMailchimpKey();
     String getCoinbasePayAppId();
+    String getWalletConnectProjectId();
 }

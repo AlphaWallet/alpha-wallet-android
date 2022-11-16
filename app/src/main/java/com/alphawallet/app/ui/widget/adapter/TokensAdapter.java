@@ -114,7 +114,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         new TokensMappingRepository(aService.getTokenLocalSource());
     }
 
-    protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, CustomSettings customSettings) {
+    protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, CustomSettings customSettings)
+    {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = null;

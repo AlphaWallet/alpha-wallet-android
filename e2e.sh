@@ -2,7 +2,19 @@
 
 function startGanache() {
   source ~/.zprofile
+  if ! command -v node &> /dev/null
+  then
+    install_nvm
+  fi
+  nvm install v16.17.1
   ganache --chain.chainId 2 -h 0.0.0.0 -m "horse light surface bamboo combine item lumber tunnel choose acid mail feature"
+}
+
+function install_nvm() {
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 }
 
 function stopGanache() {

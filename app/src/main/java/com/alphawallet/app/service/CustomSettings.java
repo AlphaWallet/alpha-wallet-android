@@ -29,7 +29,7 @@ public class CustomSettings
 {
     public final String CUSTOM_SETTINGS_FILENAME = "custom_view_settings.json";
     public static final long primaryChain = MAINNET_ID;
-    private Context context;
+    private final Context context;
     ConcurrentLinkedQueue<Long> loadLockedCachedChains = new ConcurrentLinkedQueue<>();
     ConcurrentLinkedQueue<Long> loadExclusiveCachedChains = new ConcurrentLinkedQueue<>();
     private final LongSparseArray<Map<String, TokenInfo>> loadLockedTokens = new LongSparseArray<>();
@@ -218,9 +218,10 @@ public class CustomSettings
     //    : You'll need to check if the list is empty and if so flag a 'loaded', so we don't spam this list
     public Boolean tokenCanBeDisplayed(TokenCardMeta token)
     {
-        if (getLockedTokensFromJsonFile().size() > 0)
+        final ArrayList<TokenInfo> lockedTokens = new ArrayList<>();
+        if (loadLockedTokens.size() > 0)
         {
-            return true;
+            return lockedTokens.addAll(loadLockedTokens.get(primaryChain).values());
         }
         else
         {
@@ -232,16 +233,9 @@ public class CustomSettings
     //TODO: Caching
     public Boolean isLockedToken(long chainId, String contractAddress)
     {
-        if (loadLockedTokens.size() > 0)
-        {
-            return true;
-        }
-        else
-        {
-            final ConcurrentHashMap<String, TokenInfo> lockedTokens = getLockedTokensFromJsonFile();
-            Map<String, TokenInfo> mapping = loadLockedTokens.get(chainId);
-            return mapping.containsKey(contractAddress.toLowerCase(Locale.ROOT));
-        }
+        final ConcurrentHashMap<String, TokenInfo> lockedTokens = getLockedTokensFromJsonFile();
+        Map<String, TokenInfo> mapping = loadLockedTokens.get(chainId);
+        return mapping.containsKey(contractAddress.toLowerCase(Locale.ROOT));
     }
 
     public ContractType checkKnownTokens(TokenInfo tokenInfo)

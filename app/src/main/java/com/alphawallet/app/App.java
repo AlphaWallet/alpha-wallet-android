@@ -140,7 +140,10 @@ public class App extends Application
     public void onTrimMemory(int level)
     {
         super.onTrimMemory(level);
-        awWalletConnectClient.shutdown();
+        if (awWalletConnectClient != null)
+        {
+            awWalletConnectClient.shutdown();
+        }
     }
 
     @Override
@@ -148,7 +151,10 @@ public class App extends Application
     {
         super.onTerminate();
         activityStack.clear();
-        awWalletConnectClient.shutdown();
+        if (awWalletConnectClient != null)
+        {
+            awWalletConnectClient.shutdown();
+        }
     }
 
     private void pop()

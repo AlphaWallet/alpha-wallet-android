@@ -58,7 +58,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import dagger.hilt.android.qualifiers.ApplicationContext;
 import timber.log.Timber;
 
 @AndroidEntryPoint
@@ -353,7 +352,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
         else
         {
-
+            showDialog(functionBar);
         }
     }
 
@@ -384,7 +383,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             @Override
             public void onConfirmed()
             {
-                tokenAdapterCallback.onSwitchClicked();
+                Intent i = new Intent(getApplication(), SelectNetworkFilterActivity.class);
+                startActivity(i);
             }
 
             @Override

@@ -25,6 +25,12 @@ jobs:
           java-version: 11
           architecture: arm64
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+      - run: npm install ganache --global
+
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:

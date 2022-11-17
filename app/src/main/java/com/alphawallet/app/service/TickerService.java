@@ -16,8 +16,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.PHI_V2_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
@@ -89,7 +87,6 @@ public class TickerService
     private static final String COINGECKO_API = String.format("https://api.coingecko.com/api/v3/simple/token_price/%s?contract_addresses=%s&vs_currencies=%s&include_24hr_change=true",
             CHAIN_IDS, CONTRACT_ADDR, CURRENCY_TOKEN);
     private static final String DEXGURU_API = "https://api.dex.guru/v1/tokens/" + CONTRACT_ADDR + "-" + CHAIN_IDS;
-    private static final String PHI_TICKER_API = "https://price.phi.network/api/ticker?filter=WPHI";
     private static final String CURRENCY_CONV = "currency";
     private static final boolean ALLOW_UNVERIFIED_TICKERS = false; //allows verified:false tickers from DEX.GURU. Not recommended
     public static final long TICKER_TIMEOUT = DateUtils.WEEK_IN_MILLIS; //remove ticker if not seen in one week
@@ -144,7 +141,6 @@ public class TickerService
                 .flatMap(this::updateTickersFromOracle)
                 .flatMap(this::fetchTickersSeparatelyIfRequired)
                 .flatMap(this::addArtisTicker)
-                .map(this::addPhiTickers)
                 .map(this::checkTickers)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -448,10 +444,6 @@ public class TickerService
             ethTickers.put(ARBITRUM_MAIN_ID, ticker);
             ethTickers.put(OPTIMISTIC_MAIN_ID, ticker);
         }
-        else if (chainId == PHI_V2_MAIN_ID)
-        {
-            ethTickers.put(PHI_MAIN_ID, ticker);
-        }
     }
 
     private void addToTokenTickers(BigInteger tickerInfo, long tickerTime)
@@ -510,51 +502,6 @@ public class TickerService
     {
         ethTickers.put(ARTIS_SIGMA1_ID, tokenTicker);
         return tokenTicker;
-    }
-
-    private int addPhiTickers(int tickerCount)
-    {
-        //fetch phi price
-        Request request = new Request.Builder()
-                .url(PHI_TICKER_API)
-                .get()
-                .build();
-
-        try (okhttp3.Response response = httpClient.newCall(request)
-                .execute())
-        {
-            if ((response.code() / 100) == 2 && response.body() != null)
-            {
-                String result = response.body()
-                        .string();
-                JSONObject data = new JSONObject(result);
-                JSONObject tickerData = (JSONObject) data.get("data");
-                JSONObject quoteData = (JSONObject) tickerData.get("quotes");
-                JSONObject usdQuote = (JSONObject) quoteData.get("USD");
-
-                double priceChange = usdQuote.getDouble("price_change_24h");
-                double price = usdQuote.getDouble("price");
-                double percentChange = (priceChange / price) * 100.0;
-
-                String currentPrice = String.valueOf(price * currentConversionRate);
-
-                TokenTicker phiTicker = new TokenTicker(currentPrice,
-                        String.valueOf(percentChange),
-                        currentCurrencySymbolTxt,
-                        "",
-                        System.currentTimeMillis());
-
-                ethTickers.put(PHI_V2_MAIN_ID, phiTicker);
-                ethTickers.put(PHI_MAIN_ID, phiTicker);
-                return tickerCount + 1;
-            }
-        }
-        catch (Exception e)
-        {
-            Timber.e(e);
-        }
-
-        return tickerCount;
     }
 
     private TokenTicker decodeCoinGeckoTicker(JSONObject eth)

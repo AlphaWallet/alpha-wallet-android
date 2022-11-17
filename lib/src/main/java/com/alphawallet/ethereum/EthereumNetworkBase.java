@@ -45,8 +45,6 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final long AURORA_TESTNET_ID = 1313161555;
     public static final long MILKOMEDA_C1_ID = 2001;
     public static final long MILKOMEDA_C1_TEST_ID = 200101;
-    public static final long PHI_MAIN_ID = 4181;
-    public static final long PHI_V2_MAIN_ID = 144;
     public static final long SEPOLIA_TESTNET_ID = 11155111;
     public static final long OPTIMISM_GOERLI_TEST_ID = 420;
     public static final long ARBITRUM_GOERLI_TEST_ID = 421613;
@@ -87,8 +85,6 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String AURORA_TESTNET_RPC_URL = "https://testnet.aurora.dev";
     public static final String MILKOMEDA_C1_RPC = "https://rpc-mainnet-cardano-evm.c1.milkomeda.com";
     public static final String MILKOMEDA_C1_TEST_RPC = "https://rpc-devnet-cardano-evm.c1.milkomeda.com";
-    public static final String PHI_MAIN_RPC_URL = "https://rpc1.phi.network";
-    public static final String PHI_NETWORK_V2_RPC = "https://connect.phi.network";
     public static final String SEPOLIA_TESTNET_RPC_URL = "https://rpc.sepolia.org";
     public static final String OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL = "https://goerli.optimism.io";
     public static final String ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL = "https://goerli-rollup.arbitrum.io/rpc";
@@ -172,10 +168,6 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     MILKOMEDA_C1_ID, false));
             put(MILKOMEDA_C1_TEST_ID, new NetworkInfo("Milkomeda Cardano (Test)","milktADA", MILKOMEDA_C1_TEST_RPC, "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/",
                     MILKOMEDA_C1_TEST_ID, false));
-            put(PHI_MAIN_ID, new NetworkInfo("PHI", "\u03d5", PHI_MAIN_RPC_URL, "https://explorer.phi.network/tx/",
-                    PHI_MAIN_ID, false));
-            put(PHI_V2_MAIN_ID, new NetworkInfo("PHI v2", "\u03d5", PHI_NETWORK_V2_RPC, "https://phiscan.com/tx/",
-                    PHI_V2_MAIN_ID, false));
             put(SEPOLIA_TESTNET_ID, new NetworkInfo("Sepolia (Test)", "ETH", SEPOLIA_TESTNET_RPC_URL, "https://sepolia.etherscan.io/tx/",
                     SEPOLIA_TESTNET_ID, false));
             put(OPTIMISM_GOERLI_TEST_ID, new NetworkInfo("Optimism Goerli (Test)", "ETH", OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL, "https://blockscout.com/optimism/goerli/tx/",

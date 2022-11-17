@@ -41,35 +41,17 @@ public class CustomSettings
         this.context = context;
     }
 
-    public ArrayList<Long> loadChains(String chainName)
+    public JSONArray loadDataFromJsonArray(String chainName)
     {
-        ArrayList<Long> chains = new ArrayList<>();
+        JSONArray jsonArray = new JSONArray();
         try
         {
+
             String lockedChains = loadJSONStringFromAsset();
             if (lockedChains != null)
             {
                 JSONObject customSettingsJsonObject = new JSONObject(lockedChains);
-                JSONArray chainsArray = customSettingsJsonObject.getJSONArray(chainName);
-                if (chainsArray.length() > 0)
-                {
-                    for (int i = 0; i < chainsArray.length(); i++)
-                    {
-                        JSONObject chainObject = chainsArray.getJSONObject(i);
-                        Long chain = chainObject.getLong("chain");
-                        chains.add(chain);
-                    }
-                    if (chainName.equals("locked_chains"))
-                    {
-                        loadLockedCachedChains.clear();
-                        loadLockedCachedChains.addAll(chains);
-                    }
-                    else
-                    {
-                        loadExclusiveCachedChains.clear();
-                        loadExclusiveCachedChains.addAll(chains);
-                    }
-                }
+                jsonArray = customSettingsJsonObject.getJSONArray(chainName);
             }
         }
         catch (JSONException err)
@@ -77,7 +59,7 @@ public class CustomSettings
             err.printStackTrace();
         }
 
-        return chains;
+        return jsonArray;
     }
 
     //TODO: Cache locked chains & Tokens in an ConcurrentLinkedQueue / ConcurrentHashMap
@@ -91,14 +73,29 @@ public class CustomSettings
     public ArrayList<Long> getChainsFromJsonFile() //<-- TODO: chainName is redundant
     {
         ArrayList<Long> chains = new ArrayList<>();
-        if (loadLockedCachedChains.size() > 0)
+        if (loadLockedCachedChains.size() <= 0)
         {
-            chains.addAll(loadLockedCachedChains);
+            JSONArray chainsArray = loadDataFromJsonArray("locked_chains");
+            if (chainsArray.length() > 0)
+            {
+                try
+                {
+                    for (int i = 0; i < chainsArray.length(); i++)
+                    {
+                        JSONObject chainObject = chainsArray.getJSONObject(i);
+                        Long chain = chainObject.getLong("chain");
+                        chains.add(chain);
+                    }
+                }
+                catch (JSONException err)
+                {
+                    err.printStackTrace();
+                }
+                loadLockedCachedChains.clear();
+                loadLockedCachedChains.addAll(chains);
+            }
         }
-        else
-        {
-            chains.addAll(loadChains("locked_chains"));
-        }
+        chains.addAll(loadLockedCachedChains);
         return chains;
     }
 
@@ -106,34 +103,22 @@ public class CustomSettings
     {
         ConcurrentHashMap<String, TokenInfo> chains = new ConcurrentHashMap<>();
         Gson gson = new Gson();
-        try
+        JSONArray chainsArray = loadDataFromJsonArray("locked_tokens");
+        if (chainsArray.length() > 0)
         {
-            String lockedTokens = loadJSONStringFromAsset();
-            if (lockedTokens != null)
+            loadLockedTokens.clear();
+            //TODO: use GSON class array load (see "private EtherscanTransaction[] getEtherscanTransactions" for how-to)
+            //    : this will need a static class within this class
+            //    : you can then traverse (for x : y) that list and have cleaner code
+            //    : esp if you add a getTokenInfo from that static internal class.
+            TokenInfo[] lockedTokenInfo = gson.fromJson(chainsArray.toString(), TokenInfo[].class);
+            int i = 0;
+            for (TokenInfo tokenInfo : lockedTokenInfo)
             {
-                JSONObject customSettingsJsonObject = new JSONObject(lockedTokens);
-                JSONArray chainsArray = customSettingsJsonObject.getJSONArray("locked_tokens");
-                if (chainsArray.length() > 0)
-                {
-                    loadLockedTokens.clear();
-                    //TODO: use GSON class array load (see "private EtherscanTransaction[] getEtherscanTransactions" for how-to)
-                    //    : this will need a static class within this class
-                    //    : you can then traverse (for x : y) that list and have cleaner code
-                    //    : esp if you add a getTokenInfo from that static internal class.
-                    TokenInfo[] lockedTokenInfo = gson.fromJson(chainsArray.toString(), TokenInfo[].class);
-                    int i = 0;
-                    for (TokenInfo tokenInfo : lockedTokenInfo)
-                    {
-                        chains.put(String.valueOf(i), tokenInfo);
-                        loadLockedTokens.put(tokenInfo.chainId, chains);
-                        i++;
-                    }
-                }
+                chains.put(String.valueOf(i), tokenInfo);
+                loadLockedTokens.put(tokenInfo.chainId, chains);
+                i++;
             }
-        }
-        catch (JSONException err)
-        {
-            err.printStackTrace();
         }
 
         return chains;
@@ -202,14 +187,30 @@ public class CustomSettings
     public Boolean alwaysShow(long chainId)
     {
         ArrayList<Long> exclusiveChains = new ArrayList<>();
-        if (loadExclusiveCachedChains.size() > 0)
+        if (loadExclusiveCachedChains.size() <= 0)
         {
-            exclusiveChains.addAll(loadExclusiveCachedChains);
+            JSONArray chainsArray = loadDataFromJsonArray("exclusive_chains");
+            if (chainsArray.length() > 0)
+            {
+                try
+                {
+                    for (int i = 0; i < chainsArray.length(); i++)
+                    {
+                        JSONObject chainObject = chainsArray.getJSONObject(i);
+                        Long chain = chainObject.getLong("chain");
+                        exclusiveChains.add(chain);
+                    }
+                }
+                catch (JSONException err)
+                {
+                    err.printStackTrace();
+                }
+                loadExclusiveCachedChains.clear();
+                loadExclusiveCachedChains.addAll(exclusiveChains);
+
+            }
         }
-        else
-        {
-            exclusiveChains.addAll(loadChains("exclusive_chains"));
-        }
+        exclusiveChains.addAll(loadExclusiveCachedChains);
         return exclusiveChains.contains(chainId);
     }
 

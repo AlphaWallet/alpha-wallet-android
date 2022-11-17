@@ -26,16 +26,16 @@
     }
   ],
   "dark_mode": false,
-  "isShowContractAddress" : true,
-  "startupDelay" : 0,
-  "imageOverride" : 0,
-  "isHideDappBrowser" : false,
-  "isHideTabBar" : false,
-  "isHasDirectTransfer" : true,
-  "isCanChangeWallets" : true,
-  "isHideEIP681" : false,
-  "isCanAddTokens" : true,
-  "isShowManageTokens" : true,
-  "isShowAllNetworks" : false,
-  "getDecimalPlaces" : 5
+  "isShowContractAddress": true,
+  "startupDelay": 0,
+  "imageOverride": 0,
+  "isHideDappBrowser": false,
+  "isHideTabBar": false,
+  "isHasDirectTransfer": true,
+  "isCanChangeWallets": true,
+  "isHideEIP681": false,
+  "isCanAddTokens": true,
+  "isShowManageTokens": true,
+  "isShowAllNetworks": false,
+  "getDecimalPlaces": 5
 }

@@ -286,7 +286,10 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
             result -> {
                 if (result.getResultCode() == RESULT_OK)
                 {
-                    successOverlay.setVisibility(View.VISIBLE);
+                    if (successOverlay != null)
+                    {
+                        successOverlay.setVisibility(View.VISIBLE);
+                    }
                     handler.postDelayed(this, 1000);
                     backupSuccessful();
                     finish();

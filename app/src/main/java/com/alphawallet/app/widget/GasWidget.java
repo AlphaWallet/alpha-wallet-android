@@ -38,6 +38,7 @@ import java.math.BigInteger;
 
 import io.realm.Realm;
 import io.realm.RealmQuery;
+import timber.log.Timber;
 
 /**
  * Created by JB on 19/11/2020.
@@ -318,6 +319,11 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
     {
         GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
 
+        if (gs == null || gs.gasPrice == null || gs.gasPrice.maxFeePerGas == null)
+        {
+            return;
+        }
+
         Token baseCurrency = tokensService.getTokenOrBase(token.tokenInfo.chainId, token.getWallet());
         BigInteger networkFee = gs.gasPrice.maxFeePerGas.multiply(getUseGasLimit());
         String gasAmountInBase = BalanceUtils.getSlidingBaseValue(new BigDecimal(networkFee), baseCurrency.tokenInfo.decimals, GasSettingsActivity.GAS_PRECISION);
@@ -349,7 +355,7 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
         }
         catch (Exception e)
         {
-            //
+            Timber.w(e);
         }
         timeEstimate.setText(displayStr);
         speedText.setText(gs.speed);

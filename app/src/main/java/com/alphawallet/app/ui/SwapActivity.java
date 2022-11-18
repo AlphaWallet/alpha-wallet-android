@@ -249,7 +249,13 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             @Override
             public void onMaxClicked()
             {
-                String max = viewModel.getBalance(sourceSelector.getToken());
+                Token token = sourceSelector.getToken();
+                if (token == null)
+                {
+                    return;
+                }
+
+                String max = viewModel.getBalance(token);
                 if (!max.isEmpty())
                 {
                     sourceSelector.setAmount(max);

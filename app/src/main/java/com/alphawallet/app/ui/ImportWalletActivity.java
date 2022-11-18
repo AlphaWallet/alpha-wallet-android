@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,7 +29,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.KeyEncodingType;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.OnImportKeystoreListener;
 import com.alphawallet.app.ui.widget.OnImportPrivateKeyListener;
 import com.alphawallet.app.ui.widget.OnImportSeedListener;
@@ -55,8 +54,6 @@ import org.web3j.utils.Numeric;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -283,7 +280,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         }
         else if (item.getItemId() == R.id.action_scan)
         {
-            Intent intent = new Intent(this, QRScanner.class);
+            Intent intent = new Intent(this, QRScannerActivity.class);
             getQRCode.launch(intent);
         }
 
@@ -460,7 +457,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
                     }
                 }
                 break;
-            case QRScanner.DENY_PERMISSION:
+            case QRScannerActivity.DENY_PERMISSION:
                 showCameraDenied();
                 break;
             default:

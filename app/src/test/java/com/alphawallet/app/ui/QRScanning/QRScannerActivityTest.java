@@ -16,14 +16,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowRealm.class})
-public class QRScannerTest
+public class QRScannerActivityTest
 {
 
     @Test
     @Config(sdk = 23)
     public void given_api_23_when_onCreate_then_notify_feature_not_supported()
     {
-        try (ActivityScenario<QRScanner> scenario = ActivityScenario.launch(QRScanner.class))
+        try (ActivityScenario<QRScannerActivity> scenario = ActivityScenario.launch(QRScannerActivity.class))
         {
             assertThat(scenario.getState(), equalTo(Lifecycle.State.DESTROYED));
             assertThat(ShadowToast.getTextOfLatestToast(), equalTo("QR scanning requires Android 7.0 (API level 24) or above."));

@@ -86,7 +86,7 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.WalletConnectService;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
 import com.alphawallet.app.ui.widget.adapter.DappBrowserSuggestionsAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -1832,10 +1832,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                         }
                     }
                     break;
-                case QRScanner.DENY_PERMISSION:
+                case QRScannerActivity.DENY_PERMISSION:
                     showCameraDenied();
                     break;
-                case QRScanner.WALLET_CONNECT:
+                case QRScannerActivity.WALLET_CONNECT:
                     return;
                 default:
                     break;

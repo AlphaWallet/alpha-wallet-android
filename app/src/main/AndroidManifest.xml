@@ -300,7 +300,7 @@
             android:label="Search Tokens" />
 
         <activity
-            android:name=".ui.QRScanning.QRScanner"
+            android:name=".ui.QRScanning.QRScannerActivity"
             android:label="@string/qr_scanner" />
 
         <activity

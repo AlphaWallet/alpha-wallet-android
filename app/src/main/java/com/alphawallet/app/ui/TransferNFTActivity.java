@@ -33,7 +33,7 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -256,7 +256,7 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                             addressInput.setAddress(extracted_address);
                         }
                         break;
-                    case QRScanner.DENY_PERMISSION:
+                    case QRScannerActivity.DENY_PERMISSION:
                         showCameraDenied();
                         break;
                     default:

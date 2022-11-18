@@ -1,5 +1,10 @@
 package com.alphawallet.app.ui.QRScanning;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.os.Build.VERSION.SDK_INT;
+import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.FULL_SCREEN_STATE;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
@@ -55,15 +60,10 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.os.Build.VERSION.SDK_INT;
-import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-import static com.alphawallet.app.repository.SharedPreferenceRepository.FULL_SCREEN_STATE;
-
 /**
  * Created by JB on 12/09/2021.
  */
-public class QRScanner extends BaseActivity
+public class QRScannerActivity extends BaseActivity
 {
     private DecoratedBarcodeView barcodeView;
     private BeepManager beepManager;

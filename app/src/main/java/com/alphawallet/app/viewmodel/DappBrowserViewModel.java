@@ -36,7 +36,7 @@ import com.alphawallet.app.ui.AddEditDappActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
@@ -186,7 +186,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     }
 
     public void startScan(Activity activity) {
-        Intent intent = new Intent(activity, QRScanner.class);
+        Intent intent = new Intent(activity, QRScannerActivity.class);
         activity.startActivityForResult(intent, HomeActivity.DAPP_BARCODE_READER_REQUEST_CODE);
     }
 

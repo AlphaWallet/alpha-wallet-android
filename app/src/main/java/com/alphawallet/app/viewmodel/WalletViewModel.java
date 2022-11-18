@@ -40,7 +40,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.NameThisWalletActivity;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.widget.WalletFragmentActionsView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -50,7 +50,6 @@ import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -266,7 +265,7 @@ public class WalletViewModel extends BaseViewModel
     }
 
     public void showQRCodeScanning(Activity activity) {
-        Intent intent = new Intent(activity, QRScanner.class);
+        Intent intent = new Intent(activity, QRScannerActivity.class);
         intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
         activity.startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
     }

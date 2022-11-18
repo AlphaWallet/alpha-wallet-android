@@ -601,7 +601,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         if (viewModel != null)
         {
-            if (viewModel.getActiveNetwork() == null || activeNetwork.chainId != viewModel.getActiveNetwork().chainId)
+            if (viewModel.getActiveNetwork() == null || activeNetwork == null || activeNetwork.chainId != viewModel.getActiveNetwork().chainId)
             {
                 viewModel.checkForNetworkChanges();
             }

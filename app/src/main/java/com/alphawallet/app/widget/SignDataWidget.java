@@ -1,6 +1,7 @@
 package com.alphawallet.app.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -38,6 +39,24 @@ public class SignDataWidget extends LinearLayout
         moreArrow = findViewById(R.id.image_more);
         scrollView = findViewById(R.id.scroll_view);
         messageTitle = findViewById(R.id.text_message_title);
+
+        boolean noTitle = getAttribute(context, attrs);
+        if (noTitle)
+        {
+            messageTitle.setText("");
+            messageTitle.setVisibility(GONE);
+        }
+    }
+
+    private boolean getAttribute(Context context, AttributeSet attrs)
+    {
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.SignDataWidget,
+                0, 0
+        );
+
+        return a.getBoolean(R.styleable.SignDataWidget_noTitle, false);
     }
 
     public void setupSignData(Signable message)

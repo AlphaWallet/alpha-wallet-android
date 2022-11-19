@@ -784,7 +784,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                     return;
                 }
                 confirmationWidget.startProgressCycle(4);
-                //send the transaction
                 actionSheetCallback.sendTransaction(formTransaction());
                 actionSheetCallback.notifyConfirm(mode.getValue());
             }
@@ -887,4 +886,9 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         return false;
     }
+}
+
+interface OnGasSelectedCallback
+{
+    void onSelected();
 }

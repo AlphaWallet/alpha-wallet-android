@@ -56,6 +56,11 @@ public class WalletConnectService extends Service
     {
         Timber.tag(TAG).d("SERVICE STARTING");
 
+        if (intent == null)
+        {
+            return Service.START_STICKY;
+        }
+
         try
         {
             int actionVal = Integer.parseInt(intent.getAction());

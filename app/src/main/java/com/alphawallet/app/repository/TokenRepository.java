@@ -76,7 +76,6 @@ public class TokenRepository implements TokenRepositoryType {
 
     private static final String TAG = "TRT";
     private final TokenLocalSource localSource;
-    private final KeyProvider keyProvider = KeyProviderFactory.get();
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final OkHttpClient okClient;
     private final Context context;

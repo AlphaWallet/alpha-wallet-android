@@ -3,17 +3,13 @@ package com.alphawallet.app.ui.widget.adapter;
 import android.content.Intent;
 import android.view.ViewGroup;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SortedList;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.repository.TokensMappingRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -28,6 +24,7 @@ import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TestNetTipsItem;
 import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
 import com.alphawallet.app.ui.widget.entity.TotalBalanceSortedItem;
+import com.alphawallet.app.ui.widget.entity.WalletConnectSessionSortedItem;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.entity.WarningSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
@@ -40,13 +37,20 @@ import com.alphawallet.app.ui.widget.holder.TestNetTipsHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
+import com.alphawallet.app.ui.widget.holder.WalletConnectSessionHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
+
+public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
+{
     private static final String TAG = "TKNADAPTER";
 
     private TokenFilter filterType = TokenFilter.ALL;
@@ -62,39 +66,47 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private boolean showTestNetTips = false;
 
     protected final TokensAdapterCallback tokensAdapterCallback;
-    protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
+    protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>()
+    {
         @Override
-        public int compare(SortedItem o1, SortedItem o2) {
+        public int compare(SortedItem o1, SortedItem o2)
+        {
             return o1.compare(o2);
         }
 
         @Override
-        public void onChanged(int position, int count) {
+        public void onChanged(int position, int count)
+        {
             notifyItemRangeChanged(position, count);
         }
 
         @Override
-        public boolean areContentsTheSame(SortedItem oldItem, SortedItem newItem) {
+        public boolean areContentsTheSame(SortedItem oldItem, SortedItem newItem)
+        {
             return oldItem.areContentsTheSame(newItem);
         }
 
         @Override
-        public boolean areItemsTheSame(SortedItem item1, SortedItem item2) {
+        public boolean areItemsTheSame(SortedItem item1, SortedItem item2)
+        {
             return item1.areItemsTheSame(item2);
         }
 
         @Override
-        public void onInserted(int position, int count) {
+        public void onInserted(int position, int count)
+        {
             notifyItemRangeInserted(position, count);
         }
 
         @Override
-        public void onRemoved(int position, int count) {
+        public void onRemoved(int position, int count)
+        {
             notifyItemRangeRemoved(position, count);
         }
 
         @Override
-        public void onMoved(int fromPosition, int toPosition) {
+        public void onMoved(int fromPosition, int toPosition)
+        {
             notifyItemMoved(fromPosition, toPosition);
         }
     });
@@ -113,7 +125,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         new TokensMappingRepository(aService.getTokenLocalSource());
     }
 
-    protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService) {
+    protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService)
+    {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = null;
@@ -126,14 +139,17 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public long getItemId(int position)
     {
         Object obj = items.get(position);
-        if (obj instanceof TokenSortedItem) {
+        if (obj instanceof TokenSortedItem)
+        {
             TokenCardMeta tcm = ((TokenSortedItem) obj).value;
 
-             // This is an attempt to obtain a 'unique' id
-             // to fully utilise the RecyclerView's setHasStableIds feature.
-             // This will drastically reduce 'blinking' when the list changes
+            // This is an attempt to obtain a 'unique' id
+            // to fully utilise the RecyclerView's setHasStableIds feature.
+            // This will drastically reduce 'blinking' when the list changes
             return tcm.getUID();
-        } else {
+        }
+        else
+        {
             return position;
         }
     }
@@ -180,6 +196,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 holder = new WarningHolder(R.layout.item_warning, parent);
                 break;
 
+            case WalletConnectSessionHolder.VIEW_TYPE:
+                holder = new WalletConnectSessionHolder(R.layout.item_wallet_connect_sessions, parent);
+                break;
+
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, null, assetService, false);
                 break;
@@ -188,7 +208,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 holder = new ChainNameHeaderHolder(R.layout.item_chainname_header, parent);
                 break;
 
-                // NB to save ppl a lot of effort this view doesn't show - item_total_balance has height coded to 1dp.
+            // NB to save ppl a lot of effort this view doesn't show - item_total_balance has height coded to 1dp.
             case TotalBalanceHolder.VIEW_TYPE:
             default:
                 holder = new TotalBalanceHolder(R.layout.item_total_balance, parent);
@@ -206,7 +226,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void onRViewRecycled(RecyclerView.ViewHolder holder)
     {
-        ((BinderViewHolder<?>)holder).onDestroyView();
+        ((BinderViewHolder<?>) holder).onDestroyView();
     }
 
     @Override
@@ -229,17 +249,20 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     @Override
-    public int getItemCount() {
+    public int getItemCount()
+    {
         return items.size();
     }
 
-    public void setWalletAddress(String walletAddress) {
+    public void setWalletAddress(String walletAddress)
+    {
         this.walletAddress = walletAddress;
     }
 
     private void addSearchTokensLayout()
     {
-        if (walletAddress != null && !walletAddress.isEmpty()) {
+        if (walletAddress != null && !walletAddress.isEmpty())
+        {
             items.add(new ManageTokensSearchItem(new ManageTokensData(walletAddress, managementLauncher), -1));
         }
     }
@@ -254,7 +277,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private void addManageTokensLayout()
     {
         if (walletAddress != null && !walletAddress.isEmpty() && tokensService.isMainNetActive()
-            && (filterType == TokenFilter.ALL || filterType == TokenFilter.ASSETS)) { //only show buy button if filtering all or assets
+                && (filterType == TokenFilter.ALL || filterType == TokenFilter.ASSETS))
+        { //only show buy button if filtering all or assets
             items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress, managementLauncher)));
         }
     }
@@ -262,19 +286,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void addWarning(WarningData data)
     {
         items.add(new WarningSortedItem(data, 1));
-    }
-
-    public void removeBackupWarning()
-    {
-        for (int i = 0; i < items.size(); i++)
-        {
-            if (items.get(i).viewType == WarningHolder.VIEW_TYPE)
-            {
-                items.removeItemAt(i);
-                notifyItemRemoved(i);
-                break;
-            }
-        }
     }
 
     public void setTokens(TokenCardMeta[] tokens)
@@ -338,12 +349,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void removeToken(TokenCardMeta token)
     {
-        for (int i = 0; i < items.size(); i++) {
+        for (int i = 0; i < items.size(); i++)
+        {
             Object si = items.get(i);
-            if (si instanceof TokenSortedItem) {
+            if (si instanceof TokenSortedItem)
+            {
                 TokenSortedItem tsi = (TokenSortedItem) si;
                 TokenCardMeta thisToken = tsi.value;
-                if (thisToken.tokenId.equalsIgnoreCase(token.tokenId)) {
+                if (thisToken.tokenId.equalsIgnoreCase(token.tokenId))
+                {
                     items.removeItemAt(i);
                     break;
                 }
@@ -354,12 +368,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void removeToken(long chainId, String tokenAddress)
     {
         String id = TokensRealmSource.databaseKey(chainId, tokenAddress);
-        for (int i = 0; i < items.size(); i++) {
+        for (int i = 0; i < items.size(); i++)
+        {
             Object si = items.get(i);
-            if (si instanceof TokenSortedItem) {
+            if (si instanceof TokenSortedItem)
+            {
                 TokenSortedItem tsi = (TokenSortedItem) si;
                 TokenCardMeta thisToken = tsi.value;
-                if (thisToken.tokenId.equalsIgnoreCase(id)) {
+                if (thisToken.tokenId.equalsIgnoreCase(id))
+                {
                     items.removeItemAt(i);
                     break;
                 }
@@ -412,7 +429,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private void populateTokens(TokenCardMeta[] tokens, boolean clear)
     {
         items.beginBatchedUpdates();
-        if (clear) {
+        if (clear)
+        {
             items.clear();
         }
 
@@ -447,7 +465,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             Object si = items.get(i);
             if (si instanceof TotalBalanceSortedItem)
             {
-                items.remove((TotalBalanceSortedItem)si);
+                items.remove((TotalBalanceSortedItem) si);
                 items.add(total);
                 notifyItemChanged(i);
                 break;
@@ -518,8 +536,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 Object si = items.get(i);
                 if (si instanceof TokenSortedItem)
                 {
-                    TokenSortedItem tsi   = (TokenSortedItem) si;
-                    TokenCardMeta   token = tsi.value;
+                    TokenSortedItem tsi = (TokenSortedItem) si;
+                    TokenCardMeta token = tsi.value;
                     if (scrollToken.equals(token))
                     {
                         scrollToken = null;
@@ -573,5 +591,30 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
 
         return selected;
+    }
+
+    public void showActiveWalletConnectSessions(List<WalletConnectSessionItem> sessions)
+    {
+        if (sessions.isEmpty())
+        {
+            removeItem(WalletConnectSessionHolder.VIEW_TYPE);
+        }
+        else
+        {
+            items.add(new WalletConnectSessionSortedItem(sessions, 2));
+        }
+    }
+
+    public void removeItem(int viewType)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i).viewType == viewType)
+            {
+                items.removeItemAt(i);
+                notifyItemRemoved(i);
+                break;
+            }
+        }
     }
 }

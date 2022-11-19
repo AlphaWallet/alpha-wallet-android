@@ -889,7 +889,7 @@
     <string name="unknown_network_title">Unknown Network</string>
     <string name="unknown_network">This dapp is requesting to change to an unknown chain: %1$s</string>
     <string name="switch_and_reload"><![CDATA[Switch & Reload]]></string>
-    <string name="wc_no_active_sessions">No Active sessions</string>
+    <string name="wc_no_active_sessions">No active sessions</string>
     <string name="wc_connect_wallet">Connect Wallet</string>
     <string name="error_seed_phrase_must_words">Seed phrase can only contain words</string>
     <string name="label_token_id" translatable="false">Token #</string>
@@ -913,6 +913,13 @@
     <string name="trait_rarity_suppl_text">%1$s%% have this trait</string>
     <string name="experimental_1559">Use 1559 Transactions</string>
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
+    <string name="wc_methods">Methods</string>
+    <string name="wc_card_title" translatable="false">WalletConnect</string>
+    <string name="wc_card_subtitle">Active connection to browser-based Dapp</string>
+    <string name="wc_disconnect">User disconnect the session.</string>
+    <string name="wc_sign_dapp_name">Name</string>
+    <string name="wc_wallet">Wallet</string>
+    <string name="wc_wallet_not_match">Wallet not exist or it\'s watch only</string>
     <string name="chain_id">Chain ID: %1d</string>
     <string name="asset_creator">Created By</string>
     <string name="asset_schema">Token Standard</string>
@@ -953,6 +960,10 @@
     <string name="node_status_strong">under 1 second</string>
     <string name="mode_status_medium">over 1 second</string>
     <string name="node_status_not_responding">not responding</string>
+    <string name="chain_not_support">Chain %s is not supported.</string>
+    <string name="network_must_be_enabled">Network %s must be enabled before connecting.</string>
+    <string name="notify_wallet_connect_title">WalletConnect is active</string>
+    <string name="notify_wallet_connect_content">Click to view active sessions</string>
     <string name="mode_test">Testnet Mode</string>
     <string name="title_dialog_where_are_tokens">Where are my Tokens?</string>
     <string name="content_dialog_where_are_tokens">Don\'t worry. Your tokens are safe. You are viewing Testnet networks. They are used by developers to try out new designs. You can switch to Mainnet any time.</string>

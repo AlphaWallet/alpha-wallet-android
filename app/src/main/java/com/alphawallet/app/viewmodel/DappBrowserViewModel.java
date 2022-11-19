@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -42,7 +43,9 @@ import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
+import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.util.DappBrowserUtils;
+import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.Signable;
@@ -280,14 +283,14 @@ public class DappBrowserViewModel extends BaseViewModel
         {
             disposable = createTransactionInteract
                     .createWithSig(defaultWallet.getValue(), finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.signature),
                             error -> callback.transactionError(finalTx.leafPosition, error));
         }
         else
         {
             disposable = createTransactionInteract
                     .createWithSig(defaultWallet.getValue(), finalTx, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.signature),
                             error -> callback.transactionError(finalTx.leafPosition, error));
         }
     }
@@ -335,12 +338,36 @@ public class DappBrowserViewModel extends BaseViewModel
 
     public void handleWalletConnect(Context context, String url, NetworkInfo activeNetwork)
     {
+        Intent intent;
+        if (WalletConnectHelper.isWalletConnectV1(url))
+        {
+            intent = getIntentOfWalletConnectV1(context, url, activeNetwork);
+        }
+        else
+        {
+            intent = getIntentOfWalletConnectV2(context, url);
+        }
+
+        context.startActivity(intent);
+    }
+
+    @NonNull
+    private Intent getIntentOfWalletConnectV2(Context context, String url)
+    {
+        Intent intent = new Intent(context, WalletConnectV2Activity.class);
+        intent.putExtra("url", url);
+        return intent;
+    }
+
+    @NonNull
+    private Intent getIntentOfWalletConnectV1(Context context, String url, NetworkInfo activeNetwork)
+    {
         String importPassData = WalletConnectActivity.WC_LOCAL_PREFIX + url;
         Intent intent = new Intent(context, WalletConnectActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         intent.putExtra(C.EXTRA_CHAIN_ID, activeNetwork.chainId);
         intent.putExtra("qrCode", importPassData);
-        context.startActivity(intent);
+        return intent;
     }
 
     public TokensService getTokenService()
@@ -381,7 +408,7 @@ public class DappBrowserViewModel extends BaseViewModel
     {
         String rpc = extractRpc(chainObject);
         if (rpc == null) return false;
-        
+
         this.ethereumNetworkRepository.saveCustomRPCNetwork(chainObject.chainName, rpc, chainObject.getChainId(),
                 chainObject.nativeCurrency.symbol, extractBlockExplorer(chainObject), "", false, -1L);
 

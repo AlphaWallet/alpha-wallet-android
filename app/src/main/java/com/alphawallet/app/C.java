@@ -300,6 +300,9 @@ public abstract class C {
     public static final String APP_NAME = "PACKAGE_NAME";
 
     public static final String ALPHAWALLET_LOGO_URI = "https://alphawallet.com/wp-content/themes/alphawallet/img/logo-horizontal-new.svg";
+    public static final String ALPHAWALLET_WEBSITE = "https://alphawallet.com";
+    public static final String WALLET_CONNECT_REACT_APP_RELAY_URL = "wss://relay.walletconnect.com";
+    public static final String ALPHA_WALLET_LOGO_URL = "https://user-images.githubusercontent.com/51817359/158344418-c0f2bd19-38bb-4e64-a1d5-25ceb099688a.png";
 
     // Theme/Dark Mode
     public static final int THEME_LIGHT = 0;

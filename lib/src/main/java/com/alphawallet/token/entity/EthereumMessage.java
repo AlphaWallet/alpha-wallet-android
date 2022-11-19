@@ -44,7 +44,8 @@ public class EthereumMessage implements Signable {
         }
 
         byte[] result;
-        if (messageType == SignMessageType.SIGN_PERSONAL_MESSAGE)
+        if (messageType == SignMessageType.SIGN_PERSONAL_MESSAGE
+            || messageType == SignMessageType.SIGN_MESSAGE)
         {
             byte[] prefix = getEthereumMessagePrefix(encodedMessage.length);
 

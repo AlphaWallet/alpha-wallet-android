@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="@dimen/dp8">
+
+    <ImageView
+        android:id="@+id/chain_icon"
+        android:layout_width="@dimen/dp25"
+        android:layout_height="@dimen/dp25"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/ic_icons_network_eth"
+        android:contentDescription="Chain Logo"
+        tools:ignore="HardcodedText" />
+
+    <com.alphawallet.app.widget.ChainName
+        android:id="@+id/chain_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp16"
+        custom:font_size="16"
+        custom:invert="true" />
+
+</LinearLayout>

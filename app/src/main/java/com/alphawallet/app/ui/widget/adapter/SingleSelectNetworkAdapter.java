@@ -96,7 +96,7 @@ public class SingleSelectNetworkAdapter extends RecyclerView.Adapter<SingleSelec
 
     public void selectDefault()
     {
-        if (!hasSelection)
+        if (!hasSelection && !networkList.isEmpty())
         {
             networkList.get(0).setSelected(true);
             notifyItemChanged(0);

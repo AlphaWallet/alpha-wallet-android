@@ -80,7 +80,7 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     public WalletConnectSessionActivity()
     {
-        broadcastManager = LocalBroadcastManager.getInstance(this);
+        broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
     }
 
     @Override

@@ -408,6 +408,10 @@ public class QRScannerActivity extends BaseActivity
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
+        if (barcodeView == null)
+        {
+            return false;
+        }
         return barcodeView.onKeyDown(keyCode, event) || super.onKeyDown(keyCode, event);
     }
 

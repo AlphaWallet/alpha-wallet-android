@@ -50,7 +50,7 @@ import timber.log.Timber;
 public class WalletConnectSessionActivity extends BaseActivity
 {
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final LocalBroadcastManager broadcastManager;
+    private LocalBroadcastManager broadcastManager;
     WalletConnectViewModel viewModel;
     private RecyclerView recyclerView;
     private Button btnConnectWallet;
@@ -72,11 +72,6 @@ public class WalletConnectSessionActivity extends BaseActivity
             }
         }
     };
-
-    public WalletConnectSessionActivity()
-    {
-        broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -102,6 +97,11 @@ public class WalletConnectSessionActivity extends BaseActivity
                     .get(WalletConnectViewModel.class);
             viewModel.serviceReady().observe(this, this::onServiceReady);
         }
+
+        if (broadcastManager == null)
+        {
+            broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+        }
     }
 
     private void onServiceReady(Boolean aBoolean)
@@ -115,13 +115,6 @@ public class WalletConnectSessionActivity extends BaseActivity
         {
             setupList();
         }
-    }
-
-    @Override
-    public void onPause()
-    {
-        super.onPause();
-        stopConnectionCheck();
     }
 
     private void setupList()
@@ -163,6 +156,13 @@ public class WalletConnectSessionActivity extends BaseActivity
         initViewModel();
         setupList();
         startConnectionCheck();
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        stopConnectionCheck();
     }
 
     @Override

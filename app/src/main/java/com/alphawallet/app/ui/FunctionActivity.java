@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -49,7 +48,9 @@ import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheet;
 import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.ethereum.EthereumNetworkBase;
@@ -103,7 +104,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private int parsePass = 0;
     private int resolveInputCheckCount;
     private TSAction action;
-    private ActionSheetDialog confirmationDialog;
+    private ActionSheet confirmationDialog;
 
     private void initViews() {
         actionMethod = getIntent().getStringExtra(C.EXTRA_STATE);
@@ -135,9 +136,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
         parsePass = 0;
-
-        ProgressBar loadSpinner = findViewById(R.id.ticket_load_spinner);
-        handler.postDelayed(() -> loadSpinner.setVisibility(View.GONE), 2500);
     }
 
     private void displayFunction(String tokenAttrs)
@@ -637,8 +635,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void onSignPersonalMessage(EthereumMessage message)
     {
-        //pop open the actionsheet
-        confirmationDialog = new ActionSheetDialog(this, this, this, message);
+        confirmationDialog = new ActionSheetSignDialog(this, this, this, message);
         confirmationDialog.setCanceledOnTouchOutside(false);
         confirmationDialog.show();
         confirmationDialog.fullExpand();

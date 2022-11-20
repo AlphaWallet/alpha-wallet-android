@@ -58,7 +58,9 @@ import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheet;
 import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
@@ -101,7 +103,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private WCSession session;
     private WCPeerMeta peerMeta;
     private WCPeerMeta remotePeerMeta;
-    private ActionSheetDialog confirmationDialog;
+    private ActionSheet confirmationDialog;
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> confirmationDialog.setCurrentGasIndex(result));
     private AddEthereumChainPrompt addEthereumChainPrompt;
@@ -909,7 +911,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         };
 
-        confirmationDialog = new ActionSheetDialog(this, this, signCallback, signable);
+        confirmationDialog = new ActionSheetSignDialog(this, this, signCallback, signable);
         confirmationDialog.setCanceledOnTouchOutside(false);
         confirmationDialog.show();
 

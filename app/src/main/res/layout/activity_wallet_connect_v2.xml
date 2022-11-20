@@ -23,7 +23,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/dp5"
             android:layout_marginBottom="@dimen/dp5"
-            android:src="@mipmap/ic_alpha" />
+            android:src="@mipmap/ic_launcher" />
 
         <TextView
             android:id="@+id/peer_name"

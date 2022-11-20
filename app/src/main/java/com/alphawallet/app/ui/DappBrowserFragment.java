@@ -6,7 +6,6 @@ import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
-import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
 import static com.alphawallet.app.util.Utils.isValidUrl;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
@@ -107,7 +106,9 @@ import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Call;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheet;
 import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.app.widget.AddressBar;
 import com.alphawallet.app.widget.AddressBarListener;
 import com.alphawallet.app.widget.TestNetDialog;
@@ -183,7 +184,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private WebChromeClient.FileChooserParams fileChooserParams;
     private RealmResults<RealmToken> realmUpdate;
     private Realm realm = null;
-    private ActionSheetDialog confirmationDialog;
+    private ActionSheet confirmationDialog;
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> confirmationDialog.setCurrentGasIndex(result));
     private DappBrowserViewModel viewModel;
@@ -1169,15 +1170,14 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             {
                 String signHex = Numeric.toHexString(data);
                 Timber.d("Initial Msg: %s", message.getMessage());
-                web3.onSignMessageSuccessful(message, signHex);
-
                 confirmationDialog.success();
+                web3.onSignMessageSuccessful(message, signHex);
             }
         };
 
         if (confirmationDialog == null || !confirmationDialog.isShowing())
         {
-            confirmationDialog = new ActionSheetDialog(requireActivity(), this, this, message);
+            confirmationDialog = new ActionSheetSignDialog(requireActivity(), this, this, message);
             confirmationDialog.setCanceledOnTouchOutside(false);
             confirmationDialog.show();
             confirmationDialog.fullExpand();

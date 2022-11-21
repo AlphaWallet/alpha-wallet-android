@@ -50,7 +50,7 @@ public class TransferTest extends BaseE2ETest
         importWalletFromSettingsPage(privateKey);
         addNewNetwork("Ganache", GANACHE_URL);
         selectTestNet("Ganache");
-        sendBalanceTo(newWalletAddress, "0.001");
+        sendBalanceTo("ETH", "0.001", newWalletAddress);
         ensureTransactionConfirmed();
         switchToWallet(newWalletAddress);
         assertBalanceIs("0.001");

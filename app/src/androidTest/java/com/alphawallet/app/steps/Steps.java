@@ -33,6 +33,8 @@ import com.alphawallet.app.assertions.Should;
 import com.alphawallet.app.util.GetTextAction;
 import com.alphawallet.app.util.Helper;
 
+import org.hamcrest.core.AllOf;
+
 /**
  * Every step consists of several operations, step name stands for user perspective actions.
  * You can add steps as you wish to reuse code between test cases.
@@ -106,11 +108,11 @@ public class Steps
         pressBack();
     }
 
-    public static void sendBalanceTo(String receiverAddress, String amountStr)
+    public static void sendBalanceTo(String tokenSymbol, String amountStr, String receiverAddress)
     {
         click(withId(R.id.nav_wallet_text));
         ensureBalanceFetched();
-        click(withSubstring("ETH"));
+        click(withSubstring(tokenSymbol));
         click(withText("Send"));
         onView(withHint("0")).perform(replaceText(amountStr));
         onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));
@@ -167,7 +169,6 @@ public class Steps
         Helper.wait(2); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis
         click(withId(buttonId));
         waitForLoadingComplete("Handling");
-        waitUntil(withSubstring(""));
         closeSelectNetworkPage();
     }
 
@@ -276,5 +277,28 @@ public class Steps
     public static void openOptionsMenu()
     {
         openActionBarOverflowOrOptionsMenu(ApplicationProvider.getApplicationContext());
+    }
+
+    public static void addCustomToken(String contractAddress)
+    {
+        //add the token manually since test doesn't seem to work normally
+        click(withId(R.id.action_my_wallet));
+        click(withSubstring("Add / Hide Tokens"));
+        Helper.wait(1);
+        click(withId(R.id.action_add));
+        Helper.wait(1);
+
+        onView(AllOf.allOf(withId(R.id.edit_text))).perform(replaceText(contractAddress));
+
+        onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 300));
+
+        click(withId(R.id.select_token));
+
+        click(withSubstring("Save"));
+
+        pressBack();
+
+        //Swipe up
+        onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());
     }
 }

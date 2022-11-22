@@ -1,11 +1,6 @@
 package com.alphawallet.app;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.Espresso.pressBack;
-import static androidx.test.espresso.action.ViewActions.replaceText;
-import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static com.alphawallet.app.steps.Steps.GANACHE_URL;
 import static com.alphawallet.app.steps.Steps.addCustomToken;
 import static com.alphawallet.app.steps.Steps.addNewNetwork;
@@ -20,27 +15,27 @@ import static com.alphawallet.app.steps.Steps.sendBalanceTo;
 import static com.alphawallet.app.steps.Steps.switchToWallet;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.waitUntil;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import android.os.Build;
 
-import androidx.test.espresso.action.ViewActions;
-
 import com.alphawallet.app.resources.Contracts;
-import com.alphawallet.app.steps.Steps;
 import com.alphawallet.app.util.EthUtils;
-import com.alphawallet.app.util.Helper;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class TransferERC20Test extends BaseE2ETest
 {
@@ -57,43 +52,45 @@ public class TransferERC20Test extends BaseE2ETest
         }
     };
     private Web3j web3j;
+    private String senderPivateKey;
+    private String gasFeeHolder;
+    private Credentials senderCredentials;
+    private Credentials contractOwnerCredentials;
 
     @Override
     @Before
     public void setUp()
     {
-        super.setUp();
-        deployUSDCOnGanache();
-    }
-
-    private void deployUSDCOnGanache()
-    {
         int apiLevel = Build.VERSION.SDK_INT;
         String[] array = WALLETS_ON_GANACHE.get(String.valueOf(apiLevel));
-
         if (array == null)
         {
             fail("Please config seed phrase and wallet address for this API level first.");
         }
 
+        senderPivateKey = array[0];
+        gasFeeHolder = array[1];
+        senderCredentials = Credentials.create(senderPivateKey);
+        contractOwnerCredentials = Credentials.create(contractOwnerPk);
+
+        super.setUp();
         web3j = EthUtils.buildWeb3j(GANACHE_URL);
+        deployTestTokenOnGanache();
 
-        String privateKey = array[0];
+        // Transfer ETH to sender as fee
+//        EthUtils.transferFunds(web3j, contractOwnerCredentials, senderAddress, BigDecimal.ONE);
+    }
 
-        //create credentials for initial transfer
-        Credentials credentials = Credentials.create(privateKey);
-
-        //create credentials for contract deployment (fixed so we can link to a tokenscript)
-        Credentials deployCredentials = Credentials.create(contractOwnerPk);
-
+    private void deployTestTokenOnGanache()
+    {
         //Transfer 1 eth into deployment wallet
-        EthUtils.transferFunds(web3j, credentials, deployCredentials.getAddress(), BigDecimal.ONE);
+        EthUtils.transferFunds(web3j, senderCredentials, contractOwnerCredentials.getAddress(), BigDecimal.ONE);
 
         //Deploy door contract
-        EthUtils.deployContract(web3j, deployCredentials, Contracts.usdcContractCode);
+        EthUtils.deployContract(web3j, contractOwnerCredentials, Contracts.usdcContractCode);
 
         //Always use zero nonce for determining the contract address
-        contractAddress = EthUtils.calculateContractAddress(deployCredentials.getAddress(), 0L);
+        contractAddress = EthUtils.calculateContractAddress(contractOwnerCredentials.getAddress(), 0L);
 
         assertNotNull(contractAddress);
     }
@@ -101,32 +98,17 @@ public class TransferERC20Test extends BaseE2ETest
     @Test
     public void should_transfer_from_an_account_to_another()
     {
-        int apiLevel = Build.VERSION.SDK_INT;
-        String[] array = WALLETS_ON_GANACHE.get(String.valueOf(apiLevel));
-        if (array == null)
-        {
-            fail("Please config seed phrase and wallet address for this API level first.");
-        }
-
-        transferToSenderAccount(array[1]);
-        String privateKey = array[0];
-
         createNewWallet();
         String newWalletAddress = getWalletAddress();
 
-        importWalletFromSettingsPage(privateKey);
+        importWalletFromSettingsPage(contractOwnerPk);
         addNewNetwork("Ganache", GANACHE_URL);
         selectTestNet("Ganache");
         gotoWalletPage();
         addCustomToken(contractAddress);
-        sendBalanceTo("USDC", "0.001", newWalletAddress);
+        sendBalanceTo("AW test token", "1.11", newWalletAddress);
         ensureTransactionConfirmed();
         switchToWallet(newWalletAddress);
-        assertBalanceIs("0.001");
-    }
-
-    private void transferToSenderAccount(String receiverAddress)
-    {
-
+        assertBalanceIs("1.11");
     }
 }

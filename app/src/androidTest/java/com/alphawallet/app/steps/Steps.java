@@ -104,7 +104,7 @@ public class Steps
     {
 //        onView(withText(R.string.rate_no_thanks)).perform(click());
         click(withId(R.string.action_show_tx_details));
-        onView(isRoot()).perform(waitUntil(withSubstring("Sent"), 30 * 60));
+        onView(isRoot()).perform(waitUntil(withSubstring("Send"), 30 * 60));
         pressBack();
     }
 
@@ -117,8 +117,15 @@ public class Steps
         onView(withHint("0")).perform(replaceText(amountStr));
         onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));
         click(withId(R.string.action_next));
-        Helper.wait(10);
-        click(withId(R.string.action_confirm));
+        try
+        {
+            click(withId(R.string.action_confirm));
+        }
+        catch (Error | Exception e)
+        {
+            waitForLoadingComplete("Calculating Gas Limit");
+            click(withId(R.string.action_confirm));
+        }
     }
 
     private static void ensureBalanceFetched()
@@ -168,7 +175,8 @@ public class Steps
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(textId)))))).perform(replaceText(text));
         Helper.wait(2); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis
         click(withId(buttonId));
-        waitForLoadingComplete("Handling");
+//        waitForLoadingComplete("Handling");
+        Helper.wait(5);
         closeSelectNetworkPage();
     }
 

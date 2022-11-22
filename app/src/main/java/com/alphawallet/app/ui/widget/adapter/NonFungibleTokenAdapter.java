@@ -61,7 +61,8 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     private boolean isGrid;
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
-                                   OpenSeaService opensea) {
+                                   OpenSeaService opensea)
+    {
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
@@ -71,7 +72,8 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
-                                   OpenSeaService opensea, boolean isGrid) {
+                                   OpenSeaService opensea, boolean isGrid)
+    {
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
@@ -110,9 +112,11 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
 
     @NotNull
     @Override
-    public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    {
         BinderViewHolder<?> holder = null;
-        switch (viewType) {
+        switch (viewType)
+        {
             case TicketHolder.VIEW_TYPE: //Ticket holder now deprecated //TODO: remove
                 holder = new TicketHolder(R.layout.item_ticket, parent, token, assetService);
                 holder.setOnTokenClickListener(tokensAdapterCallback);
@@ -138,9 +142,11 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         return holder;
     }
 
-    public int getTicketRangeCount() {
+    public int getTicketRangeCount()
+    {
         int count = 0;
-        if (currentRange != null) {
+        if (currentRange != null)
+        {
             count = currentRange.tokenIds.size();
         }
         return count;
@@ -189,7 +195,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
 
         for (int i = 0; i < selection.size(); i++)
         {
-            items.add(new NFTSortedItem(selection.get(i), i+1));
+            items.add(new NFTSortedItem(selection.get(i), i + 1));
         }
 
         items.endBatchedUpdates();
@@ -248,7 +254,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
             {
                 currentRange = new TicketRange(e.id, t.getAddress());
                 final T item = generateType(currentRange, 10 + i, id);
-                items.add((SortedItem)item);
+                items.add((SortedItem) item);
                 currentTime = e.time;
             }
         }

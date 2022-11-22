@@ -54,7 +54,10 @@ public abstract class ActionSheet extends BottomSheetDialog
         throw new RuntimeException("Implement setSigningWallet");
     }
 
-    public void setIcon(String icon) { throw new RuntimeException("Implement setIcon"); }
+    public void setIcon(String icon)
+    {
+        throw new RuntimeException("Implement setIcon");
+    }
 
     public void transactionWritten(String hash)
     {

@@ -15,7 +15,8 @@ import java.net.URL;
 
 public class CustomSettingsTest extends BaseE2ETest
 {
-    private static File getFileFromPath(Object obj) {
+    private static File getFileFromPath(Object obj)
+    {
         ClassLoader classLoader = obj.getClass().getClassLoader();
         assert classLoader != null;
         URL resource = classLoader.getResource("assets/custom_view_settings.json");
@@ -23,7 +24,8 @@ public class CustomSettingsTest extends BaseE2ETest
     }
 
     @Test
-    public void fileObjectShouldNotBeNull() throws Exception {
+    public void fileObjectShouldNotBeNull() throws Exception
+    {
         File file = getFileFromPath(this);
         assertThat(file, notNullValue());
 

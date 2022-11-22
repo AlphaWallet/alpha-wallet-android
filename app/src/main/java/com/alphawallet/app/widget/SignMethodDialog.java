@@ -4,10 +4,9 @@ import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,15 +17,11 @@ import androidx.lifecycle.ViewModelStoreOwner;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.entity.BaseRequest;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
-import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
-import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.walletconnect.android.Core;
@@ -41,23 +36,20 @@ import io.reactivex.schedulers.Schedulers;
 
 public class SignMethodDialog extends BottomSheetDialog
 {
-    private FunctionButtonBar functionBar;
-    private TextView dAppName;
-    private ImageView logo;
-    private TextView url;
-    private TextView walletTv;
-    private TextView message;
-    private ImageView networkIcon;
-    private ChainName networkName;
     private final Activity activity;
-    private ImageView closeButton;
     private final Sign.Model.SessionRequest sessionRequest;
     private final BaseRequest request;
-    private String walletAddress;
-    private SignMethodDialogViewModel viewModel;
     private final Signable signable;
-    private SignDataWidget signDataWidget;
     private final Core.Model.AppMetaData metaData;
+    private SignMethodDialogViewModel viewModel;
+    private BottomSheetToolbarView toolbar;
+    private AddressDetailView dappName;
+    private AddressDetailView dappUrl;
+    private AddressDetailView wallet;
+    private NetworkDisplayWidget networkDisplayWidget;
+    private SignDataWidget signDataWidget;
+    private FunctionButtonBar functionBar;
+    private String walletAddress;
 
     public SignMethodDialog(@NonNull Activity activity, Sign.Model.SessionRequest sessionRequest, BaseRequest request, Core.Model.AppMetaData metaData)
     {
@@ -74,35 +66,40 @@ public class SignMethodDialog extends BottomSheetDialog
         BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
         behavior.setState(STATE_EXPANDED);
         behavior.setSkipCollapsed(true);
-        setCancelable(false);
 
         initViews();
         bindData();
     }
 
+    private void initViews()
+    {
+        toolbar = findViewById(R.id.bottom_sheet_toolbar);
+        functionBar = findViewById(R.id.layoutButtons);
+        signDataWidget = findViewById(R.id.sign_widget);
+        dappName = findViewById(R.id.dapp_name);
+        dappUrl = findViewById(R.id.dapp_url);
+        wallet = findViewById(R.id.wallet);
+        networkDisplayWidget = findViewById(R.id.network_display_widget);
+    }
+
     private void bindData()
     {
         List<String> icons = Objects.requireNonNull(metaData).getIcons();
+        if (!icons.isEmpty())
+        {
+            toolbar.setLogo(getContext(), icons.get(0));
+        }
 
-        if (icons.isEmpty())
-        {
-            logo.setImageResource(R.drawable.ic_coin_eth_small);
-        }
-        else
-        {
-            Glide.with(activity)
-                    .load(icons.get(0))
-                    .circleCrop()
-                    .into(logo);
-        }
-        dAppName.setText(metaData.getName());
-        url.setText(metaData.getUrl());
+        dappName.setupRequester(metaData.getName());
+        dappUrl.setupRequester(metaData.getUrl());
+
         walletAddress = request.getWalletAddress();
-        walletTv.setText(walletAddress);
+        wallet.setupRequester(walletAddress);
 
-        long chainID = WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId()));
-        networkIcon.setImageResource(EthereumNetworkRepository.getChainLogo(chainID));
-        networkName.setChainID(chainID);
+        networkDisplayWidget.setNetwork(WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())));
+
+        signDataWidget.setupSignData(request.getSignable());
+
         functionBar.setupFunctions(new StandardFunctionInterface()
         {
             @Override
@@ -115,37 +112,13 @@ public class SignMethodDialog extends BottomSheetDialog
             }
         }, Collections.singletonList(R.string.action_confirm));
 
-        closeButton.setOnClickListener(v ->
-        {
+        toolbar.setCloseListener(v -> {
             viewModel.reject(sessionRequest);
             dismiss();
         });
 
-        if (signable.getMessageType() == SignMessageType.SIGN_PERSONAL_MESSAGE
-                || signable.getMessageType() == SignMessageType.SIGN_MESSAGE)
-        {
-            message.setText(Hex.hexToUtf8(signable.getMessage()));
-        }
-        else
-        {
-            message.setVisibility(View.GONE);
-            signDataWidget.setVisibility(View.VISIBLE);
-            signDataWidget.setupSignData(request.getSignable());
-        }
-    }
-
-    private void initViews()
-    {
-        logo = findViewById(R.id.logo);
-        dAppName = findViewById(R.id.dapp_name);
-        url = findViewById(R.id.url);
-        walletTv = findViewById(R.id.wallet);
-        message = findViewById(R.id.message);
-        networkIcon = findViewById(R.id.network_icon);
-        networkName = findViewById(R.id.network_name);
-        functionBar = findViewById(R.id.layoutButtons);
-        closeButton = findViewById(R.id.image_close);
-        signDataWidget = findViewById(R.id.sign_widget);
+        setOnDismissListener(dialog -> viewModel.reject(sessionRequest));
+        setOnCancelListener(dialog -> viewModel.reject(sessionRequest));
     }
 
     private void initViewModel()

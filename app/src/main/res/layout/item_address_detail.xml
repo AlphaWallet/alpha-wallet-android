@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/small_12"
             android:layout_weight="3.5"
-            android:gravity="start"
+            android:gravity="start|center_vertical"
             android:lines="2"
             android:maxLines="2"
             tools:text="pablo.eth | 0x123456...0421" />
@@ -42,7 +42,7 @@
             android:id="@+id/image_more"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
+            android:layout_gravity="start|center_vertical"
             android:layout_weight="0.6"
             android:background="@color/transparent"
             android:padding="@dimen/mini_4"
@@ -57,7 +57,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <TextView
             style="@style/Aw.Typography.Label"

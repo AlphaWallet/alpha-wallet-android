@@ -67,6 +67,11 @@ public class BottomSheetToolbarView extends RelativeLayout
                 .into(logo);
     }
 
+    public void setLogo(int imageRes)
+    {
+        logo.setImageResource(imageRes);
+    }
+
     public void setCloseListener(View.OnClickListener listener)
     {
         closeBtn.setOnClickListener(listener);

@@ -17,11 +17,6 @@
         android:layout_height="wrap_content"
         custom:label="@string/requester_url" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/mercury" />
-
     <com.alphawallet.app.widget.SignDataWidget
         android:id="@+id/sign_widget"
         android:layout_width="match_parent"

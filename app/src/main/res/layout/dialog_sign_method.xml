@@ -1,67 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.alphawallet.app.widget.BottomSheetToolbarView
-        android:id="@+id/bottom_sheet_toolbar"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:title="@string/dialog_title_sign_message" />
+        android:orientation="vertical">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
+        <com.alphawallet.app.widget.BottomSheetToolbarView
+            android:id="@+id/bottom_sheet_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            app:title="@string/dialog_title_sign_message" />
 
-            <com.alphawallet.app.widget.AddressDetailView
-                android:id="@+id/dapp_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:label="@string/wc_sign_dapp_name" />
+        <com.alphawallet.app.widget.AddressDetailView
+            android:id="@+id/dapp_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:label="@string/wc_sign_dapp_name" />
 
-            <com.alphawallet.app.widget.AddressDetailView
-                android:id="@+id/dapp_url"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:label="@string/label_api_v1_app_url" />
+        <com.alphawallet.app.widget.AddressDetailView
+            android:id="@+id/dapp_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:label="@string/label_api_v1_app_url" />
 
-            <com.alphawallet.app.widget.AddressDetailView
-                android:id="@+id/wallet"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:label="@string/wc_wallet" />
+        <com.alphawallet.app.widget.AddressDetailView
+            android:id="@+id/wallet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:label="@string/wc_wallet" />
 
-            <com.alphawallet.app.widget.NetworkDisplayWidget
-                android:id="@+id/network_display_widget"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+        <com.alphawallet.app.widget.NetworkDisplayWidget
+            android:id="@+id/network_display_widget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-            <com.alphawallet.app.widget.SignDataWidget
-                android:id="@+id/sign_widget"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+        <com.alphawallet.app.widget.SignDataWidget
+            android:id="@+id/sign_widget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-        </LinearLayout>
+        <View style="@style/Aw.Component.Separator" />
 
-    </ScrollView>
+        <com.alphawallet.app.widget.ConfirmationWidget
+            android:id="@+id/confirmation_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-    <View style="@style/Aw.Component.Separator" />
+        <com.alphawallet.app.widget.FunctionButtonBar
+            android:id="@+id/layoutButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-    <com.alphawallet.app.widget.ConfirmationWidget
-        android:id="@+id/confirmation_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    </LinearLayout>
 
-    <com.alphawallet.app.widget.FunctionButtonBar
-        android:id="@+id/layoutButtons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

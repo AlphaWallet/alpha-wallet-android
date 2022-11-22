@@ -13,10 +13,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
+        android:minHeight="60dp"
         android:orientation="horizontal"
-        android:layout_marginStart="@dimen/standard_16"
-        android:layout_marginVertical="@dimen/standard_16">
+        android:paddingVertical="@dimen/standard_16"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingEnd="@dimen/mini_4">
 
         <TextView
             android:id="@+id/text_recipient_title"
@@ -29,6 +30,7 @@
 
         <TextView
             android:id="@+id/text_recipient"
+            style="@style/Aw.Typography.Caption"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/small_12"
@@ -36,16 +38,15 @@
             android:gravity="start|center_vertical"
             android:lines="2"
             android:maxLines="2"
-            tools:text="pablo.eth | 0x123456...0421" />
+            tools:text="pablo.eth | 0x123456...0421\nasd" />
 
         <ImageView
             android:id="@+id/image_more"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="start|center_vertical"
+            android:layout_gravity="start"
             android:layout_weight="0.6"
             android:background="@color/transparent"
-            android:padding="@dimen/mini_4"
             android:src="@drawable/ic_expand_more"
             app:tint="?colorControlNormal" />
 
@@ -57,7 +58,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <TextView
             style="@style/Aw.Typography.Label"
@@ -69,11 +70,13 @@
 
         <TextView
             android:id="@+id/text_recipient_address"
+            style="@style/Aw.Typography.Caption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/standard_16"
             android:layout_marginTop="@dimen/tiny_8"
             android:layout_marginEnd="@dimen/standard_16"
+            android:layout_marginBottom="@dimen/standard_16"
             android:gravity="start"
             tools:text="0x6EBaF477F83E055589C1188bCC6DDCCD8C9B131a" />
 
@@ -83,12 +86,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/standard_16"
-            android:layout_marginTop="@dimen/standard_16"
             android:layout_marginBottom="@dimen/tiny_8"
             android:gravity="start"
             android:text="@string/ens_name" />
 
         <LinearLayout
+            android:id="@+id/layout_ens_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/standard_16"
@@ -105,6 +108,7 @@
 
             <TextView
                 android:id="@+id/text_ens_name"
+                style="@style/Aw.Typography.Caption"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/tiny_8"

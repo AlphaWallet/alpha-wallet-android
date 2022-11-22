@@ -24,7 +24,9 @@ public class AddressDetailView extends LinearLayout
 {
     private final TextView textAddressSummary;
     private final TextView textFullAddress;
+    private final TextView labelEnsName;
     private final TextView textEnsName;
+    private final LinearLayout layoutEnsName;
     private final ImageView recipientDetails;
     private final UserAvatar userAvatar;
     private final LinearLayout layoutDetails;
@@ -36,7 +38,9 @@ public class AddressDetailView extends LinearLayout
         inflate(context, R.layout.item_address_detail, this);
         textAddressSummary = findViewById(R.id.text_recipient);
         textFullAddress = findViewById(R.id.text_recipient_address);
+        labelEnsName = findViewById(R.id.label_ens);
         textEnsName = findViewById(R.id.text_ens_name);
+        layoutEnsName = findViewById(R.id.layout_ens_name);
         recipientDetails = findViewById(R.id.image_more);
         userAvatar = findViewById(R.id.blockie);
         layoutDetails = findViewById(R.id.layout_detail);
@@ -64,10 +68,18 @@ public class AddressDetailView extends LinearLayout
         textFullAddress.setText(address);
         textEnsName.setText(ensName);
 
-        if (TextUtils.isEmpty(ensName) && destToken != null && !destToken.isEthereum())
+        if (TextUtils.isEmpty(ensName))
         {
-            ((TextView)findViewById(R.id.label_ens)).setText(R.string.token_text);
-            textEnsName.setText(destToken.getFullName());
+            if (destToken != null && !destToken.isEthereum())
+            {
+                labelEnsName.setText(R.string.token_text);
+                textEnsName.setText(destToken.getFullName());
+            }
+            else
+            {
+                labelEnsName.setVisibility(View.GONE);
+                layoutEnsName.setVisibility(View.GONE);
+            }
         }
 
         layoutHolder.setOnClickListener(v -> {
@@ -95,8 +107,6 @@ public class AddressDetailView extends LinearLayout
             //shorten requesterURL if required
             requesterUrl = abbreviateURL(requesterUrl);
             textAddressSummary.setText(requesterUrl);
-            ViewGroup.LayoutParams param = new LayoutParams(0, LayoutParams.WRAP_CONTENT, 3.4f);
-            textAddressSummary.setLayoutParams(param);
         }
         else
         {

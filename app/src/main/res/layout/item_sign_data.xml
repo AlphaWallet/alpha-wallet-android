@@ -11,9 +11,10 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:orientation="horizontal"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
+        android:minHeight="60dp"
+        android:orientation="horizontal"
         android:paddingVertical="@dimen/standard_16"
         android:paddingStart="@dimen/standard_16"
         android:paddingEnd="@dimen/mini_4">
@@ -62,6 +63,7 @@
 
         <TextView
             android:id="@+id/text_message"
+            style="@style/Aw.Typography.Caption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="start"

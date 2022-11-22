@@ -117,7 +117,6 @@ public class SignMethodDialog extends BottomSheetDialog
             dismiss();
         });
 
-        setOnDismissListener(dialog -> viewModel.reject(sessionRequest));
         setOnCancelListener(dialog -> viewModel.reject(sessionRequest));
     }
 

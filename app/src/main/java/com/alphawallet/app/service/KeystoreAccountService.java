@@ -78,13 +78,14 @@ public class KeystoreAccountService implements AccountKeystoreService
      * @return
      */
     @Override
-    public Single<Wallet> createAccount(String password) {
+    public Single<Wallet> createAccount(String password)
+    {
         return Single.fromCallable(() -> {
-            ECKeyPair ecKeyPair = Keys.createEcKeyPair();
-            WalletFile walletFile = org.web3j.crypto.Wallet.createLight(password, ecKeyPair);
-            return objectMapper.writeValueAsString(walletFile);
-        }).compose(upstream -> importKeystore(upstream.blockingGet(), password, password))
-        .subscribeOn(Schedulers.io());
+                    ECKeyPair ecKeyPair = Keys.createEcKeyPair();
+                    WalletFile walletFile = org.web3j.crypto.Wallet.createLight(password, ecKeyPair);
+                    return objectMapper.writeValueAsString(walletFile);
+                }).compose(upstream -> importKeystore(upstream.blockingGet(), password, password))
+                .subscribeOn(Schedulers.io());
     }
 
     /**
@@ -343,7 +344,8 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<byte[]> signMessageFast(Wallet signer, String signerPassword, byte[] message) {
+    public Single<byte[]> signMessageFast(Wallet signer, String signerPassword, byte[] message)
+    {
         return Single.fromCallable(() -> {
             Credentials credentials = getCredentials(keyFolder, signer.address, signerPassword);
             Sign.SignatureData signatureData = Sign.signMessage(

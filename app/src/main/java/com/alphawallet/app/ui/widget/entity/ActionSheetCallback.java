@@ -16,17 +16,40 @@ import com.alphawallet.token.entity.Signable;
 public interface ActionSheetCallback
 {
     void getAuthorisation(SignAuthenticationCallback callback);
+
     void sendTransaction(Web3Transaction tx);
+
     void dismissed(String txHash, long callbackId, boolean actionCompleted);
+
     void notifyConfirm(String mode);
+
     ActivityResultLauncher<Intent> gasSelectLauncher();
-    default void signTransaction(Web3Transaction tx) { } // only WalletConnect uses this so far
 
-    default void buttonClick(long callbackId, Token baseToken) { }; //for message only actionsheet
+    default void signTransaction(Web3Transaction tx)
+    {
+    } // only WalletConnect uses this so far
 
-    default void notifyWalletConnectApproval(long chainId) { };    // used by WalletConnectRequest
-    default void denyWalletConnect() { };
-    default void openChainSelection() { };      // used by WalletConnectRequest
-    default void signingComplete(SignatureFromKey signature, Signable message) { };
-    default void signingFailed(Throwable error, Signable message) { };
+    default void buttonClick(long callbackId, Token baseToken)
+    {
+    }
+
+    default void notifyWalletConnectApproval(long chainId)
+    {
+    }
+
+    default void denyWalletConnect()
+    {
+    }
+
+    default void openChainSelection()
+    {
+    }
+
+    default void signingComplete(SignatureFromKey signature, Signable message)
+    {
+    }
+
+    default void signingFailed(Throwable error, Signable message)
+    {
+    }
 }

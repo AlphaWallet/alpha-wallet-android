@@ -30,6 +30,7 @@ import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.NFTAssetHolder;
 import com.alphawallet.app.ui.widget.holder.QuantitySelectorHolder;
+import com.alphawallet.app.ui.widget.holder.TextHolder;
 import com.alphawallet.app.ui.widget.holder.TicketHolder;
 import com.alphawallet.app.ui.widget.holder.TokenDescriptionHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
@@ -136,6 +137,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
                 break;
             case QuantitySelectorHolder.VIEW_TYPE:
                 holder = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent, assetCount, assetService);
+                break;
+            default:
+                holder = new TextHolder(R.layout.item_standard_header, parent);
                 break;
         }
 

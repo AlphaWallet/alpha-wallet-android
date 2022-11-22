@@ -55,7 +55,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
-import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
@@ -66,21 +65,27 @@ import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.PriceAlertsService;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
+import com.alphawallet.app.viewmodel.WalletConnectViewModel;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.WCSession;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
-import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.entity.Signable;
+import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 
@@ -90,13 +95,18 @@ import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
 
 @AndroidEntryPoint
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
-        FragmentMessenger, Runnable, SignAuthenticationCallback, LifecycleObserver, PagerCallback
+        FragmentMessenger, Runnable, SignAuthenticationCallback, ActionSheetCallback, LifecycleObserver, PagerCallback
 {
+    @Inject
+    AWWalletConnectClient awWalletConnectClient;
+
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
     public static final int RC_ASSET_NOTIFICATION_PERM = 224;
     public static final int DAPP_BARCODE_READER_REQUEST_CODE = 1;
@@ -111,6 +121,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             result -> getSupportFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle()));
 
     private HomeViewModel viewModel;
+    private WalletConnectViewModel viewModelWC;
     private Dialog dialog;
     private ViewPager2 viewPager;
     private LinearLayout successOverlay;
@@ -197,11 +208,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         LocaleUtils.setActiveLocale(this);
         getLifecycle().addObserver(this);
         isForeground = true;
+        setWCConnect();
 
         if (getSupportActionBar() != null) getSupportActionBar().hide();
 
         viewModel = new ViewModelProvider(this)
                 .get(HomeViewModel.class);
+        viewModelWC = new ViewModelProvider(this)
+                .get(WalletConnectViewModel.class);
+
         viewModel.identify();
         viewModel.setWalletStartup();
         viewModel.setCurrencyAndLocale(this);
@@ -303,6 +318,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         Intent i = new Intent(this, PriceAlertsService.class);
         startService(i);
+    }
+
+    private void setWCConnect()
+    {
+        try
+        {
+            awWalletConnectClient.init(this);
+        }
+        catch (Exception e)
+        {
+            Timber.tag("WalletConnect").e(e);
+        }
     }
 
     private void onDefaultWallet(Wallet wallet)
@@ -500,6 +527,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     protected void onResume()
     {
         super.onResume();
+        setWCConnect();
         viewModel.prepare(this);
         viewModel.getWalletName(this);
         viewModel.setErrorCallback(this);
@@ -926,11 +954,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
-        {
-            requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
-        }
+        super.onActivityResult(requestCode, resultCode, data); // intercept return intent from PIN/Swipe authentications
 
         switch (requestCode)
         {
@@ -944,16 +968,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
                 if (resultCode == RESULT_OK) backupWalletSuccess(keyBackup);
                 else backupWalletFail(keyBackup, noLockScreen);
-                break;
-            case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
-                switch (getSelectedItem())
-                {
-                    case DAPP_BROWSER:
-                        getFragment(DAPP_BROWSER).pinAuthorisation(resultCode == RESULT_OK);
-                        break;
-                    default:
-                        break;
-                }
                 break;
             case C.REQUEST_UNIVERSAL_SCAN:
                 if (data != null && resultCode == Activity.RESULT_OK)
@@ -1148,6 +1162,58 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             Timber.tag("Intent").w(e);
         }
+    }
+
+    @Override
+    public void signingComplete(SignatureFromKey signature, Signable message)
+    {
+        String signHex = Numeric.toHexString(signature.signature);
+        Timber.d("Initial Msg: %s", message.getMessage());
+        awWalletConnectClient.signComplete(signature, message);
+    }
+
+    @Override
+    public void signingFailed(Throwable error, Signable message)
+    {
+        awWalletConnectClient.signFail(error.getMessage(), message);
+    }
+
+    @Override
+    public void getAuthorisation(SignAuthenticationCallback callback)
+    {
+        viewModelWC.getAuthenticationForSignature(viewModel.defaultWallet().getValue(), this, callback);
+    }
+
+    @Override
+    public void sendTransaction(Web3Transaction tx)
+    {
+
+    }
+
+    @Override
+    public void dismissed(String txHash, long callbackId, boolean actionCompleted)
+    {
+        if (!actionCompleted)
+        {
+            awWalletConnectClient.dismissed(callbackId);
+        }
+    }
+
+    @Override
+    public void notifyConfirm(String mode)
+    {
+
+    }
+
+    //TODO: Implement when passing transactions through here
+    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> { //awWalletConnectClient.setCurrentGasIndex(result));
+            });
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return getGasSettings;
     }
 
     private static class ScreenSlidePagerAdapter extends FragmentStateAdapter

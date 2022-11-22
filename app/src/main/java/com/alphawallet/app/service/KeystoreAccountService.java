@@ -343,7 +343,7 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<byte[]> signTransactionFast(Wallet signer, String signerPassword, byte[] message, long chainId) {
+    public Single<byte[]> signMessageFast(Wallet signer, String signerPassword, byte[] message) {
         return Single.fromCallable(() -> {
             Credentials credentials = getCredentials(keyFolder, signer.address, signerPassword);
             Sign.SignatureData signatureData = Sign.signMessage(
@@ -355,10 +355,9 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<SignatureFromKey> signMessage(Wallet signer, Signable message, long chainId)
+    public Single<SignatureFromKey> signMessage(Wallet signer, Signable message)
     {
         return Single.fromCallable(() -> {
-            //byte[] messageHash = Hash.sha3(message);
             SignatureFromKey returnSig = keyService.signData(signer, message.getPrehash());
             returnSig.signature = patchSignatureVComponent(returnSig.signature);
             return returnSig;

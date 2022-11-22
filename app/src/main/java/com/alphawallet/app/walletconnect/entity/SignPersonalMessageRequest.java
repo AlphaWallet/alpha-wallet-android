@@ -18,6 +18,12 @@ public class SignPersonalMessageRequest extends BaseRequest
     }
 
     @Override
+    public Signable getSignable(long callbackId, String origin)
+    {
+        return new EthereumMessage(getMessage(), origin, callbackId, SignMessageType.SIGN_PERSONAL_MESSAGE);
+    }
+
+    @Override
     public String getWalletAddress()
     {
         return params.get(1);

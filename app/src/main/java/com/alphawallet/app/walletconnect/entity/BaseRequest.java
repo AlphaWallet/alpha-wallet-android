@@ -50,5 +50,7 @@ public abstract class BaseRequest
 
     public abstract Signable getSignable();
 
+    public Signable getSignable(long callbackId, String origin) { return null; };
+
     public abstract String getWalletAddress();
 }

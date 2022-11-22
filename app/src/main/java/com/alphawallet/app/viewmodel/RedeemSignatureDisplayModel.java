@@ -289,7 +289,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         //now run this guy through the signed message system
         if (pair != null)
         disposable = createTransactionInteract
-                .sign(wallet, pair, token.tokenInfo.chainId)
+                .sign(wallet, pair)
                 .subscribe(this::onSignedMessage, this::onError);
     }
 

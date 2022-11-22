@@ -3,6 +3,7 @@ package com.alphawallet.app.widget;
 import android.animation.Animator;
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -27,7 +28,7 @@ public class ConfirmationWidget extends RelativeLayout
     private final TextView hashText;
     private final RelativeLayout progressLayout;
     private RealmResults<RealmTransaction> realmTransactionUpdates;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public ConfirmationWidget(Context context, AttributeSet attrs)
     {
@@ -56,9 +57,11 @@ public class ConfirmationWidget extends RelativeLayout
 
     public void startProgressCycle(int cycleTime)
     {
-        progress.setVisibility(View.VISIBLE);
-        progressLayout.setVisibility(View.VISIBLE);
-        progress.startAnimation(cycleTime);
+        handler.post(() -> {
+            progress.setVisibility(View.VISIBLE);
+            progressLayout.setVisibility(View.VISIBLE);
+            progress.startAnimation(cycleTime);
+        });
     }
 
     public void completeProgressMessage(String message, final ProgressCompleteCallback callback)
@@ -78,27 +81,29 @@ public class ConfirmationWidget extends RelativeLayout
             public void onAnimationRepeat(Animator animation) { }
         };
 
-        if (!TextUtils.isEmpty(message))
-        {
-            completeProgressSuccess(true);
-            hashText.setVisibility(View.VISIBLE);
-            hashText.setAlpha(1.0f);
-            if (message.length() > 1) hashText.setText(message);
+        handler.post(() -> {
+            if (!TextUtils.isEmpty(message))
+            {
+                completeProgressSuccess(true);
+                hashText.setVisibility(View.VISIBLE);
+                hashText.setAlpha(1.0f);
+                if (message.length() > 1) hashText.setText(message);
 
-            hashText.animate()
-                    .alpha(0.0f)
-                    .setDuration(1500)
-                    .setListener(animatorListener);
-        }
-        else
-        {
-            completeProgressSuccess(false);
-            hashText.setVisibility(View.GONE);
-            hashText.animate()
-                    .alpha(0.0f)
-                    .setDuration(1500)
-                    .setListener(animatorListener);
-        }
+                hashText.animate()
+                        .alpha(0.0f)
+                        .setDuration(1500)
+                        .setListener(animatorListener);
+            }
+            else
+            {
+                completeProgressSuccess(false);
+                hashText.setVisibility(View.GONE);
+                hashText.animate()
+                        .alpha(0.0f)
+                        .setDuration(1500)
+                        .setListener(animatorListener);
+            }
+        });
     }
 
     //listen for transaction completion

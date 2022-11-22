@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.FrameLayout;
 
 import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
@@ -282,7 +281,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         actionSheetCallback = null;
         callbackId = 0;
     }
-    
+
     private GasWidgetInterface setupGasWidget()
     {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
@@ -674,26 +673,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         };
 
         actionSheetCallback.getAuthorisation(signCallback);
-    }
-
-    @Override
-    public void lockDragging(boolean lock)
-    {
-        getBehavior().setDraggable(!lock);
-
-        //ensure view fully expanded when locking scroll. Otherwise we may not be able to see our expanded view
-        if (lock)
-        {
-            FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(STATE_EXPANDED);
-        }
-    }
-
-    @Override
-    public void fullExpand()
-    {
-        FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
-        if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(STATE_EXPANDED);
     }
 
     //Takes gas estimate from calling activity (eg WalletConnectActivity) and updates dialog

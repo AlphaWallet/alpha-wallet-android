@@ -1,25 +1,23 @@
 package com.alphawallet.app.walletconnect;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static com.alphawallet.app.entity.cryptokeys.SignatureReturnType.SIGNATURE_GENERATED;
 
-import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.LongSparseArray;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.lifecycle.MutableLiveData;
 
-import com.alphawallet.app.App;
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.AuthenticationCallback;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.walletconnect.NamespaceParser;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
@@ -27,9 +25,11 @@ import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.service.WalletConnectV2Service;
+import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
-import com.alphawallet.app.viewmodel.walletconnect.SignMethodDialogViewModel;
 import com.alphawallet.app.walletconnect.util.WCMethodChecker;
+import com.alphawallet.token.entity.Signable;
+import com.alphawallet.token.tools.Numeric;
 import com.walletconnect.android.Core;
 import com.walletconnect.android.CoreClient;
 import com.walletconnect.android.relay.ConnectionType;
@@ -51,19 +51,21 @@ import timber.log.Timber;
 public class AWWalletConnectClient implements SignInterface.WalletDelegate
 {
     private static final String TAG = AWWalletConnectClient.class.getName();
-    public static AuthenticationCallback authCallback;
     private final WalletConnectInteract walletConnectInteract;
     public static Sign.Model.SessionProposal sessionProposal;
 
-    public static SignMethodDialogViewModel viewModel;
     private final Context context;
     private final MutableLiveData<List<WalletConnectSessionItem>> sessionItemMutableLiveData = new MutableLiveData<>(Collections.emptyList());
     private final KeyProvider keyProvider = KeyProviderFactory.get();
+    private final LongSparseArray<WalletConnectV2SessionRequestHandler> requestHandlers = new LongSparseArray<>();
+    private HomeActivity activity;
+    private boolean hasConnection;
 
     public AWWalletConnectClient(Context context, WalletConnectInteract walletConnectInteract)
     {
         this.context = context;
         this.walletConnectInteract = walletConnectInteract;
+        hasConnection = false;
     }
 
     public void onSessionDelete(@NonNull Sign.Model.DeletedSession deletedSession)
@@ -102,7 +104,6 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
         return true;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void onSessionRequest(@NonNull Sign.Model.SessionRequest sessionRequest)
     {
         String method = sessionRequest.getRequest().getMethod();
@@ -115,9 +116,9 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
 
         Sign.Model.Session settledSession = getSession(sessionRequest.getTopic());
 
-        Activity topActivity = App.getInstance().getTopActivity();
-        WalletConnectV2SessionRequestHandler handler = new WalletConnectV2SessionRequestHandler(sessionRequest, settledSession, topActivity, this);
-        handler.handle(method);
+        WalletConnectV2SessionRequestHandler handler = new WalletConnectV2SessionRequestHandler(sessionRequest, settledSession, activity, this);
+        handler.handle(method, activity);
+        requestHandlers.append(sessionRequest.getRequest().getId(), handler);
     }
 
     private Sign.Model.Session getSession(String topic)
@@ -133,7 +134,6 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
             listOfSettledSessions = Collections.emptyList();
             Timber.tag(TAG).e(e);
         }
-
 
         for (Sign.Model.Session session : listOfSettledSessions)
         {
@@ -285,6 +285,11 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
         return null;
     }
 
+    public void init(HomeActivity homeActivity)
+    {
+        activity = homeActivity;
+    }
+
     public void init(Application application)
     {
         Core.Model.AppMetaData appMetaData = getAppMetaData(application);
@@ -327,6 +332,7 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
     public void onConnectionStateChange(@NonNull Sign.Model.ConnectionState connectionState)
     {
         Timber.tag(TAG).i("onConnectionStateChange");
+        hasConnection = connectionState.isAvailable();
     }
 
     public void onSessionSettleResponse(@NonNull Sign.Model.SettledSessionResponse settledSessionResponse)
@@ -342,6 +348,57 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
     public void onError(Sign.Model.Error error)
     {
         Timber.e(error.getThrowable());
+    }
+
+    public void signComplete(SignatureFromKey signatureFromKey, Signable signable)
+    {
+        if (hasConnection)
+        {
+            onSign(signatureFromKey, getHandler(signable.getCallbackId())); //have valid connection, can send response
+        }
+        else
+        {
+            new Handler().postDelayed(() -> signComplete(signatureFromKey, signable), 1000); //Delay by 1 second and check again
+        }
+    }
+
+    public void signFail(String error, Signable signable)
+    {
+        final WalletConnectV2SessionRequestHandler requestHandler = getHandler(signable.getCallbackId());
+
+        Timber.i("sign fail: %s", error);
+        reject(requestHandler.getSessionRequest(), error);
+    }
+
+    //Sign Dialog (and later tx dialog) was dismissed
+    public void dismissed(long callbackId)
+    {
+        final WalletConnectV2SessionRequestHandler requestHandler = getHandler(callbackId);
+        if (requestHandler != null)
+        {
+            reject(requestHandler.getSessionRequest(), activity.getString(R.string.message_reject_request));
+        }
+    }
+
+    private WalletConnectV2SessionRequestHandler getHandler(long callbackId)
+    {
+        WalletConnectV2SessionRequestHandler handler = requestHandlers.get(callbackId);
+        requestHandlers.remove(callbackId);
+        return handler;
+    }
+
+    private void onSign(SignatureFromKey signatureFromKey, WalletConnectV2SessionRequestHandler requestHandler)
+    {
+        if (signatureFromKey.sigType == SIGNATURE_GENERATED)
+        {
+            String result = Numeric.toHexString(signatureFromKey.signature);
+            approve(requestHandler.getSessionRequest(), result);
+        }
+        else
+        {
+            Timber.i("sign fail: %s", signatureFromKey.failMessage);
+            reject(requestHandler.getSessionRequest(), signatureFromKey.failMessage);
+        }
     }
 
     public interface WalletConnectV2Callback

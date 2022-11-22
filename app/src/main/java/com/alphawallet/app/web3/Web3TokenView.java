@@ -2,21 +2,16 @@ package com.alphawallet.app.web3;
 
 import static androidx.webkit.WebSettingsCompat.FORCE_DARK_OFF;
 import static androidx.webkit.WebSettingsCompat.FORCE_DARK_ON;
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.Build;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.webkit.WebSettingsCompat;
-import androidx.webkit.WebViewFeature;
-
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Base64;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.ConsoleMessage;
@@ -29,6 +24,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.webkit.WebSettingsCompat;
+import androidx.webkit.WebViewFeature;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
@@ -51,7 +51,6 @@ import com.alphawallet.token.tools.TokenDefinition;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.math.BigInteger;
@@ -63,10 +62,6 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import timber.log.Timber;
-
-import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
-import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
-import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
 
 /**
  * Created by James on 3/04/2019.

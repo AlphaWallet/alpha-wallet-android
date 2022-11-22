@@ -19,8 +19,8 @@ public interface TransactionRepositoryType {
 	Single<TransactionData> create1559TransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasLimit, BigInteger maxFeePerGas, BigInteger maxPriorityFee, long nonce, byte[] data, long chainId);
 	Single<TransactionData> getSignatureForTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId);
 
-	Single<SignatureFromKey> getSignature(Wallet wallet, Signable message, long chainId);
-	Single<byte[]> getSignatureFast(Wallet wallet, String password, byte[] message, long chainId);
+	Single<SignatureFromKey> getSignature(Wallet wallet, Signable message);
+	Single<byte[]> getSignatureFast(Wallet wallet, String password, byte[] message);
 
     Transaction fetchCachedTransaction(String walletAddr, String hash);
 	long fetchTxCompletionTime(String walletAddr, String hash);

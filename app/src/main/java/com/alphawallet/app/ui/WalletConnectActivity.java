@@ -40,6 +40,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.analytics.ActionSheetSource;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -842,80 +843,39 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
     private void doSignMessage(final Signable signable)
     {
-        final DAppFunction dappFunction = new DAppFunction()
-        {
-            @Override
-            public void DAppError(Throwable error, Signable message)
-            {
-                showErrorDialog(error.getMessage());
-                confirmationDialog.dismiss();
-                if (fromDappBrowser) switchToDappBrowser();
-                requestId = 0;
-                lastId = 0;
-                signData = null;
-            }
-
-            @Override
-            public void DAppReturn(byte[] data, Signable message)
-            {
-                //store sign
-                viewModel.recordSign(signable, getSessionId(), () -> {
-                    viewModel.approveRequest(getApplication(), getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
-                    confirmationDialog.success();
-                    if (fromDappBrowser)
-                    {
-                        confirmationDialog.forceDismiss();
-                        switchToDappBrowser();
-                    }
-                    requestId = 0;
-                    lastId = 0;
-                    signData = null;
-                    updateSignCount();
-                });
-            }
-        };
-
-        signCallback = new SignAuthenticationCallback()
-        {
-            @Override
-            public void gotAuthorisation(boolean gotAuth)
-            {
-                viewModel.signMessage(
-                        signable,
-                        dappFunction);
-            }
-
-            @Override
-            public void gotAuthorisationForSigning(boolean gotAuth, Signable messageToSign)
-            {
-                if (gotAuth)
-                {
-                    viewModel.signMessage(
-                            signable,
-                            dappFunction);
-                }
-                else
-                {
-                    cancelAuthentication();
-                }
-            }
-
-            @Override
-            public void cancelAuthentication()
-            {
-                requestId = 0;
-                showErrorDialogCancel(getString(R.string.title_dialog_error), getString(R.string.message_authentication_failed));
-                viewModel.rejectRequest(getApplication(), getSessionId(), lastId, getString(R.string.message_authentication_failed));
-                confirmationDialog.dismiss();
-                if (fromDappBrowser) switchToDappBrowser();
-            }
-        };
-
-        confirmationDialog = new ActionSheetSignDialog(this, this, signCallback, signable);
-        confirmationDialog.setCanceledOnTouchOutside(false);
+        confirmationDialog = new ActionSheetSignDialog(this, this, signable);
         confirmationDialog.show();
 
         viewModel.track(Analytics.Action.WALLET_CONNECT_SIGN_MESSAGE_REQUEST);
+    }
+
+    @Override
+    public void signingComplete(SignatureFromKey signature, Signable signable)
+    {
+        viewModel.recordSign(signable, getSessionId(), () -> {
+            viewModel.approveRequest(getApplication(), getSessionId(), signable.getCallbackId(), Numeric.toHexString(signature.signature));
+            confirmationDialog.success();
+            if (fromDappBrowser)
+            {
+                confirmationDialog.forceDismiss();
+                switchToDappBrowser();
+            }
+            requestId = 0;
+            lastId = 0;
+            signData = null;
+            updateSignCount();
+        });
+    }
+
+    @Override
+    public void signingFailed(Throwable error, Signable message)
+    {
+        showErrorDialog(error.getMessage());
+        confirmationDialog.dismiss();
+        if (fromDappBrowser) switchToDappBrowser();
+        requestId = 0;
+        lastId = 0;
+        signData = null;
     }
 
     private void onEthSignTransaction(Long id, WCEthereumTransaction transaction, long chainId)

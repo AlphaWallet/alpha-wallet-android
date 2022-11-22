@@ -1,6 +1,6 @@
 package com.alphawallet.app.walletconnect.util;
 
-public class WalletConnectHelper
+public abstract class WalletConnectHelper
 {
     public static boolean isWalletConnectV1(String text)
     {

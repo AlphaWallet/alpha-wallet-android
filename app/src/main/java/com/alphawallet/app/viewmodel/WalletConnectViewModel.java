@@ -15,7 +15,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.GenericCallback;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -211,7 +210,7 @@ public class WalletConnectViewModel extends BaseViewModel
     public void signMessage(Signable message, DAppFunction dAppFunction)
     {
         resetSignDialog();
-        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message, MAINNET_ID)
+        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),

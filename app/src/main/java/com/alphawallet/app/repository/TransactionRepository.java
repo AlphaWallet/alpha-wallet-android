@@ -227,13 +227,14 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<SignatureFromKey> getSignature(Wallet wallet, Signable message, long chainId) {
-		return accountKeystoreService.signMessage(wallet, message, chainId);
+	public Single<SignatureFromKey> getSignature(Wallet wallet, Signable message) {
+		return accountKeystoreService.signMessage(wallet, message);
 	}
 
 	@Override
-	public Single<byte[]> getSignatureFast(Wallet wallet, String password, byte[] message, long chainId) {
-		return accountKeystoreService.signTransactionFast(wallet, password, message, chainId);
+	public Single<byte[]> getSignatureFast(Wallet wallet, String password, byte[] message)
+    {
+		return accountKeystoreService.signMessageFast(wallet, password, message);
 	}
 
 	@Override

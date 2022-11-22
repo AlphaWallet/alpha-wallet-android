@@ -12,7 +12,6 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.token.entity.Signable;
 
 /**
@@ -26,7 +25,6 @@ public class SignDataWidget extends LinearLayout
     private final ImageView moreArrow;
     private final ScrollView scrollView;
     private final TextView messageTitle;
-    private ActionSheetInterface sheetInterface;
     private Signable signable;
 
     public SignDataWidget(Context context, @Nullable AttributeSet attrs)
@@ -72,7 +70,6 @@ public class SignDataWidget extends LinearLayout
                 scrollView.setVisibility(View.VISIBLE);
                 messageTitle.setVisibility(View.GONE);
                 moreArrow.setImageResource(R.drawable.ic_expand_less_black);
-                if (sheetInterface != null) sheetInterface.lockDragging(true);
             }
             else
             {
@@ -80,14 +77,8 @@ public class SignDataWidget extends LinearLayout
                 messageTitle.setVisibility(View.VISIBLE);
                 scrollView.setVisibility(View.GONE);
                 moreArrow.setImageResource(R.drawable.ic_expand_more);
-                if (sheetInterface != null) sheetInterface.lockDragging(false);
             }
         });
-    }
-
-    public void setLockCallback(ActionSheetInterface asIf)
-    {
-        sheetInterface = asIf;
     }
 
     public Signable getSignable()

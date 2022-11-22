@@ -929,4 +929,6 @@
     <string name="message_no_routes_found_for_the_given_parameters">No se encontraron rutas para los parámetros dados.</string>
     <string name="message_select_one_exchange">Seleccione al menos un intercambio.</string>
     <string name="deprecated">Obsoleta</string>
+    <string name="unselected_token">Are you enable all unselected chains?</string>
+    <string name="toast_wait_to_scan_chains">Please wait until the chains are scanning</string>
 </resources>

@@ -963,4 +963,6 @@
     <string name="message_no_routes_found_for_the_given_parameters">ပေးထားသော ကန့်သတ်ဘောင်များအတွက် လမ်းကြောင်းများ ရှာမတွေ့ပါ။</string>
     <string name="message_select_one_exchange">အနည်းဆုံးလဲလှယ်မှုတစ်ခုကို ရွေးပါ။</string>
     <string name="deprecated">ကန့်ကွက်ထားသည်။</string>
+    <string name="unselected_token">Are you enable all unselected chains?</string>
+    <string name="toast_wait_to_scan_chains">Please wait until the chains are scanning</string>
 </resources>

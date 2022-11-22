@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -81,7 +82,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     private TokensAdapter adapter;
     private RecyclerView recyclerView;
     private FunctionButtonBar functionBar;
-    private TokensAdapterCallback tokenAdapterCallback;
 
     private boolean mainNetActive = true;
 
@@ -323,6 +323,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             lastCheck = address;
             showProgress(true);
             progressLayout.setVisibility(View.VISIBLE);
+            adapter.clear();
             viewModel.testNetworks(address);
         }
     }
@@ -333,17 +334,10 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         if (mainNetActive)
         {
             List<TokenCardMeta> selected = adapter.getSelected();
-            List<Token> toSave = new ArrayList<>();
-            for (TokenCardMeta tcm : selected)
-            {
-                Token matchingToken = tokenList.get(tcm.getChain());
-                if (matchingToken != null) toSave.add(matchingToken);
-            }
 
-            if (toSave.size() > 0)
+            if (selected.size() > 0)
             {
-                viewModel.saveTokens(toSave);
-                onSaved(toSave.get(0));
+                onSelectedChains(selected);
             }
             else
             {
@@ -356,6 +350,35 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
     }
 
+    private void onSelectedChains(List<TokenCardMeta> selected)
+    {
+        aDialog = new AWalletAlertDialog(this);
+        aDialog.setTitle(R.string.title_add_token);
+        aDialog.setIcon(AWalletAlertDialog.NONE);
+        aDialog.setMessage(R.string.unselected_token);
+        aDialog.setButtonText(R.string.dialog_ok);
+        aDialog.setButtonListener(v -> {
+            List<Token> toSave = new ArrayList<>();
+            for (TokenCardMeta tcm : selected)
+            {
+                Token matchingToken = tokenList.get(tcm.getChain());
+                if (matchingToken != null) toSave.add(matchingToken);
+            }
+            viewModel.saveTokens(toSave);
+            if (toSave.size() == 0)
+            {
+                Toast.makeText(this, R.string.toast_wait_to_scan_chains, Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                viewModel.saveTokens(toSave);
+                onSaved(toSave.get(0));
+                aDialog.dismiss();
+            }
+
+        });
+        aDialog.show();
+    }
 
     private void showDialog(View view)
     {

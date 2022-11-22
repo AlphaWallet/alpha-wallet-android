@@ -942,4 +942,6 @@
     <string name="message_no_routes_found_for_the_given_parameters">Không tìm thấy các tuyến đường cho các thông số đã cho.</string>
     <string name="message_select_one_exchange">Chọn ít nhất một sàn giao dịch.</string>
     <string name="deprecated">Không được chấp nhận</string>
+    <string name="unselected_token">Are you enable all unselected chains?</string>
+    <string name="toast_wait_to_scan_chains">Please wait until the chains are scanning</string>
 </resources>

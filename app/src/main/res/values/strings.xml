@@ -1003,4 +1003,6 @@
     <string name="message_no_routes_found_for_the_given_parameters">No routes found for the given parameters.</string>
     <string name="message_select_one_exchange">Select at least one exchange.</string>
     <string name="deprecated">Deprecated</string>
+    <string name="unselected_token">Are you want enable all unselected chains?</string>
+    <string name="toast_wait_to_scan_chains">Please wait until the chains are scanning</string>
 </resources>

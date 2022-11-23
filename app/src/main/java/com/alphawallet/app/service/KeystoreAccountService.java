@@ -82,8 +82,7 @@ public class KeystoreAccountService implements AccountKeystoreService
     @Override
     public Single<Wallet> createAccount(String password)
     {
-        return Single.fromCallable(() ->
-                {
+        return Single.fromCallable(() -> {
                     ECKeyPair ecKeyPair = Keys.createEcKeyPair();
                     WalletFile walletFile = org.web3j.crypto.Wallet.createLight(password, ecKeyPair);
                     return objectMapper.writeValueAsString(walletFile);

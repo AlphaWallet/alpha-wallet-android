@@ -235,7 +235,9 @@ public class KeystoreAccountService implements AccountKeystoreService
             if (contents != null)
             {
                 for (File child : contents)
+                {
                     deleteRecursive(child);
+                }
             }
         }
 

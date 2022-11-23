@@ -1016,4 +1016,6 @@
     <string name="message_select_one_exchange">Select at least one exchange.</string>
     <string name="deprecated">Deprecated</string>
     <string name="error_message_watch_only_wallet">Could not perform action on this Watch-only wallet.</string>
+    <string name="toast_wait_to_scan_chains">Please wait until the chains are scanning</string>
+    <string name="unselected_token">Are you want enable all unselected chains?</string>
 </resources>

@@ -944,4 +944,6 @@
     <string name="message_select_one_exchange">Pilih setidaknya satu bursa.</string>
     <string name="deprecated">Tidak digunakan lagi</string>
     <string name="error_message_watch_only_wallet">Tidak dapat melakukan tindakan pada dompet khusus jam tangan ini.</string>
+    <string name="toast_wait_to_scan_chains">Please wait until the chains are scanning</string>
+    <string name="unselected_token">Are you want enable all unselected chains?</string>
 </resources>

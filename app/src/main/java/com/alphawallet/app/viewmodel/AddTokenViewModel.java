@@ -304,4 +304,9 @@ public class AddTokenViewModel extends BaseViewModel {
     {
         return assetDefinitionService;
     }
+
+    public EthereumNetworkRepositoryType ethereumNetworkRepositoryType()
+    {
+        return ethereumNetworkRepositoryType();
+    }
 }

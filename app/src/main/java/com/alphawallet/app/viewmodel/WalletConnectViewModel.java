@@ -247,14 +247,14 @@ public class WalletConnectViewModel extends BaseViewModel
         {
             disposable = createTransactionInteract
                     .createWithSig(wallet, finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.signature),
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
                             error -> callback.transactionError(finalTx.leafPosition, error));
         }
         else
         {
             disposable = createTransactionInteract
                     .createWithSig(wallet, finalTx, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.signature),
+                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
                             error -> callback.transactionError(finalTx.leafPosition, error));
         }
     }

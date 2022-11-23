@@ -367,7 +367,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             viewModel.saveTokens(toSave);
             if (toSave.size() == 0)
             {
-                Toast.makeText(this, R.string.toast_wait_to_scan_chains , Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.toast_wait_to_scan_chains, Toast.LENGTH_SHORT).show();
             }
             else
             {
@@ -416,7 +416,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
             }
         });
-        dialog.setTitle(getString(R.string.title_dialog_where_are_tokens));
+        dialog.setTitle(getString(R.string.button_switch_to_mainnet));
         dialog.setContent(getString(R.string.content_dialog_where_are_tokens));
         dialog.setConfirmButton(getString(R.string.button_switch_to_mainnet));
         return dialog;

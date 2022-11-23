@@ -34,7 +34,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 @HiltViewModel
-public class AddTokenViewModel extends BaseViewModel {
+public class AddTokenViewModel extends BaseViewModel
+{
 
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Long> switchNetwork = new MutableLiveData<>();
@@ -57,14 +58,35 @@ public class AddTokenViewModel extends BaseViewModel {
     private long primaryChainId = 1;
     private final List<Token> discoveredTokenList = new ArrayList<>();
 
-    public MutableLiveData<Wallet> wallet() {
+    public MutableLiveData<Wallet> wallet()
+    {
         return wallet;
     }
-    public MutableLiveData<Token> tokenType() { return tokentype; }
-    public LiveData<Long> switchNetwork() { return switchNetwork; }
-    public LiveData<Integer> chainScanCount() { return scanCount; }
-    public LiveData<Token> onToken() { return onToken; }
-    public LiveData<Token[]> allTokens() { return allTokens; }
+
+    public MutableLiveData<Token> tokenType()
+    {
+        return tokentype;
+    }
+
+    public LiveData<Long> switchNetwork()
+    {
+        return switchNetwork;
+    }
+
+    public LiveData<Integer> chainScanCount()
+    {
+        return scanCount;
+    }
+
+    public LiveData<Token> onToken()
+    {
+        return onToken;
+    }
+
+    public LiveData<Token[]> allTokens()
+    {
+        return allTokens;
+    }
 
     @Nullable
     Disposable scanNetworksDisposable;
@@ -77,7 +99,8 @@ public class AddTokenViewModel extends BaseViewModel {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService) {
+            TokensService tokensService)
+    {
         this.genericWalletInteract = genericWalletInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
@@ -140,7 +163,10 @@ public class AddTokenViewModel extends BaseViewModel {
         finalisedToken.postValue(token);
     }
 
-    public NetworkInfo getNetworkInfo(long chainId) { return ethereumNetworkRepository.getNetworkByChain(chainId); }
+    public NetworkInfo getNetworkInfo(long chainId)
+    {
+        return ethereumNetworkRepository.getNetworkByChain(chainId);
+    }
 
     private void findWallet()
     {
@@ -148,7 +174,8 @@ public class AddTokenViewModel extends BaseViewModel {
                 .subscribe(wallet::setValue, this::onError);
     }
 
-    private void onTokensSetup(TokenInfo info) {
+    private void onTokensSetup(TokenInfo info)
+    {
         disposable = tokensService.addToken(info, wallet.getValue().address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -307,6 +334,6 @@ public class AddTokenViewModel extends BaseViewModel {
 
     public EthereumNetworkRepositoryType ethereumNetworkRepositoryType()
     {
-        return ethereumNetworkRepositoryType();
+        return ethereumNetworkRepository;
     }
 }

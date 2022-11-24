@@ -74,7 +74,7 @@ public class TransferERC20Test extends BaseE2ETest
         EthUtils.transferFunds(web3j, senderCredentials, contractOwnerCredentials.getAddress(), BigDecimal.ONE);
 
         //Deploy door contract
-        EthUtils.deployContract(web3j, contractOwnerCredentials, Contracts.usdcContractCode);
+        EthUtils.deployContract(web3j, contractOwnerCredentials, Contracts.erc20ContractCode);
 
         //Always use zero nonce for determining the contract address
         contractAddress = EthUtils.calculateContractAddress(contractOwnerCredentials.getAddress(), 0L);

@@ -175,7 +175,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         }
         else
         {
-            walletAdapter = new WalletAdapter(this, viewModel.wallets().getValue(), viewModel.defaultWallet().getValue());
+            walletAdapter = new WalletAdapter(this, Wallets.filter(viewModel.wallets().getValue()), viewModel.defaultWallet().getValue());
         }
         walletList.setAdapter(walletAdapter);
         methodList.setAdapter(new MethodAdapter(this, session.methods));

@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.UserAvatar;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
@@ -66,7 +67,7 @@ public class WalletAdapter extends ArrayAdapter<Wallet>
         {
             holder.walletName.setText(wallet.ENSname);
         }
-        holder.walletAddress.setText(wallet.address);
+        holder.walletAddress.setText(Utils.formatAddress(wallet.address));
         if (wallet.type == WalletType.NOT_DEFINED)
         {
             holder.walletAddress.setPaintFlags(holder.walletAddress.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);

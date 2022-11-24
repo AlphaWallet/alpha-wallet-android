@@ -1,6 +1,5 @@
 package com.alphawallet.app;
 
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static com.alphawallet.app.steps.Steps.GANACHE_URL;
 import static com.alphawallet.app.steps.Steps.addCustomToken;
 import static com.alphawallet.app.steps.Steps.addNewNetwork;
@@ -13,12 +12,7 @@ import static com.alphawallet.app.steps.Steps.importWalletFromSettingsPage;
 import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.steps.Steps.sendBalanceTo;
 import static com.alphawallet.app.steps.Steps.switchToWallet;
-import static com.alphawallet.app.util.Helper.click;
-import static com.alphawallet.app.util.Helper.waitUntil;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.AllOf.allOf;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import android.os.Build;
@@ -31,11 +25,9 @@ import org.junit.Test;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class TransferERC20Test extends BaseE2ETest
 {
@@ -52,8 +44,7 @@ public class TransferERC20Test extends BaseE2ETest
         }
     };
     private Web3j web3j;
-    private String senderPivateKey;
-    private String gasFeeHolder;
+    private String senderPrivateKey;
     private Credentials senderCredentials;
     private Credentials contractOwnerCredentials;
 
@@ -68,17 +59,13 @@ public class TransferERC20Test extends BaseE2ETest
             fail("Please config seed phrase and wallet address for this API level first.");
         }
 
-        senderPivateKey = array[0];
-        gasFeeHolder = array[1];
-        senderCredentials = Credentials.create(senderPivateKey);
+        senderPrivateKey = array[0];
+        senderCredentials = Credentials.create(senderPrivateKey);
         contractOwnerCredentials = Credentials.create(contractOwnerPk);
 
         super.setUp();
         web3j = EthUtils.buildWeb3j(GANACHE_URL);
         deployTestTokenOnGanache();
-
-        // Transfer ETH to sender as fee
-//        EthUtils.transferFunds(web3j, contractOwnerCredentials, senderAddress, BigDecimal.ONE);
     }
 
     private void deployTestTokenOnGanache()
@@ -109,6 +96,7 @@ public class TransferERC20Test extends BaseE2ETest
         sendBalanceTo("AW test token", "1.11", newWalletAddress);
         ensureTransactionConfirmed();
         switchToWallet(newWalletAddress);
+        addCustomToken(contractAddress);
         assertBalanceIs("1.11");
     }
 }

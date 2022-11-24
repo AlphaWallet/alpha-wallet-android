@@ -139,6 +139,7 @@ public class Steps
         gotoSettingsPage();
         click(withText("Change / Add Wallet"));
         onView(withSubstring(address.substring(0, 6))).perform(ViewActions.click());
+        waitUntil(withSubstring("Buy"), 30);
     }
 
     public static String getWalletAddress()

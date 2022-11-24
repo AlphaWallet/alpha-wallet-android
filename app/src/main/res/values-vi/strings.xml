@@ -954,4 +954,5 @@
     <string name="message_select_one_exchange">Chọn ít nhất một sàn giao dịch.</string>
     <string name="deprecated">Không được chấp nhận</string>
     <string name="error_message_watch_only_wallet">Không thể thực hiện hành động trên ví Chỉ xem này.</string>
+    <string name="no_title">(Không tiêu đề)</string>
 </resources>

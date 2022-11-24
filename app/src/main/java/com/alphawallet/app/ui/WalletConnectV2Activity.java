@@ -28,6 +28,7 @@ import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
 import com.alphawallet.app.ui.widget.adapter.MethodAdapter;
 import com.alphawallet.app.ui.widget.adapter.WalletAdapter;
 import com.alphawallet.app.util.LayoutHelper;
+import com.alphawallet.app.util.Wallets;
 import com.alphawallet.app.viewmodel.SelectNetworkFilterViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectV2ViewModel;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
@@ -165,7 +166,13 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
                     .circleCrop()
                     .into(icon);
         }
-        peerName.setText(session.name);
+
+        String title = session.name;
+        if (TextUtils.isEmpty(title))
+        {
+            title = getString(R.string.no_title);
+        }
+        peerName.setText(title);
         peerUrl.setText(session.url);
 
         chainList.setAdapter(new ChainAdapter(this, session.chains));

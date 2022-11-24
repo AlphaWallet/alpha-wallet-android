@@ -9,6 +9,8 @@ import static org.w3c.dom.Node.TEXT_NODE;
 
 import com.alphawallet.token.tools.TokenDefinition;
 
+import java.util.Objects;
+
 /**
  * Holds an individual Token View which consists of style and HTML view code
  *
@@ -29,6 +31,10 @@ public class TSTokenView
     }
 
     private void generateTokenView(Element element){
+
+        if (!Objects.equals(this.getUrl(), "")){
+            return;
+        }
 
         String lStyle = "";
         String lView = "";
@@ -85,6 +91,10 @@ public class TSTokenView
         }
 
         return style;
+    }
+
+    public String getUrl(){
+        return this.element.getAttribute("url");
     }
 
     public String getUrlFragment(){

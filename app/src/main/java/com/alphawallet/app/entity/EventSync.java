@@ -13,6 +13,7 @@ import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.BatchResponse;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.EthFilter;
@@ -36,6 +37,8 @@ public class EventSync
     public static final long BLOCK_SEARCH_INTERVAL = 100000L;
 
     private final Token token;
+
+    private boolean batchProcessingError = false;
 
     public EventSync(Token token)
     {
@@ -375,26 +378,18 @@ public class EventSync
         EthFilter receiveFilter = token.getReceiveBalanceFilter(transferEvent, startBlock, endBlock);
         EthFilter sendFilter    = token.getSendBalanceFilter(transferEvent, startBlock, endBlock);
 
-        EthLog receiveLogs = web3j.ethGetLogs(receiveFilter).send();
-        if (receiveLogs.hasError())
-        {
-            throw new LogOverflowException(receiveLogs.getError());
-        }
+        Pair<EthLog, EthLog> ethLogs = getTxLogs(web3j, receiveFilter, sendFilter);
+
+        EthLog receiveLogs = ethLogs.first;
+        EthLog sendLogs = ethLogs.second;
 
         int eventCount = receiveLogs.getLogs().size();
 
         HashSet<BigInteger> rcvTokenIds = new HashSet<>(token.processLogsAndStoreTransferEvents(receiveLogs, transferEvent, txHashes, realm));
 
-        EthLog sentLogs = web3j.ethGetLogs(sendFilter).send();
+        if (sendLogs.getLogs().size() > eventCount) eventCount = sendLogs.getLogs().size();
 
-        if (sentLogs.hasError())
-        {
-            throw new LogOverflowException(receiveLogs.getError());
-        }
-
-        if (sentLogs.getLogs().size() > eventCount) eventCount = sentLogs.getLogs().size();
-
-        HashSet<BigInteger> sendTokenIds = token.processLogsAndStoreTransferEvents(sentLogs, transferEvent, txHashes, realm);
+        HashSet<BigInteger> sendTokenIds = token.processLogsAndStoreTransferEvents(sendLogs, transferEvent, txHashes, realm);
 
         //register Transaction fetches
         for (String txHash : txHashes)
@@ -403,6 +398,60 @@ public class EventSync
         }
 
         return new Pair<>(eventCount, new Pair<>(rcvTokenIds, sendTokenIds));
+    }
+
+    private Pair<EthLog, EthLog> getTxLogs(Web3j web3j, EthFilter receiveFilter, EthFilter sendFilter) throws LogOverflowException, IOException
+    {
+        if (EthereumNetworkBase.getBatchProcessingLimit(token.tokenInfo.chainId) > 0 && !batchProcessingError)
+        {
+            return getBatchTxLogs(web3j, receiveFilter, sendFilter);
+        }
+        else
+        {
+            EthLog receiveLogs = web3j.ethGetLogs(receiveFilter).send();
+
+            if (receiveLogs.hasError())
+            {
+                throw new LogOverflowException(receiveLogs.getError());
+            }
+
+            EthLog sentLogs = web3j.ethGetLogs(sendFilter).send();
+
+            if (sentLogs.hasError())
+            {
+                throw new LogOverflowException(sentLogs.getError());
+            }
+
+            return new Pair<>(receiveLogs, sentLogs);
+        }
+    }
+
+    private Pair<EthLog, EthLog> getBatchTxLogs(Web3j web3j, EthFilter receiveFilter, EthFilter sendFilter) throws LogOverflowException, IOException
+    {
+        BatchResponse rsp = web3j.newBatch()
+                .add(web3j.ethGetLogs(receiveFilter))
+                .add(web3j.ethGetLogs(sendFilter))
+                .send();
+
+        if (rsp.getResponses().size() != 2)
+        {
+            batchProcessingError = true;
+            return getTxLogs(web3j, receiveFilter, sendFilter);
+        }
+
+        EthLog receiveLogs = (EthLog) rsp.getResponses().get(0);
+        EthLog sendLogs = (EthLog) rsp.getResponses().get(1);
+
+        if (receiveLogs.hasError())
+        {
+            throw new LogOverflowException(receiveLogs.getError());
+        }
+        else if (sendLogs.hasError())
+        {
+            throw new LogOverflowException(sendLogs.getError());
+        }
+
+        return new Pair<>(receiveLogs, sendLogs);
     }
 
     public String getActivityName(String toAddress)

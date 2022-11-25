@@ -560,6 +560,51 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
+    //TODO: Refactor when we bump the version of java to allow switch on Long (Finally!!)
+    //Also TODO: add a test to check these batch limits of each chain we support
+    private static int batchProcessingLimit(long chainId)
+    {
+        NetworkInfo info = builtinNetworkMap.get(chainId);
+        if (info.rpcServerUrl.contains("infura")) //infura supported chains can handle tx batches of 1000 and up
+        {
+            return 512;
+        }
+        else if (info.rpcServerUrl.contains("klaytn"))
+        {
+            return 0;
+        }
+        else if (info.rpcServerUrl.contains("gnosis"))
+        {
+            return 6; //TODO: Check limit
+        }
+        else if (info.rpcServerUrl.contains("cronos.org"))
+        {
+            return 5; //TODO: Check limit
+        }
+        else
+        {
+            return 32;
+        }
+    }
+
+    private static final LongSparseArray<Integer> batchProcessingLimitMap = new LongSparseArray<>();
+
+    //Init the batch limits
+    private static void setBatchProcessingLimits()
+    {
+        for (int i = 0; i < builtinNetworkMap.size(); i++)
+        {
+            NetworkInfo info = builtinNetworkMap.valueAt(i);
+            batchProcessingLimitMap.put(info.chainId, batchProcessingLimit(info.chainId));
+        }
+    }
+
+    public static int getBatchProcessingLimit(long chainId)
+    {
+        if (batchProcessingLimitMap.size() == 0) setBatchProcessingLimits(); //If batch limits not set, init them and proceed
+        return batchProcessingLimitMap.get(chainId, 0); //default to zero / no batching
+    }
+
     @Override
     public boolean hasLockedGas(long chainId)
     {

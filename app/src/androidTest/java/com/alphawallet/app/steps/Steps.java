@@ -128,6 +128,25 @@ public class Steps
         }
     }
 
+    public static void sendNFTTo(String tokenSymbol, String receiverAddress)
+    {
+        click(withId(R.id.nav_wallet_text));
+        ensureBalanceFetched();
+        click(withSubstring(tokenSymbol));
+        click(withText("Send"));
+        onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));
+        click(withId(R.string.action_next));
+        try
+        {
+            click(withId(R.string.action_confirm));
+        }
+        catch (Error | Exception e)
+        {
+            waitForLoadingComplete("Calculating Gas Limit");
+            click(withId(R.string.action_confirm));
+        }
+    }
+
     private static void ensureBalanceFetched()
     {
         shouldSee("Ganache");

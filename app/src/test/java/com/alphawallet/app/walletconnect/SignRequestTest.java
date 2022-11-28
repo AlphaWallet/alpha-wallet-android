@@ -1,12 +1,13 @@
 package com.alphawallet.app.walletconnect;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import com.alphawallet.app.walletconnect.entity.SignRequest;
 import com.alphawallet.token.entity.SignMessageType;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SignRequestTest
 {

@@ -13,13 +13,6 @@
         android:minHeight="100dp"
         android:paddingHorizontal="@dimen/tiny_8">
 
-        <ProgressBar
-            android:id="@+id/ticket_load_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="visible" />
-
         <LinearLayout
             android:id="@+id/total_wrapper"
             android:layout_width="match_parent"

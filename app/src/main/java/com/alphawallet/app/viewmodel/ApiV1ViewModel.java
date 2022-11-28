@@ -1,8 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-
 import android.app.Activity;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -76,7 +74,7 @@ public class ApiV1ViewModel extends BaseViewModel
 
     public void signMessage(Signable message)
     {
-        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message, MAINNET_ID)
+        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onSignSuccess, this::onSignError);

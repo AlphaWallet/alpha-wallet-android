@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
@@ -38,9 +36,7 @@ import com.alphawallet.app.ui.widget.entity.GasWidgetInterface;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.token.entity.Signable;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -53,7 +49,7 @@ import io.realm.Realm;
 /**
  * Created by JB on 17/11/2020.
  */
-public class ActionSheetDialog extends BottomSheetDialog implements StandardFunctionInterface, ActionSheetInterface
+public class ActionSheetDialog extends ActionSheet implements StandardFunctionInterface, ActionSheetInterface
 {
     private final BottomSheetToolbarView toolbar;
     private final GasWidget2 gasWidget;
@@ -173,86 +169,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         setupCancelListeners();
     }
 
-    public ActionSheetDialog(@NonNull Activity activity, ActionSheetCallback aCallback, SignAuthenticationCallback sCallback, Signable message)
-    {
-        super(activity);
-        setContentView(R.layout.dialog_action_sheet_sign);
-
-        toolbar = findViewById(R.id.bottom_sheet_toolbar);
-        gasWidget = findViewById(R.id.gas_widgetx);
-        gasWidgetLegacy = findViewById(R.id.gas_widget_legacy);
-        balanceDisplay = findViewById(R.id.balance);
-        networkDisplay = findViewById(R.id.network_display_widget);
-        confirmationWidget = findViewById(R.id.confirmation_view);
-        addressDetail = findViewById(R.id.requester);
-        amountDisplay = findViewById(R.id.amount_display);
-        assetDetailView = findViewById(R.id.asset_detail);
-        functionBar = findViewById(R.id.layoutButtons);
-        detailWidget = null;
-        mode = ActionSheetMode.SIGN_MESSAGE;
-        callbackId = message.getCallbackId();
-        this.activity = activity;
-
-        actionSheetCallback = aCallback;
-        signCallback = sCallback;
-
-        token = null;
-        tokensService = null;
-        candidateTransaction = null;
-        actionCompleted = false;
-        walletConnectRequestWidget = null;
-        gasWidgetInterface = null;
-
-        addressDetail.setupRequester(message.getOrigin());
-        SignDataWidget signWidget = findViewById(R.id.sign_widget);
-        signWidget.setupSignData(message);
-        signWidget.setLockCallback(this);
-
-        toolbar.setTitle(Utils.getSigningTitle(message));
-
-        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
-        functionBar.revealButtons();
-        setupCancelListeners();
-    }
-
-    public ActionSheetDialog(@NonNull Activity activity, ActionSheetCallback aCallback, int titleId, String message, int buttonTextId,
-                             long cId, Token baseToken)
-    {
-        super(activity);
-        setContentView(R.layout.dialog_action_sheet_message);
-
-        toolbar = findViewById(R.id.bottom_sheet_toolbar);
-        TextView messageView = findViewById(R.id.text_message);
-        functionBar = findViewById(R.id.layoutButtons);
-        this.activity = activity;
-
-        actionSheetCallback = aCallback;
-        mode = ActionSheetMode.MESSAGE;
-
-        toolbar.setTitle(titleId);
-        messageView.setText(message);
-
-        gasWidget = null;
-        balanceDisplay = null;
-        networkDisplay = null;
-        confirmationWidget = null;
-        addressDetail = null;
-        amountDisplay = null;
-        assetDetailView = null;
-        detailWidget = null;
-        callbackId = cId;
-        token = baseToken;
-        tokensService = null;
-        candidateTransaction = null;
-        walletConnectRequestWidget = null;
-        gasWidgetLegacy = null;
-        gasWidgetInterface = null;
-
-        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(buttonTextId)));
-        functionBar.revealButtons();
-        setupCancelListeners();
-    }
-
     // wallet connect request
     public ActionSheetDialog(Activity activity, WCPeerMeta wcPeerMeta, long chainIdOverride, String iconUrl, ActionSheetCallback actionSheetCallback)
     {
@@ -337,30 +253,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         setupCancelListeners();
     }
 
-    private GasWidgetInterface setupGasWidget()
-    {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        boolean canUse1559Transactions = prefs.getBoolean(SharedPreferenceRepository.EXPERIMENTAL_1559_TX, false);
-
-        use1559Transactions = canUse1559Transactions && has1559Gas() //1559 Transactions toggled on in settings and this chain supports 1559
-                && !(token.isEthereum() && candidateTransaction.leafPosition == -2) //User not sweeping wallet (if so we need to use legacy tx)
-                && !tokensService.hasLockedGas(token.tokenInfo.chainId) //Service has locked gas, can only use legacy (eg Optimism).
-                && !candidateTransaction.isConstructor(); //Currently cannot use EIP1559 for constructors due to gas calculation issues
-
-        if (use1559Transactions)
-        {
-            gasWidget.setupWidget(tokensService, token, candidateTransaction, actionSheetCallback.gasSelectLauncher());
-            return gasWidget;
-        }
-        else
-        {
-            gasWidget.setVisibility(View.GONE);
-            gasWidgetLegacy.setVisibility(View.VISIBLE);
-            gasWidgetLegacy.setupWidget(tokensService, token, candidateTransaction, this, actionSheetCallback.gasSelectLauncher());
-            return gasWidgetLegacy;
-        }
-    }
-
     public ActionSheetDialog(Activity activity, ActionSheetMode mode)
     {
         super(activity);
@@ -388,6 +280,30 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         candidateTransaction = null;
         actionSheetCallback = null;
         callbackId = 0;
+    }
+
+    private GasWidgetInterface setupGasWidget()
+    {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        boolean canUse1559Transactions = prefs.getBoolean(SharedPreferenceRepository.EXPERIMENTAL_1559_TX, false);
+
+        use1559Transactions = canUse1559Transactions && has1559Gas() //1559 Transactions toggled on in settings and this chain supports 1559
+                && !(token.isEthereum() && candidateTransaction.leafPosition == -2) //User not sweeping wallet (if so we need to use legacy tx)
+                && !tokensService.hasLockedGas(token.tokenInfo.chainId) //Service has locked gas, can only use legacy (eg Optimism).
+                && !candidateTransaction.isConstructor(); //Currently cannot use EIP1559 for constructors due to gas calculation issues
+
+        if (use1559Transactions)
+        {
+            gasWidget.setupWidget(tokensService, token, candidateTransaction, actionSheetCallback.gasSelectLauncher());
+            return gasWidget;
+        }
+        else
+        {
+            gasWidget.setVisibility(View.GONE);
+            gasWidgetLegacy.setVisibility(View.VISIBLE);
+            gasWidgetLegacy.setupWidget(tokensService, token, candidateTransaction, this, actionSheetCallback.gasSelectLauncher());
+            return gasWidgetLegacy;
+        }
     }
 
     public void setSignOnly()
@@ -439,6 +355,7 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         }
     }
 
+    @Override
     public void setCurrentGasIndex(ActivityResult result)
     {
         if (result == null || result.getData() == null) return;
@@ -495,9 +412,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
                     sendTransaction();
                 }
                 break;
-            case SIGN_MESSAGE:
-                signMessage();
-                break;
             case SIGN_TRANSACTION:
                 signTransaction();
                 break;
@@ -541,44 +455,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
     {
         if (!token.isERC721()) return "";
         return token.getTransferValueRaw(transaction.transactionInput).toString();
-    }
-
-    private void signMessage()
-    {
-        //get authentication
-        functionBar.setVisibility(View.GONE);
-
-        //authentication screen
-        SignAuthenticationCallback localSignCallback = new SignAuthenticationCallback()
-        {
-            final SignDataWidget signWidget = findViewById(R.id.sign_widget);
-
-            @Override
-            public void gotAuthorisation(boolean gotAuth)
-            {
-                actionCompleted = true;
-                //display success and hand back to calling function
-                if (gotAuth)
-                {
-                    confirmationWidget.startProgressCycle(1);
-                    signCallback.gotAuthorisationForSigning(gotAuth, signWidget.getSignable());
-                    actionSheetCallback.notifyConfirm(mode.getValue());
-                }
-                else
-                {
-                    cancelAuthentication();
-                }
-            }
-
-            @Override
-            public void cancelAuthentication()
-            {
-                confirmationWidget.hide();
-                signCallback.gotAuthorisationForSigning(false, signWidget.getSignable());
-            }
-        };
-
-        actionSheetCallback.getAuthorisation(localSignCallback);
     }
 
     /**
@@ -799,26 +675,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         actionSheetCallback.getAuthorisation(signCallback);
     }
 
-    @Override
-    public void lockDragging(boolean lock)
-    {
-        getBehavior().setDraggable(!lock);
-
-        //ensure view fully expanded when locking scroll. Otherwise we may not be able to see our expanded view
-        if (lock)
-        {
-            FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
-            if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(STATE_EXPANDED);
-        }
-    }
-
-    @Override
-    public void fullExpand()
-    {
-        FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
-        if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(STATE_EXPANDED);
-    }
-
     //Takes gas estimate from calling activity (eg WalletConnectActivity) and updates dialog
     public void setGasEstimate(BigInteger estimate)
     {
@@ -841,14 +697,6 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
         {
             confirmationWidget.completeProgressMessage(".", this::dismiss);
         }
-    }
-
-    public void forceDismiss()
-    {
-        setOnDismissListener(v -> {
-            // Do nothing
-        });
-        dismiss();
     }
 
     public void waitForEstimate()
@@ -886,9 +734,4 @@ public class ActionSheetDialog extends BottomSheetDialog implements StandardFunc
 
         return false;
     }
-}
-
-interface OnGasSelectedCallback
-{
-    void onSelected();
 }

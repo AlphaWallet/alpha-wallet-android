@@ -79,14 +79,12 @@ public interface AccountKeystoreService {
 
 	Single<SignatureFromKey> signMessage(
 			Wallet signer,
-			Signable message,
-			long chainId);
+			Signable messaged);
 
-	Single<byte[]> signTransactionFast(
+	Single<byte[]> signMessageFast(
 			Wallet signer,
 			String password,
-			byte[] message,
-			long chainId);
+			byte[] message);
 
 	/**
 	 * Check if there is an address in the keystore

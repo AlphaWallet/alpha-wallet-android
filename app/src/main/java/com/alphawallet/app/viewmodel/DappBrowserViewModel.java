@@ -20,7 +20,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.DApp;
-import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
@@ -48,7 +47,6 @@ import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.token.entity.Signable;
 
 import org.web3j.utils.Numeric;
 
@@ -61,7 +59,6 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
@@ -152,16 +149,6 @@ public class DappBrowserViewModel extends BaseViewModel
                     .observeOn(Schedulers.io())
                     .subscribe(w -> {}, e -> {});
         }
-    }
-
-    public void signMessage(Signable message, DAppFunction dAppFunction)
-    {
-        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message,
-                        getActiveNetwork().chainId)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
-                        error -> dAppFunction.DAppError(error, message));
     }
 
     public void setLastUrl(Context context, String url)

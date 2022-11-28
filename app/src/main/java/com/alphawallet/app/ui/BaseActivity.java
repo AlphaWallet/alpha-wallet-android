@@ -5,20 +5,23 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.AuthenticationFailType;
-import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.walletconnect.AWWalletConnectClient;
-import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.app.widget.SignTransactionDialog;
-
 import androidx.annotation.DrawableRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AuthenticationCallback;
+import com.alphawallet.app.entity.AuthenticationFailType;
+import com.alphawallet.app.entity.Operation;
+import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.alphawallet.app.widget.SignTransactionDialog;
+
 public abstract class BaseActivity extends AppCompatActivity
 {
+    public static AuthenticationCallback authCallback;  // Note: This static is only for signing callbacks
+                                                        // which won't occur between wallet sessions - do not repeat this pattern
+                                                        // for other code
 
     protected Toolbar toolbar()
     {
@@ -139,7 +142,7 @@ public abstract class BaseActivity extends AppCompatActivity
         //Interpret the return code; if it's within the range of values possible to return from PIN confirmation then separate out
         //the task code from the return value. We have to do it this way because there's no way to send a bundle across the PIN dialog
         //and out through the PIN dialog's return back to here
-        if (AWWalletConnectClient.authCallback == null)
+        if (authCallback == null)
         {
             return;
         }
@@ -149,12 +152,14 @@ public abstract class BaseActivity extends AppCompatActivity
             Operation taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
             if (resultCode == RESULT_OK)
             {
-                AWWalletConnectClient.authCallback.authenticatePass(taskCode);
+                authCallback.authenticatePass(taskCode);
             }
             else
             {
-                AWWalletConnectClient.authCallback.authenticateFail("", AuthenticationFailType.PIN_FAILED, taskCode);
+                authCallback.authenticateFail("", AuthenticationFailType.PIN_FAILED, taskCode);
             }
+
+            authCallback = null;
         }
     }
 }

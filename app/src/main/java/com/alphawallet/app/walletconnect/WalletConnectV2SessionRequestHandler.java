@@ -1,17 +1,20 @@
 package com.alphawallet.app.walletconnect;
 
 import android.app.Activity;
-import android.app.Dialog;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.walletconnect.entity.BaseRequest;
-import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
-import com.alphawallet.app.walletconnect.entity.SignTypedDataRequest;
-import com.alphawallet.app.widget.SignMethodDialog;
+import com.alphawallet.app.walletconnect.entity.EthSignRequest;
+import com.alphawallet.app.widget.ActionSheet;
+import com.alphawallet.app.widget.ActionSheetSignDialog;
+import com.alphawallet.token.entity.Signable;
 import com.walletconnect.sign.client.Sign;
+
+import java.util.List;
+import java.util.Objects;
 
 import timber.log.Timber;
 
@@ -30,14 +33,19 @@ public class WalletConnectV2SessionRequestHandler
         this.client = client;
     }
 
-    public void handle(String method)
+    public void handle(String method, ActionSheetCallback aCallback)
     {
         activity.runOnUiThread(() -> {
-            showDialog(method);
+            showDialog(method, aCallback);
         });
     }
 
-    private void showDialog(String method)
+    public Sign.Model.SessionRequest getSessionRequest()
+    {
+        return sessionRequest;
+    }
+
+    private void showDialog(String method, ActionSheetCallback aCallback)
     {
         boolean isSignTransaction = "eth_signTransaction".equals(method);
         boolean isSendTransaction = "eth_sendTransaction".equals(method);
@@ -49,45 +57,22 @@ public class WalletConnectV2SessionRequestHandler
             return;
         }
 
-        if ("personal_sign".equals(method))
+        BaseRequest signRequest = EthSignRequest.getSignRequest(sessionRequest);
+        if (signRequest != null)
         {
-            personalSign().show();
-            return;
+            Signable signable = signRequest.getSignable(sessionRequest.getRequest().getId(), settledSession.getMetaData().getUrl());
+            ActionSheet actionSheet = new ActionSheetSignDialog(activity, aCallback, signable);
+            actionSheet.setSigningWallet(signRequest.getWalletAddress());
+            List<String> icons = Objects.requireNonNull(settledSession.getMetaData()).getIcons();
+            if (!icons.isEmpty())
+            {
+                actionSheet.setIcon(icons.get(0));
+            }
+            actionSheet.show();
         }
-
-        if ("eth_sign".equals(method))
+        else
         {
-            ethSign().show();
-            return;
+            Timber.e("Method %s not supported.", method);
         }
-
-        if ("eth_signTypedData".equals(method))
-        {
-            ethSignTypedData().show();
-            return;
-        }
-
-        Timber.e("Method %s not support.", method);
     }
-
-    private Dialog ethSign()
-    {
-        BaseRequest request = new SignRequest(sessionRequest.getRequest().getParams());
-        return new SignMethodDialog(activity, sessionRequest, request, settledSession.getMetaData());
-    }
-
-    @NonNull
-    private SignMethodDialog ethSignTypedData()
-    {
-        BaseRequest request = new SignTypedDataRequest(sessionRequest.getRequest().getParams());
-        return new SignMethodDialog(activity, sessionRequest, request, settledSession.getMetaData());
-    }
-
-    @NonNull
-    private SignMethodDialog personalSign()
-    {
-        BaseRequest request = new SignPersonalMessageRequest(sessionRequest.getRequest().getParams());
-        return new SignMethodDialog(activity, sessionRequest, request, settledSession.getMetaData());
-    }
-
 }

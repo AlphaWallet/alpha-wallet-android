@@ -1,6 +1,5 @@
 package com.alphawallet.app.walletconnect.util;
 
-import com.alphawallet.app.entity.TokensMapping;
 import com.alphawallet.app.walletconnect.entity.WCMethod;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -29,10 +28,10 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
-import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
@@ -49,7 +48,9 @@ import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheet;
 import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.ethereum.EthereumNetworkBase;
@@ -103,7 +104,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private int parsePass = 0;
     private int resolveInputCheckCount;
     private TSAction action;
-    private ActionSheetDialog confirmationDialog;
+    private ActionSheet confirmationDialog;
 
     private void initViews() {
         actionMethod = getIntent().getStringExtra(C.EXTRA_STATE);
@@ -135,9 +136,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
         parsePass = 0;
-
-        ProgressBar loadSpinner = findViewById(R.id.ticket_load_spinner);
-        handler.postDelayed(() -> loadSpinner.setVisibility(View.GONE), 2500);
     }
 
     private void displayFunction(String tokenAttrs)
@@ -550,12 +548,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void signMessage(Signable message, DAppFunction dAppFunction)
-    {
-        viewModel.signMessage(message, dAppFunction, token.tokenInfo.chainId);
-    }
-
-    @Override
     public void functionSuccess()
     {
         LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
@@ -638,8 +630,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     public void onSignPersonalMessage(EthereumMessage message)
     {
         //pop open the actionsheet
-        confirmationDialog = new ActionSheetDialog(this, this, this, message);
-        confirmationDialog.setCanceledOnTouchOutside(false);
+        confirmationDialog = new ActionSheetSignDialog(this, this, message); //new ActionSheetDialog(this, this, this, message);
         confirmationDialog.show();
         confirmationDialog.fullExpand();
     }
@@ -785,39 +776,19 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void gotAuthorisationForSigning(boolean gotAuth, Signable messageToSign)
+    public void signingComplete(SignatureFromKey signature, Signable message)
     {
-        viewModel.completeAuthentication(SIGN_DATA);
+        String signHex = Numeric.toHexString(signature.signature);
+        signHex = Numeric.cleanHexPrefix(signHex);
+        tokenView.onSignPersonalMessageSuccessful(message, signHex);
+        testRecoverAddressFromSignature(message.getMessage(), signHex);
+    }
 
-        DAppFunction dAppFunction = new DAppFunction()
-        {
-            @Override
-            public void DAppError(Throwable error, Signable message)
-            {
-                confirmationDialog.dismiss();
-                tokenView.onSignCancel(message);
-                functionFailed();
-            }
-
-            @Override
-            public void DAppReturn(byte[] data, Signable message)
-            {
-                String signHex = Numeric.toHexString(data);
-                signHex = Numeric.cleanHexPrefix(signHex);
-                tokenView.onSignPersonalMessageSuccessful(message, signHex);
-                testRecoverAddressFromSignature(message.getMessage(), signHex);
-                confirmationDialog.success();
-            }
-        };
-
-        if (gotAuth)
-        {
-            signMessage(messageToSign, dAppFunction);
-        }
-        else
-        {
-            confirmationDialog.dismiss();
-        }
+    @Override
+    public void signingFailed(Throwable error, Signable message)
+    {
+        tokenView.onSignCancel(message);
+        functionFailed();
     }
 
     @Override

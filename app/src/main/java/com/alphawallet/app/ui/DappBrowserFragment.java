@@ -2,11 +2,9 @@ package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
-import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
 import static com.alphawallet.app.util.Utils.isValidUrl;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
@@ -65,7 +63,6 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DApp;
-import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
@@ -76,6 +73,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetSource;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
@@ -107,7 +105,9 @@ import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Call;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheet;
 import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.app.widget.AddressBar;
 import com.alphawallet.app.widget.AddressBarListener;
 import com.alphawallet.app.widget.TestNetDialog;
@@ -183,7 +183,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private WebChromeClient.FileChooserParams fileChooserParams;
     private RealmResults<RealmToken> realmUpdate;
     private Realm realm = null;
-    private ActionSheetDialog confirmationDialog;
+    private ActionSheet confirmationDialog;
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> confirmationDialog.setCurrentGasIndex(result));
     private DappBrowserViewModel viewModel;
@@ -267,7 +267,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     // Some multi-chain Dapps have a watchdog thread that checks the chain
     // This thread stays in operation until a new page load is complete.
     private String loadUrlAfterReload;
-    private DAppFunction dAppFunction;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState)
@@ -1155,33 +1154,27 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void handleSignMessage(Signable message)
     {
-        dAppFunction = new DAppFunction()
-        {
-            @Override
-            public void DAppError(Throwable error, Signable message)
-            {
-                web3.onSignCancel(message.getCallbackId());
-                confirmationDialog.dismiss();
-            }
-
-            @Override
-            public void DAppReturn(byte[] data, Signable message)
-            {
-                String signHex = Numeric.toHexString(data);
-                Timber.d("Initial Msg: %s", message.getMessage());
-                web3.onSignMessageSuccessful(message, signHex);
-
-                confirmationDialog.success();
-            }
-        };
-
         if (confirmationDialog == null || !confirmationDialog.isShowing())
         {
-            confirmationDialog = new ActionSheetDialog(requireActivity(), this, this, message);
-            confirmationDialog.setCanceledOnTouchOutside(false);
+            confirmationDialog = new ActionSheetSignDialog(requireActivity(), this, message);
             confirmationDialog.show();
-            confirmationDialog.fullExpand();
         }
+    }
+
+    @Override
+    public void signingComplete(SignatureFromKey signature, Signable message)
+    {
+        String signHex = Numeric.toHexString(signature.signature);
+        Timber.d("Initial Msg: %s", message.getMessage());
+        confirmationDialog.success();
+        web3.onSignMessageSuccessful(message, signHex);
+    }
+
+    @Override
+    public void signingFailed(Throwable error, Signable message)
+    {
+        web3.onSignCancel(message.getCallbackId());
+        confirmationDialog.dismiss();
     }
 
     @Override
@@ -1808,34 +1801,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         if (confirmationDialog != null && confirmationDialog.isShowing())
         {
             confirmationDialog.dismiss();
-        }
-    }
-
-    @Override
-    public void gotAuthorisationForSigning(boolean gotAuth, Signable messageToSign)
-    {
-        if (gotAuth)
-        {
-            viewModel.completeAuthentication(SIGN_DATA);
-            viewModel.signMessage(messageToSign, dAppFunction);
-        }
-        else
-        {
-            web3.onSignCancel(messageToSign.getCallbackId());
-        }
-    }
-
-    /**
-     * Endpoint from PIN/Swipe authorisation
-     *
-     * @param gotAuth
-     */
-    @Override
-    public void pinAuthorisation(boolean gotAuth)
-    {
-        if (confirmationDialog != null && confirmationDialog.isShowing())
-        {
-            confirmationDialog.completeSignRequest(gotAuth);
         }
     }
 

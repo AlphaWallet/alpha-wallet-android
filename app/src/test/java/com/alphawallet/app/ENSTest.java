@@ -71,6 +71,15 @@ public class ENSTest
 
         assertEquals(
                 ensResolver.resolve("offchainexample.eth"), ("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045").toLowerCase());
+
+        //Now test the cache
+        assertEquals(
+                ensResolver.resolve("1.offchainexample.eth"), ("0x41563129cdbbd0c5d3e1c86cf9563926b243834d").toLowerCase());
+        assertEquals(
+                ensResolver.resolve("1.offchainexample.eth"), ("0x41563129cdbbd0c5d3e1c86cf9563926b243834d").toLowerCase());
+
+        assertEquals(
+                ensResolver.resolve("web3j.eth"), ("0x7bfd522dea355ddee2be3c01dfa4419451759310").toLowerCase());
     }
 
     @Test

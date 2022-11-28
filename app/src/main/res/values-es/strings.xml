@@ -941,6 +941,6 @@
     <string name="message_select_one_exchange">Seleccione al menos un intercambio.</string>
     <string name="deprecated">Obsoleta</string>
     <string name="error_message_watch_only_wallet">No se pudo realizar la acción en esta billetera de solo reloj.</string>
-    <string name="toast_wait_to_scan_chains">Please wait until the chains are scanning</string>
-    <string name="unselected_token">Are you want enable all unselected chains?</string>
+    <string name="toast_wait_to_scan_chains">Escaneo en curso: espere a que finalice</string>
+    <string name="unselected_token">¿Habilitar cadenas para tokens seleccionados?</string>
 </resources>

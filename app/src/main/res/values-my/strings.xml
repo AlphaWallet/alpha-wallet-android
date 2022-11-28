@@ -975,6 +975,6 @@
     <string name="message_select_one_exchange">အနည်းဆုံးလဲလှယ်မှုတစ်ခုကို ရွေးပါ။</string>
     <string name="deprecated">ကန့်ကွက်ထားသည်။</string>
     <string name="error_message_watch_only_wallet">ဤ Watch-only ပိုက်ဆံအိတ်တွင် လုပ်ဆောင်ချက်ကို မလုပ်ဆောင်နိုင်ပါ။</string>
-    <string name="toast_wait_to_scan_chains">Please wait until the chains are scanning</string>
-    <string name="unselected_token">Are you want enable all unselected chains?</string>
+    <string name="toast_wait_to_scan_chains">စကင်န်လုပ်နေသည်- ပြီးစီးရန်စောင့်ဆိုင်းပါ။</string>
+    <string name="unselected_token">ရွေးချယ်ထားသော တိုကင်များအတွက် ကွင်းဆက်များကို ဖွင့်မလား။</string>
 </resources>

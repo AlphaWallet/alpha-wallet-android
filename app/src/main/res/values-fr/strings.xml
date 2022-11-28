@@ -954,6 +954,6 @@
     <string name="message_select_one_exchange">Sélectionnez au moins un échange.</string>
     <string name="deprecated">Obsolète</string>
     <string name="error_message_watch_only_wallet">Impossible d\'effectuer une action sur ce portefeuille Watch-only.</string>
-    <string name="toast_wait_to_scan_chains">Please wait until the chains are scanning</string>
-    <string name="unselected_token">Are you want enable all unselected chains?</string>
+    <string name="toast_wait_to_scan_chains">Numérisation en cours : veuillez patienter jusqu\'à la fin</string>
+    <string name="unselected_token">Activer les chaînes pour les jetons sélectionnés ?</string>
 </resources>

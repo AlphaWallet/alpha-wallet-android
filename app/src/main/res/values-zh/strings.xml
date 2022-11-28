@@ -941,6 +941,6 @@
     <string name="message_select_one_exchange">至少选择一个交易所。</string>
     <string name="deprecated">已弃用</string>
     <string name="error_message_watch_only_wallet">无法对这个仅限手表的钱包执行操作。</string>
-    <string name="toast_wait_to_scan_chains">Please wait until the chains are scanning</string>
-    <string name="unselected_token">Are you want enable all unselected chains?</string>
+    <string name="toast_wait_to_scan_chains">掃描中：請等待完成</string>
+    <string name="unselected_token">為選定的代幣啟用鏈？</string>
 </resources>

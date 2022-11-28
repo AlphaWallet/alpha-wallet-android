@@ -954,6 +954,6 @@
     <string name="message_select_one_exchange">Chọn ít nhất một sàn giao dịch.</string>
     <string name="deprecated">Không được chấp nhận</string>
     <string name="error_message_watch_only_wallet">Không thể thực hiện hành động trên ví Chỉ xem này.</string>
-    <string name="toast_wait_to_scan_chains">Please wait until the chains are scanning</string>
-    <string name="unselected_token">Are you want enable all unselected chains?</string>
+    <string name="toast_wait_to_scan_chains">Đang quét: Vui lòng chờ hoàn thành</string>
+    <string name="unselected_token">Kích hoạt chuỗi cho mã thông báo đã chọn?</string>
 </resources>

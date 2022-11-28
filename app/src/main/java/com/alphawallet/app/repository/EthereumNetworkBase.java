@@ -204,6 +204,32 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     private static final List<Long> deprecatedNetworkList = new ArrayList<>(Arrays.asList(
             ROPSTEN_ID, RINKEBY_ID, KOVAN_ID, OPTIMISTIC_TEST_ID, SOKOL_ID, ARBITRUM_TEST_ID));
 
+    private static final String INFURA_ENDPOINT = ".infura.io/v3/";
+
+    @Override
+    public String getDappBrowserRPC(long chainId)
+    {
+        NetworkInfo info = getNetworkByChain(chainId);
+
+        if (info == null)
+        {
+            return "";
+        }
+        else if (chainId == MAINNET_ID)
+        {
+            int index = info.rpcServerUrl.indexOf(INFURA_ENDPOINT);
+            return info.rpcServerUrl.substring(0, index + INFURA_ENDPOINT.length()) + keyProvider.getTertiaryInfuraKey();
+        }
+        else if (info.backupNodeUrl != null)
+        {
+            return info.backupNodeUrl;
+        }
+        else
+        {
+            return info.rpcServerUrl;
+        }
+    }
+
     // for reset built-in network
     private static final LongSparseArray<NetworkInfo> builtinNetworkMap = new LongSparseArray<NetworkInfo>()
     {

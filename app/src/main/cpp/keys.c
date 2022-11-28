@@ -93,6 +93,19 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSecondaryInfuraKey( JN
 }
 
 JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getTertiaryInfuraKey( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, tertiaryInfuraKey);
+#elif (HAS_INFURA == 1)
+    return (*env)->NewStringUTF(env, IFKEY);
+#else
+    const jstring key = "da3717f25f824cc1baa32d812386d93f";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getKlaytnKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)

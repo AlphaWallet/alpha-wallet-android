@@ -11,6 +11,7 @@ public interface KeyProvider
     String getKlaytnKey();
     String getInfuraKey();
     String getSecondaryInfuraKey();
+    String getTertiaryInfuraKey();
     String getRampKey();
     String getOpenSeaKey();
     String getMailchimpKey();

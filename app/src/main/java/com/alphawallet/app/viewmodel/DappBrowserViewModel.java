@@ -335,9 +335,10 @@ public class DappBrowserViewModel extends BaseViewModel  {
         }
     }
 
+    // Use the backup node if avail
     public String getNetworkNodeRPC(long chainId)
     {
-        return ethereumNetworkRepository.getNetworkByChain(chainId).rpcServerUrl;
+        return ethereumNetworkRepository.getDappBrowserRPC(chainId);
     }
 
     public NetworkInfo getNetworkInfo(long chainId)

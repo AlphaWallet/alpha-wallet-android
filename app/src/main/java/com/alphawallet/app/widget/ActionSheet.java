@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
 
+import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -17,66 +18,11 @@ import java.math.BigInteger;
 /**
  * Created by JB on 20/11/2022.
  */
-public abstract class ActionSheet extends BottomSheetDialog
+public abstract class ActionSheet extends BottomSheetDialog implements ActionSheetInterface
 {
     public ActionSheet(@NonNull Context context)
     {
         super(context);
-    }
-
-    public void setCurrentGasIndex(ActivityResult result)
-    {
-        throw new RuntimeException("Implement setCurrentGasIndex");
-    }
-
-    public void success()
-    {
-        throw new RuntimeException("Implement success");
-    }
-
-    public void setURL(String url)
-    {
-        throw new RuntimeException("Implement setURL");
-    }
-
-    public void setGasEstimate(BigInteger estimate)
-    {
-        throw new RuntimeException("Implement setGasEstimate");
-    }
-
-    public void completeSignRequest(Boolean gotAuth)
-    {
-        throw new RuntimeException("Implement completeSignRequest");
-    }
-
-    public void setSigningWallet(String account)
-    {
-        throw new RuntimeException("Implement setSigningWallet");
-    }
-
-    public void setIcon(String icon)
-    {
-        throw new RuntimeException("Implement setIcon");
-    }
-
-    public void transactionWritten(String hash)
-    {
-        throw new RuntimeException("Implement transactionWritten");
-    }
-
-    public void updateChain(long chainId)
-    {
-        throw new RuntimeException("Implement updateChain");
-    }
-
-    public Web3Transaction getTransaction()
-    {
-        throw new RuntimeException("Implement getTransaction");
-    }
-
-    public void setSignOnly()
-    {
-        throw new RuntimeException("Implement setSignOnly");
     }
 
     public void forceDismiss()

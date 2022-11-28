@@ -69,8 +69,7 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
         actionCompleted = false;
 
         //ensure view fully expanded when locking scroll. Otherwise we may not be able to see our expanded view
-        BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
-        behavior.setState(STATE_EXPANDED);
+        fullExpand();
 
         viewModel = new ViewModelProvider((ViewModelStoreOwner) activity).get(SignDialogViewModel.class);
         viewModel.completed().observe((LifecycleOwner) activity, this::signComplete);

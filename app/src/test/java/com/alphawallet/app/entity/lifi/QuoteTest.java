@@ -1,13 +1,8 @@
 package com.alphawallet.app.entity.lifi;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsEqual.equalTo;
-
-import org.junit.Test;
-
 public class QuoteTest
 {
-    @Test
+    /*@Test
     public void should_return_current_price()
     {
         Quote quote = new Quote();
@@ -18,5 +13,5 @@ public class QuoteTest
         quote.action.toToken.priceUSD = "1000";
 
         assertThat(quote.getCurrentPrice(), equalTo("5000"));
-    }
+    }*/
 }

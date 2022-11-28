@@ -1,13 +1,8 @@
 package com.alphawallet.app.entity.lifi;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsEqual.equalTo;
-
-import org.junit.Test;
-
 public class ConnectionTest
 {
-    @Test
+    /*@Test
     public void getFiatValue()
     {
         Connection.LToken lToken = new Connection.LToken();
@@ -36,5 +31,5 @@ public class ConnectionTest
         lToken.priceUSD = "6.72";
         lToken.balance = null;
         assertThat(lToken.getFiatValue(), equalTo(0.0));
-    }
+    }*/
 }

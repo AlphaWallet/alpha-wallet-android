@@ -61,6 +61,12 @@ public class KeyProviderMockImpl implements KeyProvider
     }
 
     @Override
+    public String getTertiaryInfuraKey()
+    {
+        return FAKE_KEY_FOR_TESTING;
+    }
+
+    @Override
     public String getRampKey()
     {
         return FAKE_KEY_FOR_TESTING;
@@ -83,4 +89,5 @@ public class KeyProviderMockImpl implements KeyProvider
     {
         return FAKE_KEY_FOR_TESTING;
     }
+
 }

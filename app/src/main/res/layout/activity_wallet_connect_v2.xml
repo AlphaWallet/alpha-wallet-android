@@ -79,36 +79,12 @@
                 android:layout_marginBottom="@dimen/mini_4"
                 android:text="@string/wallet_address" />
 
-            <TextView
-                android:id="@+id/wallet_address"
-                style="@style/Aw.Typography.Caption"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/standard_16"
-                tools:text="0x1a2b...3c4d" />
-
-            <LinearLayout
-                android:id="@+id/layout_wallets"
+            <ListView
+                android:id="@+id/wallet_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/background_bottom_border"
-                android:gravity="center_vertical"
-                android:orientation="vertical">
-
-                <!--                    <TextView-->
-                <!--                        style="@style/Aw.Typography.Caption.SemiBold"-->
-                <!--                        android:layout_width="wrap_content"-->
-                <!--                        android:layout_height="wrap_content"-->
-                <!--                        android:paddingTop="@dimen/dp16"-->
-                <!--                        android:text="@string/your_wallets" />-->
-
-                <ListView
-                    android:id="@+id/wallet_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal" />
-            </LinearLayout>
+                android:divider="@null"
+                android:dividerHeight="@dimen/tiny_8" />
 
             <TextView
                 android:id="@+id/label_networks"
@@ -124,10 +100,8 @@
                 android:id="@+id/chain_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:clickable="false"
                 android:divider="@null"
-                android:dividerHeight="@dimen/tiny_8"
-                android:orientation="horizontal" />
+                android:dividerHeight="@dimen/tiny_8" />
 
             <TextView
                 style="@style/Aw.Typography.Label"
@@ -142,10 +116,8 @@
                 android:id="@+id/method_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:clickable="false"
                 android:divider="@null"
-                android:dividerHeight="@dimen/tiny_8"
-                android:orientation="horizontal" />
+                android:dividerHeight="@dimen/tiny_8" />
 
         </LinearLayout>
 

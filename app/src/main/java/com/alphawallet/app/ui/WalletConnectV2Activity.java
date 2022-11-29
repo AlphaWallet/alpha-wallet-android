@@ -23,12 +23,13 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.walletconnect.NamespaceParser;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
 import com.alphawallet.app.ui.widget.adapter.MethodAdapter;
+import com.alphawallet.app.ui.widget.adapter.WalletAdapter;
 import com.alphawallet.app.util.LayoutHelper;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SelectNetworkFilterViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectV2ViewModel;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
@@ -40,8 +41,10 @@ import com.walletconnect.sign.client.Sign;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -60,11 +63,12 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     private TextView peerUrl;
     private ProgressBar progressBar;
     private LinearLayout infoLayout;
-    private TextView walletAddressText;
-    private FunctionButtonBar functionBar;
     private TextView networksLabel;
+    private ListView walletList;
     private ListView chainList;
     private ListView methodList;
+    private FunctionButtonBar functionBar;
+    private WalletAdapter walletAdapter;
     private WalletConnectV2SessionItem session;
 
     @Override
@@ -105,8 +109,8 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         icon = findViewById(R.id.icon);
         peerName = findViewById(R.id.peer_name);
         peerUrl = findViewById(R.id.peer_url);
-        walletAddressText = findViewById(R.id.wallet_address);
         networksLabel = findViewById(R.id.label_networks);
+        walletList = findViewById(R.id.wallet_list);
         chainList = findViewById(R.id.chain_list);
         methodList = findViewById(R.id.method_list);
         functionBar = findViewById(R.id.layoutButtons);
@@ -142,14 +146,34 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         selectNetworkFilterViewModel = new ViewModelProvider(this)
                 .get(SelectNetworkFilterViewModel.class);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.wallets().observe(this, this::onWallets);
+    }
+
+    private void onWallets(Wallet[] wallets)
+    {
+        viewModel.fetchDefaultWallet();
     }
 
     private void onDefaultWallet(Wallet wallet)
     {
-        displaySessionStatus(session, wallet);
-        progressBar.setVisibility(View.GONE);
-        functionBar.setVisibility(View.VISIBLE);
-        infoLayout.setVisibility(View.VISIBLE);
+        if (wallet.type == WalletType.WATCH)
+        {
+            AWalletAlertDialog errorDialog = new AWalletAlertDialog(this);
+            errorDialog.setTitle(R.string.title_dialog_error);
+            errorDialog.setMessage(getString(R.string.error_message_watch_only_wallet));
+            errorDialog.setButton(R.string.dialog_ok, v -> {
+                errorDialog.dismiss();
+                finish();
+            });
+            errorDialog.show();
+        }
+        else
+        {
+            displaySessionStatus(session, wallet);
+            progressBar.setVisibility(View.GONE);
+            functionBar.setVisibility(View.VISIBLE);
+            infoLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     private void displaySessionStatus(WalletConnectV2SessionItem session, Wallet wallet)
@@ -183,7 +207,17 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
             }
         });
 
-        walletAddressText.setText(Utils.formatAddress(wallet.address));
+        if (session.settled)
+        {
+            walletAdapter = new WalletAdapter(this, findWallets(session.wallets));
+            networksLabel.setText(R.string.network);
+        }
+        else
+        {
+            walletAdapter = new WalletAdapter(this, new Wallet[]{wallet}, viewModel.defaultWallet().getValue());
+        }
+
+        walletList.setAdapter(walletAdapter);
 
         if (session.chains.size() > 1)
         {
@@ -273,7 +307,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         List<Long> disabledNetworks = disabledNetworks(sessionProposal.getRequiredNamespaces());
         if (disabledNetworks.isEmpty())
         {
-            awWalletConnectClient.approve(sessionProposal, Collections.singletonList(walletAddress), this);
+            awWalletConnectClient.approve(sessionProposal, getSelectedAccounts(), this);
         }
         else
         {
@@ -324,6 +358,38 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
             }
         }
         return result;
+    }
+
+    private List<Wallet> findWallets(List<String> addresses)
+    {
+        List<Wallet> result = new ArrayList<>();
+        Map<String, Wallet> map = toMap(Objects.requireNonNull(viewModel.wallets().getValue()));
+        for (String address : addresses)
+        {
+            Wallet wallet = map.get(address);
+            if (wallet == null)
+            {
+                wallet = new Wallet(address);
+            }
+            result.add(wallet);
+        }
+        return result;
+    }
+
+    private Map<String, Wallet> toMap(Wallet[] wallets)
+    {
+        HashMap<String, Wallet> map = new HashMap<>();
+        for (Wallet wallet : wallets)
+        {
+            map.put(wallet.address, wallet);
+        }
+        return map;
+    }
+
+    private List<String> getSelectedAccounts()
+    {
+        return walletAdapter.getSelectedWallets().stream()
+                .map((wallet) -> wallet.address).collect(toList());
     }
 
     @Override

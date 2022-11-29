@@ -3,9 +3,13 @@ package com.alphawallet.app.ui.widget.adapter;
 import android.content.Intent;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
@@ -13,6 +17,7 @@ import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.repository.TokensMappingRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.CustomSettings;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.ChainItem;
@@ -44,11 +49,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SortedList;
-
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 {
     private static final String TAG = "TKNADAPTER";
@@ -56,6 +56,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     private TokenFilter filterType = TokenFilter.ALL;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
+    protected final CustomSettings customSettings;
     private final ActivityResultLauncher<Intent> managementLauncher;
     private ContractLocator scrollToken; // designates a token that should be scrolled to
 
@@ -114,22 +115,23 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
 
-    public TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, TokensService tService,
-                         ActivityResultLauncher<Intent> launcher)
+    public TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, TokensService tService, CustomSettings customSettings, ActivityResultLauncher<Intent> launcher)
     {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = tService;
+        this.customSettings = customSettings;
         this.managementLauncher = launcher;
 
         new TokensMappingRepository(aService.getTokenLocalSource());
     }
 
-    protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService)
+    protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, CustomSettings customSettings)
     {
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = null;
+        this.customSettings = customSettings;
 
         new TokensMappingRepository(aService.getTokenLocalSource());
         this.managementLauncher = null;
@@ -388,7 +390,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     {
         if (token == null) return false;
         //Add token to display list if it's the base currency, or if it has balance
-        boolean allowThroughFilter = CustomViewSettings.tokenCanBeDisplayed(token);
+        boolean allowThroughFilter = customSettings.tokenCanBeDisplayed(token);
         allowThroughFilter = checkTokenValue(token, allowThroughFilter);
 
         switch (filterType)

@@ -164,7 +164,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         if (hasTokenScriptOverride(token))
         {
             searchLayout.setVisibility(View.GONE);
-            adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), isGridView);
+            adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), isGridView, viewModel.getCustomSettings());
         }
         else
         {

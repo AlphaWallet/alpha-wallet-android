@@ -1019,4 +1019,5 @@
     <string name="no_title">(No title)</string>
     <string name="title_session_details">Session Details</string>
     <string name="title_session_proposal">Session Proposal</string>
+    <string name="message_wc_wallet_different_from_active_wallet">Wallet different from active wallet.</string>
 </resources>

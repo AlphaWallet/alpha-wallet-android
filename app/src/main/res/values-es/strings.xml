@@ -944,4 +944,5 @@
     <string name="no_title">(Sin título)</string>
     <string name="title_session_details">Detalles de la sesión</string>
     <string name="title_session_proposal">Propuesta de sesión</string>
+    <string name="message_wc_wallet_different_from_active_wallet">Monedero diferente del monedero activo.</string>
 </resources>

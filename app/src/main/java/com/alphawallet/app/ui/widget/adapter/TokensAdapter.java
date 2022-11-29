@@ -49,7 +49,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
+public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
+{
     private static final String TAG = "TKNADAPTER";
 
     private TokenFilter filterType = TokenFilter.ALL;

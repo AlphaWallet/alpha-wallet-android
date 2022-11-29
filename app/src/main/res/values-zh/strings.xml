@@ -942,4 +942,6 @@
     <string name="deprecated">已弃用</string>
     <string name="error_message_watch_only_wallet">无法对这个仅限手表的钱包执行操作。</string>
     <string name="no_title">(无题)</string>
+    <string name="title_session_details">会议详情</string>
+    <string name="title_session_proposal">会议提案</string>
 </resources>

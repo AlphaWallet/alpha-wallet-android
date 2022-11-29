@@ -976,4 +976,6 @@
     <string name="deprecated">ကန့်ကွက်ထားသည်။</string>
     <string name="error_message_watch_only_wallet">ဤ Watch-only ပိုက်ဆံအိတ်တွင် လုပ်ဆောင်ချက်ကို မလုပ်ဆောင်နိုင်ပါ။</string>
     <string name="no_title">(ခေါင်းစဉ်မရှိ။)</string>
+    <string name="title_session_details">အပိုင်းအသေးစိတ်</string>
+    <string name="title_session_proposal">Session အဆိုပြုချက်</string>
 </resources>

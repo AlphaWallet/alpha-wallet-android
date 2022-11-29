@@ -955,4 +955,6 @@
     <string name="deprecated">Obsolète</string>
     <string name="error_message_watch_only_wallet">Impossible d\'effectuer une action sur ce portefeuille Watch-only.</string>
     <string name="no_title">(Pas de titre)</string>
+    <string name="title_session_details">Détails de la session</string>
+    <string name="title_session_proposal">Proposition de séance</string>
 </resources>

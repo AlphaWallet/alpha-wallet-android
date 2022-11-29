@@ -945,4 +945,6 @@
     <string name="deprecated">Tidak digunakan lagi</string>
     <string name="error_message_watch_only_wallet">Tidak dapat melakukan tindakan pada dompet khusus jam tangan ini.</string>
     <string name="no_title">(Tanpa judul)</string>
+    <string name="title_session_details">Detail Sesi</string>
+    <string name="title_session_proposal">Proposal Sesi</string>
 </resources>

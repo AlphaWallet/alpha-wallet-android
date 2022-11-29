@@ -1017,4 +1017,6 @@
     <string name="deprecated">Deprecated</string>
     <string name="error_message_watch_only_wallet">Could not perform action on this Watch-only wallet.</string>
     <string name="no_title">(No title)</string>
+    <string name="title_session_details">Session Details</string>
+    <string name="title_session_proposal">Session Proposal</string>
 </resources>

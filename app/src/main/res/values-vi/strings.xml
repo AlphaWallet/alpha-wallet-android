@@ -955,4 +955,6 @@
     <string name="deprecated">Không được chấp nhận</string>
     <string name="error_message_watch_only_wallet">Không thể thực hiện hành động trên ví Chỉ xem này.</string>
     <string name="no_title">(Không tiêu đề)</string>
+    <string name="title_session_details">Session Details</string>
+    <string name="title_session_proposal">Chi tiết phiên</string>
 </resources>

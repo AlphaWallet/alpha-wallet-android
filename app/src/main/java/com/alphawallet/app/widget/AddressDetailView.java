@@ -61,34 +61,6 @@ public class AddressDetailView extends LinearLayout
         recipientText.setText(a.getResourceId(R.styleable.InputView_label, R.string.recipient));
     }
 
-    public void setupMessage(String address, String message, int drawableRes)
-    {
-        textAddressSummary.setText(Utils.formatAddress(address));
-        textFullAddress.setText(address);
-        textMessage.setText(message);
-        textMessage.setVisibility(View.VISIBLE);
-        if (drawableRes > 0)
-        {
-            textAddressSummary.setCompoundDrawablesWithIntrinsicBounds(0,0, drawableRes, 0);
-            textMessage.setCompoundDrawablesWithIntrinsicBounds(drawableRes,0, 0, 0);
-        }
-
-        layoutHolder.setOnClickListener(v -> {
-            if (layoutDetails.getVisibility() == View.GONE)
-            {
-                layoutDetails.setVisibility(View.VISIBLE);
-                textAddressSummary.setVisibility(View.INVISIBLE);
-                recipientDetails.setImageResource(R.drawable.ic_expand_less_black);
-            }
-            else
-            {
-                layoutDetails.setVisibility(View.GONE);
-                textAddressSummary.setVisibility(View.VISIBLE);
-                recipientDetails.setImageResource(R.drawable.ic_expand_more);
-            }
-        });
-    }
-
     public void addMessage(String message, int drawableRes)
     {
         textMessage.setText(message);

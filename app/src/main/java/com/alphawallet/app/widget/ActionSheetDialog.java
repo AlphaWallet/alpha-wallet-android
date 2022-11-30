@@ -147,12 +147,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
         addressDetail.setupAddress(destAddress, destName, tokensService.getToken(token.tokenInfo.chainId, destAddress));
 
-        SharedPreferenceRepository prefs = new SharedPreferenceRepository(getContext());
-        if (!prefs.getCurrentWalletAddress().equalsIgnoreCase(destAddress))
-        {
-            addressDetail.addMessage(getContext().getString(R.string.message_wc_wallet_different_from_active_wallet), R.drawable.ic_red_warning);
-        }
-
         if (token.isNonFungible())
         {
             balanceDisplay.setVisibility(View.GONE);
@@ -739,5 +733,14 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         }
 
         return false;
+    }
+
+    public void setSigningWallet(String address)
+    {
+        SharedPreferenceRepository prefs = new SharedPreferenceRepository(getContext());
+        if (!prefs.getCurrentWalletAddress().equalsIgnoreCase(address))
+        {
+            addressDetail.addMessage(getContext().getString(R.string.message_wc_wallet_different_from_active_wallet), R.drawable.ic_red_warning);
+        }
     }
 }

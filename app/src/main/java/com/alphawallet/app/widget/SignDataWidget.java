@@ -12,6 +12,9 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ActionSheetInterface;
+import com.alphawallet.app.util.Hex;
+import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 
 /**
@@ -19,25 +22,24 @@ import com.alphawallet.token.entity.Signable;
  */
 public class SignDataWidget extends LinearLayout
 {
-    private final TextView textSignDetails;
-    private final TextView textSignDetailsMax;
+    private final TextView previewText;
+    private final TextView messageText;
     private final LinearLayout layoutHolder;
     private final ImageView moreArrow;
     private final ScrollView scrollView;
-    private final TextView messageTitle;
+    private ActionSheetInterface sheetInterface;
     private Signable signable;
 
     public SignDataWidget(Context context, @Nullable AttributeSet attrs)
     {
         super(context, attrs);
         inflate(context, R.layout.item_sign_data, this);
-        textSignDetails = findViewById(R.id.text_sign_data);
-        textSignDetailsMax = findViewById(R.id.text_sign_data_max);
+        previewText = findViewById(R.id.text_preview);
+        messageText = findViewById(R.id.text_message);
         layoutHolder = findViewById(R.id.layout_holder);
         moreArrow = findViewById(R.id.image_more);
         scrollView = findViewById(R.id.scroll_view);
-        messageTitle = findViewById(R.id.text_message_title);
-
+        TextView messageTitle = findViewById(R.id.text_message_title);
         boolean noTitle = getAttribute(context, attrs);
         if (noTitle)
         {
@@ -57,28 +59,45 @@ public class SignDataWidget extends LinearLayout
         return a.getBoolean(R.styleable.SignDataWidget_noTitle, false);
     }
 
-    public void setupSignData(Signable message)
+    public void setupSignData(Signable signable)
     {
-        this.signable = message;
-        textSignDetails.setText(message.getUserMessage());
-        textSignDetailsMax.setText(message.getUserMessage());
+        this.signable = signable;
+        String message;
+        if (signable.getMessageType() == SignMessageType.SIGN_PERSONAL_MESSAGE
+                || signable.getMessageType() == SignMessageType.SIGN_MESSAGE)
+        {
+            message = Hex.hexToUtf8(signable.getMessage());
+        }
+        else
+        {
+            message = signable.getUserMessage().toString();
+        }
+        previewText.setText(message);
+        messageText.setText(message);
 
         layoutHolder.setOnClickListener(v -> {
-            if (textSignDetails.getVisibility() == View.VISIBLE)
+            if (previewText.getVisibility() == View.VISIBLE)
             {
-                textSignDetails.setVisibility(View.GONE);
+                previewText.setVisibility(View.INVISIBLE);
                 scrollView.setVisibility(View.VISIBLE);
-                messageTitle.setVisibility(View.GONE);
+                scrollView.setEnabled(true);
                 moreArrow.setImageResource(R.drawable.ic_expand_less_black);
+                if (sheetInterface != null) sheetInterface.lockDragging(true);
             }
             else
             {
-                textSignDetails.setVisibility(View.VISIBLE);
-                messageTitle.setVisibility(View.VISIBLE);
+                previewText.setVisibility(View.VISIBLE);
                 scrollView.setVisibility(View.GONE);
+                scrollView.setEnabled(false);
                 moreArrow.setImageResource(R.drawable.ic_expand_more);
+                if (sheetInterface != null) sheetInterface.lockDragging(false);
             }
         });
+    }
+
+    public void setLockCallback(ActionSheetInterface asIf)
+    {
+        sheetInterface = asIf;
     }
 
     public Signable getSignable()

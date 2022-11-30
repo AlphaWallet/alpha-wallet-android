@@ -24,7 +24,7 @@
             style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="@integer/widget_label"
             android:gravity="start"
             android:text="@string/message_to_sign" />
 
@@ -34,7 +34,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/small_12"
-            android:layout_weight="3.5"
+            android:layout_weight="@integer/widget_content"
             android:ellipsize="end"
             android:gravity="start"
             android:maxLines="1"
@@ -46,7 +46,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:layout_weight="0.6"
+            android:layout_weight="@integer/widget_control"
             android:background="@color/transparent"
             android:src="@drawable/ic_expand_more"
             app:tint="?colorControlNormal" />

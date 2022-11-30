@@ -13,18 +13,18 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="@dimen/standard_16"
-        android:layout_marginStart="@dimen/standard_16"
-        android:layout_marginEnd="@dimen/mini_4"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingVertical="@dimen/standard_16"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingEnd="@dimen/mini_4">
 
         <TextView
             android:id="@+id/text_recipient_title"
             style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="@integer/widget_label"
             android:gravity="start"
             android:text="@string/recipient" />
 
@@ -34,7 +34,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/small_12"
-            android:layout_weight="3.5"
+            android:layout_weight="@integer/widget_content"
             android:drawablePadding="@dimen/tiny_8"
             android:ellipsize="end"
             android:gravity="start|center_vertical"
@@ -46,7 +46,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="start|center_vertical"
-            android:layout_weight="0.6"
+            android:layout_weight="@integer/widget_control"
             android:background="@color/transparent"
             android:padding="@dimen/mini_4"
             android:src="@drawable/ic_expand_more"

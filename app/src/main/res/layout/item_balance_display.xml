@@ -11,14 +11,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/standard_16"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingVertical="@dimen/standard_16"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingEnd="@dimen/mini_4">
 
         <TextView
             style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="@integer/widget_label"
             android:gravity="start"
             android:text="@string/balance" />
 
@@ -26,7 +28,8 @@
             android:id="@+id/relativeLayout2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.4"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_weight="@integer/widget_content"
             android:orientation="vertical"
             custom:layout_constraintBottom_toTopOf="@+id/text_new_balance"
             custom:layout_constraintTop_toTopOf="@+id/text_new_balance">
@@ -52,8 +55,8 @@
                 tools:text="35.4236 ETH" />
 
             <TextView
-                style="@style/Aw.Typography.Sub"
                 android:id="@+id/text_new_balance"
+                style="@style/Aw.Typography.Sub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/mini_4"
@@ -63,6 +66,11 @@
                 tools:text="(New: 31.1818 ETH)" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="@integer/widget_control" />
 
     </LinearLayout>
 

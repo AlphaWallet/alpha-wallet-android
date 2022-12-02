@@ -111,7 +111,7 @@
         app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
         app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
         app:layout_constraintTop_toTopOf="@id/guidelineTop"
-        tools:src="@drawable/ic_ropsten" />
+        tools:src="@drawable/ic_goerli" />
 
     <TextView
         style="@style/Aw.Typography.Title.Large.Bold"

@@ -2,8 +2,6 @@ package com.alphawallet.app;
 
 import static com.alphawallet.app.web3j.ens.NameHash.nameHash;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
 import static org.junit.Assert.assertEquals;
 
 import com.alphawallet.app.service.AWHttpService;
@@ -55,8 +53,6 @@ public class ENSTest
     @Test
     public void testResolveRegistryContract() {
         assertEquals(Contracts.resolveRegistryContract(MAINNET_ID), (Contracts.MAINNET));
-        assertEquals(Contracts.resolveRegistryContract(ROPSTEN_ID), (Contracts.ROPSTEN));
-        assertEquals(Contracts.resolveRegistryContract(RINKEBY_ID), (Contracts.RINKEBY));
     }
 
     @Test

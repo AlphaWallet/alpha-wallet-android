@@ -111,7 +111,7 @@
         app:layout_constraintEnd_toStartOf="@id/guidelineInnerRight"
         app:layout_constraintStart_toEndOf="@id/guidelineInnerLeft"
         app:layout_constraintTop_toTopOf="@id/guidelineTop"
-        tools:src="@drawable/ic_ropsten" />
+        tools:src="@drawable/ic_goerli" />
 
     <TextView
         style="@style/Aw.Typography.Title.Large.Bold"
@@ -182,7 +182,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:contentDescription="@string/empty"
-        android:src="@drawable/ic_kovan"
+        android:src="@drawable/ic_goerli"
         android:visibility="gone"
         android:padding="@dimen/micro_2"
         app:layout_constraintBottom_toTopOf="@id/guidelineBottom2"

@@ -14,24 +14,16 @@ package com.alphawallet.app.web3j.ens;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.RINKEBY_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ROPSTEN_ID;
 
 /** ENS registry contract addresses. */
 public class Contracts {
 
     public static final String MAINNET = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
-    public static final String ROPSTEN = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
-    public static final String RINKEBY = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
     public static final String GOERLI = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
 
     public static String resolveRegistryContract(long chainId) {
         if (chainId == MAINNET_ID) {
             return MAINNET;
-        } else if (chainId == ROPSTEN_ID) {
-            return ROPSTEN;
-        } else if (chainId == RINKEBY_ID) {
-            return RINKEBY;
         } else if (chainId == GOERLI_ID) {
             return GOERLI;
         } else {

@@ -1,7 +1,6 @@
 package com.alphawallet.app.widget;
 
 import android.app.Activity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -15,7 +14,6 @@ import androidx.lifecycle.ViewModelStoreOwner;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.Utils;
@@ -45,7 +43,7 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
     public ActionSheetSignDialog(@NonNull Activity callingActivity, ActionSheetCallback aCallback, Signable message)
     {
         super(callingActivity);
-        View view = LayoutInflater.from(callingActivity).inflate(R.layout.dialog_action_sheet_sign, null);
+        View view = View.inflate(callingActivity, R.layout.dialog_action_sheet_sign, null);
         setContentView(view);
         toolbar = findViewById(R.id.bottom_sheet_toolbar);
         confirmationWidget = findViewById(R.id.confirmation_view);

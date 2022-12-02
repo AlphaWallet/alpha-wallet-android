@@ -5,7 +5,6 @@ import android.content.res.TypedArray;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -67,8 +66,8 @@ public class AddressDetailView extends LinearLayout
         textMessage.setVisibility(View.VISIBLE);
         if (drawableRes > 0)
         {
-            textAddressSummary.setCompoundDrawablesWithIntrinsicBounds(drawableRes,0, 0, 0);
-            textMessage.setCompoundDrawablesWithIntrinsicBounds(drawableRes,0, 0, 0);
+            textAddressSummary.setCompoundDrawablesWithIntrinsicBounds(drawableRes, 0, 0, 0);
+            textMessage.setCompoundDrawablesWithIntrinsicBounds(drawableRes, 0, 0, 0);
         }
     }
 
@@ -132,7 +131,7 @@ public class AddressDetailView extends LinearLayout
         if (inputURL.length() > 32)
         {
             int index = inputURL.indexOf("/", 20);
-            return index >= 0 ? inputURL.substring(0,index) : inputURL;
+            return index >= 0 ? inputURL.substring(0, index) : inputURL;
         }
         else
         {

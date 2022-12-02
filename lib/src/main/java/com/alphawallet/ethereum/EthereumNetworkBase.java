@@ -7,14 +7,11 @@ package com.alphawallet.ethereum;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class EthereumNetworkBase { // implements EthereumNetworkRepositoryType
+public abstract class EthereumNetworkBase
+{ // implements EthereumNetworkRepositoryType
     public static final long MAINNET_ID = 1;
     public static final long CLASSIC_ID = 61;
     public static final long POA_ID = 99;
-    public static final long KOVAN_ID = 42;
-    public static final long ROPSTEN_ID = 3;
-    public static final long SOKOL_ID = 77;
-    public static final long RINKEBY_ID = 4;
     public static final long GNOSIS_ID = 100;
     public static final long GOERLI_ID = 5;
     public static final long ARTIS_SIGMA1_ID = 246529;
@@ -54,10 +51,6 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
     public static final String XDAI_RPC_URL = "https://rpc.ankr.com/gnosis";
     public static final String POA_RPC_URL = "https://core.poa.network/";
-    public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    public static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
     public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
@@ -91,7 +84,8 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final String IOTEX_MAINNET_RPC_URL = "https://babel-api.mainnet.iotex.io";
     public static final String IOTEX_TESTNET_RPC_URL = "https://babel-api.testnet.iotex.io";
 
-    static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>() {
+    static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>()
+    {
         {
             put(MAINNET_ID, new NetworkInfo("Ethereum", "ETH", MAINNET_RPC_URL, "https://etherscan.io/tx/",
                     MAINNET_ID, false));
@@ -103,14 +97,6 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     POA_ID, false));
             put(ARTIS_SIGMA1_ID, new NetworkInfo("ARTIS sigma1", "ATS", ARTIS_SIGMA1_RPC_URL, "https://explorer.sigma1.artis.network/tx/",
                     ARTIS_SIGMA1_ID, false));
-            put(KOVAN_ID, new NetworkInfo("Kovan (Test)", "ETH", KOVAN_RPC_URL, "https://kovan.etherscan.io/tx/",
-                    KOVAN_ID, false));
-            put(ROPSTEN_ID, new NetworkInfo("Ropsten (Test)", "ETH", ROPSTEN_RPC_URL, "https://ropsten.etherscan.io/tx/",
-                    ROPSTEN_ID, false));
-            put(SOKOL_ID, new NetworkInfo("Sokol (Test)", "POA", SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/tx/",
-                    SOKOL_ID, false));
-            put(RINKEBY_ID, new NetworkInfo("Rinkeby (Test)", "ETH", RINKEBY_RPC_URL, "https://rinkeby.etherscan.io/tx/",
-                    RINKEBY_ID, false));
             put(GOERLI_ID, new NetworkInfo("Görli (Test)", "GÖETH", GOERLI_RPC_URL, "https://goerli.etherscan.io/tx/",
                     GOERLI_ID, false));
             put(ARTIS_TAU1_ID, new NetworkInfo("ARTIS tau1 (Test)", "ATS", ARTIS_TAU1_RPC_URL, "https://explorer.tau1.artis.network/tx/",
@@ -139,34 +125,34 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
             put(POLYGON_TEST_ID, new NetworkInfo("Mumbai (Test)", "POLY", MUMBAI_TEST_RPC_URL, "https://mumbai.polygonscan.com/tx/",
                     POLYGON_TEST_ID, false));
 
-            put(OPTIMISTIC_MAIN_ID, new NetworkInfo("Optimistic","ETH", OPTIMISTIC_MAIN_FALLBACK_URL, "https://optimistic.etherscan.io/tx/",
+            put(OPTIMISTIC_MAIN_ID, new NetworkInfo("Optimistic", "ETH", OPTIMISTIC_MAIN_FALLBACK_URL, "https://optimistic.etherscan.io/tx/",
                     OPTIMISTIC_MAIN_ID, false));
             put(OPTIMISTIC_TEST_ID, new NetworkInfo("Optimistic (Test)", "ETH", OPTIMISTIC_TEST_FALLBACK_URL, "https://kovan-optimistic.etherscan.io/tx/",
                     OPTIMISTIC_TEST_ID, false));
             put(CRONOS_MAIN_ID, new NetworkInfo("Cronos (Beta)", "CRO", CRONOS_MAIN_RPC_URL, "https://cronoscan.com/tx", CRONOS_MAIN_ID, false));
             put(CRONOS_TEST_ID, new NetworkInfo("Cronos (Test)", "tCRO", CRONOS_TEST_URL, "https://testnet.cronoscan.com/tx/", CRONOS_TEST_ID, false));
-            put(ARBITRUM_MAIN_ID, new NetworkInfo("Arbitrum One","AETH", ARBITRUM_RPC_URL, "https://arbiscan.io/tx/",
+            put(ARBITRUM_MAIN_ID, new NetworkInfo("Arbitrum One", "AETH", ARBITRUM_RPC_URL, "https://arbiscan.io/tx/",
                     ARBITRUM_MAIN_ID, false));
             put(ARBITRUM_TEST_ID, new NetworkInfo("Arbitrum Test", "ARETH", ARBITRUM_TEST_RPC_URL, "https://rinkeby-explorer.arbitrum.io/tx/",
                     ARBITRUM_TEST_ID, false));
 
-            put(PALM_ID, new NetworkInfo("PALM","PALM", PALM_RPC_URL, "https://explorer.palm.io/tx/",
+            put(PALM_ID, new NetworkInfo("PALM", "PALM", PALM_RPC_URL, "https://explorer.palm.io/tx/",
                     PALM_ID, false));
             put(PALM_TEST_ID, new NetworkInfo("PALM (Test)", "PALM", PALM_TEST_RPC_URL, "https://explorer.palm-uat.xyz/tx/",
                     PALM_TEST_ID, false));
 
-            put(KLAYTN_ID, new NetworkInfo("Klaytn Cypress","KLAY", KLAYTN_RPC, "https://scope.klaytn.com/tx/",
+            put(KLAYTN_ID, new NetworkInfo("Klaytn Cypress", "KLAY", KLAYTN_RPC, "https://scope.klaytn.com/tx/",
                     KLAYTN_ID, false));
-            put(KLAYTN_BAOBAB_ID, new NetworkInfo("Klaytn Baobab (Test)","KLAY", KLAYTN_BAOBAB_RPC, "https://baobab.scope.klaytn.com/tx/",
+            put(KLAYTN_BAOBAB_ID, new NetworkInfo("Klaytn Baobab (Test)", "KLAY", KLAYTN_BAOBAB_RPC, "https://baobab.scope.klaytn.com/tx/",
                     KLAYTN_BAOBAB_ID, false));
-            put(AURORA_MAINNET_ID, new NetworkInfo("Aurora","ETH", AURORA_MAINNET_RPC_URL, "https://aurorascan.dev/tx/",
+            put(AURORA_MAINNET_ID, new NetworkInfo("Aurora", "ETH", AURORA_MAINNET_RPC_URL, "https://aurorascan.dev/tx/",
                     AURORA_MAINNET_ID, false));
-            put(AURORA_TESTNET_ID, new NetworkInfo("Aurora (Test)","ETH", AURORA_TESTNET_RPC_URL, "https://testnet.aurorascan.dev/tx/",
+            put(AURORA_TESTNET_ID, new NetworkInfo("Aurora (Test)", "ETH", AURORA_TESTNET_RPC_URL, "https://testnet.aurorascan.dev/tx/",
                     AURORA_TESTNET_ID, false));
 
-            put(MILKOMEDA_C1_ID, new NetworkInfo("Milkomeda Cardano","milkADA", MILKOMEDA_C1_RPC, "https://explorer-mainnet-cardano-evm.c1.milkomeda.com/tx/",
+            put(MILKOMEDA_C1_ID, new NetworkInfo("Milkomeda Cardano", "milkADA", MILKOMEDA_C1_RPC, "https://explorer-mainnet-cardano-evm.c1.milkomeda.com/tx/",
                     MILKOMEDA_C1_ID, false));
-            put(MILKOMEDA_C1_TEST_ID, new NetworkInfo("Milkomeda Cardano (Test)","milktADA", MILKOMEDA_C1_TEST_RPC, "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/",
+            put(MILKOMEDA_C1_TEST_ID, new NetworkInfo("Milkomeda Cardano (Test)", "milktADA", MILKOMEDA_C1_TEST_RPC, "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/",
                     MILKOMEDA_C1_TEST_ID, false));
             put(SEPOLIA_TESTNET_ID, new NetworkInfo("Sepolia (Test)", "ETH", SEPOLIA_TESTNET_RPC_URL, "https://sepolia.etherscan.io/tx/",
                     SEPOLIA_TESTNET_ID, false));
@@ -174,14 +160,15 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     OPTIMISM_GOERLI_TEST_ID, false));
             put(ARBITRUM_GOERLI_TEST_ID, new NetworkInfo("Arbitrum Goerli (Test)", "AGOR", OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL, "https://goerli-rollup-explorer.arbitrum.io/tx/",
                     ARBITRUM_GOERLI_TEST_ID, false));
-            put(IOTEX_MAINNET_ID, new NetworkInfo("IoTeX","IOTX", IOTEX_MAINNET_RPC_URL, "https://iotexscan.io/tx/",
+            put(IOTEX_MAINNET_ID, new NetworkInfo("IoTeX", "IOTX", IOTEX_MAINNET_RPC_URL, "https://iotexscan.io/tx/",
                     IOTEX_MAINNET_ID, false));
-            put(IOTEX_TESTNET_ID, new NetworkInfo("IoTeX (Test)","IOTX", IOTEX_TESTNET_RPC_URL, "https://testnet.iotexscan.io/tx/",
+            put(IOTEX_TESTNET_ID, new NetworkInfo("IoTeX (Test)", "IOTX", IOTEX_TESTNET_RPC_URL, "https://testnet.iotexscan.io/tx/",
                     IOTEX_TESTNET_ID, false));
         }
     };
 
-    public static NetworkInfo getNetworkByChain(long chainId) {
+    public static NetworkInfo getNetworkByChain(long chainId)
+    {
         return networkMap.get(chainId);
     }
 

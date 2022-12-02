@@ -24,10 +24,6 @@ public abstract class C {
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
     public static final String POA_NETWORK_NAME = "POA";
     public static final String XDAI_NETWORK_NAME = "Gnosis";
-    public static final String KOVAN_NETWORK_NAME = "Kovan (Test)";
-    public static final String ROPSTEN_NETWORK_NAME = "Ropsten (Test)";
-    public static final String SOKOL_NETWORK_NAME = "Sokol (Test)";
-    public static final String RINKEBY_NETWORK_NAME = "Rinkeby (Test)";
     public static final String GOERLI_NETWORK_NAME = "Görli (Test)";
     public static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
     public static final String ARTIS_TAU1_NETWORK = "ARTIS tau1 (Test)";

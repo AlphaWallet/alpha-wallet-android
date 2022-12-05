@@ -27,11 +27,9 @@ public abstract class EthereumNetworkBase
     public static final long POLYGON_ID = 137;
     public static final long POLYGON_TEST_ID = 80001;
     public static final long OPTIMISTIC_MAIN_ID = 10;
-    public static final long OPTIMISTIC_TEST_ID = 69;
     public static final long CRONOS_MAIN_ID = 25;
     public static final long CRONOS_TEST_ID = 338;
     public static final long ARBITRUM_MAIN_ID = 42161;
-    public static final long ARBITRUM_TEST_ID = 421611;
     public static final long PALM_ID = 0x2a15c308dL; //11297108109
     public static final long PALM_TEST_ID = 0x2a15c3083L; //11297108099
     public static final long KLAYTN_ID = 8217;
@@ -65,11 +63,9 @@ public abstract class EthereumNetworkBase
     public static final String MATIC_RPC_URL = "https://matic-mainnet.chainstacklabs.com";
     public static final String MUMBAI_TEST_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";
-    public static final String OPTIMISTIC_TEST_FALLBACK_URL = "https://kovan.optimism.io";
     public static final String CRONOS_MAIN_RPC_URL = "https://evm.cronos.org";
     public static final String CRONOS_TEST_URL = "https://evm-t3.cronos.org";
     public static final String ARBITRUM_RPC_URL = "https://arbitrum-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    public static final String ARBITRUM_TEST_RPC_URL = "https://arbitrum-rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String KLAYTN_RPC = "https://public-node-api.klaytnapi.com/v1/cypress";
@@ -127,14 +123,10 @@ public abstract class EthereumNetworkBase
 
             put(OPTIMISTIC_MAIN_ID, new NetworkInfo("Optimistic", "ETH", OPTIMISTIC_MAIN_FALLBACK_URL, "https://optimistic.etherscan.io/tx/",
                     OPTIMISTIC_MAIN_ID, false));
-            put(OPTIMISTIC_TEST_ID, new NetworkInfo("Optimistic (Test)", "ETH", OPTIMISTIC_TEST_FALLBACK_URL, "https://kovan-optimistic.etherscan.io/tx/",
-                    OPTIMISTIC_TEST_ID, false));
             put(CRONOS_MAIN_ID, new NetworkInfo("Cronos (Beta)", "CRO", CRONOS_MAIN_RPC_URL, "https://cronoscan.com/tx", CRONOS_MAIN_ID, false));
             put(CRONOS_TEST_ID, new NetworkInfo("Cronos (Test)", "tCRO", CRONOS_TEST_URL, "https://testnet.cronoscan.com/tx/", CRONOS_TEST_ID, false));
             put(ARBITRUM_MAIN_ID, new NetworkInfo("Arbitrum One", "AETH", ARBITRUM_RPC_URL, "https://arbiscan.io/tx/",
                     ARBITRUM_MAIN_ID, false));
-            put(ARBITRUM_TEST_ID, new NetworkInfo("Arbitrum Test", "ARETH", ARBITRUM_TEST_RPC_URL, "https://rinkeby-explorer.arbitrum.io/tx/",
-                    ARBITRUM_TEST_ID, false));
 
             put(PALM_ID, new NetworkInfo("PALM", "PALM", PALM_RPC_URL, "https://explorer.palm.io/tx/",
                     PALM_ID, false));

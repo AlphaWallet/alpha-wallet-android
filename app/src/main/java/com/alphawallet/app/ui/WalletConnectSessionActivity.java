@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -301,7 +302,14 @@ public class WalletConnectSessionActivity extends BaseActivity
                     .load(session.icon)
                     .circleCrop()
                     .into(holder.icon);
-            holder.peerName.setText(session.name);
+            if (TextUtils.isEmpty(session.name))
+            {
+                holder.peerName.setText(R.string.no_title);
+            }
+            else
+            {
+                holder.peerName.setText(session.name);
+            }
             holder.peerUrl.setText(session.url);
             holder.chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(session.chainId));
             holder.clickLayer.setOnClickListener(v -> {

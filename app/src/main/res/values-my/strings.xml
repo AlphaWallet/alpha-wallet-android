@@ -975,4 +975,8 @@
     <string name="message_select_one_exchange">အနည်းဆုံးလဲလှယ်မှုတစ်ခုကို ရွေးပါ။</string>
     <string name="deprecated">ကန့်ကွက်ထားသည်။</string>
     <string name="error_message_watch_only_wallet">ဤ Watch-only ပိုက်ဆံအိတ်တွင် လုပ်ဆောင်ချက်ကို မလုပ်ဆောင်နိုင်ပါ။</string>
+    <string name="no_title">(ခေါင်းစဉ်မရှိ။)</string>
+    <string name="title_session_details">အပိုင်းအသေးစိတ်</string>
+    <string name="title_session_proposal">Session အဆိုပြုချက်</string>
+    <string name="message_wc_wallet_different_from_active_wallet">ပိုက်ဆံအိတ်သည် တက်ကြွသောပိုက်ဆံအိတ်နှင့် ကွဲပြားသည်။</string>
 </resources>

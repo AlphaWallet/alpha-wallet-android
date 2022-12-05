@@ -941,4 +941,8 @@
     <string name="message_select_one_exchange">至少选择一个交易所。</string>
     <string name="deprecated">已弃用</string>
     <string name="error_message_watch_only_wallet">无法对这个仅限手表的钱包执行操作。</string>
+    <string name="no_title">(无题)</string>
+    <string name="title_session_details">会议详情</string>
+    <string name="title_session_proposal">会议提案</string>
+    <string name="message_wc_wallet_different_from_active_wallet">钱包不同于活动钱包。</string>
 </resources>

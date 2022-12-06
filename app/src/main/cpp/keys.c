@@ -205,3 +205,14 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getWalletConnectProjectId
     return (*env)->NewStringUTF(env, WALLETCONNECT_PROJECT_ID);
 #endif
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getUnstoppableDomainsKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, unstoppableDomainsKey);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}

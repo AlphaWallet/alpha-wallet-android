@@ -88,4 +88,16 @@ public class KeyProviderMockNonProductionImpl implements KeyProvider
     {
         return null;
     }
+
+    @Override
+    public String getWalletConnectProjectId()
+    {
+        return null;
+    }
+
+    @Override
+    public String getInfuraSecret()
+    {
+        return null;
+    }
 }

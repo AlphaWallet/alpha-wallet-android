@@ -90,4 +90,15 @@ public class KeyProviderMockImpl implements KeyProvider
         return FAKE_KEY_FOR_TESTING;
     }
 
+    @Override
+    public String getWalletConnectProjectId()
+    {
+        return FAKE_KEY_FOR_TESTING;
+    }
+
+    @Override
+    public String getInfuraSecret()
+    {
+        return FAKE_KEY_FOR_TESTING;
+    }
 }

@@ -36,4 +36,6 @@ public class KeyProviderJNIImpl implements KeyProvider
     public native String getCoinbasePayAppId();
 
     public native String getWalletConnectProjectId();
+
+    public native String getInfuraSecret();
 }

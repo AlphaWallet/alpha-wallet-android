@@ -38,7 +38,7 @@ public class EventSync
     public static final long POLYGON_BLOCK_SEARCH_INTERVAL = 10000L;
 
     private static final String TAG = "EVENT_SYNC";
-    private static final boolean EVENT_SYNC_DEBUGGING = true;
+    private static final boolean EVENT_SYNC_DEBUGGING = false;
 
     private final Token token;
 

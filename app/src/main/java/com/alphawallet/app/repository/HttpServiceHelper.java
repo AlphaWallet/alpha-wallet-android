@@ -3,6 +3,8 @@ package com.alphawallet.app.repository;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BAOBAB_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 
+import android.text.TextUtils;
+
 import org.web3j.protocol.http.HttpService;
 
 import okhttp3.Request;

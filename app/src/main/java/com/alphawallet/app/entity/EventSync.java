@@ -142,14 +142,6 @@ public class EventSync
         return new SyncDef(eventReadStartBlock, eventReadEndBlock, syncState, upwardSync);
     }
 
-    private void EVENT_DEBUG(String message)
-    {
-        if (EVENT_SYNC_DEBUGGING)
-        {
-            Timber.tag(TAG).i(token.tokenInfo.chainId + " " + token.tokenInfo.address + ": " + message);
-        }
-    }
-
     private boolean upwardSyncStateLost(BigInteger lastBlockRead, BigInteger currentBlock)
     {
         return currentBlock.subtract(lastBlockRead).compareTo(EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId)) >= 0;
@@ -671,5 +663,13 @@ public class EventSync
         matchingEntry.setEventName(activityName);
         matchingEntry.setTransferDetail(valueList);
         instance.insertOrUpdate(matchingEntry);
+    }
+
+    private void EVENT_DEBUG(String message)
+    {
+        if (EVENT_SYNC_DEBUGGING)
+        {
+            Timber.tag(TAG).i(token.tokenInfo.chainId + " " + token.tokenInfo.address + ": " + message);
+        }
     }
 }

@@ -884,4 +884,9 @@ public class TokenFunctionViewModel extends BaseViewModel
             getTokenMetadata(token, tokenId, oldAsset);
         }
     }
+
+    public String getBrowserRPC(long chainId)
+    {
+        return ethereumNetworkRepository.getDappBrowserRPC(chainId);
+    }
 }

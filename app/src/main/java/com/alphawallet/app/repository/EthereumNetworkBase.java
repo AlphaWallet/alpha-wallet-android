@@ -198,9 +198,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             return "";
         }
-        else if (chainId == MAINNET_ID)
+
+        int index = info.rpcServerUrl.indexOf(INFURA_ENDPOINT);
+        if (index > 0)
         {
-            int index = info.rpcServerUrl.indexOf(INFURA_ENDPOINT);
             return info.rpcServerUrl.substring(0, index + INFURA_ENDPOINT.length()) + keyProvider.getTertiaryInfuraKey();
         }
         else if (info.backupNodeUrl != null)
@@ -211,6 +212,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             return info.rpcServerUrl;
         }
+    }
+
+    public static boolean isInfura(String rpcServerUrl)
+    {
+        return rpcServerUrl.contains(INFURA_ENDPOINT);
     }
 
     // for reset built-in network

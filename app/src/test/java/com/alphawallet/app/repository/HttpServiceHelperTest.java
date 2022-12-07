@@ -42,7 +42,7 @@ public class HttpServiceHelperTest
     @Test
     public void should_not_addRequiredCredentials_for_KLAYTN_when_not_use_production_key() throws Exception
     {
-        HttpServiceHelper.addRequiredCredentials(8217, httpService,"klaytn-key", "infura-key", false);
+        HttpServiceHelper.addRequiredCredentials(8217, httpService, "klaytn-key", "infura-key", false);
         HashMap<String, String> headers = httpService.getHeaders();
         assertFalse(headers.containsKey("x-chain-id"));
         assertFalse(headers.containsKey("Authorization"));

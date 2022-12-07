@@ -233,7 +233,8 @@ public class Web3TokenView extends WebView
         jsInjectorClient.setChainId(chainId);
     }
 
-    public void setRpcUrl(@NonNull String useRPC) {
+    public void setRpcUrl(@NonNull String useRPC)
+    {
         jsInjectorClient.setRpcUrl(useRPC);
     }
 

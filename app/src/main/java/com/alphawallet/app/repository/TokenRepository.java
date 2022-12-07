@@ -1227,8 +1227,8 @@ public class TokenRepository implements TokenRepositoryType {
     public static Web3j getWeb3jServiceForEvents(long chainId)
     {
         OkHttpClient okClient = new OkHttpClient.Builder()
-                .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
-                .connectTimeout(C.READ_TIMEOUT*3, TimeUnit.SECONDS) //events can take longer to render
+                .connectTimeout(C.CONNECT_TIMEOUT * 3, TimeUnit.SECONDS) //events can take longer to render
+                .connectTimeout(C.READ_TIMEOUT * 3, TimeUnit.SECONDS)
                 .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();

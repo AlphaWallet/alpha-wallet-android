@@ -26,6 +26,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.HttpServiceHelper;
 import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
@@ -471,11 +472,16 @@ public class GasService implements ContractGasProvider
         RequestBody requestBody = RequestBody.create(requestJSON, HttpService.JSON_MEDIA_TYPE);
         NetworkInfo info = networkRepository.getNetworkByChain(currentChainId);
 
+        final Request.Builder rqBuilder = new Request.Builder()
+                .url(info.rpcServerUrl)
+                .post(requestBody);
+
+        HttpServiceHelper.addRequiredCredentials(info.chainId, rqBuilder, KeyProviderFactory.get().getKlaytnKey(),
+                KeyProviderFactory.get().getInfuraSecret(), EthereumNetworkBase.usesProductionKey, EthereumNetworkBase.isInfura(info.rpcServerUrl));
+
         return Single.fromCallable(() -> {
-            Request request = new Request.Builder()
-                    .url(info.rpcServerUrl)
-                    .post(requestBody)
-                    .build();
+            Request request = rqBuilder.build();
+
             try (Response response = httpClient.newCall(request).execute())
             {
                 if (response.code() / 200 == 1)

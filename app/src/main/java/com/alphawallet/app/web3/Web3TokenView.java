@@ -35,7 +35,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.util.Utils;
@@ -239,8 +238,8 @@ public class Web3TokenView extends WebView
         jsInjectorClient.setChainId(chainId);
     }
 
-    public void setRpcUrl(@NonNull long chainId) {
-        jsInjectorClient.setRpcUrl(EthereumNetworkRepository.getDefaultNodeURL(chainId));
+    public void setRpcUrl(@NonNull String useRPC) {
+        jsInjectorClient.setRpcUrl(useRPC);
     }
 
     public void onSignPersonalMessageSuccessful(@NotNull Signable message, String signHex) {

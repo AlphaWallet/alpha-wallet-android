@@ -62,11 +62,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import timber.log.Timber;
 
 /** Resolution logic for contract addresses. According to https://eips.ethereum.org/EIPS/eip-2544 */
 public class EnsResolver implements Resolvable
@@ -84,7 +87,7 @@ public class EnsResolver implements Resolvable
 
     private final Web3j web3j;
     protected final int addressLength;
-    protected final long chainId;
+    protected long chainId;
 
     private OkHttpClient client = new OkHttpClient();
 
@@ -95,20 +98,16 @@ public class EnsResolver implements Resolvable
         this.web3j = web3j;
         this.addressLength = addressLength;
 
-        long chainId = 1;
+        chainId = 1;
 
-        try
-        {
+        Single.fromCallable(() -> {
             NetVersion v = web3j.netVersion().send();
             String ver = v.getNetVersion();
-            chainId = Long.parseLong(ver);
-        }
-        catch (Exception e)
-        {
-            //
-        }
-
-        this.chainId = chainId;
+            return Long.parseLong(ver);
+        }).subscribeOn(Schedulers.io())
+          .observeOn(Schedulers.io())
+          .subscribe(id -> this.chainId = id, Timber::w)
+          .isDisposed();
     }
 
     public EnsResolver(Web3j web3j) {

@@ -62,8 +62,8 @@ import timber.log.Timber;
 public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
     private static final String TAG = "TXNETCLIENT";
-    private final int PAGESIZE = 800;
-    private final int SYNC_PAGECOUNT = 2; //how many pages to read when we first sync the account - means we store the first 1600 transactions only
+    private final int PAGESIZE = 1000;
+    private final int SYNC_PAGECOUNT = 1; //how many pages to read when we first sync the account - means we store the first 1600 transactions only
     public static final int TRANSFER_RESULT_MAX = 250; //check 200 records when we first get a new account
     //Note: if user wants to view transactions older than this, we fetch from etherscan on demand.
     //Generally this would only happen when watching extremely active accounts for curiosity
@@ -664,6 +664,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         String result = "0";
         if (currentBlock == 0) currentBlock = 1;
 
+        if (networkInfo.chainId == BINANCE_TEST_ID || networkInfo.chainId == BINANCE_MAIN_ID)
+        {
+            System.out.println("YOLESS");
+        }
+
         String fullUrl = networkInfo.etherscanAPI + "module=account&action=" + queryType +
                 "&startblock=" + currentBlock + "&endblock=9999999999" +
                 "&address=" + walletAddress +
@@ -704,7 +709,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             return ETHERSCAN_API_KEY;
         }
-        else if (networkInfo.chainId == BINANCE_TEST_ID || networkInfo.chainId == BINANCE_MAIN_ID)
+        else if (networkInfo.chainId == BINANCE_MAIN_ID)
         {
             return BSC_EXPLORER_API_KEY;
         }

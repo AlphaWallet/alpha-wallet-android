@@ -35,9 +35,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -71,25 +69,32 @@ public class TokensRealmSource implements TokenLocalSource {
     @Override
     public Single<Token[]> saveTokens(Wallet wallet, Token[] items)
     {
-        if (!Utils.isAddressValid(wallet.address)) { return Single.fromCallable(() -> items); }
-        else return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getRealmInstance(wallet))
-            {
-                realm.executeTransaction(r -> {
-                    for (Token token : items) {
-                        if (token.tokenInfo != null && token.tokenInfo.name != null && !token.tokenInfo.name.equals(EXPIRED_CONTRACT) && token.tokenInfo.symbol != null)
+        if (!Utils.isAddressValid(wallet.address))
+        {
+            return Single.fromCallable(() -> items);
+        }
+        else
+        {
+            return Single.fromCallable(() -> {
+                try (Realm realm = realmManager.getRealmInstance(wallet))
+                {
+                    realm.executeTransaction(r -> {
+                        for (Token token : items)
                         {
-                            saveTokenLocal(r, token);
+                            if (token.tokenInfo != null && token.tokenInfo.name != null && !token.tokenInfo.name.equals(EXPIRED_CONTRACT) && token.tokenInfo.symbol != null)
+                            {
+                                saveTokenLocal(r, token);
+                            }
                         }
-                    }
-                });
-            }
-            catch (Exception e)
-            {
-                //
-            }
-            return items;
-        });
+                    });
+                }
+                catch (Exception e)
+                {
+                    Timber.w(e);
+                }
+                return items;
+            });
+        }
     }
 
     @Override
@@ -429,6 +434,11 @@ public class TokensRealmSource implements TokenLocalSource {
     {
         boolean balanceChanged = false;
         String key = databaseKey(token);
+        if (token.getWallet() == null)
+        {
+            token.setTokenWallet(wallet.address);
+        }
+
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             RealmToken realmToken = realm.where(RealmToken.class)
@@ -608,6 +618,11 @@ public class TokensRealmSource implements TokenLocalSource {
                 writeAssetContract(realm, token);
             }
 
+            if (oldToken.getInterfaceSpec() != token.getInterfaceSpec())
+            {
+                realmToken.setInterfaceSpec(token.getInterfaceSpec().ordinal());
+            }
+
             //check if name needs to be updated
             if (!TextUtils.isEmpty(token.tokenInfo.name) && (TextUtils.isEmpty(realmToken.getName()) || !realmToken.getName().equals(token.tokenInfo.name)))
             {
@@ -667,45 +682,21 @@ public class TokensRealmSource implements TokenLocalSource {
                     //load all the assets from the database
                     Map<BigInteger, NFTAsset> assetMap = getNFTAssets(r, token);
 
-                    //construct live list
-                    //for erc1155 need to check each potential 'removal'.
-                    //erc721 gets removed by noting token transfer
-                    Map<BigInteger, NFTAsset> liveMap = token.queryAssets(assetMap);
-                    HashSet<BigInteger> deleteList = new HashSet<>();
+                    //Query the changes
+                    Map<BigInteger, NFTAsset> updatedMap = token.getAssetChange(assetMap); // feed in old assets
 
-                    for (BigInteger tokenId : liveMap.keySet())
-                    {
-                        NFTAsset oldAsset = assetMap.get(tokenId); //may be null
-                        NFTAsset newAsset = liveMap.get(tokenId); //never null
-
-                        if (newAsset.getBalance().compareTo(BigDecimal.ZERO) == 0)
-                        {
-                            deleteAssets(r, token, Collections.singletonList(tokenId));
-                            deleteList.add(tokenId);
-                        }
-                        else
-                        {
-                            //token updated or new
-                            if (oldAsset != null) { newAsset.updateAsset(oldAsset); }
-                            writeAsset(r, token, tokenId, newAsset);
-                        }
-                    }
-
-                    for (BigInteger tokenId : deleteList)
-                    {
-                        liveMap.remove(tokenId);
-                    }
-
-                    //update token balance & visibility
-                    setTokenUpdateTime(r, token, liveMap.keySet().size());
-                    token.balance = new BigDecimal(liveMap.keySet().size());
-                    if (token.getTokenAssets().hashCode() != liveMap.hashCode()) //replace asset map if different
+                    //is there any difference?
+                    if (updatedMap.hashCode() != assetMap.hashCode())
                     {
                         token.getTokenAssets().clear();
-                        token.getTokenAssets().putAll(liveMap);
+                        token.getTokenAssets().putAll(updatedMap);
                     }
                 }
             });
+        }
+        catch (Exception e)
+        {
+            Timber.w(e);
         }
 
         return tokens;

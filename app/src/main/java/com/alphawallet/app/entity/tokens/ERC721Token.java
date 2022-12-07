@@ -49,6 +49,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -264,7 +265,9 @@ public class ERC721Token extends Token
     public boolean checkBalanceChange(Token oldToken)
     {
         if (super.checkBalanceChange(oldToken)) return true;
-        if (getTokenAssets().size() != oldToken.getTokenAssets().size()) return true;
+        if ((getTokenAssets() != null && oldToken.getTokenAssets() != null)
+                && getTokenAssets().size() != oldToken.getTokenAssets().size()) return true;
+
         for (BigInteger tokenId : tokenBalanceAssets.keySet())
         {
             NFTAsset newAsset = tokenBalanceAssets.get(tokenId);
@@ -350,7 +353,7 @@ public class ERC721Token extends Token
         try
         {
             balanceChecks.put(tokenInfo.address, true); //set checking
-            final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
+            final Web3j web3j = TokenRepository.getWeb3jServiceForEvents(tokenInfo.chainId);
             if (contractType == ContractType.ERC721_ENUMERABLE)
             {
                 updateEnumerableBalance(web3j, realm);
@@ -385,6 +388,7 @@ public class ERC721Token extends Token
             if (eventSync.handleEthLogError(e.error, startBlock, endBlock, sync, realm))
             {
                 //recurse until we find a good value
+                balanceChecks.remove(tokenInfo.address);
                 updateBalance(realm);
             }
         }
@@ -598,24 +602,6 @@ public class ERC721Token extends Token
         return filter;
     }
 
-    /**
-     * Returns false if the Asset balance appears to be entries with only TokenId - indicating an ERC721Ticket
-     *
-     * @return
-     */
-    @Override
-    public boolean checkBalanceType()
-    {
-        boolean onlyHasTokenId = true;
-        //if elements contain asset with only assetId then most likely this is a ticket.
-        for (NFTAsset a : tokenBalanceAssets.values())
-        {
-            if (!a.isBlank()) onlyHasTokenId = false;
-        }
-
-        return tokenBalanceAssets.size() == 0 || !onlyHasTokenId;
-    }
-
     public String getTransferID(Transaction tx)
     {
         if (tx.transactionInput != null && tx.transactionInput.miscData.size() > 0)
@@ -689,18 +675,28 @@ public class ERC721Token extends Token
      * If there is a token that previously was there, but now isn't, it could be because
      * the opensea call was split or that the owner transferred the token
      *
-     * @param assetMap Loaded Assets from Realm
-     * @return map of currently known live assets
+     * @param assetMap Loaded Assets which are new assets (don't add assets from opensea unless we double check here first)
+     * @return map of checked assets
      */
     @Override
     public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
     {
-        final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
-
         //check all tokens in this contract
         assetMap.putAll(tokenBalanceAssets);
 
-        //now check balance for all tokenIds (note that ERC1155 has a batch balance check, ERC721 does not)
+        HashSet<BigInteger> currentAssets = new HashSet<>(assetMap.keySet());
+
+        final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
+
+        try
+        {
+            currentAssets = checkBalances(web3j, currentAssets);
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
         for (Map.Entry<BigInteger, NFTAsset> entry : assetMap.entrySet())
         {
             BigInteger checkId = entry.getKey();
@@ -721,35 +717,74 @@ public class ERC721Token extends Token
                 checkAsset.setBalance(BigDecimal.ZERO);
             }
 
-            //add back into asset map
             tokenBalanceAssets.put(checkId, checkAsset);
         }
 
         return tokenBalanceAssets;
     }
 
+    // Check for new/missing tokenBalanceAssets
     @Override
-    public List<BigInteger> getChangeList(Map<BigInteger, NFTAsset> assetMap)
+    public Map<BigInteger, NFTAsset> getAssetChange(Map<BigInteger, NFTAsset> oldAssetList)
     {
-        //detect asset removal
-        List<BigInteger> oldAssetIdList = new ArrayList<>(assetMap.keySet());
-        oldAssetIdList.removeAll(tokenBalanceAssets.keySet());
+        Map<BigInteger, NFTAsset> updatedAssets = new HashMap<>();
+        // detect asset removal, first find new assets
+        HashSet<BigInteger> changedAssetList = new HashSet<>(tokenBalanceAssets.keySet());
+        changedAssetList.removeAll(oldAssetList.keySet());
 
-        List<BigInteger> changeList = new ArrayList<>(oldAssetIdList);
+        HashSet<BigInteger> unchangedAssets = new HashSet<>(tokenBalanceAssets.keySet());
+        unchangedAssets.removeAll(changedAssetList);
+
+        // removed assets
+        HashSet<BigInteger> removedAssets = new HashSet<>(oldAssetList.keySet());
+        removedAssets.removeAll(tokenBalanceAssets.keySet());
+        changedAssetList.addAll(removedAssets);
+        HashSet<BigInteger> balanceAssets = new HashSet<>();
+
+        final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
+
+        try
+        {
+            balanceAssets = checkBalances(web3j, changedAssetList);
+        }
+        catch (Exception e)
+        {
+            //
+        }
 
         //Now detect differences or new tokens
-        for (BigInteger tokenId : tokenBalanceAssets.keySet())
+        for (BigInteger tokenId : changedAssetList)
         {
-            NFTAsset newAsset = tokenBalanceAssets.get(tokenId);
-            NFTAsset oldAsset = assetMap.get(tokenId);
+            NFTAsset asset = tokenBalanceAssets.get(tokenId);
+            if (asset == null) asset = oldAssetList.get(tokenId);
 
-            if (oldAsset == null || newAsset.hashCode() != oldAsset.hashCode())
+            if (asset == null)
             {
-                changeList.add(tokenId);
+                continue;
+            }
+
+            if (balanceAssets.contains(tokenId))
+            {
+                asset.setBalance(BigDecimal.ZERO);
+            }
+            else
+            {
+                asset.setBalance(BigDecimal.ONE);
+            }
+
+            updatedAssets.put(tokenId, asset);
+        }
+
+        for (BigInteger tokenId : unchangedAssets)
+        {
+            NFTAsset asset = tokenBalanceAssets.get(tokenId);
+            if (asset != null)
+            {
+                updatedAssets.put(tokenId, asset);
             }
         }
 
-        return changeList;
+        return updatedAssets;
     }
 
     private String callSmartContractFunction(Web3j web3j,

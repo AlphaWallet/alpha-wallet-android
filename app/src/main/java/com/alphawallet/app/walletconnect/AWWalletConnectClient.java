@@ -107,6 +107,10 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
     public void onSessionRequest(@NonNull Sign.Model.SessionRequest sessionRequest)
     {
         String method = sessionRequest.getRequest().getMethod();
+        if ("eth_signTypedData_v4".equals(method))
+        {
+            method = "eth_signTypedData";
+        }
 
         if (!WCMethodChecker.includes(method))
         {
@@ -416,4 +420,3 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
         }
     }
 }
-

@@ -22,6 +22,7 @@ public abstract class EthSignRequest
                 signRequest = new SignPersonalMessageRequest(sessionRequest.getRequest().getParams());
                 break;
             case "eth_signTypedData":
+            case "eth_signTypedData_v4":
                 signRequest = new SignTypedDataRequest(sessionRequest.getRequest().getParams());
                 break;
             default:

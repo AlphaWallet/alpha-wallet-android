@@ -251,7 +251,7 @@ public class EventSync
 
     private long getCurrentEventBlockSize(Realm instance)
     {
-        if (EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).equals(BigInteger.valueOf(3500L)))
+        if (EthereumNetworkBase.isEventBlockLimitEnforced(token.tokenInfo.chainId))
         {
             return EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
         }

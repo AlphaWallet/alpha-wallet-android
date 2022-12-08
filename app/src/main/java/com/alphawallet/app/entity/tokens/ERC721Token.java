@@ -829,21 +829,7 @@ public class ERC721Token extends Token
     @Override
     public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
     {
-        //check all tokens in this contract
-        assetMap.putAll(tokenBalanceAssets);
-
-        HashSet<BigInteger> currentAssets = new HashSet<>(assetMap.keySet());
-
         final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
-
-        try
-        {
-            currentAssets = checkBalances(web3j, currentAssets);
-        }
-        catch (Exception e)
-        {
-            //
-        }
 
         for (Map.Entry<BigInteger, NFTAsset> entry : assetMap.entrySet())
         {
@@ -858,10 +844,10 @@ public class ERC721Token extends Token
                 checkAsset.setBalance(BigDecimal.ZERO);
             }
 
-            tokenBalanceAssets.put(checkId, checkAsset);
+            assetMap.put(checkId, checkAsset);
         }
 
-        return tokenBalanceAssets;
+        return assetMap;
     }
 
     // Check for new/missing tokenBalanceAssets

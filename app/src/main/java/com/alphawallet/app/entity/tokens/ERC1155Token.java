@@ -320,16 +320,10 @@ public class ERC1155Token extends Token
     @Override
     public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
     {
-        //first see if there's no change; if this is the case we can skip
-        if (assetsUnchanged(assetMap)) return assets;
-
-        //add all known tokens in
-        Map<BigInteger, NFTAsset> sum = new HashMap<>(assetMap);
-        sum.putAll(assets);
-        Set<BigInteger> tokenIds = sum.keySet();
+        Set<BigInteger> tokenIds = assetMap.keySet();
         Function balanceOfBatch = balanceOfBatch(getWallet(), tokenIds);
         List<Uint256> balances = callSmartContractFunctionArray(tokenInfo.chainId, balanceOfBatch, getAddress(), getWallet());
-        Map<BigInteger, NFTAsset> updatedAssetMap;
+        Map<BigInteger, NFTAsset> updatedAssetMap = new HashMap<>();
 
         if (balances != null && balances.size() > 0)
         {
@@ -337,17 +331,13 @@ public class ERC1155Token extends Token
             int index = 0;
             for (BigInteger tokenId : tokenIds)
             {
-                NFTAsset thisAsset = new NFTAsset(sum.get(tokenId));
+                NFTAsset thisAsset = new NFTAsset(assetMap.get(tokenId));
                 BigInteger balance = balances.get(index).getValue();
                 thisAsset.setBalance(new BigDecimal(balance));
                 updatedAssetMap.put(tokenId, thisAsset);
 
                 index++;
             }
-        }
-        else
-        {
-            updatedAssetMap = assets;
         }
 
         return updatedAssetMap;

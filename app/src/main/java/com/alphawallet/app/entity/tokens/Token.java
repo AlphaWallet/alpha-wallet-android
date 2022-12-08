@@ -383,7 +383,7 @@ public class Token
 
     public boolean isBad()
     {
-        return tokenInfo == null || (tokenInfo.symbol == null && tokenInfo.name == null);
+        return tokenInfo == null || tokenInfo.chainId == 0 || (tokenInfo.symbol == null && tokenInfo.name == null);
     }
 
     public void setTokenWallet(String address)

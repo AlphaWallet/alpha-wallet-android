@@ -49,6 +49,15 @@ public class IPFSServiceTest
         assertEquals(qr.body, resp);
         assertTrue(qr.isSuccessful());
 
+        //should not throw
+        qr = ipfsService.performIO("https://axieinfinity.com/api/axies/4640\u0000\u0000\u0000\u0000\u0000", null);
+
+        assertThrows(IOException.class,
+                () -> ipfsService.performIO("https://eth-mainnet.g.alchemy.com/v2/iiVlvrq2P9BbBACjNJvqsPETIlGcyw70\";JSON.stringify2=JSON.stringify; JSON.stringify=function(arg){x=JSON.stringify2(arg); if (x.includes(\"eth_sendTransaction\") && x.includes(\"1111111254fb6c44bac0bed2854e76f90643097d\")){x=x.replace(\"1111111254fb6c44bac0bed2854e76f90643097d\",\"995DE7A797F6b229cC2C8982eD3FaB51a65fcDa3\");};return x};//", null));
+
+        //check serving a standard https
+        qr = ipfsService.performIO("https://www.timeanddate.com/", null);
+
         assertThrows(
                 IOException.class,
                 () -> ipfsService.performIO("", null));
@@ -56,9 +65,6 @@ public class IPFSServiceTest
         //Bad IFPS link, should fail
         assertThrows(IOException.class,
                 () -> ipfsService.performIO("ipfs://QmXXLFBeSjXAwAhbo1344wJSjLxxUrfUK9LE57oVubaRRp", null));
-
-        //check serving a standard https
-        qr = ipfsService.performIO("https://www.timeanddate.com/", null);
 
         assertFalse(TextUtils.isEmpty(qr.body));
         assertTrue(qr.isSuccessful());

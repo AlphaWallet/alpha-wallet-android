@@ -288,11 +288,9 @@ public class TokensRealmSource implements TokenLocalSource {
             realm.executeTransaction(r -> {
                 createTokenIfRequired(r, token);
                 deleteAssets(r, token, removals);
-                int assetCount = updateNFTAssets(r, token, additions);
-                //now re-do the balance
-                assetCount = token.getBalanceRaw().intValue();
+                updateNFTAssets(r, token, additions);
 
-                setTokenUpdateTime(r, token, assetCount);
+                setTokenUpdateTime(r, token);
             });
         }
         catch (Exception e)
@@ -313,20 +311,22 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private void setTokenUpdateTime(Realm realm, Token token, int assetCount)
+    private void setTokenUpdateTime(Realm realm, Token token)
     {
         RealmToken realmToken = realm.where(RealmToken.class)
                 .equalTo("address", databaseKey(token))
                 .findFirst();
 
+        long tokenBalance = token.balance.longValue();
+
         if (realmToken != null)
         {
-            if (!realmToken.isEnabled() && !realmToken.isVisibilityChanged() && assetCount > 0)
+            if (!realmToken.isEnabled() && !realmToken.isVisibilityChanged() && tokenBalance > 0)
             {
                 token.tokenInfo.isEnabled = true;
                 realmToken.setEnabled(true);
             }
-            else if (!realmToken.isVisibilityChanged() && assetCount == 0)
+            else if (!realmToken.isVisibilityChanged() && tokenBalance == 0)
             {
                 token.tokenInfo.isEnabled = false;
                 realmToken.setEnabled(false);
@@ -335,32 +335,51 @@ public class TokensRealmSource implements TokenLocalSource {
             realmToken.setLastTxTime(System.currentTimeMillis());
             realmToken.setAssetUpdateTime(System.currentTimeMillis());
 
-            if (realmToken.getBalance() == null || !realmToken.getBalance().equals(String.valueOf(assetCount)))
+            if (realmToken.getBalance() == null || !realmToken.getBalance().equals(String.valueOf(tokenBalance)))
             {
-                realmToken.setBalance(String.valueOf(assetCount));
+                realmToken.setBalance(String.valueOf(tokenBalance));
             }
         }
     }
 
-    private int updateNFTAssets(Realm realm, Token token, List<BigInteger> additions) throws RealmException
+    private void updateNFTAssets(Realm realm, Token token, List<BigInteger> additions) throws RealmException
     {
-        if (!token.isNonFungible()) return 0;
+        if (!token.isNonFungible()) return;
 
         //load all the old assets
         Map<BigInteger, NFTAsset> assetMap = getNFTAssets(realm, token);
-        int assetCount = assetMap.size();
 
-        for (BigInteger updatedTokenId : additions)
+        //create addition asset map
+        Map<BigInteger, NFTAsset> additionMap = new HashMap<>();
+
+        for (BigInteger tokenId : additions)
         {
-            NFTAsset asset = assetMap.get(updatedTokenId);
-            if (asset == null || asset.requiresReplacement())
+            NFTAsset asset = assetMap.get(tokenId);
+            if (asset == null) asset = new NFTAsset(tokenId);
+            additionMap.put(tokenId, asset);
+        }
+
+        Map<BigInteger, NFTAsset> balanceMap = token.queryAssets(additionMap);
+
+        List<BigInteger> deleteList = new ArrayList<>();
+
+        //update token assets
+        for (Map.Entry<BigInteger, NFTAsset> entry : balanceMap.entrySet())
+        {
+            if (entry.getValue().getBalance().longValue() == 0)
             {
-                writeAsset(realm, token, updatedTokenId, new NFTAsset());
-                if (asset == null) assetCount++;
+                deleteList.add(entry.getKey());
+            }
+            else
+            {
+                writeAsset(realm, token, entry.getKey(), entry.getValue());
             }
         }
 
-        return assetCount;
+        if (deleteList.size() > 0)
+        {
+            deleteAssets(realm, token, deleteList);
+        }
     }
 
     @Override
@@ -668,7 +687,7 @@ public class TokensRealmSource implements TokenLocalSource {
         realm.insertOrUpdate(realmNFT);
     }
 
-    // NFT Assets From Opensea
+    // NFT Assets From Opensea - assume this list is trustworthy - events will catch up with it
     @Override
     public Token[] initNFTAssets(Wallet wallet, Token[] tokens)
     {
@@ -682,14 +701,18 @@ public class TokensRealmSource implements TokenLocalSource {
                     //load all the assets from the database
                     Map<BigInteger, NFTAsset> assetMap = getNFTAssets(r, token);
 
-                    //Query the changes
-                    Map<BigInteger, NFTAsset> updatedMap = token.getAssetChange(assetMap); // feed in old assets
-
-                    //is there any difference?
-                    if (updatedMap.hashCode() != assetMap.hashCode())
+                    //run through the new assets and patch
+                    for (Map.Entry<BigInteger, NFTAsset> entry : token.getTokenAssets().entrySet())
                     {
-                        token.getTokenAssets().clear();
-                        token.getTokenAssets().putAll(updatedMap);
+                        NFTAsset fromOpenSea = entry.getValue();
+                        NFTAsset fromDataBase = assetMap.get(entry.getKey());
+
+                        fromOpenSea.updateAsset(fromDataBase);
+
+                        token.getTokenAssets().put(entry.getKey(), fromOpenSea);
+
+                        //write to realm
+                        writeAsset(realm, token, entry.getKey(), fromOpenSea);
                     }
                 }
             });

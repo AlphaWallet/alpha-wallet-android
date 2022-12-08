@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.ui.NFTActivity;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.alphawallet.app.widget.NFTImageView;
@@ -38,16 +39,18 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
     private final OnAssetClickListener listener;
     private final Token token;
     private final boolean isGrid;
+    private final OpenSeaService openSeaService;
 
     private final List<Pair<BigInteger, NFTAsset>> actualData;
     private final List<Pair<BigInteger, NFTAsset>> displayData;
 
-    public NFTAssetsAdapter(Activity activity, Token token, OnAssetClickListener listener, boolean isGrid)
+    public NFTAssetsAdapter(Activity activity, Token token, OnAssetClickListener listener, OpenSeaService openSeaSvs, boolean isGrid)
     {
         this.activity = activity;
         this.listener = listener;
         this.token = token;
         this.isGrid = isGrid;
+        this.openSeaService = openSeaSvs;
 
         actualData = new ArrayList<>();
         switch (token.getInterfaceSpec())
@@ -137,7 +140,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
                 holder.subtitle.setVisibility(View.GONE);
             }
 
-            if (!asset.needsLoading())
+            if (asset.hasImageAsset())
             {
                 holder.icon.setupTokenImageThumbnail(asset);
             }
@@ -153,17 +156,39 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
 
     private void fetchAsset(ViewHolder holder, Pair<BigInteger, NFTAsset> pair)
     {
-        pair.second.metaDataLoader = Single.fromCallable(() -> {
-            return token.fetchTokenMetadata(pair.first); //fetch directly from token
-        }).map(newAsset -> storeAsset(pair.first, newAsset, pair.second))
+        pair.second.metaDataLoader = openSeaService.getAsset(token, pair.first)
+                .map(NFTAsset::new)
+                .map(asset -> storeAsset(pair.first, asset, pair.second))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(a -> displayAsset(holder, a, pair.first), e -> {
-                });
+                .subscribe(asset -> checkAsset(asset, holder, pair), e -> {});
+    }
+
+    private void fetchContractMetadata(ViewHolder holder, Pair<BigInteger, NFTAsset> pair)
+    {
+        pair.second.metaDataLoader = Single.fromCallable(() -> {
+                    return token.fetchTokenMetadata(pair.first); //fetch directly from token
+                }).map(newAsset -> storeAsset(pair.first, newAsset, pair.second))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(a -> displayAsset(holder, a, pair.first), e -> {});
+    }
+
+    private void checkAsset(NFTAsset asset, ViewHolder holder, Pair<BigInteger, NFTAsset> pair)
+    {
+        if (asset.hasImageAsset())
+        {
+            displayAsset(holder, asset, pair.first);
+        }
+        else
+        {
+            fetchContractMetadata(holder, pair);
+        }
     }
 
     private NFTAsset storeAsset(BigInteger tokenId, NFTAsset fetchedAsset, NFTAsset oldAsset)
     {
+        if (!fetchedAsset.hasImageAsset()) return oldAsset;
         fetchedAsset.updateFromRaw(oldAsset);
         if (activity != null && activity instanceof NFTActivity)
         {

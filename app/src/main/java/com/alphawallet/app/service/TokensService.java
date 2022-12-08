@@ -132,18 +132,17 @@ public class TokensService
         {
             ContractAddress t = unknownTokens.pollFirst();
             Token cachedToken = t != null ? getToken(t.chainId, t.address) : null;
-            ContractType type = cachedToken != null ? cachedToken.getInterfaceSpec() : ContractType.NOT_SET;
 
             if (t != null && t.address.length() > 0 && (cachedToken == null || TextUtils.isEmpty(cachedToken.tokenInfo.name)))
             {
-                queryUnknownTokensDisposable = tokenRepository.update(t.address, t.chainId, type).toObservable() //fetch tokenInfo
-                        .filter(tokenInfo -> (!TextUtils.isEmpty(tokenInfo.name) || !TextUtils.isEmpty(tokenInfo.symbol)) && tokenInfo.chainId != 0)
-                        .map(tokenInfo -> { tokenInfo.isEnabled = false; return tokenInfo; }) //set default visibility to false
-                        .flatMap(tokenInfo -> tokenRepository.determineCommonType(tokenInfo).toObservable()
-                            .map(contractType -> tokenFactory.createToken(tokenInfo, contractType, ethereumNetworkRepository.getNetworkByChain(t.chainId).getShortName())))
+                ContractType type = tokenRepository.determineCommonType(new TokenInfo(t.address, "", "", 18, false, t.chainId)).blockingGet();
+
+                queryUnknownTokensDisposable = tokenRepository.update(t.address, t.chainId, type) //fetch tokenInfo
+                        .map(tokenInfo -> tokenFactory.createToken(tokenInfo, type, ethereumNetworkRepository.getNetworkByChain(t.chainId).getShortName()))
+                        .flatMap(token -> tokenRepository.updateTokenBalance(currentAddress, token))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
-                        .subscribe(this::finishAddToken, err -> onCheckError(err, t), this::finishTokenCheck);
+                        .subscribe(this::finishAddToken, err -> onCheckError(err, t));
             }
             else if (t == null)
             {
@@ -159,17 +158,9 @@ public class TokensService
         Timber.e(throwable);
     }
 
-    private void finishTokenCheck()
+    private void finishAddToken(BigDecimal balance)
     {
         queryUnknownTokensDisposable = null;
-    }
-
-    private void finishAddToken(Token token)
-    {
-        if (token != null && token.getInterfaceSpec() != ContractType.OTHER)
-        {
-            tokenStoreList.add(token);
-        }
     }
 
     public Token getToken(long chainId, String addr)

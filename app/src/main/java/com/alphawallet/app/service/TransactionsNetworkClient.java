@@ -7,7 +7,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 
@@ -626,9 +625,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private void writeAssets   (Map<String, List<EtherscanEvent>> eventMap, Token token, String walletAddress,
                                 String contractAddress, TokensService svs, boolean newToken)
     {
-        List<BigInteger> additions = new ArrayList<>();
-        List<BigInteger> removals = new ArrayList<>();
+        HashSet<BigInteger> additions = new HashSet<>();
+        HashSet<BigInteger> removals = new HashSet<>();
 
+        //run through addition/removal in chronological order
         for (EtherscanEvent ev : eventMap.get(contractAddress))
         {
             BigInteger tokenId = getTokenId(ev.tokenID);
@@ -637,12 +637,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             if (ev.to.equalsIgnoreCase(walletAddress))
             {
-                if (!additions.contains(tokenId)) { additions.add(tokenId); }
+                additions.add(tokenId);
                 removals.remove(tokenId);
             }
             else
             {
-                if (!removals.contains(tokenId)) { removals.add(tokenId); }
+                removals.add(tokenId);
                 additions.remove(tokenId);
             }
         }
@@ -654,7 +654,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
         if (additions.size() > 0 || removals.size() > 0)
         {
-            svs.updateAssets(token, additions, removals);
+            svs.updateAssets(token, new ArrayList<>(additions), new ArrayList<>(removals));
         }
     }
 
@@ -663,11 +663,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         if (TextUtils.isEmpty(networkInfo.etherscanAPI) || networkInfo.etherscanAPI.contains(COVALENT)) return ""; //Covalent transfers are handled elsewhere
         String result = "0";
         if (currentBlock == 0) currentBlock = 1;
-
-        if (networkInfo.chainId == BINANCE_TEST_ID || networkInfo.chainId == BINANCE_MAIN_ID)
-        {
-            System.out.println("YOLESS");
-        }
 
         String fullUrl = networkInfo.etherscanAPI + "module=account&action=" + queryType +
                 "&startblock=" + currentBlock + "&endblock=9999999999" +

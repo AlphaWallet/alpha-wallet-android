@@ -21,6 +21,7 @@ import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.ERC721Token;
+import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
@@ -326,6 +327,11 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<BigDecimal> updateTokenBalance(String walletAddress, Token token)
     {
+        if (token.isBad())
+        {
+            return Single.fromCallable(() -> BigDecimal.ZERO);
+        }
+
         Wallet wallet = new Wallet(walletAddress);
         return updateBalance(wallet, token)
                 .subscribeOn(Schedulers.io())
@@ -411,6 +417,8 @@ public class TokenRepository implements TokenRepositoryType {
         return localSource.getTokenImageUrl(networkId, address);
     }
 
+    //TODO: Refactor this so the balance update is abstracted into the Token itself
+    //      Once the token is updated we can store it. May need to make the token internal balance non-final
     private Single<BigDecimal> updateBalance(final Wallet wallet, final Token token)
     {
         return Single.fromCallable(() -> {
@@ -429,6 +437,7 @@ public class TokenRepository implements TokenRepositoryType {
                         case ERC875:
                         case ERC875_LEGACY:
                             balanceArray = getBalanceArray875(wallet, token.tokenInfo.chainId, token.getAddress());
+                            thisToken = new Ticket(thisToken, balanceArray);
                             balance = BigDecimal.valueOf(balanceArray.size());
                             break;
                         case ERC721_LEGACY:

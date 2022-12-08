@@ -137,6 +137,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         parsePass = 0;
 
         ProgressBar loadSpinner = findViewById(R.id.ticket_load_spinner);
+        loadSpinner.setVisibility(View.VISIBLE);
         handler.postDelayed(() -> loadSpinner.setVisibility(View.GONE), 2500);
     }
 

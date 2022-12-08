@@ -363,6 +363,11 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     private List<Wallet> findWallets(List<String> addresses)
     {
         List<Wallet> result = new ArrayList<>();
+        if (viewModel.wallets().getValue() == null)
+        {
+            return result;
+        }
+
         Map<String, Wallet> map = toMap(Objects.requireNonNull(viewModel.wallets().getValue()));
         for (String address : addresses)
         {

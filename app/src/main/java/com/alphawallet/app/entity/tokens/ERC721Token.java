@@ -831,10 +831,23 @@ public class ERC721Token extends Token
     {
         final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
 
+        HashSet<BigInteger> currentAssets = new HashSet<>(assetMap.keySet());
+
+        try
+        {
+            currentAssets = checkBalances(web3j, currentAssets);
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
         for (Map.Entry<BigInteger, NFTAsset> entry : assetMap.entrySet())
         {
             BigInteger checkId = entry.getKey();
             NFTAsset checkAsset = entry.getValue();
+
+            //check balance
             if (currentAssets.contains(checkId))
             {
                 checkAsset.setBalance(BigDecimal.ONE);
@@ -849,7 +862,7 @@ public class ERC721Token extends Token
 
         return assetMap;
     }
-
+    
     // Check for new/missing tokenBalanceAssets
     @Override
     public Map<BigInteger, NFTAsset> getAssetChange(Map<BigInteger, NFTAsset> oldAssetList)

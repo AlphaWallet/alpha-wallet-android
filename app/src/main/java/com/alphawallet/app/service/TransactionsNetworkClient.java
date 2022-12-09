@@ -704,7 +704,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             return ETHERSCAN_API_KEY;
         }
-        else if (networkInfo.chainId == BINANCE_TEST_ID || networkInfo.chainId == BINANCE_MAIN_ID)
+        else if (networkInfo.chainId == BINANCE_MAIN_ID)
         {
             return BSC_EXPLORER_API_KEY;
         }

@@ -1,8 +1,9 @@
 package com.alphawallet.app.service;
 
-import android.util.Log;
+import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
+import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
+import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Ticket;
@@ -32,10 +33,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import timber.log.Timber;
-
-import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
-import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
-import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
 
 public class AlphaWalletService
 {
@@ -109,6 +106,8 @@ public class AlphaWalletService
 
             String result = response.body().string();
             JsonObject obj = gson.fromJson(result, JsonObject.class);
+            if (obj.has("error") || !obj.has("result")) return dsigDescriptor;
+
             String queryResult = obj.get("result").getAsString();
             if (queryResult.equals(XML_VERIFIER_PASS))
             {

@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -128,7 +129,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.setWalletAddress(new Address(token.getWallet()));
         tokenView.setupWindowCallback(this);
-        tokenView.setRpcUrl(token.tokenInfo.chainId);
+        tokenView.setRpcUrl(viewModel.getBrowserRPC(token.tokenInfo.chainId));
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSignPersonalMessageListener(this);
         tokenView.setOnSetValuesListener(this);

@@ -169,7 +169,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         else
         {
             searchLayout.setVisibility(View.VISIBLE);
-            adapter = new NFTAssetsAdapter(getActivity(), token, this, isGridView);
+            adapter = new NFTAssetsAdapter(getActivity(), token, this, viewModel.getOpenseaService(), isGridView);
             search.addTextChangedListener(setupTextWatcher((NFTAssetsAdapter)adapter));
         }
 

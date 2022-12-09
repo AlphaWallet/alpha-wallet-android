@@ -276,43 +276,13 @@ public class ERC1155Token extends Token
     }
 
     @Override
-    public List<BigInteger> getChangeList(Map<BigInteger, NFTAsset> assetMap)
-    {
-        //detect asset removal
-        List<BigInteger> oldAssetIdList = new ArrayList<>(assetMap.keySet());
-        oldAssetIdList.removeAll(assets.keySet());
-
-        List<BigInteger> changeList = new ArrayList<>(oldAssetIdList);
-
-        //Now detect differences or new tokens
-        for (BigInteger tokenId : assets.keySet())
-        {
-            NFTAsset newAsset = assets.get(tokenId);
-            NFTAsset oldAsset = assetMap.get(tokenId);
-
-            if (oldAsset == null || newAsset.hashCode() != oldAsset.hashCode())
-            {
-                changeList.add(tokenId);
-            }
-        }
-
-        return changeList;
-    }
-
-    private List<Uint256> fetchBalances(Set<BigInteger> tokenIds)
-    {
-        Function balanceOfBatch = balanceOfBatch(getWallet(), tokenIds);
-        return callSmartContractFunctionArray(tokenInfo.chainId, balanceOfBatch, getAddress(), getWallet());
-    }
-
-    @Override
-    public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
+    public Map<BigInteger, NFTAsset> getAssetChange(Map<BigInteger, NFTAsset> oldAssetList)
     {
         //first see if there's no change; if this is the case we can skip
-        if (assetsUnchanged(assetMap)) return assets;
+        if (assetsUnchanged(oldAssetList)) return assets;
 
         //add all known tokens in
-        Map<BigInteger, NFTAsset> sum = new HashMap<>(assetMap);
+        Map<BigInteger, NFTAsset> sum = new HashMap<>(oldAssetList);
         sum.putAll(assets);
         Set<BigInteger> tokenIds = sum.keySet();
         Function balanceOfBatch = balanceOfBatch(getWallet(), tokenIds);
@@ -336,6 +306,38 @@ public class ERC1155Token extends Token
         else
         {
             updatedAssetMap = assets;
+        }
+
+        return updatedAssetMap;
+    }
+
+    private List<Uint256> fetchBalances(Set<BigInteger> tokenIds)
+    {
+        Function balanceOfBatch = balanceOfBatch(getWallet(), tokenIds);
+        return callSmartContractFunctionArray(tokenInfo.chainId, balanceOfBatch, getAddress(), getWallet());
+    }
+
+    @Override
+    public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
+    {
+        Set<BigInteger> tokenIds = assetMap.keySet();
+        Function balanceOfBatch = balanceOfBatch(getWallet(), tokenIds);
+        List<Uint256> balances = callSmartContractFunctionArray(tokenInfo.chainId, balanceOfBatch, getAddress(), getWallet());
+        Map<BigInteger, NFTAsset> updatedAssetMap = new HashMap<>();
+
+        if (balances != null && balances.size() > 0)
+        {
+            updatedAssetMap = new HashMap<>();
+            int index = 0;
+            for (BigInteger tokenId : tokenIds)
+            {
+                NFTAsset thisAsset = new NFTAsset(assetMap.get(tokenId));
+                BigInteger balance = balances.get(index).getValue();
+                thisAsset.setBalance(new BigDecimal(balance));
+                updatedAssetMap.put(tokenId, thisAsset);
+
+                index++;
+            }
         }
 
         return updatedAssetMap;
@@ -643,7 +645,7 @@ public class ERC1155Token extends Token
 
         try
         {
-            final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
+            final Web3j web3j = TokenRepository.getWeb3jServiceForEvents(tokenInfo.chainId);
 
             Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> evRead = eventSync.processTransferEvents(web3j,
                     getBalanceUpdateEvents(), startBlock, endBlock, realm);

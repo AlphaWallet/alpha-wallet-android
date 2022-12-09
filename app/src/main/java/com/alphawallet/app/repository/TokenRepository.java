@@ -21,6 +21,7 @@ import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.ERC721Token;
+import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
@@ -120,7 +121,8 @@ public class TokenRepository implements TokenRepositoryType {
     private void buildWeb3jClient(NetworkInfo networkInfo)
     {
         AWHttpService publicNodeService = new AWHttpService(networkInfo.rpcServerUrl, networkInfo.backupNodeUrl, okClient, false);
-        HttpServiceHelper.addRequiredCredentials(networkInfo.chainId, publicNodeService, KeyProviderFactory.get().getKlaytnKey(), EthereumNetworkBase.usesProductionKey);
+        HttpServiceHelper.addRequiredCredentials(networkInfo.chainId, publicNodeService, KeyProviderFactory.get().getKlaytnKey(),
+                KeyProviderFactory.get().getInfuraSecret(), EthereumNetworkBase.usesProductionKey);
         web3jNodeServers.put(networkInfo.chainId, Web3j.build(publicNodeService));
     }
 
@@ -141,7 +143,7 @@ public class TokenRepository implements TokenRepositoryType {
             for (int i = 0; i < tokens.length; i++)
             {
                 Token t = tokens[i];
-                if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED || t.getInterfaceSpec() == ContractType.MAYBE_ERC20 || !t.checkBalanceType()) //balance type appears to be wrong
+                if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED || t.getInterfaceSpec() == ContractType.MAYBE_ERC20) //balance type appears to be wrong
                 {
                     ContractType type = determineCommonType(t.tokenInfo)
                             .onErrorReturnItem(t.getInterfaceSpec()).blockingGet();
@@ -324,6 +326,11 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<BigDecimal> updateTokenBalance(String walletAddress, Token token)
     {
+        if (token.isBad())
+        {
+            return Single.fromCallable(() -> BigDecimal.ZERO);
+        }
+
         Wallet wallet = new Wallet(walletAddress);
         return updateBalance(wallet, token)
                 .subscribeOn(Schedulers.io())
@@ -409,6 +416,8 @@ public class TokenRepository implements TokenRepositoryType {
         return localSource.getTokenImageUrl(networkId, address);
     }
 
+    //TODO: Refactor this so the balance update is abstracted into the Token itself
+    //      Once the token is updated we can store it. May need to make the token internal balance non-final
     private Single<BigDecimal> updateBalance(final Wallet wallet, final Token token)
     {
         return Single.fromCallable(() -> {
@@ -427,6 +436,7 @@ public class TokenRepository implements TokenRepositoryType {
                         case ERC875:
                         case ERC875_LEGACY:
                             balanceArray = getBalanceArray875(wallet, token.tokenInfo.chainId, token.getAddress());
+                            thisToken = new Ticket(thisToken, balanceArray);
                             balance = BigDecimal.valueOf(balanceArray.size());
                             break;
                         case ERC721_LEGACY:
@@ -500,13 +510,14 @@ public class TokenRepository implements TokenRepositoryType {
         return newBalance;
     }
 
+    //Batch Balance
     private Single<Token[]> updateBalances(Wallet wallet, Token[] tokens)
     {
         return Single.fromCallable(() -> {
             for (Token t : tokens)
             {
                 //get balance of any token here
-                if (t.isERC721() || t.isERC20()) t.balance = checkUint256Balance(wallet, t.tokenInfo.chainId, t.getAddress());
+                if (t.isERC20() || t.isNonFungible()) t.balance = checkUint256Balance(wallet, t.tokenInfo.chainId, t.getAddress());
             }
             return tokens;
         });
@@ -1222,6 +1233,28 @@ public class TokenRepository implements TokenRepositoryType {
         localSource.storeTokenUrl(networkId, address, imageUrl);
     }
 
+    public static Web3j getWeb3jServiceForEvents(long chainId)
+    {
+        OkHttpClient okClient = new OkHttpClient.Builder()
+                .connectTimeout(C.CONNECT_TIMEOUT * 3, TimeUnit.SECONDS) //events can take longer to render
+                .connectTimeout(C.READ_TIMEOUT * 3, TimeUnit.SECONDS)
+                .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
+                .build();
+
+        String nodeUrl = EthereumNetworkBase.getNodeURLForEvents(chainId);
+        String secondaryNode = EthereumNetworkRepository.getSecondaryNodeURL(chainId);
+        if (nodeUrl.equals(secondaryNode)) //ensure backup node is different
+        {
+            secondaryNode = EthereumNetworkRepository.getNodeURLByNetworkId(chainId);
+        }
+
+        AWHttpService publicNodeService = new AWHttpService(nodeUrl, secondaryNode, okClient, false);
+        HttpServiceHelper.addRequiredCredentials(chainId, publicNodeService, KeyProviderFactory.get().getKlaytnKey(),
+                KeyProviderFactory.get().getInfuraSecret(), EthereumNetworkBase.usesProductionKey);
+        return Web3j.build(publicNodeService);
+    }
+
     public static Web3j getWeb3jService(long chainId)
     {
         OkHttpClient okClient = new OkHttpClient.Builder()
@@ -1230,8 +1263,10 @@ public class TokenRepository implements TokenRepositoryType {
                 .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();
+
         AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId(chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);
-        HttpServiceHelper.addRequiredCredentials(chainId, publicNodeService, KeyProviderFactory.get().getKlaytnKey(), EthereumNetworkBase.usesProductionKey);
+        HttpServiceHelper.addRequiredCredentials(chainId, publicNodeService, KeyProviderFactory.get().getKlaytnKey(),
+                KeyProviderFactory.get().getInfuraSecret(), EthereumNetworkBase.usesProductionKey);
         return Web3j.build(publicNodeService);
     }
 

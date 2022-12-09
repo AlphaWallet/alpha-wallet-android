@@ -47,7 +47,7 @@ public abstract class EthereumNetworkBase
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
-    public static final String XDAI_RPC_URL = "https://rpc.ankr.com/gnosis";
+    public static final String XDAI_RPC_URL = "https://rpc.gnosischain.com";
     public static final String POA_RPC_URL = "https://core.poa.network/";
     public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";

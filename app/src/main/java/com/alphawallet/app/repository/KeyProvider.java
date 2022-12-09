@@ -31,4 +31,6 @@ public interface KeyProvider
     String getCoinbasePayAppId();
 
     String getWalletConnectProjectId();
+
+    String getInfuraSecret();
 }

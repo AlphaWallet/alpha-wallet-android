@@ -3,6 +3,8 @@ package com.alphawallet.app.repository;
 /* Please don't add import android at this point. Later this file will be shared
  * between projects including non-Android projects */
 
+import static com.alphawallet.app.entity.EventSync.BLOCK_SEARCH_INTERVAL;
+import static com.alphawallet.app.entity.EventSync.POLYGON_BLOCK_SEARCH_INTERVAL;
 import static com.alphawallet.app.util.Utils.isValidUrl;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_GOERLI_TEST_ID;
@@ -196,9 +198,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             return "";
         }
-        else if (chainId == MAINNET_ID)
+
+        int index = info.rpcServerUrl.indexOf(INFURA_ENDPOINT);
+        if (index > 0)
         {
-            int index = info.rpcServerUrl.indexOf(INFURA_ENDPOINT);
             return info.rpcServerUrl.substring(0, index + INFURA_ENDPOINT.length()) + keyProvider.getTertiaryInfuraKey();
         }
         else if (info.backupNodeUrl != null)
@@ -209,6 +212,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             return info.rpcServerUrl;
         }
+    }
+
+    public static boolean isInfura(String rpcServerUrl)
+    {
+        return rpcServerUrl.contains(INFURA_ENDPOINT);
     }
 
     // for reset built-in network
@@ -226,7 +234,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(GNOSIS_ID, new NetworkInfo(C.XDAI_NETWORK_NAME, C.xDAI_SYMBOL,
                     XDAI_RPC_URL,
                     "https://blockscout.com/xdai/mainnet/tx/", GNOSIS_ID,
-                    "https://gnosis.public-rpc.com", "https://blockscout.com/xdai/mainnet/api?"));
+                    "https://rpc.ankr.com/gnosis", "https://blockscout.com/xdai/mainnet/api?"));
             put(POA_ID, new NetworkInfo(C.POA_NETWORK_NAME, C.POA_SYMBOL,
                     POA_RPC_URL,
                     "https://blockscout.com/poa/core/tx/", POA_ID, POA_RPC_URL,
@@ -525,22 +533,25 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
+    public static final int INFURA_BATCH_LIMIT = 512;
+    public static final String INFURA_DOMAIN = "infura.io";
+
     //TODO: Refactor when we bump the version of java to allow switch on Long (Finally!!)
     //Also TODO: add a test to check these batch limits of each chain we support
     private static int batchProcessingLimit(long chainId)
     {
         NetworkInfo info = builtinNetworkMap.get(chainId);
-        if (info.rpcServerUrl.contains("infura")) //infura supported chains can handle tx batches of 1000 and up
+        if (info.rpcServerUrl.contains(INFURA_DOMAIN)) //infura supported chains can handle tx batches of 1000 and up
         {
-            return 512;
+            return INFURA_BATCH_LIMIT;
         }
-        else if (info.rpcServerUrl.contains("klaytn"))
+        else if (info.rpcServerUrl.contains("klaytn") || info.rpcServerUrl.contains("rpc.ankr.com"))
         {
             return 0;
         }
-        else if (info.rpcServerUrl.contains("gnosis"))
+        else if (chainId == GNOSIS_ID)
         {
-            return 6; //TODO: Check limit
+            return 6; //TODO: Check limit:
         }
         else if (info.rpcServerUrl.contains("cronos.org"))
         {
@@ -1197,15 +1208,43 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
+    public static boolean isEventBlockLimitEnforced(long chainId)
+    {
+        if (chainId == POLYGON_ID || chainId == POLYGON_TEST_ID)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     public static BigInteger getMaxEventFetch(long chainId)
     {
         if (chainId == POLYGON_ID || chainId == POLYGON_TEST_ID)
         {
-            return BigInteger.valueOf(3500L);
+            return BigInteger.valueOf(POLYGON_BLOCK_SEARCH_INTERVAL);
         }
         else
         {
-            return BigInteger.valueOf(10000L);
+            return BigInteger.valueOf(BLOCK_SEARCH_INTERVAL);
+        }
+    }
+
+    public static String getNodeURLForEvents(long chainId)
+    {
+        if (chainId == POLYGON_ID)
+        {
+            return EthereumNetworkBase.FREE_POLYGON_RPC_URL; // Better than Infura for fetching events
+        }
+        else if (chainId == POLYGON_TEST_ID)
+        {
+            return EthereumNetworkBase.MUMBAI_FALLBACK_RPC_URL;
+        }
+        else
+        {
+            return getNodeURLByNetworkId(chainId);
         }
     }
 

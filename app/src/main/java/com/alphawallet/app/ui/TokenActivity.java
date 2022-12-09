@@ -552,7 +552,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
         tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.setWalletAddress(new Address(token.getWallet()));
-        tokenView.setRpcUrl(token.tokenInfo.chainId);
+        tokenView.setRpcUrl(viewModel.getBrowserRPC(token.tokenInfo.chainId));
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSetValuesListener(this);
         tokenView.setKeyboardListenerCallback(this);

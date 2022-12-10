@@ -62,16 +62,7 @@ public class SignDataWidget extends LinearLayout
     public void setupSignData(Signable signable)
     {
         this.signable = signable;
-        String message;
-        if (signable.getMessageType() == SignMessageType.SIGN_PERSONAL_MESSAGE
-                || signable.getMessageType() == SignMessageType.SIGN_MESSAGE)
-        {
-            message = Hex.hexToUtf8(signable.getMessage());
-        }
-        else
-        {
-            message = signable.getUserMessage().toString();
-        }
+        String message = signable.getUserMessage().toString();
         previewText.setText(message);
         messageText.setText(message);
 

@@ -43,14 +43,29 @@ public class AWEnsResolver
 
     public AWEnsResolver(Web3j web3j, Context context)
     {
+        this(web3j, context, -1);
+    }
+
+    public AWEnsResolver(Web3j web3j, Context context, long chainId)
+    {
         this.ensResolver = new EnsResolver(web3j);
         this.context = context;
         this.client = setupClient();
 
-        resolvables = new HashMap<String, Resolvable>() {
+        resolvables = new HashMap<>()
+        {
             {
                 put(".bit", new DASResolver(client));
-                put(".crypto", new CryptoResolver(ensResolver));
+//                put(".crypto", new CryptoResolver(ensResolver));
+                put(".crypto", new UnstoppableDomainsResolver(client, chainId));
+                put(".zil", new UnstoppableDomainsResolver(client, chainId));
+                put(".wallet", new UnstoppableDomainsResolver(client, chainId));
+                put(".x", new UnstoppableDomainsResolver(client, chainId));
+                put(".nft", new UnstoppableDomainsResolver(client, chainId));
+                put(".888", new UnstoppableDomainsResolver(client, chainId));
+                put(".dao", new UnstoppableDomainsResolver(client, chainId));
+                put(".blockchain", new UnstoppableDomainsResolver(client, chainId));
+                put(".bitcoin", new UnstoppableDomainsResolver(client, chainId));
             }
         };
     }

@@ -545,6 +545,11 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
         }
     }
 
+    public long getChain()
+    {
+        return chainOverride;
+    }
+
     /*public void setEnsNodeNotSyncCallback(EnsNodeNotSyncCallback callback)
     {
         Timber.d("setEnsNodeNotSyncCallback: ");

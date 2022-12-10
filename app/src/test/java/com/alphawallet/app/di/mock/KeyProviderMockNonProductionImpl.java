@@ -94,4 +94,10 @@ public class KeyProviderMockNonProductionImpl implements KeyProvider
     {
         return null;
     }
+
+    @Override
+    public String getUnstoppableDomainsKey()
+    {
+        return null;
+    }
 }

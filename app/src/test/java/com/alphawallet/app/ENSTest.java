@@ -78,6 +78,9 @@ public class ENSTest
 
         assertEquals(
                 ensResolver.resolve("web3j.eth"), ("0x7bfd522dea355ddee2be3c01dfa4419451759310").toLowerCase());
+
+        assertEquals(
+                ensResolver.resolve("vladylav.wallet"), ("0xac1de5bbdc2c8d0b3e4324c87599dc66d3221c13").toLowerCase());
     }
 
     //Temporarily remove - DAS seems to be acting up

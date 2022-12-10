@@ -1167,7 +1167,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void signingComplete(SignatureFromKey signature, Signable message)
     {
-        String signHex = Numeric.toHexString(signature.signature);
         Timber.d("Initial Msg: %s", message.getMessage());
         awWalletConnectClient.signComplete(signature, message);
     }

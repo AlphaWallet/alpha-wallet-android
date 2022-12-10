@@ -3,19 +3,15 @@ package com.alphawallet.app;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES;
 
-import android.app.Activity;
 import android.app.Application;
 import android.app.UiModeManager;
 import android.content.Context;
-import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.util.ReleaseTree;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
-
-import java.util.Stack;
 
 import javax.inject.Inject;
 
@@ -31,16 +27,10 @@ public class App extends Application
     AWWalletConnectClient awWalletConnectClient;
 
     private static App mInstance;
-    private final Stack<Activity> activityStack = new Stack<>();
 
     public static App getInstance()
     {
         return mInstance;
-    }
-
-    public Activity getTopActivity()
-    {
-        return activityStack.peek();
     }
 
     @Override
@@ -94,46 +84,6 @@ public class App extends Application
         {
             Timber.tag("WalletConnect").e(e);
         }
-
-        registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks()
-        {
-            @Override
-            public void onActivityCreated(Activity activity, Bundle savedInstanceState)
-            {
-            }
-
-            @Override
-            public void onActivityDestroyed(Activity activity)
-            {
-            }
-
-            @Override
-            public void onActivityStarted(Activity activity)
-            {
-            }
-
-            @Override
-            public void onActivityResumed(Activity activity)
-            {
-                activityStack.push(activity);
-            }
-
-            @Override
-            public void onActivityPaused(Activity activity)
-            {
-                pop();
-            }
-
-            @Override
-            public void onActivityStopped(Activity activity)
-            {
-            }
-
-            @Override
-            public void onActivitySaveInstanceState(Activity activity, Bundle outState)
-            {
-            }
-        });
     }
 
     @Override
@@ -150,15 +100,9 @@ public class App extends Application
     public void onTerminate()
     {
         super.onTerminate();
-        activityStack.clear();
         if (awWalletConnectClient != null)
         {
             awWalletConnectClient.shutdown();
         }
-    }
-
-    private void pop()
-    {
-        activityStack.pop();
     }
 }

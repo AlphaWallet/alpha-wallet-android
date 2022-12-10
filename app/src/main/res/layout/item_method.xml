@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/text"
+    style="@style/Aw.Typography.Caption"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingVertical="@dimen/dp8">
-
-    <TextView
-        android:id="@+id/tv_method_name"
-        style="@style/Aw.Component.TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/dp16" />
-</LinearLayout>
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="@dimen/standard_16"
+    tools:text="Method" />

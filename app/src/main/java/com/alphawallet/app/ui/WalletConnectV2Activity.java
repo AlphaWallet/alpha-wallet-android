@@ -3,8 +3,8 @@ package com.alphawallet.app.ui;
 import static java.util.stream.Collectors.toList;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
@@ -16,12 +16,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.walletconnect.NamespaceParser;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
@@ -56,19 +58,18 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     AWWalletConnectClient awWalletConnectClient;
     private WalletConnectV2ViewModel viewModel;
     private SelectNetworkFilterViewModel selectNetworkFilterViewModel;
-
     private ImageView icon;
     private TextView peerName;
     private TextView peerUrl;
     private ProgressBar progressBar;
     private LinearLayout infoLayout;
-    private FunctionButtonBar functionBar;
-    private ListView chainList;
+    private TextView networksLabel;
     private ListView walletList;
+    private ListView chainList;
     private ListView methodList;
-
-    private WalletConnectV2SessionItem session;
+    private FunctionButtonBar functionBar;
     private WalletAdapter walletAdapter;
+    private WalletConnectV2SessionItem session;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -89,7 +90,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
                 {
                     return;
                 }
-                new Handler().post(() -> {
+                runOnUiThread(() -> {
                     Toast.makeText(WalletConnectV2Activity.this, msg, Toast.LENGTH_SHORT).show();
                     finish();
                 });
@@ -99,6 +100,25 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
         this.session = retrieveSession(getIntent());
         initViewModel();
+    }
+
+    private void initViews()
+    {
+        progressBar = findViewById(R.id.progress);
+        infoLayout = findViewById(R.id.layout_info);
+        icon = findViewById(R.id.icon);
+        peerName = findViewById(R.id.peer_name);
+        peerUrl = findViewById(R.id.peer_url);
+        networksLabel = findViewById(R.id.label_networks);
+        walletList = findViewById(R.id.wallet_list);
+        chainList = findViewById(R.id.chain_list);
+        methodList = findViewById(R.id.method_list);
+        functionBar = findViewById(R.id.layoutButtons);
+
+        progressBar.setVisibility(View.VISIBLE);
+        infoLayout.setVisibility(View.GONE);
+        functionBar.setupFunctions(this, Arrays.asList(R.string.dialog_approve, R.string.dialog_reject));
+        functionBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -123,40 +143,44 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     {
         viewModel = new ViewModelProvider(this)
                 .get(WalletConnectV2ViewModel.class);
-
-        viewModel.wallets().observe(this, this::onWalletsFetched);
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-
         selectNetworkFilterViewModel = new ViewModelProvider(this)
                 .get(SelectNetworkFilterViewModel.class);
+        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.wallets().observe(this, this::onWallets);
     }
 
-    private void onWalletsFetched(Wallet[] wallets)
+    private void onWallets(Wallet[] wallets)
     {
-        tryDisplaySessionStatus();
+        viewModel.fetchDefaultWallet();
     }
 
-    private void tryDisplaySessionStatus()
+    private void onDefaultWallet(Wallet wallet)
     {
-        if (viewModel.wallets().getValue() != null && viewModel.defaultWallet().getValue() != null)
+        if (wallet.type == WalletType.WATCH)
         {
-            displaySessionStatus(session);
+            AWalletAlertDialog errorDialog = new AWalletAlertDialog(this);
+            errorDialog.setTitle(R.string.title_dialog_error);
+            errorDialog.setMessage(getString(R.string.error_message_watch_only_wallet));
+            errorDialog.setButton(R.string.dialog_ok, v -> {
+                errorDialog.dismiss();
+                finish();
+            });
+            errorDialog.show();
+        }
+        else
+        {
+            displaySessionStatus(session, wallet);
             progressBar.setVisibility(View.GONE);
             functionBar.setVisibility(View.VISIBLE);
             infoLayout.setVisibility(View.VISIBLE);
         }
     }
 
-    private void onDefaultWallet(Wallet wallet)
-    {
-        tryDisplaySessionStatus();
-    }
-
-    private void displaySessionStatus(WalletConnectV2SessionItem session)
+    private void displaySessionStatus(WalletConnectV2SessionItem session, Wallet wallet)
     {
         if (session.icon == null)
         {
-            icon.setImageResource(R.drawable.ic_coin_eth_small);
+            icon.setImageResource(R.drawable.grey_circle);
         }
         else
         {
@@ -165,24 +189,55 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
                     .circleCrop()
                     .into(icon);
         }
-        peerName.setText(session.name);
-        peerUrl.setText(session.url);
 
-        chainList.setAdapter(new ChainAdapter(this, session.chains));
+        if (!TextUtils.isEmpty(session.name))
+        {
+            peerName.setText(session.name);
+        }
+
+        peerUrl.setText(session.url);
+        peerUrl.setTextColor(ContextCompat.getColor(this, R.color.brand));
+        peerUrl.setOnClickListener(v -> {
+            String url = peerUrl.getText().toString();
+            if (url.startsWith("http"))
+            {
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
+            }
+        });
+
         if (session.settled)
         {
             walletAdapter = new WalletAdapter(this, findWallets(session.wallets));
+            networksLabel.setText(R.string.network);
         }
         else
         {
-            walletAdapter = new WalletAdapter(this, viewModel.wallets().getValue(), viewModel.defaultWallet().getValue());
+            walletAdapter = new WalletAdapter(this, new Wallet[]{wallet}, viewModel.defaultWallet().getValue());
         }
+
         walletList.setAdapter(walletAdapter);
+
+        if (session.chains.size() > 1)
+        {
+            networksLabel.setText(R.string.network);
+        }
+        else
+        {
+            networksLabel.setText(R.string.subtitle_network);
+        }
+
+        chainList.setAdapter(new ChainAdapter(this, session.chains));
+
         methodList.setAdapter(new MethodAdapter(this, session.methods));
+
         resizeList();
 
         if (session.settled)
         {
+            setTitle(getString(R.string.title_session_details));
+
             functionBar.setupFunctions(new StandardFunctionInterface()
             {
                 @Override
@@ -194,6 +249,8 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         }
         else
         {
+            setTitle(getString(R.string.title_session_proposal));
+
             functionBar.setupFunctions(new StandardFunctionInterface()
             {
                 @Override
@@ -201,7 +258,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
                 {
                     if (actionId == R.string.dialog_approve)
                     {
-                        approve(AWWalletConnectClient.sessionProposal);
+                        approve(AWWalletConnectClient.sessionProposal, wallet.address);
                     }
                     else
                     {
@@ -213,64 +270,16 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     }
 
-    private List<Wallet> findWallets(List<String> addresses)
-    {
-        List<Wallet> result = new ArrayList<>();
-        Map<String, Wallet> map = toMap(Objects.requireNonNull(viewModel.wallets().getValue()));
-        for (String address : addresses)
-        {
-            Wallet wallet = map.get(address);
-            if (wallet == null)
-            {
-                wallet = new Wallet(address);
-            }
-            result.add(wallet);
-        }
-        return result;
-    }
-
-    private Map<String, Wallet> toMap(Wallet[] wallets)
-    {
-        HashMap<String, Wallet> map = new HashMap<>();
-        for (Wallet wallet : wallets)
-        {
-            map.put(wallet.address, wallet);
-        }
-        return map;
-    }
-
     private void resizeList()
     {
         LayoutHelper.resizeList(chainList);
-        LayoutHelper.resizeList(walletList);
         LayoutHelper.resizeList(methodList);
-    }
-
-    private void initViews()
-    {
-        progressBar = findViewById(R.id.progress);
-        infoLayout = findViewById(R.id.layout_info);
-        icon = findViewById(R.id.icon);
-        peerName = findViewById(R.id.peer_name);
-        peerUrl = findViewById(R.id.peer_url);
-        chainList = findViewById(R.id.chain_list);
-        walletList = findViewById(R.id.wallet_list);
-        methodList = findViewById(R.id.method_list);
-
-        progressBar.setVisibility(View.VISIBLE);
-        infoLayout.setVisibility(View.GONE);
-
-        functionBar = findViewById(R.id.layoutButtons);
-        functionBar.setupFunctions(this, Arrays.asList(R.string.dialog_approve, R.string.dialog_reject));
-
-        functionBar.setVisibility(View.GONE);
     }
 
     private void endSessionDialog()
     {
         runOnUiThread(() ->
         {
-
             AWalletAlertDialog dialog = new AWalletAlertDialog(this, AWalletAlertDialog.ERROR);
             dialog.setTitle(R.string.dialog_title_disconnect_session);
             dialog.setButton(R.string.action_close, v -> {
@@ -293,7 +302,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         awWalletConnectClient.reject(sessionProposal, this);
     }
 
-    private void approve(Sign.Model.SessionProposal sessionProposal)
+    private void approve(Sign.Model.SessionProposal sessionProposal, String walletAddress)
     {
         List<Long> disabledNetworks = disabledNetworks(sessionProposal.getRequiredNamespaces());
         if (disabledNetworks.isEmpty())
@@ -349,6 +358,32 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
             }
         }
         return result;
+    }
+
+    private List<Wallet> findWallets(List<String> addresses)
+    {
+        List<Wallet> result = new ArrayList<>();
+        Map<String, Wallet> map = toMap(Objects.requireNonNull(viewModel.wallets().getValue()));
+        for (String address : addresses)
+        {
+            Wallet wallet = map.get(address);
+            if (wallet == null)
+            {
+                wallet = new Wallet(address);
+            }
+            result.add(wallet);
+        }
+        return result;
+    }
+
+    private Map<String, Wallet> toMap(Wallet[] wallets)
+    {
+        HashMap<String, Wallet> map = new HashMap<>();
+        for (Wallet wallet : wallets)
+        {
+            map.put(wallet.address, wallet);
+        }
+        return map;
     }
 
     private List<String> getSelectedAccounts()

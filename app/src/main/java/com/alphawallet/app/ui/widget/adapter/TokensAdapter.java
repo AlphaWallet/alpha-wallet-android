@@ -3,6 +3,11 @@ package com.alphawallet.app.ui.widget.adapter;
 import android.content.Intent;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
@@ -43,11 +48,6 @@ import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SortedList;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 {
@@ -289,6 +289,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     }
 
     public void setTokens(TokenCardMeta[] tokens)
+    {
+        populateTokens(tokens, true);
+    }
+
+    public void updateTokenMetas(TokenCardMeta[] tokens)
     {
         populateTokens(tokens, false);
     }

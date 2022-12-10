@@ -15,35 +15,38 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:layout_marginStart="@dimen/standard_16"
-        android:layout_marginVertical="@dimen/standard_16">
+        android:paddingVertical="@dimen/standard_16"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingEnd="@dimen/mini_4">
 
         <TextView
             android:id="@+id/text_recipient_title"
             style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="@integer/widget_label"
             android:gravity="start"
             android:text="@string/recipient" />
 
         <TextView
             android:id="@+id/text_recipient"
+            style="@style/Aw.Typography.Caption"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/small_12"
-            android:layout_weight="3.5"
-            android:gravity="start"
-            android:lines="2"
-            android:maxLines="2"
+            android:layout_weight="@integer/widget_content"
+            android:drawablePadding="@dimen/tiny_8"
+            android:ellipsize="end"
+            android:gravity="start|center_vertical"
+            android:lines="1"
             tools:text="pablo.eth | 0x123456...0421" />
 
         <ImageView
             android:id="@+id/image_more"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_weight="0.6"
+            android:layout_gravity="start|center_vertical"
+            android:layout_weight="@integer/widget_control"
             android:background="@color/transparent"
             android:padding="@dimen/mini_4"
             android:src="@drawable/ic_expand_more"
@@ -65,37 +68,44 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/standard_16"
             android:gravity="start"
-            android:text="@string/wallet_address" />
+            android:text="@string/signer_address" />
 
         <TextView
             android:id="@+id/text_recipient_address"
+            style="@style/Aw.Typography.Caption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/standard_16"
             android:layout_marginTop="@dimen/tiny_8"
             android:layout_marginEnd="@dimen/standard_16"
+            android:layout_marginBottom="@dimen/standard_16"
             android:gravity="start"
             tools:text="0x6EBaF477F83E055589C1188bCC6DDCCD8C9B131a" />
 
         <TextView
-            android:id="@+id/label_ens"
+            android:id="@+id/label_ens_name"
             style="@style/Aw.Typography.Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/standard_16"
-            android:layout_marginTop="@dimen/standard_16"
             android:layout_marginBottom="@dimen/tiny_8"
             android:gravity="start"
-            android:text="@string/ens_name" />
+            android:text="@string/ens_name"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <LinearLayout
+            android:id="@+id/layout_ens_name"
+            style="@style/Aw.Typography.Caption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/standard_16"
             android:layout_marginEnd="@dimen/standard_16"
             android:layout_marginBottom="@dimen/standard_16"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <com.alphawallet.app.widget.UserAvatar
                 android:id="@+id/blockie"
@@ -111,6 +121,20 @@
                 tools:text="pablo.eth" />
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/message"
+            style="@style/Aw.Typography.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/standard_16"
+            android:layout_marginBottom="@dimen/standard_16"
+            android:drawablePadding="@dimen/tiny_8"
+            android:gravity="start"
+            android:visibility="gone"
+            app:drawableStartCompat="@drawable/ic_red_warning"
+            tools:text="Sample message\nLine 2"
+            tools:visibility="visible" />
 
     </LinearLayout>
 

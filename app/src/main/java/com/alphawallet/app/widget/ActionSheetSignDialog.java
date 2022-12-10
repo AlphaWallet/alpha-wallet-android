@@ -1,14 +1,12 @@
 package com.alphawallet.app.widget;
 
-import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
-
 import android.app.Activity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.util.Pair;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
@@ -22,7 +20,6 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SignDialogViewModel;
 import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +32,7 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
     private final SignDialogViewModel viewModel;
     private final BottomSheetToolbarView toolbar;
     private final ConfirmationWidget confirmationWidget;
+    private final AddressDetailView requesterDetail;
     private final AddressDetailView addressDetail;
     private final FunctionButtonBar functionBar;
     private final ActionSheetCallback actionSheetCallback;
@@ -45,19 +43,19 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
     public ActionSheetSignDialog(@NonNull Activity callingActivity, ActionSheetCallback aCallback, Signable message)
     {
         super(callingActivity);
-        View view = LayoutInflater.from(callingActivity).inflate(R.layout.dialog_action_sheet_sign, null);
+        View view = View.inflate(callingActivity, R.layout.dialog_action_sheet_sign, null);
         setContentView(view);
-
         toolbar = findViewById(R.id.bottom_sheet_toolbar);
         confirmationWidget = findViewById(R.id.confirmation_view);
-        addressDetail = findViewById(R.id.requester);
+        requesterDetail = findViewById(R.id.requester);
+        addressDetail = findViewById(R.id.wallet);
         functionBar = findViewById(R.id.layoutButtons);
         callbackId = message.getCallbackId();
         activity = callingActivity;
 
         actionSheetCallback = aCallback;
 
-        addressDetail.setupRequester(message.getOrigin());
+        requesterDetail.setupRequester(message.getOrigin());
         SignDataWidget signWidget = findViewById(R.id.sign_widget);
         signWidget.setupSignData(message);
 
@@ -73,6 +71,7 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
 
         viewModel = new ViewModelProvider((ViewModelStoreOwner) activity).get(SignDialogViewModel.class);
         viewModel.completed().observe((LifecycleOwner) activity, this::signComplete);
+        viewModel.message().observe((LifecycleOwner) activity, this::onMessage);
         setCanceledOnTouchOutside(false);
     }
 
@@ -99,6 +98,13 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
     public void setSigningWallet(String account)
     {
         viewModel.setSigningWallet(account);
+        addressDetail.setVisibility(View.VISIBLE);
+        addressDetail.setupAddress(account, "", null);
+    }
+
+    private void onMessage(Pair<Integer, Integer> res)
+    {
+        addressDetail.addMessage(getContext().getString(res.first), res.second);
     }
 
     public void success()

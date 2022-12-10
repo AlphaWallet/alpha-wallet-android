@@ -15,17 +15,17 @@
         android:id="@+id/layout_summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/standard_16"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingTop="@dimen/standard_16"
-        android:paddingBottom="@dimen/standard_16">
+        android:paddingVertical="@dimen/standard_16"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingEnd="@dimen/mini_4">
 
         <TextView
             style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="@integer/widget_label"
             android:gravity="start" />
 
         <TextView
@@ -33,7 +33,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/small_12"
-            android:layout_weight="3.5"
+            android:layout_weight="@integer/widget_content"
             android:gravity="start"
             tools:text="Destination: 0xabcdef" />
 
@@ -41,7 +41,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:layout_weight="0.6"
+            android:layout_weight="@integer/widget_control"
             android:background="@color/transparent"
             android:padding="@dimen/mini_4"
             android:src="@drawable/ic_expand_more"
@@ -61,24 +61,31 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingVertical="@dimen/cozy_20">
+            android:paddingVertical="@dimen/standard_16"
+            android:paddingStart="@dimen/standard_16"
+            android:paddingEnd="@dimen/mini_4">
 
             <TextView
                 style="@style/Aw.Typography.Label"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/standard_16"
-                android:layout_weight="3.45"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="@integer/widget_content"
                 android:text="@string/title_transaction_details"
                 android:visibility="visible" />
+
+            <androidx.viewpager.widget.ViewPager
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="@dimen/small_12"
+                android:layout_weight="@integer/widget_label" />
 
             <ImageView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
-                android:layout_weight="0.5"
+                android:layout_weight="@integer/widget_control"
                 android:background="@color/transparent"
                 android:padding="@dimen/mini_4"
                 android:src="@drawable/ic_expand_less_black"
@@ -93,6 +100,7 @@
 
             <TextView
                 android:id="@+id/text_full_details"
+                style="@style/Aw.Typography.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/standard_16"

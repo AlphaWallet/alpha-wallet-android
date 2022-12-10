@@ -954,4 +954,8 @@
     <string name="message_select_one_exchange">Sélectionnez au moins un échange.</string>
     <string name="deprecated">Obsolète</string>
     <string name="error_message_watch_only_wallet">Impossible d\'effectuer une action sur ce portefeuille Watch-only.</string>
+    <string name="no_title">(Pas de titre)</string>
+    <string name="title_session_details">Détails de la session</string>
+    <string name="title_session_proposal">Proposition de séance</string>
+    <string name="message_wc_wallet_different_from_active_wallet">Portefeuille différent du portefeuille actif.</string>
 </resources>

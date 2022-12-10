@@ -7,18 +7,24 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.alphawallet.app.R;
 
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 public class MethodAdapter extends ArrayAdapter<String>
 {
     public MethodAdapter(@NonNull Context context, List<String> methods)
     {
         super(context, 0, methods);
+    }
+
+    @Override
+    public boolean isEnabled(int position)
+    {
+        return false;
     }
 
     @NonNull
@@ -30,9 +36,9 @@ public class MethodAdapter extends ArrayAdapter<String>
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_method, parent, false);
         }
 
-        TextView methodName = convertView.findViewById(R.id.tv_method_name);
-
+        TextView methodName = convertView.findViewById(R.id.text);
         methodName.setText(getItem(position));
+
         return convertView;
     }
 }

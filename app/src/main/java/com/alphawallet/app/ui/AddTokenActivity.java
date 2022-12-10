@@ -44,6 +44,7 @@ import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.AddTokenViewModel;
+import com.alphawallet.app.widget.AWBottomSheetDialog;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
@@ -56,9 +57,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import timber.log.Timber;
-
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class AddTokenActivity extends BaseActivity implements AddressReadyCallback, StandardFunctionInterface, TokensAdapterCallback
@@ -80,8 +80,12 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private TokensAdapter adapter;
     private RecyclerView recyclerView;
+    FunctionButtonBar functionBar;
+
+    private boolean mainNetActive = true;
 
     private AWalletAlertDialog aDialog;
+    private AWBottomSheetDialog dialog;
     private final LongSparseArray<Token> tokenList = new LongSparseArray<>();
 
     @Override
@@ -319,28 +323,103 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             lastCheck = address;
             showProgress(true);
             progressLayout.setVisibility(View.VISIBLE);
+            adapter.clear();
             viewModel.testNetworks(address);
         }
     }
 
-    private void onSave() {
-        List<TokenCardMeta> selected = adapter.getSelected();
-        List<Token> toSave = new ArrayList<>();
-        for (TokenCardMeta tcm : selected)
+    private void onSave()
+    {
+        mainNetActive = viewModel.ethereumNetworkRepositoryType().isMainNetSelected();
+        if (mainNetActive)
         {
-            Token matchingToken = tokenList.get(tcm.getChain());
-            if (matchingToken != null) toSave.add(matchingToken);
-        }
+            List<TokenCardMeta> selected = adapter.getSelected();
 
-        if (toSave.size() > 0)
-        {
-            viewModel.saveTokens(toSave);
-            onSaved(toSave.get(0));
+            if (selected.size() > 0)
+            {
+                onSelectedChains(selected);
+            }
+            else
+            {
+                finish();
+            }
         }
         else
         {
-            finish();
+            showDialog(functionBar);
         }
+    }
+
+    private void onSelectedChains(List<TokenCardMeta> selected)
+    {
+        aDialog = new AWalletAlertDialog(this);
+        aDialog.setTitle(R.string.title_add_token);
+        aDialog.setIcon(AWalletAlertDialog.NONE);
+        aDialog.setMessage(getString(R.string.unselected_token));
+        aDialog.setButtonText(R.string.dialog_ok);
+        aDialog.setButtonListener(v -> {
+            List<Token> toSave = new ArrayList<>();
+            for (TokenCardMeta tcm : selected)
+            {
+                Token matchingToken = tokenList.get(tcm.getChain());
+                if (matchingToken != null) toSave.add(matchingToken);
+            }
+            viewModel.saveTokens(toSave);
+            if (toSave.size() == 0)
+            {
+                Toast.makeText(this, R.string.toast_wait_to_scan_chains, Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                viewModel.saveTokens(toSave);
+                onSaved(toSave.get(0));
+                aDialog.dismiss();
+            }
+
+        });
+        aDialog.show();
+    }
+
+    private void showDialog(View view)
+    {
+        if (dialog == null)
+        {
+            dialog = createDialog();
+        }
+
+        if (!dialog.isShowing())
+        {
+            dialog.show();
+        }
+    }
+
+    private AWBottomSheetDialog createDialog()
+    {
+        AWBottomSheetDialog dialog = new AWBottomSheetDialog(this, new AWBottomSheetDialog.Callback()
+        {
+            @Override
+            public void onClosed()
+            {
+
+            }
+
+            @Override
+            public void onConfirmed()
+            {
+                Intent i = new Intent(getApplication(), SelectNetworkFilterActivity.class);
+                startActivity(i);
+            }
+
+            @Override
+            public void onCancelled()
+            {
+
+            }
+        });
+        dialog.setTitle(getString(R.string.button_switch_to_mainnet));
+        dialog.setContent(getString(R.string.content_dialog_where_are_tokens));
+        dialog.setConfirmButton(getString(R.string.button_switch_to_mainnet));
+        return dialog;
     }
 
     private void onNoContractFound(Boolean noContract)

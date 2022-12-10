@@ -15,7 +15,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
-import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Transaction;
@@ -55,7 +54,6 @@ import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.SigReturnType;
-import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
@@ -296,15 +294,6 @@ public class TokenFunctionViewModel extends BaseViewModel
         failSig.type = SigReturnType.NO_TOKENSCRIPT;
         failSig.subject = throwable.getMessage();
         sig.postValue(failSig);
-    }
-
-    public void signMessage(Signable message, DAppFunction dAppFunction, long chainId)
-    {
-        disposable = createTransactionInteract.sign(wallet, message, chainId)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
-                        error -> dAppFunction.DAppError(error, message));
     }
 
     public String getTransactionBytes(Token token, BigInteger tokenId, FunctionDefinition def)
@@ -894,5 +883,10 @@ public class TokenFunctionViewModel extends BaseViewModel
         {
             getTokenMetadata(token, tokenId, oldAsset);
         }
+    }
+
+    public String getBrowserRPC(long chainId)
+    {
+        return ethereumNetworkRepository.getDappBrowserRPC(chainId);
     }
 }

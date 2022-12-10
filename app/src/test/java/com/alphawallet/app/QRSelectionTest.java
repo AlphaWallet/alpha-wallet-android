@@ -84,13 +84,13 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<SignatureFromKey> getSignature(Wallet wallet, Signable sign, long chainId)
+            public Single<SignatureFromKey> getSignature(Wallet wallet, Signable sign)
             {
                 return null;
             }
 
             @Override
-            public Single<byte[]> getSignatureFast(Wallet wallet, String pass, byte[] message, long chainId)
+            public Single<byte[]> getSignatureFast(Wallet wallet, String pass, byte[] message)
             {
                 return Single.fromCallable(() -> {
                     //sign using the local key
@@ -222,7 +222,7 @@ public class QRSelectionTest
                     .getMessage(qr.indices, CONTRACT_ADDR, ContractType.ERC875).blockingGet();
 
             byte[] sig = transactionRepository
-                    .getSignatureFast(null, "hackintosh", messagePair.message.getBytes(), 1).blockingGet();
+                    .getSignatureFast(null, "hackintosh", messagePair.message.getBytes()).blockingGet();
 
             qr.sigPair = new SignaturePair(messagePair.selection, sig, messagePair.message);
         }

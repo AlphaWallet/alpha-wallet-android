@@ -173,7 +173,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
+                .sign(defaultWallet().getValue(), tradeBytes)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotSignature, this::onError);
@@ -194,7 +194,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
+                .sign(defaultWallet().getValue(), tradeBytes)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotSignature, this::onError);

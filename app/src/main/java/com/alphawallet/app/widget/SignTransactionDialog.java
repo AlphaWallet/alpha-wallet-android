@@ -22,7 +22,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.AuthenticationFailType;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.walletconnect.AWWalletConnectClient;
+import com.alphawallet.app.ui.BaseActivity;
 
 import java.security.ProviderException;
 import java.util.concurrent.Executor;
@@ -182,7 +182,7 @@ public class SignTransactionDialog
             else
             {
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                AWWalletConnectClient.authCallback = authCallback;
+                BaseActivity.authCallback = authCallback;
                 activity.startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + callBackId.ordinal());
             }
         }

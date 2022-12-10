@@ -59,12 +59,17 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import timber.log.Timber;
 
 /** Resolution logic for contract addresses. According to https://eips.ethereum.org/EIPS/eip-2544 */
 public class EnsResolver implements Resolvable
@@ -76,12 +81,13 @@ public class EnsResolver implements Resolvable
 
     // Permit number offchain calls  for a single contract call.
     public static final int LOOKUP_LIMIT = 4;
+    private static final long ENS_CACHE_TIME_VALIDITY = 10 * (1000*60); //10 minutes
 
     public static final String REVERSE_NAME_SUFFIX = ".addr.reverse";
 
     private final Web3j web3j;
     protected final int addressLength;
-    protected final long chainId;
+    protected long chainId;
 
     private OkHttpClient client = new OkHttpClient();
 
@@ -92,29 +98,75 @@ public class EnsResolver implements Resolvable
         this.web3j = web3j;
         this.addressLength = addressLength;
 
-        long chainId = 1;
+        chainId = 1;
 
-        try
-        {
+        Single.fromCallable(() -> {
             NetVersion v = web3j.netVersion().send();
             String ver = v.getNetVersion();
-            chainId = Long.parseLong(ver);
-        }
-        catch (Exception e)
-        {
-            //
-        }
-
-        this.chainId = chainId;
+            return Long.parseLong(ver);
+        }).subscribeOn(Schedulers.io())
+          .observeOn(Schedulers.io())
+          .subscribe(id -> this.chainId = id, Timber::w)
+          .isDisposed();
     }
 
     public EnsResolver(Web3j web3j) {
         this(web3j, Keys.ADDRESS_LENGTH_IN_HEX);
     }
 
-    protected ContractAddress obtainOffchainResolverAddr(String ensName) throws Exception
+    protected ContractAddress obtainOffChainResolverAddress(String ensName) throws Exception
     {
         return new ContractAddress(chainId, getResolverAddress(ensName));
+    }
+
+    private static class CachedENSRead
+    {
+        public final String cachedResult;
+        public final long cachedResultTime;
+
+        public CachedENSRead(String result)
+        {
+            cachedResult = result;
+            cachedResultTime = System.currentTimeMillis();
+        }
+
+        public boolean isValid()
+        {
+            return System.currentTimeMillis() < (cachedResultTime + ENS_CACHE_TIME_VALIDITY); //10 minutes cache validity
+        }
+    }
+
+    //Need to cache results for Resolve
+    private static final Map<String, CachedENSRead> cachedNameReads = new ConcurrentHashMap<>();
+
+    private String cacheKey(String ensName, String addrFunction)
+    {
+        return ((ensName != null) ? ensName : "") + "%" + ((addrFunction != null) ? addrFunction : "");
+    }
+
+    private String resolveWithCaching(String ensName, byte[] nameHash, String resolverAddr) throws Exception
+    {
+        String dnsEncoded = NameHash.dnsEncode(ensName);
+        String addrFunction = encodeResolverAddr(nameHash);
+
+        CachedENSRead lookupData = cachedNameReads.get(cacheKey(ensName, addrFunction));
+        String lookupDataHex = lookupData != null ? lookupData.cachedResult : null;
+
+        if (lookupData == null || !lookupData.isValid())
+        {
+            EthCall result =
+                    resolve(
+                            Numeric.hexStringToByteArray(dnsEncoded),
+                            Numeric.hexStringToByteArray(addrFunction),
+                            resolverAddr);
+            lookupDataHex = result.isReverted() ? Utils.removeDoubleQuotes(result.getError().getData()) : result.getValue();// .toString();
+            if (!TextUtils.isEmpty(lookupDataHex) && !lookupDataHex.equals("0x"))
+            {
+                cachedNameReads.put(cacheKey(ensName, addrFunction), new CachedENSRead(lookupDataHex));
+            }
+        }
+
+        return lookupDataHex;
     }
 
     /**
@@ -133,7 +185,7 @@ public class EnsResolver implements Resolvable
         try {
             if (isValidEnsName(ensName, addressLength))
             {
-                ContractAddress resolverAddress = obtainOffchainResolverAddr(ensName);
+                ContractAddress resolverAddress = obtainOffChainResolverAddress(ensName);
 
                 boolean supportWildcard =
                         supportsInterface(EnsUtils.ENSIP_10_INTERFACE_ID, resolverAddress.address);
@@ -141,16 +193,7 @@ public class EnsResolver implements Resolvable
 
                 String resolvedName;
                 if (supportWildcard) {
-                    String dnsEncoded = NameHash.dnsEncode(ensName);
-                    String addrFunction = encodeResolverAddr(nameHash);
-
-                    EthCall result =
-                            resolve(
-                                            Numeric.hexStringToByteArray(dnsEncoded),
-                                            Numeric.hexStringToByteArray(addrFunction),
-                                            resolverAddress.address);
-
-                    String lookupDataHex = result.isReverted() ? Utils.removeDoubleQuotes(result.getError().getData()) : result.getValue();// .toString();
+                    String lookupDataHex = resolveWithCaching(ensName, nameHash, resolverAddress.address);
                     resolvedName = resolveOffchain(lookupDataHex, resolverAddress, LOOKUP_LIMIT);
                 } else {
                     try {
@@ -359,7 +402,7 @@ public class EnsResolver implements Resolvable
         if (WalletUtils.isValidAddress(address, addressLength))
         {
             String reverseName = Numeric.cleanHexPrefix(address) + REVERSE_NAME_SUFFIX;
-            ContractAddress resolverAddress = obtainOffchainResolverAddr(reverseName);
+            ContractAddress resolverAddress = obtainOffChainResolverAddress(reverseName);
 
             byte[] nameHash = NameHash.nameHashAsBytes(reverseName);
             String name;
@@ -438,11 +481,27 @@ public class EnsResolver implements Resolvable
 
     public String resolverAddr(byte[] node, String address) throws Exception
     {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_addr,
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(node)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
+        //use caching
+        String nodeData = Numeric.toHexString(node);
+        CachedENSRead resolverData = cachedNameReads.get(cacheKey(nodeData, address));
+        String resolverAddr = resolverData != null ? resolverData.cachedResult : null;
 
-        return getContractData(address, function, "");
+        if (resolverData == null || !resolverData.isValid())
+        {
+            final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_addr,
+                    Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(node)),
+                    Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                    {
+                    }));
+
+            resolverAddr = getContractData(address, function, "");
+            if (!TextUtils.isEmpty(resolverAddr) && resolverAddr.length() > 2)
+            {
+                cachedNameReads.put(cacheKey(nodeData, address), new CachedENSRead(resolverAddr));
+            }
+        }
+
+        return resolverAddr;
     }
 
     public String encodeResolverAddr(byte[] node)

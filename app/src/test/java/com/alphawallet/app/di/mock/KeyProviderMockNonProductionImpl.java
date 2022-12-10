@@ -60,6 +60,12 @@ public class KeyProviderMockNonProductionImpl implements KeyProvider
     }
 
     @Override
+    public String getTertiaryInfuraKey()
+    {
+        return null;
+    }
+
+    @Override
     public String getRampKey()
     {
         return null;
@@ -85,6 +91,12 @@ public class KeyProviderMockNonProductionImpl implements KeyProvider
 
     @Override
     public String getWalletConnectProjectId()
+    {
+        return null;
+    }
+
+    @Override
+    public String getInfuraSecret()
     {
         return null;
     }

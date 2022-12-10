@@ -20,4 +20,10 @@ public class SignTypedDataRequest extends BaseRequest
     {
         return new EthereumTypedMessage(getMessage(), "", 0, new CryptoFunctions());
     }
+
+    @Override
+    public Signable getSignable(long callbackId, String origin)
+    {
+        return new EthereumTypedMessage(getMessage(), origin, callbackId, new CryptoFunctions());
+    }
 }

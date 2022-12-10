@@ -171,7 +171,7 @@ public class ERC721Ticket extends Token
     public List<BigInteger> getNonZeroArrayBalance()
     {
         List<BigInteger> nonZeroValues = new ArrayList<>();
-        for (BigInteger value : balanceArray) if (value.compareTo(BigInteger.ZERO) != 0 && !nonZeroValues.contains(value)) nonZeroValues.add(value);
+        for (BigInteger value : balanceArray) if (value.compareTo(BigInteger.ZERO) != 0) nonZeroValues.add(value);
         return nonZeroValues;
     }
 

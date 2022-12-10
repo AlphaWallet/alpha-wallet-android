@@ -1018,4 +1018,8 @@
     <string name="error_message_watch_only_wallet">Could not perform action on this Watch-only wallet.</string>
     <string name="toast_wait_to_scan_chains">Scanning in progress: Please wait for completion</string>
     <string name="unselected_token">Enable chains for selected tokens?</string>
+    <string name="no_title">(No title)</string>
+    <string name="title_session_details">Session Details</string>
+    <string name="title_session_proposal">Session Proposal</string>
+    <string name="message_wc_wallet_different_from_active_wallet">Wallet different from active wallet.</string>
 </resources>

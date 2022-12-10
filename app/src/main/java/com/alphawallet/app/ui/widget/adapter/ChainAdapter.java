@@ -6,22 +6,29 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-
-import com.alphawallet.app.R;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
-import com.alphawallet.app.widget.ChainName;
-
-import java.util.List;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.alphawallet.app.R;
+import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
+
+import java.util.List;
 
 public class ChainAdapter extends ArrayAdapter<String>
 {
     public ChainAdapter(Context context, List<String> chains)
     {
         super(context, 0, chains);
+    }
+
+    @Override
+    public boolean isEnabled(int position)
+    {
+        return false;
     }
 
     @NonNull
@@ -34,10 +41,10 @@ public class ChainAdapter extends ArrayAdapter<String>
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_chain, parent, false);
         }
 
-        ChainName chainName = convertView.findViewById(R.id.chain_name);
+        TextView chainName = convertView.findViewById(R.id.chain_name);
         ImageView chainIcon = convertView.findViewById(R.id.chain_icon);
 
-        chainName.setChainID(chainId);
+        chainName.setText(EthereumNetworkBase.getNetworkInfo(chainId).name);
         chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(chainId));
 
         return convertView;

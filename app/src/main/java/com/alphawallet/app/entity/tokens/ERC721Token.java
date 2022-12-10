@@ -1,11 +1,13 @@
 package com.alphawallet.app.entity.tokens;
 
+import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.util.Utils.parseTokenId;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 import static org.web3j.tx.Contract.staticExtractEventParameters;
 
 import android.app.Activity;
+import android.text.TextUtils;
 import android.util.Pair;
 
 import com.alphawallet.app.R;
@@ -30,25 +32,32 @@ import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeEncoder;
 import org.web3j.abi.TypeReference;
+import org.web3j.abi.Utils;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.BatchRequest;
+import org.web3j.protocol.core.BatchResponse;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.utils.Numeric;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +77,7 @@ public class ERC721Token extends Token
 {
     private final Map<BigInteger, NFTAsset> tokenBalanceAssets;
     private static final Map<String, Boolean> balanceChecks = new ConcurrentHashMap<>();
+    private boolean batchProcessingError;
 
     public ERC721Token(TokenInfo tokenInfo, Map<BigInteger, NFTAsset> balanceList, BigDecimal balance, long blancaTime, String networkName, ContractType type)
     {
@@ -82,6 +92,7 @@ public class ERC721Token extends Token
         }
         setInterfaceSpec(type);
         group = TokenGroup.NFT;
+        batchProcessingError = false;
     }
 
     @Override
@@ -264,7 +275,9 @@ public class ERC721Token extends Token
     public boolean checkBalanceChange(Token oldToken)
     {
         if (super.checkBalanceChange(oldToken)) return true;
-        if (getTokenAssets().size() != oldToken.getTokenAssets().size()) return true;
+        if ((getTokenAssets() != null && oldToken.getTokenAssets() != null)
+                && getTokenAssets().size() != oldToken.getTokenAssets().size()) return true;
+
         for (BigInteger tokenId : tokenBalanceAssets.keySet())
         {
             NFTAsset newAsset = tokenBalanceAssets.get(tokenId);
@@ -350,7 +363,7 @@ public class ERC721Token extends Token
         try
         {
             balanceChecks.put(tokenInfo.address, true); //set checking
-            final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
+            final Web3j web3j = TokenRepository.getWeb3jServiceForEvents(tokenInfo.chainId);
             if (contractType == ContractType.ERC721_ENUMERABLE)
             {
                 updateEnumerableBalance(web3j, realm);
@@ -372,12 +385,8 @@ public class ERC721Token extends Token
                 allMovingTokens.addAll(tokenBalanceAssets.keySet());
             }
 
-            //no need to check balances if this chain is supported by OpenSea
-            if (allMovingTokens.size() < 10 || !EthereumNetworkBase.hasOpenseaAPI(tokenInfo.chainId))
-            {
-                HashSet<BigInteger> tokenIdsHeld = checkBalances(web3j, allMovingTokens);
-                updateRealmBalance(realm, tokenIdsHeld, allMovingTokens);
-            }
+            HashSet<BigInteger> tokenIdsHeld = checkBalances(web3j, allMovingTokens);
+            updateRealmBalance(realm, tokenIdsHeld, allMovingTokens);
         }
         catch (LogOverflowException e)
         {
@@ -385,6 +394,7 @@ public class ERC721Token extends Token
             if (eventSync.handleEthLogError(e.error, startBlock, endBlock, sync, realm))
             {
                 //recurse until we find a good value
+                balanceChecks.remove(tokenInfo.address);
                 updateBalance(realm);
             }
         }
@@ -410,21 +420,87 @@ public class ERC721Token extends Token
     /***********
      * For ERC721Enumerable interface
      **********/
-    private void updateEnumerableBalance(Web3j web3j, Realm realm)
+    private void updateEnumerableBalance(Web3j web3j, Realm realm) throws IOException
     {
         HashSet<BigInteger> tokenIdsHeld = new HashSet<>();
         //get enumerable balance
         //find tokenIds held
         long currentBalance = balance != null ? balance.longValue() : 0;
-        for (long tokenIndex = 0; tokenIndex < currentBalance; tokenIndex++)
+
+        if (EthereumNetworkBase.getBatchProcessingLimit(tokenInfo.chainId) > 0 && !batchProcessingError && currentBalance > 1) //no need to do batch query for 1
         {
-            // find tokenId from index
-            String tokenId = callSmartContractFunction(web3j, tokenOfOwnerByIndex(BigInteger.valueOf(tokenIndex)), getAddress(), getWallet());
-            if (tokenId == null) continue;
-            tokenIdsHeld.add(new BigInteger(tokenId));
+            updateEnumerableBatchBalance(web3j, currentBalance, tokenIdsHeld, realm);
+        }
+        else
+        {
+            for (long tokenIndex = 0; tokenIndex < currentBalance; tokenIndex++)
+            {
+                // find tokenId from index
+                String tokenId = callSmartContractFunction(tokenInfo.chainId, tokenOfOwnerByIndex(BigInteger.valueOf(tokenIndex)), getAddress(), getWallet());
+                if (tokenId == null) continue;
+                tokenIdsHeld.add(new BigInteger(tokenId));
+            }
         }
 
         updateRealmForEnumerable(realm, tokenIdsHeld);
+    }
+
+    private void updateEnumerableBatchBalance(Web3j web3j, long currentBalance, HashSet<BigInteger> tokenIdsHeld, Realm realm) throws IOException
+    {
+        BatchRequest requests = web3j.newBatch();
+
+        for (long tokenIndex = 0; tokenIndex < currentBalance; tokenIndex++)
+        {
+            requests.add(getContractCall(web3j, tokenOfOwnerByIndex(BigInteger.valueOf(tokenIndex)), getAddress()));
+            if (requests.getRequests().size() >= EthereumNetworkBase.getBatchProcessingLimit(tokenInfo.chainId))
+            {
+                //do this send
+                handleEnumerableRequests(requests, tokenIdsHeld);
+                requests = web3j.newBatch();
+            }
+        }
+
+        if (requests.getRequests().size() > 0)
+        {
+            //do final call
+            handleEnumerableRequests(requests, tokenIdsHeld);
+        }
+
+        if (batchProcessingError)
+        {
+            updateEnumerableBalance(web3j, realm);
+        }
+    }
+
+    private void handleEnumerableRequests(BatchRequest requests, HashSet<BigInteger> tokenIdsHeld) throws IOException
+    {
+        BatchResponse responses = requests.send();
+        if (responses.getResponses().size() != requests.getRequests().size())
+        {
+            batchProcessingError = true;
+            return;
+        }
+
+        //process responses
+        for (Response<?> rsp : responses.getResponses())
+        {
+            BigInteger tokenId = getTokenId(rsp);
+            if (tokenId == null) continue;
+            tokenIdsHeld.add(tokenId);
+        }
+    }
+
+    private BigInteger getTokenId(Response<?> rsp)
+    {
+        List<TypeReference<Type>> outputParams = Utils.convert(Collections.singletonList(new TypeReference<Uint256>() {}));
+        List<Type> responseValues = FunctionReturnDecoder.decode(((EthCall)rsp).getValue(), outputParams);
+        if (!responseValues.isEmpty())
+        {
+            String tokenIdStr = responseValues.get(0).getValue().toString();
+            if (!TextUtils.isEmpty(tokenIdStr)) return new BigInteger(tokenIdStr);
+        }
+
+        return null;
     }
 
     private void updateRealmBalance(Realm realm, Set<BigInteger> tokenIds, Set<BigInteger> allMovingTokens)
@@ -551,12 +627,14 @@ public class ERC721Token extends Token
         return tokenIds;
     }
 
-    private HashSet<BigInteger> checkBalances(Web3j web3j, HashSet<BigInteger> eventIds)
+    private HashSet<BigInteger> checkBalances(Web3j web3j, HashSet<BigInteger> eventIds) throws IOException
     {
         HashSet<BigInteger> heldTokens = new HashSet<>();
+        if (EthereumNetworkBase.getBatchProcessingLimit(tokenInfo.chainId) > 0 && !batchProcessingError && eventIds.size() > 1) return checkBatchBalances(web3j, eventIds);
+
         for (BigInteger tokenId : eventIds)
         {
-            String owner = callSmartContractFunction(web3j, ownerOf(tokenId), getAddress(), getWallet());
+            String owner = callSmartContractFunction(tokenInfo.chainId, ownerOf(tokenId), getAddress(), getWallet());
             if (owner == null || owner.equalsIgnoreCase(getWallet()))
             {
                 heldTokens.add(tokenId);
@@ -564,6 +642,80 @@ public class ERC721Token extends Token
         }
 
         return heldTokens;
+    }
+
+    private HashSet<BigInteger> checkBatchBalances(Web3j web3j, HashSet<BigInteger> eventIds) throws IOException
+    {
+        HashSet<BigInteger> heldTokens = new HashSet<>();
+        List<BigInteger> balanceIds = new ArrayList<>();
+        BatchRequest requests = web3j.newBatch();
+        for (BigInteger tokenId : eventIds)
+        {
+            requests.add(getContractCall(web3j, ownerOf(tokenId), getAddress()));
+            balanceIds.add(tokenId);
+            if (requests.getRequests().size() >= EthereumNetworkBase.getBatchProcessingLimit(tokenInfo.chainId))
+            {
+                //do this send
+                handleRequests(requests, balanceIds, heldTokens);
+                requests = web3j.newBatch();
+            }
+        }
+
+        if (requests.getRequests().size() > 0)
+        {
+            //do final call
+            handleRequests(requests, balanceIds, heldTokens);
+        }
+
+        if (batchProcessingError)
+        {
+            return checkBalances(web3j, eventIds);
+        }
+        else
+        {
+            return heldTokens;
+        }
+    }
+
+    private void handleRequests(BatchRequest requests, List<BigInteger> balanceIds, HashSet<BigInteger> heldTokens) throws IOException
+    {
+        int index = 0;
+        BatchResponse responses = requests.send();
+        if (responses.getResponses().size() != requests.getRequests().size())
+        {
+            batchProcessingError = true;
+            return;
+        }
+
+        //process responses
+        for (Response<?> rsp : responses.getResponses())
+        {
+            BigInteger tokenId = balanceIds.get(index);
+            if (isOwner(rsp, tokenId))
+            {
+                heldTokens.add(tokenId);
+            }
+
+            index++;
+        }
+
+        balanceIds.clear();
+    }
+
+    private boolean isOwner(Response<?> rsp, BigInteger tokenId)
+    {
+        EthCall response = (EthCall) rsp;
+        Function function = ownerOf(tokenId);
+        List<Type> responseValues = FunctionReturnDecoder.decode(response.getValue(), function.getOutputParameters());
+        if (!responseValues.isEmpty())
+        {
+            String owner = responseValues.get(0).getValue().toString();
+            return (!owner.isEmpty() && owner.equalsIgnoreCase(getWallet()));
+        }
+        else
+        {
+            return false;
+        }
     }
 
     @Override
@@ -596,24 +748,6 @@ public class ERC721Token extends Token
         filter.addSingleTopic(null);
         filter.addSingleTopic(null);
         return filter;
-    }
-
-    /**
-     * Returns false if the Asset balance appears to be entries with only TokenId - indicating an ERC721Ticket
-     *
-     * @return
-     */
-    @Override
-    public boolean checkBalanceType()
-    {
-        boolean onlyHasTokenId = true;
-        //if elements contain asset with only assetId then most likely this is a ticket.
-        for (NFTAsset a : tokenBalanceAssets.values())
-        {
-            if (!a.isBlank()) onlyHasTokenId = false;
-        }
-
-        return tokenBalanceAssets.size() == 0 || !onlyHasTokenId;
     }
 
     public String getTransferID(Transaction tx)
@@ -689,30 +823,32 @@ public class ERC721Token extends Token
      * If there is a token that previously was there, but now isn't, it could be because
      * the opensea call was split or that the owner transferred the token
      *
-     * @param assetMap Loaded Assets from Realm
-     * @return map of currently known live assets
+     * @param assetMap Loaded Assets which are new assets (don't add assets from opensea unless we double check here first)
+     * @return map of checked assets
      */
     @Override
     public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
     {
         final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
 
-        //check all tokens in this contract
-        assetMap.putAll(tokenBalanceAssets);
+        HashSet<BigInteger> currentAssets = new HashSet<>(assetMap.keySet());
 
-        //now check balance for all tokenIds (note that ERC1155 has a batch balance check, ERC721 does not)
+        try
+        {
+            currentAssets = checkBalances(web3j, currentAssets);
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
         for (Map.Entry<BigInteger, NFTAsset> entry : assetMap.entrySet())
         {
             BigInteger checkId = entry.getKey();
             NFTAsset checkAsset = entry.getValue();
 
             //check balance
-            String owner = callSmartContractFunction(web3j, ownerOf(checkId), getAddress(), getWallet());
-            if (owner == null) //play it safe. If there's no 'ownerOf' for an ERC721, it's something custom like ENS
-            {
-                checkAsset.setBalance(BigDecimal.ONE);
-            }
-            else if (owner.equalsIgnoreCase(getWallet()))
+            if (currentAssets.contains(checkId))
             {
                 checkAsset.setBalance(BigDecimal.ONE);
             }
@@ -721,65 +857,82 @@ public class ERC721Token extends Token
                 checkAsset.setBalance(BigDecimal.ZERO);
             }
 
-            //add back into asset map
-            tokenBalanceAssets.put(checkId, checkAsset);
+            assetMap.put(checkId, checkAsset);
         }
 
-        return tokenBalanceAssets;
+        return assetMap;
     }
-
+    
+    // Check for new/missing tokenBalanceAssets
     @Override
-    public List<BigInteger> getChangeList(Map<BigInteger, NFTAsset> assetMap)
+    public Map<BigInteger, NFTAsset> getAssetChange(Map<BigInteger, NFTAsset> oldAssetList)
     {
-        //detect asset removal
-        List<BigInteger> oldAssetIdList = new ArrayList<>(assetMap.keySet());
-        oldAssetIdList.removeAll(tokenBalanceAssets.keySet());
+        Map<BigInteger, NFTAsset> updatedAssets = new HashMap<>();
+        // detect asset removal, first find new assets
+        HashSet<BigInteger> changedAssetList = new HashSet<>(tokenBalanceAssets.keySet());
+        changedAssetList.removeAll(oldAssetList.keySet());
 
-        List<BigInteger> changeList = new ArrayList<>(oldAssetIdList);
+        HashSet<BigInteger> unchangedAssets = new HashSet<>(tokenBalanceAssets.keySet());
+        unchangedAssets.removeAll(changedAssetList);
 
-        //Now detect differences or new tokens
-        for (BigInteger tokenId : tokenBalanceAssets.keySet())
-        {
-            NFTAsset newAsset = tokenBalanceAssets.get(tokenId);
-            NFTAsset oldAsset = assetMap.get(tokenId);
+        // removed assets
+        HashSet<BigInteger> removedAssets = new HashSet<>(oldAssetList.keySet());
+        removedAssets.removeAll(tokenBalanceAssets.keySet());
+        changedAssetList.addAll(removedAssets);
+        HashSet<BigInteger> balanceAssets = new HashSet<>();
 
-            if (oldAsset == null || newAsset.hashCode() != oldAsset.hashCode())
-            {
-                changeList.add(tokenId);
-            }
-        }
-
-        return changeList;
-    }
-
-    private String callSmartContractFunction(Web3j web3j,
-                                             Function function, String contractAddress, String walletAddr)
-    {
-        String encodedFunction = FunctionEncoder.encode(function);
+        final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
 
         try
         {
-            org.web3j.protocol.core.methods.request.Transaction transaction
-                    = createEthCallTransaction(walletAddr, contractAddress, encodedFunction);
-            EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
-
-            List<Type> responseValues = FunctionReturnDecoder.decode(response.getValue(), function.getOutputParameters());
-
-            if (!responseValues.isEmpty())
-            {
-                return responseValues.get(0).getValue().toString();
-            }
-            else if (response.hasError() && response.getError().getCode() == 3) //reverted
-            {
-                return "";
-            }
+            balanceAssets = checkBalances(web3j, changedAssetList);
         }
         catch (Exception e)
         {
             //
         }
 
-        return null;
+        //Now detect differences or new tokens
+        for (BigInteger tokenId : changedAssetList)
+        {
+            NFTAsset asset = tokenBalanceAssets.get(tokenId);
+            if (asset == null) asset = oldAssetList.get(tokenId);
+
+            if (asset == null)
+            {
+                continue;
+            }
+
+            if (balanceAssets.contains(tokenId))
+            {
+                asset.setBalance(BigDecimal.ZERO);
+            }
+            else
+            {
+                asset.setBalance(BigDecimal.ONE);
+            }
+
+            updatedAssets.put(tokenId, asset);
+        }
+
+        for (BigInteger tokenId : unchangedAssets)
+        {
+            NFTAsset asset = tokenBalanceAssets.get(tokenId);
+            if (asset != null)
+            {
+                updatedAssets.put(tokenId, asset);
+            }
+        }
+
+        return updatedAssets;
+    }
+
+    private Request<?, EthCall> getContractCall(Web3j web3j, Function function, String contractAddress)
+    {
+        String encodedFunction = FunctionEncoder.encode(function);
+        org.web3j.protocol.core.methods.request.Transaction transaction
+                = createEthCallTransaction(getWallet(), contractAddress, encodedFunction);
+        return web3j.ethCall(transaction, DefaultBlockParameterName.LATEST);
     }
 
     private static Function ownerOf(BigInteger token)

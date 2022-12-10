@@ -355,10 +355,6 @@ public class TokenIcon extends ConstraintLayout
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
         {
             if (model == null || token == null || !model.toString().toLowerCase().contains(token.getAddress())) return false;
-            if (token != null)
-            {
-                IconItem.noIconFound(token.tokenInfo.chainId, token.getAddress()); //don't try to load this asset again for this session
-            }
             return false;
         }
 

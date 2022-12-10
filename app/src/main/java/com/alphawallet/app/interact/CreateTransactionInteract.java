@@ -28,15 +28,15 @@ public class CreateTransactionInteract
         this.transactionRepository = transactionRepository;
     }
 
-    public Single<SignaturePair> sign(Wallet wallet, MessagePair messagePair, long chainId)
+    public Single<SignaturePair> sign(Wallet wallet, MessagePair messagePair)
     {
-        return transactionRepository.getSignature(wallet, messagePair, chainId)
+        return transactionRepository.getSignature(wallet, messagePair)
                 .map(sig -> new SignaturePair(messagePair.selection, sig.signature, messagePair.message));
     }
 
-    public Single<SignatureFromKey> sign(Wallet wallet, Signable message, long chainId)
+    public Single<SignatureFromKey> sign(Wallet wallet, Signable message)
     {
-        return transactionRepository.getSignature(wallet, message, chainId);
+        return transactionRepository.getSignature(wallet, message);
     }
 
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)

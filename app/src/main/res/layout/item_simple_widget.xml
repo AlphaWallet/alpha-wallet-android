@@ -15,7 +15,9 @@
         android:layout_centerVertical="true"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="@dimen/standard_16">
+        android:paddingVertical="@dimen/standard_16"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingEnd="@dimen/mini_4">
 
         <TextView
             android:id="@+id/label"
@@ -23,13 +25,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:layout_weight="1"
+            android:layout_weight="@integer/widget_label"
             tools:text="Label" />
 
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.4"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_weight="@integer/widget_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -48,6 +51,11 @@
                 tools:text="Caption" />
 
         </RelativeLayout>
+
+        <androidx.viewpager.widget.ViewPager
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="@integer/widget_control" />
 
     </LinearLayout>
 

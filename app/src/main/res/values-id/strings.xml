@@ -946,4 +946,8 @@
     <string name="error_message_watch_only_wallet">Tidak dapat melakukan tindakan pada dompet khusus jam tangan ini.</string>
     <string name="toast_wait_to_scan_chains">Pemindaian sedang berlangsung: Harap tunggu hingga selesai</string>
     <string name="unselected_token">Aktifkan rantai untuk token yang dipilih?</string>
+    <string name="no_title">(Tanpa judul)</string>
+    <string name="title_session_details">Detail Sesi</string>
+    <string name="title_session_proposal">Proposal Sesi</string>
+    <string name="message_wc_wallet_different_from_active_wallet">Dompet berbeda dengan dompet aktif.</string>
 </resources>

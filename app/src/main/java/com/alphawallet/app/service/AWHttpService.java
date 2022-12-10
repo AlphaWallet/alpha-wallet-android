@@ -161,10 +161,9 @@ public class AWHttpService extends HttpService
     {
         Timber.d("trySecondaryNode: ");
         RequestBody requestBody = RequestBody.create(request, JSON_MEDIA_TYPE);
-        Headers headers = buildHeaders();
 
         okhttp3.Request httpRequest =
-                new okhttp3.Request.Builder().url(secondaryUrl).headers(headers).post(requestBody).build();
+                new okhttp3.Request.Builder().url(secondaryUrl).post(requestBody).build();
 
         okhttp3.Response response;
 
@@ -259,4 +258,10 @@ public class AWHttpService extends HttpService
 
     @Override
     public void close() throws IOException {}
+
+    @Override
+    public String getUrl()
+    {
+        return this.url;
+    }
 }

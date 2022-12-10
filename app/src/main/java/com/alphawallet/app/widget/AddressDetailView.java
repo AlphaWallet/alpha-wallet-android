@@ -5,7 +5,6 @@ import android.content.res.TypedArray;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,10 +23,13 @@ public class AddressDetailView extends LinearLayout
 {
     private final TextView textAddressSummary;
     private final TextView textFullAddress;
+    private final TextView labelEnsName;
     private final TextView textEnsName;
+    private final TextView textMessage;
     private final ImageView recipientDetails;
     private final UserAvatar userAvatar;
     private final LinearLayout layoutDetails;
+    private final LinearLayout layoutEnsName;
     private final LinearLayout layoutHolder;
 
     public AddressDetailView(Context context, @Nullable AttributeSet attrs)
@@ -36,10 +38,13 @@ public class AddressDetailView extends LinearLayout
         inflate(context, R.layout.item_address_detail, this);
         textAddressSummary = findViewById(R.id.text_recipient);
         textFullAddress = findViewById(R.id.text_recipient_address);
+        labelEnsName = findViewById(R.id.label_ens_name);
         textEnsName = findViewById(R.id.text_ens_name);
+        textMessage = findViewById(R.id.message);
         recipientDetails = findViewById(R.id.image_more);
         userAvatar = findViewById(R.id.blockie);
         layoutDetails = findViewById(R.id.layout_detail);
+        layoutEnsName = findViewById(R.id.layout_ens_name);
         layoutHolder = findViewById(R.id.layout_holder);
         getAttrs(context, attrs);
     }
@@ -55,19 +60,45 @@ public class AddressDetailView extends LinearLayout
         recipientText.setText(a.getResourceId(R.styleable.InputView_label, R.string.recipient));
     }
 
+    public void addMessage(String message, int drawableRes)
+    {
+        textMessage.setText(message);
+        textMessage.setVisibility(View.VISIBLE);
+        if (drawableRes > 0)
+        {
+            textAddressSummary.setCompoundDrawablesWithIntrinsicBounds(drawableRes, 0, 0, 0);
+            textMessage.setCompoundDrawablesWithIntrinsicBounds(drawableRes, 0, 0, 0);
+        }
+    }
+
     public void setupAddress(String address, String ensName, Token destToken)
     {
         boolean hasEns = !TextUtils.isEmpty(ensName);
-        String destStr = (hasEns ? ensName + " | " : "") + (hasEns ? Utils.formatAddress(address) : address);
+        String destStr = (hasEns ? ensName + " | " : "") + Utils.formatAddress(address);
         textAddressSummary.setText(destStr);
         userAvatar.bind(new Wallet(address), wallet -> { /*NOP, here to enable lookup of ENS avatar*/ });
         textFullAddress.setText(address);
-        textEnsName.setText(ensName);
 
-        if (TextUtils.isEmpty(ensName) && destToken != null && !destToken.isEthereum())
+        if (TextUtils.isEmpty(ensName))
         {
-            ((TextView)findViewById(R.id.label_ens)).setText(R.string.token_text);
-            textEnsName.setText(destToken.getFullName());
+            if (destToken != null && !destToken.isEthereum())
+            {
+                labelEnsName.setVisibility(View.VISIBLE);
+                layoutEnsName.setVisibility(View.VISIBLE);
+                labelEnsName.setText(R.string.token_text);
+                textEnsName.setText(destToken.getFullName());
+            }
+            else
+            {
+                labelEnsName.setVisibility(View.GONE);
+                layoutEnsName.setVisibility(View.GONE);
+            }
+        }
+        else
+        {
+            labelEnsName.setVisibility(View.VISIBLE);
+            layoutEnsName.setVisibility(View.VISIBLE);
+            textEnsName.setText(ensName);
         }
 
         layoutHolder.setOnClickListener(v -> {
@@ -89,12 +120,10 @@ public class AddressDetailView extends LinearLayout
     public void setupRequester(String requesterUrl)
     {
         setVisibility(View.VISIBLE);
-        recipientDetails.setVisibility(View.GONE);
+        recipientDetails.setVisibility(View.INVISIBLE);
         //shorten requesterURL if required
         requesterUrl = abbreviateURL(requesterUrl);
         textAddressSummary.setText(requesterUrl);
-        ViewGroup.LayoutParams param = new LayoutParams(0, LayoutParams.WRAP_CONTENT, 3.4f);
-        textAddressSummary.setLayoutParams(param);
     }
 
     private String abbreviateURL(String inputURL)
@@ -102,7 +131,7 @@ public class AddressDetailView extends LinearLayout
         if (inputURL.length() > 32)
         {
             int index = inputURL.indexOf("/", 20);
-            return index >= 0 ? inputURL.substring(0,index) : inputURL;
+            return index >= 0 ? inputURL.substring(0, index) : inputURL;
         }
         else
         {

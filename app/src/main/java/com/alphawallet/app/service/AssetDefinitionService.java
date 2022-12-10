@@ -924,6 +924,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private Single<TokenDefinition> handleNewTSFile(File newFile)
     {
+        if (!newFile.exists())
+        {
+            return Single.fromCallable(TokenDefinition::new);
+        }
         //1. check validity & check for origin tokens
         //2. check for existing and check if this is a debug file or script from server
         //3. update signature data
@@ -1065,7 +1069,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
-            Timber.w(e);
+            if (!TextUtils.isEmpty(Uri)) //throws on empty, which is expected
+            {
+                Timber.w(e);
+            }
         }
 
         return new Pair<>("", false);

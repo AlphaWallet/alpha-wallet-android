@@ -2,8 +2,6 @@ package com.alphawallet.app.ui.widget.entity;
 
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 
-import com.bumptech.glide.signature.ObjectKey;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,12 +40,6 @@ public class IconItem {
     public static void secondaryFound(long chainId, String address)
     {
         iconLoadType.put(databaseKey(chainId, address.toLowerCase()), true);
-    }
-
-    //Use TextIcon
-    public static void noIconFound(long chainId, String address)
-    {
-        iconLoadType.put(databaseKey(chainId, address.toLowerCase()), false);
     }
 
     /**

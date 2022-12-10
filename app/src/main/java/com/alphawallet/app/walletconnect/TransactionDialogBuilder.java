@@ -124,6 +124,7 @@ public class TransactionDialogBuilder extends DialogFragment
                 return activityResultLauncher;
             }
         });
+        actionSheetDialog.setSigningWallet(fromWallet.address);
         if (signOnly)
         {
             actionSheetDialog.setSignOnly();

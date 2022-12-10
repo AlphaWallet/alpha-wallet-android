@@ -21,13 +21,13 @@
             style="@style/Aw.Typography.Label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="@integer/widget_label"
             android:text="@string/subtitle_network" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.4"
+            android:layout_weight="@integer/widget_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -44,6 +44,11 @@
                 android:layout_height="wrap_content"
                 tools:text="Ethereum" />
         </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="@integer/widget_control" />
 
     </LinearLayout>
 

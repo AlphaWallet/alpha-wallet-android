@@ -124,6 +124,7 @@ public class TokenFactory
             case ERC721:
             case ERC721_LEGACY:
             case ERC721_ENUMERABLE:
+            case ERC721_UNDETERMINED:
                 thisToken = new ERC721Token(tokenInfo, null, decimalBalance, updateBlancaTime, networkName, type);
                 break;
 

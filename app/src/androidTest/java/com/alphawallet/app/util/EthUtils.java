@@ -41,7 +41,7 @@ public abstract class EthUtils
                 .retryOnConnectionFailure(true)
                 .build();
 
-        AWHttpService svs = new AWHttpService(url, "", client, false);
+        AWHttpService svs = new AWHttpService(url, url, client, false);
         return Web3j.build(svs);
     }
 

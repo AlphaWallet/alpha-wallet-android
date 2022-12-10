@@ -20,6 +20,8 @@ public interface KeyProvider
 
     String getSecondaryInfuraKey();
 
+    String getTertiaryInfuraKey();
+
     String getRampKey();
 
     String getOpenSeaKey();
@@ -29,4 +31,6 @@ public interface KeyProvider
     String getCoinbasePayAppId();
 
     String getWalletConnectProjectId();
+
+    String getInfuraSecret();
 }

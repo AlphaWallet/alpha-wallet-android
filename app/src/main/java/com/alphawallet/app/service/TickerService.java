@@ -101,6 +101,7 @@ public class TickerService
     private static String currentCurrencySymbol;
     private static final Map<Long, Long> canUpdate = new ConcurrentHashMap<>();
     private static final Map<String, TokenCardMeta> dexGuruQuery = new ConcurrentHashMap<>();
+    private static long lastTickerUpdate;
 
     @Nullable
     private Disposable tickerUpdateTimer;
@@ -119,11 +120,12 @@ public class TickerService
 
         resetTickerUpdate();
         initCurrency();
+        lastTickerUpdate = 0;
     }
 
     public void updateTickers()
     {
-        if (mainTickerUpdate != null && !mainTickerUpdate.isDisposed())
+        if (mainTickerUpdate != null && !mainTickerUpdate.isDisposed() && System.currentTimeMillis() > (lastTickerUpdate + DateUtils.MINUTE_IN_MILLIS))
         {
             return; //do not update if update is currently in progress
         }
@@ -151,6 +153,7 @@ public class TickerService
     {
         Timber.d("Tickers Updated: %s", tickerCount);
         mainTickerUpdate = null;
+        lastTickerUpdate = System.currentTimeMillis();
     }
 
     public Single<Double> updateCurrencyConversion()

@@ -383,7 +383,7 @@ public class Token
 
     public boolean isBad()
     {
-        return tokenInfo == null || (tokenInfo.symbol == null && tokenInfo.name == null);
+        return tokenInfo == null || tokenInfo.chainId == 0 || (tokenInfo.symbol == null && tokenInfo.name == null);
     }
 
     public void setTokenWallet(String address)
@@ -711,11 +711,6 @@ public class Token
         return hash;
     }
 
-    public boolean checkBalanceType()
-    {
-        return true;
-    }
-
     public String getTransactionDetail(Context ctx, Transaction tx, TokensService tService)
     {
         if (isEthereum())
@@ -922,11 +917,6 @@ public class Token
                 || (!TextUtils.isEmpty(tokenInfo.symbol) && tokenInfo.symbol.contains("?"));
     }
 
-    public List<BigInteger> getChangeList(Map<BigInteger, NFTAsset> assetMap)
-    {
-        return new ArrayList<>();
-    }
-
     public void setAssetContract(AssetContract contract) {  }
     public AssetContract getAssetContract() { return null; }
 
@@ -943,6 +933,11 @@ public class Token
     public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
     {
         return assetMap;
+    }
+
+    public Map<BigInteger, NFTAsset> getAssetChange(Map<BigInteger, NFTAsset> oldAssetList)
+    {
+        return oldAssetList;
     }
 
     /**

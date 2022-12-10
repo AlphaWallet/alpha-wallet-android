@@ -50,7 +50,11 @@ public class IPFSService implements IPFSServiceType
 
     public QueryResponse performIO(String url, String[] headers) throws IOException
     {
-        if (!Utils.isValidUrl(url)) throw new IOException("URL not valid");
+        url = url.trim();
+        if (!Utils.isValidUrl(url))
+        {
+            throw new IOException("URL not valid");
+        }
 
         if (Utils.isIPFS(url)) //note that URL might contain IPFS, but not pass 'isValidUrl'
         {

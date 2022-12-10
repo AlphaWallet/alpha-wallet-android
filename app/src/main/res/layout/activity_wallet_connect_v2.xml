@@ -7,156 +7,136 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
-    <LinearLayout
-        android:id="@+id/layout_info"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/dp30"
-        android:visibility="visible">
+        android:layout_above="@id/layoutButtons"
+        android:layout_below="@id/toolbar">
 
-        <ImageView
-            android:id="@+id/icon"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/dp5"
-            android:layout_marginBottom="@dimen/dp5"
-            android:src="@mipmap/ic_alpha" />
-
-        <TextView
-            android:id="@+id/peer_name"
-            style="@style/Aw.Typography.Title.SemiBold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center_horizontal"
-            android:paddingStart="@dimen/dp16"
-            android:paddingEnd="@dimen/dp16"
-            tools:text="Sample Peer Name" />
-
-        <TextView
-            android:id="@+id/peer_url"
-            style="@style/Aw.Typography.Sub"
+        <LinearLayout
+            android:id="@+id/layout_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:layout_marginBottom="10dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/font_light"
-            android:lines="1"
-            android:maxLines="1"
-            tools:text="https://samplepeer.com"
-            android:textSize="16sp" />
+            android:layout_below="@id/toolbar"
+            android:layout_marginTop="@dimen/standard_16"
+            android:orientation="vertical"
+            android:visibility="visible">
 
-        <View style="@style/Aw.Component.Separator" />
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="?actionBarSize">
-
-            <LinearLayout
+            <TextView
+                style="@style/Aw.Typography.Label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_marginHorizontal="@dimen/standard_16"
+                android:layout_marginBottom="@dimen/mini_4"
+                android:text="@string/connected_to" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/standard_16"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/icon"
+                    android:layout_width="@dimen/token_icon"
+                    android:layout_height="@dimen/token_icon"
+                    android:layout_marginEnd="@dimen/tiny_8"
+                    android:src="@mipmap/ic_launcher" />
 
                 <LinearLayout
-                    android:id="@+id/layout_wallets"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/background_bottom_border"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical"
-                    android:paddingStart="@dimen/dp16"
-                    android:paddingEnd="@dimen/dp16">
-
-                    <TextView
-                        style="@style/Aw.Typography.Caption.SemiBold"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/your_wallets"
-                        android:paddingTop="@dimen/dp16" />
-
-                    <ListView
-                        android:id="@+id/wallet_list"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-                    </ListView>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layout_network"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/background_bottom_border"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical"
-                    android:paddingStart="@dimen/dp16"
-                    android:paddingEnd="@dimen/dp16">
-
-                    <TextView
-                        style="@style/Aw.Typography.Caption.SemiBold"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/subtitle_network"
-                        android:paddingTop="@dimen/dp16" />
-
-                    <ListView
-                        android:id="@+id/chain_list"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-                    </ListView>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layout_methods"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/background_bottom_border"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical"
-                    android:paddingStart="@dimen/dp16"
-                    android:paddingEnd="@dimen/dp16">
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/icon"
+                    android:orientation="vertical">
 
                     <TextView
-                        style="@style/Aw.Typography.Caption.SemiBold"
+                        android:id="@+id/peer_name"
+                        style="@style/Aw.Typography.Caption"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/wc_methods"
-                        android:paddingTop="@dimen/dp16" />
+                        android:text="@string/no_title"
+                        tools:text="Sample Peer Name" />
 
-                    <ListView
-                        android:id="@+id/method_list"
+                    <TextView
+                        android:id="@+id/peer_url"
+                        style="@style/Aw.Typography.Caption"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-                    </ListView>
+                        android:layout_height="wrap_content"
+                        tools:text="https://samplepeer.com" />
+
                 </LinearLayout>
-            </LinearLayout>
 
-        </ScrollView>
+            </RelativeLayout>
 
-    </LinearLayout>
+            <TextView
+                style="@style/Aw.Typography.Label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/standard_16"
+                android:layout_marginTop="@dimen/base_24"
+                android:layout_marginBottom="@dimen/mini_4"
+                android:text="@string/wallet_address" />
+
+            <ListView
+                android:id="@+id/wallet_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@null"
+                android:dividerHeight="@dimen/tiny_8" />
+
+            <TextView
+                android:id="@+id/label_networks"
+                style="@style/Aw.Typography.Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/base_24"
+                android:layout_marginBottom="@dimen/mini_4"
+                android:paddingHorizontal="@dimen/standard_16"
+                android:text="@string/subtitle_network" />
+
+            <ListView
+                android:id="@+id/chain_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@null"
+                android:dividerHeight="@dimen/tiny_8" />
+
+            <TextView
+                style="@style/Aw.Typography.Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/base_24"
+                android:layout_marginBottom="@dimen/mini_4"
+                android:paddingHorizontal="@dimen/standard_16"
+                android:text="@string/wc_methods" />
+
+            <ListView
+                android:id="@+id/method_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@null"
+                android:dividerHeight="@dimen/tiny_8" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
     <ProgressBar
         android:id="@+id/progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:indeterminateTint="@color/azure"
         android:visibility="gone"
-        android:indeterminateTint="@color/azure" />
+        tools:visibility="visible" />
 
     <com.alphawallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:visibility="gone" />
+        android:visibility="gone"
+        tools:visibility="visible" />
 </RelativeLayout>

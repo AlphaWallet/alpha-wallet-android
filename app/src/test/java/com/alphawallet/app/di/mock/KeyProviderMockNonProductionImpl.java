@@ -60,6 +60,12 @@ public class KeyProviderMockNonProductionImpl implements KeyProvider
     }
 
     @Override
+    public String getTertiaryInfuraKey()
+    {
+        return null;
+    }
+
+    @Override
     public String getRampKey()
     {
         return null;

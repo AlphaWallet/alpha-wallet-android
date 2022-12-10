@@ -38,10 +38,8 @@ public abstract class C {
     public static final String POLYGON_NETWORK = "Polygon";
     public static final String POLYGON_TEST_NETWORK = "Mumbai (Test)";
     public static final String OPTIMISTIC_NETWORK = "Optimistic";
-    public static final String OPTIMISTIC_TEST_NETWORK = "Optimistic (Test)";
     public static final String CRONOS_MAIN_NETWORK = "Cronos";
     public static final String CRONOS_TEST_NETWORK = "Cronos (Test)";
-    public static final String ARBITRUM_TEST_NETWORK = "Arbitrum (Test)";
     public static final String ARBITRUM_ONE_NETWORK = "Arbitrum One";
     public static final String PALM_NAME = "PALM";
     public static final String PALM_TEST_NAME = "PALM (Test)";
@@ -82,7 +80,6 @@ public abstract class C {
     public static final String CRONOS_SYMBOL = "CRO";
     public static final String CRONOS_TEST_SYMBOL = "tCRO";
     public static final String ARBITRUM_SYMBOL = "AETH";
-    public static final String ARBITRUM_TEST_SYMBOL = "ARETH";
     public static final String PALM_SYMBOL = "PALM";
     public static final String KLAYTN_SYMBOL = "KLAY";
     public static final String IOTEX_SYMBOL = "IOTX";

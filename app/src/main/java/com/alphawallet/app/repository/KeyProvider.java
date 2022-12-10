@@ -20,6 +20,8 @@ public interface KeyProvider
 
     String getSecondaryInfuraKey();
 
+    String getTertiaryInfuraKey();
+
     String getRampKey();
 
     String getOpenSeaKey();

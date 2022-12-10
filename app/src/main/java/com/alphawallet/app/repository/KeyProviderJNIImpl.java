@@ -11,6 +11,8 @@ public class KeyProviderJNIImpl implements KeyProvider
 
     public native String getSecondaryInfuraKey();
 
+    public native String getTertiaryInfuraKey();
+
     public native String getBSCExplorerKey();
 
     public native String getAnalyticsKey();

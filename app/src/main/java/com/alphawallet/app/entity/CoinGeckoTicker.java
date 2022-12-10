@@ -45,10 +45,14 @@ public class CoinGeckoTicker
                 fiatPrice = obj.getDouble(currencyIsoSymbol.toLowerCase());
                 fiatChangeStr = obj.getString(currencyIsoSymbol.toLowerCase() + "_24h_change");
             }
-            else
+            else if (obj.has("usd"))
             {
                 fiatPrice = obj.getDouble("usd") * currentConversionRate;
                 fiatChangeStr = obj.getString("usd_24h_change");
+            }
+            else
+            {
+                continue; //handle empty/corrupt returns
             }
 
             res.add(new CoinGeckoTicker(address, fiatPrice, getFiatChange(fiatChangeStr)));

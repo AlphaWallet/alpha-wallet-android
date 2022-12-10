@@ -126,6 +126,11 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     private void setupList()
     {
+        new Handler().postDelayed(() -> updateSessionsList(), 3000);
+    }
+
+    private void updateSessionsList()
+    {
         wcSessions = viewModel.getSessions();
 
         layoutNoActiveSessions.setVisibility(View.VISIBLE);

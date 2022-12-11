@@ -494,7 +494,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //These chains don't allow custom gas
     private static final List<Long> hasLockedGas = Arrays.asList(OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, KLAYTN_ID, KLAYTN_BAOBAB_ID);
 
-    private static final List<Long> hasOpenSeaAPI = Arrays.asList(MAINNET_ID, POLYGON_ID);
+    private static final List<Long> hasOpenSeaAPI = Arrays.asList(MAINNET_ID, POLYGON_ID, ARBITRUM_GOERLI_TEST_ID, AVALANCHE_ID, KLAYTN_ID, OPTIMISM_GOERLI_TEST_ID, GOERLI_ID);
 
     private static final LongSparseArray<BigInteger> blockGasLimit = new LongSparseArray<BigInteger>()
     {

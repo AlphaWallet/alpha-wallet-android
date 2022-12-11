@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.ui.NFTActivity;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
@@ -156,12 +157,19 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
 
     private void fetchAsset(ViewHolder holder, Pair<BigInteger, NFTAsset> pair)
     {
-        pair.second.metaDataLoader = openSeaService.getAsset(token, pair.first)
-                .map(NFTAsset::new)
-                .map(asset -> storeAsset(pair.first, asset, pair.second))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(asset -> checkAsset(asset, holder, pair), e -> {});
+        if (EthereumNetworkBase.hasOpenseaAPI(token.tokenInfo.chainId))
+        {
+            pair.second.metaDataLoader = openSeaService.getAsset(token, pair.first)
+                    .map(NFTAsset::new)
+                    .map(asset -> storeAsset(pair.first, asset, pair.second))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(asset -> checkAsset(asset, holder, pair), e -> {});
+        }
+        else
+        {
+            fetchContractMetadata(holder, pair);
+        }
     }
 
     private void fetchContractMetadata(ViewHolder holder, Pair<BigInteger, NFTAsset> pair)

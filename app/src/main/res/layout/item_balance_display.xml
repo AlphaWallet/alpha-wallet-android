@@ -17,11 +17,11 @@
         android:paddingEnd="@dimen/mini_4">
 
         <TextView
-            style="@style/Aw.Typography.Label"
+            style="@style/Aw.Typography.Label.Widget"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="@integer/widget_label"
-            android:gravity="start"
+            android:gravity="start|center_vertical"
             android:text="@string/balance" />
 
         <androidx.constraintlayout.widget.ConstraintLayout

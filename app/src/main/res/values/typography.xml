@@ -70,6 +70,11 @@
         <item name="android:textColor">?android:textColorSecondary</item>
     </style>
 
+    <style name="Aw.Typography.Label.Widget">
+        <item name="android:lines">1</item>
+        <item name="autoSizeTextType">uniform</item>
+    </style>
+
     <style name="Aw.Typography.Label.Small">
         <item name="fontFamily">@font/font_semibold</item>
         <item name="android:textSize">@dimen/sp13</item>

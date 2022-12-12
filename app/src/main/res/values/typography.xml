@@ -72,7 +72,8 @@
 
     <style name="Aw.Typography.Label.Widget">
         <item name="android:lines">1</item>
-        <item name="autoSizeTextType">uniform</item>
+        <!-- Note: Using dp here to lock down label text size -->
+        <item name="android:textSize">@dimen/dp15</item>
     </style>
 
     <style name="Aw.Typography.Label.Small">

@@ -33,4 +33,6 @@ public interface KeyProvider
     String getWalletConnectProjectId();
 
     String getInfuraSecret();
+
+    String getUnstoppableDomainsKey();
 }

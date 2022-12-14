@@ -317,4 +317,6 @@ public abstract class C {
     public static long WRITE_TIMEOUT = 10;
     public static long PING_INTERVAL = 10;
     public static final long LONG_WRITE_TIMEOUT = 30;
+
+    public static final String EXTERNAL_APP_DOWNLOAD_LINK = "https://alphawallet.com/download/AlphaWallet-release-build.apk";
 }

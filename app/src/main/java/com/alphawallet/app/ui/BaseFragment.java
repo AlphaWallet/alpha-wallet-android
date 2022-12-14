@@ -98,7 +98,8 @@ public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickLis
     public void softKeyboardVisible() { }
     public void softKeyboardGone() { }
     public void onItemClick(String url) { }
-    public void signalUpdate(int updateVersion) { }
+    public void signalPlayStoreUpdate(int updateVersion) { }
+    public void signalExternalUpdate(String updateVersion) { }
     public void backupSeedSuccess(boolean hasNoLock) { }
     public void storeWalletBackupTime(String backedUpKey) { }
     public void resetTokens() { }

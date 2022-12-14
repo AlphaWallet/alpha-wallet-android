@@ -16,6 +16,7 @@ import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -84,7 +85,7 @@ public class NewSettingsFragment extends BaseFragment
     private ImageView closeBtn;
     private NotificationView notificationView;
     private MaterialCardView updateLayout;
-    private int pendingUpdate = 0;
+    private String pendingUpdate;
     private Wallet wallet;
     private ActivityResultLauncher<Intent> handleBackupClick;
     private ActivityResultLauncher<Intent> networkSettingsHandler;
@@ -115,8 +116,6 @@ public class NewSettingsFragment extends BaseFragment
         initBackupWarningViews(view);
 
         initNotificationView(view);
-
-        checkPendingUpdate(view);
 
         initResultLaunchers();
 
@@ -209,11 +208,36 @@ public class NewSettingsFragment extends BaseFragment
     }
 
     @Override
-    public void signalUpdate(int updateVersion)
+    public void signalPlayStoreUpdate(int updateVersion)
     {
         //add wallet update signal to adapter
+        pendingUpdate = String.valueOf(updateVersion);
+        checkPendingUpdate(getView(), true, v ->
+        {
+            UpdateUtils.pushUpdateDialog(getActivity());
+            updateLayout.setVisibility(View.GONE);
+            pendingUpdate = "";
+            if (getActivity() != null)
+            {
+                ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
+            }
+        });
+    }
+
+    @Override
+    public void signalExternalUpdate(String updateVersion)
+    {
         pendingUpdate = updateVersion;
-        checkPendingUpdate(getView());
+        checkPendingUpdate(getView(), false, v ->
+        {
+            pendingUpdate = "";
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.EXTERNAL_APP_DOWNLOAD_LINK));
+            if (getActivity() != null)
+            {
+                ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
+                getActivity().startActivity(intent);
+            }
+        });
     }
 
     private void initBackupWarningViews(View view)
@@ -630,32 +654,30 @@ public class NewSettingsFragment extends BaseFragment
         startActivity(intent);
     }
 
-    private void checkPendingUpdate(View view)
+    private void checkPendingUpdate(View view, boolean isFromPlayStore, View.OnClickListener listener)
     {
         if (updateLayout == null || view == null) return;
 
-        if (pendingUpdate > 0)
+        if (!TextUtils.isEmpty(pendingUpdate))
         {
             updateLayout.setVisibility(View.VISIBLE);
+            updateLayout.setOnClickListener(listener);
             TextView current = view.findViewById(R.id.text_detail_current);
             TextView available = view.findViewById(R.id.text_detail_available);
-            current.setText(getString(R.string.installed_version, String.valueOf(BuildConfig.VERSION_CODE)));
+            if (isFromPlayStore)
+            {
+                current.setText(getString(R.string.installed_version, String.valueOf(BuildConfig.VERSION_CODE)));
+            }
+            else
+            {
+                current.setText(getString(R.string.installed_version, BuildConfig.VERSION_NAME));
+            }
             available.setText(getString(R.string.available_version, String.valueOf(pendingUpdate)));
+
             if (getActivity() != null)
             {
                 ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
             }
-
-            updateLayout.setOnClickListener(v ->
-            {
-                UpdateUtils.pushUpdateDialog(getActivity());
-                updateLayout.setVisibility(View.GONE);
-                pendingUpdate = 0;
-                if (getActivity() != null)
-                {
-                    ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
-                }
-            });
         }
         else
         {

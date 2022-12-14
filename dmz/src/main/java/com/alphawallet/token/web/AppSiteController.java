@@ -92,7 +92,7 @@ public class AppSiteController implements AttributeInterface
             "    ],\n" +
             "    \"target\": {\n" +
             "      \"namespace\": \"android_app\",\n" +
-            "      \"package_name\": \"io.stormbird.wallet\",\n" +
+            "      \"package_name\": \"io.stormbird.testwallet\",\n" +
             "      \"sha256_cert_fingerprints\": [\n" +
             "        \"8E:1E:C7:92:44:E2:AE:8F:5E:BE:A6:09:E5:CC:05:8F:01:9F:67:F4:A6:FF:E7:60:6E:DA:C8:64:8F:29:AB:C0\"\n" +
             "      ]\n" +

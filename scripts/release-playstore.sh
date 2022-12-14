@@ -10,7 +10,7 @@ change_log_file=$change_logs_dir/$version_code.txt
 fastlane android beta
 if [ $? -eq 0 ]; then
   echo "New release candidate $tag published on internal testing track, visit link on your Android device to install:"
-  echo "https://play.google.com/apps/test/io.stormbird.wallet/$version_code"
+  echo "https://play.google.com/apps/test/io.stormbird.testwallet/$version_code"
   echo "\nUpdates:"
   cat $change_log_file
 fi

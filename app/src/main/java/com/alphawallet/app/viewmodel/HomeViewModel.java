@@ -21,6 +21,7 @@ import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -83,6 +84,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 
@@ -572,41 +574,11 @@ public class HomeViewModel extends BaseViewModel
             int versionCode = packageInfo.versionCode;
             if (preferenceRepository.getLastVersionCode(versionCode) < versionCode)
             {
-                // load what's new
-                Request request = new Request.Builder()
-                    .header("Accept", "application/vnd.github.v3+json")
-                    .url("https://api.github.com/repos/alphawallet/alpha-wallet-android/releases")
-                    .get()
-                    .build();
-
-                Single.fromCallable(() -> {
-                        try (okhttp3.Response response = httpClient.newCall(request)
-                            .execute())
-                        {
-                            return new Gson().<List<GitHubRelease>>fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>()
-                            {
-                            }.getType());
-                        }
-                        catch (Exception e)
-                        {
-                            Timber.e(e);
-                        }
-                        return null;
-                    }).subscribeOn(Schedulers.io())
+                Request request = getRequest();
+                Single.fromCallable(getGitHubReleases(request)).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread()).subscribe((releases) -> {
-
-                        BottomSheetDialog dialog = new BottomSheetDialog(context);
-
-                        WhatsNewView view = new WhatsNewView(context, releases, v -> dialog.dismiss(), true);
-                        dialog.setContentView(view);
-                        dialog.setCancelable(true);
-                        dialog.setCanceledOnTouchOutside(true);
-                        BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
-                        dialog.setOnShowListener(d -> behavior.setPeekHeight(view.getHeight()));
-                        dialog.show();
-
+                        doShowWhatsNewDialog(context, releases);
                         preferenceRepository.setLastVersionCode(versionCode);
-
                     }).isDisposed();
             }
         }
@@ -615,6 +587,28 @@ public class HomeViewModel extends BaseViewModel
             Timber.e(e);
         }
 
+    }
+
+    private void doShowWhatsNewDialog(Context context, List<GitHubRelease> releases)
+    {
+        BottomSheetDialog dialog = new BottomSheetDialog(context);
+        WhatsNewView view = new WhatsNewView(context, releases, v -> dialog.dismiss(), true);
+        dialog.setContentView(view);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
+        BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
+        dialog.setOnShowListener(d -> behavior.setPeekHeight(view.getHeight()));
+        dialog.show();
+    }
+
+    @NonNull
+    private Request getRequest()
+    {
+        return new Request.Builder()
+            .header("Accept", "application/vnd.github.v3+json")
+            .url("https://api.github.com/repos/alphawallet/alpha-wallet-android/releases")
+            .get()
+            .build();
     }
 
     private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception
@@ -768,27 +762,8 @@ public class HomeViewModel extends BaseViewModel
 
     public void checkLatestGithubRelease()
     {
-        Request request = new Request.Builder()
-            .header("Accept", "application/vnd.github.v3+json")
-            .url("https://api.github.com/repos/alphawallet/alpha-wallet-android/releases")
-            .get()
-            .build();
-
-        Single.fromCallable(() ->
-            {
-                try (okhttp3.Response response = httpClient.newCall(request)
-                    .execute())
-                {
-                    return new Gson().<List<GitHubRelease>>fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>()
-                    {
-                    }.getType());
-                }
-                catch (Exception e)
-                {
-                    Timber.e(e);
-                }
-                return null;
-            })
+        Request request = getRequest();
+        Single.fromCallable(getGitHubReleases(request))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe((releases) -> {
@@ -810,5 +785,25 @@ public class HomeViewModel extends BaseViewModel
                     }
                 }, Timber::e
             ).isDisposed();
+    }
+
+    @NonNull
+    private Callable<List<GitHubRelease>> getGitHubReleases(Request request)
+    {
+        return () ->
+        {
+            try (okhttp3.Response response = httpClient.newCall(request)
+                .execute())
+            {
+                return new Gson().fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>()
+                {
+                }.getType());
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
+            return null;
+        };
     }
 }

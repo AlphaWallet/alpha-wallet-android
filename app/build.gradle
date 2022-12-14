@@ -85,8 +85,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 232
-        versionName "3.61.2t"
+        versionCode 236
+        versionName "3.61.6t"
 
         applicationId "io.stormbird.testwallet"
         minSdkVersion 24
@@ -159,7 +159,6 @@ android {
 //                    'proguard-rules.pro'
         }
         release {
-            debuggable true
             minifyEnabled false
             if (signingConfigs.release.storeFile) {
                 signingConfig signingConfigs.release

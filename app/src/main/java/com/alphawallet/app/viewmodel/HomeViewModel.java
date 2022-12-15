@@ -613,16 +613,7 @@ public class HomeViewModel extends BaseViewModel
 
     private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception
     {
-        Locale locale;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        {
-            locale = ctx.getResources().getConfiguration().getLocales().get(0);
-        }
-        else
-        {
-            locale = ctx.getResources().getConfiguration().locale;
-        }
-
+        Locale locale = ctx.getResources().getConfiguration().getLocales().get(0);
         return new TokenDefinition(
             xmlInputStream, locale, null);
     }

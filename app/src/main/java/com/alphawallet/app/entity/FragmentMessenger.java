@@ -7,6 +7,8 @@ package com.alphawallet.app.entity;
 public interface FragmentMessenger
 {
     void tokenScriptError(String message);
+
     void playStoreUpdateReady(int versionUpdate);
+
     void externalUpdateReady(String version);
 }

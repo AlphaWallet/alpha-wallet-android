@@ -1,11 +1,20 @@
 package com.alphawallet.token.web.Ethereum;
 
-import io.reactivex.Observable;
-import com.alphawallet.token.entity.*;
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+
+import com.alphawallet.token.entity.As;
+import com.alphawallet.token.entity.Attribute;
+import com.alphawallet.token.entity.AttributeInterface;
+import com.alphawallet.token.entity.ContractAddress;
+import com.alphawallet.token.entity.FunctionDefinition;
+import com.alphawallet.token.entity.MethodArg;
+import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.entity.TokenscriptContext;
+import com.alphawallet.token.entity.TokenscriptElement;
+import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.alphawallet.token.web.Service.EthRPCNodes;
 
-import okhttp3.OkHttpClient;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
@@ -129,7 +138,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+import io.reactivex.Observable;
+import okhttp3.OkHttpClient;
 
 /**
  * Created by James on 13/06/2019.
@@ -794,7 +804,7 @@ public abstract class TokenscriptFunction
                 val = BigInteger.ZERO;
             }
         }
-        return new TokenScriptResult.Attribute(attr.name, attr.label, val, res);
+        return new TokenScriptResult.Attribute(attr, val, res);
     }
 
     private void resolveReference(String walletAddress, MethodArg arg, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
@@ -936,11 +946,11 @@ public abstract class TokenscriptFunction
             try
             {
                 BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
-                return new TokenScriptResult.Attribute(attr.name, attr.label, val, attr.getSyntaxVal(attr.toString(val)));
+                return new TokenScriptResult.Attribute(attr, val, attr.getSyntaxVal(attr.toString(val)));
             }
             catch (Exception e)
             {
-                return new TokenScriptResult.Attribute(attr.name, attr.label, tokenId, "unsupported encoding");
+                return new TokenScriptResult.Attribute(attr, tokenId, "unsupported encoding");
             }
         });
     }

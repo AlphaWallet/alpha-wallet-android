@@ -3,10 +3,10 @@ package com.alphawallet.app.widget;
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -68,7 +68,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private final Semaphore functionMapComplete = new Semaphore(1);
     private Map<String, TSAction> functions;
     private NonFungibleAdapterInterface adapter;
-    private List<BigInteger> selection = new ArrayList<>();
+    private final List<BigInteger> selection = new ArrayList<>();
     private StandardFunctionInterface callStandardFunctions;
     private BuyCryptoInterface buyFunctionInterface;
     private int buttonCount;
@@ -162,7 +162,8 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     {
         callStandardFunctions = functionInterface;
         adapter = adp;
-        selection = tokenIds;
+        selection.clear();
+        if (tokenIds != null) selection.addAll(tokenIds);
         this.token = token;
         functions = assetSvs.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         assetService = assetSvs;
@@ -293,8 +294,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             }
             else
             {
-                List<BigInteger> selected = selection;
-                if (adapter != null) selected = adapter.getSelectedTokenIds(selection);
+                List<BigInteger> selected = getSelectionFromAdapter();
                 callStandardFunctions.handleTokenScriptFunction(function.buttonText, selected);
             }
         }
@@ -302,8 +302,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private boolean isSelectionValid(int buttonId)
     {
-        List<BigInteger> selected = selection;
-        if (adapter != null) selected = adapter.getSelectedTokenIds(selection);
+        List<BigInteger> selected = getSelectionFromAdapter();
         if (token == null || token.checkSelectionValidity(selected))
         {
             return true;
@@ -312,6 +311,18 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         {
             displayInvalidSelectionError();
             return false;
+        }
+    }
+
+    private List<BigInteger> getSelectionFromAdapter()
+    {
+        if (adapter != null)
+        {
+            return adapter.getSelectedTokenIds(selection);
+        }
+        else
+        {
+            return selection;
         }
     }
 
@@ -346,11 +357,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     {
         int maxSelect = 1;
 
-        if (!selected && tokenIds.containsAll(selection))
-        {
-            selection = new ArrayList<>();
-        }
-
         if (!selected) return;
 
         if (functions != null)
@@ -370,7 +376,8 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         if (maxSelect <= 1)
         {
-            selection = tokenIds;
+            selection.clear();
+            selection.addAll(tokenIds);
             if (adapter != null) adapter.setRadioButtons(true);
         }
     }
@@ -381,7 +388,8 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         //show radio buttons of all token groups
         if (adapter != null) adapter.setRadioButtons(true);
 
-        selection = tokenIds;
+        selection.clear();
+        selection.addAll(tokenIds);
         Vibrator vb = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         if (vb != null && vb.hasVibrator())
         {
@@ -665,13 +673,16 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         try
         {
             functionMapComplete.acquire();
-        } catch (InterruptedException e)
+        }
+        catch (InterruptedException e)
         {
             Timber.e(e);
         }
 
+        findViewById(R.id.wait_buttons).setVisibility(View.VISIBLE);
+
         //get the available map for this collection
-        assetSvs.fetchFunctionMap(token)
+        assetSvs.fetchFunctionMap(token, selection)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(availabilityMap -> setupTokenMap(token, availabilityMap), this::onMapFetchError)

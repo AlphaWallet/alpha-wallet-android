@@ -80,6 +80,7 @@ public class TokenScriptResult
             case BitString:
             case CountryString:
             case JPEG:
+            default:
                 if (attr.text.length() == 0 || (attr.text.charAt(0) != '{')) attrs.append("\"");
                 attrs.append(attr.text);
                 if (attr.text.length() == 0 || (attr.text.charAt(0) != '{')) attrs.append("\"");
@@ -126,11 +127,11 @@ public class TokenScriptResult
         }
         else if (attrValue instanceof BigInteger)
         {
-            attrs.append(((BigInteger)attrValue).toString(10));
+            attrs.append(((BigInteger) attrValue).toString(10));
         }
         else if (attrValue instanceof Integer)
         {
-            attrs.append((Integer)attrValue);
+            attrs.append(attrValue);
         }
         else if (attrValue instanceof List)
         {

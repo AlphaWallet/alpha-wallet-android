@@ -186,6 +186,7 @@
 
         <activity
             android:name=".ui.TokenDetailActivity"
+            android:hardwareAccelerated="true"
             android:label="@string/token_details" />
 
         <activity
@@ -255,6 +256,7 @@
 
         <activity
             android:name=".ui.TokenActivity"
+            android:hardwareAccelerated="true"
             android:label="@string/activity_label" />
 
         <activity
@@ -297,10 +299,12 @@
 
         <activity
             android:name=".ui.NFTAssetDetailActivity"
+            android:hardwareAccelerated="true"
             android:label="ERC1155 Asset Details" />
 
         <activity
             android:name=".ui.Erc1155AssetListActivity"
+            android:hardwareAccelerated="true"
             android:label="ERC1155 Asset Details" />
 
         <activity

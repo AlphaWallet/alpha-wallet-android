@@ -17,6 +17,7 @@ import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -174,6 +175,7 @@ public class NFTImageView extends RelativeLayout
     {
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
+        webView.setWebChromeClient(new WebChromeClient());
 
         //determine how to display this URL
         final DisplayType useType = new DisplayType(imageUrl, hint);
@@ -197,6 +199,9 @@ public class NFTImageView extends RelativeLayout
                 webView.getSettings().setJavaScriptEnabled(true);
                 webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
                 webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+                webView.getSettings().setAllowContentAccess(true);
+                webView.getSettings().setBlockNetworkLoads(false);
+                webView.getSettings().setDomStorageEnabled(true);
                 String base64 = android.util.Base64.encodeToString(loaderAnim.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
                 webView.loadData(base64, "text/html; charset=utf-8", "base64");
             }

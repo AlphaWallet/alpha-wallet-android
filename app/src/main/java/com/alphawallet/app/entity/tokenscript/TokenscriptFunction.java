@@ -1,8 +1,10 @@
 package com.alphawallet.app.entity.tokenscript;
 
+import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+
 import android.text.TextUtils;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.util.BalanceUtils;
@@ -11,7 +13,6 @@ import com.alphawallet.token.entity.As;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.AttributeInterface;
 import com.alphawallet.token.entity.ContractAddress;
-import com.alphawallet.token.entity.EventDefinition;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.TokenScriptResult;
@@ -29,7 +30,102 @@ import org.web3j.abi.datatypes.Int;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.*;
+import org.web3j.abi.datatypes.generated.Bytes1;
+import org.web3j.abi.datatypes.generated.Bytes10;
+import org.web3j.abi.datatypes.generated.Bytes11;
+import org.web3j.abi.datatypes.generated.Bytes12;
+import org.web3j.abi.datatypes.generated.Bytes13;
+import org.web3j.abi.datatypes.generated.Bytes14;
+import org.web3j.abi.datatypes.generated.Bytes15;
+import org.web3j.abi.datatypes.generated.Bytes16;
+import org.web3j.abi.datatypes.generated.Bytes17;
+import org.web3j.abi.datatypes.generated.Bytes18;
+import org.web3j.abi.datatypes.generated.Bytes19;
+import org.web3j.abi.datatypes.generated.Bytes2;
+import org.web3j.abi.datatypes.generated.Bytes20;
+import org.web3j.abi.datatypes.generated.Bytes21;
+import org.web3j.abi.datatypes.generated.Bytes22;
+import org.web3j.abi.datatypes.generated.Bytes23;
+import org.web3j.abi.datatypes.generated.Bytes24;
+import org.web3j.abi.datatypes.generated.Bytes25;
+import org.web3j.abi.datatypes.generated.Bytes26;
+import org.web3j.abi.datatypes.generated.Bytes27;
+import org.web3j.abi.datatypes.generated.Bytes28;
+import org.web3j.abi.datatypes.generated.Bytes29;
+import org.web3j.abi.datatypes.generated.Bytes3;
+import org.web3j.abi.datatypes.generated.Bytes30;
+import org.web3j.abi.datatypes.generated.Bytes31;
+import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.abi.datatypes.generated.Bytes4;
+import org.web3j.abi.datatypes.generated.Bytes5;
+import org.web3j.abi.datatypes.generated.Bytes6;
+import org.web3j.abi.datatypes.generated.Bytes7;
+import org.web3j.abi.datatypes.generated.Bytes8;
+import org.web3j.abi.datatypes.generated.Bytes9;
+import org.web3j.abi.datatypes.generated.Int104;
+import org.web3j.abi.datatypes.generated.Int112;
+import org.web3j.abi.datatypes.generated.Int120;
+import org.web3j.abi.datatypes.generated.Int128;
+import org.web3j.abi.datatypes.generated.Int136;
+import org.web3j.abi.datatypes.generated.Int144;
+import org.web3j.abi.datatypes.generated.Int152;
+import org.web3j.abi.datatypes.generated.Int16;
+import org.web3j.abi.datatypes.generated.Int160;
+import org.web3j.abi.datatypes.generated.Int168;
+import org.web3j.abi.datatypes.generated.Int176;
+import org.web3j.abi.datatypes.generated.Int184;
+import org.web3j.abi.datatypes.generated.Int192;
+import org.web3j.abi.datatypes.generated.Int200;
+import org.web3j.abi.datatypes.generated.Int208;
+import org.web3j.abi.datatypes.generated.Int216;
+import org.web3j.abi.datatypes.generated.Int224;
+import org.web3j.abi.datatypes.generated.Int232;
+import org.web3j.abi.datatypes.generated.Int24;
+import org.web3j.abi.datatypes.generated.Int240;
+import org.web3j.abi.datatypes.generated.Int248;
+import org.web3j.abi.datatypes.generated.Int256;
+import org.web3j.abi.datatypes.generated.Int32;
+import org.web3j.abi.datatypes.generated.Int40;
+import org.web3j.abi.datatypes.generated.Int48;
+import org.web3j.abi.datatypes.generated.Int56;
+import org.web3j.abi.datatypes.generated.Int64;
+import org.web3j.abi.datatypes.generated.Int72;
+import org.web3j.abi.datatypes.generated.Int8;
+import org.web3j.abi.datatypes.generated.Int80;
+import org.web3j.abi.datatypes.generated.Int88;
+import org.web3j.abi.datatypes.generated.Int96;
+import org.web3j.abi.datatypes.generated.Uint104;
+import org.web3j.abi.datatypes.generated.Uint112;
+import org.web3j.abi.datatypes.generated.Uint120;
+import org.web3j.abi.datatypes.generated.Uint128;
+import org.web3j.abi.datatypes.generated.Uint136;
+import org.web3j.abi.datatypes.generated.Uint144;
+import org.web3j.abi.datatypes.generated.Uint152;
+import org.web3j.abi.datatypes.generated.Uint16;
+import org.web3j.abi.datatypes.generated.Uint160;
+import org.web3j.abi.datatypes.generated.Uint168;
+import org.web3j.abi.datatypes.generated.Uint176;
+import org.web3j.abi.datatypes.generated.Uint184;
+import org.web3j.abi.datatypes.generated.Uint192;
+import org.web3j.abi.datatypes.generated.Uint200;
+import org.web3j.abi.datatypes.generated.Uint208;
+import org.web3j.abi.datatypes.generated.Uint216;
+import org.web3j.abi.datatypes.generated.Uint224;
+import org.web3j.abi.datatypes.generated.Uint232;
+import org.web3j.abi.datatypes.generated.Uint24;
+import org.web3j.abi.datatypes.generated.Uint240;
+import org.web3j.abi.datatypes.generated.Uint248;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.abi.datatypes.generated.Uint32;
+import org.web3j.abi.datatypes.generated.Uint40;
+import org.web3j.abi.datatypes.generated.Uint48;
+import org.web3j.abi.datatypes.generated.Uint56;
+import org.web3j.abi.datatypes.generated.Uint64;
+import org.web3j.abi.datatypes.generated.Uint72;
+import org.web3j.abi.datatypes.generated.Uint8;
+import org.web3j.abi.datatypes.generated.Uint80;
+import org.web3j.abi.datatypes.generated.Uint88;
+import org.web3j.abi.datatypes.generated.Uint96;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
@@ -50,11 +146,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import timber.log.Timber;
-
-import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
-import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 /**
  * Created by James on 13/06/2019.
@@ -528,7 +621,7 @@ public abstract class TokenscriptFunction
                 {
                     case Boolean:
                         value = Numeric.toBigInt(hexBytes);
-                        transResult = value.equals(BigDecimal.ZERO) ? "FALSE" : "TRUE";
+                        transResult = value.equals(BigInteger.ZERO) ? "FALSE" : "TRUE";
                         break;
                     case Integer:
                         value = Numeric.toBigInt(hexBytes);
@@ -618,7 +711,7 @@ public abstract class TokenscriptFunction
     public TokenScriptResult.Attribute parseFunctionResult(TransactionResult transactionResult, Attribute attr)
     {
         String res = attr.getSyntaxVal(transactionResult.result);
-        BigInteger val = transactionResult.tokenId; //?
+        BigInteger val = transactionResult.tokenId;
 
         if (attr.syntax == TokenDefinition.Syntax.Boolean)
         {
@@ -644,7 +737,7 @@ public abstract class TokenscriptFunction
                 val = BigInteger.ZERO;
             }
         }
-        return new TokenScriptResult.Attribute(attr.name, attr.label, val, res);
+        return new TokenScriptResult.Attribute(attr, val, res);
     }
 
     public static final String ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -656,10 +749,10 @@ public abstract class TokenscriptFunction
      * @param definition
      * @return
      */
-    public Observable<TransactionResult> fetchResultFromEthereum(Token token, ContractAddress contractAddress, Attribute attr,
+    public Single<TransactionResult> fetchResultFromEthereum(Token token, ContractAddress contractAddress, Attribute attr,
                                                                  BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
-        return Observable.fromCallable(() -> {
+        return Single.fromCallable(() -> {
             TransactionResult transactionResult = new TransactionResult(contractAddress.chainId, contractAddress.address, tokenId, attr);
             Function transaction = generateTransactionFunction(token, tokenId, definition, attr.function, attrIf);
 
@@ -753,7 +846,7 @@ public abstract class TokenscriptFunction
         }
         else
         {
-            return fetchAttrResult(token, attr, tokenId, definition, attrIf, false).blockingSingle().text;
+            return fetchAttrResult(token, attr, tokenId, definition, attrIf, false).blockingGet().text;
         }
 
         return null;
@@ -781,16 +874,16 @@ public abstract class TokenscriptFunction
      * @return
      */
 
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(Token token, Attribute attr, BigInteger tokenId,
-                                                                   TokenDefinition td, AttributeInterface attrIf, boolean itemView)
+    public Single<TokenScriptResult.Attribute> fetchAttrResult(Token token, Attribute attr, BigInteger tokenId,
+                                                               TokenDefinition td, AttributeInterface attrIf, boolean itemView)
     {
         if (attr == null)
         {
-            return Observable.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
+            return Single.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
         }
         else if (token.getAttributeResult(attr.name, tokenId) != null)
         {
-            return Observable.fromCallable(() -> token.getAttributeResult(attr.name, tokenId));
+            return Single.fromCallable(() -> token.getAttributeResult(attr.name, tokenId));
         }
         else if (attr.event != null)
         {
@@ -834,10 +927,10 @@ public abstract class TokenscriptFunction
         }
     }
 
-    private Observable<TokenScriptResult.Attribute> getEventResult(TransactionResult txResult, Attribute attr, BigInteger tokenId, AttributeInterface attrIf)
+    private Single<TokenScriptResult.Attribute> getEventResult(TransactionResult txResult, Attribute attr, BigInteger tokenId, AttributeInterface attrIf)
     {
         //fetch the function
-        return Observable.fromCallable(() -> {
+        return Single.fromCallable(() -> {
             String walletAddress = attrIf.getWalletAddr();
             Web3j web3j = getWeb3jService(attr.event.getEventChainId());
             List<BigInteger> tokenIds = new ArrayList<>(Collections.singletonList(tokenId));
@@ -857,9 +950,9 @@ public abstract class TokenscriptFunction
         });
     }
 
-    private Observable<TokenScriptResult.Attribute> staticAttribute(Attribute attr, BigInteger tokenId)
+    private Single<TokenScriptResult.Attribute> staticAttribute(Attribute attr, BigInteger tokenId)
     {
-        return Observable.fromCallable(() -> {
+        return Single.fromCallable(() -> {
             try
             {
                 if (attr.userInput)
@@ -870,19 +963,19 @@ public abstract class TokenscriptFunction
                 {
                     BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
                     Timber.d("ATTR: " + attr.label + " : " + attr.name + " : " + attr.getSyntaxVal(attr.toString(val)));
-                    return new TokenScriptResult.Attribute(attr.name, attr.label, val, attr.getSyntaxVal(attr.toString(val)));
+                    return new TokenScriptResult.Attribute(attr, val, attr.getSyntaxVal(attr.toString(val)));
                 }
             }
             catch (Exception e)
             {
-                return new TokenScriptResult.Attribute(attr.name, attr.label, tokenId, "unsupported encoding");
+                return new TokenScriptResult.Attribute(attr, tokenId, "unsupported encoding");
             }
         });
     }
 
-    private Observable<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, Attribute attr)
+    private Single<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, Attribute attr)
     {
-        return Observable.fromCallable(() -> parseFunctionResult(transactionResult, attr));
+        return Single.fromCallable(() -> parseFunctionResult(transactionResult, attr));
     }
 
     /**

@@ -5,10 +5,12 @@
     android:id="@+id/layout_update"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/standard_16"
+    android:layout_marginHorizontal="@dimen/standard_16"
+    android:layout_marginBottom="@dimen/standard_16"
     android:elevation="0dp"
     android:theme="@style/AppTheme.DarkOverlay"
     app:cardBackgroundColor="@color/mine"
+    app:cardCornerRadius="@dimen/dialog_corner_radius"
     app:contentPadding="@dimen/standard_16"
     app:strokeWidth="0dp">
 
@@ -21,7 +23,7 @@
 
         <TextView
             android:id="@+id/text_title"
-            style="@style/Aw.Typography.Title"
+            style="@style/Aw.Typography.Title.SemiBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/small_12"
@@ -34,14 +36,14 @@
 
             <TextView
                 android:id="@+id/text_detail_current"
-                style="@style/Aw.Typography.Sub"
+                style="@style/Aw.Typography"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="Installed: 123" />
 
             <TextView
                 android:id="@+id/text_detail_available"
-                style="@style/Aw.Typography.Sub"
+                style="@style/Aw.Typography"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/small_12"

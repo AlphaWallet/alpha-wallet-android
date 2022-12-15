@@ -5,7 +5,8 @@
     android:id="@+id/layout_item_warning"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/standard_16"
+    android:layout_marginHorizontal="@dimen/standard_16"
+    android:layout_marginBottom="@dimen/standard_16"
     android:animateLayoutChanges="true"
     android:elevation="2dp"
     android:orientation="vertical"
@@ -17,7 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="0dp"
         app:cardBackgroundColor="@color/mine"
-        app:cardCornerRadius="8dp"
+        app:cardCornerRadius="@dimen/dialog_corner_radius"
         app:cardElevation="0dp">
 
         <RelativeLayout

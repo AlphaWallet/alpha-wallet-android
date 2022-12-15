@@ -259,6 +259,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.backUpMessage().observe(this, this::onBackup);
         viewModel.splashReset().observe(this, this::onRequireInit);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.updateAvailable().observe(this, this::onUpdateAvailable);
 
         if (CustomViewSettings.hideDappBrowser())
         {
@@ -289,9 +290,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
         else
         {
-            //TODO: Check we are using latest version on github, since we're using a downloaded/manually installed version
-            //TODO: Also add a build exclusion so this code only appears if it's a noAnalytics build.
-            //First check that this the package name is "io.stormbird.wallet" - it could be a fork
+            if (getApplicationContext().getPackageName().equals("io.stormbird.wallet"))
+            {
+                viewModel.checkLatestGithubRelease();
+            }
         }
 
         setupFragmentListeners();
@@ -318,6 +320,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         Intent i = new Intent(this, PriceAlertsService.class);
         startService(i);
+    }
+
+    private void onUpdateAvailable(String availableVersion)
+    {
+        externalUpdateReady(availableVersion);
     }
 
     private void setWCConnect()
@@ -735,11 +742,17 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public void updateReady(int updateVersion)
+    public void playStoreUpdateReady(int updateVersion)
     {
         //signal to WalletFragment an update is ready
         //display entry in the WalletView
-        getFragment(SETTINGS).signalUpdate(updateVersion);
+        getFragment(SETTINGS).signalPlayStoreUpdate(updateVersion);
+    }
+
+    @Override
+    public void externalUpdateReady(String updateVersion)
+    {
+        getFragment(SETTINGS).signalExternalUpdate(updateVersion);
     }
 
     @Override

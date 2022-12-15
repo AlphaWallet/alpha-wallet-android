@@ -67,10 +67,10 @@
             android:paddingEnd="@dimen/mini_4">
 
             <TextView
-                style="@style/Aw.Typography.Label"
+                style="@style/Aw.Typography.Label.Widget"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="start|center_vertical"
                 android:layout_weight="@integer/widget_content"
                 android:text="@string/title_transaction_details"
                 android:visibility="visible" />

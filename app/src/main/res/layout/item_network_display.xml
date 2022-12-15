@@ -18,9 +18,10 @@
         android:paddingHorizontal="@dimen/standard_16">
 
         <TextView
-            style="@style/Aw.Typography.Label"
+            style="@style/Aw.Typography.Label.Widget"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
             android:layout_weight="@integer/widget_label"
             android:text="@string/subtitle_network" />
 

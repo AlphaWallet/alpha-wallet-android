@@ -18,10 +18,10 @@
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/sp16"
+                android:layout_height="250dp"
+                android:layout_marginTop="@dimen/optimal_30"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_illustrations_analytics"
+                android:src="@drawable/icons_illustrations_analytics"
                 android:visibility="visible" />
 
             <TextView

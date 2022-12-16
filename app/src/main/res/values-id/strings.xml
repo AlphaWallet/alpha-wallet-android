@@ -950,4 +950,8 @@
     <string name="title_session_details">Detail Sesi</string>
     <string name="title_session_proposal">Proposal Sesi</string>
     <string name="message_wc_wallet_different_from_active_wallet">Dompet berbeda dengan dompet aktif.</string>
+    <string name="settings_title_analytics">Analitik</string>
+    <string name="settings_title_crash_reporting">Pelaporan Kerusakan</string>
+    <string name="message_share_anonymous_data">Bantu kami meningkatkan AlphaWallet dengan membagikan data anonim Anda kepada kami. Ini tidak termasuk informasi keuangan apa pun.</string>
+    <string name="share_anonymous_data">Bagikan Data Anonim?</string>
 </resources>

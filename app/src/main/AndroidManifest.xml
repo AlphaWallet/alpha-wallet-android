@@ -349,6 +349,14 @@
             android:name=".ui.WalletDiagnosticActivity"
             android:label="@string/key_diagnostic" />
 
+        <activity
+            android:name=".ui.AnalyticsSettingsActivity"
+            android:label="@string/settings_title_analytics" />
+
+        <activity
+            android:name=".ui.CrashReportSettingsActivity"
+            android:label="@string/settings_title_crash_reporting" />
+
         <service
             android:name=".service.PriceAlertsService"
             android:enabled="true"

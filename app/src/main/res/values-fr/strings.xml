@@ -960,4 +960,8 @@
     <string name="title_session_details">Détails de la session</string>
     <string name="title_session_proposal">Proposition de séance</string>
     <string name="message_wc_wallet_different_from_active_wallet">Portefeuille différent du portefeuille actif.</string>
+    <string name="settings_title_analytics">Analytique</string>
+    <string name="settings_title_crash_reporting">Rapport d\'incident</string>
+    <string name="message_share_anonymous_data">Aidez-nous à améliorer AlphaWallet en partageant vos données anonymes avec nous. Cela n\'inclut aucune information financière.</string>
+    <string name="share_anonymous_data">Partager des données anonymes ?</string>
 </resources>

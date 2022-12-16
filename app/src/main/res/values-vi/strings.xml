@@ -960,4 +960,8 @@
     <string name="title_session_details">Session Details</string>
     <string name="title_session_proposal">Chi tiết phiên</string>
     <string name="message_wc_wallet_different_from_active_wallet">Ví khác với ví đang hoạt động.</string>
+    <string name="settings_title_analytics">Phân tích</string>
+    <string name="settings_title_crash_reporting">Báo cáo sự cố</string>
+    <string name="message_share_anonymous_data">Hãy giúp chúng tôi cải thiện AlphaWallet bằng cách chia sẻ dữ liệu ẩn danh của bạn với chúng tôi. Điều này không bao gồm bất kỳ thông tin tài chính.</string>
+    <string name="share_anonymous_data">Chia sẻ dữ liệu ẩn danh?</string>
 </resources>

@@ -44,6 +44,8 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String LAST_FRAGMENT_ID = "lastfrag_id";
     private static final String LAST_VERSION_CODE = "last_version_code";
     private static final String SELECTED_SWAP_PROVIDERS_KEY = "selected_exchanges";
+    private static final String ANALYTICS_KEY = "analytics_key";
+    private static final String CRASH_REPORTING_KEY = "crash_reporting_key";
 
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
@@ -392,6 +394,30 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public void setSelectedSwapProviders(Set<String> swapProviders)
     {
         pref.edit().putStringSet(SELECTED_SWAP_PROVIDERS_KEY, swapProviders).apply();
+    }
+
+    @Override
+    public boolean isAnalyticsEnabled()
+    {
+        return pref.getBoolean(ANALYTICS_KEY, true);
+    }
+
+    @Override
+    public void setAnalyticsEnabled(boolean isEnabled)
+    {
+        pref.edit().putBoolean(ANALYTICS_KEY, isEnabled).apply();
+    }
+
+    @Override
+    public boolean isCrashReportingEnabled()
+    {
+        return pref.getBoolean(CRASH_REPORTING_KEY, true);
+    }
+
+    @Override
+    public void setCrashReportingEnabled(boolean isEnabled)
+    {
+        pref.edit().putBoolean(CRASH_REPORTING_KEY, isEnabled).apply();
     }
 
     @NonNull

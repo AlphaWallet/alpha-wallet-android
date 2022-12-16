@@ -981,4 +981,8 @@
     <string name="title_session_details">အပိုင်းအသေးစိတ်</string>
     <string name="title_session_proposal">Session အဆိုပြုချက်</string>
     <string name="message_wc_wallet_different_from_active_wallet">ပိုက်ဆံအိတ်သည် တက်ကြွသောပိုက်ဆံအိတ်နှင့် ကွဲပြားသည်။</string>
+    <string name="settings_title_analytics">ပိုင်းခြားစိတ်ဖြာပါ။</string>
+    <string name="settings_title_crash_reporting">ပျက်စီးမှုသတင်းပို့ခြင်း။</string>
+    <string name="message_share_anonymous_data">သင်၏အမည်မသိဒေတာကို ကျွန်ုပ်တို့နှင့်မျှဝေခြင်းဖြင့် AlphaWallet တိုးတက်စေရန် ကျွန်ုပ်တို့ကိုကူညီပါ။ ၎င်းတွင် မည်သည့်ဘဏ္ဍာရေးဆိုင်ရာ အချက်အလက်မှ မပါဝင်ပါ။</string>
+    <string name="share_anonymous_data">အမည်မသိဒေတာကို မျှဝေမလား။</string>
 </resources>

@@ -1022,4 +1022,8 @@
     <string name="title_session_details">Session Details</string>
     <string name="title_session_proposal">Session Proposal</string>
     <string name="message_wc_wallet_different_from_active_wallet">Wallet different from active wallet.</string>
+    <string name="settings_title_analytics">Analytics</string>
+    <string name="settings_title_crash_reporting">Crash Reporting</string>
+    <string name="message_share_anonymous_data">Help us to improve AlphaWallet by sharing your anonymous data with us. This does not include any financial information.</string>
+    <string name="share_anonymous_data">Share Anonymous Data?</string>
 </resources>

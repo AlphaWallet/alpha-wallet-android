@@ -101,4 +101,10 @@ public interface PreferenceRepositoryType {
 
     Set<String> getSelectedSwapProviders();
     void setSelectedSwapProviders(Set<String> swapProviders);
+
+    boolean isAnalyticsEnabled();
+    void setAnalyticsEnabled(boolean isEnabled);
+
+    boolean isCrashReportingEnabled();
+    void setCrashReportingEnabled(boolean isEnabled);
 }

@@ -201,4 +201,18 @@ public class NFTViewModel extends BaseViewModel {
         if (disposable != null && !disposable.isDisposed()) disposable.dispose();
         if (scriptUpdate != null && !scriptUpdate.isDisposed()) scriptUpdate.dispose();
     }
+
+    public boolean hasTokenScript(Token token)
+    {
+        return token != null && assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address) != null;
+    }
+
+    public void updateAttributes(Token token)
+    {
+        assetDefinitionService.refreshAllAttributes(token)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(b -> { }, this::onError)
+                .isDisposed();
+    }
 }

@@ -650,7 +650,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     {
         //is the attr incomplete?
        Timber.d("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
-        TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
+       TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
     }
 
     private void displayFunction(String tokenAttrs)

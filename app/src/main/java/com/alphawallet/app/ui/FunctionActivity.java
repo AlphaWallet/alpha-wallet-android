@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -230,7 +229,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         //is the attr incomplete?
         Timber.d("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
-        TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
+        TokenScriptResult.addPair(attrs, attribute);
     }
 
     private void fillEmpty()

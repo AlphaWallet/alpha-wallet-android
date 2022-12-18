@@ -29,7 +29,6 @@ import com.alphawallet.app.entity.QueryResponse;
 import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
@@ -603,7 +602,42 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (originToken == null || td == null) return null;
 
         //produce result
-        return tokenscriptUtility.fetchAttrResult(originToken, attr, tokenId, td, this, false).blockingSingle();
+        return tokenscriptUtility.fetchAttrResult(originToken, attr, tokenId, td, this, false).blockingGet();
+    }
+
+    public Single<Boolean> refreshAllAttributes(Token token)
+    {
+        TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        if (td == null) return Single.fromCallable(() -> false);
+
+        return Single.fromCallable(() -> {
+            //run through attributes first
+            for (Map.Entry<String, Attribute> attrEntry : td.attributes.entrySet())
+            {
+                //check if any of these attributes take TokenID
+                if (attrEntry.getValue().usesTokenId())
+                {
+                    //run through each tokenId and update
+                    for (BigInteger tokenId : token.getTokenAssets().keySet())
+                    {
+                        updateAttributeResult(token, td, attrEntry.getValue(), tokenId);
+                    }
+                }
+                else
+                {
+                    updateAttributeResult(token, td, attrEntry.getValue(), BigInteger.ZERO);
+                }
+            }
+            return true;
+        });
+    }
+
+    private void updateAttributeResult(Token token, TokenDefinition td, Attribute attr, BigInteger tokenId)
+    {
+        ContractAddress useAddress = new ContractAddress(attr.function); //always use the function attribute's address
+        tokenscriptUtility.fetchResultFromEthereum(token, useAddress, attr, tokenId, td, this)       // Fetch function result from blockchain
+                .subscribe(txResult -> storeAuxData(getWalletAddr(), txResult))
+                .isDisposed();
     }
 
     public void addLocalRefs(Map<String, String> refs)
@@ -655,7 +689,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
             else if (attrtype.event != null)
             {
-                result = new TokenScriptResult.Attribute(attrtype.name, attrtype.label, tokenId, "unsupported encoding");
+                result = new TokenScriptResult.Attribute(attrtype, tokenId, "unsupported encoding");
             }
             else if (attrtype.function != null)
             {
@@ -667,12 +701,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             else
             {
                 BigInteger val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
-                result = new TokenScriptResult.Attribute(attrtype.name, attrtype.label, attrtype.processValue(val), attrtype.getSyntaxVal(attrtype.toString(val)));
+                result = new TokenScriptResult.Attribute(attrtype, attrtype.processValue(val), attrtype.getSyntaxVal(attrtype.toString(val)));
             }
         }
         catch (Exception e)
         {
-            result = new TokenScriptResult.Attribute(attrtype.name, attrtype.label, tokenId, "unsupported encoding");
+            result = new TokenScriptResult.Attribute(attrtype, tokenId, "unsupported encoding");
         }
 
         return result;
@@ -1790,14 +1824,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      * @param token
      * @return map of unique tokenIds to lists of allowed functions for that ID - note that we allow the function to be displayed if it has a denial message
      */
-    public Single<Map<BigInteger, List<String>>> fetchFunctionMap(Token token)
+    public Single<Map<BigInteger, List<String>>> fetchFunctionMap(Token token, @NotNull List<BigInteger> tokenIds)
     {
         return Single.fromCallable(() -> {
             Map<BigInteger, List<String>> validActions = new HashMap<>();
             TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
             if (td != null)
             {
-                List<BigInteger> tokenIds = token.getUniqueTokenIds();
                 Map<String, TSAction> actions = td.getActions();
                 //first gather all attrs required - do this so if there's multiple actions using the same attribute for a tokenId we aren't fetching the value repeatedly
                 List<String> requiredAttrNames = getRequiredAttributeNames(actions, td);
@@ -1868,7 +1901,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 {
                     Attribute attr = td.attributes.get(attrId);
                     if (attr == null) continue;
-                    TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, false).blockingSingle();
+                    TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, false).blockingGet();
                     if (attrResult != null) attrs.put(attrId, attrResult);
                 }
 
@@ -1908,7 +1941,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 Attribute attr = td.attributes.get(attrName);
                 if (attr == null) continue;
-                TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, false).blockingSingle();
+                TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, false).blockingGet();
                 if (attrResult != null)
                 {
                     Map<String, TokenScriptResult.Attribute> tokenIdMap = resultSet.get(tokenId);
@@ -2149,7 +2182,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
             String databaseKey = functionKey(cAddr, tResult.tokenId, tResult.attrId);
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 RealmAuxData realmToken = r.where(RealmAuxData.class)
                         .equalTo("instanceKey", databaseKey)
                         .equalTo("chainId", tResult.contractChainId)
@@ -2273,9 +2306,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     //private Token
 
-    private void addOpenSeaAttributes(StringBuilder attrs, Token erc721Token, BigInteger tokenId)
+    private void addOpenSeaAttributes(StringBuilder attrs, Token token, BigInteger tokenId)
     {
-        NFTAsset tokenAsset = erc721Token.getAssetForToken(tokenId.toString());
+        NFTAsset tokenAsset = token.getAssetForToken(tokenId.toString());
         if (tokenAsset == null) return;
 
         try
@@ -2291,7 +2324,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 TokenScriptResult.addPair(attrs, "external_link", URLEncoder.encode(tokenAsset.getExternalLink(), "utf-8"));
             //if (tokenAsset.getTraits() != null) TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
             if (tokenAsset.getName() != null)
-                TokenScriptResult.addPair(attrs, "name", URLEncoder.encode(tokenAsset.getName(), "utf-8"));
+                TokenScriptResult.addPair(attrs, "metadata_name", URLEncoder.encode(tokenAsset.getName(), "utf-8"));
         }
         catch (UnsupportedEncodingException e)
         {
@@ -2304,21 +2337,21 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         StringBuilder attrs = new StringBuilder();
 
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
-        String name = token.getTokenTitle();
+        String label = token.getTokenTitle();
         if (definition != null && definition.getTokenName(1) != null)
         {
-            name = definition.getTokenName(1);
+            label = definition.getTokenName(1);
         }
-        TokenScriptResult.addPair(attrs, "name", name);
-        TokenScriptResult.addPair(attrs, "label", name);
+        TokenScriptResult.addPair(attrs, "name", token.tokenInfo.name);
+        TokenScriptResult.addPair(attrs, "label", label);
         TokenScriptResult.addPair(attrs, "symbol", token.getSymbol());
-        TokenScriptResult.addPair(attrs, "_count", String.valueOf(count));
+        TokenScriptResult.addPair(attrs, "_count", BigInteger.valueOf(count));
         TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);
-        TokenScriptResult.addPair(attrs, "chainId", String.valueOf(token.tokenInfo.chainId));
+        TokenScriptResult.addPair(attrs, "chainId", BigInteger.valueOf(token.tokenInfo.chainId));
         TokenScriptResult.addPair(attrs, "tokenId", tokenId);
         TokenScriptResult.addPair(attrs, "ownerAddress", token.getWallet());
 
-        if (token instanceof ERC721Token)
+        if (token.isNonFungible())
         {
             addOpenSeaAttributes(attrs, token, tokenId);
         }
@@ -2379,7 +2412,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         return Observable.fromIterable(attrList)
                 .flatMap(attr -> tokenscriptUtility.fetchAttrResult(token, attr, tokenId,
-                        definition, this, itemView));
+                        definition, this, itemView).toObservable());
     }
 
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds, List<Attribute> extraAttrs)

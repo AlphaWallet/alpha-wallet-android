@@ -90,6 +90,7 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         //check NFT events, expedite balance update
         syncListener();
         viewModel.checkEventsForToken(token);
+        viewModel.updateAttributes(token);
     }
 
     private void syncListener()

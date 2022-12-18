@@ -79,8 +79,8 @@ window.AlphaWallet.init(__rpcURL, {
   }
 }, {
     address: __addressHex,
-    networkVersion: __chainID
-    //networkVersion: "0x" + parseInt(__chainID).toString(16) || null
+    //networkVersion: __chainID
+    networkVersion: "0x" + parseInt(__chainID).toString(16) || null
 })
 
 window.web3.setProvider = function () {

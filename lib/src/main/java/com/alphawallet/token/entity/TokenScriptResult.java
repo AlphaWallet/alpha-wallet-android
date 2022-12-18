@@ -1,5 +1,7 @@
 package com.alphawallet.token.entity;
 
+import static com.alphawallet.token.tools.TokenDefinition.Syntax.IA5String;
+
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.gson.Gson;
 
@@ -28,7 +30,7 @@ public class TokenScriptResult
             this.text = text;
             this.value = value;
             this.userInput = false;
-            this.syntax = null;
+            this.syntax = IA5String;
         }
 
         public Attribute(String attributeId, String name, BigInteger value, String text, boolean userInput) {
@@ -37,7 +39,7 @@ public class TokenScriptResult
             this.text = text;
             this.value = value;
             this.userInput = userInput;
-            this.syntax = null;
+            this.syntax = IA5String;
         }
 
         public Attribute(com.alphawallet.token.entity.Attribute attr, BigInteger value, String text)
@@ -48,6 +50,53 @@ public class TokenScriptResult
             this.value = value;
             this.userInput = false;
             syntax = attr.syntax;
+        }
+
+        public String attrValue()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            switch (syntax)
+            {
+                case IA5String:
+                case DirectoryString:
+                case BitString:
+                case CountryString:
+                case JPEG:
+                default:
+                    if (text.length() == 0 || (text.charAt(0) != '{')) sb.append("\"");
+                    sb.append(text);
+                    if (text.length() == 0 || (text.charAt(0) != '{')) sb.append("\"");
+                    break;
+
+                case Integer:
+                    if (value != null)
+                    {
+                        sb.append((value).toString(10));
+                    }
+                    else
+                    {
+                        sb.append("0");
+                    }
+                    break;
+                case GeneralizedTime:
+                    break;
+                case Boolean:
+                    if (text.equalsIgnoreCase("TRUE"))
+                    {
+                        sb.append("true");
+                    }
+                    else
+                    {
+                        sb.append("false");
+                    }
+                    break;
+                case NumericString:
+                    sb.append(text);
+                    break;
+            }
+
+            return sb.toString();
         }
     }
 
@@ -72,47 +121,7 @@ public class TokenScriptResult
     {
         attrs.append(attr.id);
         attrs.append(": ");
-
-        switch (attr.syntax)
-        {
-            case IA5String:
-            case DirectoryString:
-            case BitString:
-            case CountryString:
-            case JPEG:
-            default:
-                if (attr.text.length() == 0 || (attr.text.charAt(0) != '{')) attrs.append("\"");
-                attrs.append(attr.text);
-                if (attr.text.length() == 0 || (attr.text.charAt(0) != '{')) attrs.append("\"");
-                break;
-
-            case Integer:
-                if (attr.value != null)
-                {
-                    attrs.append((attr.value).toString(10));
-                }
-                else
-                {
-                    attrs.append("0");
-                }
-                break;
-            case GeneralizedTime:
-                break;
-            case Boolean:
-                if (attr.text.equalsIgnoreCase("TRUE"))
-                {
-                    attrs.append("true");
-                }
-                else
-                {
-                    attrs.append("false");
-                }
-                break;
-            case NumericString:
-                attrs.append(attr.text);
-                break;
-        }
-
+        attrs.append(attr.attrValue());
         attrs.append(",\n");
     }
 

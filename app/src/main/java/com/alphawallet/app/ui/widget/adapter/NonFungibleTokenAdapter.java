@@ -35,6 +35,7 @@ import com.alphawallet.app.ui.widget.holder.TicketHolder;
 import com.alphawallet.app.ui.widget.holder.TokenDescriptionHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
 import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.entity.ViewType;
 import com.bumptech.glide.Glide;
 
 import org.jetbrains.annotations.NotNull;
@@ -57,7 +58,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     TicketRange currentRange = null;
     final Token token;
     protected final OpenSeaService openseaService;
-    private final boolean clickThrough;
+    private final ViewType clickThrough;
     protected int assetCount;
     private boolean isGrid;
 
@@ -67,7 +68,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
-        clickThrough = true;
+        clickThrough = ViewType.ITEM_VIEW;
         openseaService = opensea;
         setToken(t);
     }
@@ -78,7 +79,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
-        clickThrough = true;
+        clickThrough = ViewType.ITEM_VIEW;
         openseaService = opensea;
         this.isGrid = isGrid;
         setToken(t);
@@ -90,7 +91,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
-        clickThrough = false;
+        clickThrough = ViewType.VIEW;
         openseaService = null;
         setTokenRange(token, tokenSelection);
     }
@@ -101,7 +102,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
-        clickThrough = false;
+        clickThrough = ViewType.VIEW;
         openseaService = null;
         setAssetSelection(token, assetSelection);
     }

@@ -18,6 +18,7 @@ import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.TransactionResult;
+import com.alphawallet.token.entity.ViewType;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import org.web3j.abi.FunctionEncoder;
@@ -166,14 +167,14 @@ public abstract class TokenscriptFunction
         //pre-parse tokenId.
         if (tokenId.bitCount() > 256) tokenId = tokenId.or(BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE)); //truncate tokenId too large
 
-        List<Type> params = new ArrayList<Type>();
-        List<TypeReference<?>> returnTypes = new ArrayList<TypeReference<?>>();
+        List<Type> params = new ArrayList<>();
+        List<TypeReference<?>> returnTypes = new ArrayList<>();
         for (MethodArg arg : function.parameters)
         {
             String value = resolveReference(token, arg.element, tokenId, definition, attrIf);
             //get arg.element.value in the form of BigInteger if appropriate
-            byte[] argValueBytes = null;
-            BigInteger argValueBI = null;
+            byte[] argValueBytes = {0};
+            BigInteger argValueBI = BigInteger.ZERO;
 
             if (valueNotFound)
             {
@@ -525,7 +526,7 @@ public abstract class TokenscriptFunction
                         }
                         break;
                     default:
-                        Timber.d("NOT IMPLEMENTED: " + arg.parameterType);
+                        Timber.d("NOT IMPLEMENTED: %s", arg.parameterType);
                         break;
                 }
             }
@@ -683,7 +684,7 @@ public abstract class TokenscriptFunction
         return transResult;
     }
 
-    private String checkBytesString(String responseValue) throws Exception
+    private String checkBytesString(String responseValue)
     {
         String name = "";
         if (responseValue.length() > 0)
@@ -765,7 +766,7 @@ public abstract class TokenscriptFunction
             else
             {
                 //now push the transaction
-                result = callSmartContractFunction(TokenRepository.getWeb3jService(contractAddress.chainId), transaction, contractAddress.address, ZERO_ADDRESS);
+                result = callSmartContractFunction(TokenRepository.getWeb3jService(contractAddress.chainId), transaction, contractAddress.address, token.getWallet());
             }
 
             transactionResult.result = handleTransactionResult(transactionResult, transaction, result, attr, System.currentTimeMillis());
@@ -846,7 +847,7 @@ public abstract class TokenscriptFunction
         }
         else
         {
-            return fetchAttrResult(token, attr, tokenId, definition, attrIf, false).blockingGet().text;
+            return fetchAttrResult(token, attr, tokenId, definition, attrIf, ViewType.VIEW).blockingGet().text;
         }
 
         return null;
@@ -875,27 +876,28 @@ public abstract class TokenscriptFunction
      */
 
     public Single<TokenScriptResult.Attribute> fetchAttrResult(Token token, Attribute attr, BigInteger tokenId,
-                                                               TokenDefinition td, AttributeInterface attrIf, boolean itemView)
+                                                               TokenDefinition td, AttributeInterface attrIf, ViewType itemView)
     {
+        final BigInteger useTokenId = (attr == null || !attr.usesTokenId()) ? BigInteger.ZERO : tokenId;
         if (attr == null)
         {
             return Single.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
         }
-        else if (token.getAttributeResult(attr.name, tokenId) != null)
+        else if (token.getAttributeResult(attr.name, useTokenId) != null)
         {
-            return Single.fromCallable(() -> token.getAttributeResult(attr.name, tokenId));
+            return Single.fromCallable(() -> token.getAttributeResult(attr.name, useTokenId));
         }
         else if (attr.event != null)
         {
             //retrieve events from DB
             ContractAddress useAddress = new ContractAddress(attr.event.contract.addresses.keySet().iterator().next(),
                                                              attr.event.contract.addresses.values().iterator().next().get(0));
-            TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
+            TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, useTokenId); //Needs to allow for multiple tokenIds
             //if the latest event result is not yet found, then find it here
             if (TextUtils.isEmpty(cachedResult.result))
             {
                 //try to fetch latest event result - this can happen at startup
-                return getEventResult(cachedResult, attr, tokenId, attrIf);
+                return getEventResult(cachedResult, attr, useTokenId, attrIf);
             }
             else
             {
@@ -904,22 +906,22 @@ public abstract class TokenscriptFunction
         }
         else if (attr.function == null)  // static attribute from tokenId (eg city mapping from tokenId)
         {
-            return staticAttribute(attr, tokenId);
+            return staticAttribute(attr, useTokenId);
         }
         else
         {
             ContractAddress useAddress = new ContractAddress(attr.function); //always use the function attribute's address
             long lastTxUpdate = attrIf.getLastTokenUpdate(useAddress.chainId, useAddress.address);
-            TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
-            if ((itemView || (!attr.isVolatile() && ((attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(lastTxUpdate)))))) //can we use wallet's known data or cached value?
+            TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, useTokenId); //Needs to allow for multiple tokenIds
+            if ((itemView == ViewType.ITEM_VIEW || (!attr.isVolatile() && ((attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(lastTxUpdate)))))) //can we use wallet's known data or cached value?
             {
                 return resultFromDatabase(cachedResult, attr);
             }
             else  //if cached value is invalid or if value is dynamic
             {
                 final String walletAddress = attrIf.getWalletAddr();
-                return fetchResultFromEthereum(token, useAddress, attr, tokenId, td, attrIf)       // Fetch function result from blockchain
-                        .map(transactionResult -> addParseResultIfValid(token, tokenId, attr, transactionResult))// only cache live transaction result
+                return fetchResultFromEthereum(token, useAddress, attr, useTokenId, td, attrIf)       // Fetch function result from blockchain
+                        .map(transactionResult -> addParseResultIfValid(token, useTokenId, attr, transactionResult))// only cache live transaction result
                         .map(result -> restoreFromDBIfRequired(result, cachedResult))  // If network unavailable restore value from cache
                         .map(txResult -> attrIf.storeAuxData(walletAddress, txResult))                                     // store new data
                         .map(result -> parseFunctionResult(result, attr));    // write returned data into attribute
@@ -939,7 +941,7 @@ public abstract class TokenscriptFunction
             //use last received log
             if (ethLogs.getLogs().size() > 0)
             {
-                EthLog.LogResult ethLog = ethLogs.getLogs().get(ethLogs.getLogs().size() - 1);
+                EthLog.LogResult<?> ethLog = ethLogs.getLogs().get(ethLogs.getLogs().size() - 1);
                 String selectVal = EventUtils.getSelectVal(attr.event, ethLog);
                 txResult.result = attr.getSyntaxVal(selectVal);
                 txResult.resultTime = ((Log)ethLog.get()).getBlockNumber().longValue();

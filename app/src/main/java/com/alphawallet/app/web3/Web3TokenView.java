@@ -46,6 +46,7 @@ import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.entity.ViewType;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import org.jetbrains.annotations.NotNull;
@@ -337,9 +338,9 @@ public class Web3TokenView extends WebView
         return jsInjectorClient.injectStyleAndWrap(viewData, style);
     }
 
-    public void setLayout(Token token, boolean iconified)
+    public void setLayout(Token token, ViewType iconified)
     {
-        if (iconified && token.itemViewHeight > 0)
+        if (iconified == ViewType.ITEM_VIEW && token.itemViewHeight > 0)
         {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, token.itemViewHeight);
             setLayoutParams(params);
@@ -403,7 +404,7 @@ public class Web3TokenView extends WebView
 
     // Rendering
     public void displayTicketHolder(Token token, TicketRange range, AssetDefinitionService assetService) {
-        displayTicketHolder(token, range, assetService, true);
+        displayTicketHolder(token, range, assetService, ViewType.ITEM_VIEW);
     }
 
     /**
@@ -412,7 +413,7 @@ public class Web3TokenView extends WebView
      * @param range
      * @param assetService
      */
-    public void displayTicketHolder(Token token, TicketRange range, AssetDefinitionService assetService, boolean iconified)
+    public void displayTicketHolder(Token token, TicketRange range, AssetDefinitionService assetService, ViewType iconified)
     {
         //need to wait until the assetDefinitionService has finished loading assets
         assetService.getAssetDefinitionASync(token.tokenInfo.chainId, token.tokenInfo.address)
@@ -426,7 +427,7 @@ public class Web3TokenView extends WebView
         Timber.e(e);
     }
 
-    private void renderTicketHolder(Token token, TokenDefinition td, TicketRange range, AssetDefinitionService assetService, boolean iconified)
+    private void renderTicketHolder(Token token, TokenDefinition td, TicketRange range, AssetDefinitionService assetService, ViewType iconified)
     {
         if (td != null && td.holdingToken != null)
         {
@@ -455,7 +456,7 @@ public class Web3TokenView extends WebView
         loadData(displayData, "text/html", "utf-8");
     }
 
-    public void renderTokenscriptView(Token token, TicketRange range, AssetDefinitionService assetService, boolean itemView)
+    public void renderTokenscriptView(Token token, TicketRange range, AssetDefinitionService assetService, ViewType itemView)
     {
         BigInteger tokenId = range.tokenIds.get(0);
 
@@ -477,10 +478,20 @@ public class Web3TokenView extends WebView
      * @param iconified
      * @param range
      */
-    private void displayTicket(Token token, AssetDefinitionService assetService, StringBuilder attrs, boolean iconified, TicketRange range)
+    private void displayTicket(Token token, AssetDefinitionService assetService, StringBuilder attrs, ViewType iconified, TicketRange range)
     {
         setVisibility(View.VISIBLE);
-        String viewName = iconified ? ASSET_SUMMARY_VIEW_NAME : ASSET_DETAIL_VIEW_NAME;
+        String viewName;
+        switch (iconified)
+        {
+            case VIEW:
+            default:
+                viewName = ASSET_DETAIL_VIEW_NAME;
+                break;
+            case ITEM_VIEW:
+                viewName = ASSET_SUMMARY_VIEW_NAME;
+                break;
+        }
 
         String view = assetService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewName);
         if (TextUtils.isEmpty(view)) view = buildViewError(token, range, viewName);

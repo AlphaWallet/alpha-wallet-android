@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import static android.text.Html.FROM_HTML_MODE_LEGACY;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
@@ -17,6 +18,7 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.lifecycle.ViewModelProvider;
@@ -46,6 +48,7 @@ import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.TSAction;
+import com.alphawallet.token.entity.TokenScriptResult.Attribute;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 
 import java.math.BigDecimal;
@@ -56,7 +59,10 @@ import java.util.List;
 import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 
 @AndroidEntryPoint
@@ -71,6 +77,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private AWalletAlertDialog dialog;
     private NFTImageView tokenImage;
     private NFTAttributeLayout nftAttributeLayout;
+    private NFTAttributeLayout tsAttributeLayout;
     private TextView tokenDescription;
     private ActionMenuItemView refreshMenu;
     private ProgressBar progressBar;
@@ -116,6 +123,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         setupFunctionBar();
 
         updateDefaultTokenData();
+
+        viewModel.updateLocalAttributes(token, tokenId);
     }
 
     private void initIntents()
@@ -159,7 +168,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
+    public boolean onCreateOptionsMenu(@NonNull Menu menu)
     {
         getMenuInflater().inflate(R.menu.menu_refresh, menu);
         return super.onCreateOptionsMenu(menu);
@@ -179,6 +188,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         tokenImage = findViewById(R.id.asset_image);
         nftAttributeLayout = findViewById(R.id.attributes);
+        tsAttributeLayout = findViewById(R.id.ts_attributes);
         tokenDescription = findViewById(R.id.token_description);
         descriptionLabel = findViewById(R.id.label_description);
         progressBar = findViewById(R.id.progress);
@@ -325,7 +335,29 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             clearRefreshAnimation();
 
             loadFromOpenSeaData(asset.getOpenSeaAsset());
+
+            final List<Attribute> attrs = new ArrayList<>();
+
+            if (viewModel.hasTokenScript(token))
+            {
+                viewModel.getAssetDefinitionService().resolveAttrs(token, new ArrayList<>(Collections.singleton(tokenId)), null)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(attrs::add, this::onError, () -> showTSAttributes(attrs))
+                        .isDisposed();
+            }
         }
+    }
+
+    private void showTSAttributes(List<Attribute> attrs)
+    {
+        //should have resolved all the attrs
+        tsAttributeLayout.bindTSAttributes(attrs);
+    }
+
+    private void onError(Throwable throwable)
+    {
+        Timber.w(throwable);
     }
 
     private void updateTokenImage(NFTAsset asset)
@@ -368,7 +400,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (!TextUtils.isEmpty(description))
         {
             descriptionLabel.setVisibility(View.VISIBLE);
-            tokenDescription.setText(Html.fromHtml(description));
+            tokenDescription.setText(Html.fromHtml(description, FROM_HTML_MODE_LEGACY));
         }
     }
 

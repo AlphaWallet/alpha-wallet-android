@@ -50,6 +50,7 @@ import com.alphawallet.app.util.JsonUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
@@ -73,6 +74,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -109,7 +111,6 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
     private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
     private final MutableLiveData<List<OpenSeaAsset.Trait>> traits = new MutableLiveData<>();
-    private final MutableLiveData<NFTAsset> attrs = new MutableLiveData<>();
     private final MutableLiveData<AssetContract> assetContract = new MutableLiveData<>();
     private final MutableLiveData<NFTAsset> nftAsset = new MutableLiveData<>();
     private final MutableLiveData<Boolean> scriptUpdateInProgress = new MutableLiveData<>();
@@ -490,7 +491,7 @@ public class TokenFunctionViewModel extends BaseViewModel
             to = action.function.contract.addresses.get(token.tokenInfo.chainId).get(0);
         }
 
-        if (to == null || !Utils.isAddressValid(to))
+        if (!Utils.isAddressValid(to))
         {
             invalidAddress.postValue(to);
             isValid = false;
@@ -888,5 +889,37 @@ public class TokenFunctionViewModel extends BaseViewModel
     public String getBrowserRPC(long chainId)
     {
         return ethereumNetworkRepository.getDappBrowserRPC(chainId);
+    }
+
+    public boolean hasTokenScript(Token token)
+    {
+        return token != null && assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address) != null;
+    }
+
+    public void updateLocalAttributes(Token token, BigInteger tokenId)
+    {
+        //Fetch Allowed attributes, then call updateAllowedAttributes
+        assetDefinitionService.fetchFunctionMap(token, Collections.singletonList(tokenId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(availableActions -> updateAllowedAttrs(token, availableActions), this::onError)
+                .isDisposed();
+    }
+
+    private void updateAllowedAttrs(Token token, Map<BigInteger, List<String>> availableActions)
+    {
+        if (!availableActions.keySet().stream().findFirst().isPresent())
+        {
+            return;
+        }
+        TokenDefinition td = assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        List<Attribute> localAttrList = assetDefinitionService.getLocalAttributes(td, availableActions);
+
+        //now refresh all these attrs
+        assetDefinitionService.refreshAttributes(token, td, availableActions.keySet().stream().findFirst().get(), localAttrList)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(v -> { }, this::onError)
+                .isDisposed();
     }
 }

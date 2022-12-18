@@ -188,6 +188,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
+            <com.alphawallet.app.ui.widget.entity.NFTAttributeLayout
+                    android:id="@+id/ts_attributes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

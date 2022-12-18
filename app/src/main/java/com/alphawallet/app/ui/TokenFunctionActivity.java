@@ -44,6 +44,7 @@ import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.entity.ViewType;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -89,7 +90,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
         TicketRange data = new TicketRange(idList, token.tokenInfo.address, false);
 
-        tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), false);
+        tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), ViewType.VIEW);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSetValuesListener(this);
 
@@ -403,7 +404,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         {
             viewModel.getAssetDefinitionService().addLocalRefs(args);
             //rebuild the view
-            tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), false);
+            tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), ViewType.VIEW);
         }
     }
 

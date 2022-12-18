@@ -45,6 +45,7 @@ import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.entity.ViewType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 
 import java.math.BigInteger;
@@ -208,7 +209,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         {
             BigInteger  tokenId = token.getArrayBalance().get(0);
             TicketRange data    = new TicketRange(tokenId, token.getAddress());
-            testView.renderTokenscriptView(token, data, viewModel.getAssetDefinitionService(), true);
+            testView.renderTokenscriptView(token, data, viewModel.getAssetDefinitionService(), ViewType.ITEM_VIEW);
             testView.setOnReadyCallback(this);
         }
         else

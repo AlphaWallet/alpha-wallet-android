@@ -44,6 +44,7 @@ import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
 import com.alphawallet.app.ui.widget.holder.WalletConnectSessionHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
+import com.alphawallet.token.entity.ViewType;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -201,7 +202,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
                 break;
 
             case AssetInstanceScriptHolder.VIEW_TYPE:
-                holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, null, assetService, false);
+                holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, null, assetService, ViewType.VIEW);
                 break;
 
             case ChainNameHeaderHolder.VIEW_TYPE:

@@ -11,7 +11,6 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatRadioButton;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -23,6 +22,7 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.entity.ViewType;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 /**
@@ -37,14 +37,14 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private final Token token;
     private final LinearLayout clickWrapper;
     private final LinearLayout webWrapper;
-    private final boolean iconified;
+    private final ViewType iconified;
     private TokensAdapterCallback tokenClickListener;
     private final MaterialRadioButton itemSelect;
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
     private boolean activeClick;
     private final Handler handler = new Handler();
 
-    public AssetInstanceScriptHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService, boolean iconified)
+    public AssetInstanceScriptHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService, ViewType iconified)
     {
         super(resId, parent);
         tokenView = findViewById(R.id.web3_tokenview);
@@ -79,7 +79,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
             tokenView.displayTicketHolder(token, data, assetDefinitionService, iconified);
             tokenView.setOnReadyCallback(this);
 
-            if (iconified)
+            if (iconified == ViewType.ITEM_VIEW)
             {
                 clickWrapper.setVisibility((View.VISIBLE));
                 clickWrapper.setOnClickListener(v -> handleClick(v, data));

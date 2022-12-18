@@ -58,6 +58,7 @@ import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptContext;
 import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.TransactionResult;
+import com.alphawallet.token.entity.ViewType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.TokenDefinition;
 
@@ -602,9 +603,39 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (originToken == null || td == null) return null;
 
         //produce result
-        return tokenscriptUtility.fetchAttrResult(originToken, attr, tokenId, td, this, false).blockingGet();
+        return tokenscriptUtility.fetchAttrResult(originToken, attr, tokenId, td, this, ViewType.VIEW).blockingGet();
     }
 
+    /**
+     * Refreshes the stored values for a list of attributes
+     * @param token
+     * @return
+     */
+    public Single<Boolean> refreshAttributes(Token token, TokenDefinition td, BigInteger tokenId, List<Attribute> attrs)
+    {
+        return Single.fromCallable(() -> {
+            //run through attributes first
+            for (Attribute attr : attrs)
+            {
+                //check if any of these attributes take TokenID
+                if (attr.usesTokenId())
+                {
+                    updateAttributeResult(token, td, attr, tokenId);
+                }
+                else
+                {
+                    updateAttributeResult(token, td, attr, BigInteger.ZERO);
+                }
+            }
+            return true;
+        });
+    }
+
+    /**
+     * Refreshes the stored values for all Attribute results for all tokenIds
+     * @param token
+     * @return
+     */
     public Single<Boolean> refreshAllAttributes(Token token)
     {
         TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
@@ -1391,7 +1422,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private String processLogs(EventDefinition ev, List<EthLog.LogResult> logs, String walletAddress)
     {
-        if (logs.size() == 0) return ""; //early return
+        if (logs == null || logs.size() == 0) return ""; //early return
         long chainId = ev.contract.addresses.keySet().iterator().next();
         Web3j web3j = getWeb3jService(chainId);
 
@@ -1401,7 +1432,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         for (int i = index; i >= 0; i--)
         {
-            EthLog.LogResult ethLog = logs.get(i);
+            EthLog.LogResult<?> ethLog = logs.get(i);
             String txHash = ((Log) ethLog.get()).getTransactionHash();
             if (TextUtils.isEmpty(firstTxHash)) firstTxHash = txHash;
             String selectVal = EventUtils.getSelectVal(ev, ethLog);
@@ -1818,6 +1849,33 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
+    public List<Attribute> getLocalAttributes(TokenDefinition td, Map<BigInteger, List<String>> availableActions)
+    {
+        List<Attribute> attrs = new ArrayList<>();
+        if (td != null)
+        {
+            for (Map.Entry<BigInteger, List<String>> availableAction : availableActions.entrySet())
+            {
+                attrs.addAll(getLocalAttributes(td, availableAction.getValue()));
+            }
+        }
+
+        return attrs;
+    }
+
+    private List<Attribute> getLocalAttributes(TokenDefinition td, List<String> actions)
+    {
+        List<Attribute> attrs = new ArrayList<>();
+        for (Map.Entry<String, TSAction> action : td.getActions().entrySet())
+        {
+            if (!actions.contains(action.getKey())) { continue; }
+
+            attrs.addAll(action.getValue().attributes.values());
+        }
+
+        return attrs;
+    }
+
     /**
      * Build a map of all available tokenIds to a list of available functions for that tokenId
      *
@@ -1901,7 +1959,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 {
                     Attribute attr = td.attributes.get(attrId);
                     if (attr == null) continue;
-                    TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, false).blockingGet();
+                    TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, ViewType.VIEW).blockingGet();
                     if (attrResult != null) attrs.put(attrId, attrResult);
                 }
 
@@ -1941,7 +1999,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 Attribute attr = td.attributes.get(attrName);
                 if (attr == null) continue;
-                TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, false).blockingGet();
+                TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, ViewType.VIEW).blockingGet();
                 if (attrResult != null)
                 {
                     Map<String, TokenScriptResult.Attribute> tokenIdMap = resultSet.get(tokenId);
@@ -2394,7 +2452,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         tokenscriptUtility.clearParseMaps();
     }
 
-    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId, List<Attribute> extraAttrs, boolean itemView)
+    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId, List<Attribute> extraAttrs, ViewType itemView)
     {
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
@@ -2408,16 +2466,24 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         List<Attribute> attrList = new ArrayList<>(definition.attributes.values());
         if (extraAttrs != null) attrList.addAll(extraAttrs);
 
-        tokenscriptUtility.buildAttrMap(attrList);
+        return resolveAttrs(token, tokenId, definition, attrList, itemView);
+    }
 
+    private Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId, TokenDefinition td, List<Attribute> attrList, ViewType itemView)
+    {
+        tokenscriptUtility.buildAttrMap(attrList);
         return Observable.fromIterable(attrList)
                 .flatMap(attr -> tokenscriptUtility.fetchAttrResult(token, attr, tokenId,
-                        definition, this, itemView).toObservable());
+                        td, this, itemView).toObservable());
     }
 
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds, List<Attribute> extraAttrs)
     {
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        if (definition == null)
+        {
+            return Observable.fromCallable(() -> new TokenScriptResult.Attribute("", "", BigInteger.ZERO, ""));
+        }
         //pre-fill tokenIds
         for (Attribute attrType : definition.attributes.values())
         {
@@ -2426,7 +2492,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //TODO: store transaction fetch time for multiple tokenIds
 
-        return resolveAttrs(token, tokenIds.get(0), extraAttrs, false);
+        return resolveAttrs(token, tokenIds.get(0), extraAttrs, ViewType.VIEW);
     }
 
     private void resolveTokenIds(Attribute attrType, List<BigInteger> tokenIds)

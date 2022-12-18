@@ -482,7 +482,7 @@ public class Web3TokenView extends WebView
     {
         setVisibility(View.VISIBLE);
         String viewName;
-        switch(iconified)
+        switch (iconified)
         {
             case VIEW:
             default:

@@ -55,7 +55,8 @@ public class TSAttributesAdapter extends RecyclerView.Adapter<TSAttributesAdapte
         return attrList.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder
+    {
         TextView trait;
         TextView value;
         TextView rarity;

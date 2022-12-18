@@ -111,7 +111,6 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
     private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
     private final MutableLiveData<List<OpenSeaAsset.Trait>> traits = new MutableLiveData<>();
-    private final MutableLiveData<NFTAsset> attrs = new MutableLiveData<>();
     private final MutableLiveData<AssetContract> assetContract = new MutableLiveData<>();
     private final MutableLiveData<NFTAsset> nftAsset = new MutableLiveData<>();
     private final MutableLiveData<Boolean> scriptUpdateInProgress = new MutableLiveData<>();
@@ -492,7 +491,7 @@ public class TokenFunctionViewModel extends BaseViewModel
             to = action.function.contract.addresses.get(token.tokenInfo.chainId).get(0);
         }
 
-        if (to == null || !Utils.isAddressValid(to))
+        if (!Utils.isAddressValid(to))
         {
             invalidAddress.postValue(to);
             isValid = false;
@@ -909,7 +908,10 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     private void updateAllowedAttrs(Token token, Map<BigInteger, List<String>> availableActions)
     {
-        if (!availableActions.keySet().stream().findFirst().isPresent()) { return; }
+        if (!availableActions.keySet().stream().findFirst().isPresent())
+        {
+            return;
+        }
         TokenDefinition td = assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         List<Attribute> localAttrList = assetDefinitionService.getLocalAttributes(td, availableActions);
 

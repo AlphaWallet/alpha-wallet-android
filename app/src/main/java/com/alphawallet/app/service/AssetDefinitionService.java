@@ -1868,8 +1868,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         List<Attribute> attrs = new ArrayList<>();
         for (Map.Entry<String, TSAction> action : td.getActions().entrySet())
         {
-            if (!actions.contains(action.getKey())) { continue; }
-
+            if (!actions.contains(action.getKey()))
+            {
+                continue;
+            }
             attrs.addAll(action.getValue().attributes.values());
         }
 

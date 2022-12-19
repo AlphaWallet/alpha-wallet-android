@@ -77,10 +77,6 @@ public class NameHash
      */
     public static String normalise(String ensName)
     {
-        if (TextUtils.isEmpty(ensName))
-        {
-            return "";
-        }
         try
         {
             return IDN.toASCII(ensName, IDN.USE_STD3_ASCII_RULES).toLowerCase(Locale.ROOT);

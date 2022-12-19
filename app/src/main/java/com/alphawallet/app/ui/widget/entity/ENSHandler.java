@@ -61,7 +61,7 @@ public class ENSHandler implements Runnable
         this.handler = new Handler(Looper.getMainLooper());
         this.adapterUrl = adapter;
         this.host = host;
-        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), host.getContext());
+        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), host.getContext(), host.getChain());
 
         createWatcher();
         getENSHistoryFromPrefs(host.getContext());

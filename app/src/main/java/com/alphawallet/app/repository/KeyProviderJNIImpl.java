@@ -38,4 +38,6 @@ public class KeyProviderJNIImpl implements KeyProvider
     public native String getWalletConnectProjectId();
 
     public native String getInfuraSecret();
+
+    public native String getUnstoppableDomainsKey();
 }

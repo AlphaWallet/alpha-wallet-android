@@ -51,6 +51,7 @@ public interface TokenRepositoryType {
 
     void addImageUrl(long chainId, String address, String imageUrl);
     void updateLocalAddress(String walletAddress);
+    void deleteRealmTokens(Wallet wallet, List<TokenCardMeta> tcmList);
 
     Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Long> networkFilters,
                                             AssetDefinitionService svs);

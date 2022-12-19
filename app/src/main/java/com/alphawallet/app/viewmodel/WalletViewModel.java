@@ -53,6 +53,7 @@ import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -87,7 +88,7 @@ public class WalletViewModel extends BaseViewModel
     private final OnRampRepositoryType onRampRepository;
     private long lastBackupCheck = 0;
     private BottomSheetDialog dialog;
-    private AWWalletConnectClient awWalletConnectClient;
+    private final AWWalletConnectClient awWalletConnectClient;
 
     @Inject
     WalletViewModel(
@@ -442,5 +443,25 @@ public class WalletViewModel extends BaseViewModel
     public MutableLiveData<List<WalletConnectSessionItem>> activeWalletConnectSessions()
     {
         return awWalletConnectClient.sessionItemMutableLiveData();
+    }
+
+    public void checkDeleteMetas(List<TokenCardMeta> metas)
+    {
+        List<TokenCardMeta> metasToDelete = new ArrayList<>();
+        for (TokenCardMeta meta : metas)
+        {
+            if (meta.balance.equals("-2"))
+            {
+                metasToDelete.add(meta);
+            }
+        }
+
+        if (metasToDelete.size() > 0)
+        {
+            disposable = tokensService.deleteTokens(metasToDelete)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe();
+        }
     }
 }

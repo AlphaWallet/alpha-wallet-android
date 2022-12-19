@@ -69,7 +69,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 26; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 27; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY;
     private final String BSC_EXPLORER_API_KEY;
@@ -423,7 +423,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             fullUrl = sb.toString();
 
-            if (!Utils.isValidUrl(fullUrl))
+            if (networkInfo.isCustom && !Utils.isValidUrl(networkInfo.etherscanAPI))
             {
                 return new EtherscanTransaction[0];
             }
@@ -572,6 +572,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                             token.getInterfaceSpec() != ContractType.ERC721_UNDETERMINED )))
             {
                 token = createNewERC721Token(eventMap.get(contract).get(0), networkInfo, walletAddress, false);
+                token.setTokenWallet(walletAddress);
                 newToken = true;
                 Timber.tag(TAG).d("Discover NFT: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
             }
@@ -594,10 +595,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             if (token.isNonFungible())
             {
                 writeAssets(eventMap, token, walletAddress, contract, svs, newToken);
-            }
-            else if (newToken) // new Fungible token
-            {
-                svs.storeToken(token);
             }
             else
             {
@@ -670,7 +667,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 "&page=1&offset=" + TRANSFER_RESULT_MAX +
                 "&sort=asc" + getNetworkAPIToken(networkInfo);
 
-        if (!Utils.isValidUrl(fullUrl))
+        if (networkInfo.isCustom && !Utils.isValidUrl(networkInfo.etherscanAPI))
         {
             return "0";
         }

@@ -129,7 +129,7 @@ public class AWHttpService extends HttpService
         okhttp3.Request httpRequest =
                 new okhttp3.Request.Builder().url(url).headers(headers).post(requestBody).build();
 
-        okhttp3.Response response;
+        okhttp3.Response response = null;
 
         try
         {
@@ -151,6 +151,7 @@ public class AWHttpService extends HttpService
 
         if (response.code() / 100 == 4) //rate limited
         {
+            response.close();
             return trySecondaryNode(request);
         }
 
@@ -189,6 +190,7 @@ public class AWHttpService extends HttpService
         }
         else if (!useSecondaryNode && secondaryUrl != null)
         {
+            response.close();
             return trySecondaryNode(request);
         }
         else

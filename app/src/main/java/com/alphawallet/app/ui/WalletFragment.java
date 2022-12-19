@@ -346,6 +346,7 @@ public class WalletFragment extends BaseFragment implements
             {
                 adapter.updateTokenMetas(metas.toArray(new TokenCardMeta[0]));
                 systemView.hide();
+                viewModel.checkDeleteMetas(metas);
             }
         });
     }

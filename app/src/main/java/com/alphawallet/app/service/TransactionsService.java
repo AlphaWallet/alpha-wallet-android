@@ -105,13 +105,13 @@ public class TransactionsService
         //reset transaction timers
         if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
         {
-            transactionCheckCycle = Observable.interval(0, 15, TimeUnit.SECONDS)
+            transactionCheckCycle = Observable.interval(3, 15, TimeUnit.SECONDS)
                     .doOnNext(l -> checkTransactionQueue()).subscribe();
         }
 
         if (tokenTransferCheckCycle == null || tokenTransferCheckCycle.isDisposed())
         {
-            tokenTransferCheckCycle = Observable.interval(2, 17, TimeUnit.SECONDS) //attempt to not interfere with transaction check
+            tokenTransferCheckCycle = Observable.interval(1, 17, TimeUnit.SECONDS) //attempt to not interfere with transaction check
                     .doOnNext(l -> checkTransfers()).subscribe();
         }
 
@@ -411,6 +411,9 @@ public class TransactionsService
         tokensService.checkingChain(0);
         chainTransferCheckTimes.clear();
         chainTransactionCheckTimes.clear();
+
+        currentChainIndex = 0;
+        nftCheck = false;
     }
 
     public static void addTransactionHashFetch(String txHash, long chainId, String wallet)

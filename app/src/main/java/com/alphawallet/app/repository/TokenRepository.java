@@ -326,11 +326,6 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<BigDecimal> updateTokenBalance(String walletAddress, Token token)
     {
-        if (token.isBad())
-        {
-            return Single.fromCallable(() -> BigDecimal.ZERO);
-        }
-
         Wallet wallet = new Wallet(walletAddress);
         return updateBalance(wallet, token)
                 .subscribeOn(Schedulers.io())
@@ -469,7 +464,12 @@ public class TokenRepository implements TokenRepositoryType {
                             break;
                     }
 
-                    if (!balance.equals(BigDecimal.valueOf(-1)) || balanceArray != null)
+                    if (balance.equals(BigDecimal.valueOf(-2)))
+                    {
+                        //token may have been self-destructed. Check name/symbol for 0x
+                        checkDestroyedToken(wallet, token);
+                    }
+                    else if (!balance.equals(BigDecimal.valueOf(-1)) || balanceArray != null)
                     {
                         localSource.updateTokenBalance(wallet, thisToken, balance, balanceArray);
                     }
@@ -485,6 +485,35 @@ public class TokenRepository implements TokenRepositoryType {
 
                 return balance;
             });
+    }
+
+    private void checkDestroyedToken(Wallet wallet, Token token)
+    {
+        try
+        {
+            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
+            String responseValue = callSmartContractFunction(nameOf(), token.tokenInfo.address, network, wallet);
+
+            if (responseValue.equals("0x"))
+            {
+                responseValue = callSmartContractFunction(symbolOf(), token.tokenInfo.address, network, wallet);
+                if (responseValue.equals("0x"))
+                {
+                    //mark token destroyed
+                    localSource.updateTokenBalance(wallet, token, BigDecimal.valueOf(-2), null);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            // take no action unless it's a confirmed destruction
+        }
+    }
+
+    @Override
+    public void deleteRealmTokens(Wallet wallet, List<TokenCardMeta> tcmList)
+    {
+        localSource.deleteRealmTokens(wallet, tcmList);
     }
 
     private BigDecimal updateERC721Balance(Token token, Wallet wallet)
@@ -535,6 +564,7 @@ public class TokenRepository implements TokenRepositoryType {
 
             if (!TextUtils.isEmpty(responseValue))
             {
+                if (responseValue.equals("0x")) return BigDecimal.valueOf(-2);
                 List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
                 if (response.size() > 0) balance = new BigDecimal(((Uint256) response.get(0)).getValue());
             }

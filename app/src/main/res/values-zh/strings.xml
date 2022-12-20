@@ -947,4 +947,8 @@
     <string name="title_session_details">会议详情</string>
     <string name="title_session_proposal">会议提案</string>
     <string name="message_wc_wallet_different_from_active_wallet">钱包不同于活动钱包。</string>
+    <string name="settings_title_analytics">分析</string>
+    <string name="settings_title_crash_reporting">崩溃报告</string>
+    <string name="message_share_anonymous_data">与我们分享您的匿名数据，帮助我们改进 AlphaWallet。 这不包括任何财务信息。</string>
+    <string name="share_anonymous_data">共享匿名数据？</string>
 </resources>

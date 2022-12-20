@@ -4,7 +4,8 @@ import com.alphawallet.app.entity.CurrencyItem;
 
 import java.util.Set;
 
-public interface PreferenceRepositoryType {
+public interface PreferenceRepositoryType
+{
     String getCurrentWalletAddress();
 
     void setCurrentWalletAddress(String address);
@@ -45,8 +46,9 @@ public interface PreferenceRepositoryType {
 
     void setFullScreenState(boolean state);
 
-    void setUse1559Transactions(boolean toggleState);
     boolean getUse1559Transactions();
+
+    void setUse1559Transactions(boolean toggleState);
 
     boolean isActiveMainnet();
 
@@ -56,49 +58,73 @@ public interface PreferenceRepositoryType {
 
     void setShownTestNetWarning();
 
+    String getPriceAlerts();
+
     void setPriceAlerts(String json);
 
-    String getPriceAlerts();
     void setHasSetNetworkFilters();
+
     boolean hasSetNetworkFilters();
+
     void blankHasSetNetworkFilters();
 
     void commit();
 
     void incrementLaunchCount();
+
     int getLaunchCount();
+
     void resetLaunchCount();
 
     void setRateAppShown();
+
     boolean getRateAppShown();
 
     void setShowZeroBalanceTokens(boolean shouldShow);
+
     boolean shouldShowZeroBalanceTokens();
 
     int getUpdateWarningCount();
+
     void setUpdateWarningCount(int count);
 
     long getInstallTime();
+
     void setInstallTime(long time);
 
     String getUniqueId();
+
     void setUniqueId(String uuid);
 
     boolean isMarshMallowWarningShown();
+
     void setMarshMallowWarning(boolean shown);
 
     void storeLastFragmentPage(int ordinal);
+
     int getLastFragmentPage();
 
     int getLastVersionCode(int currentCode);
+
     void setLastVersionCode(int code);
 
     int getTheme();
+
     void setTheme(int state);
 
     boolean isNewWallet(String address);
+
     void setNewWallet(String address, boolean isNewWallet);
 
     Set<String> getSelectedSwapProviders();
+
     void setSelectedSwapProviders(Set<String> swapProviders);
+
+    boolean isAnalyticsEnabled();
+
+    void setAnalyticsEnabled(boolean isEnabled);
+
+    boolean isCrashReportingEnabled();
+
+    void setCrashReportingEnabled(boolean isEnabled);
 }

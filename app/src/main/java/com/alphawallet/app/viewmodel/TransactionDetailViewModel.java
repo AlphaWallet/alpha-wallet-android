@@ -1,5 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -9,9 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -43,16 +43,14 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-
-import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
-
-import javax.inject.Inject;
 
 @HiltViewModel
 public class TransactionDetailViewModel extends BaseViewModel {
@@ -129,7 +127,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     public void showMoreDetails(Context context, Transaction transaction) {
         Uri uri = buildEtherscanUri(transaction);
-        if (uri != null && Utils.isValidUrl(uri.toString())) {
+        if (uri != null)
+        {
             externalBrowserRouter.open(context, uri);
         }
     }
@@ -159,7 +158,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
     public void shareTransactionDetail(Context context, Transaction transaction)
     {
         Uri shareUri = buildEtherscanUri(transaction);
-        if (shareUri != null) {
+        if (shareUri != null)
+        {
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("text/plain");
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.subject_transaction_detail));
@@ -177,10 +177,14 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private Uri buildEtherscanUri(Transaction transaction)
     {
         NetworkInfo networkInfo = networkInteract.getNetworkInfo(transaction.chainId);
-        if (networkInfo != null) {
+        if (networkInfo != null && Utils.isValidUrl(networkInfo.etherscanUrl))
+        {
             return networkInfo.getEtherscanUri(transaction.hash);
         }
-        return null;
+        else
+        {
+            return null;
+        }
     }
 
     public boolean hasEtherscanDetail(Transaction tx)

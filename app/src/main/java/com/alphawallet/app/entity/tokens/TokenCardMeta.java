@@ -8,7 +8,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
@@ -18,11 +17,6 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.widget.holder.TokenHolder;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 /**
  * Created by JB on 12/07/2020.
@@ -261,10 +255,11 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     {
         float updateWeight = 0;
         //calculate balance update time
+        long timeDiff = (System.currentTimeMillis() - lastUpdate) / DateUtils.SECOND_IN_MILLIS;
+
         if (isEthereum())
         {
-            long currentTime = System.currentTimeMillis();
-            if (lastUpdate < currentTime - 30 * DateUtils.SECOND_IN_MILLIS)
+            if (timeDiff > 30)
             {
                 updateWeight = 2.0f;
             }
@@ -278,15 +273,15 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
             if (isNFT())
             {
                 //ERC721 types which usually get their balance from opensea. Still need to check the balance for stale tokens to spot a positive -> zero balance transition
-                updateWeight = 0.25f;
+                updateWeight = (timeDiff > 30) ? 0.25f : 0.01f;
             }
             else if (isEnabled)
             {
-                updateWeight = hasPositiveBalance() ? 1.0f : 0.5f; //30 seconds
+                updateWeight = hasPositiveBalance() ? 1.0f : 0.1f; //30 seconds
             }
             else
             {
-                updateWeight = 0.25f; //1 minute
+                updateWeight = 0.1f; //1 minute
             }
         }
         return updateWeight;
@@ -306,5 +301,13 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public boolean equals(TokenCardMeta other)
     {
         return (tokenId.equalsIgnoreCase(other.tokenId));
+    }
+
+    //30 seconds for enabled with balance, 120 seconds for enabled zero balance, 300 for not enabled
+    //Note that if we pick up a balance change for non-enabled token that hasn't been locked out, it'll appear with the transfer sweep
+    public long calculateUpdateFrequency()
+    {
+        long timeInSeconds = isEnabled ? (hasPositiveBalance() ? 30 : 120) : 300;
+        return timeInSeconds * DateUtils.SECOND_IN_MILLIS;
     }
 }

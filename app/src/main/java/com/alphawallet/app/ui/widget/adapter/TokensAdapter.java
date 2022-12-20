@@ -393,6 +393,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     private boolean canDisplayToken(TokenCardMeta token)
     {
         if (token == null) return false;
+        if (token.balance.equals("-2"))
+        {
+            return false;
+        }
+
         //Add token to display list if it's the base currency, or if it has balance
         boolean allowThroughFilter = CustomViewSettings.tokenCanBeDisplayed(token);
         allowThroughFilter = checkTokenValue(token, allowThroughFilter);

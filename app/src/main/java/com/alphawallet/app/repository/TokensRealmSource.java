@@ -98,19 +98,22 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public void deleteRealmToken(long chainId, Wallet wallet, String address)
+    public void deleteRealmTokens(Wallet wallet, List<TokenCardMeta> tcmList)
     {
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
-            realm.executeTransactionAsync(r -> {
-                String dbKey = databaseKey(chainId, address);
-                RealmToken realmToken = r.where(RealmToken.class)
-                        .equalTo("address", dbKey)
-                        .findFirst();
-
-                if (realmToken != null)
+            realm.executeTransaction(r -> {
+                for (TokenCardMeta tcm : tcmList)
                 {
-                    realmToken.deleteFromRealm();
+                    String dbKey = databaseKey(tcm.getChain(), tcm.getAddress());
+                    RealmToken realmToken = r.where(RealmToken.class)
+                            .equalTo("address", dbKey)
+                            .findFirst();
+
+                    if (realmToken != null)
+                    {
+                        realmToken.deleteFromRealm();
+                    }
                 }
             });
         }
@@ -480,6 +483,8 @@ public class TokensRealmSource implements TokenLocalSource {
                     });
                 }
 
+                validateTokenName(realm, realmToken, token, balance);
+
                 if ((token.isERC721()) && balance.equals(BigDecimal.ZERO) && !currentBalance.equals("0"))
                 {
                     //only used for determining if balance is now zero
@@ -535,6 +540,16 @@ public class TokensRealmSource implements TokenLocalSource {
         }
 
         return balanceChanged;
+    }
+
+    private void validateTokenName(Realm realm, RealmToken realmToken, Token token, BigDecimal balance)
+    {
+        if (TextUtils.isEmpty(token.tokenInfo.name) && TextUtils.isEmpty(token.tokenInfo.symbol) && balance.compareTo(BigDecimal.ZERO) > 0)
+        {
+            realm.executeTransaction(r -> {
+                realmToken.setName(Utils.formatAddress(token.tokenInfo.address));
+            });
+        }
     }
 
     private boolean checkEthToken(Realm realm, Token token)
@@ -642,11 +657,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setInterfaceSpec(token.getInterfaceSpec().ordinal());
             }
 
-            //check if name needs to be updated
-            if (!TextUtils.isEmpty(token.tokenInfo.name) && (TextUtils.isEmpty(realmToken.getName()) || !realmToken.getName().equals(token.tokenInfo.name)))
-            {
-                realmToken.setName(token.tokenInfo.name);
-            }
+            checkNameUpdate(realmToken, token);
         }
 
         //Final check to see if the token should be visible
@@ -662,6 +673,23 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             token.tokenInfo.isEnabled = false;
             realmToken.setEnabled(false);
+        }
+    }
+
+    private void checkNameUpdate(RealmToken realmToken, Token token)
+    {
+        //check if name needs to be updated
+        if (!TextUtils.isEmpty(token.tokenInfo.name) && (TextUtils.isEmpty(realmToken.getName()) || !realmToken.getName().equals(token.tokenInfo.name)))
+        {
+            realmToken.setName(token.tokenInfo.name);
+        }
+
+        //This will be an update from the transfer
+        if (token.tokenInfo.name.equalsIgnoreCase(Utils.formatAddress(token.tokenInfo.address)) || !TextUtils.isEmpty(token.tokenInfo.name))
+        {
+            realmToken.setName(token.tokenInfo.name);
+            realmToken.setSymbol(token.tokenInfo.symbol);
+            realmToken.setDecimals(token.tokenInfo.decimals);
         }
     }
 
@@ -888,7 +916,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     {
                         if (rootChainTokenCards.contains(t.getChainId()))
                         {
-                            rootChainTokenCards.remove((Long)t.getChainId());
+                            rootChainTokenCards.remove(t.getChainId());
                         }
                         else
                         {

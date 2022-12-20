@@ -10,7 +10,6 @@ import android.util.Pair;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.C;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
@@ -234,7 +233,6 @@ public class TokensService
 
         eventTimer = Single.fromCallable(() -> {
             startupPass();
-            addUnresolvedContracts(ethereumNetworkRepository.getAllKnownContracts(getNetworkFilters()));
             checkIssueTokens();
             pendingTokenMap.clear();
             return true;
@@ -542,21 +540,6 @@ public class TokensService
                 .isDisposed();
     }
 
-    private void addUnresolvedContracts(List<ContractLocator> contractCandidates)
-    {
-        if (openseaService == null) return; //no need for this if syncing
-        if (contractCandidates != null && contractCandidates.size() > 0)
-        {
-            for (ContractLocator cl : contractCandidates)
-            {
-                if (getToken(cl.chainId, cl.address) == null)
-                {
-                    addUnknownTokenToCheck(new ContractAddress(cl.chainId, cl.address));
-                }
-            }
-        }
-    }
-
     private void checkTokensBalance()
     {
         final Token t = getNextInBalanceUpdateQueue();
@@ -608,6 +591,12 @@ public class TokensService
     private void onBalanceChange(BigDecimal newBalance, Token t)
     {
         boolean balanceChange = !newBalance.equals(t.balance);
+
+        if (newBalance.equals(BigDecimal.valueOf(-2)))
+        {
+            //token deleted
+            return;
+        }
 
         if (balanceChange && BuildConfig.DEBUG)
         {
@@ -848,7 +837,7 @@ public class TokensService
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastCheckDiff * (check.isEnabled ? 1 : 0.25f);
-            long cutoffCheck = 30*DateUtils.SECOND_IN_MILLIS / (check.isEnabled ? 1 : 10); //normal minimum update frequency for token 30 seconds, 5 minutes for hidden token
+            long cutoffCheck = check.calculateUpdateFrequency(); //normal minimum update frequency for token 30 seconds, 5 minutes for hidden token
 
             if (!check.isEthereum() && lastUpdateDiff > DateUtils.DAY_IN_MILLIS)
             {
@@ -1014,53 +1003,9 @@ public class TokensService
         });
     }
 
-    public Completable lockTokenVisibility(Token token)
-    {
-        return enableToken(currentAddress, token);
-    }
-
-    /**
-     * Timings for when there can be a check for new transactions
-     * @param t
-     * @return
-     */
-    private long getTokenTimeInterval(Token t)
-    {
-        long nextTimeCheck;
-
-        if (t.isEthereum())
-        {
-            nextTimeCheck = 30*DateUtils.SECOND_IN_MILLIS; //allow base chains to be checked about every 30 seconds
-        }
-        else
-        {
-            nextTimeCheck = t.getTransactionCheckInterval();
-        }
-
-        return nextTimeCheck;
-    }
-
     public Realm getTickerRealmInstance()
     {
         return tokenRepository.getTickerRealmInstance();
-    }
-
-    public boolean shouldDisplayPopularToken(TokenCardMeta tcm)
-    {
-        //Display popular token if
-        // - explicitly enabled
-        // - user has not altered the visibility and token has positive balance (user may not be aware of visibility controls).
-        if (ethereumNetworkRepository.getIsPopularToken(tcm.getChain(), tcm.getAddress()))
-        {
-            Token token = getToken(tcm.getChain(), tcm.getAddress());
-            return (token == null)
-                    || tokenRepository.isEnabled(token)
-                    || (!tokenRepository.hasVisibilityBeenChanged(token) && token.hasPositiveBalance());
-        }
-        else
-        {
-            return true;
-        }
     }
 
     public void walletInFocus()
@@ -1258,5 +1203,17 @@ public class TokensService
     public boolean hasLockedGas(long chainId)
     {
         return ethereumNetworkRepository.hasLockedGas(chainId);
+    }
+
+    public Single<Boolean> deleteTokens(List<TokenCardMeta> metasToDelete)
+    {
+        return Single.fromCallable(() -> {
+            tokenRepository.deleteRealmTokens(new Wallet(currentAddress), metasToDelete);
+            for (TokenCardMeta tcm : metasToDelete)
+            {
+                pendingTokenMap.remove(databaseKey(tcm.getChain(), tcm.getAddress()));
+            }
+            return true;
+        });
     }
 }

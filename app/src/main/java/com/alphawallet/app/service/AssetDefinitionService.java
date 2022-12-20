@@ -23,14 +23,11 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.QueryResponse;
 import com.alphawallet.app.entity.TokenLocator;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
@@ -83,7 +80,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
@@ -2145,58 +2141,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             return sigDescriptor;
         });
-    }
-
-    private void checkCorrectInterface(Token token, String contractInterface)
-    {
-        ContractType cType;
-        switch (contractInterface.toLowerCase())
-        {
-            case "erc875":
-                cType = ContractType.ERC875;
-                if (token.isERC875()) return;
-                break;
-            case "erc20":
-                cType = ContractType.ERC20;
-                break;
-            // note: ERC721 and ERC721Ticket are contracts with different interfaces which are handled in different ways but we describe them
-            // as the same within the tokenscript.
-            case "erc721":
-                if (token.isERC721() || token.isERC721Ticket()) return;
-                cType = ContractType.ERC721;
-                break;
-            case "erc721ticket":
-                if (token.isERC721() || token.isERC721Ticket()) return;
-                cType = ContractType.ERC721_TICKET;
-                break;
-            case "ethereum":
-                cType = ContractType.ETHEREUM;
-                break;
-            default:
-                cType = ContractType.OTHER;
-                break;
-        }
-
-        if (cType == ContractType.OTHER) return;
-        if (cType == token.getInterfaceSpec()) return;
-
-        //contract mismatch, re-assign
-        //first delete from database
-        tokenLocalSource.deleteRealmToken(token.tokenInfo.chainId, new Wallet(token.getWallet()), token.tokenInfo.address);
-
-        //now store into database
-        //TODO: if erc20 refresh all values
-        TokenFactory tf = new TokenFactory();
-
-        Token newToken = tf.createToken(token.tokenInfo, BigDecimal.ZERO, null, 0, cType, token.getNetworkName(), 0);
-        newToken.setTokenWallet(token.getWallet());
-        newToken.walletUIUpdateRequired = true;
-        newToken.updateBlancaTime = 0;
-
-        tokenLocalSource.saveToken(new Wallet(token.getWallet()), newToken)
-                .subscribeOn(Schedulers.io())
-                .subscribe()
-                .isDisposed();
     }
 
     //Database functions

@@ -50,7 +50,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
 
     @Inject
     ImportWalletViewModel(ImportWalletInteract importWalletInteract, KeyService keyService,
-                          AnalyticsServiceType<?> analyticsService)
+                          AnalyticsServiceType analyticsService)
     {
         this.importWalletInteract = importWalletInteract;
         this.keyService = keyService;

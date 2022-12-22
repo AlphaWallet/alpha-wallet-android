@@ -27,6 +27,8 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletFile;
 import org.web3j.utils.Numeric;
 
+import java.math.BigInteger;
+
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -48,7 +50,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
 
     @Inject
     ImportWalletViewModel(ImportWalletInteract importWalletInteract, KeyService keyService,
-                          AnalyticsServiceType analyticsService)
+                          AnalyticsServiceType<?> analyticsService)
     {
         this.importWalletInteract = importWalletInteract;
         this.keyService = keyService;
@@ -176,6 +178,8 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
             ECKeyPair kp = org.web3j.crypto.Wallet.decrypt(password, walletFile);
             String address = Numeric.prependHexPrefix(Keys.getAddress(kp));
             if (address.equalsIgnoreCase(keystoreAddress)) isValid = true;
+            //check public key
+            if (isValid && kp.getPublicKey().compareTo(BigInteger.ZERO) == 0) isValid = false;
             return isValid;
         });
     }

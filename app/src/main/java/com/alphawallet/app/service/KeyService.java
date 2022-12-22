@@ -112,7 +112,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         REQUESTING_SECURITY, NO_SCREENLOCK, ALREADY_LOCKED, ERROR, SUCCESSFULLY_UPGRADED
     }
 
-    public class UpgradeKeyResult
+    public static class UpgradeKeyResult
     {
         public final UpgradeKeyResultType result;
         public final String message;

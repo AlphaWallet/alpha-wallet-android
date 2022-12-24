@@ -365,6 +365,9 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         if (!result)
         {
             keyImportError(getString(R.string.invalid_keystore));
+            //return back to the start
+            ImportKeystoreFragment importKeystoreFragment = (ImportKeystoreFragment) pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()).second;
+            importKeystoreFragment.showKeystore();
         }
         else if (viewModel.keystoreExists(address))
         {

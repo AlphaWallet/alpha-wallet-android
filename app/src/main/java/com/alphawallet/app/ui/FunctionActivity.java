@@ -174,6 +174,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
         // Fetch attributes local to this action and add them to the injected token properties
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        if (functions == null)
+        {
+            recreate();
+            return;
+        }
+
         action = functions.get(actionMethod);
         List<Attribute> localAttrs = (action != null && action.attributes != null) ? new ArrayList<>(action.attributes.values()) : null;
 

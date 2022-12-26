@@ -230,6 +230,10 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
             adapter.clear();
             viewModel.prepare();
         }
+        else
+        {
+            requireActivity().recreate();
+        }
     }
 
     @Override

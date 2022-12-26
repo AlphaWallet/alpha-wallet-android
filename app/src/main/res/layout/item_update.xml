@@ -9,6 +9,7 @@
     android:layout_marginBottom="@dimen/standard_16"
     android:elevation="0dp"
     android:theme="@style/AppTheme.DarkOverlay"
+    android:visibility="gone"
     app:cardBackgroundColor="@color/mine"
     app:cardCornerRadius="@dimen/dialog_corner_radius"
     app:contentPadding="@dimen/standard_16"

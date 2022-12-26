@@ -1026,6 +1026,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     List<ContractLocator> tokenData = data.getParcelableArrayListExtra(C.EXTRA_TOKENID_LIST);
                     getFragment(ACTIVITY).addedToken(tokenData);
                 }
+                else if (data != null && data.getBooleanExtra(RESET_WALLET, false))
+                {
+                    viewModel.restartTokensService();
+                    //trigger wallet adapter reset
+                    resetTokens();
+                }
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);

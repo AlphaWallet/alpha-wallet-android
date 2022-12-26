@@ -951,4 +951,6 @@
     <string name="settings_title_crash_reporting">Informes de bloqueo</string>
     <string name="message_share_anonymous_data">Ayúdenos a mejorar AlphaWallet compartiendo sus datos anónimos con nosotros. Esto no incluye ninguna información financiera.</string>
     <string name="share_anonymous_data">¿Compartir datos anónimos?</string>
+    <string name="enable_required_chains">¿Habilitar las cadenas necesarias?</string>
+    <string name="enable_required_chains_message">Los tokens seleccionados están en cadenas actualmente no seleccionadas, ¿habilitar cadenas no seleccionadas?</string>
 </resources>

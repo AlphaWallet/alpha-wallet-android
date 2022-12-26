@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
+import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
 
 import android.content.Intent;
@@ -76,7 +77,15 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     final ActivityResultLauncher<Intent> addTokenLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getData() == null) return;
-                tokenUpdates = result.getData().getParcelableArrayListExtra(ADDED_TOKEN);
+                boolean saved = result.getData().getBooleanExtra(RESET_WALLET, false);
+                if (saved)
+                {
+                    //finish and return
+                    Intent intent = new Intent();
+                    intent.putExtra(RESET_WALLET, true);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
             });
 
     @Override

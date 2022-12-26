@@ -62,4 +62,6 @@ public interface EthereumNetworkRepositoryType {
     boolean hasLockedGas(long chainId);
 
     NetworkInfo getBuiltInNetwork(long chainId);
+
+    void commitPrefs();
 }

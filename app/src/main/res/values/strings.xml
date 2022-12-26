@@ -1026,4 +1026,6 @@
     <string name="settings_title_crash_reporting">Crash Reporting</string>
     <string name="message_share_anonymous_data">Help us to improve AlphaWallet by sharing your anonymous data with us. This does not include any financial information.</string>
     <string name="share_anonymous_data">Share Anonymous Data?</string>
+    <string name="enable_required_chains">Enable required chains?</string>
+    <string name="enable_required_chains_message">Selected tokens are on chains currently not selected, enable unselected chains?</string>
 </resources>

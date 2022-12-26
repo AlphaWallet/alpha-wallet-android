@@ -801,7 +801,7 @@ public class WalletFragment extends BaseFragment implements
     {
         if (menuItem.getItemId() == R.id.action_my_wallet)
         {
-            viewModel.showMyAddress(getContext());
+            viewModel.showMyAddress(requireActivity());
         }
         if (menuItem.getItemId() == R.id.action_scan)
         {

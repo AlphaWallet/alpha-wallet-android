@@ -1258,4 +1258,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         return deprecatedNetworkList.contains(chainId);
     }
+
+    @Override
+    public void commitPrefs()
+    {
+        preferences.commit();
+    }
 }

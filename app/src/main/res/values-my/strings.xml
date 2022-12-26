@@ -985,4 +985,6 @@
     <string name="settings_title_crash_reporting">ပျက်စီးမှုသတင်းပို့ခြင်း။</string>
     <string name="message_share_anonymous_data">သင်၏အမည်မသိဒေတာကို ကျွန်ုပ်တို့နှင့်မျှဝေခြင်းဖြင့် AlphaWallet တိုးတက်စေရန် ကျွန်ုပ်တို့ကိုကူညီပါ။ ၎င်းတွင် မည်သည့်ဘဏ္ဍာရေးဆိုင်ရာ အချက်အလက်မှ မပါဝင်ပါ။</string>
     <string name="share_anonymous_data">အမည်မသိဒေတာကို မျှဝေမလား။</string>
+    <string name="enable_required_chains">လိုအပ်တဲ့ သံကြိုးတွေကို လုပ်ဆောင်နိုင်မလား။</string>
+    <string name="enable_required_chains_message">ရွေးချယ်ထားသော အမှတ်အသားများသည် လောလောဆယ် ရွေးချယ်မထားသော သံကြိုးများပေါ်တွင် ရွေးချယ်ထားပြီး ရွေးချယ်မှုမရှိသော သံကြိုးများ ဖြစ်စေနိုင်ပါသလော။</string>
 </resources>

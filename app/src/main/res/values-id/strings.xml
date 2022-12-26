@@ -954,4 +954,6 @@
     <string name="settings_title_crash_reporting">Pelaporan Kerusakan</string>
     <string name="message_share_anonymous_data">Bantu kami meningkatkan AlphaWallet dengan membagikan data anonim Anda kepada kami. Ini tidak termasuk informasi keuangan apa pun.</string>
     <string name="share_anonymous_data">Bagikan Data Anonim?</string>
+    <string name="enable_required_chains">Aktifkan rantai yang diperlukan?</string>
+    <string name="enable_required_chains_message">Token yang dipilih ada di rantai saat ini tidak dipilih, mengaktifkan rantai yang tidak dipilih?</string>
 </resources>

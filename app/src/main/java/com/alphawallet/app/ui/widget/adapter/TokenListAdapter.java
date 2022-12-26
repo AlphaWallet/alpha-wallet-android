@@ -1,5 +1,14 @@
 package com.alphawallet.app.ui.widget.adapter;
 
+import static com.alphawallet.app.entity.TokenManageType.DISPLAY_TOKEN;
+import static com.alphawallet.app.entity.TokenManageType.HIDDEN_TOKEN;
+import static com.alphawallet.app.entity.TokenManageType.LABEL_DISPLAY_TOKEN;
+import static com.alphawallet.app.entity.TokenManageType.LABEL_HIDDEN_TOKEN;
+import static com.alphawallet.app.entity.TokenManageType.LABEL_POPULAR_TOKEN;
+import static com.alphawallet.app.entity.TokenManageType.POPULAR_TOKEN;
+import static com.alphawallet.app.entity.TokenManageType.SHOW_ZERO_BALANCE;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.HIDE_ZERO_BALANCE_TOKENS;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -39,15 +48,6 @@ import java.util.Objects;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.alphawallet.app.entity.TokenManageType.DISPLAY_TOKEN;
-import static com.alphawallet.app.entity.TokenManageType.HIDDEN_TOKEN;
-import static com.alphawallet.app.entity.TokenManageType.LABEL_DISPLAY_TOKEN;
-import static com.alphawallet.app.entity.TokenManageType.LABEL_HIDDEN_TOKEN;
-import static com.alphawallet.app.entity.TokenManageType.LABEL_POPULAR_TOKEN;
-import static com.alphawallet.app.entity.TokenManageType.POPULAR_TOKEN;
-import static com.alphawallet.app.entity.TokenManageType.SHOW_ZERO_BALANCE;
-import static com.alphawallet.app.repository.SharedPreferenceRepository.HIDE_ZERO_BALANCE_TOKENS;
 
 public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> implements OnTokenManageClickListener {
 
@@ -152,6 +152,10 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
             TokenSortedItem sortedItem = null;
             if (tokenCardMeta.isEthereum()) continue; //no chain cards
             Token token = tokensService.getToken(tokenCardMeta.getChain(), tokenCardMeta.getAddress());
+            if (token == null)
+            {
+                continue;
+            }
             tokenCardMeta.isEnabled = token.tokenInfo.isEnabled;
 
             if (token.tokenInfo.isEnabled)

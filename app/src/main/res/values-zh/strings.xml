@@ -951,4 +951,6 @@
     <string name="settings_title_crash_reporting">崩溃报告</string>
     <string name="message_share_anonymous_data">与我们分享您的匿名数据，帮助我们改进 AlphaWallet。 这不包括任何财务信息。</string>
     <string name="share_anonymous_data">共享匿名数据？</string>
+    <string name="enable_required_chains">启用所需的链？</string>
+    <string name="enable_required_chains_message">选定的代币位于当前未选择的链上，启用未选择的链？</string>
 </resources>

@@ -164,6 +164,7 @@ public class WalletViewModel extends BaseViewModel
 
     public void reloadTokens()
     {
+        tokensService.startUpdateCycle();
         if (defaultWallet.getValue() != null)
         {
             fetchTokens(defaultWallet().getValue());
@@ -256,7 +257,7 @@ public class WalletViewModel extends BaseViewModel
         coinbasePayRouter.buyFromSelectedChain(activity, CoinbasePayRepository.Blockchains.ETHEREUM);
     }
 
-    public void showMyAddress(Context context)
+    public void showMyAddress(Activity context)
     {
         // show bottomsheet dialog
         WalletFragmentActionsView actionsView = new WalletFragmentActionsView(context);
@@ -279,7 +280,7 @@ public class WalletViewModel extends BaseViewModel
             dialog.dismiss();
             Intent intent = new Intent(context, TokenManagementActivity.class);
             intent.putExtra(EXTRA_ADDRESS, getWalletAddr());
-            context.startActivity(intent);
+            context.startActivityForResult(intent, C.ADDED_TOKEN_RETURN);
         });
         actionsView.setOnRenameThisWalletClickListener(v -> {
             dialog.dismiss();

@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
+import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.ui.widget.holder.TokenHolder.CHECK_MARK;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
@@ -48,11 +49,13 @@ import com.alphawallet.app.widget.AWBottomSheetDialog;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
+import com.alphawallet.app.widget.TestNetDialog;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,7 +64,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
 
 @AndroidEntryPoint
-public class AddTokenActivity extends BaseActivity implements AddressReadyCallback, StandardFunctionInterface, TokensAdapterCallback
+public class AddTokenActivity extends BaseActivity implements AddressReadyCallback, StandardFunctionInterface, TokensAdapterCallback, TestNetDialog.TestNetDialogCallback
 {
     private AddTokenViewModel viewModel;
 
@@ -80,9 +83,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private TokensAdapter adapter;
     private RecyclerView recyclerView;
-    FunctionButtonBar functionBar;
-
-    private boolean mainNetActive = true;
 
     private AWalletAlertDialog aDialog;
     private AWBottomSheetDialog dialog;
@@ -275,17 +275,22 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
     }
 
-    private void onSaved(Token result)
+    private void onSaved()
     {
         showProgress(false);
-        if (result != null)
+        List<TokenCardMeta> selected = adapter.getSelected();
+
+        if (selected.size() > 0)
         {
-            ContractLocator cr = new ContractLocator(result.getAddress(), result.tokenInfo.chainId);
+            TokenCardMeta result = selected.get(0);
+            ContractLocator cr = new ContractLocator(result.getAddress(), result.getChain());
             Intent iResult = new Intent();
             iResult.putParcelableArrayListExtra(ADDED_TOKEN, new ArrayList<>(Collections.singletonList(cr)));
+            iResult.putExtra(RESET_WALLET, true);
             setResult(RESULT_OK, iResult);
-            finish();
         }
+
+        finish();
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
@@ -330,72 +335,76 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private void onSave()
     {
-        mainNetActive = viewModel.ethereumNetworkRepositoryType().isMainNetSelected();
-        if (mainNetActive)
-        {
-            List<TokenCardMeta> selected = adapter.getSelected();
+        boolean mainNetActive = viewModel.ethereumNetworkRepository().isMainNetSelected();
+        List<Long> activeChains = viewModel.ethereumNetworkRepository().getFilterNetworkList();
+        List<TokenCardMeta> selected = adapter.getSelected();
+        HashSet<Long> chainsNotEnabled = new HashSet<>();
+        boolean onlyTestNet = selected.size() > 0;
 
-            if (selected.size() > 0)
+        // 1. if any mainnet networks were selected, and we're using testnet, switch to mainnet
+        // 2. detect if we need to enable chains
+        for (TokenCardMeta token : selected)
+        {
+            NetworkInfo info = viewModel.ethereumNetworkRepository().getNetworkByChain(token.getChain());
+            if (info.hasRealValue()) onlyTestNet = false;
+            if (!activeChains.contains(info.chainId))
             {
-                onSelectedChains(selected);
-            }
-            else
-            {
-                finish();
+                chainsNotEnabled.add(info.chainId);
             }
         }
-        else
+
+        if (mainNetActive && onlyTestNet) // only testnet tokens selected and we're not showing testnet
         {
-            showDialog(functionBar);
+            //Will need to make these chains active on the callback
+            TestNetDialog testnetDialog = new TestNetDialog(this, activeChains.get(0), this);
+            testnetDialog.show();
+        }
+        else if (chainsNotEnabled.size() == 0) // currently showing the required chains, only need to save new tokens
+        {
+            //store tokens
+            onSelectedChains(selected);
+        }
+        else // we should ask user to enable chains for selected tokens
+        {
+            showAddChainsDialog();
         }
     }
 
     private void onSelectedChains(List<TokenCardMeta> selected)
     {
-        aDialog = new AWalletAlertDialog(this);
-        aDialog.setTitle(R.string.title_add_token);
-        aDialog.setIcon(AWalletAlertDialog.NONE);
-        aDialog.setMessage(getString(R.string.unselected_token));
-        aDialog.setButtonText(R.string.dialog_ok);
-        aDialog.setButtonListener(v -> {
-            List<Token> toSave = new ArrayList<>();
-            for (TokenCardMeta tcm : selected)
-            {
-                Token matchingToken = tokenList.get(tcm.getChain());
-                if (matchingToken != null) toSave.add(matchingToken);
-            }
-            viewModel.saveTokens(toSave);
-            if (toSave.size() == 0)
-            {
-                Toast.makeText(this, R.string.toast_wait_to_scan_chains, Toast.LENGTH_SHORT).show();
-            }
-            else
-            {
-                viewModel.saveTokens(toSave);
-                onSaved(toSave.get(0));
-                aDialog.dismiss();
-            }
-
-        });
-        aDialog.show();
+        List<Token> toSave = new ArrayList<>();
+        for (TokenCardMeta tcm : selected)
+        {
+            Token matchingToken = tokenList.get(tcm.getChain());
+            if (matchingToken != null) toSave.add(matchingToken);
+        }
+        viewModel.saveTokens(toSave);
+        onSaved();
     }
 
-    private void showDialog(View view)
+    private boolean requireMainNet()
     {
-        if (dialog == null)
+        boolean hasMainNetChain = false;
+        for (TokenCardMeta tcm : adapter.getSelected())
         {
-            dialog = createDialog();
+            if (viewModel.ethereumNetworkRepository().getNetworkByChain(tcm.getChain()).hasRealValue())
+            {
+                hasMainNetChain = true;
+                break;
+            }
         }
 
-        if (!dialog.isShowing())
-        {
-            dialog.show();
-        }
+        return hasMainNetChain;
     }
 
-    private AWBottomSheetDialog createDialog()
+    private void showAddChainsDialog()
     {
-        AWBottomSheetDialog dialog = new AWBottomSheetDialog(this, new AWBottomSheetDialog.Callback()
+        if (dialog != null && dialog.isShowing())
+        {
+            return;
+        }
+
+        dialog = new AWBottomSheetDialog(this, new AWBottomSheetDialog.Callback()
         {
             @Override
             public void onClosed()
@@ -406,8 +415,15 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             @Override
             public void onConfirmed()
             {
-                Intent i = new Intent(getApplication(), SelectNetworkFilterActivity.class);
-                startActivity(i);
+                //switch to mainnet if required
+                if (!viewModel.ethereumNetworkRepository().isMainNetSelected() && requireMainNet())
+                {
+                    viewModel.setMainNetsSelected(true); // switch to mainnet before setting up filters
+                }
+                //add required chains
+                viewModel.selectExtraChains(getSelectedChains());
+                //did we add the tokens?
+                onSelectedChains(adapter.getSelected());
             }
 
             @Override
@@ -416,10 +432,10 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
             }
         });
-        dialog.setTitle(getString(R.string.button_switch_to_mainnet));
-        dialog.setContent(getString(R.string.content_dialog_where_are_tokens));
-        dialog.setConfirmButton(getString(R.string.button_switch_to_mainnet));
-        return dialog;
+        dialog.setTitle(getString(R.string.enable_required_chains));
+        dialog.setContent(getString(R.string.enable_required_chains_message));
+        dialog.setConfirmButton(getString(R.string.dialog_ok));
+        dialog.show();
     }
 
     private void onNoContractFound(Boolean noContract)
@@ -521,7 +537,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                     showCameraDenied();
                     break;
                 default:
-                    Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
+                    Timber.tag("SEND").e(getString(R.string.barcode_error_format,
                                                 "Code: " + resultCode
                     ));
                     break;
@@ -554,5 +570,34 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     public void onLongTokenClick(View view, Token token, List<BigInteger> tokenIds)
     {
 
+    }
+
+    @Override
+    public void onTestNetDialogClosed()
+    {
+
+    }
+
+    @Override
+    public void onTestNetDialogConfirmed(long chainId)
+    {
+        //switch to testnet, ensuring the networks are selected
+        viewModel.setMainNetsSelected(false);
+        viewModel.selectExtraChains(getSelectedChains());
+        //did we add the tokens?
+        onSelectedChains(adapter.getSelected());
+    }
+
+    private List<Long> getSelectedChains()
+    {
+        HashSet<Long> selectedChains = new HashSet<>();
+
+        for (TokenCardMeta token : adapter.getSelected())
+        {
+            NetworkInfo info = viewModel.ethereumNetworkRepository().getNetworkByChain(token.getChain());
+            selectedChains.add(info.chainId);
+        }
+
+        return new ArrayList<>(selectedChains);
     }
 }

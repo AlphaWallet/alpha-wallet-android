@@ -2,6 +2,9 @@ package com.alphawallet.app.viewmodel;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.format.DateUtils;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -23,6 +26,7 @@ import com.alphawallet.app.ui.SendActivity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -40,7 +44,7 @@ public class AddTokenViewModel extends BaseViewModel
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Long> switchNetwork = new MutableLiveData<>();
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
-    private final MutableLiveData<Token> tokentype = new MutableLiveData<>();
+    private final MutableLiveData<Token> tokenType = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noContract = new MutableLiveData<>();
     private final MutableLiveData<Integer> scanCount = new MutableLiveData<>();
 
@@ -57,6 +61,7 @@ public class AddTokenViewModel extends BaseViewModel
     private int networkCount;
     private long primaryChainId = 1;
     private final List<Token> discoveredTokenList = new ArrayList<>();
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     public MutableLiveData<Wallet> wallet()
     {
@@ -65,7 +70,7 @@ public class AddTokenViewModel extends BaseViewModel
 
     public MutableLiveData<Token> tokenType()
     {
-        return tokentype;
+        return tokenType;
     }
 
     public LiveData<Long> switchNetwork()
@@ -193,7 +198,7 @@ public class AddTokenViewModel extends BaseViewModel
     {
         checkNetworkCount();
         Token badToken = new Token(data, BigDecimal.ZERO, 0, "", ContractType.NOT_SET);
-        tokentype.postValue(badToken);
+        tokenType.postValue(badToken);
     }
 
     public void prepare()
@@ -263,6 +268,8 @@ public class AddTokenViewModel extends BaseViewModel
 
             scanThreads.add(d);
         }
+
+        handler.postDelayed(this::stopScan, 60 * DateUtils.SECOND_IN_MILLIS);
     }
 
     private void testNetworkResult(final TokenInfo info, final ContractType type)
@@ -287,6 +294,8 @@ public class AddTokenViewModel extends BaseViewModel
             if (!d.isDisposed()) d.dispose();
         }
         scanThreads.clear();
+        scanCount.postValue(0);
+        handler.removeCallbacksAndMessages(null);
     }
 
     private void onTestError(Throwable throwable)
@@ -332,8 +341,24 @@ public class AddTokenViewModel extends BaseViewModel
         return assetDefinitionService;
     }
 
-    public EthereumNetworkRepositoryType ethereumNetworkRepositoryType()
+    public EthereumNetworkRepositoryType ethereumNetworkRepository()
     {
         return ethereumNetworkRepository;
+    }
+
+    public void setMainNetsSelected(boolean mainNetSelected)
+    {
+        ethereumNetworkRepository.setActiveMainnet(mainNetSelected);
+    }
+
+    public void selectExtraChains(List<Long> selectedChains)
+    {
+        //add new chains to chain selection
+        //get current list and add it on
+        HashSet<Long> uniqueList = new HashSet<>(selectedChains);
+        uniqueList.addAll(ethereumNetworkRepository.getFilterNetworkList());
+        ethereumNetworkRepository.setFilterNetworkList(uniqueList.toArray(new Long[0]));
+        ethereumNetworkRepository.commitPrefs();
+        tokensService.setupFilter(true);
     }
 }

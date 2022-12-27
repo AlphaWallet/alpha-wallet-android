@@ -128,14 +128,14 @@ public class Steps
         }
     }
 
-    public static void sendNFTTo(String tokenSymbol, String receiverAddress)
+    public static void sendNFTTo(String collectionName, String nftName, String receiverAddress)
     {
         click(withId(R.id.nav_wallet_text));
-        ensureBalanceFetched();
-        click(withSubstring(tokenSymbol));
-        click(withText("Send"));
+        click(withSubstring(collectionName));
+        click(withSubstring(nftName));
+        click(withText("Transfer"));
         onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));
-        click(withId(R.string.action_next));
+        click(withId(R.string.action_transfer));
         try
         {
             click(withId(R.string.action_confirm));

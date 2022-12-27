@@ -94,7 +94,7 @@ public class TransferERC721Test extends BaseE2ETest
         selectTestNet("Ganache");
         gotoWalletPage();
         addCustomToken(contractAddress);
-        sendNFTTo("MNFT", newWalletAddress);
+        sendNFTTo("My NFT", "#1", newWalletAddress);
         ensureTransactionConfirmed();
         switchToWallet(newWalletAddress);
         addCustomToken(contractAddress);

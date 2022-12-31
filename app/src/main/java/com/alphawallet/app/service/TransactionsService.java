@@ -55,6 +55,7 @@ public class TransactionsService
     private final TransactionLocalSource transactionsCache;
     private int currentChainIndex;
     private boolean nftCheck;
+    private boolean firstCycle;
 
     private final LongSparseArray<Long> chainTransferCheckTimes = new LongSparseArray<>(); //TODO: Use this to coordinate token checks on chains
     private final LongSparseArray<Long> chainTransactionCheckTimes = new LongSparseArray<>();
@@ -63,6 +64,9 @@ public class TransactionsService
 
     private final static int TRANSACTION_DROPPED = -1;
     private final static int TRANSACTION_SEEN = -2;
+
+    private final static long START_CHECK_DELAY = 3;
+    private final static long CHECK_CYCLE = 15;
 
     @Nullable
     private Disposable fetchTransactionDisposable;
@@ -95,7 +99,8 @@ public class TransactionsService
         if (TextUtils.isEmpty(tokensService.getCurrentAddress())) return;
 
         currentChainIndex = 0;
-        nftCheck = true; //check nft first to filter out NFT tokens
+        nftCheck = false;
+        firstCycle = true;
 
         transactionsClient.checkRequiresAuxReset(tokensService.getCurrentAddress());
 
@@ -105,21 +110,26 @@ public class TransactionsService
         //reset transaction timers
         if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
         {
-            transactionCheckCycle = Observable.interval(3, 15, TimeUnit.SECONDS)
+            transactionCheckCycle = Observable.interval(START_CHECK_DELAY, CHECK_CYCLE, TimeUnit.SECONDS)
                     .doOnNext(l -> checkTransactionQueue()).subscribe();
         }
 
-        if (tokenTransferCheckCycle == null || tokenTransferCheckCycle.isDisposed())
-        {
-            tokenTransferCheckCycle = Observable.interval(1, 17, TimeUnit.SECONDS) //attempt to not interfere with transaction check
-                    .doOnNext(l -> checkTransfers()).subscribe();
-        }
+        readTransferCycle();
 
         if (pendingTransactionCheckCycle == null || pendingTransactionCheckCycle.isDisposed())
         {
-            pendingTransactionCheckCycle = Observable.interval(15, 15, TimeUnit.SECONDS)
+            pendingTransactionCheckCycle = Observable.interval(CHECK_CYCLE, CHECK_CYCLE, TimeUnit.SECONDS)
                     .doOnNext(l -> checkPendingTransactions()).subscribe();
         }
+    }
+
+    private void readTransferCycle()
+    {
+        if (tokenTransferCheckCycle != null && !tokenTransferCheckCycle.isDisposed()) tokenTransferCheckCycle.dispose();
+
+        tokenTransferCheckCycle = Observable.interval(firstCycle ? START_CHECK_DELAY / 3 : (START_CHECK_DELAY * 15) + 1,
+                        firstCycle ? CHECK_CYCLE / 3 : CHECK_CYCLE, TimeUnit.SECONDS)
+                .doOnNext(l -> checkTransfers()).subscribe();
     }
 
     public void resumeFocus()
@@ -176,6 +186,11 @@ public class TransactionsService
             {
                 nftCheck = !nftCheck;
                 currentIndex = 0;
+                if (!nftCheck && firstCycle)
+                {
+                    firstCycle = false;
+                    readTransferCycle();
+                }
             }
             NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(filters.get(currentIndex));
             if (!nftCheck || info.usesSeparateNFTTransferQuery()) break;

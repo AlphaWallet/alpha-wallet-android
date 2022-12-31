@@ -717,31 +717,27 @@ public class TokensRealmSource implements TokenLocalSource {
 
     // NFT Assets From Opensea - assume this list is trustworthy - events will catch up with it
     @Override
-    public Token[] initNFTAssets(Wallet wallet, Token[] tokens)
+    public Token initNFTAssets(Wallet wallet, Token token)
     {
+        if (!token.isNonFungible()) return token;
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             realm.executeTransaction(r -> {
-                for (Token token : tokens)
+                //load all the assets from the database
+                Map<BigInteger, NFTAsset> assetMap = getNFTAssets(r, token);
+
+                //run through the new assets and patch
+                for (Map.Entry<BigInteger, NFTAsset> entry : token.getTokenAssets().entrySet())
                 {
-                    if (!token.isNonFungible()) continue;
+                    NFTAsset fromOpenSea = entry.getValue();
+                    NFTAsset fromDataBase = assetMap.get(entry.getKey());
 
-                    //load all the assets from the database
-                    Map<BigInteger, NFTAsset> assetMap = getNFTAssets(r, token);
+                    fromOpenSea.updateAsset(fromDataBase);
 
-                    //run through the new assets and patch
-                    for (Map.Entry<BigInteger, NFTAsset> entry : token.getTokenAssets().entrySet())
-                    {
-                        NFTAsset fromOpenSea = entry.getValue();
-                        NFTAsset fromDataBase = assetMap.get(entry.getKey());
+                    token.getTokenAssets().put(entry.getKey(), fromOpenSea);
 
-                        fromOpenSea.updateAsset(fromDataBase);
-
-                        token.getTokenAssets().put(entry.getKey(), fromOpenSea);
-
-                        //write to realm
-                        writeAsset(realm, token, entry.getKey(), fromOpenSea);
-                    }
+                    //write to realm
+                    writeAsset(r, token, entry.getKey(), fromOpenSea);
                 }
             });
         }
@@ -750,7 +746,7 @@ public class TokensRealmSource implements TokenLocalSource {
             Timber.w(e);
         }
 
-        return tokens;
+        return token;
     }
 
     private void writeAsset(Realm realm, Token token, BigInteger tokenId, NFTAsset asset)

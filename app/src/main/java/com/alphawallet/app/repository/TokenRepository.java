@@ -136,13 +136,11 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<Token[]> checkInterface(Token[] tokens, Wallet wallet)
+    public Single<Token> checkInterface(Token token, Wallet wallet)
     {
         return Single.fromCallable(() -> {
             //check if the token interface has been checked
-            for (int i = 0; i < tokens.length; i++)
-            {
-                Token t = tokens[i];
+                Token t = token;
                 if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED || t.getInterfaceSpec() == ContractType.MAYBE_ERC20) //balance type appears to be wrong
                 {
                     ContractType type = determineCommonType(t.tokenInfo)
@@ -157,8 +155,6 @@ public class TokenRepository implements TokenRepositoryType {
                                 type = ContractType.ERC20;
                                 break;
                             }
-                            //couldn't determine the type, try again next time
-                            continue;
                         case ERC20:
                             if (t.getInterfaceSpec() != ContractType.MAYBE_ERC20)
                             {
@@ -174,25 +170,21 @@ public class TokenRepository implements TokenRepositoryType {
                             t.balance = checkUint256Balance(wallet, tInfo.chainId, tInfo.address); //get balance for wallet from contract
                             if (TextUtils.isEmpty(tInfo.name + tInfo.symbol)) tInfo = new TokenInfo(tInfo.address, " ", " ", tInfo.decimals, tInfo.isEnabled, tInfo.chainId); //ensure we don't keep overwriting this
                             t = new ERC721Token(tInfo, NFTBalance, t.balance, System.currentTimeMillis(), t.getNetworkName(), type);
-                            t.lastTxTime = tokens[i].lastTxTime;
-                            t.setTokenWallet(wallet.address);
-                            tokens[i] = t;
+                            t.lastTxTime = token.lastTxTime;
                             break;
                         case ERC721_TICKET:
                             List<BigInteger> balanceFromOpenSea = t.getArrayBalance();
                             t = new ERC721Ticket(t.tokenInfo, balanceFromOpenSea, System.currentTimeMillis(), t.getNetworkName(), ContractType.ERC721_TICKET);
-                            t.setTokenWallet(wallet.address);
-                            tokens[i] = t;
                             break;
                         default:
                             type = ContractType.ERC721;
                     }
 
                     t.setInterfaceSpec(type);
+                    t.setTokenWallet(wallet.address);
                 }
-            }
 
-            return tokens;
+            return t;
         }).flatMap(this::checkTokenData);
     }
 
@@ -356,7 +348,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Token[] initNFTAssets(Wallet wallet, Token[] token)
+    public Token initNFTAssets(Wallet wallet, Token token)
     {
         return localSource.initNFTAssets(wallet, token);
     }
@@ -608,8 +600,7 @@ public class TokenRepository implements TokenRepositoryType {
                     List<BigInteger> testBalance = getBalanceArray721Ticket(wallet, tokenInfo);
                     if (testBalance.size() > 0)
                     {
-                        Token[] tkr = checkInterface(new Token[]{token}, wallet).onErrorReturnItem(new Token[]{token}).blockingGet();
-                        token = tkr.length == 1 ? tkr[0] : token;
+                        token = checkInterface(token, wallet).onErrorReturnItem(token).blockingGet();
                         if (token.getInterfaceSpec() == ContractType.ERC721_TICKET)
                         {
                             for (BigInteger tokenId : testBalance) { token.addAssetToTokenBalanceAssets(tokenId, null); }
@@ -619,8 +610,7 @@ public class TokenRepository implements TokenRepositoryType {
                 else if (balance.equals(BigDecimal.valueOf(32)) && responseValue.length() > 66)
                 {
                     //this is a token returning an array balance. Test the interface and update
-                    Token[] tkr = checkInterface(new Token[]{token}, wallet).onErrorReturnItem(new Token[]{token}).blockingGet();
-                    token = tkr.length == 1 ? tkr[0] : token;
+                    token = checkInterface(token, wallet).onErrorReturnItem(token).blockingGet();
                 }
             }
         }
@@ -1129,17 +1119,10 @@ public class TokenRepository implements TokenRepositoryType {
         }).onErrorReturnItem(new TokenInfo());
     }
 
-    private Single<Token[]> checkTokenData(Token[] tokens)
+    private Single<Token> checkTokenData(Token token)
     {
-        return Single.fromCallable(() -> {
-            for (int i = 0; i < tokens.length; i++)
-            {
-                tokens[i] = updateTokenNameIfRequired(tokens[i])
-                        .onErrorReturnItem(tokens[i]).blockingGet();
-            }
-
-            return tokens;
-        });
+        return updateTokenNameIfRequired(token)
+                    .onErrorReturnItem(token);
     }
 
     private Single<Token> updateTokenNameIfRequired(final Token t)

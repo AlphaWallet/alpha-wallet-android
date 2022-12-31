@@ -157,6 +157,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             viewModel.prepare();
             viewModel.getAsset(token, tokenId);
             progressBar.setVisibility(View.VISIBLE);
+            tokenImage.onResume();
+        }
+        else
+        {
+            recreate();
         }
     }
 
@@ -165,6 +170,14 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         viewModel.onDestroy();
         super.onDestroy();
+        tokenImage.onDestroy();
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        tokenImage.onPause();
     }
 
     @Override

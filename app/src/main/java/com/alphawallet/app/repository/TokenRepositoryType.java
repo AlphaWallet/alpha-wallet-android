@@ -31,7 +31,7 @@ public interface TokenRepositoryType
 
     Single<ContractLocator> getTokenResponse(String address, long chainId, String method);
 
-    Single<Token[]> checkInterface(Token[] tokens, Wallet wallet);
+    Single<Token> checkInterface(Token tokens, Wallet wallet);
 
     void setEnable(Wallet wallet, Token token, boolean isEnabled);
 
@@ -59,7 +59,7 @@ public interface TokenRepositoryType
 
     void storeAsset(String currentAddress, Token token, BigInteger tokenId, NFTAsset asset);
 
-    Token[] initNFTAssets(Wallet wallet, Token[] token);
+    Token initNFTAssets(Wallet wallet, Token token);
 
     Single<ContractType> determineCommonType(TokenInfo tokenInfo);
 

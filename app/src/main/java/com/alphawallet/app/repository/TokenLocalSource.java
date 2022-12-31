@@ -38,7 +38,7 @@ public interface TokenLocalSource
 
     void storeTokenUrl(long chainId, String address, String imageUrl);
 
-    Token[] initNFTAssets(Wallet wallet, Token[] tokens);
+    Token initNFTAssets(Wallet wallet, Token tokens);
 
     Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Long> networkFilters,
                                             AssetDefinitionService svs);

@@ -2,6 +2,8 @@ package com.alphawallet.app.widget;
 
 import static androidx.core.content.ContextCompat.getColorStateList;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.ColorMatrix;
@@ -315,6 +317,13 @@ public class TokenIcon extends ConstraintLayout
         {
             textIcon.setText(Utils.getIconisedText(tokenName));
         }
+    }
+
+    public void setupFallbackTextIcon(String name)
+    {
+        textIcon.setText(name);
+        textIcon.setVisibility(View.VISIBLE);
+        textIcon.setBackgroundTintList(getColorStateList(getContext(), EthereumNetworkBase.getChainColour(MAINNET_ID)));
     }
 
     public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback)

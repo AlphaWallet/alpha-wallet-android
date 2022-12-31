@@ -143,6 +143,11 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
 
     private String getEventAmount(TokenTransferData eventData, Transaction tx)
     {
+        if (token == null)
+        {
+            return "";
+        }
+
         tx.getDestination(token); //build decoded input
         Map<String, EventResult> resultMap = eventData.getEventResultMap();
         String value = "";

@@ -172,10 +172,10 @@ public class TokensService
     public void storeToken(Token token)
     {
         if (TextUtils.isEmpty(currentAddress) || token == null || token.getInterfaceSpec() == ContractType.OTHER) return;
-        tokenStoreDisposable = tokenRepository.checkInterface(new Token[] { token }, new Wallet(token.getWallet()))
+        tokenStoreDisposable = tokenRepository.checkInterface(token, new Wallet(token.getWallet()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(tkn -> Collections.addAll(tokenStoreList, tkn), this::onERC20Error);
+                .subscribe(tokenStoreList::add, this::onERC20Error);
     }
 
     public TokenTicker getTokenTicker(Token token)
@@ -660,40 +660,51 @@ public class TokensService
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
 
         if (info.chainId == transferCheckChain) return; //currently checking this chainId in TransactionsNetworkClient
-
-        final Wallet wallet = new Wallet(currentAddress);
         
         Timber.tag(TAG).d("Fetch from opensea : " + currentAddress + " : " + info.getShortName());
 
         openSeaCheckId = info.chainId;
 
-        openSeaQueryDisposable = openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
-                .flatMap(tokens -> tokenRepository.checkInterface(tokens, wallet)) //check the token interface
-                .map(tokens -> tokenRepository.initNFTAssets(wallet, tokens))
-                .flatMap(tokens -> tokenRepository.storeTokens(wallet, tokens)) //store fetched tokens
+        openSeaQueryDisposable = callOpenSeaAPI(info)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(t -> checkedNetwork(info),
-                        this::chuckError);
+                .observeOn(Schedulers.io())
+                .subscribe(r -> {
+                    openSeaQueryDisposable = null;
+                    openSeaCheckId = 0;
+                }, this::openSeaCallError);
+    }
+
+    private void openSeaCallError(Throwable error)
+    {
+        Timber.w(error);
+        openSeaQueryDisposable = null;
+        openSeaCheckId = 0;
+    }
+
+    private Single<Boolean> callOpenSeaAPI(NetworkInfo info)
+    {
+        final Wallet wallet = new Wallet(currentAddress);
+
+        return Single.fromCallable(() -> {
+            openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this).toObservable()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .flatMap(Observable::fromArray)
+                    .blockingForEach(t -> tokenRepository.checkInterface(t, wallet)
+                            .map(token -> tokenRepository.initNFTAssets(wallet, token))
+                            .flatMap(token -> tokenRepository.storeTokens(wallet, new Token[]{token}))
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(Schedulers.io())
+                            .blockingGet()
+                    );
+
+            return true;
+        });
     }
 
     public boolean openSeaUpdateInProgress(long chainId)
     {
         return openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed() && openSeaCheckId == chainId;
-    }
-
-    private void checkedNetwork(NetworkInfo info)
-    {
-        openSeaQueryDisposable = null;
-        openSeaCheckId = 0;
-        Timber.tag(TAG).d("Checked " + info.name + " Opensea");
-    }
-
-    private void chuckError(@NotNull Throwable e)
-    {
-        openSeaCheckId = 0;
-        openSeaQueryDisposable = null;
-        Timber.e(e);
     }
 
     private void checkERC20(long chainId)

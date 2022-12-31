@@ -102,6 +102,8 @@ public abstract class C {
     public static final String QUICKSWAP_EXCHANGE_DAPP = "https://quickswap.exchange/#/swap";
     public static final String ONEINCH_EXCHANGE_DAPP   = "https://app.1inch.io/#/[CHAIN]/swap/[TOKEN1]/[TOKEN2]";
 
+    public static final String GLIDE_URL_INVALID = "com.bumptech.glide.load.HttpException";
+
     public static final String GWEI_UNIT = "Gwei";
 
     public static final String MARKET_SALE = "market";

@@ -1,5 +1,11 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.EXTRA_STATE;
+import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
+import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -38,15 +44,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.inject.Inject;
-
-
-import static com.alphawallet.app.C.EXTRA_STATE;
-import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
-import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
 import dagger.hilt.android.AndroidEntryPoint;
 

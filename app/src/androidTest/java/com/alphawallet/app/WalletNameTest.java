@@ -11,6 +11,7 @@ import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.steps.Steps.getWalletAddress;
 import static com.alphawallet.app.steps.Steps.gotoWalletPage;
 import static com.alphawallet.app.steps.Steps.input;
+import static com.alphawallet.app.steps.Steps.watchWalletWithENS;
 import static com.alphawallet.app.util.Helper.click;
 
 import com.alphawallet.app.util.Helper;
@@ -52,6 +53,8 @@ public class WalletNameTest extends BaseE2ETest
     @Test
     public void should_show_ENS_name_instead_of_address()
     {
+        watchWalletWithENS("vitalik.eth");
+        shouldSee("vitalik.eth");
     }
 
     @Test

@@ -12,7 +12,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -274,7 +273,7 @@ public class HomeViewModel extends BaseViewModel
             .getWallet(preferenceRepository.getCurrentWalletAddress())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(wallet -> onWallet(context, wallet), this::walletError);
+            .subscribe(wallet -> updateWalletTitle(context, wallet), this::walletError);
     }
 
     private void walletError(Throwable throwable)
@@ -283,7 +282,7 @@ public class HomeViewModel extends BaseViewModel
         splashActivity.postValue(true);
     }
 
-    private void onWallet(Context context, Wallet wallet)
+    private void updateWalletTitle(Context context, Wallet wallet)
     {
         transactionsService.changeWallet(wallet);
         if (!TextUtils.isEmpty(wallet.name))
@@ -307,7 +306,14 @@ public class HomeViewModel extends BaseViewModel
                 .flatMap(fetchWalletsInteract::updateENS) //store the ENS name
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(updatedWallet -> walletName.postValue(updatedWallet.ENSname), this::onENSError).isDisposed();
+                .subscribe(updatedWallet -> {
+                    String name = Utils.formatAddress(wallet.address);
+                    if (!TextUtils.isEmpty(updatedWallet.ENSname))
+                    {
+                        name = updatedWallet.ENSname;
+                    }
+                    walletName.postValue(name);
+                }, this::onENSError).isDisposed();
         }
     }
 

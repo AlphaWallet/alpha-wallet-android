@@ -42,9 +42,11 @@ public class WalletNameTest extends BaseE2ETest
         watchWalletWithENS("vitalik.eth");
         // Should see ENS name instead of address
         shouldSee("vitalik.eth");
+
         renameWalletTo("Vitalik");
         gotoWalletPage();
         shouldSee("Vitalik");
+
         renameWalletTo("");
         gotoWalletPage();
         shouldSee("vitalik.eth");
@@ -60,7 +62,8 @@ public class WalletNameTest extends BaseE2ETest
         Helper.wait(2);
     }
 
-    private void shouldSeeFormattedAddress(String address) {
+    private void shouldSeeFormattedAddress(String address)
+    {
         shouldSee(address.substring(0, 6) + "..." + address.substring(address.length() - 4)); // 0xabcd...wxyz
     }
 }

@@ -5,7 +5,6 @@ import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-import static com.alphawallet.app.assertions.Should.shouldNotSee;
 import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.steps.Steps.getWalletAddress;

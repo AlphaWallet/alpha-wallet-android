@@ -20,10 +20,6 @@ import org.junit.Test;
 
 public class WalletNameTest extends BaseE2ETest
 {
-    public void shouldSeeFormattedAddress(String address) {
-        shouldSee(address.substring(0, 6) + "..." + address.substring(address.length() - 4)); // 0xabcd...wxyz
-    }
-
     @Test
     public void should_show_custom_name_instead_of_address()
     {
@@ -40,6 +36,20 @@ public class WalletNameTest extends BaseE2ETest
         shouldSeeFormattedAddress(address);
     }
 
+    @Test
+    public void should_show_custom_name_instead_of_ENS_name()
+    {
+        watchWalletWithENS("vitalik.eth");
+        // Should see ENS name instead of address
+        shouldSee("vitalik.eth");
+        renameWalletTo("Vitalik");
+        gotoWalletPage();
+        shouldSee("Vitalik");
+        renameWalletTo("");
+        gotoWalletPage();
+        shouldSee("vitalik.eth");
+    }
+
     private void renameWalletTo(String name)
     {
         click(withId(R.id.action_my_wallet));
@@ -50,15 +60,7 @@ public class WalletNameTest extends BaseE2ETest
         Helper.wait(2);
     }
 
-    @Test
-    public void should_show_ENS_name_instead_of_address()
-    {
-        watchWalletWithENS("vitalik.eth");
-        shouldSee("vitalik.eth");
-    }
-
-    @Test
-    public void should_show_custom_name_instead_of_ENS_name()
-    {
+    private void shouldSeeFormattedAddress(String address) {
+        shouldSee(address.substring(0, 6) + "..." + address.substring(address.length() - 4)); // 0xabcd...wxyz
     }
 }

@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
@@ -40,8 +39,8 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this)
                 .get(SelectNetworkFilterViewModel.class);
-        setupList();
         initTestNetDialog(this);
+        setupList();
     }
 
     @Override
@@ -52,45 +51,18 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         viewModel.track(Analytics.Navigation.SELECT_NETWORKS);
     }
 
+    @Override
+    protected void onDestroy()
+    {
+        viewModel.setTestnetEnabled(testnetSwitch.isChecked());
+        super.onDestroy();
+    }
+
     void setupList()
     {
-        boolean isMainNetActive = viewModel.mainNetActive();
-
-        mainnetSwitch.setChecked(isMainNetActive);
-        testnetSwitch.setChecked(!isMainNetActive);
-
-        CompoundButton.OnCheckedChangeListener mainnetListener = (compoundButton, checked) -> {
-            testnetSwitch.setChecked(!checked);
-            if (checked)
-            {
-                updateTitle(mainNetAdapter.getSelectedItemCount());
-            }
-        };
-
-        CompoundButton.OnCheckedChangeListener testnetListener = (compoundButton, checked) ->
-        {
-            mainnetSwitch.setOnCheckedChangeListener(null);
-            mainnetSwitch.setChecked(!checked);
-            mainnetSwitch.setOnCheckedChangeListener(mainnetListener);
-
-            toggleListVisibility(!checked);
-
-            if (checked)
-            {
-                testnetDialog.show();
-                updateTitle(testNetAdapter.getSelectedItemCount());
-            }
-            else
-            {
-                updateTitle(mainNetAdapter.getSelectedItemCount());
-            }
-        };
-
-        mainnetSwitch.setOnCheckedChangeListener(mainnetListener);
-        testnetSwitch.setOnCheckedChangeListener(testnetListener);
-
-        toggleListVisibility(isMainNetActive);
-
+        boolean testnetEnabled = viewModel.testnetEnabled();
+        testnetSwitch.setChecked(testnetEnabled);
+        toggleListVisibility(testnetEnabled);
         setupFilterList();
     }
 
@@ -160,7 +132,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         testNetAdapter = new MultiSelectNetworkAdapter(testNetList, callback);
         testnetRecyclerView.setAdapter(testNetAdapter);
 
-        updateTitle(viewModel.mainNetActive() ? mainNetAdapter.getSelectedItemCount() : testNetAdapter.getSelectedItemCount());
+        updateTitle(mainNetAdapter.getSelectedItemCount() + testNetAdapter.getSelectedItemCount());
     }
 
     private void updateTitle(int count)
@@ -174,10 +146,10 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         List<Long> filterList = new ArrayList<>(Arrays.asList(mainNetAdapter.getSelectedItems()));
         filterList.addAll(Arrays.asList(testNetAdapter.getSelectedItems()));
         boolean hasClicked = mainNetAdapter.hasSelectedItems() || testNetAdapter.hasSelectedItems();
-        boolean shouldBlankUserSelection = (mainnetSwitch.isChecked() && mainNetAdapter.getSelectedItems().length == 0)
+        boolean shouldBlankUserSelection = (mainNetAdapter.getSelectedItems().length == 0)
                 || (testnetSwitch.isChecked() && testNetAdapter.getSelectedItems().length == 0);
 
-        viewModel.setFilterNetworks(filterList, mainnetSwitch.isChecked(), hasClicked, shouldBlankUserSelection);
+        viewModel.setFilterNetworks(filterList, hasClicked, shouldBlankUserSelection);
         setResult(RESULT_OK, new Intent());
         finish();
     }
@@ -191,7 +163,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
     @Override
     public void onTestNetDialogConfirmed(long newChainId)
     {
-        //Shouldn't we change to testnet here?
+        toggleListVisibility(true);
     }
 
     @Override

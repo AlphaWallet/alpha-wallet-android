@@ -50,6 +50,10 @@ public interface PreferenceRepositoryType
 
     void setUse1559Transactions(boolean toggleState);
 
+    boolean isTestnetEnabled();
+
+    void setTestnetEnabled(boolean enabled);
+
     boolean isActiveMainnet();
 
     void setActiveMainnet(boolean state);

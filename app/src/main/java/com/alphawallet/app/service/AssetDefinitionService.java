@@ -1783,7 +1783,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     isNew = true;
                 }
                 realmData.setFromSig(sig);
-                if (isNew) { r.insertOrUpdate(realmData); }
+                if (isNew)
+                {
+                    r.insertOrUpdate(realmData);
+                }
             });
         }
     }

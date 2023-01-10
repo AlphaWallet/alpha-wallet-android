@@ -36,10 +36,8 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         return networkRepository.getAvailableNetworkList();
     }
 
-    public void setFilterNetworks(List<Long> selectedItems, boolean mainnetActive, boolean hasSelected, boolean shouldBlankUserSelection)
+    public void setFilterNetworks(List<Long> selectedItems, boolean hasSelected, boolean shouldBlankUserSelection)
     {
-        preferenceRepository.setActiveMainnet(mainnetActive);
-
         NetworkInfo activeNetwork = networkRepository.getActiveBrowserNetwork();
         long activeNetworkId = -99;
         if (activeNetwork != null) {
@@ -51,7 +49,7 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         Long[] selectedIds = new Long[selectedItems.size()];
         int index = 0;
         for (Long selectedId : selectedItems) {
-            if (EthereumNetworkRepository.hasRealValue(selectedId) == mainnetActive && activeNetworkId == selectedId) {
+            if (EthereumNetworkRepository.hasRealValue(selectedId) && activeNetworkId == selectedId) {
                 deselected = false;
             }
             selectedIds[index++] = selectedId;
@@ -86,6 +84,11 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         return preferenceRepository.isActiveMainnet();
     }
 
+    public boolean testnetEnabled()
+    {
+        return preferenceRepository.isTestnetEnabled();
+    }
+
     public List<NetworkItem> getNetworkList(boolean isMainNet)
     {
         List<NetworkItem> networkList = new ArrayList<>();
@@ -113,5 +116,10 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
     public List<Long> getActiveNetworks()
     {
         return networkRepository.getFilterNetworkList();
+    }
+
+    public void setTestnetEnabled(boolean enabled)
+    {
+        preferenceRepository.setTestnetEnabled(enabled);
     }
 }

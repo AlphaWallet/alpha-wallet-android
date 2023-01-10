@@ -96,10 +96,8 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     {
         boolean isMainNetActive = viewModel.mainNetActive();
 
-        mainnetSwitch.setOnCheckedChangeListener(null);
         testnetSwitch.setOnCheckedChangeListener(null);
 
-        mainnetSwitch.setChecked(isMainNetActive);
         testnetSwitch.setChecked(!isMainNetActive);
 
         CompoundButton.OnCheckedChangeListener mainnetListener = (compoundButton, checked) -> {
@@ -108,23 +106,10 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
 
         CompoundButton.OnCheckedChangeListener testnetListener = (compoundButton, checked) ->
         {
-            mainnetSwitch.setOnCheckedChangeListener(null);
-            mainnetSwitch.setChecked(!checked);
-            mainnetSwitch.setOnCheckedChangeListener(mainnetListener);
-
-            toggleListVisibility(!checked);
-
-            if (!checked)
-            {
-                mainNetAdapter.selectDefault();
-            }
-            else
-            {
-                testnetDialog.show();
-            }
+            toggleListVisibility(checked);
+            testnetDialog.show();
         };
 
-        mainnetSwitch.setOnCheckedChangeListener(mainnetListener);
         testnetSwitch.setOnCheckedChangeListener(testnetListener);
 
         toggleListVisibility(isMainNetActive);
@@ -200,7 +185,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     @Override
     protected void handleSetNetworks()
     {
-        long selectedNetwork = mainnetSwitch.isChecked() ? mainNetAdapter.getSelectedItem() : testNetAdapter.getSelectedItem();
+        long selectedNetwork = mainNetAdapter.getSelectedItem() + testNetAdapter.getSelectedItem();
         Intent intent = new Intent();
         intent.putExtra(C.EXTRA_CHAIN_ID, selectedNetwork);
         setResult(RESULT_OK, intent);

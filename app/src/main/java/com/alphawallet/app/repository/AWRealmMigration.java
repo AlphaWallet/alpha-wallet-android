@@ -425,6 +425,16 @@ public class AWRealmMigration implements RealmMigration
             }
             oldVersion++;
         }
+
+        if (oldVersion == 46)
+        {
+            RealmObjectSchema realmData = schema.get("RealmTokenScriptData");
+            if (realmData != null && !realmData.hasField("ipfsPath"))
+            {
+                realmData.addField("ipfsPath", String.class);
+            }
+            oldVersion++;
+        }
     }
 
     @Override

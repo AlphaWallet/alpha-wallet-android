@@ -173,7 +173,6 @@ public class NFTImageView extends RelativeLayout
         }
         catch (Exception e)
         {
-            Timber.w(e);
             holdingView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent));
         }
 

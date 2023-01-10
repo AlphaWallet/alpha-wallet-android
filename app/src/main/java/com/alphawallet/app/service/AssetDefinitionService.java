@@ -4,6 +4,7 @@ import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
+import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
 
 import android.Manifest;
 import android.content.Context;
@@ -398,11 +399,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 for (ContractLocator cl : originContracts)
                 {
                     String entryKey = getTSDataKey(cl.chainId, cl.address);
-                    RealmTokenScriptData entry = realm.where(RealmTokenScriptData.class)
+                    RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
                             .equalTo("instanceKey", entryKey)
                             .findFirst();
-                    if (entry != null) continue; // at this point, don't override any existing entry
-                    entry = realm.createObject(RealmTokenScriptData.class, entryKey);
+
+                    if (entry == null)
+                    {
+                        entry = r.createObject(RealmTokenScriptData.class, entryKey);
+                    }
+
                     entry.setFileHash(hash);
                     entry.setFilePath(file.getAbsolutePath());
                     entry.setNames(td.getTokenNameList());
@@ -662,7 +667,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void updateAttributeResult(Token token, TokenDefinition td, Attribute attr, BigInteger tokenId)
     {
         ContractAddress useAddress = new ContractAddress(attr.function); //always use the function attribute's address
-        tokenscriptUtility.fetchResultFromEthereum(token, useAddress, attr, tokenId, td, this)       // Fetch function result from blockchain
+        tokenscriptUtility.fetchResultFromEthereum(token, useAddress, attr, tokenId, td, this) // Fetch function result from blockchain
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
                 .subscribe(txResult -> storeAuxData(getWalletAddr(), txResult))
                 .isDisposed();
     }
@@ -814,7 +821,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     .equalTo("instanceKey", getTSDataKey(chainId, address))
                     .findFirst();
 
-            if (tsData != null)
+            if (tsData != null && tsData.getFilePath() != null)
             {
                 return new TokenScriptFile(context, tsData.getFilePath());
             }
@@ -987,7 +994,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         if (!newFile.exists())
         {
-            return Single.fromCallable(TokenDefinition::new);
+            return signalUnchangedScript(newFile.getName());
         }
         //1. check validity & check for origin tokens
         //2. check for existing and check if this is a debug file or script from server
@@ -1000,7 +1007,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             final TokenDefinition td = parseFile(tsf.getInputStream());
             List<ContractLocator> originContracts = getOriginContracts(td);
             //remove all old definitions & certificates
-            deleteScriptEntriesFromRealm(originContracts, isDebugOverride, tsf.calcMD5());
+            updateScriptEntriesInRealm(originContracts, isDebugOverride, tsf.calcMD5());
             cachedDefinition = null;
             return cacheSignature(tsf)
                     .map(contracts -> fileLoadComplete(originContracts, tsf, td));
@@ -1013,11 +1020,21 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return Single.fromCallable(TokenDefinition::new);
     }
 
-    private void deleteScriptEntriesFromRealm(List<ContractLocator> origins, boolean isDebug, String newFileHash)
+    private Single<TokenDefinition> signalUnchangedScript(String name)
+    {
+        TokenDefinition placeHolder = new TokenDefinition();
+        if (name.equals(UNCHANGED_SCRIPT))
+        {
+            placeHolder.nameSpace = UNCHANGED_SCRIPT;
+        }
+        return Single.fromCallable(() -> placeHolder);
+    }
+
+    private void updateScriptEntriesInRealm(List<ContractLocator> origins, boolean isDebug, String newFileHash)
     {
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
-            realm.executeTransactionAsync(r -> {
+            realm.executeTransaction(r -> {
                 for (ContractLocator cl : origins)
                 {
                     String entryKey = getTSDataKey(cl.chainId, cl.address);
@@ -1031,9 +1048,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 .equalTo("instanceKey", realmData.getFileHash())
                                 .findFirst();
                         if (realmCert != null && !realmData.getFileHash().equals(newFileHash))
+                        {
                             realmCert.deleteFromRealm(); //don't delete cert if new cert will overwrite it
+                        }
                         deleteEventDataForScript(realmData);
-                        realmData.deleteFromRealm();
+                        if (!realmData.getFileHash().equals(newFileHash))
+                        {
+                            realmData.deleteFromRealm();
+                        }
                     }
                 }
             });
@@ -1041,20 +1063,91 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     //Call contract and check for script
-    public Single<File> fetchTokenScriptFromContract(Token token, MutableLiveData<Boolean> updateFlag)
+    private Single<File> fetchTokenScriptFromContract(Token token, MutableLiveData<Boolean> updateFlag)
     {
         return token.getScriptURI()
                 .map(uri -> {
-                    if (!TextUtils.isEmpty(uri)) updateFlag.postValue(true);
+                    if (!TextUtils.isEmpty(uri))
+                    {
+                        updateFlag.postValue(true);
+                    }
+
                     return uri;
                 })
-                .map(uri -> downloadScript(uri, 0))
-                .map(dlResponse -> storeFile(token.tokenInfo.address, dlResponse));
+                .map(uri -> compareExistingScript(token, uri))
+                .map(uri -> new Pair<>(uri, downloadScript(uri, 0)))
+                .map(scriptData -> storeEntry(token, scriptData));
+    }
+
+    private File storeEntry(Token token, Pair<String, Pair<String, Boolean>> scriptData) throws IOException
+    {
+        if (TextUtils.isEmpty(scriptData.second.first) || scriptData.second.first.equals(UNCHANGED_SCRIPT))
+        {
+            return new File(UNCHANGED_SCRIPT); // blank file with UNCHANGED name
+        }
+
+        File storeFile = storeFile(token.tokenInfo.address, scriptData.second);
+
+        TokenScriptFile tsf = new TokenScriptFile(context, storeFile.getAbsolutePath());
+
+        String fileHash = tsf.calcMD5();
+
+        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        {
+            realm.executeTransaction(r -> {
+                String entryKey = getTSDataKey(token.tokenInfo.chainId, token.tokenInfo.address);
+                RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
+                        .equalTo("instanceKey", entryKey)
+                        .findFirst();
+
+                if (entry == null)
+                {
+                    entry = r.createObject(RealmTokenScriptData.class, entryKey);
+                }
+
+                entry.setFileHash(fileHash);
+                if (scriptData.second.second) entry.setIpfsPath(scriptData.first); //if sourced from IPFS store path
+                entry.setFilePath(storeFile.getAbsolutePath());
+            });
+        }
+        catch (Exception e)
+        {
+            Timber.w(e);
+        }
+
+        return storeFile;
+    }
+
+    private String compareExistingScript(Token token, String uri)
+    {
+        //TODO: calculate and use the IPFS CID to validate existing script against IPFS locator
+        String returnUri = uri;
+        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        {
+            String entryKey = getTSDataKey(token.tokenInfo.chainId, token.tokenInfo.address);
+            RealmTokenScriptData entry = realm.where(RealmTokenScriptData.class)
+                    .equalTo("instanceKey", entryKey)
+                    .findFirst();
+
+            if (entry != null && !TextUtils.isEmpty(entry.getFileHash())
+                    && !TextUtils.isEmpty(entry.getFilePath())
+                    && !TextUtils.isEmpty(entry.getIpfsPath())
+                    && entry.getIpfsPath().equals(uri))
+            {
+                returnUri = UNCHANGED_SCRIPT;
+            }
+        }
+        catch (Exception e)
+        {
+            Timber.w(e);
+        }
+
+        return returnUri;
     }
 
     private Single<File> tryServerIfRequired(File contractScript, String address)
     {
-        if (contractScript.exists())
+        if (contractScript.exists() || contractScript.getName().equals(UNCHANGED_SCRIPT))
         {
             return Single.fromCallable(() -> contractScript);
         }
@@ -1114,6 +1207,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private Pair<String, Boolean> downloadScript(String Uri, long currentFileTime)
     {
+        if (Uri.equals(UNCHANGED_SCRIPT))
+        {
+            return new Pair<>(UNCHANGED_SCRIPT, false);
+        }
+
         boolean isIPFS = Utils.isIPFS(Uri);
 
         try
@@ -1642,6 +1740,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     /* Add cached signature if uncached files found. */
     private Single<File> cacheSignature(File file)
     {
+        if (file.getName().equals(UNCHANGED_SCRIPT))
+        {
+            return Single.fromCallable(() -> file);
+        }
+
         return Single.fromCallable(() -> {
             if (file.canRead())
             {
@@ -1669,6 +1772,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             realm.executeTransaction(r -> {
                 //if signature present, then just update
+                boolean isNew = false;
                 RealmCertificateData realmData = r.where(RealmCertificateData.class)
                         .equalTo("instanceKey", hash)
                         .findFirst();
@@ -1676,9 +1780,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 if (realmData == null)
                 {
                     realmData = r.createObject(RealmCertificateData.class, hash);
+                    isNew = true;
                 }
                 realmData.setFromSig(sig);
-                r.insertOrUpdate(realmData);
+                if (isNew) { r.insertOrUpdate(realmData); }
             });
         }
     }
@@ -1864,7 +1969,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         List<Attribute> attrs = new ArrayList<>();
         for (Map.Entry<String, TSAction> action : td.getActions().entrySet())
         {
-            if (!actions.contains(action.getKey()))
+            if (!actions.contains(action.getKey()) || action.getValue().attributes == null)
             {
                 continue;
             }
@@ -2595,7 +2700,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         TokenScriptFile tf = getTokenScriptFile(token.tokenInfo.chainId, token.getAddress());
         if ((tf != null && !TextUtils.isEmpty(tf.getName())) && !isInSecureZone(tf))
+        {
             return Single.fromCallable(TokenDefinition::new); //early return for debug script check
+        }
 
         //try the contractURI, then server
         return fetchTokenScriptFromContract(token, updateFlag)

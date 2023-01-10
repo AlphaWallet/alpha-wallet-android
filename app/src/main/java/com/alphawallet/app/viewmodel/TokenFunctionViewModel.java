@@ -1,6 +1,8 @@
 package com.alphawallet.app.viewmodel;
 
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
+import static com.alphawallet.token.tools.TokenDefinition.NO_SCRIPT;
+import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
 
 import android.app.Activity;
 import android.content.Context;
@@ -581,13 +583,17 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     private void handleDefinition(TokenDefinition td)
     {
-        if (!TextUtils.isEmpty(td.holdingToken))
+        switch (td.nameSpace)
         {
-            newScriptFound.postValue(true);
-        }
-        else
-        {
-            scriptUpdateInProgress.postValue(false);
+            case UNCHANGED_SCRIPT:
+                newScriptFound.postValue(false);
+                break;
+            case NO_SCRIPT:
+                scriptUpdateInProgress.postValue(false);
+                break;
+            default:
+                newScriptFound.postValue(true);
+                break;
         }
     }
 
@@ -898,6 +904,7 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     public void updateLocalAttributes(Token token, BigInteger tokenId)
     {
+        System.out.println("YOLESS: Call update Local Attrs");
         //Fetch Allowed attributes, then call updateAllowedAttributes
         assetDefinitionService.fetchFunctionMap(token, Collections.singletonList(tokenId))
                 .subscribeOn(Schedulers.io())
@@ -908,12 +915,15 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     private void updateAllowedAttrs(Token token, Map<BigInteger, List<String>> availableActions)
     {
+        System.out.println("YOLESS: update allowed Attrs");
         if (!availableActions.keySet().stream().findFirst().isPresent())
         {
             return;
         }
         TokenDefinition td = assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         List<Attribute> localAttrList = assetDefinitionService.getLocalAttributes(td, availableActions);
+
+        System.out.println("YOLESS 2: " + localAttrList.size());
 
         //now refresh all these attrs
         assetDefinitionService.refreshAttributes(token, td, availableActions.keySet().stream().findFirst().get(), localAttrList)

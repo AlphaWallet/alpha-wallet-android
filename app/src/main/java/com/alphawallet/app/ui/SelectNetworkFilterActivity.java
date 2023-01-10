@@ -27,7 +27,7 @@ import java.util.List;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback
+public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity
 {
     private SelectNetworkFilterViewModel viewModel;
     private MultiSelectNetworkAdapter mainNetAdapter;
@@ -40,7 +40,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         viewModel = new ViewModelProvider(this)
                 .get(SelectNetworkFilterViewModel.class);
         initTestNetDialog(this);
-        setupList();
+        setupFilterList();
     }
 
     @Override
@@ -56,14 +56,6 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
     {
         viewModel.setTestnetEnabled(testnetSwitch.isChecked());
         super.onDestroy();
-    }
-
-    void setupList()
-    {
-        boolean testnetEnabled = viewModel.testnetEnabled();
-        testnetSwitch.setChecked(testnetEnabled);
-        toggleListVisibility(testnetEnabled);
-        setupFilterList();
     }
 
     private void setupFilterList()
@@ -162,23 +154,5 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         viewModel.setFilterNetworks(filterList, hasClicked, shouldBlankUserSelection);
         setResult(RESULT_OK, new Intent());
         finish();
-    }
-
-    @Override
-    public void onTestNetDialogClosed()
-    {
-        testnetSwitch.setChecked(false);
-    }
-
-    @Override
-    public void onTestNetDialogConfirmed(long newChainId)
-    {
-        toggleListVisibility(true);
-    }
-
-    @Override
-    public void onTestNetDialogCancelled()
-    {
-        testnetSwitch.setChecked(false);
     }
 }

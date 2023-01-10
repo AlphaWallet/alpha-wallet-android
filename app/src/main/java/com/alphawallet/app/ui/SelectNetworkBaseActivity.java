@@ -5,23 +5,20 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CompoundButton;
 
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.viewmodel.SelectNetworkFilterViewModel;
 import com.alphawallet.app.widget.StandardHeader;
 import com.alphawallet.app.widget.TestNetDialog;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import javax.inject.Inject;
 
-public abstract class SelectNetworkBaseActivity extends BaseActivity
+public abstract class SelectNetworkBaseActivity extends BaseActivity implements TestNetDialog.TestNetDialogCallback
 {
     RecyclerView mainnetRecyclerView;
     RecyclerView testnetRecyclerView;
@@ -29,6 +26,9 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity
     StandardHeader testnetHeader;
     SwitchMaterial testnetSwitch;
     TestNetDialog testnetDialog;
+    
+    @Inject
+    PreferenceRepositoryType preferenceRepositoryType;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -79,7 +79,7 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity
         testnetDialog = new TestNetDialog(this, 0, callback);
     }
 
-    private void initViews()
+    protected void initViews()
     {
         mainnetHeader = findViewById(R.id.mainnet_header);
         testnetHeader = findViewById(R.id.testnet_header);
@@ -102,9 +102,16 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity
                 toggleListVisibility(false);
             }
         });
+        
+        boolean testnetEnabled = preferenceRepositoryType.isTestnetEnabled();
+        testnetSwitch.setChecked(testnetEnabled);
+        toggleListVisibility(testnetEnabled);
+        initTestNetDialog(this);
     }
 
-    protected abstract void updateTitle();
+    protected void updateTitle()
+    {
+    }
 
     void hideSwitches()
     {
@@ -116,5 +123,22 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity
     {
         testnetRecyclerView.setVisibility(testnetChecked ? View.VISIBLE : View.GONE);
         updateTitle();
+    }
+
+    public void onTestNetDialogClosed()
+    {
+        testnetSwitch.setChecked(false);
+    }
+
+    @Override
+    public void onTestNetDialogConfirmed(long newChainId)
+    {
+        toggleListVisibility(true);
+    }
+
+    @Override
+    public void onTestNetDialogCancelled()
+    {
+        testnetSwitch.setChecked(false);
     }
 }

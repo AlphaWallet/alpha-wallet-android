@@ -256,7 +256,7 @@ public class Steps
         pressBack();
     }
 
-    private static void input(int id, String text)
+    public static void input(int id, String text)
     {
         onView(allOf(withId(R.id.edit_text), isDescendantOfA(withId(id)))).perform(replaceText(text));
     }

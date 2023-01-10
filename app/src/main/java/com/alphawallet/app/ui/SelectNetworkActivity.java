@@ -94,26 +94,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
 
     void setupList(Long selectedNetwork, List<NetworkInfo> availableNetworks)
     {
-        boolean isMainNetActive = viewModel.mainNetActive();
-
-        testnetSwitch.setOnCheckedChangeListener(null);
-
-        testnetSwitch.setChecked(!isMainNetActive);
-
-        CompoundButton.OnCheckedChangeListener mainnetListener = (compoundButton, checked) -> {
-            testnetSwitch.setChecked(!checked);
-        };
-
-        CompoundButton.OnCheckedChangeListener testnetListener = (compoundButton, checked) ->
-        {
-            toggleListVisibility(checked);
-            testnetDialog.show();
-        };
-
-        testnetSwitch.setOnCheckedChangeListener(testnetListener);
-
-        toggleListVisibility(isMainNetActive);
-
+        initViews();
         setupFilters(selectedNetwork, availableNetworks);
     }
 
@@ -193,26 +174,9 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     }
 
     @Override
-    protected void updateTitle()
-    {
-
-    }
-
-    @Override
-    public void onTestNetDialogClosed()
-    {
-        testnetSwitch.setChecked(false);
-    }
-
-    @Override
     public void onTestNetDialogConfirmed(long newChainId)
     {
+        super.onTestNetDialogConfirmed(newChainId);
         testNetAdapter.selectDefault();
-    }
-
-    @Override
-    public void onTestNetDialogCancelled()
-    {
-        testnetSwitch.setChecked(false);
     }
 }

@@ -122,7 +122,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
             @Override
             public void onCheckChanged(long chainId, int count)
             {
-                updateTitle(count);
+                updateTitle();
             }
         };
 
@@ -132,11 +132,21 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity imple
         testNetAdapter = new MultiSelectNetworkAdapter(testNetList, callback);
         testnetRecyclerView.setAdapter(testNetAdapter);
 
-        updateTitle(mainNetAdapter.getSelectedItemCount() + testNetAdapter.getSelectedItemCount());
+        updateTitle();
     }
 
-    private void updateTitle(int count)
+    @Override
+    protected void updateTitle()
     {
+        if (mainNetAdapter == null || testNetAdapter == null)
+        {
+            return;
+        }
+
+        int count = mainNetAdapter.getSelectedItemCount();
+        if (testnetSwitch.isChecked()) {
+            count += testNetAdapter.getSelectedItemCount();
+        }
         setTitle(getString(R.string.title_enabled_networks, String.valueOf(count)));
     }
 

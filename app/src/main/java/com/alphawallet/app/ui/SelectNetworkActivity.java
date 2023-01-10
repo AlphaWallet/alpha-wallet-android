@@ -193,6 +193,12 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     }
 
     @Override
+    protected void updateTitle()
+    {
+
+    }
+
+    @Override
     public void onTestNetDialogClosed()
     {
         testnetSwitch.setChecked(false);

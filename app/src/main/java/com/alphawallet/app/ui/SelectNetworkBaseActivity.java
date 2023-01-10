@@ -99,11 +99,12 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity
             {
                 testnetDialog.show();
             } else {
-
                 toggleListVisibility(false);
             }
         });
     }
+
+    protected abstract void updateTitle();
 
     void hideSwitches()
     {
@@ -114,5 +115,6 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity
     void toggleListVisibility(boolean testnetChecked)
     {
         testnetRecyclerView.setVisibility(testnetChecked ? View.VISIBLE : View.GONE);
+        updateTitle();
     }
 }

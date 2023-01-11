@@ -335,31 +335,19 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private void onSave()
     {
-        boolean mainNetActive = viewModel.ethereumNetworkRepository().isMainNetSelected();
         List<Long> activeChains = viewModel.ethereumNetworkRepository().getFilterNetworkList();
         List<TokenCardMeta> selected = adapter.getSelected();
         HashSet<Long> chainsNotEnabled = new HashSet<>();
-        boolean onlyTestNet = selected.size() > 0;
-
-        // 1. if any mainnet networks were selected, and we're using testnet, switch to mainnet
-        // 2. detect if we need to enable chains
         for (TokenCardMeta token : selected)
         {
             NetworkInfo info = viewModel.ethereumNetworkRepository().getNetworkByChain(token.getChain());
-            if (info.hasRealValue()) onlyTestNet = false;
             if (!activeChains.contains(info.chainId))
             {
                 chainsNotEnabled.add(info.chainId);
             }
         }
 
-        if (mainNetActive && onlyTestNet) // only testnet tokens selected and we're not showing testnet
-        {
-            //Will need to make these chains active on the callback
-            TestNetDialog testnetDialog = new TestNetDialog(this, activeChains.get(0), this);
-            testnetDialog.show();
-        }
-        else if (chainsNotEnabled.size() == 0) // currently showing the required chains, only need to save new tokens
+        if (chainsNotEnabled.size() == 0) // currently showing the required chains, only need to save new tokens
         {
             //store tokens
             onSelectedChains(selected);
@@ -382,21 +370,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         onSaved();
     }
 
-    private boolean requireMainNet()
-    {
-        boolean hasMainNetChain = false;
-        for (TokenCardMeta tcm : adapter.getSelected())
-        {
-            if (viewModel.ethereumNetworkRepository().getNetworkByChain(tcm.getChain()).hasRealValue())
-            {
-                hasMainNetChain = true;
-                break;
-            }
-        }
-
-        return hasMainNetChain;
-    }
-
     private void showAddChainsDialog()
     {
         if (dialog != null && dialog.isShowing())
@@ -415,11 +388,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             @Override
             public void onConfirmed()
             {
-                //switch to mainnet if required
-                if (!viewModel.ethereumNetworkRepository().isMainNetSelected() && requireMainNet())
-                {
-                    viewModel.setMainNetsSelected(true); // switch to mainnet before setting up filters
-                }
                 //add required chains
                 viewModel.selectExtraChains(getSelectedChains());
                 //did we add the tokens?
@@ -581,8 +549,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     @Override
     public void onTestNetDialogConfirmed(long chainId)
     {
-        //switch to testnet, ensuring the networks are selected
-        viewModel.setMainNetsSelected(false);
         viewModel.selectExtraChains(getSelectedChains());
         //did we add the tokens?
         onSelectedChains(adapter.getSelected());

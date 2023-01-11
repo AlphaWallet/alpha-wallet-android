@@ -48,21 +48,6 @@ public class SelectNetworkViewModel extends BaseViewModel {
         ctx.startActivityForResult(intent, requestCode);
     }
 
-    public boolean mainNetActive()
-    {
-        return preferenceRepository.isActiveMainnet();
-    }
-
-    public boolean hasShownTestNetWarning()
-    {
-        return preferenceRepository.hasShownTestNetWarning();
-    }
-
-    public void setShownTestNetWarning()
-    {
-        preferenceRepository.setShownTestNetWarning();
-    }
-
     public NetworkInfo getNetworkByChain(long chainId)
     {
         return networkRepository.getNetworkByChain(chainId);

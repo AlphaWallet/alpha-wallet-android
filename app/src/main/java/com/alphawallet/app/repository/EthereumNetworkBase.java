@@ -747,7 +747,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         for (NetworkInfo network : networks)
         {
             if (EthereumNetworkRepository.hasRealValue(network.chainId) == withValue
-                    && !result.contains(network)) result.add(network);
+                    && !result.contains(network))
+            {
+                result.add(network);
+            }
         }
     }
 
@@ -840,7 +843,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public List<Long> getFilterNetworkList()
     {
-        return getSelectedFilters(preferences.isActiveMainnet());
+        return getSelectedFilters(true);
     }
 
     @Override
@@ -920,7 +923,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         NetworkInfo[] allNetworks = getAvailableNetworkList();
         List<NetworkInfo> networks = new ArrayList<>();
-        addNetworks(allNetworks, networks, preferences.isActiveMainnet());
+        addNetworks(allNetworks, networks, true);
         return networks.toArray(new NetworkInfo[0]);
     }
 
@@ -1143,17 +1146,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public void setHasSetNetworkFilters()
     {
         preferences.setHasSetNetworkFilters();
-    }
-
-    public boolean isMainNetSelected()
-    {
-        return preferences.isActiveMainnet();
-    }
-
-    @Override
-    public void setActiveMainnet(boolean isMainNet)
-    {
-        preferences.setActiveMainnet(isMainNet);
     }
 
     public void saveCustomRPCNetwork(String networkName, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId)

@@ -64,24 +64,9 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         preferenceRepository.commit();
     }
 
-    public boolean hasShownTestNetWarning()
-    {
-        return preferenceRepository.hasShownTestNetWarning();
-    }
-
-    public void setShownTestNetWarning()
-    {
-        preferenceRepository.setShownTestNetWarning();
-    }
-
     public NetworkInfo getNetworkByChain(long chainId)
     {
         return networkRepository.getNetworkByChain(chainId);
-    }
-
-    public boolean mainNetActive()
-    {
-        return preferenceRepository.isActiveMainnet();
     }
 
     public boolean testnetEnabled()

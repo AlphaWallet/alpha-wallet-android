@@ -54,14 +54,6 @@ public interface PreferenceRepositoryType
 
     void setTestnetEnabled(boolean enabled);
 
-    boolean isActiveMainnet();
-
-    void setActiveMainnet(boolean state);
-
-    boolean hasShownTestNetWarning();
-
-    void setShownTestNetWarning();
-
     String getPriceAlerts();
 
     void setPriceAlerts(String json);

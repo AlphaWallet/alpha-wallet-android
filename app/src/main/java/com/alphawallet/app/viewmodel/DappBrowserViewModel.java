@@ -451,16 +451,6 @@ public class DappBrowserViewModel extends BaseViewModel
         return null;
     }
 
-    public boolean isMainNetsSelected()
-    {
-        return ethereumNetworkRepository.isMainNetSelected();
-    }
-
-    public void setMainNetsSelected(boolean isMainNet)
-    {
-        ethereumNetworkRepository.setActiveMainnet(isMainNet);
-    }
-
     public void addNetworkToFilters(NetworkInfo info)
     {
         List<Long> filters = ethereumNetworkRepository.getFilterNetworkList();

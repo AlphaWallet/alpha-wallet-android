@@ -51,13 +51,6 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity
         viewModel.track(Analytics.Navigation.SELECT_NETWORKS);
     }
 
-    @Override
-    protected void onDestroy()
-    {
-        viewModel.setTestnetEnabled(testnetSwitch.isChecked());
-        super.onDestroy();
-    }
-
     private void setupFilterList()
     {
         List<NetworkItem> mainNetList = viewModel.getNetworkList(true);
@@ -145,6 +138,8 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity
     @Override
     protected void handleSetNetworks()
     {
+        viewModel.setTestnetEnabled(testnetSwitch.isChecked());
+
         List<Long> filterList = new ArrayList<>(Arrays.asList(mainNetAdapter.getSelectedItems()));
         filterList.addAll(Arrays.asList(testNetAdapter.getSelectedItems()));
         boolean hasClicked = mainNetAdapter.hasSelectedItems() || testNetAdapter.hasSelectedItems();

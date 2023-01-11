@@ -927,7 +927,6 @@
     <string name="label_slippage_custom">Custom</string>
     <string name="notify_wallet_connect_title">WalletConnect သည် အသက်ဝင်ပါသည်။</string>
     <string name="notify_wallet_connect_content">အသက်ဝင်သော ဆက်ရှင်များကို ကြည့်ရန် နှိပ်ပါ။</string>
-    <string name="mode_test">Testnet မုဒ်</string>
     <string name="title_dialog_where_are_tokens">ငါ့တိုကင်များ ဘယ်မှာလဲ</string>
     <string name="content_dialog_where_are_tokens">စိတ်မပူပါနှင့်။ သင့်တိုကင်များသည် ဘေးကင်းပါသည်။ သင်သည် Testnet ကွန်ရက်များကို ကြည့်ရှုနေပါသည်။ ဒီဇိုင်းအသစ်များကို စမ်းသပ်ရန်အတွက် ၎င်းတို့ကို developer များက အသုံးပြုကြသည်။ သင်သည် အချိန်မရွေး Mainnet သို့ ပြောင်းနိုင်သည်။</string>
     <string name="button_switch_to_mainnet">Mainnet သို့ပြောင်းပါ။</string>

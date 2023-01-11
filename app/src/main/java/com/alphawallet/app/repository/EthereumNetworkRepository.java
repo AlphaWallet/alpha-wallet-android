@@ -1,5 +1,8 @@
 package com.alphawallet.app.repository;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.content.Context;
 
 import com.alphawallet.app.entity.ContractLocator;
@@ -14,9 +17,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 
 public class EthereumNetworkRepository extends EthereumNetworkBase
 {

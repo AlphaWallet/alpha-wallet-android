@@ -892,7 +892,6 @@
     <string name="label_slippage_custom">Custom</string>
     <string name="notify_wallet_connect_title">WalletConnect 处于活动状态</string>
     <string name="notify_wallet_connect_content">点击查看活跃会话</string>
-    <string name="mode_test">测试网模式</string>
     <string name="title_dialog_where_are_tokens">我的代币在哪里？</string>
     <string name="content_dialog_where_are_tokens">不用担心，您的代币是安全的。您正在查看 Testnet 网络，开发人员使用它们来尝试新设计。您可以随时切换到主网。</string>
     <string name="button_switch_to_mainnet">切换到主网</string>

@@ -67,15 +67,8 @@ public class WalletSummaryHeaderHolder extends BinderViewHolder<Wallet> implemen
 
 		String balanceTxt = TickerService.getCurrencyString(fiatValue);
 
-        if (addition.getBoolean(IS_MAINNET_ACTIVE))
-        {
-            summaryBalance.setText(balanceTxt);
-            setWalletChange(fiatValue, oldFiatValue);
-        } else
-        {
-            summaryBalance.setText(R.string.testnet);
-            summaryChange.setText(R.string.mode_test);
-        }
+        summaryBalance.setText(balanceTxt);
+        setWalletChange(fiatValue, oldFiatValue);
 	}
 
 	private void setWalletChange(double fiatValue, double oldFiatValue)

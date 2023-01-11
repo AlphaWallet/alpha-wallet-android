@@ -964,7 +964,6 @@
     <string name="network_must_be_enabled">Network %s must be enabled before connecting.</string>
     <string name="notify_wallet_connect_title">WalletConnect is active</string>
     <string name="notify_wallet_connect_content">Click to view active sessions</string>
-    <string name="mode_test">Testnet Mode</string>
     <string name="title_dialog_where_are_tokens">Where are my Tokens?</string>
     <string name="content_dialog_where_are_tokens">Don\'t worry. Your tokens are safe. You are viewing Testnet networks. They are used by developers to try out new designs. You can switch to Mainnet any time.</string>
     <string name="button_switch_to_mainnet">Switch to Mainnet</string>

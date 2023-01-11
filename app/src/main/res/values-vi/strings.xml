@@ -907,7 +907,6 @@
     <string name="label_slippage_custom">Custom</string>
     <string name="notify_wallet_connect_title">WalletConnect đang hoạt động</string>
     <string name="notify_wallet_connect_content">Nhấp để xem các phiên hoạt động</string>
-    <string name="mode_test">Chế độ testnet</string>
     <string name="title_dialog_where_are_tokens">Token của tôi ở đâu?</string>
     <string name="content_dialog_where_are_tokens">Đừng lo. Các mã thông báo của bạn được an toàn. Bạn đang xem các mạng Testnet. Chúng được các nhà phát triển sử dụng để thử các thiết kế mới. Bạn có thể chuyển sang Mainnet bất kỳ lúc nào.</string>
     <string name="button_switch_to_mainnet">Chuyển sang Mainnet</string>

@@ -26,7 +26,6 @@ import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSearchItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
-import com.alphawallet.app.ui.widget.entity.TestNetTipsItem;
 import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
 import com.alphawallet.app.ui.widget.entity.TotalBalanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.WalletConnectSessionSortedItem;
@@ -277,7 +276,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
     private void addManageTokensLayout()
     {
-        if (walletAddress != null && !walletAddress.isEmpty() && tokensService.isMainNetActive()
+        if (walletAddress != null && !walletAddress.isEmpty()
                 && (filterType == TokenFilter.ALL || filterType == TokenFilter.ASSETS))
         { //only show buy button if filtering all or assets
             items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress, managementLauncher)));
@@ -446,7 +445,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         }
 
         addSearchTokensLayout();
-        addTestNetTips();
 
         if (managementLauncher != null) addManageTokensLayout();
 
@@ -458,12 +456,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         addManageTokensLayout();
 
         items.endBatchedUpdates();
-    }
-
-    private void addTestNetTips()
-    {
-        if (!tokensService.isMainNetActive() && !showTestNetTips)
-            items.add(new TestNetTipsItem(0));
     }
 
     public void setTotal(BigDecimal totalInCurrency)

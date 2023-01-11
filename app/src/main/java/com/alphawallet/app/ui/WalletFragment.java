@@ -356,14 +356,11 @@ public class WalletFragment extends BaseFragment implements
     public void syncComplete(TokensService svs, int syncCount)
     {
         if (syncCount > 0) handler.post(() -> addressAvatar.finishWaiting());
-        if (viewModel.getTokensService().isMainNetActive())
-        {
-            svs.getFiatValuePair()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::updateValue)
-                    .isDisposed();
-        }
+        svs.getFiatValuePair()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::updateValue)
+                .isDisposed();
 
         if (syncCount > 0)
         {
@@ -575,7 +572,7 @@ public class WalletFragment extends BaseFragment implements
             viewModel.track(Analytics.Navigation.WALLET);
             if (largeTitleView != null)
             {
-                largeTitleView.setVisibility(viewModel.getTokensService().isMainNetActive() ? View.VISIBLE : View.GONE); //show or hide Fiat summary
+                largeTitleView.setVisibility(View.VISIBLE); //show or hide Fiat summary
             }
         }
     }

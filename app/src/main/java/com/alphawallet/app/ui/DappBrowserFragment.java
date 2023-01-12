@@ -936,7 +936,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                     }
                 }
 
-                if (fromWalletConnectModal(url)) {
+                if (fromWalletConnectModal(url))
+                {
                     String encodedURL = url.split("=")[1];
                     try
                     {

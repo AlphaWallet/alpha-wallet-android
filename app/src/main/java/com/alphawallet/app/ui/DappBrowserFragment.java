@@ -8,6 +8,7 @@ import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
 import static com.alphawallet.app.util.Utils.isValidUrl;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+import static com.alphawallet.token.entity.MagicLinkInfo.mainnetMagicLinkDomain;
 import static org.web3j.protocol.core.methods.request.Transaction.createFunctionCallTransaction;
 
 import android.Manifest;
@@ -131,8 +132,11 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Single;
@@ -926,6 +930,21 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                     }
                 }
 
+                if (fromWalletConnectModal(url))
+                {
+                    String encodedURL = url.split("=")[1];
+                    try
+                    {
+                        String decodedURL = URLDecoder.decode(encodedURL, Charset.defaultCharset().name());
+                        viewModel.handleWalletConnect(getContext(), decodedURL, activeNetwork);
+                        return true;
+                    }
+                    catch (UnsupportedEncodingException e)
+                    {
+                        Timber.d("Decode URL failed: " + e);
+                    }
+                }
+
                 setUrlText(url);
                 return false;
             }
@@ -948,6 +967,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             setUrlText(Utils.formatUrl(loadOnInit));
             loadOnInit = null;
         }
+    }
+
+    private boolean fromWalletConnectModal(String url)
+    {
+        return url.startsWith("https://" + mainnetMagicLinkDomain + "/wc?uri=");
     }
 
     private void setUrlText(String newUrl)

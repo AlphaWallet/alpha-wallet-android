@@ -4,7 +4,7 @@ public abstract class WalletConnectHelper
 {
     public static boolean isWalletConnectV1(String text)
     {
-        return text.contains("@1?");
+        return text.contains("@1");
     }
 
     public static long getChainId(String chainId)

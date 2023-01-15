@@ -136,13 +136,13 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         viewModel.newScriptFound().observe(this, this::newScriptFound);
     }
 
-    private void newScriptFound(Boolean status)
+    private void newScriptFound(Boolean scriptUpdated)
     {
-        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
-        certificateToolbar.stopDownload();
         //determinate signature
-        if (token != null)
+        if (token != null && scriptUpdated)
         {
+            CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
+            certificateToolbar.stopDownload();
             certificateToolbar.setVisibility(View.VISIBLE);
             viewModel.checkTokenScriptValidity(token);
         }

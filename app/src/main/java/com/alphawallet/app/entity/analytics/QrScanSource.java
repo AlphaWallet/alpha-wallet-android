@@ -2,26 +2,25 @@ package com.alphawallet.app.entity.analytics;
 
 public enum QrScanSource
 {
-    WALLET_CONNECT("Wallet Connect"),
-    ADDRESS_TEXT_FIELD("Address Text Field"),
-    BROWSER_SCREEN("Browser Screen"),
-    IMPORT_WALLET_SCREEN("Import Wallet Screen"),
-    ADD_CUSTOM_TOKEN_SCREEN("Add Custom Token Screen"),
-    WALLET_SCREEN("Wallet Screen"),
-    SEND_FUNGIBLE_SCREEN("Send Screen"),
-    QUICK_ACTION("Quick Action");
+    ADDRESS_TEXT_FIELD("addressTextField"),
+    BROWSER_SCREEN("browserScreen"),
+    IMPORT_WALLET_SCREEN("importWalletScreen"),
+    ADD_CUSTOM_TOKEN_SCREEN("addCustomTokenScreen"),
+    WALLET_SCREEN("walletScreen"),
+    SEND_FUNGIBLE_SCREEN("sendFungibleScreen"),
+    QUICK_ACTION("quickAction");
 
-    public static final String KEY = "qr_scan_source";
+    public static final String KEY = "source";
 
-    private final String type;
+    private final String source;
 
-    QrScanSource(String type)
+    QrScanSource(String source)
     {
-        this.type = type;
+        this.source = source;
     }
 
     public String getValue()
     {
-        return type;
+        return source;
     }
 }

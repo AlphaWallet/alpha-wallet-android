@@ -441,7 +441,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
 
     public void importWallet(Activity activity)
     {
-        importWalletRouter.openForResult(activity, C.IMPORT_REQUEST_CODE);
+        importWalletRouter.openForResult(activity, C.IMPORT_REQUEST_CODE, false);
     }
 
     public void showHome(Context context)

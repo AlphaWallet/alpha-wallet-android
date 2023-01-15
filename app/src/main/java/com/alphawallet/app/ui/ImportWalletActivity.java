@@ -28,6 +28,7 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ImportWalletCallback;
+import com.alphawallet.app.entity.analytics.FirstWalletAction;
 import com.alphawallet.app.entity.analytics.ImportWalletType;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
@@ -244,10 +245,28 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     {
         onProgress(false);
 
-        AnalyticsProperties props = new AnalyticsProperties();
-        props.put(Analytics.PROPS_WALLET_TYPE, wallet.first.type.toString());
-        props.put(Analytics.PROPS_IMPORT_WALLET_TYPE, wallet.second);
-        viewModel.track(Analytics.Action.IMPORT_WALLET, props);
+        ImportWalletType importType = wallet.second;
+        boolean fromSplash = getIntent().getBooleanExtra(C.EXTRA_FROM_SPLASH, false);
+        if (fromSplash)
+        {
+            AnalyticsProperties firstActionProps = new AnalyticsProperties();
+            if (importType == ImportWalletType.WATCH)
+            {
+                firstActionProps.put(FirstWalletAction.KEY, FirstWalletAction.WATCH_WALLET.getValue());
+            }
+            else
+            {
+                firstActionProps.put(FirstWalletAction.KEY, FirstWalletAction.IMPORT_WALLET.getValue());
+            }
+            viewModel.track(Analytics.Action.FIRST_WALLET_ACTION, firstActionProps);
+        }
+        else
+        {
+            AnalyticsProperties importProps = new AnalyticsProperties();
+            importProps.put(Analytics.PROPS_WALLET_TYPE, wallet.first.type.toString());
+            importProps.put(Analytics.PROPS_IMPORT_WALLET_TYPE, importType);
+            viewModel.track(Analytics.Action.IMPORT_WALLET, importProps);
+        }
 
         Intent result = new Intent();
         result.putExtra(C.Key.WALLET, wallet.first);

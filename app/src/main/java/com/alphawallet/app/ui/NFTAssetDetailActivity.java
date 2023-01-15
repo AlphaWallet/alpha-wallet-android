@@ -251,11 +251,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void newScriptFound(Boolean status)
     {
-        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
-        certificateToolbar.stopDownload();
         //determinate signature
-        if (token != null)
+        if (token != null && status)
         {
+            CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
+            certificateToolbar.stopDownload();
             certificateToolbar.setVisibility(View.VISIBLE);
             viewModel.checkTokenScriptValidity(token);
 

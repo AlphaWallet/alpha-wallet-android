@@ -75,6 +75,9 @@ public class TokenDefinition {
     public static final String TOKENSCRIPT_ERROR = "<h2 style=\"color:rgba(207, 0, 15, 1);\">TokenScript Error</h2>";
     private static final String LEGACY_WARNING_TEMPLATE = "<html>" + TOKENSCRIPT_ERROR + "<h3>ts:${ERR1} is deprecated.<br/>Use ts:${ERR2}</h3>";
 
+    public static final String UNCHANGED_SCRIPT = "<unchanged>";
+    public static final String NO_SCRIPT = "<blank_script>";
+
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables
      are going to be one-per-XML-file:
@@ -351,6 +354,7 @@ public class TokenDefinition {
     public TokenDefinition()
     {
         holdingToken = null;
+        nameSpace = NO_SCRIPT;
     }
 
     public TokenDefinition(InputStream xmlAsset, Locale locale, ParseResult result) throws IllegalArgumentException, IOException, SAXException {

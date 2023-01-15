@@ -1,6 +1,8 @@
 package com.alphawallet.app.viewmodel;
 
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
+import static com.alphawallet.token.tools.TokenDefinition.NO_SCRIPT;
+import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
 
 import android.app.Activity;
 import android.content.Context;
@@ -581,13 +583,17 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     private void handleDefinition(TokenDefinition td)
     {
-        if (!TextUtils.isEmpty(td.holdingToken))
+        switch (td.nameSpace)
         {
-            newScriptFound.postValue(true);
-        }
-        else
-        {
-            scriptUpdateInProgress.postValue(false);
+            case UNCHANGED_SCRIPT:
+                newScriptFound.postValue(false);
+                break;
+            case NO_SCRIPT:
+                scriptUpdateInProgress.postValue(false);
+                break;
+            default:
+                newScriptFound.postValue(true);
+                break;
         }
     }
 

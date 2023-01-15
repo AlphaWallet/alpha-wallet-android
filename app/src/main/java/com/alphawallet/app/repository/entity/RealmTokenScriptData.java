@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository.entity;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -10,8 +12,6 @@ import java.util.Map;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by JB on 17/08/2020.
@@ -24,6 +24,7 @@ public class RealmTokenScriptData extends RealmObject
     private String filePath;
     private String names; //CSV list of token names allowing for plurals. //TODO: replace with RealmMap when available
     private String viewList; //CSV list of event views //TODO: replace with RealmMap when available
+    private String ipfsPath;
     private boolean hasEvents; //TokenScript has events
 
     public long getChainId()
@@ -136,5 +137,15 @@ public class RealmTokenScriptData extends RealmObject
     public void setHasEvents(boolean hasEvents)
     {
         this.hasEvents = hasEvents;
+    }
+
+    public String getIpfsPath()
+    {
+        return ipfsPath;
+    }
+
+    public void setIpfsPath(String ipfsPath)
+    {
+        this.ipfsPath = ipfsPath;
     }
 }

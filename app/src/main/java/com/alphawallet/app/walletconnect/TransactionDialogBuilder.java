@@ -2,6 +2,7 @@ package com.alphawallet.app.walletconnect;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -196,4 +197,17 @@ public class TransactionDialogBuilder extends DialogFragment
                 awWalletConnectClient.approve(sessionRequest, hashData), 5000);
     }
 
+    @Override
+    public void onCancel(@NonNull DialogInterface dialog)
+    {
+        super.onCancel(dialog);
+        awWalletConnectClient.reject(sessionRequest);
+    }
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog)
+    {
+        super.onDismiss(dialog);
+        awWalletConnectClient.reject(sessionRequest);
+    }
 }

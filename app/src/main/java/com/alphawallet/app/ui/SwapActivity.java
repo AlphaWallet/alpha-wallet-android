@@ -27,6 +27,7 @@ import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetSource;
+import com.alphawallet.app.entity.analytics.TokenSwapEvent;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
 import com.alphawallet.app.entity.lifi.Quote;
@@ -380,6 +381,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     protected void onResume()
     {
         super.onResume();
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(TokenSwapEvent.KEY, TokenSwapEvent.NATIVE_SWAP.getValue());
         viewModel.track(Analytics.Navigation.TOKEN_SWAP);
 
         if (settingsDialog != null)

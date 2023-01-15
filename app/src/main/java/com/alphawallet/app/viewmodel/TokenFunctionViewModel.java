@@ -904,7 +904,6 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     public void updateLocalAttributes(Token token, BigInteger tokenId)
     {
-        System.out.println("YOLESS: Call update Local Attrs");
         //Fetch Allowed attributes, then call updateAllowedAttributes
         assetDefinitionService.fetchFunctionMap(token, Collections.singletonList(tokenId))
                 .subscribeOn(Schedulers.io())
@@ -915,15 +914,12 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     private void updateAllowedAttrs(Token token, Map<BigInteger, List<String>> availableActions)
     {
-        System.out.println("YOLESS: update allowed Attrs");
         if (!availableActions.keySet().stream().findFirst().isPresent())
         {
             return;
         }
         TokenDefinition td = assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         List<Attribute> localAttrList = assetDefinitionService.getLocalAttributes(td, availableActions);
-
-        System.out.println("YOLESS 2: " + localAttrList.size());
 
         //now refresh all these attrs
         assetDefinitionService.refreshAttributes(token, td, availableActions.keySet().stream().findFirst().get(), localAttrList)

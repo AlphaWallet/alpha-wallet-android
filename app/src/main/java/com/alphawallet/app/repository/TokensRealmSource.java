@@ -237,12 +237,13 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public void setEnable(Wallet wallet, Token token, boolean isEnabled) {
+    public void setEnable(Wallet wallet, ContractAddress cAddr, boolean isEnabled)
+    {
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             realm.executeTransactionAsync(r -> {
                 RealmToken realmToken = r.where(RealmToken.class)
-                        .equalTo("address", databaseKey(token))
+                        .equalTo("address", cAddr.getAddressKey())
                         .findFirst();
 
                 if (realmToken != null)
@@ -384,34 +385,14 @@ public class TokensRealmSource implements TokenLocalSource {
             deleteAssets(realm, token, deleteList);
         }
     }
-
     @Override
-    public boolean hasVisibilityBeenChanged(Token token)
-    {
-        boolean hasBeenChanged = false;
-        try (Realm realm = realmManager.getRealmInstance(new Wallet(token.getWallet().toLowerCase())))
-        {
-            RealmToken realmToken = realm.where(RealmToken.class)
-                    .equalTo("address", databaseKey(token))
-                    .findFirst();
-
-            if (realmToken != null)
-            {
-                hasBeenChanged = realmToken.isVisibilityChanged();
-            }
-        }
-
-        return hasBeenChanged;
-    }
-
-    @Override
-    public void setVisibilityChanged(Wallet wallet, Token token)
+    public void setVisibilityChanged(Wallet wallet, ContractAddress cAddr)
     {
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             realm.executeTransactionAsync(r -> {
                 RealmToken realmToken = r.where(RealmToken.class)
-                        .equalTo("address", databaseKey(token))
+                        .equalTo("address", cAddr.getAddressKey())
                         .findFirst();
 
                 if (realmToken != null)
@@ -425,32 +406,26 @@ public class TokensRealmSource implements TokenLocalSource {
             //
         }
     }
-
     public static String databaseKey(long chainId, String address)
     {
         return address.toLowerCase() + "-" + chainId;
     }
-
     public static String databaseKey(Token token)
     {
         return databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
     }
-
     public static String eventActivityKey(String txHash, String activityName)
     {
         return txHash + "-" + activityName + EVENT_CARDS;
     }
-
     public static String eventActivityKey(String txHash, String activityName, int extendedId)
     {
         return txHash + "-" + activityName + EVENT_CARDS + "-" + extendedId;
     }
-
     public static String eventBlockKey(long chainId, String eventAddress, String namedType, String filter)
     {
         return eventAddress.toLowerCase() + "-" + chainId + "-" + namedType + "-" + filter + "-eventBlock";
     }
-
     @Override
     public boolean updateTokenBalance(Wallet wallet, Token token, BigDecimal balance, List<BigInteger> balanceArray)
     {

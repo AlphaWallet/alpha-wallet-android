@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -33,6 +34,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -360,5 +362,21 @@ public class AddTokenViewModel extends BaseViewModel
         ethereumNetworkRepository.setFilterNetworkList(uniqueList.toArray(new Long[0]));
         ethereumNetworkRepository.commitPrefs();
         tokensService.setupFilter(true);
+    }
+
+    /**
+     * Set all selected tokens enabled and visible.
+     * Note that we need to update the 'visibility changed' setting to mark the token as having explicitly been set visible.
+     * @param selected list of selected TCMs
+     */
+    public void markTokensEnabled(List<TokenCardMeta> selected)
+    {
+        if (wallet.getValue() == null) return;
+        Observable.fromIterable(selected)
+                .forEach(tcm -> tokensService.enableToken(wallet.getValue().address, tcm.getContractAddress())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(Schedulers.io())
+                        .subscribe())
+                .isDisposed();
     }
 }

@@ -11,15 +11,11 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.LongSparseArray;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -198,22 +194,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         {
             showProgress(false);
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_network, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        if (item.getItemId() == R.id.action_networks)
-        {
-            selectNetwork();
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -426,19 +406,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         {
             viewModel.setPrimaryChain(chainId);
         }
-    }
-
-    ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                long networkId = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, 1);
-                setupNetwork(networkId);
-            });
-
-    private void selectNetwork() {
-        Intent intent = new Intent(this, SelectNetworkActivity.class);
-        intent.putExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, true);
-        intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
-        getNetwork.launch(intent);
     }
 
     @Override

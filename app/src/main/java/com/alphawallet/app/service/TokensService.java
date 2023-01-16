@@ -920,7 +920,7 @@ public class TokensService
             //first blank all existing filters for zero balance tokens, as user hasn't specified which chains they want to see
             blankFiltersForZeroBalance();
 
-            NetworkInfo[] networks = ethereumNetworkRepository.getAllActiveNetworks();
+            NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
             for (NetworkInfo info : networks) { baseTokenCheck.add(info.chainId); }
         }
     }
@@ -931,7 +931,7 @@ public class TokensService
     private void blankFiltersForZeroBalance()
     {
         networkFilter.clear();
-        NetworkInfo[] networks = ethereumNetworkRepository.getAllActiveNetworks();
+        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
 
         if (!ethereumNetworkRepository.hasSetNetworkFilters())
         {

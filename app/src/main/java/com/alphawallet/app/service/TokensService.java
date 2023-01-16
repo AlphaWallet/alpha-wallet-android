@@ -998,19 +998,19 @@ public class TokensService
         //ensure locked tokens are displaying
         Observable.fromIterable(CustomViewSettings.getLockedTokens())
                 .forEach(info -> addToken(info, wallet)
-                        .flatMapCompletable(token -> enableToken(wallet, token))
+                        .flatMapCompletable(token -> enableToken(wallet, token.getContractAddress()))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe())
                         .isDisposed();
     }
 
-    private Completable enableToken(String walletAddr, Token token)
+    public Completable enableToken(String walletAddr, ContractAddress cAddr)
     {
         return Completable.fromAction(() -> {
             final Wallet wallet = new Wallet(walletAddr);
-            tokenRepository.setEnable(wallet, token, true);
-            tokenRepository.setVisibilityChanged(wallet, token);
+            tokenRepository.setEnable(wallet, cAddr, true);
+            tokenRepository.setVisibilityChanged(wallet, cAddr);
         });
     }
 

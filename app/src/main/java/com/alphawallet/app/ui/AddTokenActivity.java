@@ -353,6 +353,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             }
         }
 
+        viewModel.markTokensEnabled(selected);
+
         if (mainNetActive && onlyTestNet) // only testnet tokens selected and we're not showing testnet
         {
             //Will need to make these chains active on the callback

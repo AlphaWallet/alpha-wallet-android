@@ -30,7 +30,7 @@ public interface TokenLocalSource
 
     Token fetchToken(long chainId, Wallet wallet, String address);
 
-    void setEnable(Wallet wallet, Token token, boolean isEnabled);
+    void setEnable(Wallet wallet, ContractAddress cAddr, boolean isEnabled);
 
     String getTokenImageUrl(long chainId, String address);
 
@@ -68,9 +68,7 @@ public interface TokenLocalSource
 
     TokenTicker getCurrentTicker(String key);
 
-    void setVisibilityChanged(Wallet wallet, Token token);
-
-    boolean hasVisibilityBeenChanged(Token token);
+    void setVisibilityChanged(Wallet wallet, ContractAddress cAddr);
 
     boolean getEnabled(Token token);
 

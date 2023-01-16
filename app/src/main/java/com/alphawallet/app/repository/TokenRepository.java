@@ -361,15 +361,15 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public void setEnable(Wallet wallet, Token token, boolean isEnabled)
+    public void setEnable(Wallet wallet, ContractAddress cAddr, boolean isEnabled)
     {
-        localSource.setEnable(wallet, token, isEnabled);
+        localSource.setEnable(wallet, cAddr, isEnabled);
     }
 
     @Override
-    public void setVisibilityChanged(Wallet wallet, Token token)
+    public void setVisibilityChanged(Wallet wallet, ContractAddress cAddr)
     {
-        localSource.setVisibilityChanged(wallet, token);
+        localSource.setVisibilityChanged(wallet, cAddr);
     }
 
     @Override
@@ -1147,12 +1147,6 @@ public class TokenRepository implements TokenRepositoryType {
     public boolean isEnabled(Token token)
     {
         return localSource.getEnabled(token);
-    }
-
-    @Override
-    public boolean hasVisibilityBeenChanged(Token token)
-    {
-        return localSource.hasVisibilityBeenChanged(token);
     }
 
     @Override

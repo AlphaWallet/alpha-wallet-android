@@ -33,9 +33,9 @@ public interface TokenRepositoryType
 
     Single<Token> checkInterface(Token tokens, Wallet wallet);
 
-    void setEnable(Wallet wallet, Token token, boolean isEnabled);
+    void setEnable(Wallet wallet, ContractAddress cAddr, boolean isEnabled);
 
-    void setVisibilityChanged(Wallet wallet, Token token);
+    void setVisibilityChanged(Wallet wallet, ContractAddress cAddr);
 
     Single<TokenInfo> update(String address, long chainId, ContractType type);
 
@@ -92,8 +92,6 @@ public interface TokenRepositoryType
     Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs);
 
     boolean isEnabled(Token newToken);
-
-    boolean hasVisibilityBeenChanged(Token token);
 
     Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters);
 

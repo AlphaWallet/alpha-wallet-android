@@ -31,6 +31,7 @@ import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 
@@ -171,6 +172,11 @@ public class Token
         {
             realmToken.setBalance("0");
         }
+    }
+
+    public ContractAddress getContractAddress()
+    {
+        return new ContractAddress(tokenInfo.chainId, tokenInfo.address);
     }
 
     //Used for custom balance updates

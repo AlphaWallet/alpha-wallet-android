@@ -17,6 +17,7 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.token.entity.ContractAddress;
 
 /**
  * Created by JB on 12/07/2020.
@@ -90,6 +91,11 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public long getNameWeight()
     {
         return nameWeight;
+    }
+
+    public ContractAddress getContractAddress()
+    {
+        return new ContractAddress(getChain(), getAddress());
     }
 
     public static long groupWeight(TokenGroup group)

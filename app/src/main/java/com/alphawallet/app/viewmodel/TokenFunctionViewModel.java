@@ -894,7 +894,7 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     public void updateLocalAttributes(Token token, BigInteger tokenId)
     {
         //Fetch Allowed attributes, then call updateAllowedAttributes
-        assetDefinitionService.fetchFunctionMap(token, Collections.singletonList(tokenId))
+        assetDefinitionService.fetchFunctionMap(token, Collections.singletonList(tokenId), token.getInterfaceSpec())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(availableActions -> updateAllowedAttrs(token, availableActions), this::onError)

@@ -2,7 +2,9 @@ package com.alphawallet.token.tools;
 
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
+import com.alphawallet.token.entity.ActionModifier;
 import com.alphawallet.token.entity.As;
+import com.alphawallet.token.entity.AttestationValidation;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.ContractInfo;
 import com.alphawallet.token.entity.EthereumTransaction;
@@ -27,6 +29,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.EntityReference;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.Bytes;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -47,8 +57,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-public class TokenDefinition {
-    protected Document xml;
+public class TokenDefinition
+{
     public final Map<String, Attribute> attributes = new HashMap<>();
     protected Locale locale;
 
@@ -59,6 +69,8 @@ public class TokenDefinition {
     private final TSTokenViewHolder tokenViews = new TSTokenViewHolder();
     private final Map<String, TSSelection> selections = new HashMap<>();
     private final Map<String, TSActivityView> activityCards = new HashMap<>();
+    private final Map<String, AttnElement> structs = new HashMap<>();
+    private Attestation attestation = null;
 
     public String nameSpace;
     public TokenscriptContext context;
@@ -115,6 +127,11 @@ public class TokenDefinition {
 
     public Map<String, TSActivityView> getActivityCards() { return activityCards; }
 
+    public Attestation getAttestation()
+    {
+        return attestation;
+    }
+
     public EventDefinition parseEvent(Element resolve) throws SAXException
     {
         EventDefinition ev = new EventDefinition();
@@ -158,6 +175,10 @@ public class TokenDefinition {
         }
         function.method = resolve.getAttribute("function");
         function.as = parseAs(resolve);
+        if (function.as == As.Unknown)
+        {
+            function.namedTypeReturn = resolve.getAttribute("as");
+        }
         addFunctionInputs(function, resolve);
         function.syntax = syntax;
         return function;
@@ -192,8 +213,10 @@ public class TokenDefinition {
                 return As.Mapping;
             case "address":
                 return As.Address;
-            default: // "unsigned"
+            case "uint":
                 return As.Unsigned;
+            default: // "unsigned"
+                return As.Unknown;
         }
     }
 
@@ -394,6 +417,7 @@ public class TokenDefinition {
         {
             parseTags(xml);
             extractSignedInfo(xml);
+            //scanAttestation(xml);
         }
         catch (IOException|SAXException e)
         {
@@ -443,6 +467,16 @@ public class TokenDefinition {
                         {
                             attributes.put(attr.name, attr);
                         }
+                        break;
+                    case "struct":
+                        AttnElement struct = parseAttestationStruct(element);
+                        if (struct.type != null)
+                        {
+                            structs.put(struct.name, struct);
+                        }
+                        break;
+                    case "attestation":
+                        attestation = scanAttestation(element);
                         break;
                     default:
                         break;
@@ -664,6 +698,8 @@ public class TokenDefinition {
 
     private void extractCard(Element card) throws Exception
     {
+        TSAction action;
+        TSActivityView activity;
         String type = card.getAttribute("type");
         switch (type)
         {
@@ -671,15 +707,35 @@ public class TokenDefinition {
                 processTokenCardElements(card);
                 break;
             case "action":
-                TSAction action = handleAction(card);
+                action = handleAction(card);
                 actions.put(action.name, action);
+                setModifier(action, card);
                 break;
             case "activity":
-                TSActivityView activity = processActivityView(card);
+                activity = processActivityView(card);
                 activityCards.put(card.getAttribute("name"), activity);
                 break;
             default:
                 throw new SAXException("Unexpected card type found: " + type);
+        }
+
+
+    }
+
+    private void setModifier(TSAction action, Element card) throws Exception
+    {
+        String modifier = card.getAttribute("modifier");
+        switch (modifier)
+        {
+            case "attestation":
+                action.modifier = ActionModifier.ATTESTATION;
+                break;
+            case "NONE":
+            case "":
+                action.modifier = ActionModifier.NONE;
+                break;
+            default:
+                throw new SAXException("Unexpected modifier found: " + modifier);
         }
     }
 
@@ -823,6 +879,382 @@ public class TokenDefinition {
             this.keyName = nList.item(0).getTextContent();
         }
         return; // even if the document is signed, often it doesn't have KeyName
+    }
+
+    private Attestation scanAttestation(Node attestationNode) throws SAXException
+    {
+        Attestation attn = new Attestation();
+        //NodeList nList;
+        //nList = xml.getElementsByTagNameNS("https://github.com/TokenScript/attestation", "attestation");
+
+        for (Node n = attestationNode.getFirstChild(); n != null; n = n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE) continue;
+            Element attnElement = (Element) n;
+
+            switch (attnElement.getLocalName())
+            {
+                case "display":
+                    handleAttestationDisplay(attnElement);
+                    break;
+
+                case "struct":
+                case "ProofOfKnowledge":
+                    attn.members.add(parseAttestationStruct(attnElement));
+                    //attestation.add(parseAttestationStruct(attnElement));
+                    break;
+
+                case "origins":
+                    attn.origin = parseOrigins(attnElement);
+                    //advance to function
+                    Element functionElement = getFirstChildElement(attnElement);
+                    attn.function = parseFunction(functionElement, Syntax.IA5String);
+                    attn.function.as = parseAs(functionElement);
+                    break;
+            }
+
+            //String label = tokenType.getAttribute("label");
+                /*switch (tokenType.getLocalName())
+                {
+                    case "token":
+                        Element tokenSpec = getFirstChildElement(tokenType);
+                        if (tokenSpec != null)
+                        {
+                            switch (tokenSpec.getLocalName())
+                            {
+                                case "ethereum":
+                                    String chainIdStr = tokenSpec.getAttribute("network");
+                                    long chainId = Long.parseLong(chainIdStr);
+                                    ContractInfo ci = new ContractInfo(tokenSpec.getLocalName());
+                                    ci.addresses.put(chainId, new ArrayList<>(Arrays.asList(ci.contractInterface)));
+                                    contracts.put(label, ci);
+                                    break;
+                                case "contract":
+                                    handleAddresses(getFirstChildElement(element));
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }*/
+        }
+
+        return attn;
+    }
+
+    /*
+    <attn:display>
+    <attn:element name="title">
+      <attn:label contract="ReferralToken" ref="name"/>
+    </attn:element>
+    <attn:element name="subtitle">
+      <attn:label>
+        <attn:string xml:lang="en">Devcon Referral Attestation</attn:string>
+      </attn:label>
+    </attn:element>
+    <attn:element name="id">
+      <attn:label ref="ticketId"/>
+    </attn:element>
+  </attn:display>
+     */
+    private void handleAttestationDisplay(Element attnElement)
+    {
+
+    }
+
+
+    /*
+    <attn:struct name="TicketData">
+    <attn:struct name="PreHashTicketData">
+      <attn:UTF8-String name="eventId" />
+      <attn:ASN1-Integer name="ticketId" />
+      <attn:ASN1-Integer name="ticketClass" />
+      <attn:Octet-String name="commitment2" />
+    </attn:struct>
+    <attn:signature name="IssuerSignature">
+      <attn:data>
+        <attn:prehash ref="PreHashTicketData" />
+      </attn:data>
+    </attn:signature>
+  </attn:struct>
+  <attn:struct name="SignedIdentifier">
+    <attn:struct name="IdentifierAttestation">
+      <attn:DER-Enum name="version"/>
+      <attn:ASN1-Integer name="serialNumber"/>
+      <attn:DER-Object name="signatureType"/>
+      <attn:DER-Object name="issuerSequence"/>
+      <attn:struct name="timeStamp">
+        <attn:UTF8-String name="validFromStr"/>
+        <attn:ASN1-Integer name="validFrom"/>
+        <attn:UTF8-String name="validToStr"/>
+        <attn:ASN1-Integer name="validTo"/>
+      </attn:struct>
+      <attn:DER-Object name="smartContractDef"/>
+      <attn:SubjectPublicKeyInfo name="subjectPublicKey"/>
+      <attn:struct name="filler"/>
+      <attn:DER-Compound name="commitment1"/>
+    </attn:struct>
+    <attn:signature name="AttestorSignature">
+      <attn:data>
+        <attn:prehash ref="IdentifierAttestation"/>
+      </attn:data>
+    </attn:signature>
+  </attn:struct>
+     */
+
+    //private final List<AttnElement> attestation = new ArrayList<>();
+
+    /*private AttnElement handleAttestationStruct(Element attrElement)
+    {
+        for(Node n = attrElement.getFirstChild(); n!=null; n=n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE) continue;
+            Element e = (Element) n;
+
+            AttnElement attnE = parseAttestationStruct(e);
+            attestation.add(attnE);
+        }
+    }*/
+
+    private List<AttnElement> parseAttestationStructMembers(Node attnStruct)
+    {
+        //get struct list
+        List<AttnElement> attnList = new ArrayList<>();
+
+        for(Node n = attnStruct.getFirstChild(); n!=null; n=n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE) continue;
+            Element e = (Element) n;
+            AttnElement attnE = parseAttestationStruct(e);
+            attnList.add(attnE);
+        }
+
+        return attnList;
+    }
+
+    private String getElementName(Node attribute)
+    {
+        String name = "";
+        if (attribute.hasAttributes())
+        {
+            for (int i = 0; i < attribute.getAttributes().getLength(); i++)
+            {
+                Node node = attribute.getAttributes().item(i);
+                switch (node.getLocalName())
+                {
+                    case "name":
+                        name = node.getTextContent();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return name;
+    }
+
+    public AttestationValidation getValidation(List<Type> values)
+    {
+        if (attestation == null || !namedTypeLookup.containsKey(attestation.function.namedTypeReturn))
+        {
+            return null;
+        }
+
+        //get namedType for return
+        NamedType nType = namedTypeLookup.get(attestation.function.namedTypeReturn);
+        AttestationValidation.Builder builder = new AttestationValidation.Builder();
+
+        //find issuerkey
+        ContractInfo issuerKey = contracts.get("_IssuerKey");
+        builder.issuerKey(issuerKey != null ? issuerKey.getFirstAddress() : null);
+
+        int index = 0;
+
+        for (NamedType.SequenceElement element : nType.sequence)
+        {
+            //handle magic values plus generic
+            switch (element.name)
+            {
+                case "_issuerAddress":
+                    builder.issuerAddress((String)values.get(index++).getValue());
+                    break;
+                case "_subjectAddress":
+                    builder.subjectAddress((String)values.get(index++).getValue());
+                    break;
+                case "_attestationId":
+                    builder.attestationId((BigInteger)values.get(index++).getValue());
+                    break;
+                case "isValid":
+                    builder.isValid((Boolean)values.get(index++).getValue());
+                    break;
+                default:
+                    builder.additional(element.name, (Type<?>)values.get(index++).getValue());
+                    break;
+            }
+        }
+
+        return builder.build();
+    }
+
+    public List<TypeReference<?>> getAttestationReturnTypes()
+    {
+        List<TypeReference<?>> returnTypes = new ArrayList<>();
+        if (attestation == null || !namedTypeLookup.containsKey(attestation.function.namedTypeReturn))
+        {
+            return returnTypes;
+        }
+
+        //get namedType for return
+        NamedType nType = namedTypeLookup.get(attestation.function.namedTypeReturn);
+
+        //add output params
+        for (NamedType.SequenceElement element : nType.sequence)
+        {
+            switch (element.type)
+            {
+                case "uint":
+                case "uint256":
+                    returnTypes.add(new TypeReference<Uint256>() {});
+                    break;
+                case "bytes32":
+                    returnTypes.add(new TypeReference<Bytes32>() {});
+                    break;
+                case "bytes":
+                    returnTypes.add(new TypeReference<Bytes>() {});
+                    break;
+                case "string":
+                    returnTypes.add(new TypeReference<Utf8String>() {});
+                    break;
+                case "address":
+                    returnTypes.add(new TypeReference<Address>() {});
+                    break;
+                case "bool":
+                    returnTypes.add(new TypeReference<Bool>() {});
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return returnTypes;
+    }
+
+    private AttnElement parseAttestationStruct(Node attnElement)
+    {
+        AttnElement thisElement = new AttnElement();
+        thisElement.name = getElementName(attnElement);
+        String type = processTypeName(attnElement.getLocalName());
+        switch (type)
+        {
+            case "struct":
+                thisElement.type = AttnStructType.STRUCT;
+                thisElement.members = parseAttestationStructMembers(attnElement);
+                break;
+            case "UTF8-String":
+                thisElement.type = AttnStructType.UTF8_STRING;
+                break;
+            case "ASN1-Integer":
+                thisElement.type = AttnStructType.ASN1_INTEGER;
+                break;
+            case "Octet-String":
+                thisElement.type = AttnStructType.OCTET_STRING;
+                break;
+            case "signature":
+                thisElement.type = AttnStructType.SIGNATURE;
+                break;
+            case "DER-Enum":
+                thisElement.type = AttnStructType.DER_ENUM;
+                break;
+            case "SubjectPublicKeyInfo":
+                thisElement.type = AttnStructType.SUBJECT_PUBLIC_KEY;
+                break;
+            case "ProofOfKnowledge":
+                thisElement.type = AttnStructType.PROOF_OF_KNOWLEDGE;
+                thisElement.members = parseAttestationStructMembers(attnElement);
+                break;
+            case "timestamp":
+                thisElement.type = AttnStructType.TIMESTAMP;
+                break;
+            case "bytes":
+                thisElement.type = AttnStructType.BYTES;
+                break;
+            case "uint":
+                thisElement.type = AttnStructType.UINT;
+                break;
+            case "string":
+                thisElement.type = AttnStructType.STRING;
+                break;
+            case "address":
+                thisElement.type = AttnStructType.ADDRESS;
+                break;
+            case "bool":
+                thisElement.type = AttnStructType.BOOL;
+                break;
+            default:
+                break;
+        }
+
+        return thisElement;
+    }
+
+    private String processTypeName(String tag)
+    {
+        if (tag.startsWith("uint") || tag.startsWith("int"))
+        {
+            return "uint";
+        }
+        else if (tag.startsWith("bytes"))
+        {
+            return "bytes";
+        }
+        else
+        {
+            return tag;
+        }
+    }
+
+    private enum AttnStructType
+    {
+        STRUCT,
+        SUBJECT_PUBLIC_KEY,
+        PROOF_OF_KNOWLEDGE,
+        SIGNATURE,
+        UTF8_STRING,
+        ASN1_INTEGER,
+        OCTET_STRING,
+        DER_ENUM,
+        DER_OBJECT,
+        TIMESTAMP,
+        //Ethereum return types
+        ADDRESS,
+        BYTES,
+        STRING,
+        UINT,
+        BOOL,
+    }
+
+    public static class Attestation
+    {
+        public TSOrigins origin; //single value for validation
+        public FunctionDefinition function = null;
+        public final List<AttnElement> members;
+
+        public Attestation()
+        {
+            members = new ArrayList<>();
+        }
+    }
+
+    private static class AttnElement
+    {
+        public String name;
+        public String data;
+        public AttnStructType type;
+        public List<AttnElement> members;
     }
 
     public String getKeyName() {
@@ -1198,7 +1630,7 @@ public class TokenDefinition {
         tse.ref = input.getAttribute("ref");
         tse.value = input.getTextContent();
         tse.localRef = input.getAttribute("local-ref");
-        return tse;    
+        return tse;
 }
 
     private void processDataInputs(FunctionDefinition fd, Element input)

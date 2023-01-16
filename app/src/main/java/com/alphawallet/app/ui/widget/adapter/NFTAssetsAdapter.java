@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.OpenSeaService;
@@ -79,6 +80,19 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         displayData = new ArrayList<>();
         displayData.addAll(actualData);
         lastFilter = "";
+        sortData();
+    }
+
+    //TODO: Attestations should be attached to the backing Token if available
+    public void attachAttestations(Token[] attestations)
+    {
+        for (Token att : attestations)
+        {
+            Attestation thisAttn = (Attestation)att;
+            NFTAsset attestationAsset = new NFTAsset(thisAttn);
+            displayData.add(new Pair<>(thisAttn.getAttestationId(), attestationAsset));
+        }
+
         sortData();
     }
 

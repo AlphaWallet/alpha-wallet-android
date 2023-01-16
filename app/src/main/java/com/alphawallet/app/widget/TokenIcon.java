@@ -388,6 +388,7 @@ public class TokenIcon extends ConstraintLayout
     {
         icon.setImageResource(R.drawable.ic_clock);
         textIcon.setVisibility(View.VISIBLE);
+        textIcon.setBackgroundResource(R.drawable.grid_icon);
         textIcon.setBackgroundTintList(getColorStateList(getContext(), EthereumNetworkBase.getChainColour(token.tokenInfo.chainId)));
         //try symbol first
         if (!TextUtils.isEmpty(token.tokenInfo.symbol) && token.tokenInfo.symbol.length() > 1)
@@ -404,6 +405,7 @@ public class TokenIcon extends ConstraintLayout
     {
         textIcon.setText(name);
         textIcon.setVisibility(View.VISIBLE);
+        textIcon.setBackgroundResource(R.drawable.grid_icon);
         textIcon.setBackgroundTintList(getColorStateList(getContext(), EthereumNetworkBase.getChainColour(MAINNET_ID)));
     }
 
@@ -454,5 +456,15 @@ public class TokenIcon extends ConstraintLayout
             icon.setColorFilter(null);
             icon.setImageAlpha(255);
         }
+    }
+
+    public void setIsAttestation(String symbol)
+    {
+        handler.removeCallbacks(null);
+        icon.setVisibility(View.VISIBLE);
+        icon.setImageResource(R.drawable.zero_one);
+        textIcon.setVisibility(View.VISIBLE);
+        textIcon.setBackgroundResource(0);
+        textIcon.setText(Utils.getIconisedText(symbol));
     }
 }

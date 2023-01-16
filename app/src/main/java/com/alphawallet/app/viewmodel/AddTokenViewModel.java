@@ -281,6 +281,8 @@ public class AddTokenViewModel extends BaseViewModel
             foundNetwork = true;
             disposable = tokensService
                     .update(info.address, info.chainId, type)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onTokensSetup, error -> checkType(error, info.chainId, info.address, type));
         }
         else

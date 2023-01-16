@@ -462,7 +462,7 @@ public class Web3TokenView extends WebView
 
         final StringBuilder attrs = assetService.getTokenAttrs(token, tokenId, range.tokenIds.size());
 
-        assetService.resolveAttrs(token, tokenId, assetService.getTokenViewLocalAttributes(token.tokenInfo.chainId, token.tokenInfo.address), itemView)
+        assetService.resolveAttrs(token, null, tokenId, assetService.getTokenViewLocalAttributes(token.tokenInfo.chainId, token.tokenInfo.address), itemView)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(token, throwable, range),

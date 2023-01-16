@@ -1040,4 +1040,6 @@
     <string name="remove_shortcut_while_token_not_found">Token does not exist, remove the shortcut?</string>
     <string name="title_remove_shortcut">Remove Shortcut</string>
     <string name="dialog_title_sign_in_with_ethereum">Sign in with Ethereum</string>
+    <string name="attestations_header">Attestations</string>
+    <string name="attestation">Attestation</string>
 </resources>

@@ -16,4 +16,5 @@ public class TSAction
 
     public Map<String, Attribute> attributes;
     public FunctionDefinition function;
+    public ActionModifier modifier;
 }

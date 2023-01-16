@@ -7,10 +7,12 @@ import android.content.Intent;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.AssetDisplayActivity;
 import com.alphawallet.app.ui.Erc20DetailActivity;
 import com.alphawallet.app.ui.NFTActivity;
+import com.alphawallet.app.ui.NFTAssetDetailActivity;
 
 public class TokenDetailRouter
 {
@@ -63,6 +65,17 @@ public class TokenDetailRouter
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.Key.WALLET, wallet);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        context.startActivityForResult(intent, C.TERMINATE_ACTIVITY);
+    }
+
+    public void openAttestation(Activity context, long chainId, String address, Wallet wallet, NFTAsset asset)
+    {
+        Intent intent = new Intent(context, NFTAssetDetailActivity.class);
+        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.EXTRA_CHAIN_ID, chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, address);
+        intent.putExtra(C.EXTRA_TOKEN_ID, asset.getTokenIdStr());
+        intent.putExtra(C.EXTRA_NFTASSET, asset);
         context.startActivityForResult(intent, C.TERMINATE_ACTIVITY);
     }
 }

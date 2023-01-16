@@ -999,4 +999,6 @@
     <string name="remove_shortcut_while_token_not_found">တိုကင်မရှိပါ၊ ဖြတ်လမ်းကို ဖယ်ရှားမလား။</string>
     <string name="title_remove_shortcut">Shortcut ကို ဖယ်ရှားပါ။</string>
     <string name="dialog_title_sign_in_with_ethereum">Ethereum ဖြင့် ဝင်ရောက်ပါ။</string>
+    <string name="attestations_header">စုံစမ်းစစ်ဆေးမှုများ</string>
+    <string name="attestation">စုံစမ်းစစ်ဆေးခြင်း</string>
 </resources>

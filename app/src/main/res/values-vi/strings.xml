@@ -978,4 +978,6 @@
     <string name="remove_shortcut_while_token_not_found">Mã thông báo không tồn tại, xóa phím tắt?</string>
     <string name="title_remove_shortcut">Xóa phím tắt</string>
     <string name="dialog_title_sign_in_with_ethereum">Đăng nhập bằng Ethereum</string>
+    <string name="attestations_header">Chứng thực</string>
+    <string name="attestation">Chứng thực</string>
 </resources>

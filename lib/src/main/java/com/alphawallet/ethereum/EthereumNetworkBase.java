@@ -59,7 +59,7 @@ public abstract class EthereumNetworkBase
     public static final String AVALANCHE_RPC_URL = "https://api.avax.network/ext/bc/C/rpc";
     public static final String FUJI_TEST_RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc";
     public static final String FANTOM_RPC_URL = "https://rpcapi.fantom.network";
-    public static final String FANTOM_TEST_RPC_URL = "https://rpc.testnet.fantom.network";
+    public static final String FANTOM_TEST_RPC_URL = "https://rpc.ankr.com/fantom_testnet";
     public static final String MATIC_RPC_URL = "https://matic-mainnet.chainstacklabs.com";
     public static final String MUMBAI_TEST_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
     public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";

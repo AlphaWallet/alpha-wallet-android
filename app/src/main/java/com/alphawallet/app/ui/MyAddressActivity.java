@@ -155,6 +155,8 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
                         .setVisible(false);
                 menu.findItem(R.id.action_show_contract)
                         .setVisible(false);
+                menu.findItem(R.id.action_networks)
+                        .setVisible(false);
                 break;
             case MODE_CONTRACT:
                 menu.findItem(R.id.action_show_contract)

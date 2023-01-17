@@ -726,7 +726,6 @@
     <string name="action_enable_testnet">Got it, enable Testnet</string>
     <string name="message_dialog_testnet">Testnets tokens are like \'Monopoly\' money. They have zero financial worth but are used by developers to try out new designs without needing to spend valuable coins.</string>
     <string name="select_dappbrowser_network">Connect to Network</string>
-    <string name="choose_network_preference">Choose Network Preference</string>
     <string name="please_select_at_least_one_network">Please select at least one network.</string>
     <string name="token_info_portfolio">Portfolio</string>
     <string name="enter_target_price">Ingrese el precio objetivo</string>

@@ -738,7 +738,6 @@
     <string name="action_enable_testnet">Compris, activer le Testnet</string>
     <string name="message_dialog_testnet">Les tokens Testnet sont comme de l\'argent au \'Monopoly\'. Ils n\'ont aucune valeur financière, mais sont utilisés par les développeurs pour essayer de nouvelles conceptions sans avoir à dépenser d\'argent réel.</string>
     <string name="select_dappbrowser_network">Se Connecter au Réseau</string>
-    <string name="choose_network_preference">Choisir la Préférence du Réseau</string>
     <string name="please_select_at_least_one_network">Veuillez choisir au moins un réseau.</string>
     <string name="token_info_portfolio">Portfolio</string>
     <string name="enter_target_price">Entrez le prix cible</string>

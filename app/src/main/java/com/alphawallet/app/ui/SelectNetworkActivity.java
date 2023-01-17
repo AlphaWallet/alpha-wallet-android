@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.CompoundButton;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -14,7 +13,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.adapter.SingleSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
@@ -24,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -34,8 +30,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
 
     boolean localSelectionMode;
     private SelectNetworkViewModel viewModel;
-    private SingleSelectNetworkAdapter mainNetAdapter;
-    private SingleSelectNetworkAdapter testNetAdapter;
+    private SingleSelectNetworkAdapter networkAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -74,7 +69,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
             {
                 setTitle(getString(R.string.select_dappbrowser_network));
 
-                hideSwitches();
+                hideSwitch();
                 List<NetworkInfo> filteredNetworks = new ArrayList<>();
                 for (Long chainId : viewModel.getFilterNetworkList())
                 {
@@ -101,25 +96,14 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     private void setupFilters(Long selectedNetwork, List<NetworkInfo> availableNetworks)
     {
         ArrayList<NetworkItem> mainNetList = new ArrayList<>();
-        ArrayList<NetworkItem> testNetList = new ArrayList<>();
 
         for (NetworkInfo info : availableNetworks)
         {
-            if (EthereumNetworkRepository.hasRealValue(info.chainId))
-            {
-                mainNetList.add(new NetworkItem(info.name, info.chainId, selectedNetwork.equals(info.chainId)));
-            }
-            else
-            {
-                testNetList.add(new NetworkItem(info.name, info.chainId, selectedNetwork.equals(info.chainId)));
-            }
+            mainNetList.add(new NetworkItem(info.name, info.chainId, selectedNetwork.equals(info.chainId)));
         }
 
-        mainNetAdapter = new SingleSelectNetworkAdapter(mainNetList);
-        mainnetRecyclerView.setAdapter(mainNetAdapter);
-
-        testNetAdapter = new SingleSelectNetworkAdapter(testNetList);
-        testnetRecyclerView.setAdapter(testNetAdapter);
+        networkAdapter = new SingleSelectNetworkAdapter(mainNetList);
+        mainnetRecyclerView.setAdapter(networkAdapter);
     }
 
     @Override
@@ -166,17 +150,11 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
     @Override
     protected void handleSetNetworks()
     {
-        long selectedNetwork = mainNetAdapter.getSelectedItem() + testNetAdapter.getSelectedItem();
+        long selectedNetwork = networkAdapter.getSelectedItem();
         Intent intent = new Intent();
         intent.putExtra(C.EXTRA_CHAIN_ID, selectedNetwork);
         setResult(RESULT_OK, intent);
         finish();
     }
-
-    @Override
-    public void onTestNetDialogConfirmed(long newChainId)
-    {
-        super.onTestNetDialogConfirmed(newChainId);
-        testNetAdapter.selectDefault();
-    }
 }
+

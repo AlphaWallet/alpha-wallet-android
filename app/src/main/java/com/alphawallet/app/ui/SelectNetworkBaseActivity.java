@@ -113,9 +113,8 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity implements 
     {
     }
 
-    void hideSwitches()
+    void hideSwitch()
     {
-        mainnetHeader.setVisibility(View.GONE);
         testnetHeader.setVisibility(View.GONE);
     }
 

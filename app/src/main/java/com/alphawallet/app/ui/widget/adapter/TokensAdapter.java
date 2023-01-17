@@ -37,7 +37,6 @@ import com.alphawallet.app.ui.widget.holder.ChainNameHeaderHolder;
 import com.alphawallet.app.ui.widget.holder.HeaderHolder;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.SearchTokensHolder;
-import com.alphawallet.app.ui.widget.holder.TestNetTipsHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
@@ -63,7 +62,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     private boolean debugView = false;
 
     private boolean gridFlag;
-    private boolean showTestNetTips = false;
 
     protected final TokensAdapterCallback tokensAdapterCallback;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>()
@@ -181,11 +179,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
             case HeaderHolder.VIEW_TYPE:
                 holder = new HeaderHolder(R.layout.layout_tokens_header, parent);
-                break;
-
-            case TestNetTipsHolder.VIEW_TYPE:
-                holder = new TestNetTipsHolder(R.layout.layout_testnet_header, parent);
-                holder.setOnTokenClickListener(tokensAdapterCallback);
                 break;
 
             case SearchTokensHolder.VIEW_TYPE:
@@ -503,12 +496,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         this.filterType = filterType;
         gridFlag = filterType == TokenFilter.COLLECTIBLES;
         filterAdapterItems();
-    }
-
-    public void showTestNetTips()
-    {
-        this.showTestNetTips = true;
-        notifyDataSetChanged();
     }
 
     public void clear()

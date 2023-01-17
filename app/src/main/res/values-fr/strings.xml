@@ -904,9 +904,6 @@
     <string name="label_slippage_custom">Custom</string>
     <string name="notify_wallet_connect_title">WalletConnect est actif</string>
     <string name="notify_wallet_connect_content">Cliquez pour voir les sessions actives</string>
-    <string name="title_dialog_where_are_tokens">Où sont mes jetons ?</string>
-    <string name="content_dialog_where_are_tokens">Ne t\'en fais pas. Vos jetons sont en sécurité. Vous visualisez les réseaux Testnet. Ils sont utilisés par les développeurs pour tester de nouveaux designs. Vous pouvez passer à Mainnet à tout moment.</string>
-    <string name="button_switch_to_mainnet">Passer au réseau principal</string>
     <string name="label_api_v1_app_name">Name</string>
     <string name="label_api_v1_note">Note</string>
     <string name="action_connect">Connect</string>

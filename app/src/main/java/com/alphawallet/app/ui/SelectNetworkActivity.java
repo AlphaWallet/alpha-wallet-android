@@ -19,7 +19,6 @@ import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
 import com.alphawallet.app.widget.TestNetDialog;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -46,45 +45,32 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
 
     void prepare(Intent intent)
     {
-        if (intent != null)
-        {
-            localSelectionMode = intent.getBooleanExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, false);
-            long selectedChainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
-
-            // Previous active network was deselected, get the first item in filtered networks
-            if (selectedChainId == -1) { selectedChainId = viewModel.getSelectedNetwork(); } //try network from settings
-            if (selectedChainId == -1
-                || !viewModel.getFilterNetworkList().contains(selectedChainId))
-            {
-                selectedChainId = viewModel.getFilterNetworkList().get(0);
-            } //use first network known on list if there's still any kind of issue
-
-            if (localSelectionMode)
-            {
-                setTitle(getString(R.string.choose_network_preference));
-                List<NetworkInfo> allNetworks = Arrays.asList(viewModel.getNetworkList());
-                setupList(selectedChainId, allNetworks);
-            }
-            else
-            {
-                setTitle(getString(R.string.select_dappbrowser_network));
-
-                hideSwitch();
-                List<NetworkInfo> filteredNetworks = new ArrayList<>();
-                for (Long chainId : viewModel.getFilterNetworkList())
-                {
-                    filteredNetworks.add(viewModel.getNetworkByChain(chainId));
-                }
-
-                setupList(selectedChainId, filteredNetworks);
-            }
-
-            initTestNetDialog(this);
-        }
-        else
+        if (intent == null)
         {
             finish();
+            return;
         }
+
+        long selectedChainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
+
+        // Previous active network was deselected, get the first item in filtered networks
+        if (selectedChainId == -1) { selectedChainId = viewModel.getSelectedNetwork(); } //try network from settings
+        if (selectedChainId == -1
+            || !viewModel.getFilterNetworkList().contains(selectedChainId))
+        {
+            selectedChainId = viewModel.getFilterNetworkList().get(0);
+        } //use first network known on list if there's still any kind of issue
+
+        setTitle(getString(R.string.select_dappbrowser_network));
+
+        hideSwitch();
+        List<NetworkInfo> filteredNetworks = new ArrayList<>();
+        for (Long chainId : viewModel.getFilterNetworkList())
+        {
+            filteredNetworks.add(viewModel.getNetworkByChain(chainId));
+        }
+
+        setupList(selectedChainId, filteredNetworks);
     }
 
     void setupList(Long selectedNetwork, List<NetworkInfo> availableNetworks)

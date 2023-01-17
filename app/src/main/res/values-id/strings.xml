@@ -738,7 +738,6 @@
     <string name="action_enable_testnet">Mengerti, aktifkan Testnet</string>
     <string name="message_dialog_testnet">Token Testnets seperti uang \'Monopoli\'. Mereka tidak memiliki nilai finansial, tetapi digunakan oleh para pengembang untuk mencoba desain baru tanpa perlu mengeluarkan koin yang berharga..</string>
     <string name="select_dappbrowser_network">Terhubung ke Jaringan</string>
-    <string name="choose_network_preference">Pilih Pilihan Jaringan</string>
     <string name="please_select_at_least_one_network">Pilih setidaknya satu jaringan.</string>
     <string name="token_info_portfolio">Portofolio</string>
     <string name="enter_target_price">Masukkan Target Harga</string>

@@ -855,11 +855,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
         for (Long networkId : storedIds)
         {
-            if (hasRealValue(networkId) || preferences.isTestnetEnabled())
-            {
-                NetworkInfo check = networkMap.get(networkId);
-                if (check != null) selectedIds.add(networkId);
-            }
+            NetworkInfo check = networkMap.get(networkId);
+            if (check != null) selectedIds.add(networkId);
         }
 
         if (selectedIds.size() == 0)

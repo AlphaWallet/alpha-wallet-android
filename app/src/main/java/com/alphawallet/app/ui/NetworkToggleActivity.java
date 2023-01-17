@@ -140,7 +140,10 @@ public class NetworkToggleActivity extends NetworkBaseActivity
         viewModel.setTestnetEnabled(testnetSwitch.isChecked());
 
         List<Long> filterList = new ArrayList<>(Arrays.asList(mainNetAdapter.getSelectedItems()));
-        filterList.addAll(Arrays.asList(testNetAdapter.getSelectedItems()));
+        if (testnetSwitch.isChecked())
+        {
+            filterList.addAll(Arrays.asList(testNetAdapter.getSelectedItems()));
+        }
         boolean hasClicked = mainNetAdapter.hasSelectedItems() || testNetAdapter.hasSelectedItems();
         boolean shouldBlankUserSelection = (mainNetAdapter.getSelectedItems().length == 0)
                 || (testnetSwitch.isChecked() && testNetAdapter.getSelectedItems().length == 0);

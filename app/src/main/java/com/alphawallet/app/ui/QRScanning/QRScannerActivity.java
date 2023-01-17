@@ -35,6 +35,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
+import com.alphawallet.app.entity.analytics.QrScanResultType;
 import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
@@ -426,14 +427,20 @@ public class QRScannerActivity extends BaseActivity
 
     public void handleQRCode(String qrCode)
     {
+        String resultType = getIntent().getStringExtra(QrScanResultType.KEY);
+        if (!TextUtils.isEmpty(resultType))
+        {
+            AnalyticsProperties props = new AnalyticsProperties();
+            props.put(QrScanResultType.KEY, resultType);
+            viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+        }
+
         if (qrCode.startsWith("wc:"))
         {
             startWalletConnect(qrCode);
         }
         else
         {
-            viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS);
-
             Intent intent = new Intent();
             intent.putExtra(C.EXTRA_QR_CODE, qrCode);
             setResult(Activity.RESULT_OK, intent);

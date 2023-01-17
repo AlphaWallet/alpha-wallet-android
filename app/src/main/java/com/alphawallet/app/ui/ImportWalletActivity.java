@@ -33,6 +33,7 @@ import com.alphawallet.app.entity.analytics.ImportWalletType;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.analytics.QrScanResultType;
 import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.entity.cryptokeys.KeyEncodingType;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -335,6 +336,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         {
             Intent intent = new Intent(this, QRScannerActivity.class);
             intent.putExtra(QrScanSource.KEY, QrScanSource.IMPORT_WALLET_SCREEN.getValue());
+            intent.putExtra(QrScanResultType.KEY, QrScanResultType.ADDRESS.getValue());
             getQRCode.launch(intent);
         }
 

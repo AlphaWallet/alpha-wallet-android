@@ -16,16 +16,16 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
-public class SelectNetworkFilterViewModel extends BaseViewModel {
+public class NetworkToggleViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
     private final PreferenceRepositoryType preferenceRepository;
 
     @Inject
-    public SelectNetworkFilterViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
-                                        TokensService tokensService,
-                                        PreferenceRepositoryType preferenceRepository,
-                                        AnalyticsServiceType analyticsService) {
+    public NetworkToggleViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
+                                  TokensService tokensService,
+                                  PreferenceRepositoryType preferenceRepository,
+                                  AnalyticsServiceType analyticsService) {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
         this.preferenceRepository = preferenceRepository;

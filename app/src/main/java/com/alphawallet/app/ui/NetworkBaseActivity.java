@@ -18,7 +18,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import javax.inject.Inject;
 
-public abstract class SelectNetworkBaseActivity extends BaseActivity implements TestNetDialog.TestNetDialogCallback
+public abstract class NetworkBaseActivity extends BaseActivity implements TestNetDialog.TestNetDialogCallback
 {
     RecyclerView mainnetRecyclerView;
     RecyclerView testnetRecyclerView;

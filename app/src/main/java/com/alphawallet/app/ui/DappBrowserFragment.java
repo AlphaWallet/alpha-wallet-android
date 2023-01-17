@@ -594,7 +594,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void openNetworkSelection()
     {
-        Intent intent = new Intent(getContext(), SelectNetworkActivity.class);
+        Intent intent = new Intent(getContext(), NetworkChooserActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
         if (activeNetwork != null) intent.putExtra(C.EXTRA_CHAIN_ID, activeNetwork.chainId);
         getNetwork.launch(intent);
@@ -773,7 +773,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void launchNetworkPicker()
     {
-        Intent intent = new Intent(getContext(), SelectNetworkActivity.class);
+        Intent intent = new Intent(getContext(), NetworkChooserActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
         if (activeNetwork != null) intent.putExtra(C.EXTRA_CHAIN_ID, activeNetwork.chainId);
         getNewNetwork.launch(intent);

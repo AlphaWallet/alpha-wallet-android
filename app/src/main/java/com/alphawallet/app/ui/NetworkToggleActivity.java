@@ -16,8 +16,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.ui.widget.adapter.MultiSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
-import com.alphawallet.app.viewmodel.SelectNetworkFilterViewModel;
-import com.alphawallet.app.widget.TestNetDialog;
+import com.alphawallet.app.viewmodel.NetworkToggleViewModel;
 import com.alphawallet.ethereum.NetworkInfo;
 
 import java.util.ArrayList;
@@ -27,9 +26,9 @@ import java.util.List;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity
+public class NetworkToggleActivity extends NetworkBaseActivity
 {
-    private SelectNetworkFilterViewModel viewModel;
+    private NetworkToggleViewModel viewModel;
     private MultiSelectNetworkAdapter mainNetAdapter;
     private MultiSelectNetworkAdapter testNetAdapter;
 
@@ -38,7 +37,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity
     {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this)
-                .get(SelectNetworkFilterViewModel.class);
+                .get(NetworkToggleViewModel.class);
         initTestNetDialog(this);
         setupFilterList();
     }
@@ -61,7 +60,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity
 
             private void showPopup(View view, long chainId)
             {
-                LayoutInflater inflater = LayoutInflater.from(SelectNetworkFilterActivity.this);
+                LayoutInflater inflater = LayoutInflater.from(NetworkToggleActivity.this);
                 View popupView = inflater.inflate(R.layout.popup_view_delete_network, null);
 
                 int width = LinearLayout.LayoutParams.WRAP_CONTENT;
@@ -69,7 +68,7 @@ public class SelectNetworkFilterActivity extends SelectNetworkBaseActivity
                 final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
                 popupView.findViewById(R.id.popup_view).setOnClickListener(v -> {
                     // view network
-                    Intent intent = new Intent(SelectNetworkFilterActivity.this, AddCustomRPCNetworkActivity.class);
+                    Intent intent = new Intent(NetworkToggleActivity.this, AddCustomRPCNetworkActivity.class);
                     intent.putExtra(CHAIN_ID, chainId);
                     startActivity(intent);
                     popupWindow.dismiss();

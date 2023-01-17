@@ -321,7 +321,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     });
 
     private void selectNetwork() {
-        Intent intent = new Intent(MyAddressActivity.this, SelectNetworkActivity.class);
+        Intent intent = new Intent(MyAddressActivity.this, NetworkChooserActivity.class);
         intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
         getNetwork.launch(intent);
     }

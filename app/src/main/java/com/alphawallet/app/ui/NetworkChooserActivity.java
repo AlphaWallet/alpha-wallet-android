@@ -15,7 +15,7 @@ import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.ui.widget.adapter.SingleSelectNetworkAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
-import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
+import com.alphawallet.app.viewmodel.NetworkChooserViewModel;
 import com.alphawallet.app.widget.TestNetDialog;
 
 import java.util.ArrayList;
@@ -24,11 +24,11 @@ import java.util.List;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class SelectNetworkActivity extends SelectNetworkBaseActivity implements TestNetDialog.TestNetDialogCallback {
+public class NetworkChooserActivity extends NetworkBaseActivity implements TestNetDialog.TestNetDialogCallback {
     private static final int REQUEST_SELECT_ACTIVE_NETWORKS = 2000;
 
     boolean localSelectionMode;
-    private SelectNetworkViewModel viewModel;
+    private NetworkChooserViewModel viewModel;
     private SingleSelectNetworkAdapter networkAdapter;
 
     @Override
@@ -38,7 +38,7 @@ public class SelectNetworkActivity extends SelectNetworkBaseActivity implements 
         super.onCreate(savedInstanceState);
 
         viewModel = new ViewModelProvider(this)
-                .get(SelectNetworkViewModel.class);
+                .get(NetworkChooserViewModel.class);
 
         prepare(getIntent());
     }

@@ -30,7 +30,7 @@ import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
 import com.alphawallet.app.ui.widget.adapter.MethodAdapter;
 import com.alphawallet.app.ui.widget.adapter.WalletAdapter;
 import com.alphawallet.app.util.LayoutHelper;
-import com.alphawallet.app.viewmodel.SelectNetworkFilterViewModel;
+import com.alphawallet.app.viewmodel.NetworkToggleViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectV2ViewModel;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -57,7 +57,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     @Inject
     AWWalletConnectClient awWalletConnectClient;
     private WalletConnectV2ViewModel viewModel;
-    private SelectNetworkFilterViewModel selectNetworkFilterViewModel;
+    private NetworkToggleViewModel networkToggleViewModel;
     private ImageView icon;
     private TextView peerName;
     private TextView peerUrl;
@@ -143,8 +143,8 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     {
         viewModel = new ViewModelProvider(this)
                 .get(WalletConnectV2ViewModel.class);
-        selectNetworkFilterViewModel = new ViewModelProvider(this)
-                .get(SelectNetworkFilterViewModel.class);
+        networkToggleViewModel = new ViewModelProvider(this)
+                .get(NetworkToggleViewModel.class);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.wallets().observe(this, this::onWallets);
     }
@@ -320,7 +320,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         AWalletAlertDialog dialog = new AWalletAlertDialog(this);
         dialog.setMessage(String.format(getString(R.string.network_must_be_enabled), joinNames(disabledNetworks)));
         dialog.setButton(R.string.select_active_networks, view -> {
-            Intent intent = new Intent(this, SelectNetworkFilterActivity.class);
+            Intent intent = new Intent(this, NetworkToggleActivity.class);
             startActivity(intent);
             dialog.dismiss();
         });
@@ -333,7 +333,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     {
         return disabledNetworks.stream()
                 .map((chainId) -> {
-                    NetworkInfo network = selectNetworkFilterViewModel.getNetworkByChain(chainId);
+                    NetworkInfo network = networkToggleViewModel.getNetworkByChain(chainId);
                     if (network != null)
                     {
                         return network.name;
@@ -347,7 +347,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     {
         NamespaceParser namespaceParser = new NamespaceParser();
         namespaceParser.parseProposal(requiredNamespaces);
-        List<Long> enabledChainIds = selectNetworkFilterViewModel.getActiveNetworks();
+        List<Long> enabledChainIds = networkToggleViewModel.getActiveNetworks();
         List<Long> result = new ArrayList<>();
         List<Long> chains = namespaceParser.getChains().stream().map((s) -> Long.parseLong(s.split(":")[1])).collect(toList());
         for (Long chainId : chains)

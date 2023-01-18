@@ -326,6 +326,8 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             }
         }
 
+        viewModel.markTokensEnabled(selected);
+
         if (chainsNotEnabled.size() == 0) // currently showing the required chains, only need to save new tokens
         {
             //store tokens

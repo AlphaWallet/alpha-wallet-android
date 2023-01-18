@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import io.realm.Realm;
+import timber.log.Timber;
 
 public class WalletSummaryHeaderHolder extends BinderViewHolder<Wallet> implements View.OnClickListener
 {
@@ -68,7 +69,9 @@ public class WalletSummaryHeaderHolder extends BinderViewHolder<Wallet> implemen
             //image24h.setImageResource(percentage < 0 ? R.drawable.ic_price_down : R.drawable.ic_price_up);
         }
         catch (Exception ex)
-        { /* Quietly */ }
+        {
+            Timber.w(ex);
+        }
     }
 
     @Override

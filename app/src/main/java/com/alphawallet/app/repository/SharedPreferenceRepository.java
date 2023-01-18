@@ -200,7 +200,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setTestnetEnabled(boolean enabled)
     {
-        pref.edit().putBoolean(TESTNET_ENABLED, enabled).commit();
+        pref.edit().putBoolean(TESTNET_ENABLED, enabled).apply();
     }
 
     @Override

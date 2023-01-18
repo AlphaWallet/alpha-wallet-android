@@ -17,7 +17,8 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
-public class NetworkChooserViewModel extends BaseViewModel {
+public class NetworkChooserViewModel extends BaseViewModel
+{
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
     private final PreferenceRepositoryType preferenceRepository;
@@ -61,11 +62,15 @@ public class NetworkChooserViewModel extends BaseViewModel {
     public long getSelectedNetwork()
     {
         NetworkInfo browserNetwork = networkRepository.getActiveBrowserNetwork();
-        if (browserNetwork != null) { return browserNetwork.chainId; }
+        if (browserNetwork != null)
+        {
+            return browserNetwork.chainId;
+        }
         else return -1;
     }
 
-    public TokensService getTokensService() {
+    public TokensService getTokensService()
+    {
         return tokensService;
     }
 }

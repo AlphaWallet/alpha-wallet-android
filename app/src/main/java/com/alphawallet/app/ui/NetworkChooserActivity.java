@@ -24,7 +24,8 @@ import java.util.List;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class NetworkChooserActivity extends NetworkBaseActivity implements TestNetDialog.TestNetDialogCallback {
+public class NetworkChooserActivity extends NetworkBaseActivity implements TestNetDialog.TestNetDialogCallback
+{
     private static final int REQUEST_SELECT_ACTIVE_NETWORKS = 2000;
 
     boolean localSelectionMode;
@@ -54,9 +55,12 @@ public class NetworkChooserActivity extends NetworkBaseActivity implements TestN
         long selectedChainId = intent.getLongExtra(C.EXTRA_CHAIN_ID, -1);
 
         // Previous active network was deselected, get the first item in filtered networks
-        if (selectedChainId == -1) { selectedChainId = viewModel.getSelectedNetwork(); } //try network from settings
+        if (selectedChainId == -1)
+        {
+            selectedChainId = viewModel.getSelectedNetwork();
+        } //try network from settings
         if (selectedChainId == -1
-            || !viewModel.getFilterNetworkList().contains(selectedChainId))
+                || !viewModel.getFilterNetworkList().contains(selectedChainId))
         {
             selectedChainId = viewModel.getFilterNetworkList().get(0);
         } //use first network known on list if there's still any kind of issue

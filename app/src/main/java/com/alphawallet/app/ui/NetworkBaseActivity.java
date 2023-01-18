@@ -26,7 +26,7 @@ public abstract class NetworkBaseActivity extends BaseActivity implements TestNe
     StandardHeader testnetHeader;
     SwitchMaterial testnetSwitch;
     TestNetDialog testnetDialog;
-    
+
     @Inject
     PreferenceRepositoryType preferenceRepositoryType;
 
@@ -98,11 +98,13 @@ public abstract class NetworkBaseActivity extends BaseActivity implements TestNe
             if (checked)
             {
                 testnetDialog.show();
-            } else {
+            }
+            else
+            {
                 toggleListVisibility(false);
             }
         });
-        
+
         boolean testnetEnabled = preferenceRepositoryType.isTestnetEnabled();
         testnetSwitch.setChecked(testnetEnabled);
         toggleListVisibility(testnetEnabled);

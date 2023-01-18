@@ -128,7 +128,8 @@ public class NetworkToggleActivity extends NetworkBaseActivity
         }
 
         int count = mainNetAdapter.getSelectedItemCount();
-        if (testnetSwitch.isChecked()) {
+        if (testnetSwitch.isChecked())
+        {
             count += testNetAdapter.getSelectedItemCount();
         }
         setTitle(getString(R.string.title_enabled_networks, String.valueOf(count)));

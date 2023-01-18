@@ -16,7 +16,8 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
-public class NetworkToggleViewModel extends BaseViewModel {
+public class NetworkToggleViewModel extends BaseViewModel
+{
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
     private final PreferenceRepositoryType preferenceRepository;
@@ -25,14 +26,16 @@ public class NetworkToggleViewModel extends BaseViewModel {
     public NetworkToggleViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                   TokensService tokensService,
                                   PreferenceRepositoryType preferenceRepository,
-                                  AnalyticsServiceType analyticsService) {
+                                  AnalyticsServiceType analyticsService)
+    {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
         this.preferenceRepository = preferenceRepository;
         setAnalyticsService(analyticsService);
     }
 
-    public NetworkInfo[] getNetworkList() {
+    public NetworkInfo[] getNetworkList()
+    {
         return networkRepository.getAvailableNetworkList();
     }
 
@@ -40,7 +43,8 @@ public class NetworkToggleViewModel extends BaseViewModel {
     {
         NetworkInfo activeNetwork = networkRepository.getActiveBrowserNetwork();
         long activeNetworkId = -99;
-        if (activeNetwork != null) {
+        if (activeNetwork != null)
+        {
             activeNetworkId = networkRepository.getActiveBrowserNetwork().chainId;
         }
 
@@ -48,8 +52,10 @@ public class NetworkToggleViewModel extends BaseViewModel {
         boolean deselected = true;
         Long[] selectedIds = new Long[selectedItems.size()];
         int index = 0;
-        for (Long selectedId : selectedItems) {
-            if (EthereumNetworkRepository.hasRealValue(selectedId) && activeNetworkId == selectedId) {
+        for (Long selectedId : selectedItems)
+        {
+            if (EthereumNetworkRepository.hasRealValue(selectedId) && activeNetworkId == selectedId)
+            {
                 deselected = false;
             }
             selectedIds[index++] = selectedId;
@@ -90,11 +96,13 @@ public class NetworkToggleViewModel extends BaseViewModel {
         return networkList;
     }
 
-    public void removeCustomNetwork(long chainId) {
+    public void removeCustomNetwork(long chainId)
+    {
         networkRepository.removeCustomRPCNetwork(chainId);
     }
 
-    public TokensService getTokensService() {
+    public TokensService getTokensService()
+    {
         return tokensService;
     }
 

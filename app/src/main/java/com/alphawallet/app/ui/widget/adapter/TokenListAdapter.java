@@ -113,9 +113,9 @@ public class TokenListAdapter extends RecyclerView.Adapter<BinderViewHolder> imp
     private final Context context;
     private final List<UnknownToken> unknownTokenList;
     private final Callback listener;
-    int displayedTokensCount = 0;
-    int hiddenTokensCount = 0;
-    int popularTokensCount = 0;
+    private int displayedTokensCount = 0;
+    private int hiddenTokensCount = 0;
+    private int popularTokensCount = 0;
     private Disposable disposable;
 
     public TokenListAdapter(Context context, AssetDefinitionService aService, TokensService tService, TokenCardMeta[] tokens, Callback listener)

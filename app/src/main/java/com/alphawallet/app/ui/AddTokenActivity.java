@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.LongSparseArray;
 import android.view.Menu;
@@ -163,6 +164,12 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         if ( getIntent().getStringExtra(C.EXTRA_QR_CODE) != null) {
             runOnUiThread(() -> onActivityResult(C.BARCODE_READER_REQUEST_CODE, Activity.RESULT_OK, getIntent()));
+        }
+
+        String addressFromIntent = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        if (!TextUtils.isEmpty(addressFromIntent))
+        {
+            inputAddressView.setAddress(addressFromIntent);
         }
     }
 

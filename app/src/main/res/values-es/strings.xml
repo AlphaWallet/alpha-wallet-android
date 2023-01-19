@@ -953,4 +953,5 @@
     <string name="share_anonymous_data">¿Compartir datos anónimos?</string>
     <string name="enable_required_chains">¿Habilitar las cadenas necesarias?</string>
     <string name="enable_required_chains_message">Los tokens seleccionados están en cadenas actualmente no seleccionadas, ¿habilitar cadenas no seleccionadas?</string>
+    <string name="dialog_title_search_token">¿Buscar token?</string>
 </resources>

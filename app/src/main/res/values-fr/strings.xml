@@ -966,4 +966,5 @@
     <string name="share_anonymous_data">Partager des données anonymes ?</string>
     <string name="enable_required_chains">Activer les chaînes requises?</string>
     <string name="enable_required_chains_message">Les jetons sélectionnés sont sur des chaînes actuellement non sélectionnées, activer les chaînes non sélectionnées?</string>
+    <string name="dialog_title_search_token">Rechercher un jeton?</string>
 </resources>

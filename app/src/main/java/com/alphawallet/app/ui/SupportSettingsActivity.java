@@ -188,12 +188,10 @@ public class SupportSettingsActivity extends BaseActivity
 
     private void onGitHubClicked()
     {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-
-        intent.setData(Uri.parse(MediaLinks.AWALLET_GITHUB));
-
         try
         {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(MediaLinks.AWALLET_GITHUB));
             viewModel.track(Analytics.Action.SUPPORT_GITHUB);
             startActivity(intent);
         }
@@ -207,18 +205,10 @@ public class SupportSettingsActivity extends BaseActivity
     {
         if (Utils.isAlphaWallet(getApplicationContext()))
         {
-            Intent intent;
             try
             {
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            }
-            catch (Exception e)
-            {
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
-            }
-            try
-            {
                 viewModel.track(Analytics.Action.SUPPORT_DISCORD);
                 startActivity(intent);
             }

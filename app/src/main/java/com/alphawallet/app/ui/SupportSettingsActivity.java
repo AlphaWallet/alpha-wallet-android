@@ -9,10 +9,12 @@ import android.widget.LinearLayout;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.MediaLinks;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SupportSettingsViewModel;
 import com.alphawallet.app.widget.SettingsItemView;
 
@@ -164,20 +166,23 @@ public class SupportSettingsActivity extends BaseActivity
 
     private void onTelegramClicked()
     {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(MediaLinks.AWALLET_TELEGRAM_URL));
-        if (isAppAvailable(C.TELEGRAM_PACKAGE_NAME))
+        if (Utils.isAlphaWallet(getApplicationContext()))
         {
-            intent.setPackage(C.TELEGRAM_PACKAGE_NAME);
-        }
-        try
-        {
-            viewModel.track(Analytics.Action.SUPPORT_TELEGRAM);
-            startActivity(intent);
-        }
-        catch (Exception e)
-        {
-            Timber.e(e);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(MediaLinks.AWALLET_TELEGRAM_URL));
+            if (isAppAvailable(C.TELEGRAM_PACKAGE_NAME))
+            {
+                intent.setPackage(C.TELEGRAM_PACKAGE_NAME);
+            }
+            try
+            {
+                viewModel.track(Analytics.Action.SUPPORT_TELEGRAM);
+                startActivity(intent);
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
         }
     }
 
@@ -200,24 +205,27 @@ public class SupportSettingsActivity extends BaseActivity
 
     private void onDiscordClicked()
     {
-        Intent intent;
-        try
+        if (Utils.isAlphaWallet(getApplicationContext()))
         {
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
-        catch (Exception e)
-        {
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
-        }
-        try
-        {
-            viewModel.track(Analytics.Action.SUPPORT_DISCORD);
-            startActivity(intent);
-        }
-        catch (Exception e)
-        {
-            Timber.e(e);
+            Intent intent;
+            try
+            {
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
+            catch (Exception e)
+            {
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
+            }
+            try
+            {
+                viewModel.track(Analytics.Action.SUPPORT_DISCORD);
+                startActivity(intent);
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
         }
     }
 

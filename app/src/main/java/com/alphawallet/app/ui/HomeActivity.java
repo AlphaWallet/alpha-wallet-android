@@ -290,7 +290,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
         else
         {
-            if (getApplicationContext().getPackageName().equals("io.stormbird.wallet"))
+            if (Utils.isAlphaWallet(getApplicationContext()))
             {
                 viewModel.checkLatestGithubRelease();
             }

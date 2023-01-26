@@ -95,7 +95,7 @@ android {
         testInstrumentationRunnerArguments clearPackageData: 'true'
         def XInfuraAPI = "XInfuraAPI"
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
-        def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\""
+        def DEFAULT_INFURA_API_KEY = "\"2be927a7086f4bb5a06dffb73d04d672\""
         def DEFAULT_OPENSEA_API_KEY = "\"...\""; //Put your OpenSea developer API key in here, otherwise you are reliant on the backup NFT fetch method (which usually works ok)
         def DEFAULT_POLYGONSCAN_API_KEY = "\"\""; //Put your Polygonscan developer API key in here to get access to Polygon/Mumbai token discovery and transactions
         def DEFUALT_WALLETCONNECT_PROJECT_ID = "\"40c6071febfd93f4fe485c232a8a4cd9\""

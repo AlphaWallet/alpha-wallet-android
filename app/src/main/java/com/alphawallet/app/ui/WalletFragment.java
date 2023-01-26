@@ -447,11 +447,11 @@ public class WalletFragment extends BaseFragment implements
             tabLayout.setVisibility(View.GONE);
             return;
         }
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
+        //tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.assets));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.collectibles));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.defi_header));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.governance_header));
+       // tabLayout.addTab(tabLayout.newTab().setText(R.string.collectibles));
+       // tabLayout.addTab(tabLayout.newTab().setText(R.string.defi_header));
+       // tabLayout.addTab(tabLayout.newTab().setText(R.string.governance_header));
         //tabLayout.addTab(tabLayout.newTab().setText(R.string.attestations));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
@@ -463,19 +463,19 @@ public class WalletFragment extends BaseFragment implements
                 adapter.setFilterType(newFilter);
                 switch (newFilter)
                 {
-                    case ALL:
+                    //case ALL:
                     case ASSETS:
-                    case DEFI:
-                    case GOVERNANCE:
+                    //case DEFI:
+                    //case GOVERNANCE:
                         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                         viewModel.prepare();
                         break;
-                    case COLLECTIBLES:
-                        setGridLayoutManager(TokenFilter.COLLECTIBLES);
-                        viewModel.prepare();
-                        break;
-                    case ATTESTATIONS: // TODO: Filter Attestations
-                        break;
+                    //case COLLECTIBLES:
+                    //    setGridLayoutManager(TokenFilter.COLLECTIBLES);
+                    //    viewModel.prepare();
+                    //    break;
+                    // case ATTESTATIONS: // TODO: Filter Attestations
+                    //    break;
                 }
             }
 

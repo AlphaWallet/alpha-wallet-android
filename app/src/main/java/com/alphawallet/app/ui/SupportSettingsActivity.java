@@ -9,12 +9,10 @@ import android.widget.LinearLayout;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.MediaLinks;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SupportSettingsViewModel;
 import com.alphawallet.app.widget.SettingsItemView;
 
@@ -166,7 +164,7 @@ public class SupportSettingsActivity extends BaseActivity
 
     private void onTelegramClicked()
     {
-        if (Utils.isAlphaWallet(getApplicationContext()))
+        if (MediaLinks.isMediaTargetted(getApplicationContext()))
         {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(MediaLinks.AWALLET_TELEGRAM_URL));
@@ -203,7 +201,7 @@ public class SupportSettingsActivity extends BaseActivity
 
     private void onDiscordClicked()
     {
-        if (Utils.isAlphaWallet(getApplicationContext()))
+        if (MediaLinks.isMediaTargetted(getApplicationContext()))
         {
             try
             {

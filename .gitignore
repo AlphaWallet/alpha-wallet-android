@@ -38,6 +38,9 @@ app/release
 app/debug
 app/debug/output.json
 
+# Library
+hardware_stub/build/
+
 # Fastlane
 fastlane/report.xml
 

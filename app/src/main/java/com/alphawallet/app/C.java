@@ -162,6 +162,7 @@ public abstract class C {
     public static final String EXTRA_NAME = "NAME";
     public static final String EXTRA_CHAIN_OBJ = "CHAIN_OBJ";
     public static final String EXTRA_1559_TX = "1559_TX";
+    public static final String EXTRA_FROM_SPLASH = "FROM_SPLASH";
 
     public static final String PRUNE_ACTIVITY =
             "com.stormbird.wallet.PRUNE_ACTIVITY";

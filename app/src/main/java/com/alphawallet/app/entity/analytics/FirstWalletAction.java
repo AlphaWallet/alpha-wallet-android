@@ -2,10 +2,11 @@ package com.alphawallet.app.entity.analytics;
 
 public enum FirstWalletAction
 {
-    CREATE_WALLET("Create Wallet"),
-    IMPORT_WALLET("Import Wallet");
+    CREATE_WALLET("create"),
+    IMPORT_WALLET("import"),
+    WATCH_WALLET("watch");
 
-    public static final String KEY = "action";
+    public static final String KEY = "type";
 
     private final String action;
 

@@ -74,6 +74,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetSource;
+import com.alphawallet.app.entity.analytics.QrScanResultType;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -1505,26 +1506,43 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                     {
                         qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
                         if (qrCode == null || checkForMagicLink(qrCode)) return;
+
+                        AnalyticsProperties props = new AnalyticsProperties();
                         QRParser parser = QRParser.getInstance(EthereumNetworkRepository.extraChains());
                         QRResult result = parser.parse(qrCode);
                         switch (result.type)
                         {
                             case ADDRESS:
+                                props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS.getValue());
+                                viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+
                                 //ethereum address was scanned. In dapp browser what do we do? maybe populate an input field with address?
                                 copyToClipboard(result.getAddress());
                                 break;
                             case PAYMENT:
+                                props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
+                                viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+
                                 //EIP681 payment request scanned, should go to send
                                 viewModel.showSend(getContext(), result);
                                 break;
                             case TRANSFER:
+                                props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
+                                viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+
                                 //EIP681 transfer, go to send
                                 viewModel.showSend(getContext(), result);
                                 break;
                             case FUNCTION_CALL:
+                                props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
+                                viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+
                                 //EIP681 function call. TODO: create function call confirmation. For now treat same way as tokenscript function call
                                 break;
                             case URL:
+                                props.put(QrScanResultType.KEY, QrScanResultType.URL.getValue());
+                                viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+
                                 loadUrlRemote(qrCode);
                                 break;
                             case OTHER:

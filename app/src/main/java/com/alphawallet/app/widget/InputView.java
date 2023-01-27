@@ -17,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.analytics.QrScanResultType;
 import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.entity.BoxStatus;
@@ -115,6 +116,7 @@ public class InputView extends LinearLayout {
                 scanQrIcon.setOnClickListener(v -> {
                     Intent intent = new Intent(context, QRScannerActivity.class);
                     intent.putExtra(QrScanSource.KEY, QrScanSource.ADDRESS_TEXT_FIELD.getValue());
+                    intent.putExtra(QrScanResultType.KEY, QrScanResultType.ADDRESS.getValue());
                     ((Activity) context).startActivityForResult(intent, C.BARCODE_READER_REQUEST_CODE);
                 });
             }

@@ -33,9 +33,10 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.TransactionType;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
@@ -65,6 +66,7 @@ import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.EventDetailWidget;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.TokenIcon;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.TSActivityView;
 import com.alphawallet.token.entity.TSTokenView;
 import com.alphawallet.token.entity.TokenScriptResult;
@@ -236,22 +238,22 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         if (eventDetail != null) eventDetail.onDestroy();
     }
 
-    private void txWritten(TransactionData transactionData)
+    private void txWritten(TransactionReturn transactionReturn)
     {
-        confirmationDialog.transactionWritten(transactionData.txHash);
-        transactionHash = transactionData.txHash;
+        confirmationDialog.transactionWritten(transactionReturn.hash);
+        transactionHash = transactionReturn.hash;
         //reset display using new transaction hash
         viewModel.getCurrentWallet();
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(ERROR);
         dialog.setTitle(R.string.error_transaction_failed);
-        dialog.setMessage(throwable.getMessage());
+        dialog.setMessage(txError.throwable.getMessage());
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();
@@ -867,7 +869,13 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, token.tokenInfo.chainId, transactionHash); //return point is txWritten
+        viewModel.requestSignature(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(viewModel.getWallet(), token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -892,5 +900,11 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
     public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
         return getGasSettings;
+    }
+
+    @Override
+    public WalletType getWalletType()
+    {
+        return viewModel.getWallet().type;
     }
 }

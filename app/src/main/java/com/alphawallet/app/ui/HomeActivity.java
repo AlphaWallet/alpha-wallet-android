@@ -65,7 +65,7 @@ import com.alphawallet.app.entity.MediaLinks;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.NotificationService;
@@ -83,6 +83,7 @@ import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
@@ -825,6 +826,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
+    public void gotSignature(SignatureFromKey signature)
+    {
+        //TODO: Hardware
+    }
+
+    @Override
     public void createdKey(String keyAddress)
     {
         //Key was upgraded
@@ -1173,6 +1180,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
+    public WalletType getWalletType()
+    {
+        return viewModel.defaultWallet().getValue().type;
+    }
+
+    @Override
     public void getAuthorisation(SignAuthenticationCallback callback)
     {
         viewModelWC.getAuthenticationForSignature(viewModel.defaultWallet().getValue(), this, callback);
@@ -1180,6 +1193,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     @Override
     public void sendTransaction(Web3Transaction tx)
+    {
+
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
     {
 
     }

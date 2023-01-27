@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- String related to sending -->
     <string name="action_send">Enviar</string>
@@ -949,4 +948,6 @@
     <string name="enable_required_chains">¿Habilitar las cadenas necesarias?</string>
     <string name="enable_required_chains_message">Los tokens seleccionados están en cadenas actualmente no seleccionadas, ¿habilitar cadenas no seleccionadas?</string>
     <string name="dialog_title_search_token">¿Buscar token?</string>
+    <string name="hardware_wallets">Carteras de hardware</string>
+    <string name="use_hardware_card">Usar tarjeta de hardware</string>
 </resources>

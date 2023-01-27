@@ -6,11 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -38,9 +40,13 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AddWalletView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.hardware.HardwareCallback;
+import com.alphawallet.hardware.HardwareDevice;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.security.SignatureException;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -54,10 +60,12 @@ public class WalletsActivity extends BaseActivity implements
         AddWalletView.OnImportWalletClickListener,
         AddWalletView.OnWatchWalletClickListener,
         AddWalletView.OnCloseActionListener,
+        AddWalletView.OnHardwareCardActionListener,
         CreateWalletCallbackInterface,
+        HardwareCallback,
         SyncCallback
 {
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private final long balanceChain = EthereumNetworkRepository.getOverrideToken().chainId;
     private WalletsViewModel viewModel;
     private RecyclerView list;
@@ -85,6 +93,8 @@ public class WalletsActivity extends BaseActivity implements
         }
     };
 
+    private final HardwareDevice hardwareCard = new HardwareDevice(this);
+
     @Inject
     PreferenceRepositoryType preferenceRepository;
 
@@ -103,6 +113,17 @@ public class WalletsActivity extends BaseActivity implements
     {
         super.onResume();
         initViewModel();
+        hardwareCard.activateReader(this);
+        hardwareCard.setSigningData(org.web3j.crypto.Hash.sha3(WalletsViewModel.TEST_STRING.getBytes()));
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        hideDialog();
+        viewModel.onPause(); //no need to update balances if view isn't showing
+        hardwareCard.deactivateReader();
     }
 
     private void scrollToDefaultWallet()
@@ -192,14 +213,6 @@ public class WalletsActivity extends BaseActivity implements
     public void syncStarted(String wallet, Pair<Double, Double> value)
     {
         runOnUiThread(() -> adapter.setUnsyncedWalletValue(wallet, value));
-    }
-
-    @Override
-    protected void onPause()
-    {
-        super.onPause();
-        hideDialog();
-        viewModel.onPause(); //no need to update balances if view isn't showing
     }
 
     @Override
@@ -330,6 +343,8 @@ public class WalletsActivity extends BaseActivity implements
         addWalletView.setOnNewWalletClickListener(this);
         addWalletView.setOnImportWalletClickListener(this);
         addWalletView.setOnWatchWalletClickListener(this);
+        addWalletView.setOnHardwareCardClickListener(this);
+        addWalletView.setHardwareActive(hardwareCard.isStub());
         dialog = new BottomSheetDialog(this);
         dialog.setContentView(addWalletView);
         dialog.setCancelable(true);
@@ -440,8 +455,36 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
+    public void detectCard(View view)
+    {
+        //TODO: Hardware: Show waiting for card scan. Inform user to keep the card still and in place
+        hideDialog();
+    }
+
+    @Override
     public void fetchMnemonic(String mnemonic)
     {
 
+    }
+
+    @Override
+    public void hardwareCardError(String errorMessage)
+    {
+        //TODO: Hardware Improve error reporting UI (Popup?)
+        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void signedMessageFromHardware(SignatureFromKey returnSig)
+    {
+        try
+        {
+            viewModel.importHardwareWallet(returnSig);
+        }
+        catch (SignatureException ex)
+        {
+            //TODO: Hardware: Display this in a popup
+            Toast.makeText(this, "Import Card: " + ex.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }

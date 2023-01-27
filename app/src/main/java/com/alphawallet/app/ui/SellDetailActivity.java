@@ -1,5 +1,13 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.EXTRA_PRICE;
+import static com.alphawallet.app.C.EXTRA_STATE;
+import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
+import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.C.PRUNE_ACTIVITY;
+import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.token.tools.Convert.getEthString;
+
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -30,6 +38,7 @@ import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
@@ -52,17 +61,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.MissingFormatArgumentException;
 
-import timber.log.Timber;
-
-import static com.alphawallet.app.C.EXTRA_PRICE;
-import static com.alphawallet.app.C.EXTRA_STATE;
-import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
-import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.C.PRUNE_ACTIVITY;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
-import static com.alphawallet.token.tools.Convert.getEthString;
-
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 /**
  * Created by James on 21/02/2018.
@@ -594,5 +594,11 @@ public class SellDetailActivity extends BaseActivity implements TokensAdapterCal
     public void cancelAuthentication()
     {
 
+    }
+
+    @Override
+    public void gotSignature(SignatureFromKey signature)
+    {
+        //TODO: Hardware
     }
 }

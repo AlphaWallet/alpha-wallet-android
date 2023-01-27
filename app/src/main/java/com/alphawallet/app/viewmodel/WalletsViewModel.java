@@ -12,6 +12,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
+import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
@@ -24,6 +25,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.interact.ImportWalletInteract;
 import com.alphawallet.app.interact.SetDefaultWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
@@ -37,9 +39,16 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.ens.AWEnsResolver;
+import com.alphawallet.hardware.SignatureFromKey;
 
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
+
+import java.math.BigInteger;
+import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -61,6 +70,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final GenericWalletInteract genericWalletInteract;
+    private final ImportWalletInteract importWalletInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final KeyService keyService;
     private final ImportWalletRouter importWalletRouter;
@@ -80,6 +90,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
     private final MutableLiveData<Map<String, Token[]>> baseTokens = new MutableLiveData<>();
+    private final MutableLiveData<String> getPublicKey = new MutableLiveData<>();
 
     private NetworkInfo currentNetwork;
     private final Map<String, Wallet> walletBalances = new HashMap<>();
@@ -87,6 +98,8 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final Map<String, Wallet> walletUpdate = new ConcurrentHashMap<>();
     private final Map<String, Disposable> currentWalletUpdates = new ConcurrentHashMap<>();
     private SyncCallback syncCallback;
+
+    public static final String TEST_STRING = "EncodedUUID to determine Public Key" + UUID.randomUUID().toString();
 
     @Nullable
     private Disposable balanceTimerDisposable;
@@ -105,6 +118,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
             SetDefaultWalletInteract setDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
             GenericWalletInteract genericWalletInteract,
+            ImportWalletInteract importWalletInteract,
             ImportWalletRouter importWalletRouter,
             HomeRouter homeRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -119,6 +133,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.genericWalletInteract = genericWalletInteract;
+        this.importWalletInteract = importWalletInteract;
         this.importWalletRouter = importWalletRouter;
         this.homeRouter = homeRouter;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
@@ -155,6 +170,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     }
     public LiveData<Boolean> noWalletsError() { return noWalletsError; }
     public LiveData<Map<String, Token[]>> baseTokens() { return baseTokens; }
+    public LiveData<String> getPublicKey() { return getPublicKey; }
 
     public void setDefaultWallet(Wallet wallet, boolean isNewWallet)
     {
@@ -501,5 +517,53 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
 
         walletServices.clear();
         currentWalletUpdates.clear();
+    }
+
+    public void importHardwareWallet(SignatureFromKey returnSig) throws SignatureException
+    {
+        Sign.SignatureData sigData = CryptoFunctions.sigFromByteArray(returnSig.signature);
+        BigInteger recoveredKey = Sign.signedMessageToKey(TEST_STRING.getBytes(), sigData);
+        String address = "0x" + Keys.getAddress(recoveredKey);
+
+        disposable = fetchWalletsInteract
+                .fetch()
+                .subscribe(wallets -> importOrSetActive(address, wallets), this::onError);
+    }
+
+    private void importOrSetActive(String addressHex, Wallet[] wallets)
+    {
+        Wallet existingWallet = findWallet(wallets, addressHex);
+        if (existingWallet != null)
+        {
+            setDefaultWallet(existingWallet, false);
+        }
+        else
+        {
+            storeHardwareWallet(addressHex);
+        }
+    }
+
+    private Wallet findWallet(Wallet[] wallets, String address)
+    {
+        for (Wallet wallet : wallets)
+        {
+            if (wallet.address.equalsIgnoreCase(address))
+            {
+                return wallet;
+            }
+        }
+
+        return null;
+    }
+
+    private void storeHardwareWallet(String address)
+    {
+        disposable = importWalletInteract.storeHardwareWallet(address)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(account -> {
+                    fetchWallets();
+                    createdWallet.postValue(account);
+                }, this::onCreateWalletError);
     }
 }

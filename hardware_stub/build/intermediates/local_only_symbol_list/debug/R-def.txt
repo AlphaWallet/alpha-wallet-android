@@ -1,0 +1,4 @@
+R_DEF: Internal format may change without notice
+local
+string hardware_wallets
+string use_hardware_card

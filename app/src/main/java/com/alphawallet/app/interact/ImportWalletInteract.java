@@ -1,14 +1,14 @@
 package com.alphawallet.app.interact;
 
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.repository.WalletRepositoryType;
+import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.ens.AWEnsResolver;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.service.KeyService;
 
 public class ImportWalletInteract {
 
@@ -52,6 +52,14 @@ public class ImportWalletInteract {
                 .subscribeOn(Schedulers.io())
                 .map(name -> { wallet.ENSname = name; return wallet; })
                 .flatMap(walletRepository::storeWallet);*/
+    }
+
+    public Single<Wallet> storeHardwareWallet(String address)
+    {
+        Wallet wallet = new Wallet(address);
+        wallet.type = WalletType.HARDWARE;
+        wallet.lastBackupTime = -1;
+        return walletRepository.storeWallet(wallet);
     }
 
     public Single<Wallet> storeKeystoreWallet(Wallet wallet, KeyService.AuthenticationLevel level, AWEnsResolver ensResolver)

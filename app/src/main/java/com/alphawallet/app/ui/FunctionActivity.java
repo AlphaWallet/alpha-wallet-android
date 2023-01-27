@@ -30,8 +30,9 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
+import com.alphawallet.app.entity.TransactionReturn;
+import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
@@ -501,13 +502,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
         if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(ERROR);
         alertDialog.setTitle(R.string.error_transaction_failed);
-        alertDialog.setMessage(throwable.getMessage());
+        alertDialog.setMessage(txError.throwable.getMessage());
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v -> {
             alertDialog.dismiss();
@@ -563,11 +564,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     /**
      * Final return path
-     * @param transactionData write success hash back to ActionSheet
+     * @param transactionReturn write success hash back to ActionSheet
      */
-    private void txWritten(TransactionData transactionData)
+    private void txWritten(TransactionReturn transactionReturn)
     {
-        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+        confirmationDialog.transactionWritten(transactionReturn.hash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
     }
 
     private final Runnable closer = this::finish;
@@ -798,9 +799,21 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
+    public WalletType getWalletType()
+    {
+        return viewModel.getWallet().type;
+    }
+
+    @Override
     public void cancelAuthentication()
     {
         if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.dismiss();
+    }
+
+    @Override
+    public void gotSignature(SignatureFromKey signature)
+    {
+
     }
 
     @Override
@@ -856,7 +869,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, token.tokenInfo.chainId, ""); //return point is txWritten
+        viewModel.requestSignature(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(viewModel.getWallet(), token.tokenInfo.chainId, tx, signature);
     }
 
     @Override

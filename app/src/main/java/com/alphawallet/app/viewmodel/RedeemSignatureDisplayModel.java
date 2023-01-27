@@ -13,6 +13,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignaturePair;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.hardware.SignatureReturnType;
 import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
@@ -288,12 +289,16 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private void onSignMessage(MessagePair pair, Wallet wallet) {
         //now run this guy through the signed message system
         if (pair != null)
-        disposable = createTransactionInteract
-                .sign(wallet, pair)
-                .subscribe(this::onSignedMessage, this::onError);
+        {
+            disposable = createTransactionInteract
+                    .sign(wallet, pair)
+                    .subscribe(this::onSignedMessage, this::onError);
+        }
     }
 
-    private void onSignedMessage(SignaturePair sigPair) {
+    private void onSignedMessage(SignaturePair sigPair)
+    {
+        if (sigPair.signature.sigType == SignatureReturnType.SIGNING_POSTPONED) return;
         signature.postValue(sigPair);
     }
 

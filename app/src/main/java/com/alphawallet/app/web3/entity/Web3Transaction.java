@@ -8,11 +8,12 @@ import android.text.TextUtils;
 import android.text.style.StyleSpan;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.analytics.ActionSheetMode;
+import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.StyledStringBuilder;
 import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
-import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.token.entity.MagicLinkInfo;
 
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -24,13 +25,14 @@ import java.math.BigInteger;
 public class Web3Transaction implements Parcelable {
     public final Address recipient;
     public final Address contract;
+    public final Address sender;
     public final BigInteger value;
     public final BigInteger gasPrice;
     public final BigInteger gasLimit;
 
     // EIP1559
-    public final BigInteger maxFeePerGas;
-    public final BigInteger maxPriorityFeePerGas;
+    public BigInteger maxFeePerGas;
+    public BigInteger maxPriorityFeePerGas;
 
     public final long nonce;
     public final String payload;
@@ -38,14 +40,26 @@ public class Web3Transaction implements Parcelable {
     public final String description;
 
     public Web3Transaction(
-            Address recipient,
+            Address sender,
             Address contract,
             BigInteger value,
             BigInteger gasPrice,
             BigInteger gasLimit,
             long nonce,
-            String payload) {
-        this(recipient, contract, value, gasPrice, gasLimit, nonce, payload, 0);
+            String payload)
+    {
+        this.recipient = contract;
+        this.sender = sender;
+        this.contract = contract;
+        this.value = value;
+        this.gasPrice = gasPrice;
+        this.gasLimit = gasLimit;
+        this.nonce = nonce;
+        this.payload = payload;
+        this.leafPosition = 0;
+        this.description = null;
+        this.maxPriorityFeePerGas = BigInteger.ZERO;
+        this.maxFeePerGas = BigInteger.ZERO;
     }
 
     public Web3Transaction(
@@ -57,6 +71,7 @@ public class Web3Transaction implements Parcelable {
             long nonce,
             String payload,
             String description) {
+        this.sender = null;
         this.recipient = recipient;
         this.contract = contract;
         this.value = value;
@@ -82,6 +97,7 @@ public class Web3Transaction implements Parcelable {
             String description) {
         this.recipient = recipient;
         this.contract = contract;
+        this.sender = null;
         this.value = value;
         this.gasPrice = BigInteger.ZERO;
         this.gasLimit = gasLimit;
@@ -104,6 +120,7 @@ public class Web3Transaction implements Parcelable {
             long leafPosition) {
         this.recipient = recipient;
         this.contract = contract;
+        this.sender = null;
         this.value = value;
         this.gasPrice = gasPrice;
         this.gasLimit = gasLimit;
@@ -118,6 +135,31 @@ public class Web3Transaction implements Parcelable {
     public Web3Transaction(
             Address recipient,
             Address contract,
+            Address sender,
+            BigInteger value,
+            BigInteger gasPrice,
+            BigInteger gasLimit,
+            long nonce,
+            String payload,
+            long leafPosition) {
+        this.recipient = recipient;
+        this.contract = contract;
+        this.sender = sender;
+        this.value = value;
+        this.gasPrice = gasPrice;
+        this.gasLimit = gasLimit;
+        this.nonce = nonce;
+        this.payload = payload;
+        this.leafPosition = leafPosition;
+        this.description = null;
+        this.maxFeePerGas = BigInteger.ZERO;
+        this.maxPriorityFeePerGas = BigInteger.ZERO;
+    }
+
+    public Web3Transaction(
+            Address recipient,
+            Address contract,
+            Address sender,
             BigInteger value,
             BigInteger maxFee,
             BigInteger maxPriorityFee,
@@ -127,6 +169,7 @@ public class Web3Transaction implements Parcelable {
             long leafPosition) {
         this.recipient = recipient;
         this.contract = contract;
+        this.sender = sender;
         this.value = value;
         this.gasPrice = BigInteger.ZERO;
         this.gasLimit = gasLimit;
@@ -143,7 +186,7 @@ public class Web3Transaction implements Parcelable {
      * @param wcTx
      * @param callbackId
      */
-    public Web3Transaction(WCEthereumTransaction wcTx, long callbackId)
+    public Web3Transaction(WCEthereumTransaction wcTx, long callbackId, SignType signType)
     {
         String gasPrice = wcTx.getGasPrice() != null ? wcTx.getGasPrice() : "0";
         String gasLimit = wcTx.getGasLimit() != null ? wcTx.getGasLimit() : "0";
@@ -151,6 +194,7 @@ public class Web3Transaction implements Parcelable {
 
         this.recipient = TextUtils.isEmpty(wcTx.getTo()) ? Address.EMPTY : new Address(wcTx.getTo());
         this.contract = null;
+        this.sender = TextUtils.isEmpty(wcTx.getFrom()) ? Address.EMPTY : new Address(wcTx.getFrom());
         this.value = wcTx.getValue() == null ? BigInteger.ZERO : Hex.hexToBigInteger(wcTx.getValue(), BigInteger.ZERO);
         this.gasPrice = Hex.hexToBigInteger(gasPrice, BigInteger.ZERO);
         this.gasLimit = Hex.hexToBigInteger(gasLimit, BigInteger.ZERO);
@@ -159,7 +203,20 @@ public class Web3Transaction implements Parcelable {
         this.nonce = Hex.hexToLong(nonce, -1);
         this.payload = wcTx.getData();
         this.leafPosition = callbackId;
-        this.description = null;
+        this.description = String.valueOf(signType.ordinal());
+    }
+
+    public SignType getSignType()
+    {
+        if (description != null && description.length() == 1 && Character.isDigit(description.charAt(0)))
+        {
+            int ordinal = Integer.parseInt(description);
+            return SignType.values()[ordinal];
+        }
+        else
+        {
+            return SignType.SEND_TX;
+        }
     }
 
     /**
@@ -181,11 +238,13 @@ public class Web3Transaction implements Parcelable {
         description = null;
         maxFeePerGas = BigInteger.ZERO;
         maxPriorityFeePerGas = BigInteger.ZERO;
+        sender = new Address(tx.from);
     }
 
     Web3Transaction(Parcel in) {
         recipient = in.readParcelable(Address.class.getClassLoader());
         contract = in.readParcelable(Address.class.getClassLoader());
+        sender = in.readParcelable(Address.class.getClassLoader());
         value = new BigInteger(in.readString());
         gasPrice = new BigInteger(in.readString());
         gasLimit = new BigInteger(in.readString());
@@ -209,6 +268,18 @@ public class Web3Transaction implements Parcelable {
         }
     };
 
+    public Address getTransactionDestination()
+    {
+        if (this.contract != null)
+        {
+            return contract;
+        }
+        else
+        {
+            return recipient;
+        }
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -218,6 +289,7 @@ public class Web3Transaction implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(recipient, flags);
         dest.writeParcelable(contract, flags);
+        dest.writeParcelable(sender, flags);
         dest.writeString((value == null ? BigInteger.ZERO : value).toString());
         dest.writeString((gasPrice == null ? BigInteger.ZERO : gasPrice).toString());
         dest.writeString((gasLimit == null ? BigInteger.ZERO : gasLimit).toString());
@@ -245,8 +317,6 @@ public class Web3Transaction implements Parcelable {
      * @param chainId
      * @return
      */
-
-    //TODO: Show legacy/EIP1559
     public CharSequence getFormattedTransaction(Context ctx, long chainId, String symbol)
     {
         StyledStringBuilder sb = new StyledStringBuilder();
@@ -258,10 +328,6 @@ public class Web3Transaction implements Parcelable {
         sb.setStyle(new StyleSpan(Typeface.BOLD));
         sb.append(BalanceUtils.getScaledValueWithLimit(new BigDecimal(value), 18));
         sb.append(" ").append(symbol).append("\n");
-
-        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_price)).append(": \n");
-        sb.setStyle(new StyleSpan(Typeface.BOLD));
-        sb.append(BalanceUtils.weiToGwei(gasPrice)).append("\n");
 
         sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_limit)).append(": \n");
         sb.setStyle(new StyleSpan(Typeface.BOLD));
@@ -282,7 +348,56 @@ public class Web3Transaction implements Parcelable {
         sb.setStyle(new StyleSpan(Typeface.BOLD));
         sb.append(MagicLinkInfo.getNetworkNameById(chainId));
 
+        if (isLegacyTransaction())
+        {
+            sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_price)).append(": \n");
+            sb.setStyle(new StyleSpan(Typeface.BOLD));
+            sb.append(BalanceUtils.weiToGwei(gasPrice)).append("\n");
+        }
+        else
+        {
+            sb.startStyleGroup().append("\n").append("Max Priority").append(": \n");
+            sb.setStyle(new StyleSpan(Typeface.BOLD));
+            sb.append(BalanceUtils.weiToGwei(maxPriorityFeePerGas)).append("\n");
+
+            sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_price_max)).append(": \n");
+            sb.setStyle(new StyleSpan(Typeface.BOLD));
+            sb.append(BalanceUtils.weiToGwei(maxFeePerGas)).append("\n");
+        }
+
         sb.applyStyles();
+
+        return sb;
+    }
+
+    /**
+     * Use this for debugging; it's sometimes handy to dump these transactions
+     * @param chainId
+     * @return
+     */
+    public CharSequence getTxDump(long chainId)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Recipient: ").append(recipient.toString()).append(" : ");
+        sb.append("Value: ").append(BalanceUtils.getScaledValueWithLimit(new BigDecimal(value), 18)).append(" : ");
+        sb.append("Gas Limit: ").append(gasLimit.toString()).append(" : ");
+        sb.append("Nonce: ").append(nonce).append(" : ");
+        if (!TextUtils.isEmpty(payload))
+        {
+            sb.append("Payload: ").append(payload).append(" : ");
+        }
+
+        sb.append("Network: ").append(MagicLinkInfo.getNetworkNameById(chainId)).append(" : ");
+
+        if (isLegacyTransaction())
+        {
+            sb.append("Gas Price: ").append(BalanceUtils.weiToGwei(gasPrice)).append(" : ");
+        }
+        else
+        {
+            sb.append("Max Priority: ").append(BalanceUtils.weiToGwei(maxPriorityFeePerGas)).append(" : ");
+            sb.append("Max Fee Gas: ").append(BalanceUtils.weiToGwei(maxFeePerGas)).append(" : ");
+        }
 
         return sb;
     }

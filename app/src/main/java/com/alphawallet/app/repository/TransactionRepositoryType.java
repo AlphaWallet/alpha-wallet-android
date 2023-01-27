@@ -1,12 +1,16 @@
 package com.alphawallet.app.repository;
 
+import android.util.Pair;
+
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.Signable;
+
+import org.web3j.crypto.RawTransaction;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -16,12 +20,6 @@ import io.realm.Realm;
 
 public interface TransactionRepositoryType
 {
-    Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId);
-
-    Single<TransactionData> create1559TransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasLimit, BigInteger maxFeePerGas, BigInteger maxPriorityFee, long nonce, byte[] data, long chainId);
-
-    Single<TransactionData> getSignatureForTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId);
-
     Single<SignatureFromKey> getSignature(Wallet wallet, Signable message);
 
     Single<byte[]> getSignatureFast(Wallet wallet, String password, byte[] message);
@@ -43,4 +41,9 @@ public interface TransactionRepositoryType
     RealmAuxData fetchCachedEvent(String walletAddress, String eventKey);
 
     void restartService();
+
+    Single<Pair<SignatureFromKey, RawTransaction>> signTransaction(Wallet from, Web3Transaction w3Tx, long chainId);
+    RawTransaction formatRawTransaction(Web3Transaction w3Tx, long nonce, long chainId);
+
+    Single<String> sendTransaction(Wallet from, RawTransaction rtx, SignatureFromKey sigData, long chainId);
 }

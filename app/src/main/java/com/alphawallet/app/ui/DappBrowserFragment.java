@@ -67,15 +67,14 @@ import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
-import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetSource;
 import com.alphawallet.app.entity.analytics.QrScanResultType;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
@@ -113,6 +112,7 @@ import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.app.widget.AddressBar;
 import com.alphawallet.app.widget.AddressBarListener;
 import com.alphawallet.app.widget.TestNetDialog;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -675,6 +675,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 .get(DappBrowserViewModel.class);
         viewModel.activeNetwork().observe(getViewLifecycleOwner(), this::onNetworkChanged);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionError().observe(this, this::txError);
         activeNetwork = viewModel.getActiveNetwork();
         viewModel.findWallet();
     }
@@ -1197,6 +1199,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     }
 
     @Override
+    public WalletType getWalletType()
+    {
+        return wallet.type;
+    }
+
+    @Override
     public void onSignTransaction(Web3Transaction transaction, String url)
     {
         try
@@ -1256,13 +1264,16 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn rtn)
     {
+        confirmationDialog.dismiss();
+        web3.onSignCancel(rtn.tx.leafPosition);
+
         if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
         resultDialog = new AWalletAlertDialog(requireContext());
         resultDialog.setIcon(ERROR);
         resultDialog.setTitle(R.string.error_transaction_failed);
-        resultDialog.setMessage(throwable.getMessage());
+        resultDialog.setMessage(rtn.throwable.getMessage());
         resultDialog.setButtonText(R.string.button_ok);
         resultDialog.setButtonListener(v -> {
             resultDialog.dismiss();
@@ -1860,6 +1871,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     }
 
+    @Override
+    public void gotSignature(SignatureFromKey signature)
+    {
+        //TODO: Hardware
+    }
+
     /**
      * ActionSheet interfaces
      */
@@ -1873,25 +1890,19 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        final SendTransactionInterface callback = new SendTransactionInterface()
-        {
-            @Override
-            public void transactionSuccess(Web3Transaction web3Tx, String hashData)
-            {
-                confirmationDialog.transactionWritten(hashData);
-                web3.onSignTransactionSuccessful(web3Tx, hashData);
-            }
+        viewModel.requestSignature(finalTx, wallet, activeNetwork.chainId);
+    }
 
-            @Override
-            public void transactionError(long callbackId, Throwable error)
-            {
-                confirmationDialog.dismiss();
-                txError(error);
-                web3.onSignCancel(callbackId);
-            }
-        };
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(wallet, activeNetwork.chainId, tx, signature);
+    }
 
-        viewModel.sendTransaction(finalTx, activeNetwork.chainId, callback);
+    private void txWritten(TransactionReturn txData)
+    {
+        confirmationDialog.transactionWritten(txData.hash);
+        web3.onSignTransactionSuccessful(txData);
     }
 
     @Override

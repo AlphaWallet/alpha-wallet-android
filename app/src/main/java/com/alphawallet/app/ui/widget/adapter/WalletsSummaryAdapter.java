@@ -229,6 +229,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
         this.wallets.clear();
         boolean hasLegacyWallet = false;
         boolean hasWatchWallet = false;
+        boolean hasHardwareWallet = false;
         if (wallets != null)
         {
             Wallet summaryItem = new Wallet(context.getString(R.string.summary));
@@ -261,8 +262,27 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
                         hasWatchWallet = true;
                         w.isSynced = true;
                         break;
+                    case HARDWARE:
+                        hasHardwareWallet = true;
+                        w.isSynced = false;
+                        break;
                     default:
                         break;
+                }
+            }
+
+            if (hasHardwareWallet)
+            {
+                Wallet hardwareText = new Wallet(context.getString(R.string.hardware_wallets));
+                hardwareText.type = WalletType.TEXT_MARKER;
+                this.wallets.add(hardwareText);
+
+                for (Wallet w : wallets)
+                {
+                    if (w.type == WalletType.HARDWARE)
+                    {
+                        this.wallets.add(w);
+                    }
                 }
             }
 

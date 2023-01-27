@@ -1,4 +1,4 @@
-package com.alphawallet.app.entity.cryptokeys;
+package com.alphawallet.hardware;
 
 /**
  * Created by JB on 9/02/2020.
@@ -13,4 +13,12 @@ public class SignatureFromKey
     public byte[] signature;
     public SignatureReturnType sigType;
     public String failMessage;
+
+    public  static final String FAILED_SIGNATURE = "00000000000000000000000000000000000000000000000000000000000000000";
+
+    public SignatureFromKey()
+    {
+        sigType = SignatureReturnType.KEY_AUTHENTICATION_ERROR;
+        signature = FAILED_SIGNATURE.getBytes();
+    }
 }

@@ -1,11 +1,8 @@
 package com.alphawallet.app.entity;
 
-import org.web3j.utils.Numeric;
+import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.hardware.SignatureReturnType;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +26,8 @@ public class SignaturePair
     private static final int TRAILING_ZEROES_SIZE = 3; //gives the fixed length of the trailing zeroes after selection
 
     public byte[] selection;
-    public byte[] signature;
+    public SignatureFromKey signature;
+    //public byte[] signature;
     public final String message;
 
     public String signatureStr;
@@ -42,12 +40,12 @@ public class SignaturePair
      * @param sig       65 bytes of signature
      * @param message   the message being signed, including the 'selection'.
      */
-    public SignaturePair(String selection, byte[] sig, String message)
+    public SignaturePair(String selection, SignatureFromKey sig, String message)
     {
         selectionStr = selection;
         signature = sig;
 
-        BigInteger bi = new BigInteger(1, signature);
+        BigInteger bi = new BigInteger(1, signature.signature);
         signatureStr  = bi.toString(10);
         this.message = message;
     }
@@ -167,25 +165,27 @@ public class SignaturePair
 
         BigInteger sigBi = new BigInteger(signatureStr, 10);
         //Now convert sig back to Byte
-        signature = sigBi.toByteArray();
+        signature = new SignatureFromKey();
+        signature.sigType = SignatureReturnType.SIGNATURE_GENERATED;
+        signature.signature = sigBi.toByteArray();
 
-        if (signature.length < 65)
+        if (signature.signature.length < 65)
         {
-            int offset = 65 - signature.length;
+            int offset = 65 - signature.signature.length;
             byte[] sigCopy = new byte[65];
-            System.arraycopy(signature, 0, sigCopy, offset, 65-offset);
+            System.arraycopy(signature.signature, 0, sigCopy, offset, 65-offset);
             for (int i = 0; i < offset; i++)
             {
                 sigCopy[i] = 0;
             }
-            signature = sigCopy;
+            signature.signature = sigCopy;
         }
-        else if (signature.length > 65)
+        else if (signature.signature.length > 65)
         {
             byte[] sigCopy = new byte[65];
             //prune the first digit
-            System.arraycopy(signature, 1, sigCopy, 0, 65);
-            signature = sigCopy;
+            System.arraycopy(signature.signature, 1, sigCopy, 0, 65);
+            signature.signature = sigCopy;
         }
     }
 

@@ -1,5 +1,12 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.IMPORT_STRING;
+import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
+import static com.alphawallet.token.tools.Convert.getEthString;
+import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
+import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -21,8 +28,8 @@ import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.TickerService;
@@ -34,7 +41,7 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.SignTransactionDialog;
-import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.tools.Convert;
@@ -42,16 +49,8 @@ import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigDecimal;
 
-import timber.log.Timber;
-
-import static com.alphawallet.app.C.IMPORT_STRING;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
-import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
-import static com.alphawallet.token.tools.Convert.getEthString;
-import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
-import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
-
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 /**
  * Created by James on 9/03/2018.
@@ -60,8 +59,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class ImportTokenActivity extends BaseActivity implements View.OnClickListener, SignAuthenticationCallback, PageReadyCallback
 {
     private ImportTokenViewModel viewModel;
-    private SystemView systemView;
-
     private TicketRange ticketRange;
     private String importString;
     private AWalletAlertDialog aDialog;
@@ -76,7 +73,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private TextView importTxt;
 
     private LinearLayout costLayout;
-    private long chainId = 0;
     private boolean usingFeeMaster = false;
     private final String paymasterUrlPrefix = "https://paymaster.stormbird.sg/api/";
     private final String TAG = "ITA";
@@ -92,7 +88,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         setTitle(getString(R.string.toolbar_header_importing_tickets));
 
         importString = getIntent().getStringExtra(IMPORT_STRING);
-        systemView = findViewById(R.id.system_view);
         priceETH = findViewById(R.id.textImportPrice);
         priceUSD = findViewById(R.id.textImportPriceUSD);
         priceUSDLabel = findViewById(R.id.fiat_price_txt);
@@ -166,7 +161,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private void onNetwork(NetworkInfo networkInfo)
     {
-        chainId = networkInfo.chainId;
         TextView networkText = findViewById(R.id.textNetworkName);
         networkText.setText(networkInfo.name);
     }
@@ -567,22 +561,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
         else
         {
-            //needs gas, so require auth first
-            SignAuthenticationCallback cb = new SignAuthenticationCallback()
-            {
-                @Override
-                public void gotAuthorisation(boolean gotAuth)
-                {
-                    viewModel.performImport();
-                }
-
-                @Override
-                public void cancelAuthentication()
-                {
-
-                }
-            };
-            viewModel.getAuthorisation(this, cb);
+            viewModel.getAuthorisation(this, this);
         }
     }
 
@@ -674,6 +653,12 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         });
         dialog.setCancelable(true);
         dialog.show();
+    }
+
+    @Override
+    public void gotSignature(SignatureFromKey signature)
+    {
+        //TODO: Hardware
     }
 
     @Override

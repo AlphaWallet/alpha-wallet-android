@@ -349,7 +349,6 @@ public class GasService implements ContractGasProvider
         updateChainId(chainId);
         String finalTxData = txData;
 
-        //do we have 1559 gas and can we use it?
         if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)

@@ -3,23 +3,27 @@ package com.alphawallet.app;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.util.Pair;
+
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.MessagePair;
 import com.alphawallet.app.entity.SignaturePair;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.interact.SignatureGenerateInteract;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.hardware.SignatureReturnType;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.Signable;
 
 import org.junit.Test;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
+import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
 
 import java.io.ByteArrayInputStream;
@@ -66,23 +70,6 @@ public class QRSelectionTest
 
         transactionRepository = new TransactionRepositoryType()
         {
-            @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId)
-            {
-                return null;
-            }
-
-            @Override
-            public Single<TransactionData> create1559TransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasLimit, BigInteger gasPremium, BigInteger gasMax, long nonce, byte[] data, long chainId) {
-                return null;
-            }
-
-            @Override
-            public Single<TransactionData> getSignatureForTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId)
-            {
-                return null;
-            }
-
             @Override
             public Single<SignatureFromKey> getSignature(Wallet wallet, Signable sign)
             {
@@ -170,6 +157,24 @@ public class QRSelectionTest
             {
 
             }
+
+            @Override
+            public Single<Pair<SignatureFromKey, RawTransaction>> signTransaction(Wallet from, Web3Transaction w3Tx, long chainId)
+            {
+                return null;
+            }
+
+            @Override
+            public RawTransaction formatRawTransaction(Web3Transaction w3Tx, long nonce, long chainId)
+            {
+                return null;
+            }
+
+            @Override
+            public Single<String> sendTransaction(Wallet from, RawTransaction rtx, SignatureFromKey sigData, long chainId)
+            {
+                return null;
+            }
         };
 
         signatureGenerateInteract = new SignatureGenerateInteract(null)
@@ -221,10 +226,13 @@ public class QRSelectionTest
             MessagePair messagePair = signatureGenerateInteract
                     .getMessage(qr.indices, CONTRACT_ADDR, ContractType.ERC875).blockingGet();
 
-            byte[] sig = transactionRepository
+            SignatureFromKey signatureFromKey = new SignatureFromKey();
+            signatureFromKey.sigType = SignatureReturnType.SIGNATURE_GENERATED;
+
+            signatureFromKey.signature = transactionRepository
                     .getSignatureFast(null, "hackintosh", messagePair.message.getBytes()).blockingGet();
 
-            qr.sigPair = new SignaturePair(messagePair.selection, sig, messagePair.message);
+            qr.sigPair = new SignaturePair(messagePair.selection, signatureFromKey, messagePair.message);
         }
 
         try
@@ -246,7 +254,7 @@ public class QRSelectionTest
                 //extract the sig pair
                 SignaturePair sPair = new SignaturePair(qrMessage, String.valueOf(localTime), CONTRACT_ADDR);
                 List<Integer> selectionRecreate = SignaturePair.buildIndexList(sPair.selectionStr);
-                Sign.SignatureData sigData = sigFromBase64Fix(sPair.signature);
+                Sign.SignatureData sigData = sigFromBase64Fix(sPair.signature.signature);
 
                 //check the signature corresponds to the test address
                 String addressHex = "0x" + ecRecoverAddress(sPair.message.getBytes(), sigData);

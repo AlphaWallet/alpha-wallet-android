@@ -28,8 +28,9 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -45,6 +46,7 @@ import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.TokenIcon;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.crypto.Keys;
@@ -419,7 +421,13 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, wallet, token.tokenInfo.chainId, transaction.hash); //return point is txWritten
+        viewModel.requestSignature(finalTx, wallet, token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(wallet, token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -445,6 +453,12 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     }
 
     @Override
+    public WalletType getWalletType()
+    {
+        return wallet.type;
+    }
+
+    @Override
     public void notifyConfirm(String mode)
     {
         AnalyticsProperties props = new AnalyticsProperties();
@@ -452,21 +466,21 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         viewModel.track(Analytics.Action.ACTION_SHEET_COMPLETED, props);
     }
 
-    private void txWritten(TransactionData transactionData)
+    private void txWritten(TransactionReturn transactionReturn)
     {
-        confirmationDialog.transactionWritten(transactionData.txHash);
+        confirmationDialog.transactionWritten(transactionReturn.hash);
         //reset display to show new transaction (load transaction from database)
-        viewModel.fetchTransaction(wallet, transactionData.txHash, transaction.chainId);
+        viewModel.fetchTransaction(wallet, transactionReturn.hash, transaction.chainId);
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(ERROR);
         dialog.setTitle(R.string.error_transaction_failed);
-        dialog.setMessage(throwable.getMessage());
+        dialog.setMessage(txError.throwable.getMessage());
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();

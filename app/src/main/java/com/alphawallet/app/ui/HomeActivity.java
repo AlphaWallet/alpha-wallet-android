@@ -62,6 +62,7 @@ import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
 import com.alphawallet.app.entity.HomeReceiver;
+import com.alphawallet.app.entity.MediaLinks;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
@@ -290,7 +291,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
         else
         {
-            if (getApplicationContext().getPackageName().equals("io.stormbird.wallet"))
+            if (MediaLinks.isMediaTargeted(getApplicationContext()))
             {
                 viewModel.checkLatestGithubRelease();
             }

@@ -164,31 +164,32 @@ public class SupportSettingsActivity extends BaseActivity
 
     private void onTelegramClicked()
     {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(MediaLinks.AWALLET_TELEGRAM_URL));
-        if (isAppAvailable(C.TELEGRAM_PACKAGE_NAME))
+        if (MediaLinks.isMediaTargeted(getApplicationContext()))
         {
-            intent.setPackage(C.TELEGRAM_PACKAGE_NAME);
-        }
-        try
-        {
-            viewModel.track(Analytics.Action.SUPPORT_TELEGRAM);
-            startActivity(intent);
-        }
-        catch (Exception e)
-        {
-            Timber.e(e);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(MediaLinks.AWALLET_TELEGRAM_URL));
+            if (isAppAvailable(C.TELEGRAM_PACKAGE_NAME))
+            {
+                intent.setPackage(C.TELEGRAM_PACKAGE_NAME);
+            }
+            try
+            {
+                viewModel.track(Analytics.Action.SUPPORT_TELEGRAM);
+                startActivity(intent);
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
         }
     }
 
     private void onGitHubClicked()
     {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-
-        intent.setData(Uri.parse(MediaLinks.AWALLET_GITHUB));
-
         try
         {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(MediaLinks.AWALLET_GITHUB));
             viewModel.track(Analytics.Action.SUPPORT_GITHUB);
             startActivity(intent);
         }
@@ -200,24 +201,19 @@ public class SupportSettingsActivity extends BaseActivity
 
     private void onDiscordClicked()
     {
-        Intent intent;
-        try
+        if (MediaLinks.isMediaTargeted(getApplicationContext()))
         {
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
-        catch (Exception e)
-        {
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
-        }
-        try
-        {
-            viewModel.track(Analytics.Action.SUPPORT_DISCORD);
-            startActivity(intent);
-        }
-        catch (Exception e)
-        {
-            Timber.e(e);
+            try
+            {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                viewModel.track(Analytics.Action.SUPPORT_DISCORD);
+                startActivity(intent);
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
         }
     }
 

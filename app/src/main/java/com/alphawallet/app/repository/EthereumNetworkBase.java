@@ -89,6 +89,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import io.reactivex.Single;
@@ -204,13 +205,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             return info.rpcServerUrl.substring(0, index + INFURA_ENDPOINT.length()) + keyProvider.getTertiaryInfuraKey();
         }
-        else if (info.backupNodeUrl != null)
-        {
-            return info.backupNodeUrl;
-        }
         else
         {
-            return info.rpcServerUrl;
+            return Objects.requireNonNullElseGet(info.backupNodeUrl, () -> info.rpcServerUrl);
         }
     }
 
@@ -517,19 +514,27 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
+    /**
+     * This function determines the order in which chains appear in the main wallet view
+     *
+     * TODO: Modify so that custom networks with value appear between the 'hasValue' and 'testnetList' chains
+     *
+     * @param chainId
+     * @return
+     */
     public static int getChainOrdinal(long chainId)
     {
         if (hasValue.contains(chainId))
         {
             return hasValue.indexOf(chainId);
         }
-        else if (networkMap.indexOfKey(chainId) >= 0)
+        else if (testnetList.contains(chainId))
         {
-            return networkMap.indexOfKey(chainId);
+            return hasValue.size() + testnetList.indexOf(chainId);
         }
         else
         {
-            return 500 + (int) chainId % 500; //fixed ID above 500
+            return hasValue.size() + testnetList.size() + (int) chainId % 500;
         }
     }
 

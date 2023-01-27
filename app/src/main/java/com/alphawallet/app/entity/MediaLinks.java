@@ -1,6 +1,7 @@
 package com.alphawallet.app.entity;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 public class MediaLinks
 {
@@ -25,6 +26,13 @@ public class MediaLinks
 
     public static boolean isMediaTargeted(Context context)
     {
-        return context.getPackageName().equals(MEDIA_TARGET_APPLICATION);
+        if (!TextUtils.isEmpty(MEDIA_TARGET_APPLICATION))
+        {
+            return context.getPackageName().equals(MEDIA_TARGET_APPLICATION);
+        }
+        else
+        {
+            return false;
+        }
     }
 }

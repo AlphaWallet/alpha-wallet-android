@@ -1028,4 +1028,5 @@
     <string name="share_anonymous_data">Share Anonymous Data?</string>
     <string name="enable_required_chains">Enable required chains?</string>
     <string name="enable_required_chains_message">Selected tokens are on chains currently not selected, enable unselected chains?</string>
+    <string name="dialog_title_search_token">Search for Token?</string>
 </resources>

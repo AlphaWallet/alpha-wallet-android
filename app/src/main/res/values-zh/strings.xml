@@ -953,4 +953,5 @@
     <string name="share_anonymous_data">共享匿名数据？</string>
     <string name="enable_required_chains">启用所需的链？</string>
     <string name="enable_required_chains_message">选定的代币位于当前未选择的链上，启用未选择的链？</string>
+    <string name="dialog_title_search_token">搜索令牌？</string>
 </resources>

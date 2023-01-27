@@ -987,4 +987,5 @@
     <string name="share_anonymous_data">အမည်မသိဒေတာကို မျှဝေမလား။</string>
     <string name="enable_required_chains">လိုအပ်တဲ့ သံကြိုးတွေကို လုပ်ဆောင်နိုင်မလား။</string>
     <string name="enable_required_chains_message">ရွေးချယ်ထားသော အမှတ်အသားများသည် လောလောဆယ် ရွေးချယ်မထားသော သံကြိုးများပေါ်တွင် ရွေးချယ်ထားပြီး ရွေးချယ်မှုမရှိသော သံကြိုးများ ဖြစ်စေနိုင်ပါသလော။</string>
+    <string name="dialog_title_search_token">တိုကင်ကို ရှာမလား။</string>
 </resources>

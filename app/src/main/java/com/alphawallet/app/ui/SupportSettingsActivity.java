@@ -164,7 +164,7 @@ public class SupportSettingsActivity extends BaseActivity
 
     private void onTelegramClicked()
     {
-        if (MediaLinks.isMediaTargetted(getApplicationContext()))
+        if (MediaLinks.isMediaTargeted(getApplicationContext()))
         {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(MediaLinks.AWALLET_TELEGRAM_URL));
@@ -201,7 +201,7 @@ public class SupportSettingsActivity extends BaseActivity
 
     private void onDiscordClicked()
     {
-        if (MediaLinks.isMediaTargetted(getApplicationContext()))
+        if (MediaLinks.isMediaTargeted(getApplicationContext()))
         {
             try
             {

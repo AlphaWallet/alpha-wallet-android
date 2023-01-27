@@ -23,7 +23,7 @@ public class MediaLinks
     public static final String AWALLET_EMAIL2 = "alphawallet.com";
     public static final String AWALLET_SUBJECT = "AlphaWallet Android Help";
 
-    public static boolean isMediaTargetted(Context context)
+    public static boolean isMediaTargeted(Context context)
     {
         return context.getPackageName().equals(MEDIA_TARGET_APPLICATION);
     }

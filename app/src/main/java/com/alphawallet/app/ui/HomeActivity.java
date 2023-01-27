@@ -291,7 +291,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
         else
         {
-            if (MediaLinks.isMediaTargetted(getApplicationContext()))
+            if (MediaLinks.isMediaTargeted(getApplicationContext()))
             {
                 viewModel.checkLatestGithubRelease();
             }

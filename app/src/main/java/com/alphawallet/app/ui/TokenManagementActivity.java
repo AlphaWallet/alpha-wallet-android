@@ -260,7 +260,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
 
                 String balance = TokensRealmSource.convertStringBalance(token.getBalance(), token.getContractType());
                 Token t = viewModel.getTokensService().getToken(token.getChainId(), token.getTokenAddress()); //may not be needed to group
-                if (!t.isEthereum())
+                if (t != null && !t.isEthereum())
                 {
                     TokenCardMeta meta = new TokenCardMeta(token.getChainId(), token.getTokenAddress(), balance,
                         token.getUpdateTime(), viewModel.getAssetDefinitionService(), token.getName(), token.getSymbol(), token.getContractType(),

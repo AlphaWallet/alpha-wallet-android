@@ -1,4 +1,5 @@
-[ 
+[
+  {"name": "Aave", "description": "A decentralized non-custodial liquidity protocol where users can participate as depositors or borrowers", "url": "https://app.aave.com/", "category": "Finance"},
   {"name": "Tbull", "description": "A Utility Token on Binance Smart Chain for Payments for Services", "url": "tbull.live", "category": "Utility"},
   {"name": "Rare Coin", "description": "Free Crypto Faucet & Yeild Farming", "url": "make.rare.claims", "category": "Tool"},
   {"name": "Eporio", "description": "The cheaper marketplace for NFT - Non Fungible Tokens", "url": "https://epor.io", "category": "Marketplace"},

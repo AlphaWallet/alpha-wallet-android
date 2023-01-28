@@ -31,8 +31,8 @@ public interface EthereumNetworkRepositoryType {
     String getNameById(long chainId);
 
     List<Long> getFilterNetworkList();
-    List<Long> getSelectedFilters(boolean isMainNet);
-    Long getDefaultNetwork(boolean isMainNet);
+    List<Long> getSelectedFilters();
+    Long getDefaultNetwork();
 
     void setFilterNetworkList(Long[] networkList);
 

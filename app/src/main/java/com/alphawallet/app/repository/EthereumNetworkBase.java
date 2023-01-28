@@ -848,11 +848,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public List<Long> getFilterNetworkList()
     {
-        return getSelectedFilters(true);
+        return getSelectedFilters();
     }
 
     @Override
-    public List<Long> getSelectedFilters(boolean isMainNet)
+    public List<Long> getSelectedFilters()
     {
         String filterList = preferences.getNetworkFilterList();
         List<Long> storedIds = Utils.longListToArray(filterList);
@@ -866,16 +866,16 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
         if (selectedIds.size() == 0)
         {
-            selectedIds.add(getDefaultNetwork(isMainNet));
+            selectedIds.add(getDefaultNetwork());
         }
 
         return selectedIds;
     }
 
     @Override
-    public Long getDefaultNetwork(boolean isMainNet)
+    public Long getDefaultNetwork()
     {
-        return isMainNet ? CustomViewSettings.primaryChain : GOERLI_ID;
+        return CustomViewSettings.primaryChain;
     }
 
     @Override

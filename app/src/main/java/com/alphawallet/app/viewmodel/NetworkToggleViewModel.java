@@ -83,7 +83,7 @@ public class NetworkToggleViewModel extends BaseViewModel
     public List<NetworkItem> getNetworkList(boolean isMainNet)
     {
         List<NetworkItem> networkList = new ArrayList<>();
-        List<Long> filterIds = networkRepository.getSelectedFilters(isMainNet);
+        List<Long> filterIds = networkRepository.getSelectedFilters();
 
         for (NetworkInfo info : getNetworkList())
         {

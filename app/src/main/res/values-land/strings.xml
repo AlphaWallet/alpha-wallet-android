@@ -9,5 +9,4 @@
     <string name="wc_wallet">Wallet</string>
     <string name="wc_wallet_not_match">Wallet not exist or it\'s watch only.</string>
     <string name="chain_not_support">Chain %s is not supported.</string>
-    <string name="mode_test">Testnet mode</string>
 </resources>

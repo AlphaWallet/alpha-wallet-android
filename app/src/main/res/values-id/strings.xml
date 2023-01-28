@@ -738,7 +738,6 @@
     <string name="action_enable_testnet">Mengerti, aktifkan Testnet</string>
     <string name="message_dialog_testnet">Token Testnets seperti uang \'Monopoli\'. Mereka tidak memiliki nilai finansial, tetapi digunakan oleh para pengembang untuk mencoba desain baru tanpa perlu mengeluarkan koin yang berharga..</string>
     <string name="select_dappbrowser_network">Terhubung ke Jaringan</string>
-    <string name="choose_network_preference">Pilih Pilihan Jaringan</string>
     <string name="please_select_at_least_one_network">Pilih setidaknya satu jaringan.</string>
     <string name="token_info_portfolio">Portofolio</string>
     <string name="enter_target_price">Masukkan Target Harga</string>
@@ -894,10 +893,6 @@
     <string name="node_status_strong">di bawah 1 detik</string>
     <string name="mode_status_medium">lebih dari 1 detik</string>
     <string name="node_status_not_responding">tidak merespon</string>
-    <string name="mode_test">Mode Testnet</string>
-    <string name="title_dialog_where_are_tokens">Di mana Token saya?</string>
-    <string name="content_dialog_where_are_tokens">Jangan khawatir. Token Anda aman. Anda sedang melihat jaringan Testnet. Mereka digunakan oleh para pengembang untuk mencoba desain baru. Anda bisa beralih ke jaringan utama kapan saja.</string>
-    <string name="button_switch_to_mainnet">Beralih ke Mainnet</string>
     <string name="action_select_token">Pilih Token</string>
     <string name="label_slippage_custom">Khusus</string>
     <string name="label_api_v1_app_name">Nama</string>

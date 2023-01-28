@@ -345,7 +345,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (viewModel.checkNewWallet(wallet.address))
         {
             viewModel.setNewWallet(wallet.address, false);
-            Intent selectNetworkIntent = new Intent(this, SelectNetworkFilterActivity.class);
+            Intent selectNetworkIntent = new Intent(this, NetworkToggleActivity.class);
             selectNetworkIntent.putExtra(C.EXTRA_SINGLE_ITEM, false);
             networkSettingsHandler.launch(selectNetworkIntent);
         }

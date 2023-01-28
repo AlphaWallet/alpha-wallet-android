@@ -741,7 +741,6 @@
     <string name="action_enable_testnet">OK, kích hoạt mạng thử nghiệm</string>
     <string name="message_dialog_testnet">Testnets tokens are like \'Monopoly\' money. They have zero financial worth but are used by developers to try out new designs without needing to spend valuable coins.</string>
     <string name="select_dappbrowser_network">Kết nối tới mạng</string>
-    <string name="choose_network_preference">Tùy chọn mạng</string>
     <string name="please_select_at_least_one_network">Vui lòng chọn ít nhất một mạng.</string>
     <string name="token_info_portfolio">Portfolio</string>
     <string name="enter_target_price">Nhập giá mục tiêu</string>
@@ -907,10 +906,6 @@
     <string name="label_slippage_custom">Custom</string>
     <string name="notify_wallet_connect_title">WalletConnect đang hoạt động</string>
     <string name="notify_wallet_connect_content">Nhấp để xem các phiên hoạt động</string>
-    <string name="mode_test">Chế độ testnet</string>
-    <string name="title_dialog_where_are_tokens">Token của tôi ở đâu?</string>
-    <string name="content_dialog_where_are_tokens">Đừng lo. Các mã thông báo của bạn được an toàn. Bạn đang xem các mạng Testnet. Chúng được các nhà phát triển sử dụng để thử các thiết kế mới. Bạn có thể chuyển sang Mainnet bất kỳ lúc nào.</string>
-    <string name="button_switch_to_mainnet">Chuyển sang Mainnet</string>
     <string name="label_api_v1_app_name">Name</string>
     <string name="label_api_v1_note">Note</string>
     <string name="action_connect">Connect</string>

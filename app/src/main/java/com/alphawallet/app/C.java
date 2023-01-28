@@ -153,7 +153,6 @@ public abstract class C {
     public static final String EXTRA_NONCE = "_NONCE";
     public static final String EXTRA_TXHASH = "_TXHASH";
     public static final String DAPP_URL_LOAD = "DAPP_URL";
-    public static final String EXTRA_LOCAL_NETWORK_SELECT_FLAG = "EXTRA_LOCAL_NETWORK_SELECT";
     public static final String EXTRA_PRICE_ALERT = "EXTRA_PRICE_ALERT";
     public static final String EXTRA_SESSION_ID = "SESSION_ID";
     public static final String EXTRA_WC_REQUEST_ID = "REQUEST_ID";

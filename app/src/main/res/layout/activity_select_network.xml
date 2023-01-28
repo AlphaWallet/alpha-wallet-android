@@ -31,7 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:headerText="@string/mainnet"
-                app:showSwitch="true" />
+                app:showSwitch="false" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/main_list"

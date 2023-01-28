@@ -50,13 +50,9 @@ public interface PreferenceRepositoryType
 
     void setUse1559Transactions(boolean toggleState);
 
-    boolean isActiveMainnet();
+    boolean isTestnetEnabled();
 
-    void setActiveMainnet(boolean state);
-
-    boolean hasShownTestNetWarning();
-
-    void setShownTestNetWarning();
+    void setTestnetEnabled(boolean enabled);
 
     String getPriceAlerts();
 

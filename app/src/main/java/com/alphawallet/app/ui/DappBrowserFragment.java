@@ -595,7 +595,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void openNetworkSelection()
     {
-        Intent intent = new Intent(getContext(), SelectNetworkActivity.class);
+        Intent intent = new Intent(getContext(), NetworkChooserActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
         if (activeNetwork != null) intent.putExtra(C.EXTRA_CHAIN_ID, activeNetwork.chainId);
         getNetwork.launch(intent);
@@ -768,19 +768,13 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void updateFilters(NetworkInfo networkInfo)
     {
-        if (networkInfo.hasRealValue() && !viewModel.isMainNetsSelected())
-        {
-            //switch to main net, no need to ask user
-            viewModel.setMainNetsSelected(true);
-        }
-
         viewModel.addNetworkToFilters(networkInfo);
         getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle()); //reset tokens service and wallet page with updated filters
     }
 
     private void launchNetworkPicker()
     {
-        Intent intent = new Intent(getContext(), SelectNetworkActivity.class);
+        Intent intent = new Intent(getContext(), NetworkChooserActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
         if (activeNetwork != null) intent.putExtra(C.EXTRA_CHAIN_ID, activeNetwork.chainId);
         getNewNetwork.launch(intent);
@@ -2011,7 +2005,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void onTestNetDialogConfirmed(long newChainId)
     {
-        viewModel.setMainNetsSelected(false);
         //proceed with new network change, no need to pop a second dialog, we are swapping from a main net to a testnet
         NetworkInfo newNetwork = viewModel.getNetworkInfo(newChainId);
         if (newNetwork != null)

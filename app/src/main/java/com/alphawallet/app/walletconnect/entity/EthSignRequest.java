@@ -1,13 +1,14 @@
 package com.alphawallet.app.walletconnect.entity;
 
-import com.walletconnect.sign.client.Sign;
+
+import static com.walletconnect.web3.wallet.client.Wallet.*;
 
 /**
  * Created by JB on 21/11/2022.
  */
 public abstract class EthSignRequest
 {
-    public static BaseRequest getSignRequest(Sign.Model.SessionRequest sessionRequest)
+    public static BaseRequest getSignRequest(Model.SessionRequest sessionRequest)
     {
         BaseRequest signRequest = null;
 

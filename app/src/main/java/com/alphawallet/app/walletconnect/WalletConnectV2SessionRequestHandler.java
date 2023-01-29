@@ -11,7 +11,7 @@ import com.alphawallet.app.walletconnect.entity.EthSignRequest;
 import com.alphawallet.app.widget.ActionSheet;
 import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.token.entity.Signable;
-import com.walletconnect.sign.client.Sign;
+import com.walletconnect.web3.wallet.client.Wallet;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,12 +20,12 @@ import timber.log.Timber;
 
 public class WalletConnectV2SessionRequestHandler
 {
-    private final Sign.Model.SessionRequest sessionRequest;
-    private final Sign.Model.Session settledSession;
+    private final Wallet.Model.SessionRequest sessionRequest;
+    private final Wallet.Model.Session settledSession;
     private final Activity activity;
     private final AWWalletConnectClient client;
 
-    public WalletConnectV2SessionRequestHandler(Sign.Model.SessionRequest sessionRequest, Sign.Model.Session settledSession, Activity activity, AWWalletConnectClient client)
+    public WalletConnectV2SessionRequestHandler(Wallet.Model.SessionRequest sessionRequest, Wallet.Model.Session settledSession, Activity activity, AWWalletConnectClient client)
     {
         this.sessionRequest = sessionRequest;
         this.settledSession = settledSession;
@@ -40,7 +40,7 @@ public class WalletConnectV2SessionRequestHandler
         });
     }
 
-    public Sign.Model.SessionRequest getSessionRequest()
+    public Wallet.Model.SessionRequest getSessionRequest()
     {
         return sessionRequest;
     }

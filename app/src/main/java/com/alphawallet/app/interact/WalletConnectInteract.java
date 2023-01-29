@@ -14,8 +14,8 @@ import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.entity.WCUtils;
-import com.walletconnect.sign.client.Sign;
-import com.walletconnect.sign.client.SignClient;
+import com.walletconnect.web3.wallet.client.Wallet;
+import com.walletconnect.web3.wallet.client.Web3Wallet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,8 +110,8 @@ public class WalletConnectInteract
         List<WalletConnectSessionItem> result = new ArrayList<>();
         try
         {
-            List<Sign.Model.Session> listOfSettledSessions = SignClient.INSTANCE.getListOfSettledSessions();
-            for (Sign.Model.Session session : listOfSettledSessions)
+            List<Wallet.Model.Session> listOfSettledSessions = Web3Wallet.INSTANCE.getListOfActiveSessions();
+            for (Wallet.Model.Session session : listOfSettledSessions)
             {
                 result.add(new WalletConnectV2SessionItem(session));
             }
@@ -128,4 +128,3 @@ public class WalletConnectInteract
         void onFetched(List<WalletConnectSessionItem> sessions);
     }
 }
-

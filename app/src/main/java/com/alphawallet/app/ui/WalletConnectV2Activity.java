@@ -36,7 +36,6 @@ import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.bumptech.glide.Glide;
-import com.walletconnect.sign.client.Sign;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -297,12 +296,12 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         awWalletConnectClient.disconnect(sessionId, this);
     }
 
-    private void reject(Sign.Model.SessionProposal sessionProposal)
+    private void reject(com.walletconnect.web3.wallet.client.Wallet.Model.SessionProposal sessionProposal)
     {
         awWalletConnectClient.reject(sessionProposal, this);
     }
 
-    private void approve(Sign.Model.SessionProposal sessionProposal, String walletAddress)
+    private void approve(com.walletconnect.web3.wallet.client.Wallet.Model.SessionProposal sessionProposal, String walletAddress)
     {
         List<Long> disabledNetworks = disabledNetworks(sessionProposal.getRequiredNamespaces());
         if (disabledNetworks.isEmpty())
@@ -343,7 +342,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
                 .collect(Collectors.joining(", "));
     }
 
-    private List<Long> disabledNetworks(Map<String, Sign.Model.Namespace.Proposal> requiredNamespaces)
+    private List<Long> disabledNetworks(Map<String, com.walletconnect.web3.wallet.client.Wallet.Model.Namespace.Proposal> requiredNamespaces)
     {
         NamespaceParser namespaceParser = new NamespaceParser();
         namespaceParser.parseProposal(requiredNamespaces);

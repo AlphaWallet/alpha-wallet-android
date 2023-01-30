@@ -86,6 +86,6 @@
   {"name": "mail³", "description": "Decentralized mail system for web3 natives.", "url": "https://app.mail3.me/", "category": "Social Media"},
   {"name": "ApeNow", "description": "Buy now, pay later marketplace for NFTs.", "url": "https://www.apenowpaylater.com/", "category": "Marketplace"},
   {"name": "AirCash", "description": "AirCash is the first and largest decentralized OTC platform in the galaxy.", "url": "https://aircash.finance", "category": "Exchange"},
-  {"name": "Lido", "description": "Liquidity for staked assets", "url": "https://lido.fi/", "category": "Finance"}
-  {"name": "Blur", "description": "The fastest NFT marketplace", "url": "https://www.blur.io", "category": "Marketplace")
+  {"name": "Lido", "description": "Liquidity for staked assets", "url": "https://lido.fi/", "category": "Finance"},
+  {"name": "Blur", "description": "The fastest NFT marketplace", "url": "https://www.blur.io", "category": "Marketplace"}
 ]

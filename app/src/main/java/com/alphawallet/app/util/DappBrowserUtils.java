@@ -32,8 +32,8 @@ public class DappBrowserUtils {
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
     private static final String MY_DAPPS_FILE = "mydapps";
     private static final String DAPPS_HISTORY_FILE = "dappshistory";
-    private static final String DEFAULT_HOMEPAGE = "https://alphawallet.com/browser/";
-    private static final String POLYGON_HOMEPAGE = "https://alphawallet.com/browser-item-category/polygon/";
+    private static final String DEFAULT_HOMEPAGE = "https://google.com.ar/";
+    private static final String POLYGON_HOMEPAGE = "https://google.com.ar/";
 
     //TODO: Move to database
     public static void saveToPrefs(Context context, List<DApp> myDapps) {

@@ -31,8 +31,8 @@ public interface EthereumNetworkRepositoryType {
     String getNameById(long chainId);
 
     List<Long> getFilterNetworkList();
-    List<Long> getSelectedFilters(boolean isMainNet);
-    Long getDefaultNetwork(boolean isMainNet);
+    List<Long> getSelectedFilters();
+    Long getDefaultNetwork();
 
     void setFilterNetworkList(Long[] networkList);
 
@@ -51,8 +51,6 @@ public interface EthereumNetworkRepositoryType {
     String getCurrentWalletAddress();
     boolean hasSetNetworkFilters();
     void setHasSetNetworkFilters();
-    boolean isMainNetSelected();
-    void setActiveMainnet(boolean isMainNet);
     String getDappBrowserRPC(long chainId);
 
     void saveCustomRPCNetwork(String networkName, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId);

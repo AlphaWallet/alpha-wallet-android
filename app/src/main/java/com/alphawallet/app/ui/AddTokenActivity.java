@@ -9,17 +9,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.LongSparseArray;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -126,7 +123,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(),
                 null);
         adapter.setHasStableIds(true);
-        adapter.showTestNetTips();
         adapter.setFilterType(TokenFilter.NO_FILTER);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -164,6 +160,12 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         if ( getIntent().getStringExtra(C.EXTRA_QR_CODE) != null) {
             runOnUiThread(() -> onActivityResult(C.BARCODE_READER_REQUEST_CODE, Activity.RESULT_OK, getIntent()));
         }
+
+        String addressFromIntent = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        if (!TextUtils.isEmpty(addressFromIntent))
+        {
+            inputAddressView.setAddress(addressFromIntent);
+        }
     }
 
     private void gotToken(Token token)
@@ -198,22 +200,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         {
             showProgress(false);
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_network, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        if (item.getItemId() == R.id.action_networks)
-        {
-            selectNetwork();
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -335,18 +321,12 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
     private void onSave()
     {
-        boolean mainNetActive = viewModel.ethereumNetworkRepository().isMainNetSelected();
         List<Long> activeChains = viewModel.ethereumNetworkRepository().getFilterNetworkList();
         List<TokenCardMeta> selected = adapter.getSelected();
         HashSet<Long> chainsNotEnabled = new HashSet<>();
-        boolean onlyTestNet = selected.size() > 0;
-
-        // 1. if any mainnet networks were selected, and we're using testnet, switch to mainnet
-        // 2. detect if we need to enable chains
         for (TokenCardMeta token : selected)
         {
             NetworkInfo info = viewModel.ethereumNetworkRepository().getNetworkByChain(token.getChain());
-            if (info.hasRealValue()) onlyTestNet = false;
             if (!activeChains.contains(info.chainId))
             {
                 chainsNotEnabled.add(info.chainId);
@@ -355,13 +335,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         viewModel.markTokensEnabled(selected);
 
-        if (mainNetActive && onlyTestNet) // only testnet tokens selected and we're not showing testnet
-        {
-            //Will need to make these chains active on the callback
-            TestNetDialog testnetDialog = new TestNetDialog(this, activeChains.get(0), this);
-            testnetDialog.show();
-        }
-        else if (chainsNotEnabled.size() == 0) // currently showing the required chains, only need to save new tokens
+        if (chainsNotEnabled.size() == 0) // currently showing the required chains, only need to save new tokens
         {
             //store tokens
             onSelectedChains(selected);
@@ -384,21 +358,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         onSaved();
     }
 
-    private boolean requireMainNet()
-    {
-        boolean hasMainNetChain = false;
-        for (TokenCardMeta tcm : adapter.getSelected())
-        {
-            if (viewModel.ethereumNetworkRepository().getNetworkByChain(tcm.getChain()).hasRealValue())
-            {
-                hasMainNetChain = true;
-                break;
-            }
-        }
-
-        return hasMainNetChain;
-    }
-
     private void showAddChainsDialog()
     {
         if (dialog != null && dialog.isShowing())
@@ -417,11 +376,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             @Override
             public void onConfirmed()
             {
-                //switch to mainnet if required
-                if (!viewModel.ethereumNetworkRepository().isMainNetSelected() && requireMainNet())
-                {
-                    viewModel.setMainNetsSelected(true); // switch to mainnet before setting up filters
-                }
                 //add required chains
                 viewModel.selectExtraChains(getSelectedChains());
                 //did we add the tokens?
@@ -460,19 +414,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         {
             viewModel.setPrimaryChain(chainId);
         }
-    }
-
-    ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                long networkId = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, 1);
-                setupNetwork(networkId);
-            });
-
-    private void selectNetwork() {
-        Intent intent = new Intent(this, SelectNetworkActivity.class);
-        intent.putExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, true);
-        intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
-        getNetwork.launch(intent);
     }
 
     @Override
@@ -583,8 +524,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     @Override
     public void onTestNetDialogConfirmed(long chainId)
     {
-        //switch to testnet, ensuring the networks are selected
-        viewModel.setMainNetsSelected(false);
         viewModel.selectExtraChains(getSelectedChains());
         //did we add the tokens?
         onSelectedChains(adapter.getSelected());

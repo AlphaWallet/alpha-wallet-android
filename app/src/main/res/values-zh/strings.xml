@@ -726,7 +726,6 @@
     <string name="action_enable_testnet">Got it, enable Testnet</string>
     <string name="message_dialog_testnet">Testnets tokens are like \'Monopoly\' money. They have zero financial worth but are used by developers to try out new designs without needing to spend valuable coins.</string>
     <string name="select_dappbrowser_network">Connect to Network</string>
-    <string name="choose_network_preference">Choose Network Preference</string>
     <string name="please_select_at_least_one_network">Please select at least one network.</string>
     <string name="token_info_portfolio">Portfolio</string>
     <string name="enter_target_price">输入目标价格</string>
@@ -892,10 +891,6 @@
     <string name="label_slippage_custom">Custom</string>
     <string name="notify_wallet_connect_title">WalletConnect 处于活动状态</string>
     <string name="notify_wallet_connect_content">点击查看活跃会话</string>
-    <string name="mode_test">测试网模式</string>
-    <string name="title_dialog_where_are_tokens">我的代币在哪里？</string>
-    <string name="content_dialog_where_are_tokens">不用担心，您的代币是安全的。您正在查看 Testnet 网络，开发人员使用它们来尝试新设计。您可以随时切换到主网。</string>
-    <string name="button_switch_to_mainnet">切换到主网</string>
     <string name="label_api_v1_app_name">Name</string>
     <string name="label_api_v1_note">Note</string>
     <string name="action_connect">Connect</string>
@@ -953,4 +948,5 @@
     <string name="share_anonymous_data">共享匿名数据？</string>
     <string name="enable_required_chains">启用所需的链？</string>
     <string name="enable_required_chains_message">选定的代币位于当前未选择的链上，启用未选择的链？</string>
+    <string name="dialog_title_search_token">搜索令牌？</string>
 </resources>

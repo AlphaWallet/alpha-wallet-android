@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -32,7 +31,6 @@ import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.token.entity.Signable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.walletconnect.sign.client.Sign;
 
 import org.web3j.utils.Numeric;
 
@@ -48,8 +46,8 @@ import io.reactivex.schedulers.Schedulers;
 public class TransactionDialogBuilder extends DialogFragment
 {
     private final Activity activity;
-    private final Sign.Model.SessionRequest sessionRequest;
-    private final Sign.Model.Session settledSession;
+    private final com.walletconnect.web3.wallet.client.Wallet.Model.SessionRequest sessionRequest;
+    private final com.walletconnect.web3.wallet.client.Wallet.Model.Session settledSession;
     private final AWWalletConnectClient awWalletConnectClient;
     private final boolean signOnly;
     private WalletConnectViewModel viewModel;
@@ -57,7 +55,7 @@ public class TransactionDialogBuilder extends DialogFragment
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> actionSheetDialog.setCurrentGasIndex(result));
 
-    public TransactionDialogBuilder(Activity activity, Sign.Model.SessionRequest sessionRequest, Sign.Model.Session settledSession, AWWalletConnectClient awWalletConnectClient, boolean signOnly)
+    public TransactionDialogBuilder(Activity activity, com.walletconnect.web3.wallet.client.Wallet.Model.SessionRequest sessionRequest, com.walletconnect.web3.wallet.client.Wallet.Model.Session settledSession, AWWalletConnectClient awWalletConnectClient, boolean signOnly)
     {
         this.activity = activity;
         this.sessionRequest = sessionRequest;
@@ -118,6 +116,12 @@ public class TransactionDialogBuilder extends DialogFragment
             @Override
             public void notifyConfirm(String mode)
             {
+            }
+
+            @Override
+            public void denyWalletConnect()
+            {
+                awWalletConnectClient.reject(sessionRequest);
             }
 
             @Override

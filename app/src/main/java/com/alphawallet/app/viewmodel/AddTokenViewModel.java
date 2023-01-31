@@ -348,11 +348,6 @@ public class AddTokenViewModel extends BaseViewModel
         return ethereumNetworkRepository;
     }
 
-    public void setMainNetsSelected(boolean mainNetSelected)
-    {
-        ethereumNetworkRepository.setActiveMainnet(mainNetSelected);
-    }
-
     public void selectExtraChains(List<Long> selectedChains)
     {
         //add new chains to chain selection

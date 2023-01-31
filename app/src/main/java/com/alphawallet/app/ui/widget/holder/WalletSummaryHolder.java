@@ -2,7 +2,6 @@ package com.alphawallet.app.ui.widget.holder;
 
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_CHANGE;
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_VALUE;
-import static com.alphawallet.app.ui.widget.holder.WalletHolder.IS_MAINNET_ACTIVE;
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.IS_SYNCED;
 
 import android.content.Intent;
@@ -142,21 +141,13 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
                 walletIcon.setWaiting();
             }
 
-            if (addition.getBoolean(IS_MAINNET_ACTIVE))
-            {
-                double fiatValue = addition.getDouble(FIAT_VALUE, 0.00);
-                double oldFiatValue = addition.getDouble(FIAT_CHANGE, 0.00);
+            double fiatValue = addition.getDouble(FIAT_VALUE, 0.00);
+            double oldFiatValue = addition.getDouble(FIAT_CHANGE, 0.00);
 
-                String balanceTxt = TickerService.getCurrencyString(fiatValue);
-                walletBalanceText.setVisibility(View.VISIBLE);
-                walletBalanceText.setText(balanceTxt);
-                setWalletChange(fiatValue != 0 ? ((fiatValue - oldFiatValue) / oldFiatValue) * 100.0 : 0.0);
-            }
-            else
-            {
-                walletBalanceText.setText("-");
-                wallet24hChange.setVisibility(View.GONE);
-            }
+            String balanceTxt = TickerService.getCurrencyString(fiatValue);
+            walletBalanceText.setVisibility(View.VISIBLE);
+            walletBalanceText.setText(balanceTxt);
+            setWalletChange(fiatValue != 0 ? ((fiatValue - oldFiatValue) / oldFiatValue) * 100.0 : 0.0);
 
             checkLastBackUpTime();
             startRealmListener();

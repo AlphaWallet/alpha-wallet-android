@@ -1043,6 +1043,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         .like("auxData", "*" + searchTerm + "*", Case.INSENSITIVE)
                         .or().like("symbol", "*" + searchTerm + "*", Case.INSENSITIVE)
                         .or().like("name", "*" + searchTerm + "*", Case.INSENSITIVE)
+                        .or().like("address", "*" + searchTerm + "*", Case.INSENSITIVE)
                         .endGroup()
                         .like("address", ADDRESS_FORMAT)
                         .findAll();

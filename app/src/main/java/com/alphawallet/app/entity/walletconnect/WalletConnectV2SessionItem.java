@@ -3,7 +3,7 @@ package com.alphawallet.app.entity.walletconnect;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.walletconnect.sign.client.Sign;
+import com.walletconnect.web3.wallet.client.Wallet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
     public List<String> wallets = new ArrayList<>();
     public List<String> methods = new ArrayList<>();
 
-    public WalletConnectV2SessionItem(Sign.Model.Session s)
+    public WalletConnectV2SessionItem(Wallet.Model.Session s)
     {
         super();
         name = Objects.requireNonNull(s.getMetaData()).getName();
@@ -49,7 +49,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
     {
     }
 
-    public static WalletConnectV2SessionItem from(Sign.Model.SessionProposal sessionProposal)
+    public static WalletConnectV2SessionItem from(Wallet.Model.SessionProposal sessionProposal)
     {
         WalletConnectV2SessionItem item = new WalletConnectV2SessionItem();
         item.name = sessionProposal.getName();

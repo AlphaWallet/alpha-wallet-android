@@ -625,7 +625,7 @@ public class NewSettingsFragment extends BaseFragment
 
     private void onSelectNetworksSettingClicked()
     {
-        Intent intent = new Intent(getActivity(), SelectNetworkFilterActivity.class);
+        Intent intent = new Intent(getActivity(), NetworkToggleActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
         networkSettingsHandler.launch(intent);
     }

@@ -11,25 +11,29 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.widget.StandardHeader;
 import com.alphawallet.app.widget.TestNetDialog;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
-public abstract class SelectNetworkBaseActivity extends BaseActivity
+import javax.inject.Inject;
+
+public abstract class NetworkBaseActivity extends BaseActivity implements TestNetDialog.TestNetDialogCallback
 {
     RecyclerView mainnetRecyclerView;
     RecyclerView testnetRecyclerView;
     StandardHeader mainnetHeader;
     StandardHeader testnetHeader;
-    SwitchMaterial mainnetSwitch;
     SwitchMaterial testnetSwitch;
     TestNetDialog testnetDialog;
+
+    @Inject
+    PreferenceRepositoryType preferenceRepositoryType;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_select_network);
 
         toolbar();
@@ -75,12 +79,11 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity
         testnetDialog = new TestNetDialog(this, 0, callback);
     }
 
-    private void initViews()
+    protected void initViews()
     {
         mainnetHeader = findViewById(R.id.mainnet_header);
         testnetHeader = findViewById(R.id.testnet_header);
 
-        mainnetSwitch = mainnetHeader.getSwitch();
         testnetSwitch = testnetHeader.getSwitch();
 
         mainnetRecyclerView = findViewById(R.id.main_list);
@@ -89,25 +92,54 @@ public abstract class SelectNetworkBaseActivity extends BaseActivity
         mainnetRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         testnetRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        testnetSwitch.setOnClickListener(v -> {
+            boolean checked = testnetSwitch.isChecked();
+            if (checked)
+            {
+                testnetDialog.show();
+            }
+            else
+            {
+                toggleListVisibility(false);
+            }
+        });
+
+        boolean testnetEnabled = preferenceRepositoryType.isTestnetEnabled();
+        testnetSwitch.setChecked(testnetEnabled);
+        toggleListVisibility(testnetEnabled);
+        initTestNetDialog(this);
     }
 
-    void hideSwitches()
+    protected void updateTitle()
     {
-        mainnetHeader.setVisibility(View.GONE);
+    }
+
+    void hideSwitch()
+    {
         testnetHeader.setVisibility(View.GONE);
     }
 
-    void toggleListVisibility(boolean isMainNetActive)
+    void toggleListVisibility(boolean testnetChecked)
     {
-        if (isMainNetActive)
-        {
-            testnetRecyclerView.setVisibility(View.GONE);
-            mainnetRecyclerView.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            testnetRecyclerView.setVisibility(View.VISIBLE);
-            mainnetRecyclerView.setVisibility(View.GONE);
-        }
+        testnetRecyclerView.setVisibility(testnetChecked ? View.VISIBLE : View.GONE);
+        updateTitle();
+    }
+
+    public void onTestNetDialogClosed()
+    {
+        testnetSwitch.setChecked(false);
+    }
+
+    @Override
+    public void onTestNetDialogConfirmed(long newChainId)
+    {
+        toggleListVisibility(true);
+    }
+
+    @Override
+    public void onTestNetDialogCancelled()
+    {
+        testnetSwitch.setChecked(false);
     }
 }

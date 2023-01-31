@@ -1039,4 +1039,9 @@ public class Utils
     {
         return string != null ? string.replace("\"", "") : null;
     }
+
+    public static boolean isAlphaWallet(Context context)
+    {
+        return context.getPackageName().equals("io.stormbird.wallet");
+    }
 }

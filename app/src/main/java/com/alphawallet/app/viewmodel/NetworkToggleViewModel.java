@@ -16,33 +16,35 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
-public class SelectNetworkFilterViewModel extends BaseViewModel {
+public class NetworkToggleViewModel extends BaseViewModel
+{
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
     private final PreferenceRepositoryType preferenceRepository;
 
     @Inject
-    public SelectNetworkFilterViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
-                                        TokensService tokensService,
-                                        PreferenceRepositoryType preferenceRepository,
-                                        AnalyticsServiceType analyticsService) {
+    public NetworkToggleViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
+                                  TokensService tokensService,
+                                  PreferenceRepositoryType preferenceRepository,
+                                  AnalyticsServiceType analyticsService)
+    {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
         this.preferenceRepository = preferenceRepository;
         setAnalyticsService(analyticsService);
     }
 
-    public NetworkInfo[] getNetworkList() {
+    public NetworkInfo[] getNetworkList()
+    {
         return networkRepository.getAvailableNetworkList();
     }
 
-    public void setFilterNetworks(List<Long> selectedItems, boolean mainnetActive, boolean hasSelected, boolean shouldBlankUserSelection)
+    public void setFilterNetworks(List<Long> selectedItems, boolean hasSelected, boolean shouldBlankUserSelection)
     {
-        preferenceRepository.setActiveMainnet(mainnetActive);
-
         NetworkInfo activeNetwork = networkRepository.getActiveBrowserNetwork();
         long activeNetworkId = -99;
-        if (activeNetwork != null) {
+        if (activeNetwork != null)
+        {
             activeNetworkId = networkRepository.getActiveBrowserNetwork().chainId;
         }
 
@@ -50,8 +52,10 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         boolean deselected = true;
         Long[] selectedIds = new Long[selectedItems.size()];
         int index = 0;
-        for (Long selectedId : selectedItems) {
-            if (EthereumNetworkRepository.hasRealValue(selectedId) == mainnetActive && activeNetworkId == selectedId) {
+        for (Long selectedId : selectedItems)
+        {
+            if (EthereumNetworkRepository.hasRealValue(selectedId) && activeNetworkId == selectedId)
+            {
                 deselected = false;
             }
             selectedIds[index++] = selectedId;
@@ -66,30 +70,20 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         preferenceRepository.commit();
     }
 
-    public boolean hasShownTestNetWarning()
-    {
-        return preferenceRepository.hasShownTestNetWarning();
-    }
-
-    public void setShownTestNetWarning()
-    {
-        preferenceRepository.setShownTestNetWarning();
-    }
-
     public NetworkInfo getNetworkByChain(long chainId)
     {
         return networkRepository.getNetworkByChain(chainId);
     }
 
-    public boolean mainNetActive()
+    public boolean testnetEnabled()
     {
-        return preferenceRepository.isActiveMainnet();
+        return preferenceRepository.isTestnetEnabled();
     }
 
     public List<NetworkItem> getNetworkList(boolean isMainNet)
     {
         List<NetworkItem> networkList = new ArrayList<>();
-        List<Long> filterIds = networkRepository.getSelectedFilters(isMainNet);
+        List<Long> filterIds = networkRepository.getSelectedFilters();
 
         for (NetworkInfo info : getNetworkList())
         {
@@ -102,16 +96,23 @@ public class SelectNetworkFilterViewModel extends BaseViewModel {
         return networkList;
     }
 
-    public void removeCustomNetwork(long chainId) {
+    public void removeCustomNetwork(long chainId)
+    {
         networkRepository.removeCustomRPCNetwork(chainId);
     }
 
-    public TokensService getTokensService() {
+    public TokensService getTokensService()
+    {
         return tokensService;
     }
 
     public List<Long> getActiveNetworks()
     {
         return networkRepository.getFilterNetworkList();
+    }
+
+    public void setTestnetEnabled(boolean enabled)
+    {
+        preferenceRepository.setTestnetEnabled(enabled);
     }
 }

@@ -35,7 +35,6 @@ import io.realm.Realm;
 public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder> implements WalletClickCallback, Runnable
 {
     private final OnSetWalletDefaultListener onSetWalletDefaultListener;
-    private final boolean mainNetActivated;
     private final ArrayList<Wallet> wallets;
     private final Map<String, Pair<Double, Double>> valueMap = new HashMap<>();
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -46,10 +45,9 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     private final GenericWalletInteract walletInteract;
 
     public WalletsSummaryAdapter(Context ctx,
-                                 OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract, boolean activeMainnet)
+                                 OnSetWalletDefaultListener onSetWalletDefaultListener, GenericWalletInteract genericWalletInteract)
     {
         this.onSetWalletDefaultListener = onSetWalletDefaultListener;
-        this.mainNetActivated = activeMainnet;
         this.wallets = new ArrayList<>();
         this.context = ctx;
         this.realm = genericWalletInteract.getWalletRealm();
@@ -70,7 +68,7 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
                 binderViewHolder = new TextHolder(R.layout.item_standard_header, parent);
                 break;
             case WalletSummaryHeaderHolder.VIEW_TYPE:
-                binderViewHolder = new WalletSummaryHeaderHolder(R.layout.item_wallet_summary_large_title, parent, this, realm);
+                binderViewHolder = new WalletSummaryHeaderHolder(R.layout.item_wallet_summary_large_title, parent);
                 break;
             default:
                 break;
@@ -100,7 +98,6 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
                     bundle.putDouble(WalletHolder.FIAT_CHANGE, valuePair.second);
                 }
 
-                bundle.putBoolean(WalletHolder.IS_MAINNET_ACTIVE, mainNetActivated);
                 holder.bind(wallet, bundle);
                 break;
             case TextHolder.VIEW_TYPE:
@@ -110,13 +107,9 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
             case WalletSummaryHeaderHolder.VIEW_TYPE:
                 wallet = summaryWallet;
                 bundle = new Bundle();
-                bundle.putBoolean(WalletHolder.IS_MAINNET_ACTIVE, mainNetActivated);
-                if (mainNetActivated)
-                {
-                    Pair<Double, Double> totalPair = getSummaryBalance();
-                    bundle.putDouble(WalletHolder.FIAT_VALUE, totalPair.first);
-                    bundle.putDouble(WalletHolder.FIAT_CHANGE, totalPair.second);
-                }
+                Pair<Double, Double> totalPair = getSummaryBalance();
+                bundle.putDouble(WalletHolder.FIAT_VALUE, totalPair.first);
+                bundle.putDouble(WalletHolder.FIAT_CHANGE, totalPair.second);
                 holder.bind(wallet, bundle);
                 break;
 

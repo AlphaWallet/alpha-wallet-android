@@ -31,8 +31,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String HIDE_ZERO_BALANCE_TOKENS = "hide_zero_balance_tokens";
     public static final String FULL_SCREEN_STATE = "full_screen";
     public static final String EXPERIMENTAL_1559_TX = "ex_1559_tx";
-    public static final String ACTIVE_MAINNET = "active_mainnet";
-    public static final String SHOWN_WARNING = "shown_warning";
+    public static final String TESTNET_ENABLED = "testnet_enabled";
     public static final String PRICE_ALERTS = "price_alerts";
     private static final String SET_NETWORK_FILTERS = "set_filters";
     private static final String SHOULD_SHOW_ROOT_WARNING = "should_show_root_warning";
@@ -193,30 +192,21 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
+    public boolean isTestnetEnabled()
+    {
+        return pref.getBoolean(TESTNET_ENABLED, false);
+    }
+
+    @Override
+    public void setTestnetEnabled(boolean enabled)
+    {
+        pref.edit().putBoolean(TESTNET_ENABLED, enabled).apply();
+    }
+
+    @Override
     public boolean getUse1559Transactions()
     {
         return pref.getBoolean(EXPERIMENTAL_1559_TX, false);
-    }
-
-    @SuppressLint("ApplySharedPref")
-    @Override
-    public void setActiveMainnet(boolean state) {
-        pref.edit().putBoolean(ACTIVE_MAINNET, state).commit(); //use commit
-    }
-
-    @Override
-    public boolean isActiveMainnet() {
-        return pref.getBoolean(ACTIVE_MAINNET, true);
-    }
-
-    @Override
-    public boolean hasShownTestNetWarning() {
-        return pref.getBoolean(SHOWN_WARNING, false);
-    }
-
-    @Override
-    public void setShownTestNetWarning() {
-        pref.edit().putBoolean(SHOWN_WARNING, true).apply();
     }
 
     @Override

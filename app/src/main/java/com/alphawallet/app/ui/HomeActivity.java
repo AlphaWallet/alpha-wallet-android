@@ -27,7 +27,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -62,6 +61,7 @@ import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
 import com.alphawallet.app.entity.HomeReceiver;
+import com.alphawallet.app.entity.MediaLinks;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
@@ -91,7 +91,6 @@ import com.github.florent37.tutoshowcase.TutoShowcase;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
-import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.List;
 
@@ -290,7 +289,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
         else
         {
-            if (getApplicationContext().getPackageName().equals("io.stormbird.wallet"))
+            if (MediaLinks.isMediaTargeted(getApplicationContext()))
             {
                 viewModel.checkLatestGithubRelease();
             }
@@ -344,7 +343,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (viewModel.checkNewWallet(wallet.address))
         {
             viewModel.setNewWallet(wallet.address, false);
-            Intent selectNetworkIntent = new Intent(this, SelectNetworkFilterActivity.class);
+            Intent selectNetworkIntent = new Intent(this, NetworkToggleActivity.class);
             selectNetworkIntent.putExtra(C.EXTRA_SINGLE_ITEM, false);
             networkSettingsHandler.launch(selectNetworkIntent);
         }
@@ -1037,30 +1036,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 super.onActivityResult(requestCode, resultCode, data);
                 break;
         }
-    }
-
-    @SuppressLint("RestrictedApi")
-    @Override
-    protected boolean onPrepareOptionsPanel(View view, Menu menu)
-    {
-        if (menu != null)
-        {
-            if (menu.getClass().getSimpleName().equals("MenuBuilder"))
-            {
-                try
-                {
-                    Method m = menu.getClass().getDeclaredMethod(
-                            "setOptionalIconsVisible", Boolean.TYPE);
-                    m.setAccessible(true);
-                    m.invoke(menu, true);
-                }
-                catch (Exception e)
-                {
-                    Timber.e(e, "onMenuOpened...unable to set icons for overflow menu");
-                }
-            }
-        }
-        return super.onPrepareOptionsPanel(view, menu);
     }
 
     void postponeWalletBackupWarning(String walletAddress)

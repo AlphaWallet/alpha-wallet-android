@@ -98,10 +98,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
                 new ImportWalletRouter().openWatchCreate(this, IMPORT_REQUEST_CODE);
             });
             findViewById(R.id.button_import).setOnClickListener(v -> {
-                AnalyticsProperties props = new AnalyticsProperties();
-                props.put(FirstWalletAction.KEY, FirstWalletAction.IMPORT_WALLET.getValue());
-                viewModel.track(Analytics.Action.FIRST_WALLET_ACTION, props);
-                new ImportWalletRouter().openForResult(this, IMPORT_REQUEST_CODE);
+                new ImportWalletRouter().openForResult(this, IMPORT_REQUEST_CODE, true);
             });
         }
         else

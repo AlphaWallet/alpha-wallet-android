@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -27,9 +29,9 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
-import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRUtils;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.InputAmount;
@@ -43,8 +45,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
-
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 @AndroidEntryPoint
 public class MyAddressActivity extends BaseActivity implements AmountReadyCallback
@@ -154,6 +154,8 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
                 menu.findItem(R.id.action_my_address)
                         .setVisible(false);
                 menu.findItem(R.id.action_show_contract)
+                        .setVisible(false);
+                menu.findItem(R.id.action_networks)
                         .setVisible(false);
                 break;
             case MODE_CONTRACT:
@@ -319,8 +321,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     });
 
     private void selectNetwork() {
-        Intent intent = new Intent(MyAddressActivity.this, SelectNetworkActivity.class);
-        intent.putExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, true);
+        Intent intent = new Intent(MyAddressActivity.this, NetworkChooserActivity.class);
         intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
         getNetwork.launch(intent);
     }

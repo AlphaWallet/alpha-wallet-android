@@ -226,8 +226,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
 
     private void startFullWalletSync(Wallet[] items)
     {
-        if (!ethereumNetworkRepository.isMainNetSelected()) return;
-
         walletUpdate.clear();
         for (Wallet w : items)
         {
@@ -370,11 +368,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private void startBalanceUpdateTimer(final Wallet[] wallets)
     {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
-        if (!tokensService.isMainNetActive())
-        {
-            updateAllWallets(wallets, TokenUpdateType.STORED); //initially show values from database, start update 1 second later
-        }
-
         balanceTimerDisposable = Observable.interval(1, BALANCE_CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS) //initial delay 1 second to allow view to stabilise
                 .doOnNext(l -> getWalletsBalance(wallets)).subscribe();
     }
@@ -386,20 +379,12 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
      */
     private void getWalletsBalance(Wallet[] wallets)
     {
-        if (tokensService.isMainNetActive())
-        {
-            //loop through wallets and update balance
-            disposable = Observable.fromArray(wallets)
-                    .forEach(wallet -> walletBalanceUpdate = tokensService.getChainBalance(wallet.address.toLowerCase(), currentNetwork.chainId)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(newBalance -> genericWalletInteract.updateBalanceIfRequired(wallet, newBalance), e -> {}));
-        }
-        else
-        {
-            //Testnet Mode, need to update chain balances for visible chains
-            updateAllWallets(wallets, TokenUpdateType.ACTIVE_SYNC);
-        }
+        //loop through wallets and update balance
+        disposable = Observable.fromArray(wallets)
+                .forEach(wallet -> walletBalanceUpdate = tokensService.getChainBalance(wallet.address.toLowerCase(), currentNetwork.chainId)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(newBalance -> genericWalletInteract.updateBalanceIfRequired(wallet, newBalance), e -> {}));
         progress.postValue(false);
     }
 
@@ -441,7 +426,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
 
     public void importWallet(Activity activity)
     {
-        importWalletRouter.openForResult(activity, C.IMPORT_REQUEST_CODE);
+        importWalletRouter.openForResult(activity, C.IMPORT_REQUEST_CODE, false);
     }
 
     public void showHome(Context context)

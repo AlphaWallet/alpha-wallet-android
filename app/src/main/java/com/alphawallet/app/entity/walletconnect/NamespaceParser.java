@@ -1,6 +1,6 @@
 package com.alphawallet.app.entity.walletconnect;
 
-import com.walletconnect.sign.client.Sign;
+import com.walletconnect.web3.wallet.client.Wallet;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,9 +15,9 @@ public class NamespaceParser
     private final List<String> events = new ArrayList<>();
     private final List<String> wallets = new ArrayList<>();
 
-    public void parseProposal(Map<String, Sign.Model.Namespace.Proposal> requiredNamespaces)
+    public void parseProposal(Map<String, Wallet.Model.Namespace.Proposal> requiredNamespaces)
     {
-        for (Map.Entry<String, Sign.Model.Namespace.Proposal> entry : requiredNamespaces.entrySet())
+        for (Map.Entry<String, Wallet.Model.Namespace.Proposal> entry : requiredNamespaces.entrySet())
         {
             chains.addAll(entry.getValue().getChains());
             methods.addAll(entry.getValue().getMethods());
@@ -25,9 +25,9 @@ public class NamespaceParser
         }
     }
 
-    public void parseSession(Map<String, Sign.Model.Namespace.Session> namespaces)
+    public void parseSession(Map<String, Wallet.Model.Namespace.Session> namespaces)
     {
-        for (Map.Entry<String, Sign.Model.Namespace.Session> entry : namespaces.entrySet())
+        for (Map.Entry<String, Wallet.Model.Namespace.Session> entry : namespaces.entrySet())
         {
             chains.addAll(parseChains(entry.getValue().getAccounts()));
             methods.addAll(entry.getValue().getMethods());

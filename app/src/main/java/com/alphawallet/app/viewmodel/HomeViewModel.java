@@ -27,6 +27,8 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.GitHubRelease;
@@ -36,6 +38,7 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Version;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
+import com.alphawallet.app.entity.analytics.QrScanResultType;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -354,25 +357,37 @@ public class HomeViewModel extends BaseViewModel
         {
             if (qrCode == null) return;
 
+            AnalyticsProperties props = new AnalyticsProperties();
             QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
             QRResult qrResult = parser.parse(qrCode);
-
             switch (qrResult.type)
             {
                 case ADDRESS:
+                    props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS.getValue());
+                    track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+
                     //showSend(activity, qrResult); //For now, direct an ETH address to send screen
                     //TODO: Issue #1504: bottom-screen popup to choose between: Add to Address book, Sent to Address, or Watch Wallet
                     showActionSheet(activity, qrResult);
                     break;
                 case PAYMENT:
                 case TRANSFER:
+                    props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
+                    track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+
                     showSend(activity, qrResult);
                     break;
                 case FUNCTION_CALL:
+                    props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
+                    track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+
                     //TODO: Handle via ConfirmationActivity, need to generate function signature + data then call ConfirmationActivity
                     //TODO: Code to generate the function signature will look like the code in generateTransactionFunction
                     break;
                 case URL:
+                    props.put(QrScanResultType.KEY, QrScanResultType.URL.getValue());
+                    track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+
                     ((HomeActivity) activity).onBrowserWithURL(qrCode);
                     break;
                 case MAGIC_LINK:

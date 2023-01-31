@@ -1331,7 +1331,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     public void openChainSelection()
     {
         ActionSheetCallback.super.openChainSelection();
-        Intent intent = new Intent(WalletConnectActivity.this, SelectNetworkActivity.class);
+        Intent intent = new Intent(WalletConnectActivity.this, NetworkChooserActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
         getNetwork.launch(intent);

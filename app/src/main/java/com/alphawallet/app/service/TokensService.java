@@ -79,7 +79,6 @@ public class TokensService
     private final ConcurrentLinkedQueue<Long> baseTokenCheck;
     private long openSeaCheckId;
     private boolean appHasFocus;
-    private boolean mainNetActive = true;
     private static boolean walletStartup = false;
     private long transferCheckChain;
     private final TokenFactory tokenFactory = new TokenFactory();
@@ -322,16 +321,13 @@ public class TokensService
 
     private void syncChainTickers(TokenCardMeta[] tokenList, int chainIndex)
     {
-        if (mainNetActive)
-        {
-            //go through all mainnet chains
-            NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
+        //go through all mainnet chains
+        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
 
-            for (int i = chainIndex; i < networks.length; i++)
-            {
-                NetworkInfo info = networks[i];
-                if (info.hasRealValue() && syncERC20Tickers(i, info.chainId, tokenList)) return;
-            }
+        for (int i = chainIndex; i < networks.length; i++)
+        {
+            NetworkInfo info = networks[i];
+            if (info.hasRealValue() && syncERC20Tickers(i, info.chainId, tokenList)) return;
         }
 
         //complete
@@ -624,7 +620,7 @@ public class TokensService
     private void checkChainVisibility(Token t)
     {
         //Switch this token chain on
-        if (!networkFilter.contains(t.tokenInfo.chainId) && EthereumNetworkRepository.hasRealValue(t.tokenInfo.chainId) == this.mainNetActive)
+        if (!networkFilter.contains(t.tokenInfo.chainId) && EthereumNetworkRepository.hasRealValue(t.tokenInfo.chainId))
         {
             Timber.tag(TAG).d("Detected balance");
             //activate this filter
@@ -919,25 +915,23 @@ public class TokensService
     private void setupFilters()
     {
         baseTokenCheck.clear();
-        mainNetActive = ethereumNetworkRepository.isMainNetSelected();
         if (!ethereumNetworkRepository.hasSetNetworkFilters()) //add all networks to a check list to check balances at wallet startup and refresh
         {
             //first blank all existing filters for zero balance tokens, as user hasn't specified which chains they want to see
-            blankFiltersForZeroBalance(mainNetActive);
+            blankFiltersForZeroBalance();
 
-            NetworkInfo[] networks = ethereumNetworkRepository.getAllActiveNetworks();
+            NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
             for (NetworkInfo info : networks) { baseTokenCheck.add(info.chainId); }
         }
     }
 
     /**
      * set up visibility only for tokens with balance, if all zero then add the default networks
-     * @param mainNetActive
      */
-    private void blankFiltersForZeroBalance(boolean mainNetActive)
+    private void blankFiltersForZeroBalance()
     {
         networkFilter.clear();
-        NetworkInfo[] networks = ethereumNetworkRepository.getAllActiveNetworks();
+        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
 
         if (!ethereumNetworkRepository.hasSetNetworkFilters())
         {
@@ -956,7 +950,7 @@ public class TokensService
             if (!networkFilter.contains(lockedChain)) networkFilter.add(lockedChain);
         }
 
-        if (networkFilter.size() == 0) networkFilter.add(ethereumNetworkRepository.getDefaultNetwork(mainNetActive));
+        if (networkFilter.size() == 0) networkFilter.add(ethereumNetworkRepository.getDefaultNetwork());
 
         //set network filter prefs
         ethereumNetworkRepository.setFilterNetworkList(networkFilter.toArray(new Long[0]));
@@ -993,7 +987,6 @@ public class TokensService
     //Note that we can't go via the usual tokenStoreList method as we need to mark this token as enabled and locked visible
     private void addLockedTokens()
     {
-        mainNetActive = ethereumNetworkRepository.isMainNetSelected();
         final String wallet = currentAddress;
         //ensure locked tokens are displaying
         Observable.fromIterable(CustomViewSettings.getLockedTokens())
@@ -1024,11 +1017,6 @@ public class TokensService
         appHasFocus = true;
 
         //running or not?
-    }
-
-    public boolean isMainNetActive()
-    {
-        return mainNetActive;
     }
 
     public void walletOutOfFocus()
@@ -1145,16 +1133,8 @@ public class TokensService
 
     public boolean startWalletSync(ServiceSyncCallback cb)
     {
-        if (ethereumNetworkRepository.isMainNetSelected())
-        {
-            setCompletionCallback(cb, 0);
-            return true;
-        }
-        else
-        {
-            completionCallback = cb;
-            return false;
-        }
+        setCompletionCallback(cb, 0);
+        return true;
     }
 
     public void setCompletionCallback(ServiceSyncCallback cb, int sync)
@@ -1165,7 +1145,6 @@ public class TokensService
 
         if (sync > 0)
         {
-            mainNetActive = true;
             baseTokenCheck.clear();
             networkFilter.clear();
 

@@ -785,7 +785,6 @@
     <string name="action_enable_testnet">Got it, enable Testnet</string>
     <string name="message_dialog_testnet">Testnets tokens are like \'Monopoly\' money. They have zero financial worth but are used by developers to try out new designs without needing to spend valuable coins.</string>
     <string name="select_dappbrowser_network">Connect to Network</string>
-    <string name="choose_network_preference">Choose Network Preference</string>
     <string name="please_select_at_least_one_network">Please select at least one network.</string>
     <string name="token_info_portfolio">Portfolio</string>
     <string name="enter_target_price">Enter Target Price</string>
@@ -964,10 +963,6 @@
     <string name="network_must_be_enabled">Network %s must be enabled before connecting.</string>
     <string name="notify_wallet_connect_title">WalletConnect is active</string>
     <string name="notify_wallet_connect_content">Click to view active sessions</string>
-    <string name="mode_test">Testnet Mode</string>
-    <string name="title_dialog_where_are_tokens">Where are my Tokens?</string>
-    <string name="content_dialog_where_are_tokens">Don\'t worry. Your tokens are safe. You are viewing Testnet networks. They are used by developers to try out new designs. You can switch to Mainnet any time.</string>
-    <string name="button_switch_to_mainnet">Switch to Mainnet</string>
     <string name="action_select_token">Select Token</string>
     <string name="label_slippage_custom">Custom</string>
     <string name="misc_percentage" translatable="false">%</string>
@@ -1028,4 +1023,5 @@
     <string name="share_anonymous_data">Share Anonymous Data?</string>
     <string name="enable_required_chains">Enable required chains?</string>
     <string name="enable_required_chains_message">Selected tokens are on chains currently not selected, enable unselected chains?</string>
+    <string name="dialog_title_search_token">Search for Token?</string>
 </resources>

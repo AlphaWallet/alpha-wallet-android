@@ -2,6 +2,8 @@ package com.alphawallet.app.walletconnect;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.alphawallet.app.entity.cryptokeys.SignatureReturnType.SIGNATURE_GENERATED;
+import static com.walletconnect.web3.wallet.client.Wallet.Model;
+import static com.walletconnect.web3.wallet.client.Wallet.Params;
 
 import android.app.Application;
 import android.content.Context;
@@ -33,9 +35,8 @@ import com.alphawallet.token.tools.Numeric;
 import com.walletconnect.android.Core;
 import com.walletconnect.android.CoreClient;
 import com.walletconnect.android.relay.ConnectionType;
-import com.walletconnect.sign.client.Sign;
-import com.walletconnect.sign.client.SignClient;
-import com.walletconnect.sign.client.SignInterface;
+import com.walletconnect.web3.wallet.client.Wallet.Model.Session;
+import com.walletconnect.web3.wallet.client.Web3Wallet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,11 +49,11 @@ import java.util.function.Consumer;
 import kotlin.Unit;
 import timber.log.Timber;
 
-public class AWWalletConnectClient implements SignInterface.WalletDelegate
+public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 {
     private static final String TAG = AWWalletConnectClient.class.getName();
     private final WalletConnectInteract walletConnectInteract;
-    public static Sign.Model.SessionProposal sessionProposal;
+    public static Model.SessionProposal sessionProposal;
 
     private final Context context;
     private final MutableLiveData<List<WalletConnectSessionItem>> sessionItemMutableLiveData = new MutableLiveData<>(Collections.emptyList());
@@ -68,12 +69,12 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
         hasConnection = false;
     }
 
-    public void onSessionDelete(@NonNull Sign.Model.DeletedSession deletedSession)
+    public void onSessionDelete(@NonNull Model.SessionDelete deletedSession)
     {
         updateNotification();
     }
 
-    public void onSessionProposal(@NonNull Sign.Model.SessionProposal sessionProposal)
+    public void onSessionProposal(@NonNull Model.SessionProposal sessionProposal)
     {
         WalletConnectV2SessionItem sessionItem = WalletConnectV2SessionItem.from(sessionProposal);
         if (!validChainId(sessionItem.chains))
@@ -104,7 +105,7 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
         return true;
     }
 
-    public void onSessionRequest(@NonNull Sign.Model.SessionRequest sessionRequest)
+    public void onSessionRequest(@NonNull Model.SessionRequest sessionRequest)
     {
         String method = sessionRequest.getRequest().getMethod();
         if ("eth_signTypedData_v4".equals(method))
@@ -118,20 +119,20 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
             return;
         }
 
-        Sign.Model.Session settledSession = getSession(sessionRequest.getTopic());
+        Model.Session settledSession = getSession(sessionRequest.getTopic());
 
         WalletConnectV2SessionRequestHandler handler = new WalletConnectV2SessionRequestHandler(sessionRequest, settledSession, activity, this);
         handler.handle(method, activity);
         requestHandlers.append(sessionRequest.getRequest().getId(), handler);
     }
 
-    private Sign.Model.Session getSession(String topic)
+    private Session getSession(String topic)
     {
-        List<Sign.Model.Session> listOfSettledSessions;
+        List<Session> listOfSettledSessions;
 
         try
         {
-            listOfSettledSessions = SignClient.INSTANCE.getListOfSettledSessions();
+            listOfSettledSessions = Web3Wallet.INSTANCE.getListOfActiveSessions();
         }
         catch (IllegalStateException e)
         {
@@ -139,7 +140,7 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
             Timber.tag(TAG).e(e);
         }
 
-        for (Sign.Model.Session session : listOfSettledSessions)
+        for (Session session : listOfSettledSessions)
         {
             if (session.getTopic().equals(topic))
             {
@@ -152,50 +153,50 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
     public void pair(String url, Consumer<String> callback)
     {
         Core.Params.Pair pair = new Core.Params.Pair(url);
-        CoreClient.INSTANCE.getPairing().pair(pair, error -> {
+        CoreClient.INSTANCE.getPairing().pair(pair, p -> null, error -> {
             Timber.e(error.getThrowable());
             callback.accept(error.getThrowable().getMessage());
             return null;
         });
     }
 
-    public void approve(Sign.Model.SessionRequest sessionRequest, String result)
+    public void approve(Model.SessionRequest sessionRequest, String result)
     {
-        Sign.Model.JsonRpcResponse jsonRpcResponse = new Sign.Model.JsonRpcResponse.JsonRpcResult(sessionRequest.getRequest().getId(), result);
-        Sign.Params.Response response = new Sign.Params.Response(sessionRequest.getTopic(), jsonRpcResponse);
-        SignClient.INSTANCE.respond(response, this::onSessionRequestApproveError);
+        Model.JsonRpcResponse jsonRpcResponse = new Model.JsonRpcResponse.JsonRpcResult(sessionRequest.getRequest().getId(), result);
+        Params.SessionRequestResponse response = new Params.SessionRequestResponse(sessionRequest.getTopic(), jsonRpcResponse);
+        Web3Wallet.INSTANCE.respondSessionRequest(response, srr -> null, this::onSessionRequestApproveError);
     }
 
-    private Unit onSessionRequestApproveError(Sign.Model.Error error)
+    private Unit onSessionRequestApproveError(Model.Error error)
     {
-        Timber.e(error.getThrowable());
+        Timber.tag(TAG).e(error.getThrowable());
         return null;
     }
 
-    public void reject(Sign.Model.SessionRequest sessionRequest)
+    public void reject(Model.SessionRequest sessionRequest)
     {
         reject(sessionRequest, context.getString(R.string.message_reject_request));
     }
 
-    public void approve(Sign.Model.SessionProposal sessionProposal, List<String> selectedAccounts, WalletConnectV2Callback callback)
+    public void approve(Model.SessionProposal sessionProposal, List<String> selectedAccounts, WalletConnectV2Callback callback)
     {
         String proposerPublicKey = sessionProposal.getProposerPublicKey();
-        Sign.Params.Approve approve = new Sign.Params.Approve(proposerPublicKey, buildNamespaces(sessionProposal, selectedAccounts), sessionProposal.getRelayProtocol());
-        SignClient.INSTANCE.approveSession(approve, this::onSessionApproveError);
+        Params.SessionApprove approve = new Params.SessionApprove(proposerPublicKey, buildNamespaces(sessionProposal, selectedAccounts), sessionProposal.getRelayProtocol());
+        Web3Wallet.INSTANCE.approveSession(approve, sessionApprove -> null, this::onSessionApproveError);
         callback.onSessionProposalApproved();
         new Handler().postDelayed(this::updateNotification, 3000);
     }
 
-    private Map<String, Sign.Model.Namespace.Session> buildNamespaces(Sign.Model.SessionProposal sessionProposal, List<String> selectedAccounts)
+    private Map<String, Model.Namespace.Session> buildNamespaces(Model.SessionProposal sessionProposal, List<String> selectedAccounts)
     {
-        Map<String, Sign.Model.Namespace.Session> result = new HashMap<>();
-        Map<String, Sign.Model.Namespace.Proposal> namespaces = sessionProposal.getRequiredNamespaces();
+        Map<String, Model.Namespace.Session> result = new HashMap<>();
+        Map<String, Model.Namespace.Proposal> namespaces = sessionProposal.getRequiredNamespaces();
         NamespaceParser namespaceParser = new NamespaceParser();
         namespaceParser.parseProposal(namespaces);
         List<String> accounts = toCAIP10(namespaceParser.getChains(), selectedAccounts);
-        for (Map.Entry<String, Sign.Model.Namespace.Proposal> entry : namespaces.entrySet())
+        for (Map.Entry<String, Model.Namespace.Proposal> entry : namespaces.entrySet())
         {
-            Sign.Model.Namespace.Session session = new Sign.Model.Namespace.Session(accounts, namespaceParser.getMethods(), namespaceParser.getEvents(), null);
+            Model.Namespace.Session session = new Model.Namespace.Session(accounts, namespaceParser.getMethods(), namespaceParser.getEvents(), null);
             result.put(entry.getKey(), session);
         }
         return result;
@@ -214,7 +215,7 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
         return result;
     }
 
-    private Unit onSessionApproveError(Sign.Model.Error error)
+    private Unit onSessionApproveError(Model.Error error)
     {
         Timber.e(error.getThrowable());
         Toast.makeText(context, error.getThrowable().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
@@ -248,44 +249,45 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
     }
 
 
-    public void reject(Sign.Model.SessionProposal sessionProposal, WalletConnectV2Callback callback)
+    public void reject(Model.SessionProposal sessionProposal, WalletConnectV2Callback callback)
     {
 
-        SignClient.INSTANCE.rejectSession(
-                new Sign.Params.Reject(sessionProposal.getProposerPublicKey(), context.getString(R.string.message_reject_request)),
+        Web3Wallet.INSTANCE.rejectSession(
+                new Params.SessionReject(sessionProposal.getProposerPublicKey(), context.getString(R.string.message_reject_request)),
+                sessionReject -> null,
                 this::onSessionRejectError);
         callback.onSessionProposalRejected();
     }
 
-    private Unit onSessionRejectError(Sign.Model.Error error)
+    private Unit onSessionRejectError(Model.Error error)
     {
-        Timber.e(error.getThrowable());
+        Timber.tag(TAG).e(error.getThrowable());
         return null;
     }
 
     public void disconnect(String sessionId, WalletConnectV2Callback callback)
     {
-        SignClient.INSTANCE.disconnect(new Sign.Params.Disconnect(sessionId), this::onDisconnectError);
+        Web3Wallet.INSTANCE.disconnectSession(new Params.SessionDisconnect(sessionId), sd -> null, this::onDisconnectError);
         callback.onSessionDisconnected();
         updateNotification();
     }
 
-    private Unit onDisconnectError(Sign.Model.Error error)
+    private Unit onDisconnectError(Model.Error error)
     {
-        Timber.e(error.getThrowable());
+        Timber.tag(TAG).e(error.getThrowable());
         return null;
     }
 
-    public void reject(Sign.Model.SessionRequest sessionRequest, String failMessage)
+    public void reject(Model.SessionRequest sessionRequest, String failMessage)
     {
-        Sign.Model.JsonRpcResponse jsonRpcResponse = new Sign.Model.JsonRpcResponse.JsonRpcError(sessionRequest.getRequest().getId(), 0, failMessage);
-        Sign.Params.Response response = new Sign.Params.Response(sessionRequest.getTopic(), jsonRpcResponse);
-        SignClient.INSTANCE.respond(response, this::onSessionRequestRejectError);
+        Model.JsonRpcResponse.JsonRpcError jsonRpcResponse = new Model.JsonRpcResponse.JsonRpcError(sessionRequest.getRequest().getId(), 0, failMessage);
+        Params.SessionRequestResponse response = new Params.SessionRequestResponse(sessionRequest.getTopic(), jsonRpcResponse);
+        Web3Wallet.INSTANCE.respondSessionRequest(response, srr -> null, this::onSessionRequestRejectError);
     }
 
-    private Unit onSessionRequestRejectError(Sign.Model.Error error)
+    private Unit onSessionRequestRejectError(Model.Error error)
     {
-        Timber.e(error.getThrowable());
+        Timber.tag(TAG).e(error.getThrowable());
         return null;
     }
 
@@ -299,9 +301,12 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
         Core.Model.AppMetaData appMetaData = getAppMetaData(application);
         String relayServer = String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, keyProvider.getWalletConnectProjectId());
         CoreClient coreClient = CoreClient.INSTANCE;
-        coreClient.initialize(appMetaData, relayServer, ConnectionType.AUTOMATIC, application, null);
+        coreClient.initialize(appMetaData, relayServer, ConnectionType.AUTOMATIC, application, null, error -> {
+            Timber.w(error.throwable);
+            return null;
+        });
 
-        SignClient.INSTANCE.initialize(new Sign.Params.Init(coreClient), e ->
+        Web3Wallet.INSTANCE.initialize(new Params.Init(coreClient), e ->
         {
             Timber.tag(TAG).e("Init failed: %s", e.getThrowable().getMessage());
             return null;
@@ -309,7 +314,7 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
 
         try
         {
-            SignClient.INSTANCE.setWalletDelegate(this);
+            Web3Wallet.INSTANCE.setWalletDelegate(this);
         }
         catch (Exception e)
         {
@@ -333,25 +338,10 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
         Timber.tag(TAG).i("shutdown");
     }
 
-    public void onConnectionStateChange(@NonNull Sign.Model.ConnectionState connectionState)
+    public void onConnectionStateChange(@NonNull Model.ConnectionState connectionState)
     {
         Timber.tag(TAG).i("onConnectionStateChange");
         hasConnection = connectionState.isAvailable();
-    }
-
-    public void onSessionSettleResponse(@NonNull Sign.Model.SettledSessionResponse settledSessionResponse)
-    {
-        Timber.tag(TAG).i("onSessionSettleResponse");
-    }
-
-    public void onSessionUpdateResponse(@NonNull Sign.Model.SessionUpdateResponse sessionUpdateResponse)
-    {
-        Timber.tag(TAG).i("onSessionUpdateResponse");
-    }
-
-    public void onError(Sign.Model.Error error)
-    {
-        Timber.e(error.getThrowable());
     }
 
     public void signComplete(SignatureFromKey signatureFromKey, Signable signable)
@@ -403,6 +393,31 @@ public class AWWalletConnectClient implements SignInterface.WalletDelegate
             Timber.i("sign fail: %s", signatureFromKey.failMessage);
             reject(requestHandler.getSessionRequest(), signatureFromKey.failMessage);
         }
+    }
+
+    @Override
+    public void onAuthRequest(@NonNull Model.AuthRequest authRequest)
+    {
+
+    }
+
+
+    @Override
+    public void onError(@NonNull Model.Error error)
+    {
+        Timber.tag(TAG).e(error.getThrowable());
+    }
+
+    @Override
+    public void onSessionSettleResponse(@NonNull Model.SettledSessionResponse settledSessionResponse)
+    {
+        Timber.tag(TAG).i("onSessionSettleResponse");
+    }
+
+    @Override
+    public void onSessionUpdateResponse(@NonNull Model.SessionUpdateResponse sessionUpdateResponse)
+    {
+        Timber.tag(TAG).i("onSessionUpdateResponse");
     }
 
     public interface WalletConnectV2Callback

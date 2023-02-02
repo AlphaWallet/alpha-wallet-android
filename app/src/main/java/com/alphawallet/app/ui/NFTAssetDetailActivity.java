@@ -231,7 +231,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             String walletAddress = getIntent().getStringExtra(C.Key.WALLET);
             viewModel.loadWallet(walletAddress);
             token = viewModel.getTokensService().getToken(walletAddress, chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
-        } else
+        }
+        else
         {
             Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
             viewModel.loadWallet(wallet.address);
@@ -491,6 +492,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     /**
      * Final return path
+     *
      * @param transactionData write success hash back to ActionSheet
      */
     private void txWritten(TransactionData transactionData)

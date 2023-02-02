@@ -11,5 +11,7 @@ public interface OnAssetClickListener
 {
     void onAssetClicked(Pair<BigInteger, NFTAsset> item);
 
-    default void onAssetLongClicked(Pair<BigInteger, NFTAsset> item) {}
+    default void onAssetLongClicked(Pair<BigInteger, NFTAsset> item)
+    {
+    }
 }

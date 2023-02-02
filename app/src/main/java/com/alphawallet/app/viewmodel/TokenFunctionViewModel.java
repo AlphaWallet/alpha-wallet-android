@@ -731,16 +731,15 @@ public class TokenFunctionViewModel extends BaseViewModel
         return intent;
     }
 
-    public Single<Intent> getTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)
+    public Intent getTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)
     {
-        return genericWalletInteract.find()
-                .map(wallet -> completeTransferIntent(ctx, token, tokenIds, selection, wallet));
+        return completeTransferIntent(ctx, token, tokenIds, selection, getWallet());
     }
 
     private Intent completeTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection, Wallet wallet)
     {
         Intent intent = new Intent(ctx, TransferNFTActivity.class);
-        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.Key.WALLET, wallet.address);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(tokenIds, true));

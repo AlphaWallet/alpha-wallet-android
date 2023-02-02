@@ -151,7 +151,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         super.onResume();
         if (viewModel != null)
         {
-            viewModel.prepare();
             viewModel.getAsset(token, tokenId);
             progressBar.setVisibility(View.VISIBLE);
             tokenImage.onResume();
@@ -532,8 +531,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
                 {
                     asset.setSelectedBalance(BigDecimal.ONE);
                 }
-                viewModel.getTransferIntent(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset)))
-                        .subscribe((Consumer<Intent>) handleTransactionSuccess::launch).isDisposed();
+                handleTransactionSuccess.launch(viewModel.getTransferIntent(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset))));
             }
         }
     }

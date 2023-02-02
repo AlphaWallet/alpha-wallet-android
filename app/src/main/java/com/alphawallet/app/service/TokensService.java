@@ -1209,6 +1209,10 @@ public class TokensService
 
     public Token getToken(String walletAddress, long chainId, String tokenAddress)
     {
+        if (walletAddress == null)
+        {
+            walletAddress = currentAddress;
+        }
         if (TextUtils.isEmpty(walletAddress) || TextUtils.isEmpty(tokenAddress)) return null;
         else return tokenRepository.fetchToken(chainId, walletAddress, tokenAddress.toLowerCase());
     }

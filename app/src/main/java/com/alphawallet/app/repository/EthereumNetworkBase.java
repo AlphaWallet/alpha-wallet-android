@@ -47,6 +47,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_TEST_RPC;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISM_GOERLI_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_FALLBACK_URL;
@@ -176,7 +178,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //Then xDai would appear as the first token at the top of the wallet
     private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
             MAINNET_ID, GNOSIS_ID, POLYGON_ID, CLASSIC_ID, POA_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
-            FANTOM_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID));
+            FANTOM_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID, OKX_ID));
 
     private static final List<Long> testnetList = new ArrayList<>(Arrays.asList(
             GOERLI_ID, BINANCE_TEST_ID, HECO_TEST_ID, CRONOS_TEST_ID, OPTIMISM_GOERLI_TEST_ID, ARBITRUM_GOERLI_TEST_ID, KLAYTN_BAOBAB_ID,
@@ -352,6 +354,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     ARBITRUM_GOERLI_TESTNET_RPC_URL,
                     "https://goerli-rollup-explorer.arbitrum.io/tx/", ARBITRUM_GOERLI_TEST_ID, ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL,
                     "https://goerli-rollup-explorer.arbitrum.io/api?"));
+            put(OKX_ID, new NetworkInfo(C.OKX_NETWORK_NAME, C.OKX_SYMBOL,
+                OKX_RPC_URL,
+                "https://www.oklink.com/en/okc", OKX_ID, "",
+                "https://www.oklink.com/api?"));
 
             // Add deprecated networks after this line
         }
@@ -398,6 +404,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(SEPOLIA_TESTNET_ID, R.drawable.ic_sepolia_test);
             put(OPTIMISM_GOERLI_TEST_ID, R.drawable.ic_optimism_testnet_logo);
             put(ARBITRUM_GOERLI_TEST_ID, R.drawable.ic_icons_arbitrum_test);
+            put(OKX_ID, R.drawable.ic_okx);
         }
     };
 
@@ -438,6 +445,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(SEPOLIA_TESTNET_ID, R.drawable.ic_sepolia_test);
             put(OPTIMISM_GOERLI_TEST_ID, R.drawable.ic_optimism_testnet_logo);
             put(ARBITRUM_GOERLI_TEST_ID, R.drawable.ic_icons_arbitrum_test);
+            put(OKX_ID, R.drawable.ic_okx);
         }
     };
 
@@ -478,6 +486,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(SEPOLIA_TESTNET_ID, R.color.sepolia);
             put(OPTIMISM_GOERLI_TEST_ID, R.color.optimistic_test);
             put(ARBITRUM_GOERLI_TEST_ID, R.color.arbitrum_test);
+            put(OKX_ID, R.color.okx);
         }
     };
 

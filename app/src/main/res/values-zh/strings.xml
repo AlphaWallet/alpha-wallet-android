@@ -949,4 +949,6 @@
     <string name="enable_required_chains">启用所需的链？</string>
     <string name="enable_required_chains_message">选定的代币位于当前未选择的链上，启用未选择的链？</string>
     <string name="dialog_title_search_token">搜索令牌？</string>
+    <string name="create_shortcut_for_token">为此令牌创建快捷方式？</string>
+    <string name="toast_shortcut_created">快捷方式已创建，长按应用程序图标即可查看。</string>
 </resources>

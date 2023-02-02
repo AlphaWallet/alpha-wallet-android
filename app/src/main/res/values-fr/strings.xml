@@ -962,4 +962,6 @@
     <string name="enable_required_chains">Activer les chaînes requises?</string>
     <string name="enable_required_chains_message">Les jetons sélectionnés sont sur des chaînes actuellement non sélectionnées, activer les chaînes non sélectionnées?</string>
     <string name="dialog_title_search_token">Rechercher un jeton?</string>
+    <string name="create_shortcut_for_token">Créer un raccourci pour ce jeton ?</string>
+    <string name="toast_shortcut_created">Raccourci créé, appuyez longuement sur l\'icône de l\'application pour le voir.</string>
 </resources>

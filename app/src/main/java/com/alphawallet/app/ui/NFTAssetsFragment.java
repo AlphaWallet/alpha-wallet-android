@@ -140,10 +140,10 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
     private void showCreateShortcutsDialog(Pair<BigInteger, NFTAsset> asset)
     {
-        AWalletAlertDialog cDialog = new AWalletAlertDialog(getContext());
+        AWalletAlertDialog cDialog = new AWalletAlertDialog(requireContext());
         cDialog.setCancelable(true);
         cDialog.setTitle(R.string.title_activity_confirmation);
-        cDialog.setMessage("Create shortcuts for this token?");
+        cDialog.setMessage(getString(R.string.create_shortcut_for_token));
         cDialog.setButtonText(R.string.ok);
         cDialog.setButtonListener(v -> {
             createShortcuts(asset);
@@ -160,14 +160,14 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         intent.setAction(C.ACTION_TOKEN_SHORTCUT);
         intent.putExtra(C.Key.WALLET, wallet.address);
         ShortcutInfoCompat shortcut = new ShortcutInfoCompat.Builder(requireContext(), token.getAddress())
-                .setShortLabel("Goto " + getName(token, pair.second))
-                .setLongLabel("Goto " + getName(token, pair.second))
-                .setIcon(IconCompat.createWithResource(getContext(), EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId)))
+                .setShortLabel(getName(token, pair.second))
+                .setLongLabel(getName(token, pair.second))
+                .setIcon(IconCompat.createWithResource(requireContext(), EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId)))
                 .setIntent(intent)
                 .build();
 
         ShortcutManagerCompat.pushDynamicShortcut(requireContext(), shortcut);
-        Toast.makeText(getContext(), "Shortcut created, long press app icon to see it.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(), R.string.toast_shortcut_created, Toast.LENGTH_SHORT).show();
     }
 
     private String getName(Token token, NFTAsset asset)

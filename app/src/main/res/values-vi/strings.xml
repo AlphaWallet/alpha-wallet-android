@@ -962,4 +962,6 @@
     <string name="enable_required_chains">Kích hoạt chuỗi yêu cầu?</string>
     <string name="enable_required_chains_message">Các mã thông báo đã chọn nằm trên các chuỗi hiện không được chọn, cho phép các chuỗi chưa được chọn?</string>
     <string name="dialog_title_search_token">Tìm kiếm mã thông báo?</string>
+    <string name="create_shortcut_for_token">Tạo lối tắt cho mã thông báo này?</string>
+    <string name="toast_shortcut_created">Đã tạo lối tắt, nhấn và giữ biểu tượng ứng dụng để xem.</string>
 </resources>

@@ -983,4 +983,6 @@
     <string name="enable_required_chains">လိုအပ်တဲ့ သံကြိုးတွေကို လုပ်ဆောင်နိုင်မလား။</string>
     <string name="enable_required_chains_message">ရွေးချယ်ထားသော အမှတ်အသားများသည် လောလောဆယ် ရွေးချယ်မထားသော သံကြိုးများပေါ်တွင် ရွေးချယ်ထားပြီး ရွေးချယ်မှုမရှိသော သံကြိုးများ ဖြစ်စေနိုင်ပါသလော။</string>
     <string name="dialog_title_search_token">တိုကင်ကို ရှာမလား။</string>
+    <string name="create_shortcut_for_token">ဤတိုကင်အတွက် ဖြတ်လမ်းတစ်ခု ဖန်တီးမလား။</string>
+    <string name="toast_shortcut_created">ဖြတ်လမ်းလင့်ခ်ကို ဖန်တီးထားပြီး ၎င်းကိုမြင်ရန် အက်ပ်အိုင်ကွန်ကို ကြာကြာနှိပ်ပါ။</string>
 </resources>

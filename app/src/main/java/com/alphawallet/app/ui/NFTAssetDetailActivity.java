@@ -120,8 +120,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         setTitle(token.tokenInfo.name);
 
-        setupFunctionBar();
-
         updateDefaultTokenData();
 
         viewModel.updateLocalAttributes(token, tokenId);
@@ -229,9 +227,21 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
-        wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
+        Timber.tag("Bella").d("token:" + token);
+        if ("TOKEN_SHORTCUT".equals(getIntent().getAction()))
+        {
+            Timber.tag("Bella").d("wallet:" + getIntent().getStringExtra(C.Key.WALLET));
+            viewModel.findWallet(getIntent().getStringExtra(C.Key.WALLET));
+        } else
+        {
+            Timber.tag("Bella").d("action:" + getIntent().getAction());
+            wallet = getIntent().getParcelableExtra(C.Key.WALLET);
+            Timber.tag("Bella").d("wallet:" + wallet);
+        }
+
+        Timber.tag("Bella").d("getIntentData:" + token);
         viewModel.checkForNewScript(token);
         viewModel.checkTokenScriptValidity(token);
     }
@@ -247,6 +257,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel.scriptUpdateInProgress().observe(this, this::startScriptDownload);
         viewModel.sig().observe(this, this::onSignature);
         viewModel.newScriptFound().observe(this, this::newScriptFound);
+        viewModel.walletUpdate().observe(this, this::setupFunctionBar);
     }
 
     private void newScriptFound(Boolean status)
@@ -260,7 +271,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             viewModel.checkTokenScriptValidity(token);
 
             //now re-load the verbs
-            setupFunctionBar();
+            setupFunctionBar(viewModel.getWallet());
         }
     }
 
@@ -285,7 +296,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
-    private void setupFunctionBar()
+    private void setupFunctionBar(Wallet wallet)
     {
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {

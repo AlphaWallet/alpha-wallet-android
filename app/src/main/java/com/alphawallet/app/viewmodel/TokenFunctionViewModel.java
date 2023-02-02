@@ -928,4 +928,11 @@ public class TokenFunctionViewModel extends BaseViewModel
                 .subscribe(v -> { }, this::onError)
                 .isDisposed();
     }
+
+    public void findWallet(String address)
+    {
+        disposable = genericWalletInteract
+                .findWallet(address)
+                .subscribe(this::onDefaultWallet, this::onError);
+    }
 }

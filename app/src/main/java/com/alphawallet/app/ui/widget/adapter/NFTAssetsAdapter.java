@@ -2,6 +2,8 @@ package com.alphawallet.app.ui.widget.adapter;
 
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.pm.ShortcutInfoCompat;
+import androidx.core.content.pm.ShortcutManagerCompat;
+import androidx.core.graphics.drawable.IconCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
@@ -21,6 +26,7 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.ui.NFTActivity;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.NFTImageView;
 
 import org.jetbrains.annotations.NotNull;
@@ -152,6 +158,10 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         }
 
         holder.layout.setOnClickListener(v -> listener.onAssetClicked(new Pair<>(tokenId, asset)));
+        holder.layout.setOnLongClickListener(view -> {
+            listener.onAssetLongClicked(new Pair<>(tokenId, asset));
+            return false;
+        });
         holder.loadingSpinner.setVisibility(View.GONE);
     }
 

@@ -24,6 +24,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.pm.ShortcutInfoCompat;
+import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -41,6 +43,7 @@ import com.alphawallet.app.ui.widget.adapter.NFTAssetsAdapter;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.divider.ItemOffsetDecoration;
 import com.alphawallet.app.viewmodel.NFTAssetsViewModel;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.math.BigInteger;
@@ -124,6 +127,43 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         {
             handleTransactionSuccess.launch(viewModel.showAssetDetails(requireContext(), wallet, token, item.first));
         }
+    }
+
+    @Override
+    public void onAssetLongClicked(Pair<BigInteger, NFTAsset> item)
+    {
+        showCreateShortcutsDialog(item);
+    }
+
+    private void showCreateShortcutsDialog(Pair<BigInteger, NFTAsset> asset)
+    {
+        AWalletAlertDialog cDialog = new AWalletAlertDialog(getContext());
+        cDialog.setCancelable(true);
+        cDialog.setTitle(R.string.title_activity_confirmation);
+        cDialog.setMessage("Create shortcuts for this token?");
+        cDialog.setButtonText(R.string.ok);
+        cDialog.setButtonListener(v -> {
+            createShortcuts(asset);
+            cDialog.dismiss();
+        });
+        cDialog.setSecondaryButtonText(R.string.action_cancel);
+        cDialog.setSecondaryButtonListener(view -> cDialog.dismiss());
+        cDialog.show();
+    }
+
+    private void createShortcuts(Pair<BigInteger, NFTAsset> pair)
+    {
+        Intent intent = viewModel.showAssetDetails(requireContext(), wallet, token, pair.first);
+        intent.setAction("TOKEN_SHORTCUT");
+        intent.putExtra(C.Key.WALLET, wallet.address);
+        ShortcutInfoCompat shortcut = new ShortcutInfoCompat.Builder(requireContext(), pair.second.getName())
+                .setShortLabel("View " + pair.second.getName())
+                .setLongLabel("View " + pair.second.getName())
+//                .setIcon(IconCompat.createWithResource(activity, R.drawable.ic))
+                .setIntent(intent)
+                .build();
+
+        ShortcutManagerCompat.pushDynamicShortcut(requireContext(), shortcut);
     }
 
     @Override

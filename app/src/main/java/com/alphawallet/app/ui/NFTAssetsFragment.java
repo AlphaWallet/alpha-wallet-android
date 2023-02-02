@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -26,6 +27,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
+import androidx.core.graphics.drawable.IconCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -36,6 +38,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
@@ -156,14 +159,24 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         Intent intent = viewModel.showAssetDetails(requireContext(), wallet, token, pair.first);
         intent.setAction(C.ACTION_TOKEN_SHORTCUT);
         intent.putExtra(C.Key.WALLET, wallet.address);
-        ShortcutInfoCompat shortcut = new ShortcutInfoCompat.Builder(requireContext(), pair.second.getName())
-                .setShortLabel("View " + pair.second.getName())
-                .setLongLabel("View " + pair.second.getName())
-//                .setIcon(IconCompat.createWithResource(activity, R.drawable.ic))
+        ShortcutInfoCompat shortcut = new ShortcutInfoCompat.Builder(requireContext(), token.getAddress())
+                .setShortLabel("Goto " + getName(token, pair.second))
+                .setLongLabel("Goto " + getName(token, pair.second))
+                .setIcon(IconCompat.createWithResource(getContext(), EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId)))
                 .setIntent(intent)
                 .build();
 
         ShortcutManagerCompat.pushDynamicShortcut(requireContext(), shortcut);
+        Toast.makeText(getContext(), "Shortcut created, long press app icon to see it.", Toast.LENGTH_SHORT).show();
+    }
+
+    private String getName(Token token, NFTAsset asset)
+    {
+        if (asset.getName() == null)
+        {
+            return token.getFullName();
+        }
+        return asset.getName();
     }
 
     @Override

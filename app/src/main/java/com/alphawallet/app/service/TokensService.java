@@ -1206,4 +1206,10 @@ public class TokensService
             return true;
         });
     }
+
+    public Token getToken(String walletAddress, long chainId, String tokenAddress)
+    {
+        if (TextUtils.isEmpty(walletAddress) || TextUtils.isEmpty(tokenAddress)) return null;
+        else return tokenRepository.fetchToken(chainId, walletAddress, tokenAddress.toLowerCase());
+    }
 }

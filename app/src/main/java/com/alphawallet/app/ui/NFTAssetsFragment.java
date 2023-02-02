@@ -154,7 +154,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     private void createShortcuts(Pair<BigInteger, NFTAsset> pair)
     {
         Intent intent = viewModel.showAssetDetails(requireContext(), wallet, token, pair.first);
-        intent.setAction("TOKEN_SHORTCUT");
+        intent.setAction(C.ACTION_TOKEN_SHORTCUT);
         intent.putExtra(C.Key.WALLET, wallet.address);
         ShortcutInfoCompat shortcut = new ShortcutInfoCompat.Builder(requireContext(), pair.second.getName())
                 .setShortLabel("View " + pair.second.getName())

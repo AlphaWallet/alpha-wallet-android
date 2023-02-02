@@ -70,7 +70,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 {
     private TokenFunctionViewModel viewModel;
     private Token token;
-    private Wallet wallet;
     private BigInteger tokenId;
     private String sequenceId;
     private ActionSheetDialog confirmationDialog;
@@ -226,22 +225,20 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private void getIntentData()
     {
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
-        token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
-        Timber.tag("Bella").d("token:" + token);
-        if ("TOKEN_SHORTCUT".equals(getIntent().getAction()))
+        if (C.ACTION_TOKEN_SHORTCUT.equals(getIntent().getAction()))
         {
-            Timber.tag("Bella").d("wallet:" + getIntent().getStringExtra(C.Key.WALLET));
-            viewModel.findWallet(getIntent().getStringExtra(C.Key.WALLET));
+            String walletAddress = getIntent().getStringExtra(C.Key.WALLET);
+            viewModel.loadWallet(walletAddress);
+            token = viewModel.getTokensService().getToken(walletAddress, chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         } else
         {
-            Timber.tag("Bella").d("action:" + getIntent().getAction());
-            wallet = getIntent().getParcelableExtra(C.Key.WALLET);
-            Timber.tag("Bella").d("wallet:" + wallet);
+            Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
+            viewModel.loadWallet(wallet.address);
+            token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         }
 
-        Timber.tag("Bella").d("getIntentData:" + token);
         viewModel.checkForNewScript(token);
         viewModel.checkTokenScriptValidity(token);
     }

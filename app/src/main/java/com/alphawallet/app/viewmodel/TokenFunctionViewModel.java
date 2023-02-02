@@ -929,7 +929,7 @@ public class TokenFunctionViewModel extends BaseViewModel
                 .isDisposed();
     }
 
-    public void findWallet(String address)
+    public void loadWallet(String address)
     {
         disposable = genericWalletInteract
                 .findWallet(address)

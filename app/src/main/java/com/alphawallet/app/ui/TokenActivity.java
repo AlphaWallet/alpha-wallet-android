@@ -839,6 +839,8 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             case ERC875:
                 tokenDetailRouter.openLegacyToken(activity, token, defaultWallet);
                 break;
+            default:
+                break;
         }
     }
 

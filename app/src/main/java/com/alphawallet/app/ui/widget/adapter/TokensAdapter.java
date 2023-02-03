@@ -136,20 +136,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     @Override
     public long getItemId(int position)
     {
-        Object obj = items.get(position);
-        if (obj instanceof TokenSortedItem)
-        {
-            TokenCardMeta tcm = ((TokenSortedItem) obj).value;
-
-            // This is an attempt to obtain a 'unique' id
-            // to fully utilise the RecyclerView's setHasStableIds feature.
-            // This will drastically reduce 'blinking' when the list changes
-            return tcm.getUID();
-        }
-        else
-        {
-            return position;
-        }
+        return position;
     }
 
     @NonNull
@@ -363,7 +350,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         }
     }
 
-    public void removeToken(long chainId, String tokenAddress)
+    public SortedItem<TokenCardMeta> removeToken(long chainId, String tokenAddress)
     {
         String id = TokensRealmSource.databaseKey(chainId, tokenAddress);
         for (int i = 0; i < items.size(); i++)
@@ -375,11 +362,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
                 TokenCardMeta thisToken = tsi.value;
                 if (thisToken.tokenId.equalsIgnoreCase(id))
                 {
-                    items.removeItemAt(i);
-                    break;
+                    return items.removeItemAt(i);
                 }
             }
         }
+        return null;
     }
 
     private boolean canDisplayToken(TokenCardMeta token)
@@ -606,5 +593,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
                 break;
             }
         }
+    }
+
+    public void addToken(SortedItem<TokenCardMeta> token)
+    {
+        items.add(token);
+        notifyDataSetChanged();
     }
 }

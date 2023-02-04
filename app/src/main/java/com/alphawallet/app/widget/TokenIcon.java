@@ -1,7 +1,6 @@
 package com.alphawallet.app.widget;
 
 import static androidx.core.content.ContextCompat.getColorStateList;
-
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.content.Context;
@@ -33,6 +32,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.ui.widget.entity.StatusType;
+import com.alphawallet.app.util.RoundedTopCorners;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -225,6 +225,7 @@ public class TokenIcon extends ConstraintLayout
             currentRq = Glide.with(this)
                     .load(iconItem.getUrl())
                     .placeholder(R.drawable.ic_token_eth)
+                    .transform(new RoundedTopCorners(30))
                     .apply(optionalCircleCrop)
                     .listener(requestListener)
                     .into(new DrawableImageViewTarget(icon)).getRequest();

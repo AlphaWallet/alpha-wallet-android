@@ -142,7 +142,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
 
             if (asset.hasImageAsset())
             {
-                holder.icon.setupTokenImageThumbnail(asset);
+                holder.icon.setupTokenImageThumbnail(asset, isGrid);
             }
             else
             {

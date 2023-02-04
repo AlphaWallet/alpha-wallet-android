@@ -134,8 +134,13 @@ public class NFTImageView extends RelativeLayout
 
     public void setupTokenImageThumbnail(NFTAsset asset)
     {
+        setupTokenImageThumbnail(asset, false);
+    }
+
+    public void setupTokenImageThumbnail(NFTAsset asset, boolean onlyRoundTopCorners)
+    {
         fallbackIcon.setupFallbackTextIcon(asset.getName());
-        loadImage(asset.getThumbnail(), asset.getBackgroundColor(), 26, true);
+        loadImage(asset.getThumbnail(), asset.getBackgroundColor(), 26, onlyRoundTopCorners);
     }
 
     public void setupTokenImage(NFTAsset asset) throws IllegalArgumentException
@@ -158,7 +163,7 @@ public class NFTImageView extends RelativeLayout
         }
     }
 
-    private void loadImage(String url, String backgroundColor, int corners, boolean isThumbnail) throws IllegalArgumentException
+    private void loadImage(String url, String backgroundColor, int corners, boolean onlyRoundTopCorners) throws IllegalArgumentException
     {
         if (!Utils.stillAvailable(getContext())) return;
 
@@ -182,7 +187,7 @@ public class NFTImageView extends RelativeLayout
 
 
         Transformation<Bitmap> roundedCorners;
-        if (isThumbnail)
+        if (onlyRoundTopCorners)
         {
             roundedCorners = new RoundedTopCorners(corners);
         } else {

@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,7 +21,6 @@ import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.ui.NFTActivity;
 import com.alphawallet.app.ui.widget.OnAssetClickListener;
 import com.alphawallet.app.widget.NFTImageView;
-import com.google.android.material.card.MaterialCardView;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -275,7 +273,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        MaterialCardView layout;
+        ViewGroup layout;
         NFTImageView icon;
         TextView title;
         TextView subtitle;

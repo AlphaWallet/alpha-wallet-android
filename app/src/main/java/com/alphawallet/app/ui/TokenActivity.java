@@ -7,6 +7,7 @@ import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,6 +44,8 @@ import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
+import com.alphawallet.app.router.TokenDetailRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.BalanceUtils;
@@ -799,9 +802,45 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
             }
             else
             {
-                //same as if you clicked on it in the wallet view
-                token.clickReact(viewModel, this);
+                showTokenDetail(this, token);
             }
+        }
+    }
+
+    public void showTokenDetail(Activity activity, Token token)
+    {
+        TokenDetailRouter tokenDetailRouter = new TokenDetailRouter();
+        AssetDefinitionService assetDefinitionService = viewModel.getAssetDefinitionService();
+        Wallet defaultWallet = viewModel.getWallet();
+        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
+        switch (token.getInterfaceSpec())
+        {
+            case ETHEREUM:
+            case ERC20:
+            case CURRENCY:
+            case DYNAMIC_CONTRACT:
+            case LEGACY_DYNAMIC_CONTRACT:
+            case ETHEREUM_INVISIBLE:
+            case MAYBE_ERC20:
+                tokenDetailRouter.open(activity, token.getAddress(), token.tokenInfo.symbol, token.tokenInfo.decimals,
+                    !token.isEthereum(), defaultWallet, token, hasDefinition);
+                break;
+            case ERC1155:
+                tokenDetailRouter.open(activity, token, defaultWallet, hasDefinition);
+                break;
+            case ERC721:
+            case ERC721_LEGACY:
+            case ERC721_TICKET:
+            case ERC721_UNDETERMINED:
+            case ERC721_ENUMERABLE:
+                tokenDetailRouter.open(activity, token, defaultWallet, false);
+                break;
+            case ERC875_LEGACY:
+            case ERC875:
+                tokenDetailRouter.openLegacyToken(activity, token, defaultWallet);
+                break;
+            default:
+                break;
         }
     }
 

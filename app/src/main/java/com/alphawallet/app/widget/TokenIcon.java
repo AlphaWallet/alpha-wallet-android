@@ -37,6 +37,7 @@ import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -225,7 +226,7 @@ public class TokenIcon extends ConstraintLayout
             currentRq = Glide.with(this)
                     .load(iconItem.getUrl())
                     .placeholder(R.drawable.ic_token_eth)
-                    .transform(new RoundedTopCorners(30))
+                    .transform(new CenterCrop(), new RoundedTopCorners(30))
                     .apply(optionalCircleCrop)
                     .listener(requestListener)
                     .into(new DrawableImageViewTarget(icon)).getRequest();

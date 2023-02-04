@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
@@ -31,9 +32,12 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.util.ClipBottomRoundedCornersTransformation;
+import com.alphawallet.app.util.RoundedTopCorners;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
@@ -131,7 +135,7 @@ public class NFTImageView extends RelativeLayout
     public void setupTokenImageThumbnail(NFTAsset asset)
     {
         fallbackIcon.setupFallbackTextIcon(asset.getName());
-        loadImage(asset.getThumbnail(), asset.getBackgroundColor(), 1);
+        loadImage(asset.getThumbnail(), asset.getBackgroundColor(), 26, true);
     }
 
     public void setupTokenImage(NFTAsset asset) throws IllegalArgumentException
@@ -149,12 +153,12 @@ public class NFTImageView extends RelativeLayout
         {
             showLoadingProgress();
             progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
-            loadImage(asset.getImage(), asset.getBackgroundColor(), 16);
+            loadImage(asset.getImage(), asset.getBackgroundColor(), 16, false);
             playAudioIfAvailable(anim);
         }
     }
 
-    private void loadImage(String url, String backgroundColor, int corners) throws IllegalArgumentException
+    private void loadImage(String url, String backgroundColor, int corners, boolean isThumbnail) throws IllegalArgumentException
     {
         if (!Utils.stillAvailable(getContext())) return;
 
@@ -176,9 +180,18 @@ public class NFTImageView extends RelativeLayout
             holdingView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent));
         }
 
+
+        Transformation<Bitmap> roundedCorners;
+        if (isThumbnail)
+        {
+            roundedCorners = new RoundedTopCorners(corners);
+        } else {
+            roundedCorners = new RoundedCorners(corners);
+        }
+
         loadRequest = Glide.with(getContext())
                 .load(url)
-                .transform(new CenterCrop(), new RoundedCorners(corners))
+                .transform(new CenterCrop(), new ClipBottomRoundedCornersTransformation(10), roundedCorners)
                 .transition(withCrossFade())
                 .override(Target.SIZE_ORIGINAL)
                 .timeout(30 * 1000)

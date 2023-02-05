@@ -80,7 +80,7 @@ public abstract class EthereumNetworkBase
     public static final String ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL = "https://goerli-rollup.arbitrum.io/rpc";
     public static final String IOTEX_MAINNET_RPC_URL = "https://babel-api.mainnet.iotex.io";
     public static final String IOTEX_TESTNET_RPC_URL = "https://babel-api.testnet.iotex.io";
-    public static final String OKX_RPC_URL = "https://exchainrpc.okex.org/";
+    public static final String OKX_RPC_URL = "https://exchainrpc.okex.org";
 
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>()
     {

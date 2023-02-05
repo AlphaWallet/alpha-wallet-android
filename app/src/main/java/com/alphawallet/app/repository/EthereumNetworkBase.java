@@ -356,7 +356,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://goerli-rollup-explorer.arbitrum.io/api?"));
             put(OKX_ID, new NetworkInfo(C.OKX_NETWORK_NAME, C.OKX_SYMBOL,
                 OKX_RPC_URL,
-                "https://www.oklink.com/en/okc", OKX_ID, "",
+                "https://www.oklink.com/en/okc/tx/", OKX_ID, "",
                 "https://www.oklink.com/api?"));
 
             // Add deprecated networks after this line

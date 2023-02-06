@@ -151,7 +151,7 @@ import timber.log.Timber;
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
         OnWalletActionListener, URLLoadInterface, ItemClickListener, OnDappHomeNavClickListener, DappBrowserSwipeInterface,
-        SignAuthenticationCallback, ActionSheetCallback, TestNetDialog.TestNetDialogCallback
+        ActionSheetCallback, TestNetDialog.TestNetDialogCallback
 {
     public static final String SEARCH = "SEARCH";
     public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
@@ -675,8 +675,8 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 .get(DappBrowserViewModel.class);
         viewModel.activeNetwork().observe(getViewLifecycleOwner(), this::onNetworkChanged);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
-        viewModel.transactionFinalised().observe(this, this::txWritten);
-        viewModel.transactionError().observe(this, this::txError);
+        viewModel.transactionFinalised().observe(getViewLifecycleOwner(), this::txWritten);
+        viewModel.transactionError().observe(getViewLifecycleOwner(), this::txError);
         activeNetwork = viewModel.getActiveNetwork();
         viewModel.findWallet();
     }
@@ -1841,16 +1841,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         return web3.getScrollY();
     }
 
-    // this is called when the signing is approved by the user (e.g. fingerprint / PIN)
-    @Override
-    public void gotAuthorisation(boolean gotAuth)
-    {
-        if (confirmationDialog != null && confirmationDialog.isShowing())
-        {
-            confirmationDialog.dismiss();
-        }
-    }
-
     @Override
     public void buttonClick(long callbackId, Token baseToken)
     {
@@ -1863,18 +1853,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         //switch network
         loadNewNetwork(baseToken.tokenInfo.chainId);
         web3.onWalletActionSuccessful(callbackId, null);
-    }
-
-    @Override
-    public void cancelAuthentication()
-    {
-
-    }
-
-    @Override
-    public void gotSignature(SignatureFromKey signature)
-    {
-        //TODO: Hardware
     }
 
     /**
@@ -1897,6 +1875,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
     {
         viewModel.sendTransaction(wallet, activeNetwork.chainId, tx, signature);
+    }
+
+    @Override
+    public void pinAuthorisation(boolean gotAuth)
+    {
+        confirmationDialog.gotAuthorisation(gotAuth);
     }
 
     private void txWritten(TransactionReturn txData)

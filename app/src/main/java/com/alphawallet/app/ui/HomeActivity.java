@@ -83,6 +83,7 @@ import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
+import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.Signable;
@@ -974,11 +975,21 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data); // intercept return intent from PIN/Swipe authentications
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+        }
 
         switch (requestCode)
         {
             case DAPP_BARCODE_READER_REQUEST_CODE:
                 getFragment(DAPP_BROWSER).handleQRCode(resultCode, data, this);
+                break;
+            case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
+                if (getSelectedItem() == DAPP_BROWSER)
+                {
+                    getFragment(DAPP_BROWSER).pinAuthorisation(resultCode == RESULT_OK);
+                }
                 break;
             case C.REQUEST_BACKUP_WALLET:
                 String keyBackup = null;

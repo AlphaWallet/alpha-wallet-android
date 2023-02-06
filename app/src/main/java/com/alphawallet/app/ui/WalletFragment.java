@@ -58,6 +58,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
+import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
@@ -872,7 +873,7 @@ public class WalletFragment extends BaseFragment implements
         }
 
         @Override
-        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i)
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int position)
         {
             if (viewHolder instanceof WarningHolder)
             {
@@ -882,7 +883,7 @@ public class WalletFragment extends BaseFragment implements
             {
                 Token token = ((TokenHolder) viewHolder).token;
                 viewModel.setTokenEnabled(token, false);
-                adapter.removeToken(token.tokenInfo.chainId, token.getAddress());
+                SortedItem<TokenCardMeta> removedToken = adapter.removeToken(token.tokenInfo.chainId, token.getAddress());
 
                 if (getContext() != null)
                 {
@@ -891,7 +892,7 @@ public class WalletFragment extends BaseFragment implements
                             .setAction(getString(R.string.action_snackbar_undo), view ->
                             {
                                 viewModel.setTokenEnabled(token, true);
-                                //adapter.updateToken(token.tokenInfo.chainId, token.getAddress(), true);
+                                adapter.addToken(removedToken);
                             });
 
                     snackbar.show();

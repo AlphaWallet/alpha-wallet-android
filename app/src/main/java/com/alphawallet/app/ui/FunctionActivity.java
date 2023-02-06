@@ -774,12 +774,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         return false;
     }
 
-    /*@Override
-    public void gotAuthorisation(boolean gotAuth)
-    {
-        if (!gotAuth) viewModel.failedAuthentication(SIGN_DATA);
-    }*/
-
     @Override
     public void signingComplete(SignatureFromKey signature, Signable message)
     {
@@ -801,18 +795,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         return viewModel.getWallet().type;
     }
-
-    /*@Override
-    public void cancelAuthentication()
-    {
-        if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.dismiss();
-    }*/
-
-    /*@Override
-    public void gotSignature(SignatureFromKey signature)
-    {
-
-    }*/
 
     @Override
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)

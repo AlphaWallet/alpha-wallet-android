@@ -13,6 +13,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignaturePair;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.hardware.SignatureReturnType;
 import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
@@ -286,14 +287,23 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         startMemoryPoolListener();
     }
 
+    private MessagePair pairForHardwareSign;
+
     private void onSignMessage(MessagePair pair, Wallet wallet) {
         //now run this guy through the signed message system
         if (pair != null)
         {
+            pairForHardwareSign = pair;
             disposable = createTransactionInteract
                     .sign(wallet, pair)
                     .subscribe(this::onSignedMessage, this::onError);
         }
+    }
+
+    public void completeHardwareSign(SignatureFromKey signatureFromKey)
+    {
+        signature.postValue(new SignaturePair(pairForHardwareSign.selection,
+                signatureFromKey, pairForHardwareSign.message));
     }
 
     private void onSignedMessage(SignaturePair sigPair)

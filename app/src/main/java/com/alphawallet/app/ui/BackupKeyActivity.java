@@ -779,7 +779,7 @@ public class BackupKeyActivity extends BaseActivity implements
     @Override
     public void gotSignature(SignatureFromKey signature)
     {
-        //TODO: Hardware
+        //No code here since we don't need to backup hardware key
     }
 
     private void initViewModel()

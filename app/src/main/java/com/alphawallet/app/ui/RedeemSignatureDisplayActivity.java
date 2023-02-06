@@ -254,7 +254,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     @Override
     public void gotSignature(SignatureFromKey signature)
     {
-        //TODO: Hardware
+        viewModel.completeHardwareSign(signature);
     }
 
     private void dialogKeyNotAvailableError()

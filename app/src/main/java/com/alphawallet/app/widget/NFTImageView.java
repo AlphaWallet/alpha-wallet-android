@@ -140,7 +140,7 @@ public class NFTImageView extends RelativeLayout
     public void setupTokenImageThumbnail(NFTAsset asset, boolean onlyRoundTopCorners)
     {
         fallbackIcon.setupFallbackTextIcon(asset.getName());
-        loadImage(asset.getThumbnail(), asset.getBackgroundColor(), 26, onlyRoundTopCorners);
+        loadImage(asset.getThumbnail(), asset.getBackgroundColor(), 30, onlyRoundTopCorners);
     }
 
     public void setupTokenImage(NFTAsset asset) throws IllegalArgumentException

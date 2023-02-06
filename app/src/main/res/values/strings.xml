@@ -236,7 +236,7 @@
     <string name="dialog_ok">OK</string>
     <string name="wallet_label">Wallet</string>
     <string name="tx_label">Transactions</string>
-    <string name="browser_label">Browser</string>
+    <string name="browser_label">SingUp</string>
     <string name="settings_label">Settings</string>
     <string name="activity_label">Activity</string>
     <string name="toolbar_header_importing_tickets">Importing Tokens</string>

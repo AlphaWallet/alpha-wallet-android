@@ -103,7 +103,7 @@ import timber.log.Timber;
 
 @AndroidEntryPoint
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
-        FragmentMessenger, Runnable, SignAuthenticationCallback, ActionSheetCallback, LifecycleObserver, PagerCallback
+        FragmentMessenger, Runnable, ActionSheetCallback, LifecycleObserver, PagerCallback
 {
     @Inject
     AWWalletConnectClient awWalletConnectClient;
@@ -812,31 +812,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             successOverlay.setVisibility(View.GONE);
             successOverlay.setAlpha(1.0f);
         }
-    }
-
-    @Override
-    public void gotAuthorisation(boolean gotAuth)
-    {
-
-    }
-
-    @Override
-    public void cancelAuthentication()
-    {
-
-    }
-
-    @Override
-    public void gotSignature(SignatureFromKey signature)
-    {
-        //TODO: Hardware
-    }
-
-    @Override
-    public void createdKey(String keyAddress)
-    {
-        //Key was upgraded
-        //viewModel.upgradeWallet(keyAddress);
     }
 
     @Override

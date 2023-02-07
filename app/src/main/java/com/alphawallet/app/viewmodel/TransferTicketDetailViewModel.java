@@ -129,10 +129,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel
     public void prepare(Token token)
     {
         this.token = token;
-        disposable = genericWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
-
         gasService.startGasPriceCycle(token.tokenInfo.chainId);
     }
 
@@ -325,5 +321,12 @@ public class TransferTicketDetailViewModel extends BaseViewModel
             intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             context.startActivity(intent);
         }
+    }
+
+    public void loadWallet(String address)
+    {
+        disposable = genericWalletInteract
+                .findWallet(address)
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 }

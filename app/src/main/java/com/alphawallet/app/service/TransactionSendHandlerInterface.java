@@ -10,6 +10,10 @@ import com.alphawallet.hardware.SignatureFromKey;
 public interface TransactionSendHandlerInterface
 {
     void transactionFinalised(TransactionReturn txData);
+
     void transactionError(TransactionReturn txError);
-    default void transactionSigned(SignatureFromKey sigData, Web3Transaction w3Tx) { }; //Not always required, only WalletConnect
+
+    default void transactionSigned(SignatureFromKey sigData, Web3Transaction w3Tx)
+    {
+    } //Not always required, only WalletConnect
 }

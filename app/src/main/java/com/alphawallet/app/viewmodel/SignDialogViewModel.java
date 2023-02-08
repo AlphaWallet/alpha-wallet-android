@@ -104,6 +104,7 @@ public class SignDialogViewModel extends BaseViewModel
                 completed.postValue(true);
                 break;
             case SIGNING_POSTPONED:
+            default:
                 signMessage = message; //cache message
                 break;
             case KEY_FILE_ERROR:

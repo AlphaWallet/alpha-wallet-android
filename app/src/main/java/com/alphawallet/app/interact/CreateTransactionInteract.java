@@ -99,6 +99,8 @@ public class CreateTransactionInteract
             case KEY_CIPHER_ERROR:
                 txInterface.transactionError(new TransactionReturn(new Throwable(signaturePackage.first.failMessage), w3Tx));
                 break;
+            default:
+                break;
         }
     }
 

@@ -190,15 +190,21 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     {
         return defaultWallet;
     }
+
     public MutableLiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
     }
+
     public MutableLiveData<SignatureFromKey> transactionSigned()
     {
         return transactionSigned;
     }
-    public MutableLiveData<TransactionReturn> transactionError() { return transactionError; }
+
+    public MutableLiveData<TransactionReturn> transactionError()
+    {
+        return transactionError;
+    }
 
     public Wallet getWallet()
     {
@@ -803,6 +809,7 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
                 transactionSigned.postValue(sigData);
                 break;
             case SIGNING_POSTPONED:
+            default:
                 break;
             case KEY_FILE_ERROR:
             case KEY_AUTHENTICATION_ERROR:

@@ -357,7 +357,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(OKX_ID, new NetworkInfo(C.OKX_NETWORK_NAME, C.OKX_SYMBOL,
                 OKX_RPC_URL,
                 "https://www.oklink.com/en/okc/tx/", OKX_ID, "",
-                "https://www.oklink.com/api?"));
+                "https://www.oklink.com/api"));
 
             // Add deprecated networks after this line
         }

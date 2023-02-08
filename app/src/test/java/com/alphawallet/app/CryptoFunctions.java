@@ -78,7 +78,10 @@ public class CryptoFunctions implements CryptoFunctionsInterface
 
     public static Sign.SignatureData sigFromByteArray(byte[] sig)
     {
-        if (sig.length < 64 || sig.length > 65) { return null; }
+        if (sig.length < 64 || sig.length > 65)
+        {
+            return null;
+        }
 
         byte subv = sig[64];
         if (subv < 27) subv += 27;

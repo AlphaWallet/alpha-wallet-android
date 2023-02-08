@@ -138,7 +138,7 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
                     disposable = tokenRepository.fetchLatestBlockNumber(chainId)
                             .subscribeOn(Schedulers.io())
                             .subscribeOn(AndroidSchedulers.mainThread())
-                            .subscribe(latestBlock::postValue, t -> {this.latestBlock.postValue(BigInteger.ZERO);});
+                            .subscribe(latestBlock::postValue, t -> this.latestBlock.postValue(BigInteger.ZERO));
                 }).subscribe();
     }
 

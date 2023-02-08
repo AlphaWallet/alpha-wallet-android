@@ -1,0 +1,2 @@
+int string hardware_wallets 0x0
+int string use_hardware_card 0x0

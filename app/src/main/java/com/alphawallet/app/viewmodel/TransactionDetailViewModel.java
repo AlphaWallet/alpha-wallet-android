@@ -74,11 +74,21 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
     private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
 
-    public LiveData<BigInteger> latestBlock() {
+    public LiveData<BigInteger> latestBlock()
+    {
         return latestBlock;
     }
-    public LiveData<Transaction> latestTx() { return latestTx; }
-    public LiveData<Transaction> onTransaction() { return transaction; }
+
+    public LiveData<Transaction> latestTx()
+    {
+        return latestTx;
+    }
+
+    public LiveData<Transaction> onTransaction()
+    {
+        return transaction;
+    }
+
     private String walletAddress;
 
     @Nullable
@@ -114,7 +124,11 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
     {
         return transactionFinalised;
     }
-    public MutableLiveData<TransactionReturn> transactionError() { return transactionError; }
+
+    public MutableLiveData<TransactionReturn> transactionError()
+    {
+        return transactionError;
+    }
 
     public void prepare(final long chainId, final String walletAddr)
     {
@@ -124,11 +138,12 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
                     disposable = tokenRepository.fetchLatestBlockNumber(chainId)
                             .subscribeOn(Schedulers.io())
                             .subscribeOn(AndroidSchedulers.mainThread())
-                            .subscribe(latestBlock::postValue, t -> { this.latestBlock.postValue(BigInteger.ZERO); });
+                            .subscribe(latestBlock::postValue, t -> {this.latestBlock.postValue(BigInteger.ZERO);});
                 }).subscribe();
     }
 
-    public void showMoreDetails(Context context, Transaction transaction) {
+    public void showMoreDetails(Context context, Transaction transaction)
+    {
         Uri uri = buildEtherscanUri(transaction);
         if (uri != null)
         {
@@ -139,7 +154,7 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
     public void startPendingTimeDisplay(final String txHash)
     {
         pendingUpdateDisposable = Observable.interval(0, 1, TimeUnit.SECONDS)
-            .doOnNext(l -> displayCurrentPendingTime(txHash)).subscribe();
+                .doOnNext(l -> displayCurrentPendingTime(txHash)).subscribe();
     }
 
     //TODO: move to display new transaction

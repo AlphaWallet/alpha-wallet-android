@@ -921,6 +921,7 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
                 .subscribe(wallet -> keyService.getAuthenticationForSignature(wallet, activity, callback))
                 .isDisposed();
     }
+
     public void getAuthentication(Activity activity, Wallet wallet, SignAuthenticationCallback callback)
     {
         keyService.getAuthenticationForSignature(wallet, activity, callback);

@@ -36,6 +36,7 @@ public class SignaturePair
     /**
      * You might expect the code to combine the message and signature
      * to be in this class - it is not.
+     *
      * @param selection what is returned from generate
      * @param sig       65 bytes of signature
      * @param message   the message being signed, including the 'selection'.
@@ -46,7 +47,7 @@ public class SignaturePair
         signature = sig;
 
         BigInteger bi = new BigInteger(1, signature.signature);
-        signatureStr  = bi.toString(10);
+        signatureStr = bi.toString(10);
         this.message = message;
     }
 
@@ -59,19 +60,21 @@ public class SignaturePair
     }
 
     //should only be one by one for now
+
     /**
      * Note: all values must be in decimal (base 10) to allow the QR encoding optimiser to work most efficiently
-     *
+     * <p>
      * Format is:
      * one decimal digit for future proofing in case we add to this format
      * two decimal digits giving length of the decimal encoded token ID
      * remaining digits are the signature in decimal
-     *
      */
-    public static String generateSelection721Tickets(List<BigInteger> tokenIds) {
+    public static String generateSelection721Tickets(List<BigInteger> tokenIds)
+    {
         String prefix = "0"; //future proof the format - this is one digit to refer to token count or protocol format
         StringBuilder stringBuilder = new StringBuilder();
-        for(BigInteger token: tokenIds) {
+        for (BigInteger token : tokenIds)
+        {
             stringBuilder.append(token.toString(10));
             stringBuilder.append(",");
         }
@@ -84,7 +87,8 @@ public class SignaturePair
      * Generate a compact string representation of the indices of an
      * ERC875 asset.  Notice that this function is not used in this
      * class. It is used to return the selectionStr to be used as a
-     * parameter of the constructor */
+     * parameter of the constructor
+     */
     public static String generateSelection(List<BigInteger> indexList)
     {
         Collections.sort(indexList); // just to find the lowest value
@@ -102,7 +106,8 @@ public class SignaturePair
         indexList = indexList - correctionFactor # reduce every element of the list by an int
         selection = sum(2^indexList)             # raise every element and add the result back */
         BigInteger bitFieldLookup = BigInteger.ZERO;
-        for (BigInteger i : indexList) {
+        for (BigInteger i : indexList)
+        {
             BigInteger adder = BigInteger.valueOf(2).pow(i.intValue() - correctionFactor);
             bitFieldLookup = bitFieldLookup.add(adder);
         }
@@ -122,7 +127,8 @@ public class SignaturePair
     /**
      * The reverse of generateSelection - used in scanning the QR code.
      */
-    public static List<Integer> buildIndexList(String selection) {
+    public static List<Integer> buildIndexList(String selection)
+    {
         List<Integer> intList = new ArrayList<>();
         final int NIBBLE = 4;
         //one: convert to bigint
@@ -133,7 +139,7 @@ public class SignaturePair
         int correctionFactor = trailingZeros * NIBBLE;
 
         String selectionStr = selection.substring(SELECTION_DESIGNATOR_SIZE + TRAILING_ZEROES_SIZE,
-                                                  SELECTION_DESIGNATOR_SIZE + TRAILING_ZEROES_SIZE + selectionLength);
+                SELECTION_DESIGNATOR_SIZE + TRAILING_ZEROES_SIZE + selectionLength);
         BigInteger bitField = new BigInteger(selectionStr, 10);
 
         int radix = bitField.getLowestSetBit();
@@ -173,7 +179,7 @@ public class SignaturePair
         {
             int offset = 65 - signature.signature.length;
             byte[] sigCopy = new byte[65];
-            System.arraycopy(signature.signature, 0, sigCopy, offset, 65-offset);
+            System.arraycopy(signature.signature, 0, sigCopy, offset, 65 - offset);
             for (int i = 0; i < offset; i++)
             {
                 sigCopy[i] = 0;

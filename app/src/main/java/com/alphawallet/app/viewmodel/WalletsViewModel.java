@@ -80,11 +80,9 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final AWEnsResolver ensResolver;
     private final AssetDefinitionService assetService;
     private final PreferenceRepositoryType preferenceRepository;
-
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokenRepositoryType tokenRepository;
     private final TickerService tickerService;
-
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private final MutableLiveData<Wallet> setupWallet = new MutableLiveData<>();
     private final MutableLiveData<Pair<Wallet, Boolean>> defaultWallet = new MutableLiveData<>();
@@ -94,7 +92,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
     private final MutableLiveData<Map<String, Token[]>> baseTokens = new MutableLiveData<>();
     private final MutableLiveData<String> getPublicKey = new MutableLiveData<>();
-
     private NetworkInfo currentNetwork;
     private final Map<String, Wallet> walletBalances = new HashMap<>();
     private final Map<String, TokensService> walletServices = new ConcurrentHashMap<>();
@@ -157,38 +154,41 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         return wallets;
     }
 
-    public LiveData<Pair<Wallet, Boolean>> defaultWallet()
-    {
-        return defaultWallet;
-    }
     public LiveData<Wallet> setupWallet()
     {
         return setupWallet;
     }
+
     public LiveData<Wallet> newWalletCreated()
     {
         return newWalletCreated;
     }
+
     public LiveData<ErrorEnvelope> createWalletError()
     {
         return createWalletError;
     }
+
     public LiveData<Boolean> noWalletsError()
     {
         return noWalletsError;
     }
+
     public LiveData<Map<String, Token[]>> baseTokens()
     {
         return baseTokens;
     }
+
     public LiveData<Wallet> changeDefaultWallet()
     {
         return changeDefaultWallet;
     }
+
     public LiveData<String> getPublicKey()
     {
         return getPublicKey;
     }
+
     public void setDefaultWallet(Wallet wallet)
     {
         preferenceRepository.setNewWallet(wallet.address, false);
@@ -199,6 +199,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
 
     /**
      * Change to an existing wallet after user selection
+     *
      * @param wallet
      */
     public void changeDefaultWallet(Wallet wallet)
@@ -266,7 +267,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         return startWalletSync(w)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::sendUnsyncedValue, e -> { });
+                .subscribe(this::sendUnsyncedValue, e -> {});
     }
 
     private void startFullWalletSync(Wallet[] items)
@@ -298,16 +299,16 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(value ->
-                        {
-                            if (complete)
-                            {
-                                syncCallback.syncCompleted(wallet.address.toLowerCase(), value);
-                            }
-                            else
-                            {
-                                syncCallback.syncStarted(wallet.address.toLowerCase(), value);
-                            }
-                        }).isDisposed();
+                {
+                    if (complete)
+                    {
+                        syncCallback.syncCompleted(wallet.address.toLowerCase(), value);
+                    }
+                    else
+                    {
+                        syncCallback.syncStarted(wallet.address.toLowerCase(), value);
+                    }
+                }).isDisposed();
     }
 
     private void sendUnsyncedValue(Wallet wallet)
@@ -357,8 +358,14 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(value -> {
-                    if (syncCount == 1) { syncCallback.syncCompleted(service.getCurrentAddress().toLowerCase(), value); }
-                        else { syncCallback.syncUpdate(service.getCurrentAddress().toLowerCase(), value); }
+                    if (syncCount == 1)
+                    {
+                        syncCallback.syncCompleted(service.getCurrentAddress().toLowerCase(), value);
+                    }
+                    else
+                    {
+                        syncCallback.syncUpdate(service.getCurrentAddress().toLowerCase(), value);
+                    }
                 }).isDisposed();
     }
 
@@ -383,11 +390,14 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         ensWrappingCheck = fetchWalletsInteract.fetch().toObservable()
                 .flatMap(Observable::fromArray)
                 .forEach(wallet -> ensCheck = ensResolver.reverseResolveEns(wallet.address)
-                                                    .onErrorReturnItem(wallet.ENSname != null ? wallet.ENSname : "")
-                        .map(ensName -> { wallet.ENSname = ensName; return wallet;})
+                        .onErrorReturnItem(wallet.ENSname != null ? wallet.ENSname : "")
+                        .map(ensName -> {
+                            wallet.ENSname = ensName;
+                            return wallet;
+                        })
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(w -> fetchWalletsInteract.updateWalletData(w, () -> { }), this::onError));
+                        .subscribe(w -> fetchWalletsInteract.updateWalletData(w, () -> {}), this::onError));
 
         //now load the current wallets from database
         disposable = fetchWalletsInteract
@@ -450,18 +460,18 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private void updateAllWallets(Wallet[] wallets, TokenUpdateType updateType)
     {
         disposable = Single.fromCallable(() -> {
-            //fetch all wallets in one go
-            Map<String, Token[]> walletTokenMap = new HashMap<>();
-            for (Wallet wallet : wallets)
-            {
-                Token[] walletTokens = tokensService.syncChainBalances(wallet.address.toLowerCase(), updateType).blockingGet();
-                if (walletTokens.length > 0)
-                {
-                    walletTokenMap.put(walletTokens[0].getWallet(), walletTokens);
-                }
-            }
-            return walletTokenMap;
-        }).subscribeOn(Schedulers.io())
+                    //fetch all wallets in one go
+                    Map<String, Token[]> walletTokenMap = new HashMap<>();
+                    for (Wallet wallet : wallets)
+                    {
+                        Token[] walletTokens = tokensService.syncChainBalances(wallet.address.toLowerCase(), updateType).blockingGet();
+                        if (walletTokens.length > 0)
+                        {
+                            walletTokenMap.put(walletTokens[0].getWallet(), walletTokens);
+                        }
+                    }
+                    return walletTokenMap;
+                }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(baseTokens::postValue, e -> {});
     }

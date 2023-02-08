@@ -120,11 +120,16 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
     {
         return defaultWallet;
     }
+
     public MutableLiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
     }
-    public MutableLiveData<TransactionReturn> transactionError() { return transactionError; }
+
+    public MutableLiveData<TransactionReturn> transactionError()
+    {
+        return transactionError;
+    }
 
     public void findWallet()
     {

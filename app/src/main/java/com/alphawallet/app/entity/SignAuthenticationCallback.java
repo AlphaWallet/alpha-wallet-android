@@ -9,8 +9,16 @@ import com.alphawallet.hardware.SignatureFromKey;
 public interface SignAuthenticationCallback
 {
     void gotAuthorisation(boolean gotAuth);
-    default void createdKey(String keyAddress) { }
+
+    default void createdKey(String keyAddress)
+    {
+    }
+
     void cancelAuthentication();
+
     void gotSignature(SignatureFromKey signature);
-    default void signingError(String error) { } //Handle signing error from hardware card
+
+    default void signingError(String error)
+    {
+    } //Handle signing error from hardware card
 }

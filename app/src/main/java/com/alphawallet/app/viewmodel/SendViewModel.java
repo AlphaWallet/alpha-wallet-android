@@ -77,7 +77,11 @@ public class SendViewModel extends BaseViewModel implements TransactionSendHandl
     {
         return transactionFinalised;
     }
-    public MutableLiveData<TransactionReturn> transactionError() { return transactionError; }
+
+    public MutableLiveData<TransactionReturn> transactionError()
+    {
+        return transactionError;
+    }
 
     public void showContractInfo(Context ctx, Wallet wallet, Token token)
     {
@@ -89,7 +93,10 @@ public class SendViewModel extends BaseViewModel implements TransactionSendHandl
         return networkRepository.getNetworkByChain(chainId);
     }
 
-    public Token getToken(long chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); }
+    public Token getToken(long chainId, String tokenAddress)
+    {
+        return tokensService.getToken(chainId, tokenAddress);
+    }
 
     public void showImportLink(Context context, String importTxt)
     {

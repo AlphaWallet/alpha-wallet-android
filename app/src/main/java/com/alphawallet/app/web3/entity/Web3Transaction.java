@@ -22,7 +22,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 
-public class Web3Transaction implements Parcelable {
+public class Web3Transaction implements Parcelable
+{
     public final Address recipient;
     public final Address contract;
     public final Address sender;
@@ -70,7 +71,8 @@ public class Web3Transaction implements Parcelable {
             BigInteger gasLimit,
             long nonce,
             String payload,
-            String description) {
+            String description)
+    {
         this.sender = null;
         this.recipient = recipient;
         this.contract = contract;
@@ -94,7 +96,8 @@ public class Web3Transaction implements Parcelable {
             BigInteger gasLimit,
             long nonce,
             String payload,
-            String description) {
+            String description)
+    {
         this.recipient = recipient;
         this.contract = contract;
         this.sender = null;
@@ -117,7 +120,8 @@ public class Web3Transaction implements Parcelable {
             BigInteger gasLimit,
             long nonce,
             String payload,
-            long leafPosition) {
+            long leafPosition)
+    {
         this.recipient = recipient;
         this.contract = contract;
         this.sender = null;
@@ -141,7 +145,8 @@ public class Web3Transaction implements Parcelable {
             BigInteger gasLimit,
             long nonce,
             String payload,
-            long leafPosition) {
+            long leafPosition)
+    {
         this.recipient = recipient;
         this.contract = contract;
         this.sender = sender;
@@ -166,7 +171,8 @@ public class Web3Transaction implements Parcelable {
             BigInteger gasLimit,
             long nonce,
             String payload,
-            long leafPosition) {
+            long leafPosition)
+    {
         this.recipient = recipient;
         this.contract = contract;
         this.sender = sender;
@@ -183,6 +189,7 @@ public class Web3Transaction implements Parcelable {
 
     /**
      * Initialise from WalletConnect Transaction
+     *
      * @param wcTx
      * @param callbackId
      */
@@ -221,6 +228,7 @@ public class Web3Transaction implements Parcelable {
 
     /**
      * Initialise from previous Transaction for Resending (Speeding up or cancelling)
+     *
      * @param tx
      * @param mode
      * @param minGas
@@ -228,12 +236,12 @@ public class Web3Transaction implements Parcelable {
     public Web3Transaction(com.alphawallet.app.entity.Transaction tx, ActionSheetMode mode, BigInteger minGas)
     {
         recipient = new Address(tx.to);
-        contract = new Address (tx.to);
-        value = (mode == ActionSheetMode.CANCEL_TRANSACTION) ? BigInteger.ZERO: new BigInteger(tx.value);
+        contract = new Address(tx.to);
+        value = (mode == ActionSheetMode.CANCEL_TRANSACTION) ? BigInteger.ZERO : new BigInteger(tx.value);
         gasPrice = minGas;
-        gasLimit= new BigInteger(tx.gasUsed);
+        gasLimit = new BigInteger(tx.gasUsed);
         nonce = tx.nonce;
-        payload = (mode == ActionSheetMode.CANCEL_TRANSACTION) ? "0x": tx.input;
+        payload = (mode == ActionSheetMode.CANCEL_TRANSACTION) ? "0x" : tx.input;
         leafPosition = -1;
         description = null;
         maxFeePerGas = BigInteger.ZERO;
@@ -241,7 +249,8 @@ public class Web3Transaction implements Parcelable {
         sender = new Address(tx.from);
     }
 
-    Web3Transaction(Parcel in) {
+    Web3Transaction(Parcel in)
+    {
         recipient = in.readParcelable(Address.class.getClassLoader());
         contract = in.readParcelable(Address.class.getClassLoader());
         sender = in.readParcelable(Address.class.getClassLoader());
@@ -256,14 +265,17 @@ public class Web3Transaction implements Parcelable {
         description = in.readString();
     }
 
-    public static final Creator<Web3Transaction> CREATOR = new Creator<Web3Transaction>() {
+    public static final Creator<Web3Transaction> CREATOR = new Creator<Web3Transaction>()
+    {
         @Override
-        public Web3Transaction createFromParcel(Parcel in) {
+        public Web3Transaction createFromParcel(Parcel in)
+        {
             return new Web3Transaction(in);
         }
 
         @Override
-        public Web3Transaction[] newArray(int size) {
+        public Web3Transaction[] newArray(int size)
+        {
             return new Web3Transaction[size];
         }
     };
@@ -281,12 +293,14 @@ public class Web3Transaction implements Parcelable {
     }
 
     @Override
-    public int describeContents() {
+    public int describeContents()
+    {
         return 0;
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(Parcel dest, int flags)
+    {
         dest.writeParcelable(recipient, flags);
         dest.writeParcelable(contract, flags);
         dest.writeParcelable(sender, flags);
@@ -313,6 +327,7 @@ public class Web3Transaction implements Parcelable {
 
     /**
      * Can be used anywhere to generate an 'instant' human readable transaction dump
+     *
      * @param ctx
      * @param chainId
      * @return
@@ -372,6 +387,7 @@ public class Web3Transaction implements Parcelable {
 
     /**
      * Use this for debugging; it's sometimes handy to dump these transactions
+     *
      * @param chainId
      * @return
      */

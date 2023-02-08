@@ -43,6 +43,7 @@ public interface TransactionRepositoryType
     void restartService();
 
     Single<Pair<SignatureFromKey, RawTransaction>> signTransaction(Wallet from, Web3Transaction w3Tx, long chainId);
+
     RawTransaction formatRawTransaction(Web3Transaction w3Tx, long nonce, long chainId);
 
     Single<String> sendTransaction(Wallet from, RawTransaction rtx, SignatureFromKey sigData, long chainId);

@@ -37,7 +37,8 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
     }
 
     @Override
-    public void onClick(View view) {
+    public void onClick(View view)
+    {
 
         final int close_action = R.id.close_action;
         final int new_account_action = R.id.new_account_action;
@@ -45,32 +46,42 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
         final int watch_account_action = R.id.watch_account_action;
         final int hardware_card = R.id.hardware_card;
 
-        switch (view.getId()) {
-            case close_action: {
-                if (onCloseActionListener != null) {
+        switch (view.getId())
+        {
+            case close_action:
+            {
+                if (onCloseActionListener != null)
+                {
                     onCloseActionListener.onClose(view);
                 }
                 break;
             }
-            case new_account_action: {
-                if (onNewWalletClickListener != null) {
+            case new_account_action:
+            {
+                if (onNewWalletClickListener != null)
+                {
                     onNewWalletClickListener.onNewWallet(view);
                 }
                 break;
             }
-            case import_account_action: {
-                if (onImportWalletClickListener != null) {
+            case import_account_action:
+            {
+                if (onImportWalletClickListener != null)
+                {
                     onImportWalletClickListener.onImportWallet(view);
                 }
                 break;
             }
-            case watch_account_action: {
-                if (onWatchWalletClickListener != null) {
+            case watch_account_action:
+            {
+                if (onWatchWalletClickListener != null)
+                {
                     onWatchWalletClickListener.onWatchWallet(view);
                 }
                 break;
             }
-            case hardware_card: {
+            case hardware_card:
+            {
                 if (onHardwareCardClickListener != null)
                 {
                     onHardwareCardClickListener.detectCard(view);
@@ -91,7 +102,8 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
         this.onWatchWalletClickListener = onWatchWalletClickListener;
     }
 
-    public void setOnHardwareCardClickListener(OnHardwareCardActionListener onHardwareCardClickListener) {
+    public void setOnHardwareCardClickListener(OnHardwareCardActionListener onHardwareCardClickListener)
+    {
         this.onHardwareCardClickListener = onHardwareCardClickListener;
     }
 

@@ -6,6 +6,8 @@ package com.alphawallet.hardware;
 public interface HardwareCallback
 {
     void hardwareCardError(String errorMessage);
+
     void signedMessageFromHardware(SignatureFromKey returnSig);
+
     void onCardReadStart();
 }

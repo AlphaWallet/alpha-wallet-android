@@ -87,6 +87,8 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
                     onHardwareCardClickListener.detectCard(view);
                 }
             }
+            default:
+                break;
         }
     }
 

@@ -11,6 +11,7 @@ public class HardwareDevice //Should implement the hardware callback from the de
 {
     private final HardwareCallback callback;
     private byte[] digestBytes;
+
     // Constructor - add the init code here
     public HardwareDevice(HardwareCallback callback)
     {

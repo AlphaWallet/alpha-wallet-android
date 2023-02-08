@@ -123,6 +123,9 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
     public void setHardwareActive(boolean isStub)
     {
         TextView hardwareText = findViewById(R.id.hardware_card);
-        hardwareText.setVisibility(View.GONE);
+        if (isStub)
+        {
+            hardwareText.setVisibility(View.GONE);
+        }
     }
 }

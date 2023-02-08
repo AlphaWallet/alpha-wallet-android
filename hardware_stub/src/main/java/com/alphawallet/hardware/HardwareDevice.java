@@ -22,6 +22,11 @@ public class HardwareDevice //Should implement the hardware callback from the de
         return true;
     }
 
+    public String getPlaceCardMessage(Activity activity) //string to be used to ask user to hold card to phone
+    {
+        return null;
+    }
+
     //Set the signing data which will be signed later by the card (when card is ready to sign - see onDetectedCard below)
     public void setSigningData(byte[] signingData)
     {
@@ -43,6 +48,7 @@ public class HardwareDevice //Should implement the hardware callback from the de
     @Override
     public void onDetectedCard(NFC status)
     {
+        callback.onCardReadStart(); // so you can display a pop-up to let user know card reading is in progress
         SignatureFromKey returnSig = new SignatureFromKey();
 
         try

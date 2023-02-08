@@ -5,6 +5,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Pair;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
@@ -85,8 +86,10 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final TickerService tickerService;
 
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
-    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<Wallet> createdWallet = new MutableLiveData<>();
+    private final MutableLiveData<Wallet> setupWallet = new MutableLiveData<>();
+    private final MutableLiveData<Pair<Wallet, Boolean>> defaultWallet = new MutableLiveData<>();
+    private final MutableLiveData<Wallet> changeDefaultWallet = new MutableLiveData<>();
+    private final MutableLiveData<Wallet> newWalletCreated = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
     private final MutableLiveData<Map<String, Token[]>> baseTokens = new MutableLiveData<>();
@@ -154,30 +157,56 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         return wallets;
     }
 
-    public LiveData<Wallet> defaultWallet()
+    public LiveData<Pair<Wallet, Boolean>> defaultWallet()
     {
         return defaultWallet;
     }
-
-    public LiveData<Wallet> createdWallet()
+    public LiveData<Wallet> setupWallet()
     {
-        return createdWallet;
+        return setupWallet;
     }
-
+    public LiveData<Wallet> newWalletCreated()
+    {
+        return newWalletCreated;
+    }
     public LiveData<ErrorEnvelope> createWalletError()
     {
         return createWalletError;
     }
-    public LiveData<Boolean> noWalletsError() { return noWalletsError; }
-    public LiveData<Map<String, Token[]>> baseTokens() { return baseTokens; }
-    public LiveData<String> getPublicKey() { return getPublicKey; }
-
-    public void setDefaultWallet(Wallet wallet, boolean isNewWallet)
+    public LiveData<Boolean> noWalletsError()
     {
-        preferenceRepository.setNewWallet(wallet.address, isNewWallet);
+        return noWalletsError;
+    }
+    public LiveData<Map<String, Token[]>> baseTokens()
+    {
+        return baseTokens;
+    }
+    public LiveData<Wallet> changeDefaultWallet()
+    {
+        return changeDefaultWallet;
+    }
+    public LiveData<String> getPublicKey()
+    {
+        return getPublicKey;
+    }
+    public void setDefaultWallet(Wallet wallet)
+    {
+        preferenceRepository.setNewWallet(wallet.address, false);
         disposable = setDefaultWalletInteract
                 .set(wallet)
                 .subscribe(() -> onDefaultWallet(wallet), this::onError);
+    }
+
+    /**
+     * Change to an existing wallet after user selection
+     * @param wallet
+     */
+    public void changeDefaultWallet(Wallet wallet)
+    {
+        preferenceRepository.setNewWallet(wallet.address, false);
+        disposable = setDefaultWalletInteract
+                .set(wallet)
+                .subscribe(() -> changeDefaultWallet.postValue(wallet), this::onError);
     }
 
     public void onPrepare(long chainId, SyncCallback cb)
@@ -201,7 +230,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
 
     private void onDefaultWallet(Wallet wallet)
     {
-        defaultWallet.postValue(wallet);
+        setupWallet.postValue(wallet);
         disposable = fetchWalletsInteract
                 .fetch()
                 .subscribe(this::onWallets, this::onError);
@@ -381,6 +410,20 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                 .isDisposed();
     }
 
+    /**
+     * After wallet has been stored, set the default wallet, return to WalletsActivity and run onNewWallet
+     * which resets token operations and goes to main wallet page
+     *
+     * @param wallet
+     */
+    public void setNewWallet(Wallet wallet)
+    {
+        preferenceRepository.setNewWallet(wallet.address, true);
+        disposable = setDefaultWalletInteract
+                .set(wallet)
+                .subscribe(() -> newWalletCreated.postValue(wallet), this::onError);
+    }
+
     private void startBalanceUpdateTimer(final Wallet[] wallets)
     {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
@@ -455,23 +498,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         return currentNetwork;
     }
 
-    public void storeHDWallet(String address, KeyService.AuthenticationLevel authLevel)
-    {
-        if (!address.equals(ZERO_ADDRESS))
-        {
-            Wallet wallet = new Wallet(address);
-            wallet.type = WalletType.HDKEY;
-            wallet.authLevel = authLevel;
-            fetchWalletsInteract.storeWallet(wallet)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(account -> {
-                        fetchWallets();
-                        createdWallet.postValue(account);
-                    }, this::onCreateWalletError).isDisposed();
-        }
-    }
-
     public void watchWallet(Activity activity)
     {
         importWalletRouter.openWatchCreate(activity, C.IMPORT_REQUEST_CODE);
@@ -519,7 +545,26 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         currentWalletUpdates.clear();
     }
 
-    public void importHardwareWallet(SignatureFromKey returnSig) throws SignatureException
+    public void storeHDWallet(String address, KeyService.AuthenticationLevel authLevel)
+    {
+        if (!address.equals(ZERO_ADDRESS))
+        {
+            Wallet wallet = new Wallet(address);
+            wallet.type = WalletType.HDKEY;
+            wallet.authLevel = authLevel;
+            fetchWalletsInteract.storeWallet(wallet)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(account -> setNewWallet(wallet), this::onCreateWalletError).isDisposed();
+        }
+    }
+
+    public void storeWallet(Wallet wallet, WalletType type)
+    {
+
+    }
+
+    public void storeHardwareWallet(SignatureFromKey returnSig) throws SignatureException
     {
         Sign.SignatureData sigData = CryptoFunctions.sigFromByteArray(returnSig.signature);
         BigInteger recoveredKey = Sign.signedMessageToKey(TEST_STRING.getBytes(), sigData);
@@ -535,7 +580,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         Wallet existingWallet = findWallet(wallets, addressHex);
         if (existingWallet != null)
         {
-            setDefaultWallet(existingWallet, false);
+            changeDefaultWallet(existingWallet);
         }
         else
         {
@@ -561,9 +606,6 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         disposable = importWalletInteract.storeHardwareWallet(address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(account -> {
-                    fetchWallets();
-                    createdWallet.postValue(account);
-                }, this::onCreateWalletError);
+                .subscribe(wallet -> setNewWallet(wallet), this::onCreateWalletError);
     }
 }

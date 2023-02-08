@@ -328,6 +328,12 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     }
 
     @Override
+    public void onCardReadStart()
+    {
+        //TODO: Display card read in progress
+    }
+
+    @Override
     public void hardwareCardError(String message)
     {
         signCallback.signingError(message);

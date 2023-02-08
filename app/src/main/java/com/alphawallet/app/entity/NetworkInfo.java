@@ -1,6 +1,7 @@
 package com.alphawallet.app.entity;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
 
 import android.net.Uri;
 import android.text.TextUtils;

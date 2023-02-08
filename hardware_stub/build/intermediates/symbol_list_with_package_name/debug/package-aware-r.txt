@@ -1,0 +1,3 @@
+com.alphawallet.hardware
+string hardware_wallets
+string use_hardware_card

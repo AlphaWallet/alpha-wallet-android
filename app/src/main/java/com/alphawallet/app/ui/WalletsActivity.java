@@ -14,6 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -74,7 +76,8 @@ public class WalletsActivity extends BaseActivity implements
     private AWalletAlertDialog aDialog;
     private WalletsSummaryAdapter adapter;
     private Wallet selectedWallet;
-    private boolean requiresHomeRefresh;
+    private ActivityResultLauncher<Intent> editWalletDetails;
+    private AWalletAlertDialog cardReadDialog;
     private String dialogError;
     private final Runnable displayWalletError = new Runnable()
     {
@@ -105,7 +108,7 @@ public class WalletsActivity extends BaseActivity implements
         setContentView(R.layout.activity_wallets);
         toolbar();
         setTitle(getString(R.string.title_wallets_summary));
-        requiresHomeRefresh = false;
+        initResultLaunchers();
     }
 
     @Override
@@ -123,7 +126,6 @@ public class WalletsActivity extends BaseActivity implements
         super.onPause();
         hideDialog();
         viewModel.onPause(); //no need to update balances if view isn't showing
-        hardwareCard.deactivateReader();
     }
 
     private void scrollToDefaultWallet()
@@ -145,8 +147,9 @@ public class WalletsActivity extends BaseActivity implements
             viewModel.error().observe(this, this::onError);
             viewModel.progress().observe(this, systemView::showProgress);
             viewModel.wallets().observe(this, this::onFetchWallets);
-            viewModel.defaultWallet().observe(this, this::onChangeDefaultWallet);
-            viewModel.createdWallet().observe(this, this::onCreatedWallet);
+            viewModel.setupWallet().observe(this, this::setupWallet); //initial wallet setup at activity startup
+            viewModel.newWalletCreated().observe(this, this::onNewWalletCreated); //new wallet was created
+            viewModel.changeDefaultWallet().observe(this, this::walletChanged);
             viewModel.createWalletError().observe(this, this::onCreateWalletError);
             viewModel.noWalletsError().observe(this, this::noWallets);
             viewModel.baseTokens().observe(this, this::updateBaseTokens);
@@ -169,7 +172,7 @@ public class WalletsActivity extends BaseActivity implements
     {
         Intent intent = new Intent(this, SplashActivity.class);
         startActivity(intent);
-        finish();
+        preFinish();
     }
 
     private void initViews()
@@ -226,14 +229,10 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public void onBackPressed()
     {
+        preFinish();
         // User can't start work without wallet.
-        if (adapter.getItemCount() > 0)
+        if (adapter.getItemCount() == 0)
         {
-            finish();
-        }
-        else
-        {
-            finish();
             System.exit(0);
         }
     }
@@ -294,8 +293,8 @@ public class WalletsActivity extends BaseActivity implements
                 Wallet importedWallet = data.getParcelableExtra(C.Key.WALLET);
                 if (importedWallet != null)
                 {
-                    requiresHomeRefresh = true;
-                    viewModel.setDefaultWallet(importedWallet, true);
+                    //switch to this wallet
+                    viewModel.setNewWallet(importedWallet);
                 }
             }
         }
@@ -352,28 +351,55 @@ public class WalletsActivity extends BaseActivity implements
         dialog.show();
     }
 
-    private void onChangeDefaultWallet(Wallet wallet)
+    /**
+     * Called once at Activity startup
+     * @param wallet
+     */
+    private void setupWallet(Wallet wallet)
     {
-        if (adapter == null) return;
+        adapter.setDefaultWallet(wallet);
+        scrollToDefaultWallet();
+        selectedWallet = wallet;
+    }
 
-        if (selectedWallet != null && !wallet.sameAddress(selectedWallet.address))
+    /**
+     * Called after new wallet has been stored, take user to WalletActionsActivity to finish setup
+     * @param wallet
+     */
+    private void onNewWalletCreated(Wallet wallet)
+    {
+        updateCurrentWallet(wallet);
+        hideToolbar();
+        callNewWalletPage(wallet);
+    }
+
+    /**
+     * User selected new wallet, change to that wallet and jump to wallet page
+     * @param wallet
+     */
+    private void walletChanged(Wallet wallet)
+    {
+        updateCurrentWallet(wallet);
+        viewModel.showHome(this);
+    }
+
+    private void updateCurrentWallet(Wallet wallet)
+    {
+        if (adapter == null)
         {
-            requiresHomeRefresh = true;
+            recreate();
+            return;
         }
 
         adapter.setDefaultWallet(wallet);
         scrollToDefaultWallet();
-        if (requiresHomeRefresh)
-        {
-            viewModel.stopUpdates();
-            requiresHomeRefresh = false;
-            viewModel.showHome(this);
 
-            Intent bIntent = new Intent(this, WalletConnectService.class);
-            bIntent.setAction(String.valueOf(WalletConnectActions.DISCONNECT.ordinal()));
-            bIntent.putExtra("wallet", selectedWallet);
-            startService(bIntent);
-        }
+        viewModel.stopUpdates();
+
+        Intent bIntent = new Intent(this, WalletConnectService.class);
+        bIntent.setAction(String.valueOf(WalletConnectActions.DISCONNECT.ordinal()));
+        bIntent.putExtra("wallet", selectedWallet);
+        startService(bIntent);
 
         selectedWallet = wallet;
     }
@@ -390,11 +416,9 @@ public class WalletsActivity extends BaseActivity implements
         invalidateOptionsMenu();
     }
 
-    private void onCreatedWallet(Wallet wallet)
+    private void preFinish()
     {
-        hideToolbar();
-        viewModel.setDefaultWallet(wallet, true);
-        callNewWalletPage(wallet);
+        hardwareCard.deactivateReader();
         finish();
     }
 
@@ -406,7 +430,16 @@ public class WalletsActivity extends BaseActivity implements
         intent.putExtra("walletCount", adapter.getItemCount());
         intent.putExtra("isNewWallet", true);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
+
+        editWalletDetails.launch(intent);
+    }
+
+    private void initResultLaunchers()
+    {
+        editWalletDetails = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    viewModel.showHome(this);
+                });
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -416,8 +449,7 @@ public class WalletsActivity extends BaseActivity implements
 
     private void onSetWalletDefault(Wallet wallet)
     {
-        requiresHomeRefresh = true;
-        viewModel.setDefaultWallet(wallet, false);
+        viewModel.changeDefaultWallet(wallet);
     }
 
     private void hideDialog()
@@ -458,6 +490,7 @@ public class WalletsActivity extends BaseActivity implements
     public void detectCard(View view)
     {
         //TODO: Hardware: Show waiting for card scan. Inform user to keep the card still and in place
+        Toast.makeText(this, hardwareCard.getPlaceCardMessage(this), Toast.LENGTH_SHORT).show();
         hideDialog();
     }
 
@@ -467,9 +500,12 @@ public class WalletsActivity extends BaseActivity implements
 
     }
 
+    // Callbacks from HardwareDevice
+
     @Override
     public void hardwareCardError(String errorMessage)
     {
+        cardReadDialog.dismiss();
         //TODO: Hardware Improve error reporting UI (Popup?)
         Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
     }
@@ -477,14 +513,30 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public void signedMessageFromHardware(SignatureFromKey returnSig)
     {
+        cardReadDialog.dismiss();
         try
         {
-            viewModel.importHardwareWallet(returnSig);
+            viewModel.storeHardwareWallet(returnSig);
         }
         catch (SignatureException ex)
         {
             //TODO: Hardware: Display this in a popup
             Toast.makeText(this, "Import Card: " + ex.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onCardReadStart()
+    {
+        //TODO: Hardware; display popup graphic - this popup doesn't show
+        runOnUiThread(() -> {
+            if (cardReadDialog != null && cardReadDialog.isShowing()) cardReadDialog.dismiss();
+            cardReadDialog = new AWalletAlertDialog(this);
+            cardReadDialog.setTitle(hardwareCard.getPlaceCardMessage(this));
+            cardReadDialog.setIcon(AWalletAlertDialog.NONE);
+            cardReadDialog.setProgressMode();
+            cardReadDialog.setCancelable(false);
+            cardReadDialog.show();
+        });
     }
 }

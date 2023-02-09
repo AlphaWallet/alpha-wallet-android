@@ -62,9 +62,7 @@ public class OkLinkService
                 ResponseBody responseBody = response.body();
                 if (responseBody != null)
                 {
-                    String r = responseBody.string();
-                    Timber.d(r);
-                    return r;
+                    return responseBody.string();
                 }
             }
             else

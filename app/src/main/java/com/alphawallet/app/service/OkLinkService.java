@@ -74,6 +74,9 @@ public class OkLinkService
     {
         List<OkxEvent> events = new ArrayList<OkxEvent>();
         int page = 1;
+
+        //JB: Can this be rolled into a single loop?
+
         TransactionListResponse response = new Gson().fromJson(
             fetchTransactions(address, isNft ? "token_721" : "token_20", String.valueOf(page)),
             TransactionListResponse.class);
@@ -130,6 +133,8 @@ public class OkLinkService
         Timber.d("URL: " + protocolType + " : " + url);
         return executeRequest(url);
     }
+
+    //JB: Add a method to return TokenInfo data for both NFT and ERC20.
 
     public TokenListReponse.TokenDetails getTokenDetails(String contractAddress)
     {

@@ -1,19 +1,10 @@
 package com.alphawallet.app.entity;
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
-
-import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.util.BalanceUtils;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.EthTransaction;
-
-import java.io.IOException;
 import java.math.BigDecimal;
-
-import timber.log.Timber;
 
 public class OkxEvent
 {
@@ -112,10 +103,12 @@ public class OkxEvent
             BigDecimal bi = new BigDecimal(ev.value);
             ev.value = BalanceUtils.getScaledValueMinimal(bi,
                 decimals, 5);
+            ev.tokenDecimal = "18";
         }
         else
         {
             ev.value = amount;
+            ev.tokenDecimal = "0";
         }
 
         ev.gasUsed = "0"; // TODO:

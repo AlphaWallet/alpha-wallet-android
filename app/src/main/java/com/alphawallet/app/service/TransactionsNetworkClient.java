@@ -523,7 +523,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 EtherscanEvent[] events;
                 if (networkInfo.chainId == OKX_ID)
                 {
-                    OkLinkService okLinkService = new OkLinkService(httpClient);
+                    OkLinkService okLinkService = new OkLinkService(httpClient); //JB: Can OKLinkService be a static class, passing in httpclient for all calls?
                     events = okLinkService.getEtherscanEvents(walletAddress, nftCheck);
                 }
                 else

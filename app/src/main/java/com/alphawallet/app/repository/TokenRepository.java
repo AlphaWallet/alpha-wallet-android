@@ -1,6 +1,7 @@
 package com.alphawallet.app.repository;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 import android.content.Context;
@@ -379,6 +380,12 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<TokenInfo> update(String contractAddr, long chainId, ContractType type)
     {
+        //JB: Fetch token from OKX API: Since RPC is restricted, it'll never properly recover the token details.
+        if (chainId == OKX_ID)
+        {
+            return tokenInfoFromOKLinkService(contractAddr); //don't need type here, we can determine that from the return
+        }
+
         switch (type)
         {
             case ERC721:

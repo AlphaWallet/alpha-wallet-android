@@ -108,7 +108,7 @@ public class OkxEvent
         else
         {
             ev.value = amount;
-            ev.tokenDecimal = "0";
+            ev.tokenDecimal = "";
         }
 
         ev.gasUsed = "0"; // TODO:

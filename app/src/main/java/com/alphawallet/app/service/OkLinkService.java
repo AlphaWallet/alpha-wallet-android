@@ -6,6 +6,7 @@ import com.alphawallet.app.entity.EtherscanEvent;
 import com.alphawallet.app.entity.OkxEvent;
 import com.alphawallet.app.entity.okx.TokenListReponse;
 import com.alphawallet.app.entity.okx.TransactionListResponse;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.util.JsonUtils;
 import com.google.gson.Gson;
@@ -24,21 +25,31 @@ public class OkLinkService
     private static final String BASE_URL = "https://www.oklink.com/api";
     private static final String LIMIT = "50"; // Max limit; default is 20
     private static final String CHAIN_SHORT_NAME = "OKC"; // Max limit; default is 20
-    private OkHttpClient httpClient;
+    public static OkLinkService instance;
+    private final OkHttpClient httpClient;
 
     public OkLinkService(OkHttpClient httpClient)
     {
         this.httpClient = httpClient;
     }
 
+    public static OkLinkService get(OkHttpClient httpClient)
+    {
+        if (instance == null)
+        {
+            instance = new OkLinkService(httpClient);
+        }
+        return instance;
+    }
+
     private Request buildRequest(String api)
     {
         Request.Builder requestB = new Request.Builder()
-                .url(api)
-                .header("User-Agent", "Chrome/74.0.3729.169")
-                .addHeader("Content-Type", "application/json")
-                .addHeader("Ok-Access-Key", KeyProviderFactory.get().getOkLinkKey())
-                .get();
+            .url(api)
+            .header("User-Agent", "Chrome/74.0.3729.169")
+            .addHeader("Content-Type", "application/json")
+            .addHeader("Ok-Access-Key", KeyProviderFactory.get().getOkLinkKey())
+            .get();
         return requestB.build();
     }
 
@@ -72,27 +83,14 @@ public class OkLinkService
 
     public EtherscanEvent[] getEtherscanEvents(String address, boolean isNft)
     {
-        List<OkxEvent> events = new ArrayList<OkxEvent>();
+        List<OkxEvent> events = new ArrayList<>();
         int page = 1;
-
-        //JB: Can this be rolled into a single loop?
-
-        TransactionListResponse response = new Gson().fromJson(
-            fetchTransactions(address, isNft ? "token_721" : "token_20", String.valueOf(page)),
-            TransactionListResponse.class);
-
         int totalPage = 0;
-        if (response.data.size() > 0)
-        {
-            totalPage = Integer.parseInt(response.data.get(0).totalPage);
-            events.addAll(response.data.get(0).transactionLists);
-        }
 
-
-        while (page < totalPage)
+        do
         {
             TransactionListResponse response2 = new Gson().fromJson(
-                fetchTransactions(address, isNft ? "token_721" : "token_20", String.valueOf(++page)),
+                fetchTransactions(address, isNft ? "token_721" : "token_20", String.valueOf(page++)),
                 TransactionListResponse.class);
 
             if (response2.data.size() > 0)
@@ -100,7 +98,7 @@ public class OkLinkService
                 totalPage = Integer.parseInt(response2.data.get(0).totalPage);
                 events.addAll(response2.data.get(0).transactionLists);
             }
-        }
+        } while (page <= totalPage);
 
         List<EtherscanEvent> etherscanEvents = new ArrayList<>();
         for (OkxEvent ev : events)
@@ -124,17 +122,37 @@ public class OkLinkService
     {
         Uri.Builder builder = new Uri.Builder();
         builder.encodedPath(BASE_URL + "/v5/explorer/address/transaction-list")
-                .appendQueryParameter("address", address)
-                .appendQueryParameter("protocolType", protocolType)
-                .appendQueryParameter("chainShortName", CHAIN_SHORT_NAME)
-                .appendQueryParameter("limit", LIMIT)
-                .appendQueryParameter("page", page);
+            .appendQueryParameter("address", address)
+            .appendQueryParameter("protocolType", protocolType)
+            .appendQueryParameter("chainShortName", CHAIN_SHORT_NAME)
+            .appendQueryParameter("limit", LIMIT)
+            .appendQueryParameter("page", page);
         String url = builder.build().toString();
         Timber.d("URL: " + protocolType + " : " + url);
         return executeRequest(url);
     }
 
     //JB: Add a method to return TokenInfo data for both NFT and ERC20.
+    public TokenInfo getTokenInfo(String contractAddress)
+    {
+        TokenListReponse.TokenDetails tokenDetails = getTokenDetails(contractAddress);
+
+        TokenInfo tokenInfo = new TokenInfo(
+            tokenDetails.tokenContractAddress,
+            tokenDetails.tokenFullName,
+            tokenDetails.token,
+            Integer.parseInt(tokenDetails.precision),
+            true,
+            66);
+
+        // JDG TODO: Remove logs
+        Timber.d("tokenInfo address: " + tokenInfo.address);
+        Timber.d("tokenInfo tokenFullName: " + tokenInfo.name);
+        Timber.d("tokenInfo token: " + tokenInfo.symbol);
+        Timber.d("tokenInfo decimals: " + tokenInfo.decimals);
+
+        return tokenInfo;
+    }
 
     public TokenListReponse.TokenDetails getTokenDetails(String contractAddress)
     {

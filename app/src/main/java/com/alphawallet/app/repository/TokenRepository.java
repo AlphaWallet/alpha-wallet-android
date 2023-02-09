@@ -18,6 +18,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.okx.TokenListReponse;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
@@ -28,6 +29,7 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.OkLinkService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.util.ens.AWEnsResolver;
@@ -400,6 +402,18 @@ public class TokenRepository implements TokenRepositoryType {
             default:
                 return setupTokensFromLocal(contractAddr, chainId);
         }
+    }
+
+    private Single<TokenInfo> tokenInfoFromOKLinkService(String contractAddr)
+    {
+        OkHttpClient okClient = new OkHttpClient.Builder()
+            .connectTimeout(C.CONNECT_TIMEOUT * 3, TimeUnit.SECONDS) //events can take longer to render
+            .connectTimeout(C.READ_TIMEOUT * 3, TimeUnit.SECONDS)
+            .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
+            .build();
+
+        return Single.fromCallable(() -> OkLinkService.get(okClient).getTokenInfo(contractAddr)).observeOn(Schedulers.io());
     }
 
     @Override

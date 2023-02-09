@@ -96,7 +96,8 @@ public class OkLinkService
                 totalPage = Integer.parseInt(response2.data.get(0).totalPage);
                 events.addAll(response2.data.get(0).transactionLists);
             }
-        } while (page <= totalPage);
+        }
+        while (page <= totalPage);
 
         List<EtherscanEvent> etherscanEvents = new ArrayList<>();
         for (OkxEvent ev : events)

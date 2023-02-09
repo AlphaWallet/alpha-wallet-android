@@ -12,8 +12,11 @@ import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.DApp;
+import com.alphawallet.app.entity.Wallet;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import org.web3j.crypto.Keys;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -33,6 +36,9 @@ public class DappBrowserUtils {
     private static final String MY_DAPPS_FILE = "mydapps";
     private static final String DAPPS_HISTORY_FILE = "dappshistory";
     private static final String DEFAULT_HOMEPAGE = "https://google.com.ar/";
+
+    private static final String WALLET_ADDRESS = Keys.toChecksumAddress(wallet.address);
+    private Wallet wallet;
     private static final String POLYGON_HOMEPAGE = "https://google.com.ar/";
 
     //TODO: Move to database

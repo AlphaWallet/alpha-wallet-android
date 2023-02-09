@@ -383,8 +383,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private EtherscanTransaction[] readTransactions(NetworkInfo networkInfo, TokensService svs, String tokenAddress, String firstBlock, boolean ascending, int page, int pageSize) throws JSONException
     {
         if (networkInfo == null) return new EtherscanTransaction[0];
-        if (networkInfo.etherscanAPI.contains(COVALENT)) { return readCovalentTransactions(svs, tokenAddress, networkInfo, ascending, page, pageSize);}
-        else if (networkInfo.chainId == OKX_ID) { return new EtherscanTransaction[0]; } // DO NOTHING
+        if (networkInfo.etherscanAPI.contains(COVALENT))
+        {
+            return readCovalentTransactions(svs, tokenAddress, networkInfo, ascending, page, pageSize);
+        }
+        else if (networkInfo.chainId == OKX_ID)
+        {
+            return new EtherscanTransaction[0];
+        }
 
         String result = null;
         String fullUrl;

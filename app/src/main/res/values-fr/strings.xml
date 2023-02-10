@@ -964,4 +964,5 @@
     <string name="dialog_title_search_token">Rechercher un jeton?</string>
     <string name="create_shortcut_for_token">Créer un raccourci pour ce jeton ?</string>
     <string name="toast_shortcut_created">Raccourci créé, appuyez longuement sur l\'icône de l\'application pour le voir.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Avant d\'effectuer une opération, gardez à l\'esprit que le NFT actuel n\'appartient pas au portefeuille actif actuel, mais à%1$s.</string>
 </resources>

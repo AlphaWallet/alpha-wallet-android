@@ -985,4 +985,5 @@
     <string name="dialog_title_search_token">တိုကင်ကို ရှာမလား။</string>
     <string name="create_shortcut_for_token">ဤတိုကင်အတွက် ဖြတ်လမ်းတစ်ခု ဖန်တီးမလား။</string>
     <string name="toast_shortcut_created">ဖြတ်လမ်းလင့်ခ်ကို ဖန်တီးထားပြီး ၎င်းကိုမြင်ရန် အက်ပ်အိုင်ကွန်ကို ကြာကြာနှိပ်ပါ။</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">မည်သည့်စစ်ဆင်ရေးကိုမဆိုမပြုလုပ်မီလက်ရှိ NFT သည်လက်ရှိတက်ကြွသောပိုက်ဆံအိတ်နှင့်မသက်ဆိုင်ကြောင်းသတိရပါ။%1$s</string>
 </resources>

@@ -11,4 +11,5 @@
     <string name="chain_not_support">Chain %s is not supported.</string>
     <string name="create_shortcut_for_token">Create a shortcut for this token?</string>
     <string name="toast_shortcut_created">Shortcut created, long press app icon to see it.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Before performing any operation, keep in mind that the current NFT does not belong to the current active wallet, but to %1$s.</string>
 </resources>

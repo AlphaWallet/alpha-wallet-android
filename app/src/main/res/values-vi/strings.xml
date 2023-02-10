@@ -964,4 +964,5 @@
     <string name="dialog_title_search_token">Tìm kiếm mã thông báo?</string>
     <string name="create_shortcut_for_token">Tạo lối tắt cho mã thông báo này?</string>
     <string name="toast_shortcut_created">Đã tạo lối tắt, nhấn và giữ biểu tượng ứng dụng để xem.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Trước khi thực hiện bất kỳ hoạt động nào, hãy nhớ rằng NFT hiện tại không thuộc về ví hoạt động hiện tại, mà là %1$s.</string>
 </resources>

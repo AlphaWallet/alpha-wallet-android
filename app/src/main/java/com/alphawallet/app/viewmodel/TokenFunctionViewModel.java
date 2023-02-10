@@ -355,6 +355,12 @@ public class TokenFunctionViewModel extends BaseViewModel
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
+    public Single<Wallet> findActiveWallet()
+    {
+        return genericWalletInteract
+                .find();
+    }
+
     private void onDefaultWallet(Wallet w)
     {
         progress.postValue(false);

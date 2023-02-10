@@ -37,6 +37,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -100,6 +101,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private ActivityResultLauncher<Intent> handleTransactionSuccess;
     private ActivityResultLauncher<Intent> getGasSettings;
     private boolean triggeredReload;
+    private long chainId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -116,12 +118,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         initViewModel();
 
         getIntentData();
-
-        setTitle(token.tokenInfo.name);
-
-        updateDefaultTokenData();
-
-        viewModel.updateLocalAttributes(token, tokenId);
     }
 
     private void initIntents()
@@ -151,7 +147,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         super.onResume();
         if (viewModel != null)
         {
-            viewModel.getAsset(token, tokenId);
             progressBar.setVisibility(View.VISIBLE);
             tokenImage.onResume();
         }
@@ -223,24 +218,64 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void getIntentData()
     {
-        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
+        chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
         if (C.ACTION_TOKEN_SHORTCUT.equals(getIntent().getAction()))
         {
-            String walletAddress = getIntent().getStringExtra(C.Key.WALLET);
-            viewModel.loadWallet(walletAddress);
-            token = viewModel.getTokensService().getToken(walletAddress, chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+            viewModel.findActiveWallet().subscribe(this::onActiveWalletFetched);
         }
         else
         {
             Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
             viewModel.loadWallet(wallet.address);
             token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+            setup();
         }
+    }
 
+    private void onActiveWalletFetched(Wallet activeWallet)
+    {
+        String walletAddress = getIntent().getStringExtra(C.Key.WALLET);
+        loadToken(walletAddress);
+        if (!activeWallet.address.equals(walletAddress)) {
+            showWarnDialog(walletAddress);
+        }
+    }
+
+    private void loadToken(String walletAddress)
+    {
+        viewModel.loadWallet(walletAddress);
+        token = viewModel.getTokensService().getToken(walletAddress, chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        setup();
+    }
+
+    private void showWarnDialog(String walletAddress)
+    {
+
+        AWalletAlertDialog alertDialog = new AWalletAlertDialog(this);
+        alertDialog.setIcon(WARNING);
+        alertDialog.setMessage(getApplicationContext().getString(R.string.warn_asset_not_belongs_to_active_wallet, Utils.formatAddress(walletAddress)));
+        alertDialog.setButton(R.string.yes_continue, v ->
+        {
+            alertDialog.dismiss();
+        });
+        alertDialog.setSecondaryButton(R.string.dialog_cancel_back, view -> {
+            alertDialog.dismiss();
+            finish();
+        });
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.show();
+    }
+
+    private void setup()
+    {
         viewModel.checkForNewScript(token);
         viewModel.checkTokenScriptValidity(token);
+        setTitle(token.tokenInfo.name);
+        updateDefaultTokenData();
+        viewModel.updateLocalAttributes(token, tokenId);
+        viewModel.getAsset(token, tokenId);
     }
 
     private void initViewModel()

@@ -951,4 +951,5 @@
     <string name="dialog_title_search_token">¿Buscar token?</string>
     <string name="create_shortcut_for_token">¿Crear un acceso directo para este token?</string>
     <string name="toast_shortcut_created">Acceso directo creado, mantenga presionado el ícono de la aplicación para verlo.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Antes de realizar cualquier operación, tenga en cuenta que el NFT actual no pertenece a la billetera activa actual, sino a %1$s.</string>
 </resources>

@@ -69,7 +69,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
     private final String ERC20_QUERY = "tokentx";
     private final String ERC721_QUERY = "tokennfttx";
-    private final int AUX_DATABASE_ID = 27; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 29; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY;
     private final String BSC_EXPLORER_API_KEY;
@@ -681,10 +681,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
         try (okhttp3.Response response = httpClient.newCall(request).execute())
         {
-            result = response.body().string();
-            if (result.length() < 80 && result.contains("No transactions found"))
+            if (response.code() / 200 == 1)
             {
-                result = "0";
+                result = response.body().string();
+                if (result.length() < 80 && result.contains("No transactions found"))
+                {
+                    result = "0";
+                }
             }
         }
         catch (Exception e)

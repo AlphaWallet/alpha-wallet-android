@@ -556,7 +556,10 @@ public class TokenRepository implements TokenRepositoryType {
 
             if (!TextUtils.isEmpty(responseValue))
             {
-                if (responseValue.equals("0x")) return BigDecimal.valueOf(-2);
+                if (responseValue.equals("0x"))
+                {
+                    return BigDecimal.valueOf(-2);
+                }
                 List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
                 if (response.size() > 0) balance = new BigDecimal(((Uint256) response.get(0)).getValue());
             }
@@ -970,7 +973,7 @@ public class TokenRepository implements TokenRepositoryType {
         catch (InterruptedIOException|UnknownHostException|JsonParseException e)
         {
             //expected to happen when user switches wallets
-            return "0x";
+            return "";
         }
     }
 

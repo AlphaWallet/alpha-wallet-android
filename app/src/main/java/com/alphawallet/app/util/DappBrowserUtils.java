@@ -1,28 +1,30 @@
 package com.alphawallet.app.util;
 
+import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.util.Utils.isValidUrl;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
+import com.alphawallet.app.web3.Web3View;
 
 import android.content.Context;
+import android.app.Activity;
+import com.alphawallet.app.entity.Wallet;
+
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 
-import androidx.lifecycle.MutableLiveData;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.AddressMode;
 import com.alphawallet.app.entity.DApp;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.web3.Web3ViewClient;
 import com.alphawallet.app.web3.entity.Address;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.web3j.crypto.Keys;
-
-import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -37,27 +39,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.os.Build;
-import android.util.AttributeSet;
-import android.webkit.WebChromeClient;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-
-public class DappBrowserUtils {
+public class DappBrowserUtils extends AppCompatActivity {
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
     private static final String MY_DAPPS_FILE = "mydapps";
     private static final String DAPPS_HISTORY_FILE = "dappshistory";
 
     //private static Wallet wallet;
+    //private static Web3ViewClient webViewClient;
     //private static AddressMode currentMode = AddressMode.MODE_ADDRESS;
-    private static SignPersonalMessageRequest signRequest;
+    //private static SignPersonalMessageRequest signRequest;
+    //private static SignTypedDataRequest signRequest;
+    //private static String address = MyAddressActivity.getDisplayAddress();
+
     //private static final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private static final String DEFAULT_HOMEPAGE = "https://google.com.ar/";
     private static final String POLYGON_HOMEPAGE = "https://google.com.ar/";
@@ -291,11 +284,18 @@ public class DappBrowserUtils {
 
     public static boolean isWithinHomePage(String url)
     {
+
+        //String walletAddress = attrIf.getWalletAddr();
+        //Address address = webViewClient.getJsInjectorClient().getWalletAddress();
+        //String address1 = address.getValue();
+        //Intent OpenLIst = getIntent();
+        //wallet = OpenLIst.getParcelableExtra(C.Key.WALLET);
         //String address = Keys.toChecksumAddress(wallet.address);
        // currentMode = AddressMode.MODE_ADDRESS;
         //String address = defaultWallet.getValue().address;
-        String address = signRequest.getWalletAddress();
-        String homePageRoot = DEFAULT_HOMEPAGE+address;/*.substring(0, DEFAULT_HOMEPAGE.length() - 1);*/ //remove final slash
+        //String address = signRequest.getWalletAddress()
+        //String address = MyAddressActivity.getDisplayAddress();
+        String homePageRoot = DEFAULT_HOMEPAGE.substring(0, DEFAULT_HOMEPAGE.length() - 1); //remove final slash
         return (url != null && url.startsWith(homePageRoot));
     }
 

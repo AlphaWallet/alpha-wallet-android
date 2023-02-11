@@ -54,7 +54,6 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     public static final String OVERRIDE_DEFAULT = "override";
 
     private MyAddressViewModel viewModel;
-
     private Wallet wallet;
     private String displayAddress;
     private String displayName;

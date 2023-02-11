@@ -296,10 +296,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
             if (index > -1)
             {
                 items.updateItemAt(index, tsi);
-            } else {
+            }
+            else
+            {
                 SortedItem headerItem = new HeaderItem(token.group);
                 items.add(tsi);
-                if (notExisted(headerItem)) {
+                if (notExisted(headerItem))
+                {
                     items.add(headerItem);
                 }
 

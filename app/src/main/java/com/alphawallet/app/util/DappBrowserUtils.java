@@ -8,15 +8,21 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 
+import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.AddressMode;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.web3.Web3ViewClient;
+import com.alphawallet.app.web3.entity.Address;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.web3j.crypto.Keys;
+
+import com.alphawallet.app.walletconnect.entity.SignPersonalMessageRequest;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,14 +37,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.os.Build;
+import android.util.AttributeSet;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
 public class DappBrowserUtils {
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
     private static final String MY_DAPPS_FILE = "mydapps";
     private static final String DAPPS_HISTORY_FILE = "dappshistory";
-    private static final String DEFAULT_HOMEPAGE = "https://google.com.ar/";
 
-    private static final String WALLET_ADDRESS = Keys.toChecksumAddress(wallet.address);
-    private Wallet wallet;
+    //private static Wallet wallet;
+    //private static AddressMode currentMode = AddressMode.MODE_ADDRESS;
+    private static SignPersonalMessageRequest signRequest;
+    //private static final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
+    private static final String DEFAULT_HOMEPAGE = "https://google.com.ar/";
     private static final String POLYGON_HOMEPAGE = "https://google.com.ar/";
 
     //TODO: Move to database
@@ -270,7 +291,11 @@ public class DappBrowserUtils {
 
     public static boolean isWithinHomePage(String url)
     {
-        String homePageRoot = DEFAULT_HOMEPAGE.substring(0, DEFAULT_HOMEPAGE.length() - 1); //remove final slash
+        //String address = Keys.toChecksumAddress(wallet.address);
+       // currentMode = AddressMode.MODE_ADDRESS;
+        //String address = defaultWallet.getValue().address;
+        String address = signRequest.getWalletAddress();
+        String homePageRoot = DEFAULT_HOMEPAGE+address;/*.substring(0, DEFAULT_HOMEPAGE.length() - 1);*/ //remove final slash
         return (url != null && url.startsWith(homePageRoot));
     }
 

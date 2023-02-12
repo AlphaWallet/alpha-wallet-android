@@ -94,5 +94,5 @@
     { "name": "Hypemoon", "description": "Your Portal Into Web3 Culture", "url": "https://hypemoon.com/", "category": "News" },
     { "name": "BeInCrypto", "description": "Unbiased crypto news", "url": "https://beincrypto.com/", "category": "News" },
     { "name": "The Defiant", "description": "The essential information platform for the open economy", "url": "https://thedefiant.io/", "category": "News" },
-    { "name": "StakeBoard", "description": "Web3's best staking dashboard. Stake or die!", "url": "https://app.stakepark.xyz", "category": "Tool" }
+    { "name": "StakeBoard", "description": "Web3s best staking dashboard. Stake or die!", "url": "https://app.stakepark.xyz", "category": "Tool" }
 ]

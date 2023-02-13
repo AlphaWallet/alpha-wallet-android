@@ -28,7 +28,8 @@
         android:id="@+id/web_view_wrapper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:padding="4dp"
+        android:visibility="gone" >
 
         <WebView
             android:id="@+id/image_web_view"

@@ -104,6 +104,7 @@ public class NFTImageView extends RelativeLayout
     private String imageUrl;
     private boolean hasContent;
     private boolean showProgress;
+    private boolean isThumbnail;
 
     public NFTImageView(Context context, @Nullable AttributeSet attrs)
     {
@@ -140,11 +141,13 @@ public class NFTImageView extends RelativeLayout
     public void setupTokenImageThumbnail(NFTAsset asset, boolean onlyRoundTopCorners)
     {
         fallbackIcon.setupFallbackTextIcon(asset.getName());
+        isThumbnail = true;
         loadImage(asset.getThumbnail(), asset.getBackgroundColor(), 30, onlyRoundTopCorners);
     }
 
     public void setupTokenImage(NFTAsset asset) throws IllegalArgumentException
     {
+        isThumbnail = false;
         String anim = asset.getAnimation();
         fallbackIcon.setupFallbackTextIcon(asset.getName());
 
@@ -251,6 +254,10 @@ public class NFTImageView extends RelativeLayout
                 String loader = loadFile(getContext(), R.raw.token_graphic).replace("[URL]", imageUrl);
                 String base64 = android.util.Base64.encodeToString(loader.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
                 webView.loadData(base64, "text/html; charset=utf-8", "base64");
+                if (isThumbnail)
+                {
+                    setWebViewHeight(500);
+                }
             }
         });
     }

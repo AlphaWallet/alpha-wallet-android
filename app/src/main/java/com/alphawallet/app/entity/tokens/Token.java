@@ -273,15 +273,7 @@ public class Token
         }
         else
         {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            {
-                return Html.fromHtml(str, FROM_HTML_MODE_COMPACT).toString();
-            }
-            else
-            {
-                //noinspection deprecation
-                return Html.fromHtml(str).toString();
-            }
+            return Html.fromHtml(str, FROM_HTML_MODE_COMPACT).toString();
         }
     }
 

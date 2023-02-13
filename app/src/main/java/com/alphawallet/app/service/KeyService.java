@@ -90,7 +90,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 {
     private static final String TAG = "HDWallet";
     private static final int AUTHENTICATION_DURATION_SECONDS = 30;
-    public  static final String FAILED_SIGNATURE = "00000000000000000000000000000000000000000000000000000000000000000";
+    public static final String FAILED_SIGNATURE = "00000000000000000000000000000000000000000000000000000000000000000";
     private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM;
     private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_NONE;
 
@@ -179,9 +179,9 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     /**
      * Create and encrypt/store an authentication-locked keystore password for importing a keystore.
      * Flow for importing a private key is almost identical
-     *
+     * <p>
      * Flow is as follows:
-     *
+     * <p>
      * 1. Obtain authentication event - pop up the unlock dialog.
      * 2. After authentication event, proceed to authenticatePass and switch through to createPassword()
      * 3. Create a new strong keystore password, store the password.
@@ -217,7 +217,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     /**
      * Encrypt and store mnemonic for HDWallet
-     *
+     * <p>
      * 1. Check valid seed phrase, generate HDWallet and store the mnemonic without authentication lock
      * 2. Obtain authentication event.
      * 3. After authentication pass through to authenticatePass and switch to importHDKey()
@@ -248,7 +248,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     /**
      * Fetch mnemonic from storage
-     *
+     * <p>
      * 1. call unpackMnemonic
      * 2. if authentication required, get authentication event and call unpackMnemonic
      * 3. return mnemonic to FetchMnemonic callback
@@ -322,11 +322,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     /**
      * Upgrade key security
-     *
+     * <p>
      * 1. Get authentication, and then execute 'upgradeKey()' from authenticatePass
      * 2. Upgrade key reads the mnemonic/password, then calls storeEncryptedBytes with authentication.
      * 3. returns result and flow back to callee via signCallback.CreatedKey
-     *
      *
      * @param wallet
      * @param callingActivity
@@ -348,10 +347,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     /**
      * SignData
-     *
+     * <p>
      * Flow for this function is by necessity simpler - this function is called from code that doesn't have access to an Activity, so can't create
      * any signing dialog. The authentication event must be generated prior to entering the signing flow.
-     *
+     * <p>
      * If HDWallet - decrypt mnemonic, regenerate private key, generate digest, sign digest using Trezor libs.
      * If Keystore - fetch keystore JSON file, decrypt keystore password, regenerate Web3j Credentials and sign.
      *
@@ -599,6 +598,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     /**
      * Reached after authentication has been provided
+     *
      * @return
      */
     private UpgradeKeyResult upgradeKey()
@@ -758,15 +758,15 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             keyGenerator.init(new KeyGenParameterSpec.Builder(
                     keyAddress,
                     KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                                      .setBlockModes(BLOCK_MODE)
-                                      .setKeySize(256)
-                                      .setUserAuthenticationRequired(useAuthentication)
-                                      .setIsStrongBoxBacked(true)
-                                      .setInvalidatedByBiometricEnrollment(false)
-                                      .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
-                                      .setRandomizedEncryptionRequired(true)
-                                      .setEncryptionPaddings(PADDING)
-                                      .build());
+                    .setBlockModes(BLOCK_MODE)
+                    .setKeySize(256)
+                    .setUserAuthenticationRequired(useAuthentication)
+                    .setIsStrongBoxBacked(true)
+                    .setInvalidatedByBiometricEnrollment(false)
+                    .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
+                    .setRandomizedEncryptionRequired(true)
+                    .setEncryptionPaddings(PADDING)
+                    .build());
 
             keyGenerator.generateKey();
         }
@@ -786,33 +786,17 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     {
         try
         {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            {
-                keyGenerator.init(new KeyGenParameterSpec.Builder(
-                        keyAddress,
-                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                        .setBlockModes(BLOCK_MODE)
-                        .setKeySize(256)
-                        .setUserAuthenticationRequired(useAuthentication)
-                        .setInvalidatedByBiometricEnrollment(false)
-                        .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
-                        .setRandomizedEncryptionRequired(true)
-                        .setEncryptionPaddings(PADDING)
-                        .build());
-            }
-            else
-            {
-                keyGenerator.init(new KeyGenParameterSpec.Builder(
-                        keyAddress,
-                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                        .setBlockModes(BLOCK_MODE)
-                        .setKeySize(256)
-                        .setUserAuthenticationRequired(useAuthentication)
-                        .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
-                        .setRandomizedEncryptionRequired(true)
-                        .setEncryptionPaddings(PADDING)
-                        .build());
-            }
+            keyGenerator.init(new KeyGenParameterSpec.Builder(
+                    keyAddress,
+                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                    .setBlockModes(BLOCK_MODE)
+                    .setKeySize(256)
+                    .setUserAuthenticationRequired(useAuthentication)
+                    .setInvalidatedByBiometricEnrollment(false)
+                    .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
+                    .setRandomizedEncryptionRequired(true)
+                    .setEncryptionPaddings(PADDING)
+                    .build());
         }
         catch (IllegalStateException | InvalidAlgorithmParameterException e)
         {
@@ -1262,11 +1246,13 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     /**
      * Delete all traces of the key in Android keystore, encrypted bytes and iv file in private data area
+     *
      * @param keyAddress
      */
     synchronized void deleteKey(String keyAddress)
     {
-        try {
+        try
+        {
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
             String matchingAddr = findMatchingAddrInKeyStore(keyAddress);
@@ -1276,7 +1262,9 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             if (encryptedKeyBytes.exists()) encryptedKeyBytes.delete();
             if (encryptedBytesFileIV.exists()) encryptedBytesFileIV.delete();
             deleteAccount(matchingAddr);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
@@ -1284,21 +1272,21 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     public void deleteAccount(String address) throws Exception
     {
         String cleanedAddr = Numeric.cleanHexPrefix(address).toLowerCase();
-            deleteAccountFiles(cleanedAddr);
+        deleteAccountFiles(cleanedAddr);
 
-            //Now delete database files (ie tokens, transactions and Tokenscript data for account)
-            File[] contents = context.getFilesDir().listFiles();
-            if (contents != null)
+        //Now delete database files (ie tokens, transactions and Tokenscript data for account)
+        File[] contents = context.getFilesDir().listFiles();
+        if (contents != null)
+        {
+            for (File f : contents)
             {
-                for (File f : contents)
+                String fileName = f.getName().toLowerCase();
+                if (fileName.contains(cleanedAddr.toLowerCase()))
                 {
-                    String fileName = f.getName().toLowerCase();
-                    if (fileName.contains(cleanedAddr.toLowerCase()))
-                    {
-                        deleteRecursive(f);
-                    }
+                    deleteRecursive(f);
                 }
             }
+        }
     }
 
     private void deleteAccountFiles(String address) throws Exception
@@ -1382,7 +1370,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         Vibrator vb = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         if (vb != null && vb.hasVibrator())
         {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+            {
                 VibrationEffect vibe = VibrationEffect.createOneShot(200, DEFAULT_AMPLITUDE);
                 vb.vibrate(vibe);
             }
@@ -1403,7 +1392,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             String matchingAddr = findMatchingAddrInKeyStore(walletAddress);
             return keyStore.containsAlias(matchingAddr);
         }
-        catch (KeyStoreException|NoSuchAlgorithmException|CertificateException|IOException e)
+        catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e)
         {
             Timber.e(e);
         }

@@ -976,16 +976,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private TokenDefinition parseFile(InputStream xmlInputStream) throws Exception
     {
-        Locale locale;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        {
-            locale = context.getResources().getConfiguration().getLocales().get(0);
-        }
-        else
-        {
-            locale = context.getResources().getConfiguration().locale;
-        }
-
+        Locale locale = context.getResources().getConfiguration().getLocales().get(0);
         return new TokenDefinition(
                 xmlInputStream, locale, this);
     }

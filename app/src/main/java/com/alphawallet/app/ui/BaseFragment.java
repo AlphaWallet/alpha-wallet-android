@@ -15,13 +15,14 @@ import com.alphawallet.app.entity.FragmentMessenger;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickListener,
-    BackupTokenCallback
+        BackupTokenCallback
 {
     private Toolbar toolbar;
     private TextView toolbarTitle;
@@ -161,10 +162,6 @@ public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickLis
     {
     }
 
-    public void pinAuthorisation(boolean gotAuth)
-    {
-    }
-
     public void switchNetworkAndLoadUrl(long chainId, String url)
     {
     }
@@ -183,5 +180,11 @@ public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickLis
 
     public void backPressed()
     {
+    }
+
+    protected boolean hasPermissionGranted(@NotNull String[] permissions, int[] grantResults, String permission)
+    {
+        int index = Arrays.asList(permissions).indexOf(permission);
+        return index != -1 && grantResults[index] != -1;
     }
 }

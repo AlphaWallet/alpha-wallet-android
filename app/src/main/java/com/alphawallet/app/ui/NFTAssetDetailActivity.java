@@ -61,6 +61,7 @@ import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
@@ -102,6 +103,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private ActivityResultLauncher<Intent> getGasSettings;
     private boolean triggeredReload;
     private long chainId;
+    private Disposable disposable;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -162,6 +164,10 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel.onDestroy();
         super.onDestroy();
         tokenImage.onDestroy();
+        if (disposable != null && !disposable.isDisposed())
+        {
+            disposable.dispose();
+        }
     }
 
     @Override
@@ -223,7 +229,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
         if (C.ACTION_TOKEN_SHORTCUT.equals(getIntent().getAction()))
         {
-            viewModel.findActiveWallet().subscribe(this::onActiveWalletFetched);
+            disposable = viewModel.findActiveWallet().subscribe(this::onActiveWalletFetched);
         }
         else
         {
@@ -238,7 +244,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         String walletAddress = getIntent().getStringExtra(C.Key.WALLET);
         loadToken(walletAddress);
-        if (!activeWallet.address.equals(walletAddress)) {
+        if (!activeWallet.address.equals(walletAddress))
+        {
             showWarnDialog(walletAddress);
         }
     }

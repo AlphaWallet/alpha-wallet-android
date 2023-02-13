@@ -87,6 +87,20 @@ public class ERC1155Token extends Token
     }
 
     @Override
+    public boolean hasPositiveBalance()
+    {
+        for (NFTAsset asset : assets.values())
+        {
+            if (asset.getBalance().compareTo(BigDecimal.ZERO) > 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
     public NFTAsset getAssetForToken(BigInteger tokenId)
     {
         return assets.get(tokenId);
@@ -155,7 +169,13 @@ public class ERC1155Token extends Token
     @Override
     public BigDecimal getBalanceRaw()
     {
-        return new BigDecimal(assets.size());
+        BigDecimal balance = BigDecimal.ZERO;
+        for (NFTAsset asset : assets.values())
+        {
+            balance = balance.add(asset.getBalance());
+        }
+
+        return balance;
     }
 
     @Override
@@ -683,7 +703,7 @@ public class ERC1155Token extends Token
             Timber.e(e);
         }
 
-        return new BigDecimal(assets.keySet().size());
+        return getBalanceRaw(); //new BigDecimal(assets.keySet().size());
     }
 
     @Override

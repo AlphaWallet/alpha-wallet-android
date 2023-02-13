@@ -334,10 +334,14 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public void updateAssets(String wallet, Token erc721Token, List<BigInteger> additions, List<BigInteger> removals)
+    public void updateAssets(String wallet, Token nftToken, List<BigInteger> additions, List<BigInteger> removals)
     {
-        erc721Token.balance = checkUint256Balance(new Wallet(wallet), erc721Token.tokenInfo.chainId, erc721Token.getAddress());
-        localSource.updateNFTAssets(wallet, erc721Token,
+        if (nftToken.isERC721())
+        {
+            nftToken.balance = checkUint256Balance(new Wallet(wallet), nftToken.tokenInfo.chainId, nftToken.getAddress());
+        }
+
+        localSource.updateNFTAssets(wallet, nftToken,
                 additions, removals);
     }
 

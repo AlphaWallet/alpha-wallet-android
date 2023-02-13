@@ -290,11 +290,10 @@ public class TokensRealmSource implements TokenLocalSource {
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             realm.executeTransaction(r -> {
-                createTokenIfRequired(r, token);
+                RealmToken realmToken = createTokenIfRequired(r, token);
                 deleteAssets(r, token, removals);
-                updateNFTAssets(r, token, additions);
-
-                setTokenUpdateTime(r, token);
+                populateNFTAssets(r, realmToken, token, additions);
+                setTokenUpdateTime(realmToken, token);
             });
         }
         catch (Exception e)
@@ -303,7 +302,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private void createTokenIfRequired(Realm realm, Token token)
+    private RealmToken createTokenIfRequired(Realm realm, Token token)
     {
         RealmToken realmToken = realm.where(RealmToken.class)
                 .equalTo("address", databaseKey(token))
@@ -311,44 +310,34 @@ public class TokensRealmSource implements TokenLocalSource {
 
         if (realmToken == null)
         {
-            saveToken(realm, token);
+            realmToken = saveToken(realm, token);
         }
+        else if (realmToken.getInterfaceSpec() != token.getInterfaceSpec().ordinal())
+        {
+            realmToken.setInterfaceSpec(token.getInterfaceSpec().ordinal());
+        }
+
+        return realmToken;
     }
 
-    private void setTokenUpdateTime(Realm realm, Token token)
+    private void setTokenUpdateTime(RealmToken realmToken, Token token)
     {
-        RealmToken realmToken = realm.where(RealmToken.class)
-                .equalTo("address", databaseKey(token))
-                .findFirst();
-
         long tokenBalance = token.balance.longValue();
 
-        if (realmToken != null)
+        realmToken.setLastTxTime(System.currentTimeMillis());
+        realmToken.setAssetUpdateTime(System.currentTimeMillis());
+
+        if (realmToken.getBalance() == null || !realmToken.getBalance().equals(String.valueOf(tokenBalance)))
         {
-            if (!realmToken.isEnabled() && !realmToken.isVisibilityChanged() && tokenBalance > 0)
-            {
-                token.tokenInfo.isEnabled = true;
-                realmToken.setEnabled(true);
-            }
-            else if (!realmToken.isVisibilityChanged() && tokenBalance == 0)
-            {
-                token.tokenInfo.isEnabled = false;
-                realmToken.setEnabled(false);
-            }
-
-            realmToken.setLastTxTime(System.currentTimeMillis());
-            realmToken.setAssetUpdateTime(System.currentTimeMillis());
-
-            if (realmToken.getBalance() == null || !realmToken.getBalance().equals(String.valueOf(tokenBalance)))
-            {
-                realmToken.setBalance(String.valueOf(tokenBalance));
-            }
+            realmToken.setBalance(String.valueOf(tokenBalance));
         }
     }
 
-    private void updateNFTAssets(Realm realm, Token token, List<BigInteger> additions) throws RealmException
+    private void populateNFTAssets(Realm realm, RealmToken realmToken, Token token, List<BigInteger> additions) throws RealmException
     {
         if (!token.isNonFungible()) return;
+
+        BigDecimal balanceCount = BigDecimal.ZERO;
 
         //load all the old assets
         Map<BigInteger, NFTAsset> assetMap = getNFTAssets(realm, token);
@@ -377,6 +366,7 @@ public class TokensRealmSource implements TokenLocalSource {
             else
             {
                 writeAsset(realm, token, entry.getKey(), entry.getValue());
+                balanceCount = balanceCount.add(entry.getValue().getBalance());
             }
         }
 
@@ -384,7 +374,27 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             deleteAssets(realm, token, deleteList);
         }
+
+        //switch visibility if required
+        checkTokenVisibility(realmToken, token, balanceCount);
     }
+
+    private void checkTokenVisibility(RealmToken realmToken, Token token, BigDecimal balanceCount)
+    {
+        if (balanceCount.compareTo(BigDecimal.ZERO) > 0 && !realmToken.getEnabled() && !realmToken.isVisibilityChanged())
+        {
+            token.tokenInfo.isEnabled = true;
+            realmToken.setEnabled(true);
+        }
+        else if (balanceCount.compareTo(BigDecimal.ZERO) == 0 && !realmToken.isVisibilityChanged() && realmToken.isEnabled())
+        {
+            token.tokenInfo.isEnabled = false;
+            realmToken.setEnabled(false);
+        }
+
+        realmToken.setBalance(balanceCount.toString());
+    }
+
     @Override
     public void setVisibilityChanged(Wallet wallet, ContractAddress cAddr)
     {
@@ -588,7 +598,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private void saveToken(Realm realm, Token token) throws RealmException
+    private RealmToken saveToken(Realm realm, Token token) throws RealmException
     {
         String databaseKey = databaseKey(token);
         RealmToken realmToken = realm.where(RealmToken.class)
@@ -636,19 +646,20 @@ public class TokensRealmSource implements TokenLocalSource {
         }
 
         //Final check to see if the token should be visible
-        if ((token.balance.compareTo(BigDecimal.ZERO) > 0 || token.getBalanceRaw().compareTo(BigDecimal.ZERO) > 0)
-                && !realmToken.getEnabled() && !realmToken.isVisibilityChanged())
+        if (token.hasPositiveBalance() && !realmToken.getEnabled() && !realmToken.isVisibilityChanged())
         {
             if (wasNew) Timber.tag(TAG).d("Save New Token set enable");
             token.tokenInfo.isEnabled = true;
             realmToken.setEnabled(true);
         }
-        else if (!token.isEthereum() && (token.balance.compareTo(BigDecimal.ZERO) <= 0 && token.getBalanceRaw().compareTo(BigDecimal.ZERO) <= 0)
+        else if (!token.isEthereum() && !token.hasPositiveBalance()
                 && realmToken.getEnabled() && !realmToken.isVisibilityChanged())
         {
             token.tokenInfo.isEnabled = false;
             realmToken.setEnabled(false);
         }
+
+        return realmToken;
     }
 
     private void checkNameUpdate(RealmToken realmToken, Token token)

@@ -6,9 +6,6 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;

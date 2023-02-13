@@ -86,5 +86,12 @@
   {"name": "mail³", "description": "Decentralized mail system for web3 natives.", "url": "https://app.mail3.me/", "category": "Social Media"},
   {"name": "ApeNow", "description": "Buy now, pay later marketplace for NFTs.", "url": "https://www.apenowpaylater.com/", "category": "Marketplace"},
   {"name": "AirCash", "description": "AirCash is the first and largest decentralized OTC platform in the galaxy.", "url": "https://aircash.finance", "category": "Exchange"},
-  {"name": "Lido", "description": "Liquidity for staked assets", "url": "https://lido.fi/", "category": "Finance"}
+  {"name": "Lido", "description": "Liquidity for staked assets", "url": "https://lido.fi/", "category": "Finance"},
+  {"name": "Blur", "description": "The fastest NFT marketplace", "url": "https://www.blur.io", "category": "Marketplace"},
+  {"name": "Blockworks", "description": "A media and information platform that delivers news and insights about crypto to millions of investors.", "url": "https://blockworks.co/", "category": "News"},
+  {"name": "nft now", "description": "nft now is on a mission to redefine how creators and their communities share in the value they create.", "url": "https://nftnow.com/", "category": "News"},
+  {"name": "CryptoSlate", "description": "A comprehensive and contextualized source for crypto news, insights and data.", "url": "https://cryptoslate.com/", "category": "News"},
+  {"name": "Hypemoon", "description": "Your Portal Into Web3 Culture", "url": "https://hypemoon.com/", "category": "News"},
+  {"name": "BeInCrypto", "description": "Unbiased crypto news", "url": "https://beincrypto.com/", "category": "News"},
+  {"name": "The Defiant", "description": "The essential information platform for the open economy", "url": "https://thedefiant.io/", "category": "News"}
 ]

@@ -35,14 +35,14 @@ import timber.log.Timber;
 public class EventSync
 {
     public static final long BLOCK_SEARCH_INTERVAL = 100000L;
-    public static final long POLYGON_BLOCK_SEARCH_INTERVAL = 10000L;
+    public static final long POLYGON_BLOCK_SEARCH_INTERVAL = 3000L;
 
     private static final String TAG = "EVENT_SYNC";
     private static final boolean EVENT_SYNC_DEBUGGING = false;
 
     private final Token token;
 
-    private boolean batchProcessingError = false;
+    private static final HashSet<Long> batchProcessingError = new HashSet<>();
 
     public EventSync(Token token)
     {
@@ -174,7 +174,7 @@ public class EventSync
 
     public boolean handleEthLogError(Response.Error error, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock, SyncDef sync, Realm realm)
     {
-        if (error.getCode() == -32005)
+        if (error.getCode() == -32005 || error.getCode() == -32600)
         {
             long newStartBlock;
             long newEndBlock;
@@ -251,22 +251,17 @@ public class EventSync
 
     private long getCurrentEventBlockSize(Realm instance)
     {
-        if (EthereumNetworkBase.isEventBlockLimitEnforced(token.tokenInfo.chainId))
-        {
-            return EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
-        }
-
         RealmAuxData rd = instance.where(RealmAuxData.class)
                 .equalTo("instanceKey", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress()))
                 .findFirst();
 
         if (rd == null)
         {
-            return BLOCK_SEARCH_INTERVAL;
+            return EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
         }
         else
         {
-            return rd.getResultReceivedTime();
+            return Math.min(rd.getResultReceivedTime(), EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue());
         }
     }
 
@@ -484,7 +479,7 @@ public class EventSync
 
     private Pair<EthLog, EthLog> getTxLogs(Web3j web3j, EthFilter receiveFilter, EthFilter sendFilter) throws LogOverflowException, IOException
     {
-        if (EthereumNetworkBase.getBatchProcessingLimit(token.tokenInfo.chainId) > 0 && !batchProcessingError)
+        if (EthereumNetworkBase.getBatchProcessingLimit(token.tokenInfo.chainId) > 0 && !batchProcessingError.contains(token.tokenInfo.chainId))
         {
             return getBatchTxLogs(web3j, receiveFilter, sendFilter);
         }
@@ -510,14 +505,23 @@ public class EventSync
 
     private Pair<EthLog, EthLog> getBatchTxLogs(Web3j web3j, EthFilter receiveFilter, EthFilter sendFilter) throws LogOverflowException, IOException
     {
-        BatchResponse rsp = web3j.newBatch()
-                .add(web3j.ethGetLogs(receiveFilter))
-                .add(web3j.ethGetLogs(sendFilter))
-                .send();
+        BatchResponse rsp;
 
-        if (rsp.getResponses().size() != 2)
+        try
         {
-            batchProcessingError = true;
+            rsp = web3j.newBatch()
+                    .add(web3j.ethGetLogs(receiveFilter))
+                    .add(web3j.ethGetLogs(sendFilter))
+                    .send();
+        }
+        catch (ClassCastException e)
+        {
+            rsp = null;
+        }
+
+        if (rsp == null || rsp.getResponses().size() != 2)
+        {
+            batchProcessingError.add(token.tokenInfo.chainId);
             return getTxLogs(web3j, receiveFilter, sendFilter);
         }
 

@@ -172,7 +172,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     {
         TokenCardMeta tcm = new TokenCardMeta(token, CHECK_MARK);
         tcm.isEnabled = false;
-        adapter.updateToken(tcm, true);
+        adapter.updateToken(tcm);
     }
 
     private void gotAllTokens(Token[] tokens)

@@ -64,7 +64,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     private boolean gridFlag;
 
     protected final TokensAdapterCallback tokensAdapterCallback;
-    protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>()
+
+    protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<>()
     {
         @Override
         public int compare(SortedItem o1, SortedItem o2)
@@ -136,20 +137,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     @Override
     public long getItemId(int position)
     {
-        Object obj = items.get(position);
-        if (obj instanceof TokenSortedItem)
-        {
-            TokenCardMeta tcm = ((TokenSortedItem) obj).value;
-
-            // This is an attempt to obtain a 'unique' id
-            // to fully utilise the RecyclerView's setHasStableIds feature.
-            // This will drastically reduce 'blinking' when the list changes
-            return tcm.getUID();
-        }
-        else
-        {
-            return position;
-        }
+        return items.get(position).hashCode();
     }
 
     @NonNull
@@ -260,13 +248,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         }
     }
 
-    //Only show the header if the item type is added to the list
-    private void addHeaderLayout(TokenCardMeta tcm)
-    {
-        items.add(new HeaderItem(tcm.group));
-        items.add(new ChainItem(tcm.getChain(), tcm.group));
-    }
-
     private void addManageTokensLayout()
     {
         if (walletAddress != null && !walletAddress.isEmpty()
@@ -296,33 +277,63 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
      *
      * @param token
      */
-    public void updateToken(TokenCardMeta token, boolean notify)
+    public void updateToken(TokenCardMeta token)
     {
         if (canDisplayToken(token))
         {
             //does this token already exist with a different weight (ie name has changed)?
             removeMatchingTokenDifferentWeight(token);
-            int position = -1;
             if (gridFlag)
             {
-                position = items.add(new TokenSortedItem(TokenGridHolder.VIEW_TYPE, token, token.getNameWeight()));
+                items.add(new TokenSortedItem(TokenGridHolder.VIEW_TYPE, token, token.getNameWeight()));
+                return;
+            }
+
+            TokenSortedItem tsi = new TokenSortedItem(TokenHolder.VIEW_TYPE, token, token.getNameWeight());
+            tsi.setFiatValue(tokensService.getTokenFiatValue(token.getChain(), token.getAddress()));
+            if (debugView) tsi.debug();
+            int index = findItem(tsi);
+            if (index > -1)
+            {
+                items.updateItemAt(index, tsi);
             }
             else
             {
-                TokenSortedItem tsi = new TokenSortedItem(TokenHolder.VIEW_TYPE, token, token.getNameWeight());
-                //get fiat value
-                tsi.setFiatValue(tokensService.getTokenFiatValue(token.getChain(), token.getAddress()));
-                if (debugView) tsi.debug();
-                position = items.add(tsi);
-                addHeaderLayout(token);
-            }
+                SortedItem headerItem = new HeaderItem(token.group);
+                items.add(tsi);
+                if (notExisted(headerItem))
+                {
+                    items.add(headerItem);
+                }
 
-            if (notify) notifyItemChanged(position);
+                SortedItem chainItem = new ChainItem(token.getChain(), token.group);
+                if (notExisted(chainItem))
+                {
+                    items.add(chainItem);
+                }
+            }
         }
         else
         {
             removeToken(token);
         }
+    }
+
+    private boolean notExisted(SortedItem token)
+    {
+        return findItem(token) == -1;
+    }
+
+    private int findItem(SortedItem tsi)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i).areItemsTheSame(tsi))
+            {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private void removeMatchingTokenDifferentWeight(TokenCardMeta token)
@@ -336,7 +347,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
                 {
                     if (tsi.value.getNameWeight() != token.getNameWeight())
                     {
-                        notifyItemChanged(i);
                         items.removeItemAt(i);
                         break;
                     }
@@ -363,7 +373,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         }
     }
 
-    public void removeToken(long chainId, String tokenAddress)
+    public SortedItem<TokenCardMeta> removeToken(long chainId, String tokenAddress)
     {
         String id = TokensRealmSource.databaseKey(chainId, tokenAddress);
         for (int i = 0; i < items.size(); i++)
@@ -375,11 +385,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
                 TokenCardMeta thisToken = tsi.value;
                 if (thisToken.tokenId.equalsIgnoreCase(id))
                 {
-                    items.removeItemAt(i);
-                    break;
+                    return items.removeItemAt(i);
                 }
             }
         }
+        return null;
     }
 
     private boolean canDisplayToken(TokenCardMeta token)
@@ -443,7 +453,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
         for (TokenCardMeta token : tokens)
         {
-            updateToken(token, false);
+            updateToken(token);
         }
 
         addManageTokensLayout();
@@ -463,7 +473,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
             {
                 items.remove((TotalBalanceSortedItem) si);
                 items.add(total);
-                notifyItemChanged(i);
                 break;
             }
         }
@@ -503,8 +512,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         items.beginBatchedUpdates();
         items.clear();
         items.endBatchedUpdates();
-
-        notifyDataSetChanged();
     }
 
     public boolean hasBackupWarning()
@@ -602,9 +609,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
             if (items.get(i).viewType == viewType)
             {
                 items.removeItemAt(i);
-                notifyItemRemoved(i);
                 break;
             }
         }
+    }
+
+    public void addToken(SortedItem<TokenCardMeta> token)
+    {
+        items.add(token);
     }
 }

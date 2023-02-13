@@ -170,7 +170,7 @@ public class NFTImageView extends RelativeLayout
     {
         if (!Utils.stillAvailable(getContext())) return;
 
-        setWebViewHeight((int)getLayoutParams().width);
+        setWebViewHeight((int) getLayoutParams().width);
 
         this.imageUrl = url;
         fallbackLayout.setVisibility(View.GONE);
@@ -193,7 +193,9 @@ public class NFTImageView extends RelativeLayout
         if (onlyRoundTopCorners)
         {
             roundedCorners = new RoundedTopCorners(corners);
-        } else {
+        }
+        else
+        {
             roundedCorners = new RoundedCorners(corners);
         }
 
@@ -342,7 +344,7 @@ public class NFTImageView extends RelativeLayout
         return (url != null && MimeTypeMap.getFileExtensionFromUrl(url).equals("glb"));
     }
 
-    private static final List<String> audioTypes = new ArrayList<>(Arrays.asList( "mp3", "ogg", "wav", "flac", "aac", "opus", "weba" ));
+    private static final List<String> audioTypes = new ArrayList<>(Arrays.asList("mp3", "ogg", "wav", "flac", "aac", "opus", "weba"));
 
     private boolean isAudio(String url)
     {

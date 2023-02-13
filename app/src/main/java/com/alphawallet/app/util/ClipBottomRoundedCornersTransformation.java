@@ -16,12 +16,14 @@ public class ClipBottomRoundedCornersTransformation extends BitmapTransformation
 {
     private int mClipBottom;
 
-    public ClipBottomRoundedCornersTransformation(int clipBottom) {
+    public ClipBottomRoundedCornersTransformation(int clipBottom)
+    {
         mClipBottom = clipBottom;
     }
 
     @Override
-    protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+    protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight)
+    {
         Bitmap bitmap = Bitmap.createBitmap(toTransform.getWidth(), toTransform.getHeight() - mClipBottom, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         Rect srcRect = new Rect(0, 0, toTransform.getWidth(), toTransform.getHeight() - mClipBottom);
@@ -31,7 +33,8 @@ public class ClipBottomRoundedCornersTransformation extends BitmapTransformation
     }
 
     @Override
-    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
+    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest)
+    {
         messageDigest.update(("clip_bottom_" + mClipBottom).getBytes());
     }
 }

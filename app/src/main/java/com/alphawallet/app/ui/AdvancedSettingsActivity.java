@@ -248,17 +248,8 @@ public class AdvancedSettingsActivity extends BaseActivity
         waitDialog.show();
     }
 
-    private void removeWaitDialog()
-    {
-        if (waitDialog != null && waitDialog.isShowing())
-        {
-            waitDialog.dismiss();
-        }
-    }
-
     private void showResetResult(boolean resetResult)
     {
-        removeWaitDialog();
         if (resetResult)
         {
             Toast.makeText(this, getString(R.string.toast_token_data_cleared), Toast.LENGTH_SHORT).show();

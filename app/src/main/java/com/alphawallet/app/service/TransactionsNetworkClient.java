@@ -69,7 +69,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     //Note: if user wants to view transactions older than this, we fetch from etherscan on demand.
     //Generally this would only happen when watching extremely active accounts for curiosity
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
-    private final int AUX_DATABASE_ID = 22; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 30; //increment this to do a one off refresh the AUX database, in case of changed design etc
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY;
     private final String BSC_EXPLORER_API_KEY;
@@ -1160,7 +1160,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private ERC1155Token createNewERC1155Token(EtherscanEvent ev, NetworkInfo networkInfo, String walletAddress)
     {
         TokenInfo info = new TokenInfo(ev.contractAddress, ev.tokenName, ev.tokenSymbol, 0, false, networkInfo.chainId);
-        ERC1155Token newToken = new ERC1155Token(info, null,0, networkInfo.getShortName());
+        ERC1155Token newToken = new ERC1155Token(info, null, 0, networkInfo.getShortName());
         newToken.setTokenWallet(walletAddress);
         return newToken;
     }

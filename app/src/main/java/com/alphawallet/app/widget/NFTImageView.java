@@ -1,5 +1,6 @@
 package com.alphawallet.app.widget;
 
+import static com.alphawallet.app.util.Utils.isIPFS;
 import static com.alphawallet.app.util.Utils.loadFile;
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
@@ -151,7 +152,7 @@ public class NFTImageView extends RelativeLayout
         String anim = asset.getAnimation();
         fallbackIcon.setupFallbackTextIcon(asset.getName());
 
-        if (anim != null && !isGlb(anim) && !isAudio(anim))
+        if (anim != null && !isGlb(anim) && !isAudio(anim) && !isIPFS(anim)) //IPFS anims don't seem to render correctly
         {
             if (!shouldLoad(anim)) return;
             //attempt to load animation

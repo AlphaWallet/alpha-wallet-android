@@ -333,6 +333,21 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         tivNetwork.setValue(token.getNetworkName());
 
         tivContractAddress.setCopyableValue(token.tokenInfo.address);
+
+        switch (token.getInterfaceSpec())
+        {
+            case ERC721_LEGACY:
+            case ERC721:
+            case ERC721_ENUMERABLE:
+                tivTokenStandard.setValue(getString(R.string.erc721));
+                break;
+            case ERC1155:
+                tivTokenStandard.setValue(getString(R.string.erc1155));
+                break;
+            case ERC721_UNDETERMINED:
+            default:
+                break;
+        }
     }
 
     private void loadAssetFromMetadata(NFTAsset asset)

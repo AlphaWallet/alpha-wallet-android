@@ -140,7 +140,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
                 return new TransferHolder(parent, tokensService, fetchTransactionsInteract,
                         assetService);
             default:
-                Timber.tag("ActivityAdapter").e("Wrong view type " + viewType);
+                Timber.tag("ActivityAdapter").e("Wrong view type %s", viewType);
                 break;
         }
 

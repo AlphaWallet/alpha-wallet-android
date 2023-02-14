@@ -139,6 +139,9 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
             case TransferHolder.VIEW_TYPE:
                 return new TransferHolder(parent, tokensService, fetchTransactionsInteract,
                         assetService);
+            default:
+                Timber.tag("ActivityAdapter").e("Wrong view type " + viewType);
+                break;
         }
 
         return null;

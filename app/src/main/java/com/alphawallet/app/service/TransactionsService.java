@@ -185,11 +185,11 @@ public class TransactionsService
         if (filters.size() == 0 || info == null) return 0;
         TransferFetchType[] availableTxTypes = info.getTransferQueriesUsed();
 
-        TransferFetchType tfType = apiFetchProgress.get(chainId, TransferFetchType.tokentx);
+        TransferFetchType tfType = apiFetchProgress.get(chainId, TransferFetchType.ERC_20);
 
         if (tfType.ordinal() >= availableTxTypes.length - 1) //available API routes may be zero if unsupported (eg custom network)
         {
-            apiFetchProgress.put(chainId, TransferFetchType.tokentx); // completed reads from this chain, reset to start
+            apiFetchProgress.put(chainId, TransferFetchType.ERC_20); // completed reads from this chain, reset to start
             currentIndex++;
         }
         else
@@ -217,8 +217,8 @@ public class TransactionsService
         if (filters.contains(chainId))
         {
             currentChainIndex = filters.indexOf(chainId);
-            TransferFetchType nftSelection = ethereumNetworkRepository.getNetworkByChain(chainId).getTransferQueriesUsed().length > 1 ? TransferFetchType.tokennfttx : TransferFetchType.tokentx;
-            apiFetchProgress.put(chainId, isNft ? nftSelection : TransferFetchType.tokentx);
+            TransferFetchType nftSelection = ethereumNetworkRepository.getNetworkByChain(chainId).getTransferQueriesUsed().length > 1 ? TransferFetchType.ERC_721 : TransferFetchType.ERC_20;
+            apiFetchProgress.put(chainId, isNft ? nftSelection : TransferFetchType.ERC_20);
         }
     }
 
@@ -227,13 +227,13 @@ public class TransactionsService
         //check if this route has combined NFT
         final NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
         if (info == null || info.getTransferQueriesUsed().length == 0) return;
-        TransferFetchType tfType = apiFetchProgress.get(chainId, TransferFetchType.tokentx);
+        TransferFetchType tfType = apiFetchProgress.get(chainId, TransferFetchType.ERC_20);
         if (tfType.ordinal() > 0)
         {
             tokensService.checkingChain(chainId);
         }
 
-        Timber.tag(TAG).d("Check transfers: %s : NFT=%s", chainId, tfType.name());
+        Timber.tag(TAG).d("Check transfers: %s : NFT=%s", chainId, tfType.getValue());
         eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, tfType)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -531,7 +531,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     //get last tokencheck
                     long lastBlockChecked = getTokenBlockRead(instance, networkInfo.chainId, tfType);
                     //fetch transfers from end point
-                    String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, lastBlockChecked, tfType.name());
+                    String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, lastBlockChecked, tfType.getValue());
                     events = getEtherscanEvents(fetchTransactions);
                 }
 
@@ -575,7 +575,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             int tokenDecimal = calcTokenDecimals(ev0);
 
-            if ((tfType == TransferFetchType.token1155tx || ev0.isERC1155(entry.getValue())) &&
+            if ((tfType == TransferFetchType.ERC_1155 || ev0.isERC1155(entry.getValue())) &&
                     (token == null || token.getInterfaceSpec() != ContractType.ERC1155))
             {
                 token = createNewERC1155Token(entry.getValue().get(0), networkInfo, walletAddress);
@@ -792,7 +792,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         try (Realm instance = realmManager.getRealmInstance(new Wallet(svs.getCurrentAddress())))
         {
             processEtherscanEvents(instance, svs.getCurrentAddress(), networkInfo,
-                    svs, events, TransferFetchType.tokentx);
+                    svs, events, TransferFetchType.ERC_20);
         }
         catch (Exception e)
         {
@@ -819,12 +819,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             switch (tfType)
             {
-                case tokentx:
+                case ERC_20:
                 default:
                     return rd.getResultTime();
-                case tokennfttx:
+                case ERC_721:
                     return rd.getResultReceivedTime();
-                case token1155tx:
+                case ERC_1155:
                     return rd.getChainId();
             }
         }
@@ -845,14 +845,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             switch (tfType)
             {
-                case tokentx:
+                case ERC_20:
                 default:
                     rd.setResultTime(lastBlockChecked);
                     break;
-                case tokennfttx:
+                case ERC_721:
                     rd.setResultReceivedTime(lastBlockChecked);
                     break;
-                case token1155tx:
+                case ERC_1155:
                     rd.setChainId(lastBlockChecked);
                     break;
             }

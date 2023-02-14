@@ -111,7 +111,7 @@ public class OkLinkService
         {
             try
             {
-                boolean isNft = tfType == TransferFetchType.tokennfttx || tfType == TransferFetchType.token1155tx;
+                boolean isNft = tfType == TransferFetchType.ERC_721 || tfType == TransferFetchType.ERC_1155;
                 etherscanEvents.add(ev.getEtherscanTransferEvent(isNft));
             }
             catch (Exception e)
@@ -177,11 +177,11 @@ public class OkLinkService
 
     private String getOkxFetchType(TransferFetchType tfType)
     {
-        if (tfType == TransferFetchType.tokennfttx)
+        if (tfType == TransferFetchType.ERC_721)
         {
             return "token_721";
         }
-        else if (tfType == TransferFetchType.token1155tx)
+        else if (tfType == TransferFetchType.ERC_1155)
         {
             return "token_1155";
         }

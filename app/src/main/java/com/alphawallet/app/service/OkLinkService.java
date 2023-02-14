@@ -1,12 +1,14 @@
 package com.alphawallet.app.service;
 
 import android.net.Uri;
+import android.text.TextUtils;
 
 import com.alphawallet.app.entity.EtherscanEvent;
 import com.alphawallet.app.entity.OkxEvent;
 import com.alphawallet.app.entity.okx.TokenListReponse;
 import com.alphawallet.app.entity.okx.TransactionListResponse;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.entity.transactionAPI.TransferFetchType;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.util.JsonUtils;
 import com.google.gson.Gson;
@@ -79,8 +81,9 @@ public class OkLinkService
         return JsonUtils.EMPTY_RESULT;
     }
 
-    public EtherscanEvent[] getEtherscanEvents(String address, boolean isNft)
+    public EtherscanEvent[] getEtherscanEvents(String address, TransferFetchType tfType)
     {
+        String protocolType = getOkxFetchType(tfType);
         List<OkxEvent> events = new ArrayList<>();
         int page = 1;
         int totalPage = 0;
@@ -88,12 +91,16 @@ public class OkLinkService
         do
         {
             TransactionListResponse response2 = new Gson().fromJson(
-                fetchTransactions(address, isNft ? "token_721" : "token_20", String.valueOf(page++)),
+                fetchTransactions(address, protocolType, String.valueOf(page++)),
                 TransactionListResponse.class);
 
             if (response2.data.size() > 0)
             {
-                totalPage = Integer.parseInt(response2.data.get(0).totalPage);
+                String totalPageStr = response2.data.get(0).totalPage;
+                if (!TextUtils.isEmpty(totalPageStr))
+                {
+                    totalPage = Integer.parseInt(totalPageStr);
+                }
                 events.addAll(response2.data.get(0).transactionLists);
             }
         }
@@ -104,6 +111,7 @@ public class OkLinkService
         {
             try
             {
+                boolean isNft = tfType == TransferFetchType.tokennfttx || tfType == TransferFetchType.token1155tx;
                 etherscanEvents.add(ev.getEtherscanTransferEvent(isNft));
             }
             catch (Exception e)
@@ -127,30 +135,19 @@ public class OkLinkService
             .appendQueryParameter("limit", LIMIT)
             .appendQueryParameter("page", page);
         String url = builder.build().toString();
-        Timber.d("URL: " + protocolType + " : " + url);
         return executeRequest(url);
     }
 
-    //JB: Add a method to return TokenInfo data for both NFT and ERC20.
     public TokenInfo getTokenInfo(String contractAddress)
     {
         TokenListReponse.TokenDetails tokenDetails = getTokenDetails(contractAddress);
-
-        TokenInfo tokenInfo = new TokenInfo(
+        return new TokenInfo(
             tokenDetails.tokenContractAddress,
             tokenDetails.tokenFullName,
             tokenDetails.token,
             Integer.parseInt(tokenDetails.precision),
             true,
             66);
-
-        // JDG TODO: Remove logs
-        Timber.d("tokenInfo address: " + tokenInfo.address);
-        Timber.d("tokenInfo tokenFullName: " + tokenInfo.name);
-        Timber.d("tokenInfo token: " + tokenInfo.symbol);
-        Timber.d("tokenInfo decimals: " + tokenInfo.decimals);
-
-        return tokenInfo;
     }
 
     public TokenListReponse.TokenDetails getTokenDetails(String contractAddress)
@@ -176,5 +173,21 @@ public class OkLinkService
             .appendQueryParameter("chainShortName", CHAIN_SHORT_NAME);
         String url = builder.build().toString();
         return executeRequest(url);
+    }
+
+    private String getOkxFetchType(TransferFetchType tfType)
+    {
+        if (tfType == TransferFetchType.tokennfttx)
+        {
+            return "token_721";
+        }
+        else if (tfType == TransferFetchType.token1155tx)
+        {
+            return "token_1155";
+        }
+        else
+        {
+            return "token_20";
+        }
     }
 }

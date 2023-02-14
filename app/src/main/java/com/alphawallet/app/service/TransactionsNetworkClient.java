@@ -521,23 +521,21 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             int eventCount = 0;
             try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
             {
-                //get last tokencheck
-                long lastBlockChecked = getTokenBlockRead(instance, networkInfo.chainId, tfType);
-                //fetch transfers from end point
-                String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, lastBlockChecked, tfType.name());
-
                 EtherscanEvent[] events;
                 if (networkInfo.chainId == OKX_ID)
                 {
-                    events = OkLinkService.get(httpClient).getEtherscanEvents(walletAddress, nftCheck);
+                    events = OkLinkService.get(httpClient).getEtherscanEvents(walletAddress, tfType);
                 }
                 else
                 {
+                    //get last tokencheck
+                    long lastBlockChecked = getTokenBlockRead(instance, networkInfo.chainId, tfType);
+                    //fetch transfers from end point
+                    String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, lastBlockChecked, tfType.name());
                     events = getEtherscanEvents(fetchTransactions);
                 }
 
-                processEtherscanEvents(instance, walletAddress, networkInfo,
-                    svs, events, tfType);
+                eventCount = processEtherscanEvents(instance, walletAddress, networkInfo, svs, events, tfType);
             }
             catch (Exception e)
             {

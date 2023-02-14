@@ -382,7 +382,6 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<TokenInfo> update(String contractAddr, long chainId, ContractType type)
     {
-        //JB: Fetch token from OKX API: Since RPC is restricted, it'll never properly recover the token details.
         if (chainId == OKX_ID)
         {
             return tokenInfoFromOKLinkService(contractAddr); //don't need type here, we can determine that from the return

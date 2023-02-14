@@ -5,7 +5,19 @@ package com.alphawallet.app.entity.transactionAPI;
  */
 public enum TransferFetchType
 {
-    tokentx,
-    tokennfttx,
-    token1155tx
+    tokentx("tokentx"),
+    tokennfttx("tokennfttx"),
+    token1155tx("token1155tx");
+
+    private final String type;
+
+    TransferFetchType(String type)
+    {
+        this.type = type;
+    }
+
+    public String getValue()
+    {
+        return type;
+    }
 }

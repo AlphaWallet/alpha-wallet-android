@@ -539,10 +539,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                                         TokensService svs, EtherscanEvent[] events, TransferFetchType tfType) throws Exception
     {
         //Now update tokens if we don't already know this token
-        writeTokens(walletAddress, networkInfo, events, svs, tfType);
+        Map<String, Boolean> tokenTypes = writeTokens(walletAddress, networkInfo, events, svs, tfType);
 
         //we know all these events are relevant to the wallet, and they are all ERC20 events
-        writeEvents(instance, events, walletAddress, networkInfo, tfType);
+        writeEvents(instance, events, walletAddress, networkInfo, tokenTypes);
 
         //and update the top block read
         long lastBlockChecked = Long.parseLong(events[events.length - 1].blockNumber);
@@ -551,9 +551,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return events.length;
     }
 
-    private void writeTokens(String walletAddress, NetworkInfo networkInfo, EtherscanEvent[] events, TokensService svs, TransferFetchType tfType)
+    private Map<String, Boolean> writeTokens(String walletAddress, NetworkInfo networkInfo, EtherscanEvent[] events, TokensService svs, TransferFetchType tfType)
     {
         Map<String, List<EtherscanEvent>> eventMap = getEventMap(events);
+        Map<String, Boolean> tokenTypeMap = new HashMap<>();
 
         for (Map.Entry<String, List<EtherscanEvent>> entry : eventMap.entrySet())
         {
@@ -571,7 +572,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 Timber.tag(TAG).d("Discover ERC1155: " + ev0.tokenName + " (" + ev0.tokenSymbol + ")");
                 newToken = true;
             }
-            else if (tokenDecimal == -1 && (token == null ||
+            if (tokenDecimal == -1 && (token == null ||
                     ( token.getInterfaceSpec() != ContractType.ERC721 &&
                             token.getInterfaceSpec() != ContractType.ERC721_LEGACY &&
                             token.getInterfaceSpec() != ContractType.ERC721_TICKET &&
@@ -611,14 +612,19 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             //Send to storage as soon as each token is done
             token.lastTxTime = System.currentTimeMillis();
+            tokenTypeMap.put(contract, token.isNonFungible());
         }
+
+        return tokenTypeMap;
     }
 
     private int calcTokenDecimals(EtherscanEvent ev0)
     {
         int tokenDecimal = (!TextUtils.isEmpty(ev0.tokenDecimal) && Character.isDigit(ev0.tokenDecimal.charAt(0))) ? Integer.parseInt(ev0.tokenDecimal) : -1;
 
-        if (tokenDecimal < 1 && ev0.tokenID != null && ev0.value == null && (ev0.tokenDecimal == null || ev0.tokenDecimal.equals("0")))
+        if (tokenDecimal < 1 &&
+                (ev0.tokenID != null || ev0.tokenIDs != null) &&
+                (ev0.tokenDecimal == null || ev0.tokenDecimal.equals("0")))
         {
             tokenDecimal = -1;
         }
@@ -997,7 +1003,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     }
 
     private void writeEvents   (Realm instance, EtherscanEvent[] events, String walletAddress,
-                                @NonNull NetworkInfo networkInfo, final TransferFetchType tfType) throws Exception
+                                @NonNull NetworkInfo networkInfo, final Map<String, Boolean> tokenTypes) throws Exception
     {
         String TO_TOKEN = "[TO_ADDRESS]";
         String FROM_TOKEN = "[FROM_ADDRESS]";
@@ -1010,16 +1016,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             //write event list
             for (EtherscanEvent ev : events)
             {
-                boolean scanAsNFT = tfType.ordinal() > 0 || ((ev.tokenDecimal == null || ev.tokenDecimal.length() == 0 || ev.tokenDecimal.equals("0")) &&
-                        (ev.tokenID != null && ev.tokenID.length() > 0));
+                boolean scanAsNFT = tokenTypes.getOrDefault(ev.contractAddress, false);
                 Transaction tx = scanAsNFT ? ev.createNFTTransaction(networkInfo) : ev.createTransaction(networkInfo);
 
                 //find tx name
                 String activityName = tx.getEventName(walletAddress);
                 //Etherscan sometimes interprets NFT transfers as FT's
-
-                String lala = scanAsNFT ? ev.tokenID : ev.value;
-
                 //TODO: Handle ERC1155 multiple token/batch transfers
                 //For now; just use first token
                 ev.patchFirstTokenID();
@@ -1040,25 +1042,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private void storeTransferData(Realm instance, String hash, String valueList, String activityName, String tokenAddress)
     {
-        RealmTransfer matchingEntry = instance.where(RealmTransfer.class)
-                .equalTo("hash", hash)
-                .equalTo("tokenAddress", tokenAddress)
-                .equalTo("eventName", activityName)
-                .equalTo("transferDetail", valueList)
-                .findFirst();
-
-        if (matchingEntry == null) //prevent duplicates
-        {
-            RealmTransfer realmTransfer = instance.createObject(RealmTransfer.class);
-            realmTransfer.setHash(hash);
-            realmTransfer.setTokenAddress(tokenAddress);
-            realmTransfer.setEventName(activityName);
-            realmTransfer.setTransferDetail(valueList);
-        }
-        else
-        {
-            Timber.d("Prevented collision: %s", tokenAddress);
-        }
+        RealmTransfer realmTransfer = instance.createObject(RealmTransfer.class);
+        realmTransfer.setHash(hash);
+        realmTransfer.setTokenAddress(tokenAddress);
+        realmTransfer.setEventName(activityName);
+        realmTransfer.setTransferDetail(valueList);
     }
 
     /**

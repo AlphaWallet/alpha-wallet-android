@@ -322,14 +322,12 @@ public class TokensRealmSource implements TokenLocalSource {
 
     private void setTokenUpdateTime(RealmToken realmToken, Token token)
     {
-        long tokenBalance = token.balance.longValue();
-
         realmToken.setLastTxTime(System.currentTimeMillis());
         realmToken.setAssetUpdateTime(System.currentTimeMillis());
 
-        if (realmToken.getBalance() == null || !realmToken.getBalance().equals(String.valueOf(tokenBalance)))
+        if (realmToken.getBalance() == null || !realmToken.getBalance().equals(token.getBalanceRaw().toString()))
         {
-            realmToken.setBalance(String.valueOf(tokenBalance));
+            token.setRealmBalance(realmToken);
         }
     }
 
@@ -377,6 +375,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
         //switch visibility if required
         checkTokenVisibility(realmToken, token, balanceCount);
+        token.setRealmBalance(realmToken);
     }
 
     private void checkTokenVisibility(RealmToken realmToken, Token token, BigDecimal balanceCount)
@@ -391,8 +390,6 @@ public class TokensRealmSource implements TokenLocalSource {
             token.tokenInfo.isEnabled = false;
             realmToken.setEnabled(false);
         }
-
-        realmToken.setBalance(balanceCount.toString());
     }
 
     @Override

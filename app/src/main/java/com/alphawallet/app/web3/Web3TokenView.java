@@ -358,7 +358,6 @@ public class Web3TokenView extends WebView
         public void onPageFinished(WebView view, String url)
         {
             super.onPageFinished(view, url);
-            unencodedPage = null;
             if (assetHolder != null)
                 assetHolder.onPageRendered(view);
         }
@@ -367,6 +366,7 @@ public class Web3TokenView extends WebView
         public void onPageCommitVisible(WebView view, String url)
         {
             super.onPageCommitVisible(view, url);
+            unencodedPage = null;
             if (assetHolder != null)
                 assetHolder.onPageLoaded(view);
         }

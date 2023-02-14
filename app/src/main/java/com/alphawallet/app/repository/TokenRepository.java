@@ -1322,6 +1322,11 @@ public class TokenRepository implements TokenRepositoryType {
                     DefaultBlockParameterName.LATEST).send();
 
             String value = ethCall.getValue();
+            if (value.equals("0x"))
+            {
+                return new ArrayList<>();
+            }
+
             List<Type> values = FunctionReturnDecoder.decode(value, function.getOutputParameters());
             Object o;
             if (values.isEmpty())

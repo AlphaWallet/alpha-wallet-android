@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.alphawallet.token.tools.Numeric;
 
@@ -35,6 +36,7 @@ public class EthereumReadBuffer extends DataInputStream
 
     /**
      * Custom BigInteger which is formed from a byte array of sz size.
+     *
      * @param sz size of bytes to read for the BigInteger
      * @return
      * @throws IOException
@@ -50,7 +52,8 @@ public class EthereumReadBuffer extends DataInputStream
         return retVal;
     }
 
-    public String readAddress() throws IOException {
+    public String readAddress() throws IOException
+    {
         byte[] buffer20 = new byte[20];
         read(buffer20);
         return Numeric.toHexString(buffer20);
@@ -68,9 +71,12 @@ public class EthereumReadBuffer extends DataInputStream
 
     public void readSignature(byte[] signature) throws IOException
     {
-        if (signature.length == 65) {
+        if (signature.length == 65)
+        {
             read(signature); // would it throw already, if the data is too short? - Weiwu
-        } else {
+        }
+        else
+        {
             throw new IOException("Data isn't a signature"); // Is this even necessary? - Weiwu
         }
     }
@@ -91,7 +97,8 @@ public class EthereumReadBuffer extends DataInputStream
     /*
      * equivalent of Short.toUnsignedInt
      */
-    private int toUnsignedInt(short s) {
+    private int toUnsignedInt(short s)
+    {
         return s & 0x0000FFFF;
     }
 
@@ -106,7 +113,8 @@ public class EthereumReadBuffer extends DataInputStream
     /*
      * equivalent of Integer.readUnsignedLong
      */
-    public long toUnsignedLong(int i) {
+    public long toUnsignedLong(int i)
+    {
         return i & 0x00000000ffffffffL; // long is always 64 bits
     }
 
@@ -163,10 +171,9 @@ public class EthereumReadBuffer extends DataInputStream
             index++;
         }
 
-        int[] indexArray = new int[indexList.size()];
-        for (int i = 0; i < indexList.size(); i++) indexArray[i] = indexList.get(i);
-
-        return indexArray;
+        return indexList.stream()
+                .mapToInt(Integer::intValue)
+                .toArray();
     }
 
     public byte[] readBytes(int i) throws IOException

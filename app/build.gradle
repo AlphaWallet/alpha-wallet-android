@@ -255,8 +255,7 @@ dependencies {
     // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
 
     // Ethereum client
-    //implementation "org.web3j:core:4.8.8-android"
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "org.web3j:core:4.8.8-android"
     implementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
     implementation 'org.slf4j:slf4j-api:2.0.0-alpha7'

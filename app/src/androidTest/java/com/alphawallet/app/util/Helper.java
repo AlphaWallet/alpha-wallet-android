@@ -14,7 +14,6 @@ import static org.hamcrest.core.AllOf.allOf;
 import android.content.Context;
 import android.view.KeyEvent;
 import android.view.View;
-
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.test.espresso.PerformException;
@@ -25,16 +24,13 @@ import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-
-import java.util.concurrent.TimeoutException;
 import com.alphawallet.app.R;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 public class Helper
 {
@@ -80,12 +76,10 @@ public class Helper
 
                 do
                 {
-                    for (View child : TreeIterables.breadthFirstViewTraversal(view.getRootView()))
+                    Iterable<View> views = TreeIterables.breadthFirstViewTraversal(view.getRootView());
+                    if (Stream.of(views).anyMatch(matcher::matches))
                     {
-                        if (matcher.matches(child))
-                        {
-                            return;
-                        }
+                        return;
                     }
 
                     uiController.loopMainThreadForAtLeast(50);

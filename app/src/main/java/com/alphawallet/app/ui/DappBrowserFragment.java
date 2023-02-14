@@ -629,10 +629,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         stopBalanceListener();
     }
 
-    /**
-     * Used to expand or collapse the view
-     */
-
     private void addToBackStack(String nextFragment)
     {
         if (currentFragment != null && !currentFragment.equals(DAPP_BROWSER))
@@ -640,11 +636,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
             detachFragment(currentFragment);
         }
         currentFragment = nextFragment;
-    }
-
-    private void addToForwardStack(String prevFragment)
-    {
-        currentFragment = prevFragment;
     }
 
     private void cancelSearchSession()
@@ -1677,32 +1668,22 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void gotCameraAccess(@NotNull String[] permissions, int[] grantResults)
     {
-        boolean cameraAccess = false;
-        for (int i = 0; i < permissions.length; i++)
+        boolean cameraAccess = hasPermissionGranted(permissions, grantResults, Manifest.permission.CAMERA);
+        if (cameraAccess)
         {
-            if (permissions[i].equals(Manifest.permission.CAMERA) && grantResults[i] != -1)
-            {
-                cameraAccess = true;
-                if (requestCallback != null)
-                    requestCallback.grant(requestCallback.getResources()); //now we can grant permission
-            }
+            if (requestCallback != null)
+                requestCallback.grant(requestCallback.getResources());
         }
-        if (!cameraAccess)
+        else
+        {
             Toast.makeText(getContext(), "Permission not given", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     public void gotGeoAccess(@NotNull String[] permissions, int[] grantResults)
     {
-        boolean geoAccess = false;
-        for (int i = 0; i < permissions.length; i++)
-        {
-            if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION) && grantResults[i] != -1)
-            {
-                geoAccess = true;
-                break;
-            }
-        }
+        boolean geoAccess = hasPermissionGranted(permissions, grantResults, Manifest.permission.ACCESS_FINE_LOCATION);
         if (!geoAccess)
             Toast.makeText(getContext(), "Permission not given", Toast.LENGTH_SHORT).show();
         if (geoCallback != null && geoOrigin != null)
@@ -1712,16 +1693,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void gotFileAccess(@NotNull String[] permissions, int[] grantResults)
     {
-        boolean fileAccess = false;
-        for (int i = 0; i < permissions.length; i++)
-        {
-            if (permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE) && grantResults[i] != -1)
-            {
-                fileAccess = true;
-                break;
-            }
-        }
-
+        boolean fileAccess = hasPermissionGranted(permissions, grantResults, Manifest.permission.READ_EXTERNAL_STORAGE);
         if (fileAccess) requestUpload();
     }
 

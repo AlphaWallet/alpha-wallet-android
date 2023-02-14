@@ -42,12 +42,14 @@ import com.alphawallet.app.ui.widget.holder.TransferHolder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import timber.log.Timber;
 
 public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> implements AdapterCallback
 {
-    private final ActivitySortedList<SortedItem<?>> items = new ActivitySortedList<>(SortedItem.class, new ActivitySortedList.Callback<SortedItem<?>>() {
+    private final ActivitySortedList<SortedItem<?>> items = new ActivitySortedList<>(SortedItem.class, new ActivitySortedList.Callback<SortedItem<?>>()
+    {
         @Override
         public int compare(SortedItem left, SortedItem right)
         {
@@ -55,32 +57,38 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         }
 
         @Override
-        public boolean areContentsTheSame(SortedItem oldItem, SortedItem newItem) {
+        public boolean areContentsTheSame(SortedItem oldItem, SortedItem newItem)
+        {
             return oldItem.areContentsTheSame(newItem);
         }
 
         @Override
-        public boolean areItemsTheSame(SortedItem left, SortedItem right) {
+        public boolean areItemsTheSame(SortedItem left, SortedItem right)
+        {
             return left.areItemsTheSame(right);
         }
 
         @Override
-        public void onChanged(int position, int count) {
+        public void onChanged(int position, int count)
+        {
             notifyItemRangeChanged(position, count);
         }
 
         @Override
-        public void onInserted(int position, int count) {
+        public void onInserted(int position, int count)
+        {
             notifyItemRangeInserted(position, count);
         }
 
         @Override
-        public void onRemoved(int position, int count) {
+        public void onRemoved(int position, int count)
+        {
             notifyItemRangeRemoved(position, count);
         }
 
         @Override
-        public void onMoved(int fromPosition, int toPosition) {
+        public void onMoved(int fromPosition, int toPosition)
+        {
             notifyItemMoved(fromPosition, toPosition);
         }
     });
@@ -97,7 +105,8 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
     private boolean pendingReset = false;
 
     public ActivityAdapter(TokensService service, FetchTransactionsInteract fetchTransactionsInteract,
-                           AssetDefinitionService svs, ActivityDataInteract dataInteract) {
+                           AssetDefinitionService svs, ActivityDataInteract dataInteract)
+    {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.dataInteract = dataInteract;
         this.assetService = svs;
@@ -113,8 +122,10 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
     }
 
     @Override
-    public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
-        switch (viewType) {
+    public BinderViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType)
+    {
+        switch (viewType)
+        {
             case TransactionHolder.VIEW_TYPE:
                 return new TransactionHolder(parent, tokensService, fetchTransactionsInteract,
                         assetService);
@@ -128,6 +139,9 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
             case TransferHolder.VIEW_TYPE:
                 return new TransferHolder(parent, tokensService, fetchTransactionsInteract,
                         assetService);
+            default:
+                Timber.tag("ActivityAdapter").e("Wrong view type %s", viewType);
+                break;
         }
 
         return null;
@@ -153,7 +167,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
 
     public void onRViewRecycled(RecyclerView.ViewHolder holder)
     {
-        onViewRecycled((BinderViewHolder<?>)(holder));
+        onViewRecycled((BinderViewHolder<?>) (holder));
     }
 
     @Override
@@ -185,16 +199,19 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
     };
 
     @Override
-    public int getItemCount() {
+    public int getItemCount()
+    {
         return items.size();
     }
 
     @Override
-    public int getItemViewType(int position) {
+    public int getItemViewType(int position)
+    {
         return items.get(position).viewType;
     }
 
-    public void setDefaultWallet(Wallet wallet) {
+    public void setDefaultWallet(Wallet wallet)
+    {
         this.wallet = wallet;
         notifyDataSetChanged();
     }
@@ -215,11 +232,11 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         }
         else if (obj instanceof DateSortedItem)
         {
-            return ((DateSortedItem)obj).getUID();
+            return ((DateSortedItem) obj).getUID();
         }
         else if (obj instanceof TransferSortedItem)
         {
-            return ((TransferSortedItem)obj).getUID();
+            return ((TransferSortedItem) obj).getUID();
         }
         else
         {
@@ -231,7 +248,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
 
     public void updateActivityItems(ActivityMeta[] activityItems)
     {
-        if (activityItems.length == 0) return ;
+        if (activityItems.length == 0) return;
 
         items.beginBatchedUpdates();
         if (itemLimit != 0)
@@ -243,17 +260,17 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         {
             if (item instanceof TransactionMeta)
             {
-                TransactionSortedItem sortedItem = new TransactionSortedItem(TransactionHolder.VIEW_TYPE, (TransactionMeta)item, TimestampSortedItem.DESC);
+                TransactionSortedItem sortedItem = new TransactionSortedItem(TransactionHolder.VIEW_TYPE, (TransactionMeta) item, TimestampSortedItem.DESC);
                 items.addTransaction(sortedItem); //event has higher UI priority than an event, don't overwrite
             }
             else if (item instanceof EventMeta)
             {
-                EventSortedItem sortedItem = new EventSortedItem(EventHolder.VIEW_TYPE, (EventMeta)item, TimestampSortedItem.DESC);
+                EventSortedItem sortedItem = new EventSortedItem(EventHolder.VIEW_TYPE, (EventMeta) item, TimestampSortedItem.DESC);
                 items.add(sortedItem);
             }
             else if (item instanceof TokenTransferData)
             {
-                TransferSortedItem sortedItem = new TransferSortedItem(TransferHolder.VIEW_TYPE, (TokenTransferData)item, TimestampSortedItem.DESC);
+                TransferSortedItem sortedItem = new TransferSortedItem(TransferHolder.VIEW_TYPE, (TokenTransferData) item, TimestampSortedItem.DESC);
                 items.add(sortedItem);
             }
             items.add(DateSortedItem.round(item.getTimeStampSeconds()));
@@ -264,7 +281,8 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         items.endBatchedUpdates();
     }
 
-    public void clear() {
+    public void clear()
+    {
         items.clear();
         notifyDataSetChanged();
     }
@@ -289,9 +307,9 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
             }
         }
 
-        if (items.get(items.size()-1) instanceof DateSortedItem)
+        if (items.get(items.size() - 1) instanceof DateSortedItem)
         {
-            removalObjects.add(items.get(items.size()-1));
+            removalObjects.add(items.get(items.size() - 1));
         }
 
         for (SortedItem sortedItem : removalObjects)
@@ -306,9 +324,9 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         for (int i = 0; i < items.size(); i++)
         {
             if (items.get(i).viewType == TransactionHolder.VIEW_TYPE
-                && items.get(i).value instanceof TransactionMeta)
+                    && items.get(i).value instanceof TransactionMeta)
             {
-                TransactionMeta tm = (TransactionMeta)items.get(i).value;
+                TransactionMeta tm = (TransactionMeta) items.get(i).value;
                 if (tm.contractAddress != null && hasMatchingContract(tokenContracts, tm.contractAddress.toLowerCase()))
                 {
                     notifyItemChanged(i);
@@ -352,26 +370,21 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
 
     public boolean isEmpty()
     {
-        for (int i = 0; i < items.size(); i++)
-        {
-            Object item = items.get(i).value;
-            if (item instanceof ActivityMeta)
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return IntStream.range(0, items.size())
+                .noneMatch(i -> items.get(i).value instanceof ActivityMeta);
     }
 
-    private static class LabelHolder extends BinderViewHolder<Date> {
+    private static class LabelHolder extends BinderViewHolder<Date>
+    {
 
-        public LabelHolder(int resId, ViewGroup parent) {
+        public LabelHolder(int resId, ViewGroup parent)
+        {
             super(resId, parent);
         }
 
         @Override
-        public void bind(@Nullable Date data, @NonNull Bundle addition) {
+        public void bind(@Nullable Date data, @NonNull Bundle addition)
+        {
 
         }
     }
@@ -387,12 +400,13 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         {
             if (item instanceof TransactionSortedItem)
             {
-                TransactionSortedItem txSortedItem = (TransactionSortedItem)item;
+                TransactionSortedItem txSortedItem = (TransactionSortedItem) item;
                 int index = items.indexOf(txSortedItem);
                 if (index >= 0 && items.get(index).value instanceof EventMeta)
                 {
-                    EventMeta em = (EventMeta)items.get(index).value;
-                    if (!em.hash.equals(txSortedItem.value.hash)) add(item); //don't replace matching Event
+                    EventMeta em = (EventMeta) items.get(index).value;
+                    if (!em.hash.equals(txSortedItem.value.hash))
+                        add(item); //don't replace matching Event
                 }
                 else
                 {
@@ -411,7 +425,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<BinderViewHolder<?>> i
         //ensure all holders have their realm listeners cleaned up
         for (int childCount = recyclerView.getChildCount(), i = 0; i < childCount; ++i)
         {
-            ((BinderViewHolder<?>)recyclerView.getChildViewHolder(recyclerView.getChildAt(i))).onDestroyView();
+            ((BinderViewHolder<?>) recyclerView.getChildViewHolder(recyclerView.getChildAt(i))).onDestroyView();
         }
     }
 }

@@ -49,7 +49,8 @@ public class AlphaWalletService
 
     public AlphaWalletService(OkHttpClient httpClient,
                               TransactionRepositoryType transactionRepository,
-                              Gson gson) {
+                              Gson gson)
+    {
         this.httpClient = httpClient;
         this.transactionRepository = transactionRepository;
         this.gson = gson;
@@ -82,6 +83,7 @@ public class AlphaWalletService
 
     /**
      * Use API to determine tokenscript validity
+     *
      * @param tokenScriptFile
      * @return
      */
@@ -165,9 +167,7 @@ public class AlphaWalletService
     {
         return Single.fromCallable(() -> {
             List<Integer> ticketIndices = Utils.stringIntsToIntegerList(indices);
-            int[] indicesArray = new int[ticketIndices.size()];
-            for (int i = 0; i < ticketIndices.size(); i++) indicesArray[i] = ticketIndices.get(i);
-            return indicesArray;
+            return ticketIndices.stream().mapToInt(Integer::intValue).toArray();
         });
     }
 
@@ -206,7 +206,8 @@ public class AlphaWalletService
             byte[] tradeSig,
             String contractAddress,
             List<BigInteger> tokenIds
-    ) {
+    )
+    {
         return Single.fromCallable(() -> {
             Integer result = 500; //fail by default
             try
@@ -317,7 +318,7 @@ public class AlphaWalletService
 
                     okhttp3.Response response = httpClient.newCall(request).execute();
                     int resultCode = response.code();
-                    if ((resultCode/100) == 2) result = true;
+                    if ((resultCode / 100) == 2) result = true;
                     Timber.tag("RESP").d(response.body().string());
                 }
             }

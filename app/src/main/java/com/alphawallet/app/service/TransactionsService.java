@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.TransactionType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
+import com.alphawallet.app.entity.transactionAPI.TransferFetchType;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
@@ -61,6 +62,8 @@ public class TransactionsService
     private final LongSparseArray<Long> chainTransactionCheckTimes = new LongSparseArray<>();
     private static final LongSparseArray<CurrentBlockTime> currentBlocks = new LongSparseArray<>();
     private static final ConcurrentLinkedQueue<String> requiredTransactions = new ConcurrentLinkedQueue<>();
+
+    private final LongSparseArray<TransferFetchType> apiFetchProgress = new LongSparseArray<>();
 
     private final static int TRANSACTION_DROPPED = -1;
     private final static int TRANSACTION_SEEN = -2;
@@ -152,6 +155,7 @@ public class TransactionsService
         chainTransferCheckTimes.clear();
         chainTransactionCheckTimes.clear();
         tokensService.startUpdateCycle();
+        apiFetchProgress.clear();
 
         if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
         {
@@ -165,38 +169,41 @@ public class TransactionsService
     private void checkTransfers()
     {
         List<Long> filters = tokensService.getNetworkFilters();
-        if (tokensService.getCurrentAddress() == null || filters.size() == 0 ||
-                (eventFetch != null && !eventFetch.isDisposed())) { return; } //skip check if the service isn't set up or if a current check is in progress
-
-        if (currentChainIndex >= filters.size()) currentChainIndex = 0;
-        readTokenMoves(filters.get(currentChainIndex), nftCheck); //check NFTs for same chain on next iteration or advance to next chain
-        Pair<Integer, Boolean> pendingChainData = getNextChainIndex(currentChainIndex, nftCheck, filters);
-        currentChainIndex = pendingChainData.first;
-        nftCheck = pendingChainData.second;
-    }
-
-    private Pair<Integer, Boolean> getNextChainIndex(int currentIndex, boolean nftCheck, List<Long> filters)
-    {
-        if (filters.size() == 0) return new Pair<>(currentIndex, nftCheck);
-
-        while (true)
+        if (tokensService.getCurrentAddress() == null || filters.size() == 0)
         {
-            currentIndex++;
-            if (currentIndex >= filters.size())
-            {
-                nftCheck = !nftCheck;
-                currentIndex = 0;
-                if (!nftCheck && firstCycle)
-                {
-                    firstCycle = false;
-                    readTransferCycle();
-                }
-            }
-            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(filters.get(currentIndex));
-            if (!nftCheck || info.usesSeparateNFTTransferQuery()) break;
+            return; //skip check if the service isn't set up
         }
 
-        return new Pair<>(currentIndex, nftCheck);
+        long chainId = filters.get(currentChainIndex);
+        readTokenMoves(chainId); //check NFTs for same chain on next iteration or advance to next chain
+        currentChainIndex = getNextChainIndex(currentChainIndex, chainId, filters);
+    }
+
+    private int getNextChainIndex(int currentIndex, long chainId, List<Long> filters)
+    {
+        final NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (filters.size() == 0 || info == null) return 0;
+        TransferFetchType[] availableTxTypes = info.getTransferQueriesUsed();
+
+        TransferFetchType tfType = apiFetchProgress.get(chainId, TransferFetchType.tokentx);
+
+        if (tfType.ordinal() >= availableTxTypes.length - 1) //available API routes may be zero if unsupported (eg custom network)
+        {
+            apiFetchProgress.put(chainId, TransferFetchType.tokentx); // completed reads from this chain, reset to start
+            currentIndex++;
+        }
+        else
+        {
+            apiFetchProgress.put(chainId, TransferFetchType.values()[tfType.ordinal() + 1]);
+        }
+
+        if (currentIndex >= filters.size())
+        {
+            currentIndex = 0;
+            firstCycle = false;
+        }
+
+        return currentIndex;
     }
 
     /**
@@ -210,25 +217,27 @@ public class TransactionsService
         if (filters.contains(chainId))
         {
             currentChainIndex = filters.indexOf(chainId);
-            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
-            nftCheck = isNft && info.usesSeparateNFTTransferQuery();
+            TransferFetchType nftSelection = ethereumNetworkRepository.getNetworkByChain(chainId).getTransferQueriesUsed().length > 1 ? TransferFetchType.tokennfttx : TransferFetchType.tokentx;
+            apiFetchProgress.put(chainId, isNft ? nftSelection : TransferFetchType.tokentx);
         }
     }
 
-    private void readTokenMoves(long chainId, boolean isNFT)
+    private void readTokenMoves(long chainId)
     {
         //check if this route has combined NFT
         final NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
-        if (info == null) return;
-        if (isNFT)
+        if (info == null || info.getTransferQueriesUsed().length == 0) return;
+        TransferFetchType tfType = apiFetchProgress.get(chainId, TransferFetchType.tokentx);
+        if (tfType.ordinal() > 0)
         {
             tokensService.checkingChain(chainId);
         }
-        Timber.tag(TAG).d("Check transfers: %s : NFT=%s", chainId, isNFT);
-        eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT)
+
+        Timber.tag(TAG).d("Check transfers: %s : NFT=%s", chainId, tfType.name());
+        eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, tfType)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(count -> handleMoveCheck(info.chainId, isNFT), this::gotReadErr);
+                .subscribe(count -> handleMoveCheck(info.chainId, tfType.ordinal() > 0), this::gotReadErr);
     }
 
     private void gotReadErr(Throwable e)

@@ -174,7 +174,7 @@ public class EventSync
 
     public boolean handleEthLogError(Response.Error error, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock, SyncDef sync, Realm realm)
     {
-        if (error.getCode() == -32005 || error.getCode() == -32600)
+        if (error.getMessage().contains("block range")) //trigger on block range error
         {
             long newStartBlock;
             long newEndBlock;

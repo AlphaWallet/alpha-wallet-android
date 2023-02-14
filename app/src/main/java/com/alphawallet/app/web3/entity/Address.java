@@ -29,10 +29,6 @@ public class Address implements Parcelable {
         value = in.readString();
     }
 
-    public String getValue(){
-        return this.value;
-    }
-
     @Override
     public String toString() {
         return "0x" + value;

@@ -62,6 +62,7 @@ import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportWalletActivity;
 import com.alphawallet.app.ui.SendActivity;
+import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
@@ -129,6 +130,7 @@ public class HomeViewModel extends BaseViewModel
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
     private BottomSheetDialog dialog;
+    private int counter;
 
     @Inject
     HomeViewModel(
@@ -214,6 +216,10 @@ public class HomeViewModel extends BaseViewModel
     private void onDefaultWallet(final Wallet wallet)
     {
         defaultWallet.setValue(wallet);
+        if(this.counter == 0){
+            DappBrowserUtils.setWallet(defaultWallet);
+            this.counter ++;
+        }
     }
 
     public void showImportLink(Activity activity, String importData)

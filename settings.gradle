@@ -1,1 +1,1 @@
-include ':app', ':lib', ':dmz', ':util'
+include ':app', ':lib', ':dmz', ':util', ':hardware_stub'

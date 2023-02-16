@@ -26,8 +26,9 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.GasService;
@@ -43,6 +44,7 @@ import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.ViewType;
@@ -382,11 +384,11 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
     /**
      * Final return path
-     * @param transactionData
+     * @param txData
      */
-    private void txWritten(TransactionData transactionData)
+    private void txWritten(TransactionReturn txData)
     {
-        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+        confirmationDialog.transactionWritten(txData.hash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
     }
 
     private void calculateEstimateDialog()
@@ -534,7 +536,13 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, token.tokenInfo.chainId, ""); //return point is txWritten
+        viewModel.requestSignature(finalTx, wallet, token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(wallet, token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -562,5 +570,11 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
         return getGasSettings;
+    }
+
+    @Override
+    public WalletType getWalletType()
+    {
+        return wallet.type;
     }
 }

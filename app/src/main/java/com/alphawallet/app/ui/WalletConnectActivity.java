@@ -33,15 +33,15 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetSource;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SignRecord;
@@ -66,6 +66,7 @@ import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.TokenIcon;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SignMessageType;
@@ -402,6 +403,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.serviceReady().observe(this, this::onServiceReady);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionError().observe(this, this::txError);
 
         viewModel.startService(this);
     }
@@ -878,10 +881,16 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         signData = null;
     }
 
+    @Override
+    public WalletType getWalletType()
+    {
+        return viewModel.getWallet().type;
+    }
+
     private void onEthSignTransaction(Long id, WCEthereumTransaction transaction, long chainId)
     {
         lastId = id;
-        final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
+        final Web3Transaction w3Tx = new Web3Transaction(transaction, id, SignType.SIGN_TX);
         final ActionSheetDialog confDialog = generateTransactionRequest(w3Tx, chainId);
         if (confDialog != null)
         {
@@ -896,7 +905,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private void onEthSendTransaction(Long id, WCEthereumTransaction transaction, long chainId)
     {
         lastId = id;
-        final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
+        final Web3Transaction w3Tx = new Web3Transaction(transaction, id, SignType.SEND_TX);
         final ActionSheetDialog confDialog = generateTransactionRequest(w3Tx, chainId);
         if (confDialog != null)
         {
@@ -1128,7 +1137,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             {
                 handleTransactionCallback(resultCode, data);
             }
-            else if (signCallback != null) signCallback.gotAuthorisation(true);
         }
         else
         {
@@ -1184,37 +1192,50 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        final SendTransactionInterface callback = new SendTransactionInterface()
+        viewModel.requestSignature(finalTx, viewModel.getWallet(), viewModel.getChainId(getSessionId()));
+    }
+
+    /**
+     * Complete Hardware sendTx/signTx
+     */
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        if (tx.getSignType() == SignType.SIGN_TX)
         {
-            @Override
-            public void transactionSuccess(Web3Transaction web3Tx, String hashData)
-            {
-                viewModel.recordSignTransaction(getApplicationContext(), web3Tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
-                viewModel.approveRequest(getApplication(), getSessionId(), web3Tx.leafPosition, hashData);
-                confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
-                if (fromDappBrowser) switchToDappBrowser();
-                confirmationDialog.transactionWritten(hashData);
-                requestId = 0;
-                updateSignCount();
+            completeSignTransaction(tx, tx.leafPosition, signature);
+        }
+        else
+        {
+            viewModel.sendTransaction(viewModel.getWallet(), viewModel.getChainId(getSessionId()), tx, signature);
+        }
+    }
 
-                viewModel.track(Analytics.Action.WALLET_CONNECT_TRANSACTION_SUCCESS);
-            }
+    private void completeSignTransaction(Web3Transaction w3Tx, long callbackId, SignatureFromKey signature)
+    {
+        viewModel.recordSignTransaction(getApplicationContext(), w3Tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
+        viewModel.approveRequest(getApplication(), getSessionId(), callbackId, Numeric.toHexString(signature.signature));
+        confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
+        if (fromDappBrowser) switchToDappBrowser();
+        requestId = 0;
+        updateSignCount();
+    }
 
-            @Override
-            public void transactionError(long callbackId, Throwable error)
-            {
-                displayTransactionError(error);
-                confirmationDialog.dismiss();
-                viewModel.rejectRequest(getApplication(), getSessionId(), lastId, getString(R.string.message_authentication_failed));
-                requestId = 0;
-            }
-        };
+    public void txWritten(TransactionReturn txReturn)
+    {
+        viewModel.recordSignTransaction(getApplicationContext(), txReturn.tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
+        viewModel.approveRequest(getApplication(), getSessionId(), txReturn.tx.leafPosition, txReturn.hash);
+        confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
+        if (fromDappBrowser) switchToDappBrowser();
+        confirmationDialog.transactionWritten(txReturn.hash);
+        requestId = 0;
+        updateSignCount();
 
-        viewModel.sendTransaction(finalTx, viewModel.getChainId(getSessionId()), callback);
+        viewModel.track(Analytics.Action.WALLET_CONNECT_TRANSACTION_SUCCESS);
     }
 
     //Transaction failed to be sent
-    private void displayTransactionError(final Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
         if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
         {
@@ -1223,16 +1244,20 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 dialog = new AWalletAlertDialog(this, AWalletAlertDialog.ERROR);
                 dialog.setTitle(R.string.invalid_walletconnect_session);
                 dialog.setTitle(R.string.error_transaction_failed);
-                dialog.setMessage(throwable.getMessage());
+                dialog.setMessage(txError.throwable.getMessage());
                 dialog.setButtonText(R.string.button_ok);
-                dialog.setButtonListener(v -> dialog.dismiss());
+                dialog.setButtonListener(v -> {
+                    dialog.dismiss();
+                    if (fromDappBrowser) switchToDappBrowser();
+                });
                 dialog.show();
 
                 AnalyticsProperties props = new AnalyticsProperties();
-                props.put(Analytics.PROPS_ERROR_MESSAGE, throwable.getMessage());
+                props.put(Analytics.PROPS_ERROR_MESSAGE, txError.throwable.getMessage());
                 viewModel.track(Analytics.Action.WALLET_CONNECT_TRANSACTION_FAILED, props);
             });
         }
+        //TODO: Report error fail to WalletConnect
     }
 
     @Override
@@ -1268,31 +1293,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void signTransaction(Web3Transaction tx)
     {
-        DAppFunction dappFunction = new DAppFunction()
-        {
-            @Override
-            public void DAppError(Throwable error, Signable message)
-            {
-                showErrorDialog(error.getMessage());
-                confirmationDialog.dismiss();
-                if (fromDappBrowser) switchToDappBrowser();
-                requestId = 0;
-            }
-
-            @Override
-            public void DAppReturn(byte[] data, Signable message)
-            {
-                viewModel.recordSignTransaction(getApplicationContext(), tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
-                viewModel.approveRequest(getApplication(), getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
-                confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
-                if (fromDappBrowser) switchToDappBrowser();
-                requestId = 0;
-                updateSignCount();
-            }
-        };
-
-        viewModel.signTransaction(getBaseContext(), tx, dappFunction, peerUrl.getText().toString(), viewModel.getChainId(getSessionId()), viewModel.defaultWallet().getValue());
-        if (fromDappBrowser) switchToDappBrowser();
+        viewModel.requestSignatureOnly(tx, viewModel.getWallet(), viewModel.getChainId(getSessionId()));
     }
 
     @Override

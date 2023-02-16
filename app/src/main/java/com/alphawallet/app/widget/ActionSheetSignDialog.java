@@ -14,10 +14,14 @@ import androidx.lifecycle.ViewModelStoreOwner;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SignDialogViewModel;
+import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.hardware.SignatureReturnType;
 import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
 
@@ -39,6 +43,7 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
     private final Activity activity;
     private final long callbackId;
     private boolean actionCompleted;
+    private WalletType walletType;
 
     public ActionSheetSignDialog(@NonNull Activity callingActivity, ActionSheetCallback aCallback, Signable message)
     {
@@ -61,8 +66,6 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
 
         toolbar.setTitle(Utils.getSigningTitle(message));
 
-        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
-        functionBar.revealButtons();
         setupCancelListeners();
         actionCompleted = false;
 
@@ -72,7 +75,27 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
         viewModel = new ViewModelProvider((ViewModelStoreOwner) activity).get(SignDialogViewModel.class);
         viewModel.completed().observe((LifecycleOwner) activity, this::signComplete);
         viewModel.message().observe((LifecycleOwner) activity, this::onMessage);
+        viewModel.onWallet().observe((LifecycleOwner) activity, this::onWallet);
+
         setCanceledOnTouchOutside(false);
+    }
+
+    private void onWallet(Wallet wallet)
+    {
+        walletType = wallet.type;
+        if (walletType == WalletType.HARDWARE)
+        {
+            functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.use_hardware_card)));
+            functionBar.setClickable(false);
+            //push signing request
+            viewModel.getAuthentication(activity, this);
+        }
+        else
+        {
+            functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
+        }
+
+        functionBar.revealButtons();
     }
 
     @Override
@@ -88,6 +111,12 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
     @Override
     public void handleClick(String action, int id)
     {
+        if (walletType == WalletType.HARDWARE)
+        {
+            //TODO: Hardware - popup to tell user to apply hardware card
+            return;
+        }
+
         //get authentication
         functionBar.setVisibility(View.GONE);
         viewModel.getAuthentication(activity, this);
@@ -130,9 +159,13 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
         final SignDataWidget signWidget = findViewById(R.id.sign_widget);
         if (gotAuth)
         {
-            //start animation
-            confirmationWidget.startProgressCycle(1);
-            actionSheetCallback.notifyConfirm(ActionSheetMode.SIGN_MESSAGE.getValue());
+            if (walletType != WalletType.HARDWARE)
+            {
+                //start animation
+                confirmationWidget.startProgressCycle(1);
+                actionSheetCallback.notifyConfirm(ActionSheetMode.SIGN_MESSAGE.getValue());
+            }
+
             viewModel.signMessage(signWidget.getSignable(), actionSheetCallback);
         }
         else
@@ -146,6 +179,24 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
     public void cancelAuthentication()
     {
         dismiss();
+    }
+
+    @Override
+    public void gotSignature(SignatureFromKey signature)
+    {
+        if (signature.sigType == SignatureReturnType.SIGNATURE_GENERATED)
+        {
+            functionBar.setVisibility(View.GONE);
+            confirmationWidget.startProgressCycle(1);
+            actionSheetCallback.notifyConfirm(ActionSheetMode.SIGN_MESSAGE.getValue());
+            //actionSheetCallback.completeSendTransaction(signature);
+            viewModel.completeSignMessage(signature, actionSheetCallback);
+        }
+        else
+        {
+            //TODO: Hardware - report error in a better way
+            activity.runOnUiThread(() -> Toast.makeText(activity, "ERROR: " + signature.failMessage, Toast.LENGTH_SHORT).show());
+        }
     }
 
     private void signComplete(Boolean success)

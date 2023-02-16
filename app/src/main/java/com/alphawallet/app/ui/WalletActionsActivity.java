@@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.ErrorEnvelope;
@@ -76,10 +77,18 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
             isNewWallet = getIntent().getBooleanExtra("isNewWallet", false);
             initViews();
         } else {
-            finish();
+            preFinish();
         }
 
         initViewModel();
+    }
+
+    private void preFinish()
+    {
+        Intent intent = new Intent();
+        setResult(RESULT_OK, intent);
+        intent.putExtra(C.EXTRA_ADDRESS, wallet);
+        finish();
     }
 
     @Override
@@ -107,7 +116,10 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.menu_wallet_manage, menu);
+        if (!(wallet.type == WalletType.HARDWARE || wallet.type == WalletType.WATCH))
+        {
+            getMenuInflater().inflate(R.menu.menu_wallet_manage, menu);
+        }
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -145,9 +157,9 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     public void onBackPressed()
     {
         super.onBackPressed();
-        if (isNewWallet) {
-            viewModel.showHome(this);
-            finish(); //drop back to home screen, no need to recreate everything
+        if (isNewWallet)
+        {
+            preFinish(); //drop back to home screen, no need to recreate everything
         }
     }
 
@@ -207,11 +219,14 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
         backUpSetting.setListener(this::onBackUpSettingClicked);
 
-        if (wallet.type == WalletType.KEYSTORE) {
+        if (wallet.type == WalletType.KEYSTORE)
+        {
             backUpSetting.setTitle(getString(R.string.export_keystore_json));
             TextView backupDetail = findViewById(R.id.backup_text);
             backupDetail.setText(R.string.export_keystore_detail);
-        } else if (wallet.type == WalletType.WATCH) {
+        }
+        else if (wallet.type == WalletType.WATCH || wallet.type == WalletType.HARDWARE)
+        {
             findViewById(R.id.layout_backup_method).setVisibility(View.GONE);
         }
 
@@ -244,7 +259,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         viewModel.updateWallet(wallet);
         if (isNewWallet) {
             viewModel.showHome(this);
-            finish(); //drop back to home screen, no need to recreate everything
+            preFinish(); //drop back to home screen, no need to recreate everything
         }
     }
 
@@ -264,8 +279,9 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         handleBackupWallet.launch(intent);
     }
 
-    private void showWalletsActivity() {
-        finish();
+    private void showWalletsActivity()
+    {
+        preFinish();
     }
 
     private void confirmDelete(Wallet wallet) {
@@ -292,7 +308,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
                     }
                     handler.postDelayed(this, 1000);
                     backupSuccessful();
-                    finish();
+                    preFinish();
                 }
     });
 

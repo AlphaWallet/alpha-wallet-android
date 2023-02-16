@@ -1,7 +1,6 @@
 package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.TOKENSCRIPT_CONVERSION_ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
@@ -30,8 +29,8 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
+import com.alphawallet.app.entity.TransactionReturn;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
@@ -54,6 +53,7 @@ import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.MethodArg;
@@ -86,9 +86,8 @@ import timber.log.Timber;
  */
 @AndroidEntryPoint
 public class FunctionActivity extends BaseActivity implements FunctionCallback,
-                                                              PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback,
-                                                              StandardFunctionInterface, TokenScriptRenderCallback, WebCompletionCallback,
-                                                              OnSetValuesListener, ActionSheetCallback
+        PageReadyCallback, OnSignPersonalMessageListener, StandardFunctionInterface, TokenScriptRenderCallback,
+        WebCompletionCallback, OnSetValuesListener, ActionSheetCallback
 {
     private TokenFunctionViewModel viewModel;
 
@@ -501,13 +500,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
         if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(ERROR);
         alertDialog.setTitle(R.string.error_transaction_failed);
-        alertDialog.setMessage(throwable.getMessage());
+        alertDialog.setMessage(txError.throwable.getMessage());
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v -> {
             alertDialog.dismiss();
@@ -563,11 +562,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     /**
      * Final return path
-     * @param transactionData write success hash back to ActionSheet
+     * @param transactionReturn write success hash back to ActionSheet
      */
-    private void txWritten(TransactionData transactionData)
+    private void txWritten(TransactionReturn transactionReturn)
     {
-        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+        confirmationDialog.transactionWritten(transactionReturn.hash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
     }
 
     private final Runnable closer = this::finish;
@@ -636,7 +635,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     public void onSignPersonalMessage(EthereumMessage message)
     {
         //pop open the actionsheet
-        confirmationDialog = new ActionSheetSignDialog(this, this, message); //new ActionSheetDialog(this, this, this, message);
+        confirmationDialog = new ActionSheetSignDialog(this, this, message);
         confirmationDialog.show();
         confirmationDialog.fullExpand();
     }
@@ -695,7 +694,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            gotAuthorisation(resultCode == RESULT_OK);
+            confirmationDialog.gotAuthorisation(resultCode == RESULT_OK);
         }
     }
 
@@ -776,12 +775,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void gotAuthorisation(boolean gotAuth)
-    {
-        if (!gotAuth) viewModel.failedAuthentication(SIGN_DATA);
-    }
-
-    @Override
     public void signingComplete(SignatureFromKey signature, Signable message)
     {
         String signHex = Numeric.toHexString(signature.signature);
@@ -798,9 +791,9 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void cancelAuthentication()
+    public WalletType getWalletType()
     {
-        if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.dismiss();
+        return viewModel.getWallet().type;
     }
 
     @Override
@@ -856,7 +849,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, token.tokenInfo.chainId, ""); //return point is txWritten
+        viewModel.requestSignature(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(viewModel.getWallet(), token.tokenInfo.chainId, tx, signature);
     }
 
     @Override

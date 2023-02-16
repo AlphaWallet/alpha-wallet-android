@@ -15,11 +15,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.GenericCallback;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
@@ -38,6 +37,7 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.WCClient;
@@ -47,11 +47,9 @@ import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.walletconnect.entity.WCUtils;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.EthereumTypedMessage;
-import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
-import com.alphawallet.token.tools.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -63,19 +61,20 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import timber.log.Timber;
 
 @HiltViewModel
-public class WalletConnectViewModel extends BaseViewModel
+public class WalletConnectViewModel extends BaseViewModel implements TransactionSendHandlerInterface
 {
     public static final String WC_SESSION_DB = "wc_data-db.realm";
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> serviceReady = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<SignatureFromKey> transactionSigned = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
     protected Disposable disposable;
     private final KeyService keyService;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -192,6 +191,21 @@ public class WalletConnectViewModel extends BaseViewModel
         return defaultWallet;
     }
 
+    public MutableLiveData<TransactionReturn> transactionFinalised()
+    {
+        return transactionFinalised;
+    }
+
+    public MutableLiveData<SignatureFromKey> transactionSigned()
+    {
+        return transactionSigned;
+    }
+
+    public MutableLiveData<TransactionReturn> transactionError()
+    {
+        return transactionError;
+    }
+
     public Wallet getWallet()
     {
         return wallet;
@@ -207,61 +221,19 @@ public class WalletConnectViewModel extends BaseViewModel
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void signMessage(Signable message, DAppFunction dAppFunction)
+    public void requestSignature(Web3Transaction finalTx, Wallet wallet, long chainId)
     {
-        resetSignDialog();
-        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
-                        error -> dAppFunction.DAppError(error, message));
+        createTransactionInteract.requestSignature(finalTx, wallet, chainId, this);
     }
 
-    public void signTransaction(Context ctx, Web3Transaction w3tx, DAppFunction dAppFunction, String requesterURL, long chainId, Wallet fromWallet)
+    public void requestSignatureOnly(Web3Transaction tx, Wallet fromWallet, long chainId)
     {
-        resetSignDialog();
-        EthereumMessage etm = new EthereumMessage(w3tx.getFormattedTransaction(ctx, chainId, getNetworkSymbol(chainId)).toString(),
-                requesterURL, w3tx.leafPosition, SignMessageType.SIGN_MESSAGE);
-
-        if (w3tx.isConstructor())
-        {
-            disposable = createTransactionInteract.signTransaction(fromWallet, w3tx, chainId)
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
-                            error -> dAppFunction.DAppError(error, etm));
-        }
-        else
-        {
-            disposable = createTransactionInteract.signTransaction(fromWallet, w3tx, chainId)
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
-                            error -> dAppFunction.DAppError(error, etm));
-        }
+        createTransactionInteract.requestSignatureOnly(tx, wallet, chainId, this);
     }
 
-    public void sendTransaction(final Web3Transaction finalTx, Wallet wallet, long chainId, SendTransactionInterface callback)
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction tx, SignatureFromKey signatureFromKey)
     {
-        if (finalTx.isConstructor())
-        {
-            disposable = createTransactionInteract
-                    .createWithSig(wallet, finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
-                            error -> callback.transactionError(finalTx.leafPosition, error));
-        }
-        else
-        {
-            disposable = createTransactionInteract
-                    .createWithSig(wallet, finalTx, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
-                            error -> callback.transactionError(finalTx.leafPosition, error));
-        }
-    }
-
-    public void sendTransaction(final Web3Transaction finalTx, long chainId, SendTransactionInterface callback)
-    {
-        sendTransaction(finalTx, defaultWallet.getValue(), chainId, callback);
+        createTransactionInteract.sendTransaction(wallet, chainId, tx, signatureFromKey);
     }
 
     public Single<BigInteger> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount, BigInteger defaultLimit)
@@ -813,6 +785,37 @@ public class WalletConnectViewModel extends BaseViewModel
         catch (Exception e)
         {
             Timber.e(e);
+        }
+    }
+
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        transactionFinalised.postValue(txData);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn txError)
+    {
+        transactionError.postValue(txError);
+    }
+
+    @Override
+    public void transactionSigned(SignatureFromKey sigData, Web3Transaction w3Tx)
+    {
+        switch (sigData.sigType)
+        {
+            case SIGNATURE_GENERATED:
+                transactionSigned.postValue(sigData);
+                break;
+            case SIGNING_POSTPONED:
+            default:
+                break;
+            case KEY_FILE_ERROR:
+            case KEY_AUTHENTICATION_ERROR:
+            case KEY_CIPHER_ERROR:
+                transactionError(new TransactionReturn(new Throwable(sigData.failMessage), w3Tx));
+                break;
         }
     }
 }

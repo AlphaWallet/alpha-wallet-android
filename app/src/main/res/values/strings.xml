@@ -1024,4 +1024,6 @@
     <string name="enable_required_chains">Enable required chains?</string>
     <string name="enable_required_chains_message">Selected tokens are on chains currently not selected, enable unselected chains?</string>
     <string name="dialog_title_search_token">Search for Token?</string>
+    <string name="hardware_wallets">Hardware Wallets</string>
+    <string name="use_hardware_card">Use Hardware Card</string>
 </resources>

@@ -17,18 +17,19 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 
-import com.alphawallet.app.entity.DAppFunction;
-import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.ActionSheetDialog;
-import com.alphawallet.token.entity.Signable;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -70,6 +71,9 @@ public class TransactionDialogBuilder extends DialogFragment
     {
         viewModel = new ViewModelProvider((ViewModelStoreOwner) activity)
                 .get(WalletConnectViewModel.class);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionSigned().observe(this, this::txSigned);
+        viewModel.transactionError().observe(this, this::txError);
     }
 
     @NonNull
@@ -81,9 +85,9 @@ public class TransactionDialogBuilder extends DialogFragment
         }.getType();
         List<WCEthereumTransaction> list = new Gson().fromJson(sessionRequest.getRequest().getParams(), listType);
         WCEthereumTransaction wcTx = list.get(0);
-        final Web3Transaction w3Tx = new Web3Transaction(wcTx, 0);
-        Wallet fromWallet = viewModel.findWallet(wcTx.getFrom());
-        Token token = viewModel.getTokensService().getTokenOrBase(WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), w3Tx.recipient.toString());
+        final Web3Transaction w3Tx = new Web3Transaction(wcTx, wcTx.hashCode(), signOnly ? SignType.SIGN_TX : SignType.SEND_TX);
+        final Wallet fromWallet = viewModel.findWallet(wcTx.getFrom());
+        final Token token = viewModel.getTokensService().getTokenOrBase(WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), w3Tx.recipient.toString());
         actionSheetDialog = new ActionSheetDialog(activity, w3Tx, token, "", w3Tx.recipient.toString(), viewModel.getTokensService(), new ActionSheetCallback()
         {
             @Override
@@ -95,13 +99,34 @@ public class TransactionDialogBuilder extends DialogFragment
             @Override
             public void signTransaction(Web3Transaction tx)
             {
-                signMessage(fromWallet, tx, awWalletConnectClient);
+                viewModel.requestSignatureOnly(tx, fromWallet, WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())));
+            }
+
+            @Override
+            public WalletType getWalletType()
+            {
+                return fromWallet.type;
             }
 
             @Override
             public void sendTransaction(Web3Transaction tx)
             {
-                TransactionDialogBuilder.this.sendTransaction(fromWallet, tx, awWalletConnectClient);
+                viewModel.requestSignature(tx, fromWallet, WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())));
+            }
+
+            @Override
+            public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+            {
+                //This is the return from the hardware sign
+                //it could be either a send transaction or a sign transaction.
+                if (signOnly)
+                {
+                    txSigned(signature);
+                }
+                else
+                {
+                    viewModel.sendTransaction(fromWallet, token.tokenInfo.chainId, tx, signature);
+                }
             }
 
             @Override
@@ -153,42 +178,21 @@ public class TransactionDialogBuilder extends DialogFragment
         return actionSheetDialog;
     }
 
-    private void signMessage(Wallet fromWallet, Web3Transaction tx, AWWalletConnectClient awWalletConnectClient)
+    private void txWritten(TransactionReturn txData)
     {
-        viewModel.signTransaction(actionSheetDialog.getContext(), tx, new DAppFunction()
-        {
-            @Override
-            public void DAppError(Throwable error, Signable message)
-            {
-                reject(error, awWalletConnectClient);
-            }
-
-            @Override
-            public void DAppReturn(byte[] data, Signable message)
-            {
-                approve(Numeric.toHexString(data), awWalletConnectClient);
-                actionSheetDialog.transactionWritten(".");
-            }
-        }, Objects.requireNonNull(settledSession.getMetaData()).getUrl(), WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), fromWallet);
+        approve(txData.hash, awWalletConnectClient);
+        actionSheetDialog.transactionWritten(txData.hash);
     }
 
-    private void sendTransaction(Wallet wallet, Web3Transaction tx, AWWalletConnectClient awWalletConnectClient)
+    private void txSigned(SignatureFromKey sigData)
     {
-        viewModel.sendTransaction(tx, wallet, WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), new SendTransactionInterface()
-        {
-            @Override
-            public void transactionSuccess(Web3Transaction web3Tx, String hashData)
-            {
-                approve(hashData, awWalletConnectClient);
-                actionSheetDialog.transactionWritten(hashData);
-            }
+        approve(Numeric.toHexString(sigData.signature), awWalletConnectClient);
+        actionSheetDialog.transactionWritten(Numeric.toHexString(sigData.signature).substring(0, 66));
+    }
 
-            @Override
-            public void transactionError(long callbackId, Throwable error)
-            {
-                reject(error, awWalletConnectClient);
-            }
-        });
+    private void txError(TransactionReturn txError)
+    {
+        reject(txError.throwable, awWalletConnectClient);
     }
 
     private void reject(Throwable error, AWWalletConnectClient awWalletConnectClient)

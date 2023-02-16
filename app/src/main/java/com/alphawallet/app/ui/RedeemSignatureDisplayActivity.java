@@ -29,6 +29,7 @@ import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignaturePair;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.app.viewmodel.RedeemSignatureDisplayModel;
@@ -248,6 +249,12 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         });
         dialog.setCancelable(true);
         dialog.show();
+    }
+
+    @Override
+    public void gotSignature(SignatureFromKey signature)
+    {
+        viewModel.completeHardwareSign(signature);
     }
 
     private void dialogKeyNotAvailableError()

@@ -23,8 +23,8 @@ import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
-import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.interact.CreateTransactionInteract;
@@ -35,6 +35,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
 import com.alphawallet.app.ui.AddEditDappActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
@@ -47,6 +48,7 @@ import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
 
 import org.web3j.utils.Numeric;
 
@@ -64,12 +66,14 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 @HiltViewModel
-public class DappBrowserViewModel extends BaseViewModel
+public class DappBrowserViewModel extends BaseViewModel implements TransactionSendHandlerInterface
 {
     private static final int BALANCE_CHECK_INTERVAL_SECONDS = 20;
 
     private final MutableLiveData<NetworkInfo> activeNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
@@ -115,6 +119,16 @@ public class DappBrowserViewModel extends BaseViewModel
     public LiveData<Wallet> defaultWallet()
     {
         return defaultWallet;
+    }
+
+    public MutableLiveData<TransactionReturn> transactionFinalised()
+    {
+        return transactionFinalised;
+    }
+
+    public MutableLiveData<TransactionReturn> transactionError()
+    {
+        return transactionError;
     }
 
     public void findWallet()
@@ -264,22 +278,26 @@ public class DappBrowserViewModel extends BaseViewModel
         ctx.startActivity(intent);
     }
 
-    public void sendTransaction(final Web3Transaction finalTx, long chainId, SendTransactionInterface callback)
+    public void requestSignature(Web3Transaction finalTx, Wallet wallet, long chainId)
     {
-        if (finalTx.isConstructor())
-        {
-            disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.signature),
-                            error -> callback.transactionError(finalTx.leafPosition, error));
-        }
-        else
-        {
-            disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), finalTx, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.signature),
-                            error -> callback.transactionError(finalTx.leafPosition, error));
-        }
+        createTransactionInteract.requestSignature(finalTx, wallet, chainId, this);
+    }
+
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction w3Tx, SignatureFromKey signatureFromKey)
+    {
+        createTransactionInteract.sendTransaction(wallet, chainId, w3Tx, signatureFromKey);
+    }
+
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        transactionFinalised.postValue(txData);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn rtn)
+    {
+        transactionError.postValue(rtn);
     }
 
     public void showMyAddress(Context ctx)

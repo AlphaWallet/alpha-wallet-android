@@ -4,6 +4,7 @@ import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
 import android.content.Intent;
@@ -23,8 +24,9 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.GasService;
@@ -38,6 +40,7 @@ import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.NFTImageView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.TSAction;
 
 import java.math.BigInteger;
@@ -95,6 +98,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
                 .get(TokenFunctionViewModel.class);
         viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
         viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionError().observe(this, this::txError);
 
         if (getIntent() != null && getIntent().getExtras() != null) {
             asset = getIntent().getExtras().getParcelable(C.EXTRA_NFTASSET);
@@ -287,11 +291,26 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
 
     /**
      * Final return path
-     * @param transactionData
+     * @param transactionReturn
      */
-    private void txWritten(TransactionData transactionData)
+    private void txWritten(TransactionReturn transactionReturn)
     {
-        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+        confirmationDialog.transactionWritten(transactionReturn.hash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+    }
+
+    private void txError(TransactionReturn errorReturn)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(ERROR);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(errorReturn.throwable.getMessage());
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+        confirmationDialog.dismiss();
     }
 
     @Override
@@ -303,7 +322,13 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, token.tokenInfo.chainId, ""); //return point is txWritten
+        viewModel.requestSignature(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(viewModel.getWallet(), token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -325,5 +350,11 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
         return getGasSettings;
+    }
+
+    @Override
+    public WalletType getWalletType()
+    {
+        return viewModel.getWallet().type;
     }
 }

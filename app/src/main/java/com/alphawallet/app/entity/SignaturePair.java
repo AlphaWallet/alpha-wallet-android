@@ -1,11 +1,8 @@
 package com.alphawallet.app.entity;
 
-import org.web3j.utils.Numeric;
+import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.hardware.SignatureReturnType;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +26,8 @@ public class SignaturePair
     private static final int TRAILING_ZEROES_SIZE = 3; //gives the fixed length of the trailing zeroes after selection
 
     public byte[] selection;
-    public byte[] signature;
+    public SignatureFromKey signature;
+    //public byte[] signature;
     public final String message;
 
     public String signatureStr;
@@ -38,17 +36,18 @@ public class SignaturePair
     /**
      * You might expect the code to combine the message and signature
      * to be in this class - it is not.
+     *
      * @param selection what is returned from generate
      * @param sig       65 bytes of signature
      * @param message   the message being signed, including the 'selection'.
      */
-    public SignaturePair(String selection, byte[] sig, String message)
+    public SignaturePair(String selection, SignatureFromKey sig, String message)
     {
         selectionStr = selection;
         signature = sig;
 
-        BigInteger bi = new BigInteger(1, signature);
-        signatureStr  = bi.toString(10);
+        BigInteger bi = new BigInteger(1, signature.signature);
+        signatureStr = bi.toString(10);
         this.message = message;
     }
 
@@ -61,19 +60,21 @@ public class SignaturePair
     }
 
     //should only be one by one for now
+
     /**
      * Note: all values must be in decimal (base 10) to allow the QR encoding optimiser to work most efficiently
-     *
+     * <p>
      * Format is:
      * one decimal digit for future proofing in case we add to this format
      * two decimal digits giving length of the decimal encoded token ID
      * remaining digits are the signature in decimal
-     *
      */
-    public static String generateSelection721Tickets(List<BigInteger> tokenIds) {
+    public static String generateSelection721Tickets(List<BigInteger> tokenIds)
+    {
         String prefix = "0"; //future proof the format - this is one digit to refer to token count or protocol format
         StringBuilder stringBuilder = new StringBuilder();
-        for(BigInteger token: tokenIds) {
+        for (BigInteger token : tokenIds)
+        {
             stringBuilder.append(token.toString(10));
             stringBuilder.append(",");
         }
@@ -86,7 +87,8 @@ public class SignaturePair
      * Generate a compact string representation of the indices of an
      * ERC875 asset.  Notice that this function is not used in this
      * class. It is used to return the selectionStr to be used as a
-     * parameter of the constructor */
+     * parameter of the constructor
+     */
     public static String generateSelection(List<BigInteger> indexList)
     {
         Collections.sort(indexList); // just to find the lowest value
@@ -104,7 +106,8 @@ public class SignaturePair
         indexList = indexList - correctionFactor # reduce every element of the list by an int
         selection = sum(2^indexList)             # raise every element and add the result back */
         BigInteger bitFieldLookup = BigInteger.ZERO;
-        for (BigInteger i : indexList) {
+        for (BigInteger i : indexList)
+        {
             BigInteger adder = BigInteger.valueOf(2).pow(i.intValue() - correctionFactor);
             bitFieldLookup = bitFieldLookup.add(adder);
         }
@@ -124,7 +127,8 @@ public class SignaturePair
     /**
      * The reverse of generateSelection - used in scanning the QR code.
      */
-    public static List<Integer> buildIndexList(String selection) {
+    public static List<Integer> buildIndexList(String selection)
+    {
         List<Integer> intList = new ArrayList<>();
         final int NIBBLE = 4;
         //one: convert to bigint
@@ -135,7 +139,7 @@ public class SignaturePair
         int correctionFactor = trailingZeros * NIBBLE;
 
         String selectionStr = selection.substring(SELECTION_DESIGNATOR_SIZE + TRAILING_ZEROES_SIZE,
-                                                  SELECTION_DESIGNATOR_SIZE + TRAILING_ZEROES_SIZE + selectionLength);
+                SELECTION_DESIGNATOR_SIZE + TRAILING_ZEROES_SIZE + selectionLength);
         BigInteger bitField = new BigInteger(selectionStr, 10);
 
         int radix = bitField.getLowestSetBit();
@@ -167,25 +171,27 @@ public class SignaturePair
 
         BigInteger sigBi = new BigInteger(signatureStr, 10);
         //Now convert sig back to Byte
-        signature = sigBi.toByteArray();
+        signature = new SignatureFromKey();
+        signature.sigType = SignatureReturnType.SIGNATURE_GENERATED;
+        signature.signature = sigBi.toByteArray();
 
-        if (signature.length < 65)
+        if (signature.signature.length < 65)
         {
-            int offset = 65 - signature.length;
+            int offset = 65 - signature.signature.length;
             byte[] sigCopy = new byte[65];
-            System.arraycopy(signature, 0, sigCopy, offset, 65-offset);
+            System.arraycopy(signature.signature, 0, sigCopy, offset, 65 - offset);
             for (int i = 0; i < offset; i++)
             {
                 sigCopy[i] = 0;
             }
-            signature = sigCopy;
+            signature.signature = sigCopy;
         }
-        else if (signature.length > 65)
+        else if (signature.signature.length > 65)
         {
             byte[] sigCopy = new byte[65];
             //prune the first digit
-            System.arraycopy(signature, 1, sigCopy, 0, 65);
-            signature = sigCopy;
+            System.arraycopy(signature.signature, 1, sigCopy, 0, 65);
+            signature.signature = sigCopy;
         }
     }
 

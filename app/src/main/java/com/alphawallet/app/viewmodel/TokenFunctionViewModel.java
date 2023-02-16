@@ -20,7 +20,7 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -37,6 +37,7 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
 import com.alphawallet.app.ui.AssetDisplayActivity;
 import com.alphawallet.app.ui.Erc1155AssetSelectActivity;
 import com.alphawallet.app.ui.Erc20DetailActivity;
@@ -52,6 +53,7 @@ import com.alphawallet.app.util.JsonUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.FunctionDefinition;
@@ -93,7 +95,7 @@ import timber.log.Timber;
  * Stormbird in Singapore
  */
 @HiltViewModel
-public class TokenFunctionViewModel extends BaseViewModel
+public class TokenFunctionViewModel extends BaseViewModel implements TransactionSendHandlerInterface
 {
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
@@ -109,14 +111,13 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
     private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
     private final MutableLiveData<Wallet> walletUpdate = new MutableLiveData<>();
-    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
-    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
     private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
     private final MutableLiveData<List<OpenSeaAsset.Trait>> traits = new MutableLiveData<>();
     private final MutableLiveData<AssetContract> assetContract = new MutableLiveData<>();
     private final MutableLiveData<NFTAsset> nftAsset = new MutableLiveData<>();
     private final MutableLiveData<Boolean> scriptUpdateInProgress = new MutableLiveData<>();
-
     private Wallet wallet;
 
     @Nullable
@@ -191,12 +192,12 @@ public class TokenFunctionViewModel extends BaseViewModel
         return scriptUpdateInProgress;
     }
 
-    public MutableLiveData<TransactionData> transactionFinalised()
+    public MutableLiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
     }
 
-    public MutableLiveData<Throwable> transactionError()
+    public MutableLiveData<TransactionReturn> transactionError()
     {
         return transactionError;
     }
@@ -690,23 +691,6 @@ public class TokenFunctionViewModel extends BaseViewModel
         return tokensService;
     }
 
-    public void getAuthentication(Activity activity, SignAuthenticationCallback callback)
-    {
-        genericWalletInteract.find()
-                .subscribe(wallet -> keyService.getAuthenticationForSignature(wallet, activity, callback))
-                .isDisposed();
-    }
-
-    public void sendTransaction(Web3Transaction finalTx, long chainId, String overridenTxHash)
-    {
-        disposable = createTransactionInteract
-                .createWithSig(wallet, finalTx, chainId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(transactionFinalised::postValue,
-                        transactionError::postValue);
-    }
-
     public void actionSheetConfirm(String mode)
     {
         AnalyticsProperties props = new AnalyticsProperties();
@@ -927,5 +911,41 @@ public class TokenFunctionViewModel extends BaseViewModel
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(v -> { }, this::onError)
                 .isDisposed();
+    }
+
+    //Transaction handling
+
+    public void getAuthentication(Activity activity, SignAuthenticationCallback callback)
+    {
+        genericWalletInteract.find()
+                .subscribe(wallet -> keyService.getAuthenticationForSignature(wallet, activity, callback))
+                .isDisposed();
+    }
+
+    public void getAuthentication(Activity activity, Wallet wallet, SignAuthenticationCallback callback)
+    {
+        keyService.getAuthenticationForSignature(wallet, activity, callback);
+    }
+
+    public void requestSignature(Web3Transaction finalTx, Wallet wallet, long chainId)
+    {
+        createTransactionInteract.requestSignature(finalTx, wallet, chainId, this);
+    }
+
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction tx, SignatureFromKey signatureFromKey)
+    {
+        createTransactionInteract.sendTransaction(wallet, chainId, tx, signatureFromKey);
+    }
+
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        transactionFinalised.postValue(txData);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn rtn)
+    {
+        transactionError.postValue(rtn);
     }
 }

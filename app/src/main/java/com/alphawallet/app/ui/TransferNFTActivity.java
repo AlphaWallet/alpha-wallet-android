@@ -30,7 +30,8 @@ import com.alphawallet.app.entity.EnsNodeNotSyncCallback;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -53,6 +54,7 @@ import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.tools.Numeric;
 
 import org.jetbrains.annotations.NotNull;
@@ -406,7 +408,13 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+        viewModel.requestSignature(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(viewModel.getWallet(), token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -439,19 +447,25 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
         return getGasSettings;
     }
 
-    private void txWritten(TransactionData transactionData)
+    @Override
+    public WalletType getWalletType()
     {
-        actionDialog.transactionWritten(transactionData.txHash);
+        return viewModel.getWallet().type;
+    }
+
+    private void txWritten(TransactionReturn txReturn)
+    {
+        actionDialog.transactionWritten(txReturn.hash);
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(ERROR);
         dialog.setTitle(R.string.error_transaction_failed);
-        dialog.setMessage(throwable.getMessage());
+        dialog.setMessage(txError.throwable.getMessage());
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();

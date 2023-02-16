@@ -2,17 +2,23 @@ package com.alphawallet.app.repository;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
+import android.text.TextUtils;
+import android.util.Pair;
+
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AccountKeystoreService;
 import com.alphawallet.app.service.TransactionsService;
+import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.hardware.SignatureReturnType;
 import com.alphawallet.token.entity.Signable;
 
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.transaction.type.ITransaction;
+import org.web3j.crypto.transaction.type.Transaction1559;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.utils.Numeric;
@@ -60,6 +66,52 @@ public class TransactionRepository implements TransactionRepositoryType
     }
 
     @Override
+    public Single<Pair<SignatureFromKey, RawTransaction>> signTransaction(Wallet from, Web3Transaction w3Tx, long chainId)
+    {
+        return getNonceForTransaction(getWeb3jService(chainId), from.address, w3Tx.nonce) //Note here if the supplied nonce is zero or greater then simply pass that on
+                .map(txNonce -> formatRawTransaction(w3Tx, txNonce.longValue(), chainId))
+                .map(rtx -> new Pair<>(accountKeystoreService.signTransaction(from, chainId, rtx).blockingGet(),
+                        rtx))
+                .subscribeOn(Schedulers.io());
+    }
+
+    @Override
+    public RawTransaction formatRawTransaction(Web3Transaction w3Tx, long nonce, long chainId)
+    {
+        if (w3Tx.isLegacyTransaction())
+        {
+            return formatRawTransaction(w3Tx.getTransactionDestination().toString(), w3Tx.value, w3Tx.gasPrice, w3Tx.gasLimit, nonce,
+                    !TextUtils.isEmpty(w3Tx.payload) ? Numeric.hexStringToByteArray(w3Tx.payload) : new byte[0]);
+        }
+        else
+        {
+            return formatRawTransaction(w3Tx.getTransactionDestination().toString(), chainId, w3Tx.value, w3Tx.gasLimit, w3Tx.maxPriorityFeePerGas,
+                    w3Tx.maxFeePerGas, nonce, !TextUtils.isEmpty(w3Tx.payload) ? Numeric.hexStringToByteArray(w3Tx.payload) : new byte[0]);
+        }
+    }
+
+    @Override
+    public Single<String> sendTransaction(Wallet from, RawTransaction rtx, SignatureFromKey sigData, long chainId)
+    {
+        return Single.fromCallable(() -> {
+            if (sigData.sigType != SignatureReturnType.SIGNATURE_GENERATED)
+            {
+                throw new Exception(sigData.failMessage);
+            }
+            EthSendTransaction raw = getWeb3jService(chainId)
+                    .ethSendRawTransaction(Numeric.toHexString(sigData.signature))
+                    .send();
+            if (raw.hasError())
+            {
+                throw new Exception(raw.getError().getMessage());
+            }
+            return raw.getTransactionHash();
+        }).flatMap(txHash -> storeUnconfirmedTransaction(from, txHash, rtx.getTransaction(), chainId, rtx.getData().length() > 2 ? rtx.getTo() : ""))
+        .subscribeOn(Schedulers.io());
+    }
+
+    //TODO: Re-do this for separate signing
+    @Override
     public Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
     {
         final Web3j web3j = getWeb3jService(chainId);
@@ -84,146 +136,34 @@ public class TransactionRepository implements TransactionRepositoryType
                 .subscribeOn(Schedulers.io());
     }
 
-    @Override
-    public Single<TransactionData> create1559TransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasLimit, BigInteger maxFeePerGas,
-                                                                BigInteger maxPriorityFee, long nonce, byte[] data, long chainId)
-    {
-        final Web3j web3j = getWeb3jService(chainId);
-
-        TransactionData txData = new TransactionData();
-
-        return getNonceForTransaction(web3j, from.address, nonce)
-                .flatMap(txNonce -> {
-                    txData.nonce = txNonce;
-                    return accountKeystoreService.signTransactionEIP1559(from, toAddress, subunitAmount, gasLimit, maxFeePerGas, maxPriorityFee, txNonce.longValue(), data, chainId);
-                })
-                .flatMap(signedMessage -> Single.fromCallable(() -> {
-                    if (signedMessage.sigType != SignatureReturnType.SIGNATURE_GENERATED)
-                    {
-                        throw new Exception(signedMessage.failMessage);
-                    }
-                    txData.signature = Numeric.toHexString(signedMessage.signature);
-                    EthSendTransaction raw = web3j
-                            .ethSendRawTransaction(Numeric.toHexString(signedMessage.signature))
-                            .send();
-                    if (raw.hasError())
-                    {
-                        throw new Exception(raw.getError().getMessage());
-                    }
-                    txData.txHash = raw.getTransactionHash();
-                    return txData;
-                }))
-                .flatMap(tx -> storeUnconfirmedTransaction(from, tx, toAddress, subunitAmount, tx.nonce, maxFeePerGas, maxPriorityFee, gasLimit, chainId,
-                        data != null ? Numeric.toHexString(data) : "0x", ""))
-                .subscribeOn(Schedulers.io());
-    }
-
-    @Override
-    public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId)
-    {
-        final Web3j web3j = getWeb3jService(chainId);
-        final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
-
-        TransactionData txData = new TransactionData();
-
-        return getNonceForTransaction(web3j, from.address, nonce)
-                .flatMap(txNonce -> {
-                    txData.nonce = txNonce;
-                    return accountKeystoreService.signTransaction(from, toAddress, subunitAmount, useGasPrice, gasLimit, txNonce.longValue(), data, chainId);
-                })
-                .flatMap(signedMessage -> Single.fromCallable(() -> {
-                    if (signedMessage.sigType != SignatureReturnType.SIGNATURE_GENERATED)
-                    {
-                        throw new Exception(signedMessage.failMessage);
-                    }
-                    txData.signature = Numeric.toHexString(signedMessage.signature);
-                    EthSendTransaction raw = web3j
-                            .ethSendRawTransaction(Numeric.toHexString(signedMessage.signature))
-                            .send();
-                    if (raw.hasError())
-                    {
-                        throw new Exception(raw.getError().getMessage());
-                    }
-                    txData.txHash = raw.getTransactionHash();
-                    return txData;
-                }))
-                .flatMap(tx -> storeUnconfirmedTransaction(from, tx, toAddress, subunitAmount, tx.nonce, useGasPrice, gasLimit, chainId,
-                        data != null ? Numeric.toHexString(data) : "0x", ""))
-                .subscribeOn(Schedulers.io());
-    }
-
-    /**
-     * * Given a Web3Transaction, return a signature. Note that we can't fix up nonce, gas price or limit;
-     * * This is a request to sign a transaction from an external source -
-     * * presumably that external source will broadcast the transaction; together with this signature
-     *
-     * @param from
-     * @param toAddress
-     * @param subunitAmount
-     * @param gasPrice
-     * @param gasLimit
-     * @param nonce
-     * @param data
-     * @param chainId
-     * @return
-     */
-    @Override
-    public Single<TransactionData> getSignatureForTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, long nonce,
-                                                              byte[] data, long chainId)
-    {
-        final Web3j web3j = getWeb3jService(chainId);
-        final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
-        TransactionData txData = new TransactionData();
-
-        return getNonceForTransaction(web3j, from.address, nonce)
-                .flatMap(txNonce -> {
-                    txData.nonce = txNonce;
-                    return accountKeystoreService.signTransaction(from, toAddress, subunitAmount, useGasPrice, gasLimit, txNonce.longValue(), data, chainId);
-                })
-                .flatMap(signedMessage -> Single.fromCallable(() -> {
-                    if (signedMessage.sigType != SignatureReturnType.SIGNATURE_GENERATED)
-                    {
-                        throw new Exception(signedMessage.failMessage);
-                    }
-                    txData.signature = Numeric.toHexString(signedMessage.signature);
-                    return txData;
-                }));
-    }
-
     private BigInteger gasPriceForNode(long chainId, BigInteger gasPrice)
     {
         if (EthereumNetworkRepository.hasGasOverride(chainId)) return EthereumNetworkRepository.gasOverrideValue(chainId);
         else return gasPrice;
     }
 
-    //EIP1559
-    private Single<TransactionData> storeUnconfirmedTransaction(Wallet from, TransactionData txData, String toAddress, BigInteger value, BigInteger nonce, BigInteger maxFeePerGas,
-                                                                BigInteger maxPriorityFee, BigInteger gasLimit, long chainId, String data, String contractAddr)
+    private Single<String> storeUnconfirmedTransaction(Wallet from, String txHash, ITransaction itx, long chainId, String contractAddr)
     {
         return Single.fromCallable(() -> {
-            Transaction newTx = new Transaction(txData.txHash, "0", "0", System.currentTimeMillis() / 1000, nonce.intValue(), from.address, toAddress,
-                    value.toString(10), "0", "0", maxFeePerGas.toString(10),
-                    maxPriorityFee.toString(10), data,
-                    gasLimit.toString(10), chainId, contractAddr);
+            Transaction newTx;
+            if (itx instanceof Transaction1559)
+            {
+                newTx = new Transaction(txHash, "0", "0", System.currentTimeMillis() / 1000, itx.getNonce().intValue(), from.address,
+                        itx.getTo(), itx.getValue().toString(10), "0", "0", ((Transaction1559) itx).getMaxFeePerGas().toString(10),
+                        ((Transaction1559) itx).getMaxPriorityFeePerGas().toString(10), itx.getData(),
+                        itx.getGasLimit().toString(10), chainId, contractAddr);
+            }
+            else
+            {
+                newTx = new Transaction(txHash, "0", "0", System.currentTimeMillis() / 1000, itx.getNonce().intValue(), from.address,
+                        itx.getTo(), itx.getValue().toString(10), "0", itx.getGasPrice().toString(10), itx.getData(),
+                        itx.getGasLimit().toString(10), chainId, contractAddr);
+            }
+
             inDiskCache.putTransaction(from, newTx);
             transactionsService.markPending(newTx);
 
-            return txData;
-        });
-    }
-
-    private Single<TransactionData> storeUnconfirmedTransaction(Wallet from, TransactionData txData, String toAddress, BigInteger value, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit,
-                                                                long chainId, String data, String contractAddr)
-    {
-        return Single.fromCallable(() -> {
-            Transaction newTx = new Transaction(txData.txHash, "0", "0", System.currentTimeMillis() / 1000, nonce.intValue(), from.address, toAddress,
-                    value.toString(10), "0", gasPrice.toString(10), data,
-                    gasLimit.toString(10), chainId, contractAddr);
-            //newTx.completeSetup(from.address);
-            inDiskCache.putTransaction(from, newTx);
-            transactionsService.markPending(newTx);
-
-            return txData;
+            return txHash;
         });
     }
 
@@ -301,5 +241,59 @@ public class TransactionRepository implements TransactionRepositoryType
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet);
         }
+    }
+
+    /**
+     * Format a legacy transaction
+     */
+    private RawTransaction formatRawTransaction(String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data)
+    {
+        String dataStr = data != null ? Numeric.toHexString(data) : "";
+
+        if (TextUtils.isEmpty(toAddress)) //This transaction is a constructor
+        {
+            return RawTransaction.createContractTransaction(
+                    BigInteger.valueOf(nonce),
+                    gasPrice,
+                    gasLimit,
+                    amount,
+                    dataStr);
+        }
+        else
+        {
+            return RawTransaction.createTransaction(
+                    BigInteger.valueOf(nonce),
+                    gasPrice,
+                    gasLimit,
+                    toAddress,
+                    amount,
+                    dataStr);
+        }
+    }
+
+    /**
+     * Format an ERC1559 Transaction
+     */
+    private RawTransaction formatRawTransaction(String toAddress,
+                                                long chainId,
+                                                BigInteger amount,
+                                                BigInteger gasLimit,
+                                                BigInteger maxPriorityFeePerGas,
+                                                BigInteger maxFeePerGas,
+                                                long nonce,
+                                                byte[] data)
+    {
+        String dataStr = data != null ? Numeric.toHexString(data) : "";
+
+        return RawTransaction.createTransaction(
+                chainId,
+                BigInteger.valueOf(nonce),
+                gasLimit,
+                toAddress,
+                amount,
+                dataStr,
+                maxPriorityFeePerGas,
+                maxFeePerGas
+        );
     }
 }

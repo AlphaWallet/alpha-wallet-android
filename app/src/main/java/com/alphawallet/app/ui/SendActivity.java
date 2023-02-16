@@ -31,8 +31,9 @@ import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -53,6 +54,7 @@ import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.InputAmount;
 import com.alphawallet.app.widget.SignTransactionDialog;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.Convert;
 import com.alphawallet.token.tools.Numeric;
@@ -587,7 +589,8 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         long leafCode = amountInput.isSendAll() ? -2 : -1;
         Web3Transaction w3tx = new Web3Transaction(
                 new Address(txSendAddress),
-                new Address(token.getAddress()),
+                token.isEthereum() ? null : new Address(token.getAddress()),
+                new Address(wallet.address),
                 ethValue,
                 sendGasPrice.toBigInteger(),
                 sendGasLimit,
@@ -624,7 +627,14 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, wallet, token.tokenInfo.chainId);
+        viewModel.requestSignature(finalTx, wallet, token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        //complete sending the transaction
+        viewModel.sendTransaction(wallet, token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -658,22 +668,28 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         viewModel.track(Analytics.Action.ACTION_SHEET_COMPLETED, props);
     }
 
-    private void txWritten(TransactionData transactionData)
+    @Override
+    public WalletType getWalletType()
     {
-        confirmationDialog.transactionWritten(transactionData.txHash);
+        return wallet.type;
+    }
+
+    private void txWritten(TransactionReturn txData)
+    {
+        confirmationDialog.transactionWritten(txData.hash);
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
-        Timber.d("txError: %s", throwable.getMessage());
-        if (throwable instanceof SocketTimeoutException)
+        Timber.d("txError: %s", txError.throwable.getMessage());
+        if (txError.throwable instanceof SocketTimeoutException)
         {
             showTxnTimeoutDialog();
         }
         else
         {
-            showTxnErrorDialog(throwable);
+            showTxnErrorDialog(txError.throwable);
         }
         confirmationDialog.dismiss();
     }

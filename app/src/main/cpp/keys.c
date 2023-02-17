@@ -226,3 +226,14 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getUnstoppableDomainsKey(
     return (*env)->NewStringUTF(env, key);
 #endif
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getOkLinkKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, oklinkKey);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}

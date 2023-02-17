@@ -7,6 +7,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 
@@ -382,7 +383,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private EtherscanTransaction[] readTransactions(NetworkInfo networkInfo, TokensService svs, String tokenAddress, String firstBlock, boolean ascending, int page, int pageSize) throws JSONException
     {
         if (networkInfo == null) return new EtherscanTransaction[0];
-        if (networkInfo.etherscanAPI.contains(COVALENT)) { return readCovalentTransactions(svs, tokenAddress, networkInfo, ascending, page, pageSize); }
+        if (networkInfo.etherscanAPI.contains(COVALENT))
+        {
+            return readCovalentTransactions(svs, tokenAddress, networkInfo, ascending, page, pageSize);
+        }
+        else if (networkInfo.chainId == OKX_ID)
+        {
+            return new EtherscanTransaction[0];
+        }
 
         String result = null;
         String fullUrl;
@@ -429,9 +437,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
 
             Request request = new Request.Builder()
-                    .url(fullUrl)
-                    .get()
-                    .build();
+                .url(fullUrl)
+                .get()
+                .build();
 
             try (okhttp3.Response response = httpClient.newCall(request).execute())
             {
@@ -513,19 +521,21 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             int eventCount = 0;
             try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
             {
-                //get last tokencheck
-                long lastBlockChecked = getTokenBlockRead(instance, networkInfo.chainId, tfType);
-                //fetch transfers from end point
-                String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, lastBlockChecked, tfType.name());
-
-                if (fetchTransactions != null && fetchTransactions.length() > 100)
+                EtherscanEvent[] events;
+                if (networkInfo.chainId == OKX_ID)
                 {
-                    //convert to gson
-                    EtherscanEvent[] events = getEtherscanEvents(fetchTransactions);
-
-                    eventCount = processEtherscanEvents(instance, walletAddress, networkInfo,
-                            svs, events, tfType);
+                    events = OkLinkService.get(httpClient).getEtherscanEvents(walletAddress, tfType);
                 }
+                else
+                {
+                    //get last tokencheck
+                    long lastBlockChecked = getTokenBlockRead(instance, networkInfo.chainId, tfType);
+                    //fetch transfers from end point
+                    String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, lastBlockChecked, tfType.getValue());
+                    events = getEtherscanEvents(fetchTransactions);
+                }
+
+                eventCount = processEtherscanEvents(instance, walletAddress, networkInfo, svs, events, tfType);
             }
             catch (Exception e)
             {
@@ -565,7 +575,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             int tokenDecimal = calcTokenDecimals(ev0);
 
-            if ((tfType == TransferFetchType.token1155tx || ev0.isERC1155(entry.getValue())) &&
+            if ((tfType == TransferFetchType.ERC_1155 || ev0.isERC1155(entry.getValue())) &&
                     (token == null || token.getInterfaceSpec() != ContractType.ERC1155))
             {
                 token = createNewERC1155Token(entry.getValue().get(0), networkInfo, walletAddress);
@@ -678,10 +688,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         if (currentBlock == 0) currentBlock = 1;
 
         String fullUrl = networkInfo.etherscanAPI + "module=account&action=" + queryType +
-                "&startblock=" + currentBlock + "&endblock=9999999999" +
-                "&address=" + walletAddress +
-                "&page=1&offset=" + TRANSFER_RESULT_MAX +
-                "&sort=asc" + getNetworkAPIToken(networkInfo);
+            "&startblock=" + currentBlock + "&endblock=9999999999" +
+            "&address=" + walletAddress +
+            "&page=1&offset=" + TRANSFER_RESULT_MAX +
+            "&sort=asc" + getNetworkAPIToken(networkInfo);
 
 
         if (networkInfo.isCustom && !Utils.isValidUrl(networkInfo.etherscanAPI))
@@ -690,11 +700,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
 
         Request request = new Request.Builder()
-                .url(fullUrl)
-                .header("User-Agent", "Chrome/74.0.3729.169")
-                .method("GET", null)
-                .addHeader("Content-Type", "application/json")
-                .build();
+            .url(fullUrl)
+            .header("User-Agent", "Chrome/74.0.3729.169")
+            .method("GET", null)
+            .addHeader("Content-Type", "application/json")
+            .build();
 
         try (okhttp3.Response response = httpClient.newCall(request).execute())
         {
@@ -782,7 +792,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         try (Realm instance = realmManager.getRealmInstance(new Wallet(svs.getCurrentAddress())))
         {
             processEtherscanEvents(instance, svs.getCurrentAddress(), networkInfo,
-                    svs, events, TransferFetchType.tokentx);
+                    svs, events, TransferFetchType.ERC_20);
         }
         catch (Exception e)
         {
@@ -809,12 +819,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             switch (tfType)
             {
-                case tokentx:
+                case ERC_20:
                 default:
                     return rd.getResultTime();
-                case tokennfttx:
+                case ERC_721:
                     return rd.getResultReceivedTime();
-                case token1155tx:
+                case ERC_1155:
                     return rd.getChainId();
             }
         }
@@ -835,14 +845,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             switch (tfType)
             {
-                case tokentx:
+                case ERC_20:
                 default:
                     rd.setResultTime(lastBlockChecked);
                     break;
-                case tokennfttx:
+                case ERC_721:
                     rd.setResultReceivedTime(lastBlockChecked);
                     break;
-                case token1155tx:
+                case ERC_1155:
                     rd.setChainId(lastBlockChecked);
                     break;
             }

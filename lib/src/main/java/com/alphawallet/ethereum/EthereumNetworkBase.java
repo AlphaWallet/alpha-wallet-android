@@ -43,6 +43,7 @@ public abstract class EthereumNetworkBase
     public static final long SEPOLIA_TESTNET_ID = 11155111;
     public static final long OPTIMISM_GOERLI_TEST_ID = 420;
     public static final long ARBITRUM_GOERLI_TEST_ID = 421613;
+    public static final long OKX_ID = 66;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -79,6 +80,7 @@ public abstract class EthereumNetworkBase
     public static final String ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL = "https://goerli-rollup.arbitrum.io/rpc";
     public static final String IOTEX_MAINNET_RPC_URL = "https://babel-api.mainnet.iotex.io";
     public static final String IOTEX_TESTNET_RPC_URL = "https://babel-api.testnet.iotex.io";
+    public static final String OKX_RPC_URL = "https://exchainrpc.okex.org";
 
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>()
     {
@@ -156,6 +158,8 @@ public abstract class EthereumNetworkBase
                     IOTEX_MAINNET_ID, false));
             put(IOTEX_TESTNET_ID, new NetworkInfo("IoTeX (Test)", "IOTX", IOTEX_TESTNET_RPC_URL, "https://testnet.iotexscan.io/tx/",
                     IOTEX_TESTNET_ID, false));
+            put(OKX_ID, new NetworkInfo("OKXChain Mainnet", "OKT", OKX_RPC_URL, "https://www.oklink.com/en/okc",
+                OKX_ID, false));
         }
     };
 

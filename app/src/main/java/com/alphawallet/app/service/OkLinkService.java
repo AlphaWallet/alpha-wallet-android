@@ -81,30 +81,36 @@ public class OkLinkService
         return JsonUtils.EMPTY_RESULT;
     }
 
-    public EtherscanEvent[] getEtherscanEvents(String address, TransferFetchType tfType)
+    public EtherscanEvent[] getEtherscanEvents(String address, long lastBlockRead, TransferFetchType tfType)
     {
         String protocolType = getOkxFetchType(tfType);
         List<OkxEvent> events = new ArrayList<>();
         int page = 1;
         int totalPage = 0;
+        boolean reachedPreviousRead;
 
         do
         {
-            TransactionListResponse response2 = new Gson().fromJson(
+            TransactionListResponse response = new Gson().fromJson(
                 fetchTransactions(address, protocolType, String.valueOf(page++)),
                 TransactionListResponse.class);
 
-            if (response2.data.size() > 0)
+            if (response.data != null && response.data.size() > 0)
             {
-                String totalPageStr = response2.data.get(0).totalPage;
+                String totalPageStr = response.data.get(0).totalPage;
                 if (!TextUtils.isEmpty(totalPageStr))
                 {
                     totalPage = Integer.parseInt(totalPageStr);
                 }
-                events.addAll(response2.data.get(0).transactionLists);
+                events.addAll(response.data.get(0).transactionLists);
+                reachedPreviousRead = compareEventsWithLastRead(events, lastBlockRead);
+            }
+            else
+            {
+                break;
             }
         }
-        while (page <= totalPage);
+        while (page <= totalPage && !reachedPreviousRead);
 
         List<EtherscanEvent> etherscanEvents = new ArrayList<>();
         for (OkxEvent ev : events)
@@ -121,6 +127,21 @@ public class OkLinkService
         }
 
         return etherscanEvents.toArray(new EtherscanEvent[0]);
+    }
+
+    //@SuppressWarnings("ConstantConditions")
+    private boolean compareEventsWithLastRead(List<OkxEvent> events, long lastBlockRead)
+    {
+        for (OkxEvent ev : events)
+        {
+            long height = Long.parseLong(ev.height);
+            if (height < lastBlockRead)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public String fetchTransactions(String address,

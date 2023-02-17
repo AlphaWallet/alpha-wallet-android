@@ -91,8 +91,6 @@ public class OkxEvent
         ev.tokenSymbol = transactionSymbol;
         ev.contractAddress = tokenContractAddress;
         ev.blockNumber = String.valueOf(height);
-        ev.value = amount;
-
         ev.from = from;
         ev.to = to;
         ev.tokenID = String.valueOf(tokenId);
@@ -100,7 +98,7 @@ public class OkxEvent
         if (!isNft)
         {
             int decimals = 18; // TODO: decimals can be found via OkLinkService.getTokenDetails();
-            BigDecimal bi = new BigDecimal(ev.value);
+            BigDecimal bi = new BigDecimal(amount);
             ev.value = BalanceUtils.getScaledValueMinimal(bi,
                 decimals, 5);
             ev.tokenDecimal = "18";
@@ -109,6 +107,7 @@ public class OkxEvent
         {
             ev.value = amount;
             ev.tokenDecimal = "";
+            ev.tokenValue = amount;
         }
 
         ev.gasUsed = "0"; // TODO:

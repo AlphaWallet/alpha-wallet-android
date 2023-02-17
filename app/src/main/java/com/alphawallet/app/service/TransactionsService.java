@@ -169,7 +169,8 @@ public class TransactionsService
     private void checkTransfers()
     {
         List<Long> filters = tokensService.getNetworkFilters();
-        if (tokensService.getCurrentAddress() == null || filters.size() == 0)
+        if (tokensService.getCurrentAddress() == null || filters.size() == 0 ||
+                (BuildConfig.DEBUG && eventFetch != null)) //don't allow multiple calls while debugging
         {
             return; //skip check if the service isn't set up
         }

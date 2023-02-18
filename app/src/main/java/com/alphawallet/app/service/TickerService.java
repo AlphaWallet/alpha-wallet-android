@@ -773,6 +773,7 @@ public class TickerService
         put(AURORA_MAINNET_ID, "aurora");
         put(MILKOMEDA_C1_ID, "cardano");
         put(CRONOS_MAIN_ID, "crypto-com-chain");
+        put(OKX_ID, "okb");
     }};
 
     public static boolean validateCoinGeckoAPI(Token token)

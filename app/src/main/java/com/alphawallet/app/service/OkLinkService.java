@@ -134,10 +134,13 @@ public class OkLinkService
     {
         for (OkxEvent ev : events)
         {
-            long height = Long.parseLong(ev.height);
-            if (height < lastBlockRead)
+            if (!TextUtils.isEmpty(ev.height))
             {
-                return true;
+                long height = Long.parseLong(ev.height);
+                if (height < lastBlockRead)
+                {
+                    return true;
+                }
             }
         }
 

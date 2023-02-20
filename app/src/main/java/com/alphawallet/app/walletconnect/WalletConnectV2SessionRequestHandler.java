@@ -5,6 +5,7 @@ import android.app.Activity;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
+import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.walletconnect.entity.BaseRequest;
 import com.alphawallet.app.walletconnect.entity.EthSignRequest;
@@ -51,7 +52,7 @@ public class WalletConnectV2SessionRequestHandler
         boolean isSendTransaction = "eth_sendTransaction".equals(method);
         if (isSendTransaction || isSignTransaction)
         {
-            TransactionDialogBuilder transactionDialogBuilder = new TransactionDialogBuilder(activity, sessionRequest, settledSession, client, isSignTransaction);
+            TransactionDialogBuilder transactionDialogBuilder = new TransactionDialogBuilder(activity, sessionRequest, settledSession, client, isSignTransaction ? SignType.SIGN_TX : SignType.SEND_TX);
             FragmentManager fragmentManager = ((AppCompatActivity) activity).getSupportFragmentManager();
             transactionDialogBuilder.show(fragmentManager, "wc_call");
             return;

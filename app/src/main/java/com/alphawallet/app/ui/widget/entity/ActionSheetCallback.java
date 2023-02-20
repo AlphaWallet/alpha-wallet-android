@@ -23,6 +23,11 @@ public interface ActionSheetCallback
     //For Hardware wallet
     void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature); //return from hardware signing
 
+    default void completeSignTransaction(Web3Transaction tx, SignatureFromKey signature) //return from hardware signing - sign tx only
+    {
+
+    }
+
     void dismissed(String txHash, long callbackId, boolean actionCompleted);
 
     void notifyConfirm(String mode);

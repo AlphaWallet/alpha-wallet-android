@@ -332,6 +332,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     {
         //sign only, and return signature to process
         mode = ActionSheetMode.SIGN_TRANSACTION;
+        toolbar.setTitle(R.string.dialog_title_sign_transaction);
     }
 
     public void onDestroy()
@@ -351,14 +352,14 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
             addressDetail.setVisibility(View.GONE);
         }
 
-        if (candidateTransaction.value.equals(BigInteger.ZERO))
-        {
-            amountDisplay.setVisibility(View.GONE);
-        }
-        else
+        if (candidateTransaction.value.compareTo(BigInteger.ZERO) > 0 || candidateTransaction.isBaseTransfer())
         {
             amountDisplay.setVisibility(View.VISIBLE);
             amountDisplay.setAmountUsingToken(candidateTransaction.value, tokensService.getServiceToken(token.tokenInfo.chainId), tokensService);
+        }
+        else
+        {
+            amountDisplay.setVisibility(View.GONE);
         }
     }
 
@@ -672,14 +673,26 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                 {
                     confirmationWidget.startProgressCycle(4);
                 }
-                if (mode == ActionSheetMode.SEND_TRANSACTION)
+
+                switch (mode)
                 {
-                    actionSheetCallback.sendTransaction(formTransaction());
+                    case SEND_TRANSACTION:
+                    case SEND_TRANSACTION_DAPP:
+                    case SEND_TRANSACTION_WC:
+                    case SPEEDUP_TRANSACTION:
+                    case CANCEL_TRANSACTION:
+                        actionSheetCallback.sendTransaction(formTransaction());
+                        break;
+                    case SIGN_TRANSACTION:
+                        actionSheetCallback.signTransaction(formTransaction());
+                        break;
+                    case MESSAGE:
+                    case SIGN_MESSAGE:
+                    case WALLET_CONNECT_REQUEST:
+                    case NODE_STATUS_INFO:
+                        break;
                 }
-                else
-                {
-                    actionSheetCallback.signTransaction(formTransaction());
-                }
+
                 actionSheetCallback.notifyConfirm(mode.getValue());
             }
 
@@ -701,7 +714,14 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                 {
                     functionBar.setVisibility(View.GONE);
                     confirmationWidget.startProgressCycle(4);
-                    actionSheetCallback.completeSendTransaction(establishedTransaction, signature);
+                    if (mode == ActionSheetMode.SIGN_TRANSACTION)
+                    {
+                        actionSheetCallback.completeSignTransaction(establishedTransaction, signature);
+                    }
+                    else
+                    {
+                        actionSheetCallback.completeSendTransaction(establishedTransaction, signature);
+                    }
                 }
                 else
                 {

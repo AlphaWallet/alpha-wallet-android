@@ -112,6 +112,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
+    private boolean searchBarAdded;
+    private boolean manageTokenLayoutAdded;
 
     public TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService, TokensService tService,
                          ActivityResultLauncher<Intent> launcher)
@@ -242,18 +244,21 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
     private void addSearchTokensLayout()
     {
-        if (walletAddress != null && !walletAddress.isEmpty())
+        if (walletAddress != null && !walletAddress.isEmpty() && !searchBarAdded)
         {
             items.add(new ManageTokensSearchItem(new ManageTokensData(walletAddress, managementLauncher), -1));
+            searchBarAdded = true;
         }
     }
 
     private void addManageTokensLayout()
     {
+        //only show buy button if filtering all or assets
         if (walletAddress != null && !walletAddress.isEmpty()
-                && (filterType == TokenFilter.ALL || filterType == TokenFilter.ASSETS))
-        { //only show buy button if filtering all or assets
+                && (filterType == TokenFilter.ALL || filterType == TokenFilter.ASSETS) && !manageTokenLayoutAdded)
+        {
             items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress, managementLauncher)));
+            manageTokenLayoutAdded = true;
         }
     }
 
@@ -445,6 +450,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         if (clear)
         {
             items.clear();
+            searchBarAdded = false;
+            manageTokenLayoutAdded = false;
         }
 
         addSearchTokensLayout();

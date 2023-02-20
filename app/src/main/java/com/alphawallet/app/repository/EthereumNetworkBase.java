@@ -4,6 +4,7 @@ package com.alphawallet.app.repository;
  * between projects including non-Android projects */
 
 import static com.alphawallet.app.entity.EventSync.BLOCK_SEARCH_INTERVAL;
+import static com.alphawallet.app.entity.EventSync.OKX_BLOCK_SEARCH_INTERVAL;
 import static com.alphawallet.app.entity.EventSync.POLYGON_BLOCK_SEARCH_INTERVAL;
 import static com.alphawallet.app.util.Utils.isValidUrl;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL;
@@ -1227,6 +1228,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         if (chainId == POLYGON_ID || chainId == POLYGON_TEST_ID)
         {
             return BigInteger.valueOf(POLYGON_BLOCK_SEARCH_INTERVAL);
+        }
+        else if (chainId == OKX_ID)
+        {
+            return BigInteger.valueOf(OKX_BLOCK_SEARCH_INTERVAL);
         }
         else
         {

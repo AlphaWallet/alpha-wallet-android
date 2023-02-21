@@ -4,7 +4,6 @@ import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
 import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 
 import android.content.Intent;
@@ -15,7 +14,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -51,8 +49,6 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.repository.TokensRealmSource;
-import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
@@ -86,9 +82,6 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
-import io.realm.RealmResults;
-import timber.log.Timber;
 
 /**
  * Created by justindeguzman on 2/28/18.
@@ -114,12 +107,10 @@ public class WalletFragment extends BaseFragment implements
     private SwipeRefreshLayout refreshLayout;
     private boolean isVisible;
     private TokenFilter currentTabPos = TokenFilter.ALL;
-    private Realm realm = null;
-    private RealmResults<RealmToken> realmUpdates;
     private LargeTitleView largeTitleView;
-    private long realmUpdateTime;
     private ActivityResultLauncher<Intent> handleBackupClick;
     private ActivityResultLauncher<Intent> tokenManagementLauncher;
+
 
     @Inject
     AWWalletConnectClient awWalletConnectClient;
@@ -247,6 +238,7 @@ public class WalletFragment extends BaseFragment implements
         viewModel.backupEvent().observe(getViewLifecycleOwner(), this::backupEvent);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
+        viewModel.onUpdatedTokens().observe(getViewLifecycleOwner(), this::updateMetas);
         viewModel.getTokensService().startWalletSync(this);
         viewModel.activeWalletConnectSessions().observe(getViewLifecycleOwner(), walletConnectSessionItems -> {
             adapter.showActiveWalletConnectSessions(walletConnectSessionItems);
@@ -295,62 +287,15 @@ public class WalletFragment extends BaseFragment implements
         addressAvatar.setWaiting();
     }
 
-    private void setRealmListener(final long updateTime)
+    private void updateMetas(TokenCardMeta[] metas)
     {
-        if (realm == null || realm.isClosed()) realm = viewModel.getRealmInstance();
-        if (realmUpdates != null)
+        if (metas.length > 0)
         {
-            realmUpdates.removeAllChangeListeners();
-            realm.removeAllChangeListeners();
+            adapter.updateTokenMetas(metas);
+            systemView.hide();
+            viewModel.checkDeleteMetas(metas);
+            viewModel.calculateFiatValues();
         }
-
-        realmUpdates = realm.where(RealmToken.class).equalTo("isEnabled", true)
-                .like("address", ADDRESS_FORMAT)
-                .greaterThan("addedTime", (updateTime + 1))
-                .findAllAsync();
-        realmUpdates.addChangeListener(realmTokens ->
-        {
-            long lastUpdateTime = updateTime;
-            List<TokenCardMeta> metas = new ArrayList<>();
-            //make list
-            for (RealmToken t : realmTokens)
-            {
-                if (t.getUpdateTime() > lastUpdateTime) lastUpdateTime = t.getUpdateTime();
-                if (!viewModel.getTokensService().getNetworkFilters().contains(t.getChainId()))
-                    continue;
-                if (viewModel.isChainToken(t.getChainId(), t.getTokenAddress())) continue;
-
-                String balance = TokensRealmSource.convertStringBalance(t.getBalance(), t.getContractType());
-
-                TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance,
-                        t.getUpdateTime(), viewModel.getAssetDefinitionService(), t.getName(), t.getSymbol(), t.getContractType(),
-                        viewModel.getTokenGroup(t.getChainId(), t.getTokenAddress()));
-                meta.lastTxUpdate = t.getLastTxTime();
-                meta.isEnabled = t.isEnabled();
-                metas.add(meta);
-            }
-
-            if (metas.size() > 0)
-            {
-                realmUpdateTime = lastUpdateTime;
-                updateMetas(metas);
-                handler.postDelayed(() -> setRealmListener(realmUpdateTime), 500);
-            }
-        });
-    }
-
-    private void updateMetas(List<TokenCardMeta> metas)
-    {
-        handler.post(() ->
-        {
-            if (metas.size() > 0)
-            {
-                adapter.updateTokenMetas(metas.toArray(new TokenCardMeta[0]));
-                systemView.hide();
-                viewModel.checkDeleteMetas(metas);
-                viewModel.calculateFiatValues();
-            }
-        });
     }
 
     //Refresh value of wallet once sync is complete
@@ -414,21 +359,13 @@ public class WalletFragment extends BaseFragment implements
     public void comeIntoFocus()
     {
         isVisible = true;
-        if (viewModel.getWallet() != null && !TextUtils.isEmpty(viewModel.getWallet().address))
-        {
-            setRealmListener(realmUpdateTime);
-        }
+        viewModel.startUpdateListener();
     }
 
     @Override
     public void leaveFocus()
     {
-        if (realmUpdates != null)
-        {
-            realmUpdates.removeAllChangeListeners();
-            realmUpdates = null;
-        }
-        if (realm != null && !realm.isClosed()) realm.close();
+        viewModel.stopUpdateListener();
         softKeyboardGone();
     }
 
@@ -589,15 +526,9 @@ public class WalletFragment extends BaseFragment implements
         }
         systemView.showProgress(false);
 
-        realmUpdateTime = 0;
-        for (TokenCardMeta tcm : tokens)
-        {
-            if (tcm.lastUpdate > realmUpdateTime) realmUpdateTime = tcm.lastUpdate;
-        }
-
         if (isVisible)
         {
-            setRealmListener(realmUpdateTime);
+            viewModel.startUpdateListener();
         }
 
         if (currentTabPos.equals(TokenFilter.ALL))
@@ -694,18 +625,7 @@ public class WalletFragment extends BaseFragment implements
     {
         super.onDestroy();
         handler.removeCallbacksAndMessages(null);
-        if (realmUpdates != null)
-        {
-            try
-            {
-                realmUpdates.removeAllChangeListeners();
-            }
-            catch (Exception e)
-            {
-                Timber.e(e);
-            }
-        }
-        if (realm != null && !realm.isClosed()) realm.close();
+        viewModel.stopUpdateListener();
         if (adapter != null && recyclerView != null) adapter.onDestroy(recyclerView);
     }
 

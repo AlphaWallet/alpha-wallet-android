@@ -323,7 +323,6 @@ public class TokensRealmSource implements TokenLocalSource {
     private void setTokenUpdateTime(RealmToken realmToken, Token token)
     {
         realmToken.setLastTxTime(System.currentTimeMillis());
-        realmToken.setAssetUpdateTime(System.currentTimeMillis());
 
         if (realmToken.getBalance() == null || !realmToken.getBalance().equals(token.getBalanceRaw().toString()))
         {

@@ -188,7 +188,7 @@ public class TransactionDialogBuilder extends DialogFragment
         if (txData != null)
         {
             approve(txData.hash, awWalletConnectClient);
-            actionSheetDialog.transactionWritten(txData.hash.substring(0, 66));
+            actionSheetDialog.transactionWritten(txData.getDisplayData());
         }
     }
 

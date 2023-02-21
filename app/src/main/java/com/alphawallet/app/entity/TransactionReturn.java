@@ -25,4 +25,9 @@ public class TransactionReturn
         this.tx = tx;
         this.throwable = throwable;
     }
+
+    public String getDisplayData()
+    {
+        return hash != null ? hash.substring(0, 66) : "";
+    }
 }

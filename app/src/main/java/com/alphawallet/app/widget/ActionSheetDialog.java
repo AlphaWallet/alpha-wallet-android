@@ -415,7 +415,9 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         showAmount(getTransactionAmount().toBigInteger());
     }
 
+
     @Override
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public void handleClick(String action, int id)
     {
         if (walletType == WalletType.HARDWARE)
@@ -519,6 +521,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         }
     }
 
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     private void showTransactionSuccess()
     {
         switch (mode)
@@ -581,6 +584,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         });
     }
 
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public void completeSignRequest(boolean gotAuth)
     {
         if (signCallback != null)
@@ -599,7 +603,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                     break;
 
                 case SIGN_MESSAGE:
-                    actionCompleted = true;
                     //display success and hand back to calling function
                     confirmationWidget.startProgressCycle(1);
                     signCallback.gotAuthorisation(gotAuth);
@@ -649,6 +652,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     /**
      * Either Send or Sign (WalletConnect only) the transaction
      */
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     private void handleTransactionOperation()
     {
         if (walletType != WalletType.HARDWARE)

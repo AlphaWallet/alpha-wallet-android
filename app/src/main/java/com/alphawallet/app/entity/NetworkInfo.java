@@ -1,6 +1,7 @@
 package com.alphawallet.app.entity;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
 
 import android.net.Uri;
 import android.text.TextUtils;
@@ -62,6 +63,10 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo
         if (etherscanAPI.contains(COVALENT) || TextUtils.isEmpty(etherscanAPI))
         {
             return new TransferFetchType[0];
+        }
+        else if (chainId == GOERLI_ID) //goerli doesn't yet implement erc1155 route TODO: test for when Etherscan Goerli implements ERC1155 tx:
+        {                              // https://api-goerli.etherscan.io/api?module=account&action=token1155tx&address=0x0000000000000000000000000000000000000000
+            return new TransferFetchType[]{TransferFetchType.ERC_20, TransferFetchType.ERC_721};
         }
         else if (etherscanAPI.contains(MATIC_API) || etherscanAPI.contains(ETHERSCAN_API) || etherscanAPI.contains(OKX_API))
         {

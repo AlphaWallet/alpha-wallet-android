@@ -676,6 +676,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         viewModel.activeNetwork().observe(getViewLifecycleOwner(), this::onNetworkChanged);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.transactionFinalised().observe(getViewLifecycleOwner(), this::txWritten);
+        viewModel.transactionSigned().observe(getViewLifecycleOwner(), this::txSigned);
         viewModel.transactionError().observe(getViewLifecycleOwner(), this::txError);
         activeNetwork = viewModel.getActiveNetwork();
         viewModel.findWallet();
@@ -1525,19 +1526,14 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                                 copyToClipboard(result.getAddress());
                                 break;
                             case PAYMENT:
+                            case TRANSFER:
                                 props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
                                 viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
 
                                 //EIP681 payment request scanned, should go to send
                                 viewModel.showSend(getContext(), result);
                                 break;
-                            case TRANSFER:
-                                props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
-                                viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
 
-                                //EIP681 transfer, go to send
-                                viewModel.showSend(getContext(), result);
-                                break;
                             case FUNCTION_CALL:
                                 props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
                                 viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
@@ -1878,6 +1874,18 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     }
 
     @Override
+    public void signTransaction(Web3Transaction tx)
+    {
+        viewModel.requestSignatureOnly(tx, wallet, activeNetwork.chainId);
+    }
+
+    @Override
+    public void completeSignTransaction(Web3Transaction w3Tx, SignatureFromKey signature)
+    {
+        viewModel.signTransaction(activeNetwork.chainId, w3Tx, signature);
+    }
+
+    @Override
     public void pinAuthorisation(boolean gotAuth)
     {
         confirmationDialog.gotAuthorisation(gotAuth);
@@ -1886,6 +1894,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private void txWritten(TransactionReturn txData)
     {
         confirmationDialog.transactionWritten(txData.hash);
+        web3.onSignTransactionSuccessful(txData);
+    }
+
+    private void txSigned(TransactionReturn txData)
+    {
+        confirmationDialog.transactionWritten(txData.getDisplayData());
         web3.onSignTransactionSuccessful(txData);
     }
 

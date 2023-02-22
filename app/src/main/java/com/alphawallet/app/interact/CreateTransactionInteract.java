@@ -60,19 +60,55 @@ public class CreateTransactionInteract
                         error -> txInterface.transactionError(new TransactionReturn(error, w3Tx)));
     }
 
-    public void requestSignatureOnly(Web3Transaction w3Tx, Wallet wallet, long chainId, TransactionSendHandlerInterface txInterface)
+    public void requestSignTransaction(Web3Transaction w3Tx, Wallet wallet, long chainId, TransactionSendHandlerInterface txInterface)
     {
         this.txInterface = txInterface;
         disposable = createWithSigId(wallet, w3Tx, chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(signaturePackage -> txInterface.transactionSigned(signaturePackage.first, w3Tx),
+                .subscribe(signaturePackage -> completeSignTransaction(chainId, signaturePackage, w3Tx),
                         error -> txInterface.transactionError(new TransactionReturn(error, w3Tx)));
     }
 
     public Single<Pair<SignatureFromKey, RawTransaction>> createWithSigId(Wallet from, Web3Transaction w3Tx, long chainId)
     {
         return transactionRepository.signTransaction(from, w3Tx, chainId)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    /**
+     * Return from hardware sign
+     * @param wallet
+     * @param chainId
+     * @param w3Tx
+     * @param sigData
+     */
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction w3Tx, SignatureFromKey sigData)
+    {
+        RawTransaction rtx = transactionRepository.formatRawTransaction(w3Tx, nonceForHardwareSign, chainId);
+        sendTransaction(wallet, chainId, rtx, sigData, w3Tx);
+    }
+
+    public void sendTransaction(Wallet wallet, long chainId, RawTransaction rtx, SignatureFromKey sigData, Web3Transaction w3Tx)
+    {
+        //format transaction
+        disposable = transactionRepository.sendTransaction(wallet, rtx, rlpEncodeSignature(rtx, sigData, chainId), chainId)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(txHash -> txInterface.transactionFinalised(new TransactionReturn(txHash, w3Tx)),
+                        error -> txInterface.transactionError(new TransactionReturn(error, w3Tx)));
+    }
+
+    public void signTransaction(long chainId, Web3Transaction w3Tx, SignatureFromKey sigData)
+    {
+        RawTransaction rtx = transactionRepository.formatRawTransaction(w3Tx, nonceForHardwareSign, chainId);
+        txInterface.transactionSigned(rlpEncodeSignature(rtx, sigData, chainId), w3Tx);
+    }
+
+    public Single<String> resend(Wallet from, BigInteger nonce, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
+    {
+        return transactionRepository.resendTransaction(from, to, subunitAmount, nonce, gasPrice, gasLimit, data, chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -100,26 +136,33 @@ public class CreateTransactionInteract
                 txInterface.transactionError(new TransactionReturn(new Throwable(signaturePackage.first.failMessage), w3Tx));
                 break;
             default:
-                break;
+                throw new RuntimeException("Unimplemented sign type");
         }
     }
 
-    /**
-     * Return from hardware sign
-     * @param wallet
-     * @param chainId
-     * @param w3Tx
-     * @param sigData
-     */
-    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction w3Tx, SignatureFromKey sigData)
+    private void completeSignTransaction(long chainId, Pair<SignatureFromKey, RawTransaction> signaturePackage, Web3Transaction w3Tx)
     {
-        RawTransaction rtx = transactionRepository.formatRawTransaction(w3Tx, nonceForHardwareSign, chainId);
-        sendTransaction(wallet, chainId, rtx, sigData, w3Tx);
+        switch (signaturePackage.first.sigType)
+        {
+            case SIGNATURE_GENERATED:
+                signTransaction(chainId, w3Tx, signaturePackage.first);
+                break;
+            case SIGNING_POSTPONED:
+                //record nonce
+                nonceForHardwareSign = signaturePackage.second.getNonce().longValue();
+                break;
+            case KEY_FILE_ERROR:
+            case KEY_AUTHENTICATION_ERROR:
+            case KEY_CIPHER_ERROR:
+                txInterface.transactionError(new TransactionReturn(new Throwable(signaturePackage.first.failMessage), w3Tx));
+                break;
+            default:
+                throw new RuntimeException("Unimplemented sign type");
+        }
     }
 
-    public void sendTransaction(Wallet wallet, long chainId, RawTransaction rtx, SignatureFromKey sigData, Web3Transaction w3Tx)
+    private SignatureFromKey rlpEncodeSignature(RawTransaction rtx, SignatureFromKey sigData, long chainId)
     {
-        //format transaction
         if (rtx.getTransaction() instanceof Transaction1559)
         {
             sigData.signature = KeystoreAccountService.encode(rtx, sigFromByteArray(sigData.signature));
@@ -130,17 +173,6 @@ public class CreateTransactionInteract
             sigData.signature = KeystoreAccountService.encode(rtx, sig);
         }
 
-        disposable = transactionRepository.sendTransaction(wallet, rtx, sigData, chainId)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(txHash -> txInterface.transactionFinalised(new TransactionReturn(txHash, w3Tx)),
-                        error -> txInterface.transactionError(new TransactionReturn(error, w3Tx)));
-    }
-
-    public Single<String> resend(Wallet from, BigInteger nonce, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
-    {
-        return transactionRepository.resendTransaction(from, to, subunitAmount, nonce, gasPrice, gasLimit, data, chainId)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread());
+        return sigData;
     }
 }

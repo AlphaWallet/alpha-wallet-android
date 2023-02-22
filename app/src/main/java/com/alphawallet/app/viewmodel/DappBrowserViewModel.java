@@ -74,6 +74,7 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionSigned = new MutableLiveData<>();
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
@@ -124,6 +125,11 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
     public MutableLiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
+    }
+
+    public MutableLiveData<TransactionReturn> transactionSigned()
+    {
+        return transactionSigned;
     }
 
     public MutableLiveData<TransactionReturn> transactionError()
@@ -283,9 +289,19 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
         createTransactionInteract.requestSignature(finalTx, wallet, chainId, this);
     }
 
+    public void requestSignatureOnly(Web3Transaction finalTx, Wallet wallet, long chainId)
+    {
+        createTransactionInteract.requestSignTransaction(finalTx, wallet, chainId, this);
+    }
+
     public void sendTransaction(Wallet wallet, long chainId, Web3Transaction w3Tx, SignatureFromKey signatureFromKey)
     {
         createTransactionInteract.sendTransaction(wallet, chainId, w3Tx, signatureFromKey);
+    }
+
+    public void signTransaction(long chainId, Web3Transaction tx, SignatureFromKey signatureFromKey)
+    {
+        createTransactionInteract.signTransaction(chainId, tx, signatureFromKey);
     }
 
     @Override
@@ -298,6 +314,12 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
     public void transactionError(TransactionReturn rtn)
     {
         transactionError.postValue(rtn);
+    }
+
+    @Override
+    public void transactionSigned(SignatureFromKey sigData, Web3Transaction w3Tx)
+    {
+        transactionSigned.postValue(new TransactionReturn(com.alphawallet.token.tools.Numeric.toHexString(sigData.signature), w3Tx));
     }
 
     public void showMyAddress(Context ctx)

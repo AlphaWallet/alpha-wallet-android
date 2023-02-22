@@ -405,6 +405,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         viewModel.serviceReady().observe(this, this::onServiceReady);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
+        viewModel.transactionSigned().observe(this, this::txSigned);
 
         viewModel.startService(this);
     }
@@ -1201,24 +1202,13 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
     {
-        if (tx.getSignType() == SignType.SIGN_TX)
-        {
-            completeSignTransaction(tx, tx.leafPosition, signature);
-        }
-        else
-        {
-            viewModel.sendTransaction(viewModel.getWallet(), viewModel.getChainId(getSessionId()), tx, signature);
-        }
+        viewModel.sendTransaction(viewModel.getWallet(), viewModel.getChainId(getSessionId()), tx, signature);
     }
 
-    private void completeSignTransaction(Web3Transaction w3Tx, long callbackId, SignatureFromKey signature)
+    @Override
+    public void completeSignTransaction(Web3Transaction w3Tx, SignatureFromKey signature)
     {
-        viewModel.recordSignTransaction(getApplicationContext(), w3Tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
-        viewModel.approveRequest(getApplication(), getSessionId(), callbackId, Numeric.toHexString(signature.signature));
-        confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
-        if (fromDappBrowser) switchToDappBrowser();
-        requestId = 0;
-        updateSignCount();
+        viewModel.signTransaction(viewModel.getChainId(getSessionId()), w3Tx, signature);
     }
 
     public void txWritten(TransactionReturn txReturn)
@@ -1232,6 +1222,22 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         updateSignCount();
 
         viewModel.track(Analytics.Action.WALLET_CONNECT_TRANSACTION_SUCCESS);
+    }
+
+    private void txSigned(TransactionReturn sigData)
+    {
+        if (sigData != null)
+        {
+            viewModel.recordSignTransaction(getApplicationContext(), sigData.tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
+            viewModel.approveRequest(getApplication(), getSessionId(), sigData.tx.leafPosition, sigData.hash);
+            confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
+            if (fromDappBrowser)
+            {
+                switchToDappBrowser();
+            }
+            requestId = 0;
+            updateSignCount();
+        }
     }
 
     //Transaction failed to be sent

@@ -18,6 +18,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.GenericCallback;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
@@ -50,6 +51,7 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.Signable;
+import com.alphawallet.token.tools.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -73,7 +75,7 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> serviceReady = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
-    private final MutableLiveData<SignatureFromKey> transactionSigned = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionSigned = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
     protected Disposable disposable;
     private final KeyService keyService;
@@ -196,7 +198,7 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
         return transactionFinalised;
     }
 
-    public MutableLiveData<SignatureFromKey> transactionSigned()
+    public MutableLiveData<TransactionReturn> transactionSigned()
     {
         return transactionSigned;
     }
@@ -228,7 +230,7 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
 
     public void requestSignatureOnly(Web3Transaction tx, Wallet fromWallet, long chainId)
     {
-        createTransactionInteract.requestSignatureOnly(tx, wallet, chainId, this);
+        createTransactionInteract.requestSignTransaction(tx, wallet, chainId, this);
     }
 
     public void sendTransaction(Wallet wallet, long chainId, Web3Transaction tx, SignatureFromKey signatureFromKey)
@@ -803,19 +805,16 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     @Override
     public void transactionSigned(SignatureFromKey sigData, Web3Transaction w3Tx)
     {
-        switch (sigData.sigType)
-        {
-            case SIGNATURE_GENERATED:
-                transactionSigned.postValue(sigData);
-                break;
-            case SIGNING_POSTPONED:
-            default:
-                break;
-            case KEY_FILE_ERROR:
-            case KEY_AUTHENTICATION_ERROR:
-            case KEY_CIPHER_ERROR:
-                transactionError(new TransactionReturn(new Throwable(sigData.failMessage), w3Tx));
-                break;
-        }
+        transactionSigned.postValue(new TransactionReturn(Numeric.toHexString(sigData.signature), w3Tx));
+    }
+
+    public void resetTxSignedMutable()
+    {
+        transactionSigned.postValue(null);
+    }
+
+    public void signTransaction(long chainId, Web3Transaction tx, SignatureFromKey signatureFromKey)
+    {
+        createTransactionInteract.signTransaction(chainId, tx, signatureFromKey);
     }
 }

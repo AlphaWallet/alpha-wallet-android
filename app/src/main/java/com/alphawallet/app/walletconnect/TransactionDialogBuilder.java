@@ -55,6 +55,7 @@ public class TransactionDialogBuilder extends DialogFragment
     private ActionSheetDialog actionSheetDialog;
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> actionSheetDialog.setCurrentGasIndex(result));
+    private boolean isApproved;
 
     public TransactionDialogBuilder(Activity activity, com.walletconnect.web3.wallet.client.Wallet.Model.SessionRequest sessionRequest, com.walletconnect.web3.wallet.client.Wallet.Model.Session settledSession, AWWalletConnectClient awWalletConnectClient, SignType signType)
     {
@@ -163,6 +164,7 @@ public class TransactionDialogBuilder extends DialogFragment
         actionSheetDialog.setURL(url);
         actionSheetDialog.setCanceledOnTouchOutside(false);
         actionSheetDialog.waitForEstimate();
+        isApproved = false;
 
         byte[] payload = w3Tx.payload != null ? Numeric.hexStringToByteArray(w3Tx.payload) : null;
 
@@ -206,7 +208,29 @@ public class TransactionDialogBuilder extends DialogFragment
 
     private void approve(String hashData, AWWalletConnectClient awWalletConnectClient)
     {
+        isApproved = true;
         new Handler(Looper.getMainLooper()).postDelayed(() ->
                 awWalletConnectClient.approve(sessionRequest, hashData), 1000);
+    }
+
+    @Override
+    public void onCancel(@NonNull DialogInterface dialog)
+    {
+        super.onCancel(dialog);
+        if (!isApproved)
+        {
+            awWalletConnectClient.reject(sessionRequest);
+        }
+    }
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog)
+    {
+        super.onDismiss(dialog);
+        //only reject if action wasn't completed
+        if (!isApproved)
+        {
+            awWalletConnectClient.reject(sessionRequest);
+        }
     }
 }

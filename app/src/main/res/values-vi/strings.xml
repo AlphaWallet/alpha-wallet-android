@@ -964,4 +964,5 @@
     <string name="dialog_title_search_token">Tìm kiếm mã thông báo?</string>
     <string name="hardware_wallets">Ví cứng</string>
     <string name="use_hardware_card">Sử dụng thẻ cứng</string>
+    <string name="unsupported_network">Mạng không được hỗ trợ (ID chuỗi: %s)</string>
 </resources>

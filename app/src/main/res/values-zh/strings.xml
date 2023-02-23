@@ -951,4 +951,5 @@
     <string name="dialog_title_search_token">搜索令牌？</string>
     <string name="hardware_wallets">硬件钱包</string>
     <string name="use_hardware_card">使用硬件卡</string>
+    <string name="unsupported_network">不支持的网络（链 ID：%s）</string>
 </resources>

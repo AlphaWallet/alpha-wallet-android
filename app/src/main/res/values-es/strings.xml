@@ -950,4 +950,5 @@
     <string name="dialog_title_search_token">¿Buscar token?</string>
     <string name="hardware_wallets">Carteras de hardware</string>
     <string name="use_hardware_card">Usar tarjeta de hardware</string>
+    <string name="unsupported_network">Red no admitida (ID de cadena: %s)</string>
 </resources>

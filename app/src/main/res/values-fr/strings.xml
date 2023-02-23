@@ -964,4 +964,5 @@
     <string name="dialog_title_search_token">Rechercher un jeton?</string>
     <string name="hardware_wallets">Portefeuilles matériels</string>
     <string name="use_hardware_card">Utiliser une carte matérielle</string>
+    <string name="unsupported_network">Réseau non pris en charge (ID de chaîne: %s)</string>
 </resources>

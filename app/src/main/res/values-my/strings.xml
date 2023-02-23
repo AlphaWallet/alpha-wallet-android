@@ -985,4 +985,5 @@
     <string name="dialog_title_search_token">တိုကင်ကို ရှာမလား။</string>
     <string name="hardware_wallets">ဟာ့ဒ်ဝဲ ဝေါလက်</string>
     <string name="use_hardware_card">Use Hardware Card</string>
+    <string name="unsupported_network">ပံ့ပိုးမထားသော ကွန်ရက် (ကွင်းဆက် ID- %s)</string>
 </resources>

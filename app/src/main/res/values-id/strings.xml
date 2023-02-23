@@ -954,4 +954,5 @@
     <string name="dialog_title_search_token">Cari Token?</string>
     <string name="hardware_wallets">Dompet Perangkat Keras</string>
     <string name="use_hardware_card">Gunakan Kartu Perangkat Keras</string>
+    <string name="unsupported_network">Jaringan Tidak Didukung (ID Rantai: %s)</string>
 </resources>

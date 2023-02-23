@@ -1194,8 +1194,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
         else
         {
-            return networkMap.get(MAINNET_ID).name;
+            // Unsupported network: method caller should handle this scenario
+            return "";
         }
+    }
+
+    public static boolean isChainSupported(long chainId)
+    {
+        return networkMap.get(chainId) != null;
     }
 
     public static String getChainSymbol(long chainId)

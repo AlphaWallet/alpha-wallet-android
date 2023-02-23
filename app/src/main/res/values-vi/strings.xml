@@ -965,8 +965,8 @@
     <string name="hardware_wallets">Ví cứng</string>
     <string name="use_hardware_card">Sử dụng thẻ cứng</string>
     <string name="unsupported_network">Mạng không được hỗ trợ (ID chuỗi: %s)</string>
-    <string name="error_eip712_unsupported_network">You were requested to sign a message for an unsupported chain.</string>
-    <string name="error_eip712_incompatible_network">You were requested to sign a message for %1s. You are currently on %2s.</string>
-    <string name="error_eip712_wc2_unsupported_network">You were requested to sign a message for an unsupported chain.</string>
-    <string name="error_eip712_wc2_disabled_network">You were requested to sign a message for %s. Please enable this chain for your WalletConnect session.</string>
+    <string name="error_eip712_unsupported_network">Bạn đã được yêu cầu ký một tin nhắn cho một chuỗi không được hỗ trợ.</string>
+    <string name="error_eip712_incompatible_network">Bạn đã được yêu cầu ký một tin nhắn cho chuỗi %1s. Bạn hiện đang ở trong chuỗi %2s.</string>
+    <string name="error_eip712_wc2_disabled_network">Bạn được yêu cầu ký một tin nhắn cho %s. Vui lòng kích hoạt chuỗi này cho phiên WalletConnect của bạn.</string>
+    <string name="action_view_session">Xem phiên</string>
 </resources>

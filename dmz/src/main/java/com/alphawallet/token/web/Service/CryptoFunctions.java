@@ -108,6 +108,22 @@ public class CryptoFunctions implements CryptoFunctionsInterface
     }
 
     @Override
+    public long getChainId(String messageData)
+    {
+        long chainId = -1;
+        try
+        {
+            StructuredDataEncoder eip721Object = new StructuredDataEncoder(messageData);
+            return eip721Object.jsonMessageObject.getDomain().getChainId().getValue().intValue();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return chainId;
+    }
+
+    @Override
     public byte[] getStructuredData(String messageData)
     {
         try

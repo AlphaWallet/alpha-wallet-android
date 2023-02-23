@@ -817,4 +817,9 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     {
         createTransactionInteract.signTransaction(chainId, tx, signatureFromKey);
     }
+
+    public boolean isActiveNetwork(long chainId)
+    {
+        return ethereumNetworkRepository.getSelectedFilters().contains(chainId);
+    }
 }

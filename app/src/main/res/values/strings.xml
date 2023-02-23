@@ -1027,4 +1027,8 @@
     <string name="hardware_wallets">Hardware Wallets</string>
     <string name="use_hardware_card">Use Hardware Card</string>
     <string name="unsupported_network">Unsupported Network (Chain ID: %s)</string>
+    <string name="error_eip712_unsupported_network">You were requested to sign a message for an unsupported chain.</string>
+    <string name="error_eip712_incompatible_network">You were requested to sign a message for %1s. You are currently on %2s.</string>
+    <string name="error_eip712_wc2_unsupported_network">You were requested to sign a message for an unsupported chain.</string>
+    <string name="error_eip712_wc2_disabled_network">You were requested to sign a message for %1s. Please enable this chain for your WalletConnect session.</string>
 </resources>

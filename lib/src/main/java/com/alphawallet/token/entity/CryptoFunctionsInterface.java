@@ -15,4 +15,5 @@ public interface CryptoFunctionsInterface
                                                                   // --- Currently web3j uses a different library for Android and Generic Java packages.
                                                                   // --- One day web3j could be united, then we can remove these functions
     byte[] getStructuredData(String messageData);                 // see class Utils: Uses web3j
+    long getChainId(String messageData);
 }

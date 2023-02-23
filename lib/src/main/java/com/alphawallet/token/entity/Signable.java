@@ -14,4 +14,5 @@ public interface Signable {
     String getOrigin();
     CharSequence getUserMessage();
     SignMessageType getMessageType();
+    default long getChainId() { return -1; }
 }

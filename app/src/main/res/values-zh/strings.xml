@@ -952,4 +952,8 @@
     <string name="hardware_wallets">硬件钱包</string>
     <string name="use_hardware_card">使用硬件卡</string>
     <string name="unsupported_network">不支持的网络（链 ID：%s）</string>
+    <string name="error_eip712_unsupported_network">You were requested to sign a message for an unsupported chain.</string>
+    <string name="error_eip712_incompatible_network">You were requested to sign a message for %1s. You are currently on %2s.</string>
+    <string name="error_eip712_wc2_unsupported_network">You were requested to sign a message for an unsupported chain.</string>
+    <string name="error_eip712_wc2_disabled_network">You were requested to sign a message for %s. Please enable this chain for your WalletConnect session.</string>
 </resources>

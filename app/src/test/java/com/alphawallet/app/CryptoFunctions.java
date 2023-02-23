@@ -61,6 +61,12 @@ public class CryptoFunctions implements CryptoFunctionsInterface
     }
 
     @Override
+    public long getChainId(String messageData)
+    {
+        return -1;
+    }
+
+    @Override
     public byte[] getStructuredData(String messageData)
     {
         try

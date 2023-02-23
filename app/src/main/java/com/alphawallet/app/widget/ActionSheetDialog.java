@@ -16,6 +16,7 @@ import androidx.preference.PreferenceManager;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
+import com.alphawallet.app.entity.ActionSheetStatus;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -83,7 +84,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private boolean actionCompleted;
     private boolean use1559Transactions = false;
     private Transaction transaction;
-
     private final WalletType walletType;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
@@ -218,13 +218,13 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         callbackId = 0;
         gasWidgetLegacy = null;
         gasWidgetInterface = null;
+        walletType = actionSheetCallback.getWalletType();
 
         toolbar.setLogo(activity, iconUrl);
         toolbar.setTitle(wcPeerMeta.getName());
         toolbar.setCloseListener(v -> actionSheetCallback.denyWalletConnect());
 
-        walletConnectRequestWidget.setupWidget(wcPeerMeta, chainIdOverride, actionSheetCallback::openChainSelection);
-        walletType = actionSheetCallback.getWalletType();
+        setActionSheetStatus(walletConnectRequestWidget.setupWidget(wcPeerMeta, chainIdOverride, actionSheetCallback::openChainSelection));
 
         ArrayList<Integer> functionList = new ArrayList<>();
         functionList.add(R.string.approve);

@@ -31,6 +31,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.ActionSheetStatus;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -145,7 +146,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             result -> {
                 if (result.getData() == null) return;
                 chainIdOverride = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
-                Toast.makeText(this, getText(R.string.hint_network_name) + " " + EthereumNetworkBase.getShortChainName(chainIdOverride), Toast.LENGTH_LONG).show();
                 confirmationDialog.updateChain(chainIdOverride);
             });
     private boolean waitForWalletConnectSession = false;
@@ -791,9 +791,17 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         chainIcon.bindData(chainIdOverride);
         remotePeerMeta = peer;
 
-        confirmationDialog = new ActionSheetDialog(this, peer, chainId, displayIcon, this);
-        confirmationDialog.show();
-        confirmationDialog.fullExpand();
+        confirmationDialog = new ActionSheetDialog(this, peer, chainIdOverride, displayIcon, this);
+
+        if (confirmationDialog.getActionSheetStatus() == ActionSheetStatus.ERROR_INVALID_CHAIN)
+        {
+            Toast.makeText(this, "Invalid chain", Toast.LENGTH_SHORT).show();
+        }
+        else
+        {
+            confirmationDialog.show();
+            confirmationDialog.fullExpand();
+        }
 
         viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_REQUEST);
     }

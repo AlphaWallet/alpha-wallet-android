@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ActionSheetStatus;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.ui.widget.entity.WalletConnectWidgetCallback;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
@@ -26,22 +27,28 @@ public class WalletConnectRequestWidget extends LinearLayout {
         network = findViewById(R.id.info_network);
     }
 
-    public void setupWidget(WCPeerMeta wcPeerMeta, long chainId, WalletConnectWidgetCallback callback) {
-        Timber.d("setupWidget: ");
-        this.chainIdOverride = chainId;
-        this.callback = callback;
+    public ActionSheetStatus setupWidget(WCPeerMeta wcPeerMeta, long chainId, WalletConnectWidgetCallback callback) {
+        boolean isChainSupported = EthereumNetworkBase.isChainSupported(chainId);
+        ActionSheetStatus actionSheetStatus =
+            isChainSupported ? ActionSheetStatus.OK : ActionSheetStatus.ERROR_INVALID_CHAIN;
+        if  (isChainSupported)
+        {
+            this.chainIdOverride = chainId;
+            this.callback = callback;
 
-        website.setLabel(getContext().getString(R.string.website_text));
-        website.setMessage(wcPeerMeta.getUrl());
+            website.setLabel(getContext().getString(R.string.website_text));
+            website.setMessage(wcPeerMeta.getUrl());
 
-        network.setLabel(getContext().getString(R.string.subtitle_network));
-        network.setMessage(EthereumNetworkBase.getShortChainName(chainIdOverride));
-        network.setMessageTextColor(EthereumNetworkBase.getChainColour(chainIdOverride));
-        network.setActionText(getContext().getString(R.string.edit));
+            network.setLabel(getContext().getString(R.string.subtitle_network));
+            network.setMessage(EthereumNetworkBase.getShortChainName(chainIdOverride));
+            network.setMessageTextColor(EthereumNetworkBase.getChainColour(chainIdOverride));
+            network.setActionText(getContext().getString(R.string.edit));
 
-        network.setActionListener(v -> {
-            callback.openChainSelection();
-        });
+            network.setActionListener(v -> {
+                callback.openChainSelection();
+            });
+        }
+        return actionSheetStatus;
     }
 
     public void updateChain(long chainIdOverride)

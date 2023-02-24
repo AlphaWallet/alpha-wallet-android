@@ -969,4 +969,5 @@
     <string name="error_eip712_incompatible_network">Vous avez été invité à signer un message pour la chaîne %1s. Vous êtes actuellement sur la chaîne %2s.</string>
     <string name="error_eip712_wc2_disabled_network">Vous avez été invité à signer un message pour %s. Veuillez activer cette chaîne pour votre session WalletConnect.</string>
     <string name="action_view_session">Voir la session</string>
+    <string name="error_walletconnect_session_request_unsupported_network">Impossible de gérer la demande de session d'une chaîne non prise en charge.</string>
 </resources>

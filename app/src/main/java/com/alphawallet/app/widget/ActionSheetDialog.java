@@ -25,6 +25,7 @@ import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetMode;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
@@ -224,13 +225,16 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         toolbar.setTitle(wcPeerMeta.getName());
         toolbar.setCloseListener(v -> actionSheetCallback.denyWalletConnect());
 
-        setActionSheetStatus(walletConnectRequestWidget.setupWidget(wcPeerMeta, chainIdOverride, actionSheetCallback::openChainSelection));
+        walletConnectRequestWidget.setupWidget(wcPeerMeta, chainIdOverride, actionSheetCallback::openChainSelection);
 
         ArrayList<Integer> functionList = new ArrayList<>();
         functionList.add(R.string.approve);
         functionList.add(R.string.dialog_reject);
         functionBar.setupFunctions(this, functionList);
         functionBar.revealButtons();
+
+        setActionSheetStatus(EthereumNetworkBase.isChainSupported(chainIdOverride) ?
+            ActionSheetStatus.OK : ActionSheetStatus.ERROR_INVALID_CHAIN);
     }
 
     // switch chain

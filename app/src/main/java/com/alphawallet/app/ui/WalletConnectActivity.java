@@ -794,19 +794,19 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         if (confirmationDialog.getActionSheetStatus() == ActionSheetStatus.ERROR_INVALID_CHAIN)
         {
-            Toast.makeText(this, "Invalid chain", Toast.LENGTH_SHORT).show();
+            showErrorDialogUnsupportedNetwork(id);
         }
         else
         {
             confirmationDialog.show();
             confirmationDialog.fullExpand();
-        }
 
-        viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_REQUEST);
+            viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_REQUEST);
 
-        if (!viewModel.isActiveNetwork(chainId) && !viewModel.isActiveNetwork(chainIdOverride))
-        {
-            openChainSelection();
+            if (!viewModel.isActiveNetwork(chainId) && !viewModel.isActiveNetwork(chainIdOverride))
+            {
+                openChainSelection();
+            }
         }
     }
 
@@ -841,6 +841,28 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     doSignMessage(signable);
                 }
                 break;
+        }
+    }
+
+    private void showErrorDialogUnsupportedNetwork(long callbackId)
+    {
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            runOnUiThread(() -> {
+                closeErrorDialog();
+                dialog = new AWalletAlertDialog(this, AWalletAlertDialog.ERROR);
+                String message = getString(R.string.error_walletconnect_session_request_unsupported_network);
+                dialog.setMessage(message);
+                dialog.setButton(R.string.action_close, v -> {
+                    dialog.dismiss();
+                    dismissed("", callbackId, false);
+                    finish();
+                });
+                dialog.setCancelable(false);
+                dialog.show();
+
+                viewModel.trackError(Analytics.Error.WALLET_CONNECT, message);
+            });
         }
     }
 

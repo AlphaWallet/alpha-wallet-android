@@ -969,4 +969,5 @@
     <string name="error_eip712_incompatible_network">Bạn đã được yêu cầu ký một tin nhắn cho chuỗi %1s. Bạn hiện đang ở trong chuỗi %2s.</string>
     <string name="error_eip712_wc2_disabled_network">Bạn được yêu cầu ký một tin nhắn cho %s. Vui lòng kích hoạt chuỗi này cho phiên WalletConnect của bạn.</string>
     <string name="action_view_session">Xem phiên</string>
+    <string name="error_walletconnect_session_request_unsupported_network">Không thể xử lý yêu cầu phiên từ một chuỗi không được hỗ trợ.</string>
 </resources>

@@ -113,7 +113,7 @@ public class WalletConnectV2SessionRequestHandler
         String message = EthereumNetworkBase.isChainSupported(signable.getChainId()) ?
             activity.getString(R.string.error_eip712_wc2_disabled_network,
                 EthereumNetworkBase.getShortChainName(signable.getChainId())) :
-            activity.getString(R.string.error_eip712_unsupported_network);
+            activity.getString(R.string.error_eip712_unsupported_network, String.valueOf(signable.getChainId()));
         errorDialog.setMessage(message);
         errorDialog.setButton(R.string.action_view_session, v -> {
             openSessionDetail(session);

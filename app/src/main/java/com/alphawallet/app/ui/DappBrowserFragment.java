@@ -1199,7 +1199,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 getString(R.string.error_eip712_incompatible_network,
                     EthereumNetworkBase.getShortChainName(requestingChainId),
                     EthereumNetworkBase.getShortChainName(activeChainId)) :
-                getString(R.string.error_eip712_unsupported_network);
+                getString(R.string.error_eip712_unsupported_network, String.valueOf(requestingChainId));
             errorDialog.setMessage(message);
             errorDialog.setButton(R.string.action_cancel, v -> {
                 errorDialog.dismiss();

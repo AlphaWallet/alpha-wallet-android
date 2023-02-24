@@ -986,7 +986,7 @@
     <string name="hardware_wallets">ဟာ့ဒ်ဝဲ ဝေါလက်</string>
     <string name="use_hardware_card">Use Hardware Card</string>
     <string name="unsupported_network">ပံ့ပိုးမထားသော ကွန်ရက် (ကွင်းဆက် ID- %s)</string>
-    <string name="error_eip712_unsupported_network">ပံ့ပိုးမထားသော ကွင်းဆက်တစ်ခုအတွက် မက်ဆေ့ဂျ်ကို လက်မှတ်ရေးထိုးရန် သင့်အား တောင်းဆိုထားသည်။</string>
+    <string name="error_eip712_unsupported_network">ပံ့ပိုးမထားသော ကွင်းဆက်တစ်ခုအတွက် မက်ဆေ့ဂျ်ကို လက်မှတ်ရေးထိုးရန် သင့်အား တောင်းဆိုထားသည်။ (ID: %s)</string>
     <string name="error_eip712_incompatible_network">%1s ကွင်းဆက်အတွက် မက်ဆေ့ချ်တစ်ခု လက်မှတ်ထိုးရန် သင့်အား တောင်းဆိုထားသည်။ သင်သည် လက်ရှိတွင် %2s ကွင်းဆက်တွင် ရှိနေသည်။</string>
     <string name="error_eip712_wc2_disabled_network">သင်သည် %s အတွက် မက်ဆေ့ဂျ်ကို လက်မှတ်ထိုးရန် တောင်းဆိုထားသည်။ သင်၏ WalletConnect စက်ရှင်အတွက် ဤကွင်းဆက်ကို ဖွင့်ပါ။</string>
     <string name="action_view_session">Session ကိုကြည့်ပါ။</string>

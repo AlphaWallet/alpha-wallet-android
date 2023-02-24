@@ -955,7 +955,7 @@
     <string name="hardware_wallets">Dompet Perangkat Keras</string>
     <string name="use_hardware_card">Gunakan Kartu Perangkat Keras</string>
     <string name="unsupported_network">Jaringan Tidak Didukung (ID Rantai: %s)</string>
-    <string name="error_eip712_unsupported_network">Anda diminta menandatangani pesan untuk rantai yang tidak didukung.</string>
+    <string name="error_eip712_unsupported_network">Anda diminta menandatangani pesan untuk rantai yang tidak didukung. (ID: %s)</string>
     <string name="error_eip712_incompatible_network">Anda diminta menandatangani pesan untuk rantai %1s. Anda saat ini berada di rantai %2s.</string>
     <string name="error_eip712_wc2_disabled_network">Anda diminta menandatangani pesan untuk %s. Aktifkan rantai ini untuk sesi WalletConnect Anda.</string>
     <string name="action_view_session">Lihat Sesi</string>

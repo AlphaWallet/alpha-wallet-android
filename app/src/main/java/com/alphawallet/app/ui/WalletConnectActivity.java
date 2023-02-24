@@ -877,7 +877,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     getString(R.string.error_eip712_incompatible_network,
                         EthereumNetworkBase.getShortChainName(requestingChainId),
                         EthereumNetworkBase.getShortChainName(activeChainId)) :
-                    getString(R.string.error_eip712_unsupported_network);
+                    getString(R.string.error_eip712_unsupported_network, String.valueOf(requestingChainId));
                 dialog.setMessage(message);
                 dialog.setButton(R.string.action_cancel, v -> {
                     dialog.dismiss();

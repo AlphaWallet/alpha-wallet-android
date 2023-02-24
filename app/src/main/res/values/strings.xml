@@ -1031,5 +1031,5 @@
     <string name="error_eip712_incompatible_network">You were requested to sign a message for the %1s chain. You are currently on the %2s chain.</string>
     <string name="error_eip712_wc2_disabled_network">You were requested to sign a message for the %1s chain. Please enable this chain for your WalletConnect session.</string>
     <string name="action_view_session">View Session</string>
-    <string name="error_walletconnect_session_request_unsupported_network">Unable to handle session request from an unsupported chain.</string>
+    <string name="error_walletconnect_session_request_unsupported_network">Unable to handle session request from an unsupported chain. (ID: %s)</string>
 </resources>

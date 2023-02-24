@@ -794,7 +794,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         if (confirmationDialog.getActionSheetStatus() == ActionSheetStatus.ERROR_INVALID_CHAIN)
         {
-            showErrorDialogUnsupportedNetwork(id);
+            showErrorDialogUnsupportedNetwork(id, chainIdOverride);
         }
         else
         {
@@ -844,14 +844,14 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         }
     }
 
-    private void showErrorDialogUnsupportedNetwork(long callbackId)
+    private void showErrorDialogUnsupportedNetwork(long callbackId, long chainId)
     {
         if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
         {
             runOnUiThread(() -> {
                 closeErrorDialog();
                 dialog = new AWalletAlertDialog(this, AWalletAlertDialog.ERROR);
-                String message = getString(R.string.error_walletconnect_session_request_unsupported_network);
+                String message = getString(R.string.error_walletconnect_session_request_unsupported_network, String.valueOf(chainId));
                 dialog.setMessage(message);
                 dialog.setButton(R.string.action_close, v -> {
                     dialog.dismiss();

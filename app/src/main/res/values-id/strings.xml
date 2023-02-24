@@ -959,5 +959,5 @@
     <string name="error_eip712_incompatible_network">Anda diminta menandatangani pesan untuk rantai %1s. Anda saat ini berada di rantai %2s.</string>
     <string name="error_eip712_wc2_disabled_network">Anda diminta menandatangani pesan untuk %s. Aktifkan rantai ini untuk sesi WalletConnect Anda.</string>
     <string name="action_view_session">Lihat Sesi</string>
-    <string name="error_walletconnect_session_request_unsupported_network">Tidak dapat menangani permintaan sesi dari rantai yang tidak didukung.</string>
+    <string name="error_walletconnect_session_request_unsupported_network">Tidak dapat menangani permintaan sesi dari rantai yang tidak didukung. (ID: %s)</string>
 </resources>

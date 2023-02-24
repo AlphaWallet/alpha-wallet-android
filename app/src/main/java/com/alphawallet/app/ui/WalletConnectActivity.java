@@ -773,7 +773,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             }
         }
 
-        String[] accounts = {viewModel.getWallet().address};
         String displayIcon = (peer.getIcons().size() > 0) ? peer.getIcons().get(0) : DEFAULT_ICON;
 
         chainIdOverride = chainIdOverride > 0 ? chainIdOverride : (chainId > 0 ? chainId : MAINNET_ID);

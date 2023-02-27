@@ -765,18 +765,37 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         closeErrorDialog();
 
-        if (confirmationDialog != null)
-        {
-            if (confirmationDialog.isShowing())
-            {      // if already opened
-                confirmationDialog.forceDismiss();
-            }
-        }
+        closeConfirmationDialog();
 
         String displayIcon = (peer.getIcons().size() > 0) ? peer.getIcons().get(0) : DEFAULT_ICON;
 
         chainIdOverride = chainIdOverride > 0 ? chainIdOverride : (chainId > 0 ? chainId : MAINNET_ID);
 
+        displaySessionRequestDetails(peer, chainIdOverride, displayIcon);
+
+        confirmationDialog = new ActionSheetDialog(this, peer, chainIdOverride, displayIcon, this);
+        if (confirmationDialog.getActionSheetStatus() == ActionSheetStatus.ERROR_INVALID_CHAIN)
+        {
+            showErrorDialogUnsupportedNetwork(id, chainIdOverride);
+            return;
+        }
+        else
+        {
+            confirmationDialog.show();
+            confirmationDialog.fullExpand();
+            viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_REQUEST);
+        }
+
+        if (confirmationDialog.isShowing() &&
+            !viewModel.isActiveNetwork(chainId) &&
+            !viewModel.isActiveNetwork(chainIdOverride))
+        {
+            openChainSelection();
+        }
+    }
+
+    private void displaySessionRequestDetails(WCPeerMeta peer, long chainId, String displayIcon)
+    {
         Glide.with(this)
             .load(displayIcon)
             .circleCrop()
@@ -785,27 +804,19 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         textName.setText(peer.getName());
         peerUrl.setText(peer.getUrl());
         txCount.setText(R.string.empty);
-        chainName.setChainID(chainIdOverride);
+        chainName.setChainID(chainId);
         chainIcon.setVisibility(View.VISIBLE);
-        chainIcon.bindData(chainIdOverride);
+        chainIcon.bindData(chainId);
         remotePeerMeta = peer;
+    }
 
-        confirmationDialog = new ActionSheetDialog(this, peer, chainIdOverride, displayIcon, this);
-
-        if (confirmationDialog.getActionSheetStatus() == ActionSheetStatus.ERROR_INVALID_CHAIN)
+    private void closeConfirmationDialog()
+    {
+        if (confirmationDialog != null)
         {
-            showErrorDialogUnsupportedNetwork(id, chainIdOverride);
-        }
-        else
-        {
-            confirmationDialog.show();
-            confirmationDialog.fullExpand();
-
-            viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_REQUEST);
-
-            if (!viewModel.isActiveNetwork(chainId) && !viewModel.isActiveNetwork(chainIdOverride))
-            {
-                openChainSelection();
+            if (confirmationDialog.isShowing())
+            {      // if already opened
+                confirmationDialog.forceDismiss();
             }
         }
     }

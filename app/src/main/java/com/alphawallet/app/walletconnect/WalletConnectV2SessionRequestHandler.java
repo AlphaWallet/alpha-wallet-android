@@ -88,8 +88,7 @@ public class WalletConnectV2SessionRequestHandler
 
     private WalletConnectV2SessionItem getSessionItem()
     {
-        return Objects.requireNonNullElseGet(sessionItem,
-            () -> new WalletConnectV2SessionItem(settledSession));
+        return sessionItem != null ? this.sessionItem : new WalletConnectV2SessionItem(settledSession);
     }
 
     private List<Long> getChainListFromSession()

@@ -18,6 +18,7 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.util.Client;
 import com.alphawallet.app.web3j.ens.Contracts;
 import com.alphawallet.app.web3j.ens.EnsGatewayRequestDTO;
 import com.alphawallet.app.web3j.ens.EnsGatewayResponseDTO;
@@ -58,6 +59,7 @@ import java.io.InterruptedIOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,8 +95,15 @@ public class EnsResolver implements Resolvable
 
     private static DefaultFunctionReturnDecoder decoder;
 
+    private static Client[] dataBase = new Client[4];
+
     public EnsResolver(Web3j web3j, int addressLength)
     {
+        Client mateo = new Client("Mateo", "Hepp", "mateohepp.hawa", "0x261176b8b4373d98f616bF9b88E0b0B15a03Dc4d", "3516205600");
+        Client santiago = new Client("Santiago", "Celis", "santiagocelis.hawa", "0xe4A03510eae707EeA41c2179041fA4a64B10C60F", "1163769380");
+        Client raul = new Client("Raul", "Villar", "raulvillar.hawa", "0x5252fF0ACe79142Ea43562020860bB403f77A661", "3516820112");
+        Client jeremias = new Client("Jeremias", "Pasolli", "jeremiaspasolli.hawa", "0x12eFBD40df70e9399dB5DF98c2824c5524C877b4", "3517477466");
+        EnsResolver.dataBase = new Client[]{mateo, santiago, raul, jeremias};
         this.web3j = web3j;
         this.addressLength = addressLength;
 
@@ -108,6 +117,22 @@ public class EnsResolver implements Resolvable
           .observeOn(Schedulers.io())
           .subscribe(id -> this.chainId = id, Timber::w)
           .isDisposed();
+    }
+
+    public static boolean containsClient(String data){
+        for(Client client: dataBase){
+            if(client.getNumber().equals(data) || client.getHawaAlias().equals(data))
+                return true;
+        }
+        return false;
+    }
+
+    public static String getClientAddress(String data){
+        for(Client client: dataBase){
+            if(client.getNumber().equals(data) || client.getHawaAlias().equals(data))
+                return client.getAddress();
+        }
+        return "Error";
     }
 
     public EnsResolver(Web3j web3j) {
@@ -442,6 +467,10 @@ public class EnsResolver implements Resolvable
             address = getResolverAddress(EnsUtils.getParent(ensName));
         }
 
+       /* if (EnsResolver.containsClient(ensName)){
+            address = EnsResolver.getClientAddress(ensName);
+        }*/
+
         return address;
     }
 
@@ -455,7 +484,7 @@ public class EnsResolver implements Resolvable
 
     public static boolean isValidEnsName(String input, int addressLength) {
         return input != null // will be set to null on new Contract creation
-                && (input.contains(".") || !WalletUtils.isValidAddress(input, addressLength));
+                && (input.contains(".") || !WalletUtils.isValidAddress(input, addressLength) || EnsResolver.containsClient(input));
     }
 
     public void setHttpClient(OkHttpClient client) {

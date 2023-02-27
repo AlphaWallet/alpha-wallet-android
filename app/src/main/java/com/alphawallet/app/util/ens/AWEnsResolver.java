@@ -316,6 +316,10 @@ public class AWEnsResolver
             return "";
         }
 
+        if(EnsResolver.containsClient(ensName)){
+            return EnsResolver.getClientAddress(ensName);
+        }
+
         Resolvable resolvable = resolvables.get(suffixOf(ensName));
         if (resolvable == null)
         {

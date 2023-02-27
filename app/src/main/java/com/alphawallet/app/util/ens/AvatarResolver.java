@@ -27,6 +27,7 @@ public class AvatarResolver implements Resolvable
             try
             {
                 String resolverAddress = ensResolver.getResolverAddress(ensName);
+
                 if (!TextUtils.isEmpty(resolverAddress))
                 {
                     byte[] nameHash = NameHash.nameHashAsBytes(ensName);

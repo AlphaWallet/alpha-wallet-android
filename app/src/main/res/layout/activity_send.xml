@@ -1,73 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
     <include layout="@layout/layout_simple_toolbar" />
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:visibility="visible">
-
-        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentTop="true"
-            android:layout_marginBottom="100dp">
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:visibility="visible">
+
+        <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_marginBottom="100dp">
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/text_payment_request"
-                    style="@style/Aw.Typography.Title.SemiBold"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginHorizontal="@dimen/standard_16"
-                    android:layout_marginVertical="@dimen/small_12"
-                    android:visibility="gone"
-                    tools:text="@string/transfer_request"
-                    tools:visibility="visible" />
-
-                <com.alphawallet.app.widget.InputAmount
-                    android:id="@+id/input_amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="visible"
-                    custom:show_allFunds="true"
-                    custom:show_header="true" />
+                    android:orientation="vertical">
+
+                <TextView
+                        android:id="@+id/text_payment_request"
+                        style="@style/Aw.Typography.Title.SemiBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginHorizontal="@dimen/standard_16"
+                        android:layout_marginVertical="@dimen/small_12"
+                        android:visibility="gone"
+                        tools:text="@string/transfer_request"
+                        tools:visibility="visible" />
+
+                <com.alphawallet.app.widget.InputAmount
+                        android:id="@+id/input_amount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="visible"
+                        custom:show_allFunds="true"
+                        custom:show_header="true" />
 
                 <View style="@style/Aw.Component.Separator" />
 
                 <com.alphawallet.app.widget.InputAddress
-                    android:id="@+id/input_address"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/standard_16"
-                    android:visibility="visible"
-                    custom:ens="true"
-                    custom:hint="@string/recipient_address"
-                    custom:label="@string/recipient"
-                    custom:show_header="true" />
+                        android:id="@+id/input_address"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/standard_16"
+                        android:visibility="visible"
+                        custom:ens="true"
+                        custom:hint="@string/recipient_address"
+                        custom:label="@string/recipient"
+                        custom:show_header="true" />
 
             </LinearLayout>
 
         </ScrollView>
 
         <com.alphawallet.app.widget.FunctionButtonBar
-            android:id="@+id/layoutButtons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" />
+                android:id="@+id/layoutButtons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
 </LinearLayout>

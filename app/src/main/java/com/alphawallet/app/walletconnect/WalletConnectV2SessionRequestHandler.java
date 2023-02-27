@@ -32,6 +32,7 @@ public class WalletConnectV2SessionRequestHandler
     private final Wallet.Model.Session settledSession;
     private final Activity activity;
     private final AWWalletConnectClient client;
+    private WalletConnectV2SessionItem sessionItem;
 
     public WalletConnectV2SessionRequestHandler(Wallet.Model.SessionRequest sessionRequest, Wallet.Model.Session settledSession, Activity activity, AWWalletConnectClient client)
     {
@@ -68,21 +69,11 @@ public class WalletConnectV2SessionRequestHandler
         BaseRequest signRequest = EthSignRequest.getSignRequest(sessionRequest);
         if (signRequest != null)
         {
-            Signable signable = signRequest.getSignable(sessionRequest.getRequest().getId(), Objects.requireNonNull(settledSession.getMetaData()).getUrl());
-            WalletConnectV2SessionItem session = new WalletConnectV2SessionItem(settledSession);
-
-            List<Long> chainList = new ArrayList<>();
-            for (String chain : session.chains)
+            Signable signable = signRequest.getSignable(sessionRequest.getRequest().getId(),
+                Objects.requireNonNull(settledSession.getMetaData()).getUrl());
+            if (!getChainListFromSession().contains(signable.getChainId()))
             {
-                if (chain.contains(":"))
-                {
-                    chainList.add(Long.parseLong(chain.split(":")[1]));
-                }
-            }
-
-            if (!chainList.contains(signable.getChainId()))
-            {
-                showErrorDialog(aCallback, signable, session);
+                showErrorDialog(aCallback, signable, getSessionItem());
             }
             else
             {
@@ -93,6 +84,26 @@ public class WalletConnectV2SessionRequestHandler
         {
             Timber.e("Method %s not supported.", method);
         }
+    }
+
+    private WalletConnectV2SessionItem getSessionItem()
+    {
+        return Objects.requireNonNullElseGet(sessionItem,
+            () -> new WalletConnectV2SessionItem(settledSession));
+    }
+
+    private List<Long> getChainListFromSession()
+    {
+        List<Long> chainList = new ArrayList<>();
+        for (String chain : getSessionItem().chains)
+        {
+            if (chain.contains(":"))
+            {
+                chainList.add(Long.parseLong(chain.split(":")[1]));
+            }
+        }
+
+        return chainList;
     }
 
     private void showActionSheet(ActionSheetCallback aCallback, BaseRequest signRequest, Signable signable)

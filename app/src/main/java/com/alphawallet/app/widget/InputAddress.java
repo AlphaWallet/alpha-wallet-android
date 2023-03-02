@@ -462,10 +462,11 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
 
     public void setAddress(String text)
     {
-        if (!TextUtils.isEmpty(text))
-        {
+        // TODO: Commented out for testing purposes only
+//        if (!TextUtils.isEmpty(text))
+//        {
             editText.setText(text);
-        }
+//        }
     }
 
     public String getInputText()

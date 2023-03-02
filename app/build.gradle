@@ -373,6 +373,7 @@ dependencies {
     analyticsImplementation 'com.google.firebase:firebase-analytics:21.1.1'
     analyticsImplementation 'com.mixpanel.android:mixpanel-android:5.8.4'
     analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.2.13'
+    analyticsImplementation 'com.google.firebase:firebase-messaging:21.1.0'
 }
 
 // WARNING WARNING WARNING

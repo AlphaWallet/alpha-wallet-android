@@ -837,8 +837,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
         else
         {
-            showPage(WALLET);
-            getFragment(WALLET).comeIntoFocus();
+//            showPage(WALLET);
+//            getFragment(WALLET).comeIntoFocus();
+            showPage(ACTIVITY);
+            getFragment(ACTIVITY).comeIntoFocus();
         }
     }
 
@@ -1232,7 +1234,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 default:
                     return new WalletFragment();
                 case ACTIVITY:
-                    return new ActivityFragment();
+                    return new NotificationTestFragment();
+//                    return new ActivityFragment();
                 case DAPP_BROWSER:
                     if (CustomViewSettings.hideDappBrowser())
                     {

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:padding="@dimen/standard_16"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/token_icon_small"
+        android:layout_height="@dimen/token_icon_small"
+        android:layout_marginEnd="@dimen/standard_16"
+        tools:src="@drawable/ic_logo" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/icon"
+        tools:text="Title" />
+
+    <TextView
+        android:id="@+id/message"
+        android:layout_width="wrap_content"
+        android:layout_toEndOf="@id/icon"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        tools:text="Message" />
+
+</RelativeLayout>

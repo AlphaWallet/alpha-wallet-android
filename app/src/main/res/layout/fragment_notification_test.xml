@@ -66,6 +66,16 @@
 
     </ScrollView>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_request_permission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/layout_buttons"
+        android:layout_marginHorizontal="@dimen/standard_16"
+        android:text="Request Permissions"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <LinearLayout
         android:id="@+id/layout_buttons"
         android:layout_width="match_parent"

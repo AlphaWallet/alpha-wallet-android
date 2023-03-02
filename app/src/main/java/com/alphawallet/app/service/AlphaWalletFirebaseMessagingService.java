@@ -49,18 +49,16 @@ public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingServic
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage)
     {
         super.onMessageReceived(remoteMessage);
-        showNotification(remoteMessage.getNotification().getTitle(),
-            remoteMessage.getNotification().getBody());
+        Timber.d(remoteMessage.toString());
+        showNotification(remoteMessage);
     }
 
     private void sendRegistrationToServer(String token)
     {
         // TODO: Implement
     }
-
-    // Method to display the notifications
-    public void showNotification(String title,
-                                 String message)
+    
+    public void showNotification(RemoteMessage remoteMessage)
     {
         // Pass the intent to switch to the MainActivity
         Intent intent
@@ -71,6 +69,9 @@ public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingServic
         // the activities present in the activity stack,
         // on the top of the Activity that is to be launched
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.setAction(C.NOTIFICATION_RECEIVED);
+        intent.putExtra("data", remoteMessage.getData().toString());
+
         // Pass the intent to PendingIntent to start the
         // next Activity
         PendingIntent pendingIntent
@@ -107,8 +108,8 @@ public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingServic
 //                .setSmallIcon(R.drawable.ic_logo);
 //        }
 
-        builder = builder.setContentTitle(title)
-            .setContentText(message)
+        builder = builder.setContentTitle(remoteMessage.getNotification().getTitle())
+            .setContentText(remoteMessage.getNotification().getBody())
             .setSmallIcon(R.drawable.ic_logo);
 
         // Create an object of NotificationManager class to

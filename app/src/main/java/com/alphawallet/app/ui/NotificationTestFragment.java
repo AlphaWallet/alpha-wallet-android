@@ -39,25 +39,28 @@ public class NotificationTestFragment extends BaseFragment
     private NotificationTestViewModel viewModel;
 
     // Declare the launcher at the top of your Activity/Fragment:
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
-        registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-            if (isGranted)
-            {
-                // FCM SDK (and your app) can post notifications.
-            }
-            else
-            {
-                // TODO: Inform user that that your app will not show notifications.
-                Toast.makeText(getContext(), "Permission not granted.", Toast.LENGTH_SHORT).show();
-            }
-        });
     private TextView currentAddressText;
     private TextView resultText;
     private InputAddress addressInput;
     private MaterialButton fetchButton;
     private MaterialButton clearButton;
-
+    private MaterialButton requestPermissionButton;
     private String address;
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+        registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted)
+            {
+                // FCM SDK (and your app) can post notifications.
+                requestPermissionButton.setVisibility(View.GONE);
+            }
+            else
+            {
+                // TODO: Inform user that that your app will not show notifications.
+                Toast.makeText(getContext(), "Permission not granted.", Toast.LENGTH_SHORT).show();
+                requestPermissionButton.setVisibility(View.VISIBLE);
+            }
+        });
 
     private void askNotificationPermission()
     {
@@ -68,9 +71,11 @@ public class NotificationTestFragment extends BaseFragment
                 PackageManager.PERMISSION_GRANTED)
             {
                 // FCM SDK (and your app) can post notifications.
+                requestPermissionButton.setVisibility(View.GONE);
             }
             else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS))
             {
+                requestPermissionButton.setVisibility(View.VISIBLE);
                 // TODO: display an educational UI explaining to the user the features that will be enabled
                 //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
                 //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
@@ -94,11 +99,17 @@ public class NotificationTestFragment extends BaseFragment
 
         setToolbarTitle("Notification Test");
 
-        initViewModel();
-
         initViews(view);
 
         return view;
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+
+        initViewModel();
     }
 
     private void initViews(View view)
@@ -109,6 +120,8 @@ public class NotificationTestFragment extends BaseFragment
         fetchButton.setOnClickListener(this);
         clearButton = view.findViewById(R.id.btn_clear);
         clearButton.setOnClickListener(this);
+        requestPermissionButton = view.findViewById(R.id.btn_request_permission);
+        requestPermissionButton.setOnClickListener(this);
         addressInput = view.findViewById(R.id.input_address);
         addressInput.getEditText().setEnabled(false);
         addressInput.getInputView().addTextChangedListener(new TextWatcher()
@@ -167,6 +180,10 @@ public class NotificationTestFragment extends BaseFragment
         {
             clearFields();
         }
+        else if (id == R.id.btn_request_permission)
+        {
+            askNotificationPermission();
+        }
     }
 
     private void clearFields()
@@ -219,5 +236,11 @@ public class NotificationTestFragment extends BaseFragment
                 Timber.d(msg);
                 Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
             });
+    }
+
+    public void setData(String data)
+    {
+        Timber.d(data);
+        resultText.setText(data);
     }
 }

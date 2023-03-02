@@ -182,6 +182,9 @@ public abstract class C {
             "com.stormbird.wallet.SIGN_TRANSACTION";
     public static final String REQUEST_NOTIFICATION_ACCESS =
             "com.stormbird.wallet.REQUEST_NOTIFICATION";
+
+    public static final String NOTIFICATION_RECEIVED =
+        "com.stormbird.wallet.NOTIFICATION_RECEIVED";
     public static final String BACKUP_WALLET_SUCCESS =
             "com.stormbird.wallet.BACKUP_SUCCESS";
     public static final String CHANGE_CURRENCY =

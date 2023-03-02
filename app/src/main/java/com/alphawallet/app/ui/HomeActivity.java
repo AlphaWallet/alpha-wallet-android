@@ -430,19 +430,29 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onNewIntent(Intent startIntent)
     {
         super.onNewIntent(startIntent);
-        Uri data = startIntent.getData();
-        String importPath = null;
-        String importData = null;
-
-        if (data != null)
+        if (startIntent.getAction().equals(C.NOTIFICATION_RECEIVED))
         {
-            importData = data.toString();
-            if (importData.startsWith("content://"))
-            {
-                importPath = data.getPath();
-            }
+            String data = startIntent.getStringExtra("data");
+            showPage(ACTIVITY);
+            NotificationTestFragment frag = (NotificationTestFragment) getFragment(ACTIVITY);
+            frag.setData(data);
+        }
+        else
+        {
+            Uri data = startIntent.getData();
+            String importPath = null;
+            String importData = null;
 
-            checkIntents(importData, importPath, startIntent);
+            if (data != null)
+            {
+                importData = data.toString();
+                if (importData.startsWith("content://"))
+                {
+                    importPath = data.getPath();
+                }
+
+                checkIntents(importData, importPath, startIntent);
+            }
         }
     }
 
@@ -555,6 +565,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 viewModel.showImportLink(this, magicLink);
             }
         });
+
+        if (getIntent() != null)
+        {
+            if (getIntent().getExtras() != null) {
+                for (String key : getIntent().getExtras().keySet()) {
+                    String value = getIntent().getExtras().getString(key);
+                    Timber.d("Key: " + key + " Value: " + value);
+                }
+            }
+        }
     }
 
     @Override

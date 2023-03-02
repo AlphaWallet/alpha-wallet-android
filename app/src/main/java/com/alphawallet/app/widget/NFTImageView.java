@@ -9,8 +9,16 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.PictureDrawable;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
@@ -45,12 +54,15 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
+import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import timber.log.Timber;
 
@@ -79,6 +91,7 @@ public class NFTImageView extends RelativeLayout
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
         {
             //couldn't load using glide
+            Timber.tag("Bella").d("onLoadFailed" + model);
             String msg = e != null ? e.toString() : "";
             if (msg.contains(C.GLIDE_URL_INVALID)) //URL not valid: use the attribute name
             {
@@ -200,14 +213,127 @@ public class NFTImageView extends RelativeLayout
             roundedCorners = new RoundedCorners(corners);
         }
 
-        loadRequest = Glide.with(getContext())
-                .load(url)
-                .transform(new CenterCrop(), new ClipBottomRoundedCornersTransformation(10), roundedCorners)
-                .transition(withCrossFade())
-                .override(Target.SIZE_ORIGINAL)
-                .timeout(30 * 1000)
-                .listener(requestListener)
-                .into(new DrawableImageViewTarget(image)).getRequest();
+        if (url.toLowerCase(Locale.ROOT).endsWith(".svg")) {
+
+            loadRequest = Glide.with(getContext())
+                    .as(PictureDrawable.class)
+                    .override(Target.SIZE_ORIGINAL)
+                    .timeout(30 * 1000)
+                    .load(url)
+                    .into(createSvgTarget(corners))
+                    .getRequest();
+        } else {
+            loadRequest = Glide.with(getContext())
+                    .load(url)
+                    .transform(new CenterCrop(), new ClipBottomRoundedCornersTransformation(10), roundedCorners)
+                    .transition(withCrossFade())
+                    .override(Target.SIZE_ORIGINAL)
+                    .timeout(30 * 1000)
+                    .listener(requestListener)
+                    .into(new DrawableImageViewTarget(image)).getRequest();
+        }
+    }
+
+    @NonNull
+    private Target<PictureDrawable> createSvgTarget(int corners)
+    {
+        return new Target<>()
+        {
+            @Override
+            public void onStart()
+            {
+
+            }
+
+            @Override
+            public void onStop()
+            {
+
+            }
+
+            @Override
+            public void onDestroy()
+            {
+
+            }
+
+            @Override
+            public void onLoadStarted(@Nullable Drawable placeholder)
+            {
+                // Display a placeholder or loading indicator
+            }
+
+            @Override
+            public void onLoadFailed(@Nullable Drawable errorDrawable)
+            {
+                // Display an error message or fallback image
+            }
+
+            @Override
+            public void onResourceReady(@NonNull PictureDrawable pictureDrawable, @Nullable Transition<? super PictureDrawable> transition)
+            {
+                Bitmap bitmap = Bitmap.createBitmap(pictureDrawable.getIntrinsicWidth(), pictureDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                canvas.drawPicture(pictureDrawable.getPicture());
+
+                Drawable roundedCornerBitmapDrawable = getRoundedCornerBitmapDrawable(bitmap, corners);
+                image.setImageDrawable(roundedCornerBitmapDrawable);
+            }
+
+            @Override
+            public void onLoadCleared(@Nullable Drawable placeholder)
+            {
+                // Reset the target state, such as clearing the ImageView
+            }
+
+            @Override
+            public void getSize(@NonNull SizeReadyCallback cb)
+            {
+
+            }
+
+            @Override
+            public void removeCallback(@NonNull SizeReadyCallback cb)
+            {
+
+            }
+
+            @Override
+            public void setRequest(@Nullable Request request)
+            {
+
+            }
+
+            @Nullable
+            @Override
+            public Request getRequest()
+            {
+                return null;
+            }
+
+        };
+    }
+
+    private Drawable getRoundedCornerBitmapDrawable(Bitmap bitmap, float radius)
+    {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        Bitmap roundedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(roundedBitmap);
+
+        BitmapShader shader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        Paint paint = new Paint();
+        paint.setShader(shader);
+
+        RectF rect = new RectF(0, 0, width, height);
+        radius += 35;
+        float[] radii = {radius, radius, radius, radius, 0, 0, 0, 0}; // only round the top two corners
+        Path path = new Path();
+        path.addRoundRect(rect, radii, Path.Direction.CW);
+
+        canvas.drawPath(path, paint);
+        return new BitmapDrawable(roundedBitmap);
     }
 
     @SuppressLint("SetJavaScriptEnabled")

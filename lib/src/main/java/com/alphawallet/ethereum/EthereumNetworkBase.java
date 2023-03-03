@@ -11,7 +11,6 @@ public abstract class EthereumNetworkBase
 { // implements EthereumNetworkRepositoryType
     public static final long MAINNET_ID = 1;
     public static final long CLASSIC_ID = 61;
-    public static final long POA_ID = 99;
     public static final long GNOSIS_ID = 100;
     public static final long GOERLI_ID = 5;
     public static final long ARTIS_SIGMA1_ID = 246529;
@@ -49,7 +48,6 @@ public abstract class EthereumNetworkBase
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
     public static final String XDAI_RPC_URL = "https://rpc.gnosischain.com";
-    public static final String POA_RPC_URL = "https://core.poa.network/";
     public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
@@ -91,8 +89,6 @@ public abstract class EthereumNetworkBase
                     CLASSIC_ID, false));
             put(GNOSIS_ID, new NetworkInfo("Gnosis", "xDAi", XDAI_RPC_URL, "https://blockscout.com/xdai/mainnet/tx/",
                     GNOSIS_ID, false));
-            put(POA_ID, new NetworkInfo("POA", "POA", POA_RPC_URL, "https://blockscout.com/poa/core/tx/",
-                    POA_ID, false));
             put(ARTIS_SIGMA1_ID, new NetworkInfo("ARTIS sigma1", "ATS", ARTIS_SIGMA1_RPC_URL, "https://explorer.sigma1.artis.network/tx/",
                     ARTIS_SIGMA1_ID, false));
             put(GOERLI_ID, new NetworkInfo("Görli (Test)", "GÖETH", GOERLI_RPC_URL, "https://goerli.etherscan.io/tx/",

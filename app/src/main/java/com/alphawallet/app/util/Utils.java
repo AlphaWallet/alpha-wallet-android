@@ -6,7 +6,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 
 import android.app.Activity;
@@ -803,7 +802,6 @@ public class Utils
         {
             put(CLASSIC_ID, "classic");
             put(GNOSIS_ID, "xdai");
-            put(POA_ID, "poa");
             put(BINANCE_MAIN_ID, "smartchain");
             put(AVALANCHE_ID, "avalanche");
             put(OPTIMISTIC_MAIN_ID, "optimism");

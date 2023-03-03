@@ -22,7 +22,6 @@ public abstract class C {
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
-    public static final String POA_NETWORK_NAME = "POA";
     public static final String XDAI_NETWORK_NAME = "Gnosis";
     public static final String GOERLI_NETWORK_NAME = "Görli (Test)";
     public static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
@@ -63,12 +62,10 @@ public abstract class C {
     public static final String BINANCE_TICKER = "binance";
 
     public static final String ETHEREUM_TICKER = "ethereum";
-    public static final String POA_TICKER = "poa";
 
     public static final String USD_SYMBOL = "$";
     public static final String ETH_SYMBOL = "ETH";
     public static final String xDAI_SYMBOL = "xDai";
-    public static final String POA_SYMBOL = "POA";
     public static final String ETC_SYMBOL = "ETC";
     public static final String GOERLI_SYMBOL = "GÖETH";
     public static final String ARTIS_SIGMA1_SYMBOL = "ATS";

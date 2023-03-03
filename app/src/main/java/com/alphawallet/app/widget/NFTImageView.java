@@ -203,6 +203,9 @@ public class NFTImageView extends RelativeLayout
         }
 
 
+        if (url.toLowerCase(Locale.ROOT).contains(".webp")) {
+            corners += 30;
+        }
         Transformation<Bitmap> roundedCorners;
         if (onlyRoundTopCorners)
         {

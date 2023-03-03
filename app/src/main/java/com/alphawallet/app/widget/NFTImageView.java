@@ -42,7 +42,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.util.ClipBottomRoundedCornersTransformation;
 import com.alphawallet.app.util.RoundedTopCorners;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
@@ -228,7 +227,7 @@ public class NFTImageView extends RelativeLayout
         } else {
             loadRequest = Glide.with(getContext())
                     .load(url)
-                    .transform(new CenterCrop(), new ClipBottomRoundedCornersTransformation(10), roundedCorners)
+                    .transform(new CenterCrop(), roundedCorners)
                     .transition(withCrossFade())
                     .override(Target.SIZE_ORIGINAL)
                     .timeout(30 * 1000)

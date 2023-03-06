@@ -17,7 +17,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -759,7 +758,6 @@ public class TickerService
     {{
         put(MAINNET_ID, "ethereum");
         put(CLASSIC_ID, "ethereum-classic");
-        put(POA_ID, "poa-network");
         put(GNOSIS_ID, "xdai");
         put(BINANCE_MAIN_ID, "binancecoin");
         put(HECO_ID, "huobi-token");

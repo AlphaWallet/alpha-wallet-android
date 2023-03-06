@@ -1,4 +1,4 @@
-AlphaWallet is an easy to use and secure Ethereum wallet with native ERC20, ERC721 and ERC875 support. AlphaWallet supports all Ethereum based networks, Ethereum, xDai, Ethereum Classic, Artis, POA, and Goerli.
+AlphaWallet is an easy to use and secure Ethereum wallet with native ERC20, ERC721 and ERC875 support. AlphaWallet supports all Ethereum based networks, Ethereum, xDai, Ethereum Classic, Artis, and Goerli.
 
 Focus on Defi:
 - Shows comprehensive breakdown on Token transactions & swaps.

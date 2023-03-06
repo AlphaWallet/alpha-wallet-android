@@ -680,7 +680,7 @@ public class TickerService
 
     public static String getPercentageConversion(double d)
     {
-        return BalanceUtils.getScaledValue(BigDecimal.valueOf(d), 2, 2);
+        return BalanceUtils.getScaledValue(BigDecimal.valueOf(d), 0, 2);
     }
 
     private void initCurrency()

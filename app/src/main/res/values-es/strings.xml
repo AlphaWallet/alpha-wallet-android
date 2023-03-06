@@ -950,4 +950,10 @@
     <string name="dialog_title_search_token">¿Buscar token?</string>
     <string name="hardware_wallets">Carteras de hardware</string>
     <string name="use_hardware_card">Usar tarjeta de hardware</string>
+    <string name="unsupported_network">Red no admitida (ID de cadena: %s)</string>
+    <string name="error_eip712_unsupported_network">Se le solicitó que firmara un mensaje para una cadena no admitida. (ID: %s)</string>
+    <string name="error_eip712_incompatible_network">Se le solicitó que firmara un mensaje para la cadena %1s. Actualmente estás en la cadena %2s.</string>
+    <string name="error_eip712_wc2_disabled_network">Se le solicitó que firmara un mensaje para %s. Habilite esta cadena para su sesión de WalletConnect.</string>
+    <string name="action_view_session">Ver sesión</string>
+    <string name="error_walletconnect_session_request_unsupported_network">No se puede manejar la solicitud de sesión de una cadena no admitida. (ID: %s)</string>
 </resources>

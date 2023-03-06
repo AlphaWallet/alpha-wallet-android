@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -72,7 +73,7 @@ public class TransactionDialogBuilder extends DialogFragment
     {
         viewModel = new ViewModelProvider((ViewModelStoreOwner) activity)
                 .get(WalletConnectViewModel.class);
-        viewModel.resetTxSignedMutable();
+        viewModel.blankLiveData();
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionSigned().observe(this, this::txSigned);
         viewModel.transactionError().observe(this, this::txError);
@@ -82,6 +83,7 @@ public class TransactionDialogBuilder extends DialogFragment
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState)
     {
+        viewModel.blankLiveData();
         Type listType = new TypeToken<ArrayList<WCEthereumTransaction>>()
         {
         }.getType();
@@ -181,8 +183,11 @@ public class TransactionDialogBuilder extends DialogFragment
 
     private void txWritten(TransactionReturn txData)
     {
-        approve(txData.hash, awWalletConnectClient);
-        actionSheetDialog.transactionWritten(txData.hash);
+        if (txData != null)
+        {
+            approve(txData.hash, awWalletConnectClient);
+            actionSheetDialog.transactionWritten(txData.hash);
+        }
     }
 
     private void txSigned(TransactionReturn txData)

@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity;
 
+import static org.web3j.tx.ChainIdLong.MAINNET;
+
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
@@ -72,6 +74,22 @@ public class CryptoFunctions implements CryptoFunctionsInterface
         }
 
         return msgData;
+    }
+
+    @Override
+    public long getChainId(String messageData)
+    {
+        long chainId = -1;
+        try
+        {
+            StructuredDataEncoder eip721Object = new StructuredDataEncoder(messageData);
+            return eip721Object.jsonMessageObject.getDomain().getChainId().getValue().intValue();
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
+        return chainId;
     }
 
     @Override

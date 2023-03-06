@@ -9,7 +9,6 @@ public class EthRPCNodes
     private static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/" + getInfuraKey();
     private static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
     private static final String XDAI_RPC_URL = EthereumNetworkBase.XDAI_RPC_URL;
-    private static final String POA_RPC_URL = "https://core.poa.network/";
     private static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/" + getInfuraKey();
     private static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
     private static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
@@ -19,8 +18,6 @@ public class EthRPCNodes
         switch ((int)networkId) {
             case (int)EthereumNetworkBase.MAINNET_ID:
                 return MAINNET_RPC_URL;
-            case (int)EthereumNetworkBase.POA_ID:
-                return POA_RPC_URL;
             case (int)EthereumNetworkBase.CLASSIC_ID:
                 return CLASSIC_RPC_URL;
             case (int)EthereumNetworkBase.GNOSIS_ID:

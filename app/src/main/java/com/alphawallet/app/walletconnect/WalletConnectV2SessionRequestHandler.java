@@ -71,7 +71,7 @@ public class WalletConnectV2SessionRequestHandler
         {
             Signable signable = signRequest.getSignable(sessionRequest.getRequest().getId(),
                 Objects.requireNonNull(settledSession.getMetaData()).getUrl());
-            if (!getChainListFromSession().contains(signable.getChainId()))
+            if (!validateChainId(signable))
             {
                 showErrorDialog(aCallback, signable, getSessionItem());
             }
@@ -84,6 +84,29 @@ public class WalletConnectV2SessionRequestHandler
         {
             Timber.e("Method %s not supported.", method);
         }
+    }
+
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
+    private boolean validateChainId(Signable signable)
+    {
+        switch (signable.getMessageType())
+        {
+            case SIGN_ERROR:
+                return false;
+            case SIGN_MESSAGE:
+            case SIGN_PERSONAL_MESSAGE:
+            case SIGN_TYPED_DATA:
+                return true; //no chain checking
+            case SIGN_TYPED_DATA_V3:
+            case SIGN_TYPED_DATA_V4:
+                return (signable.getChainId() == -1 || //if chainId is unspecified treat as no restriction intended
+                        !getChainListFromSession().contains(signable.getChainId()));
+            case ATTESTATION:
+                //TODO: Check attestation signing chain
+                return true;
+        }
+
+        return false;
     }
 
     private WalletConnectV2SessionItem getSessionItem()

@@ -45,6 +45,8 @@
     <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="-10dp"
+            android:background="@drawable/background_round_bottom_corners"
             android:padding="@dimen/dp9">
 
         <TextView

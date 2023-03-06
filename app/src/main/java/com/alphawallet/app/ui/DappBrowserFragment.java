@@ -55,6 +55,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
@@ -76,6 +77,7 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetSource;
 import com.alphawallet.app.entity.analytics.QrScanResultType;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -199,6 +201,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private NetworkInfo activeNetwork;
     private AWalletAlertDialog chainSwapDialog;
     private AWalletAlertDialog resultDialog;
+    private AWalletAlertDialog errorDialog;
     private String loadOnInit; //Web3 needs to be fully set up and initialised before any dapp loading can be done
     private boolean homePressed;
     private AddEthereumChainPrompt addCustomChainDialog;
@@ -1176,10 +1179,36 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void handleSignMessage(Signable message)
     {
-        if (confirmationDialog == null || !confirmationDialog.isShowing())
+        if (message.getMessageType() == SignMessageType.SIGN_TYPED_DATA_V3 && message.getChainId() != activeNetwork.chainId)
+        {
+            showErrorDialogIncompatibleNetwork(message.getCallbackId(), message.getChainId(), activeNetwork.chainId);
+        }
+        else if (confirmationDialog == null || !confirmationDialog.isShowing())
         {
             confirmationDialog = new ActionSheetSignDialog(requireActivity(), this, message);
             confirmationDialog.show();
+        }
+    }
+
+    private void showErrorDialogIncompatibleNetwork(long callbackId, long requestingChainId, long activeChainId)
+    {
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            errorDialog = new AWalletAlertDialog(getContext(), AWalletAlertDialog.ERROR);
+            String message = EthereumNetworkBase.isChainSupported(requestingChainId) ?
+                getString(R.string.error_eip712_incompatible_network,
+                    EthereumNetworkBase.getShortChainName(requestingChainId),
+                    EthereumNetworkBase.getShortChainName(activeChainId)) :
+                getString(R.string.error_eip712_unsupported_network, String.valueOf(requestingChainId));
+            errorDialog.setMessage(message);
+            errorDialog.setButton(R.string.action_cancel, v -> {
+                errorDialog.dismiss();
+                dismissed("", callbackId, false);
+            });
+            errorDialog.setCancelable(false);
+            errorDialog.show();
+
+            viewModel.trackError(Analytics.Error.BROWSER, message);
         }
     }
 

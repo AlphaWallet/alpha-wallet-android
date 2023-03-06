@@ -7,6 +7,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 
+import com.alphawallet.app.entity.ActionSheetStatus;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -16,6 +17,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
  */
 public abstract class ActionSheet extends BottomSheetDialog implements ActionSheetInterface
 {
+    private ActionSheetStatus actionSheetStatus = ActionSheetStatus.OK;
+
     public ActionSheet(@NonNull Context context)
     {
         super(context);
@@ -50,5 +53,15 @@ public abstract class ActionSheet extends BottomSheetDialog implements ActionShe
     public void gotAuthorisation(boolean gotAuth)
     {
 
+    }
+
+    public void setActionSheetStatus(ActionSheetStatus actionSheetStatus)
+    {
+        this.actionSheetStatus = actionSheetStatus;
+    }
+
+    public ActionSheetStatus getActionSheetStatus()
+    {
+        return this.actionSheetStatus;
     }
 }

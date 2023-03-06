@@ -16,6 +16,7 @@ import androidx.preference.PreferenceManager;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
+import com.alphawallet.app.entity.ActionSheetStatus;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -24,6 +25,7 @@ import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetMode;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
@@ -83,7 +85,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private boolean actionCompleted;
     private boolean use1559Transactions = false;
     private Transaction transaction;
-
     private final WalletType walletType;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
@@ -218,19 +219,22 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         callbackId = 0;
         gasWidgetLegacy = null;
         gasWidgetInterface = null;
+        walletType = actionSheetCallback.getWalletType();
 
         toolbar.setLogo(activity, iconUrl);
         toolbar.setTitle(wcPeerMeta.getName());
         toolbar.setCloseListener(v -> actionSheetCallback.denyWalletConnect());
 
         walletConnectRequestWidget.setupWidget(wcPeerMeta, chainIdOverride, actionSheetCallback::openChainSelection);
-        walletType = actionSheetCallback.getWalletType();
 
         ArrayList<Integer> functionList = new ArrayList<>();
         functionList.add(R.string.approve);
         functionList.add(R.string.dialog_reject);
         functionBar.setupFunctions(this, functionList);
         functionBar.revealButtons();
+
+        setActionSheetStatus(EthereumNetworkBase.isChainSupported(chainIdOverride) ?
+            ActionSheetStatus.OK : ActionSheetStatus.ERROR_INVALID_CHAIN);
     }
 
     // switch chain

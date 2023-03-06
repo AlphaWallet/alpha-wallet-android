@@ -9,9 +9,8 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.ui.widget.entity.WalletConnectWidgetCallback;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 
-import timber.log.Timber;
-
-public class WalletConnectRequestWidget extends LinearLayout {
+public class WalletConnectRequestWidget extends LinearLayout
+{
 
     private long chainIdOverride;
     private WalletConnectWidgetCallback callback;
@@ -19,15 +18,16 @@ public class WalletConnectRequestWidget extends LinearLayout {
     private DialogInfoItem website;
     private DialogInfoItem network;
 
-    public WalletConnectRequestWidget(Context context, AttributeSet attributeSet) {
+    public WalletConnectRequestWidget(Context context, AttributeSet attributeSet)
+    {
         super(context, attributeSet);
         inflate(context, R.layout.item_wallet_connect_request, this);
         website = findViewById(R.id.info_website);
         network = findViewById(R.id.info_network);
     }
 
-    public void setupWidget(WCPeerMeta wcPeerMeta, long chainId, WalletConnectWidgetCallback callback) {
-        Timber.d("setupWidget: ");
+    public void setupWidget(WCPeerMeta wcPeerMeta, long chainId, WalletConnectWidgetCallback callback)
+    {
         this.chainIdOverride = chainId;
         this.callback = callback;
 
@@ -51,7 +51,8 @@ public class WalletConnectRequestWidget extends LinearLayout {
         network.setMessageTextColor(EthereumNetworkBase.getChainColour(chainIdOverride));
     }
 
-    public long getChainIdOverride() {
+    public long getChainIdOverride()
+    {
         return chainIdOverride;
     }
 }

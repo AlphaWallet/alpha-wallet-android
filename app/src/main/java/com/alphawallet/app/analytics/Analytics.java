@@ -154,6 +154,7 @@ public class Analytics
     {
         TOKEN_SWAP("Token Swap"),
         TOKEN_SCRIPT("TokenScript"),
+        BROWSER("Browser"),
         WALLET_CONNECT("WalletConnect");
 
         private final String source;

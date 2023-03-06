@@ -31,6 +31,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.ActionSheetStatus;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -95,7 +96,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     public static final String WC_LOCAL_PREFIX = "wclocal:";
     public static final String WC_INTENT = "wcintent:";
     private static final String TAG = "WCClient";
-    private static final String DEFAULT_IDON = "https://example.walletconnect.org/favicon.ico";
+    private static final String DEFAULT_ICON = "https://example.walletconnect.org/favicon.ico";
     private static final long CONNECT_TIMEOUT = 10 * DateUtils.SECOND_IN_MILLIS; // 10 Seconds timeout
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final long switchChainDialogCallbackId = 1;
@@ -145,7 +146,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             result -> {
                 if (result.getData() == null) return;
                 chainIdOverride = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
-                Toast.makeText(this, getText(R.string.hint_network_name) + " " + EthereumNetworkBase.getShortChainName(chainIdOverride), Toast.LENGTH_LONG).show();
                 confirmationDialog.updateChain(chainIdOverride);
             });
     private boolean waitForWalletConnectSession = false;
@@ -530,7 +530,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 case MESSAGE:
                     if (watchOnly(rq.id)) return false;
                     runOnUiThread(() -> {
-                        onEthSign(rq.id, rq.sign);
+                        onEthSign(rq.id, rq.sign, useChainId);
                     });
                     break;
                 case SIGN_TX:
@@ -765,6 +765,53 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         closeErrorDialog();
 
+        closeConfirmationDialog();
+
+        String displayIcon = (peer.getIcons().size() > 0) ? peer.getIcons().get(0) : DEFAULT_ICON;
+
+        chainIdOverride = chainIdOverride > 0 ? chainIdOverride : (chainId > 0 ? chainId : MAINNET_ID);
+
+        displaySessionRequestDetails(peer, chainIdOverride, displayIcon);
+
+        confirmationDialog = new ActionSheetDialog(this, peer, chainIdOverride, displayIcon, this);
+        if (confirmationDialog.getActionSheetStatus() == ActionSheetStatus.ERROR_INVALID_CHAIN)
+        {
+            showErrorDialogUnsupportedNetwork(id, chainIdOverride);
+            return;
+        }
+        else
+        {
+            confirmationDialog.show();
+            confirmationDialog.fullExpand();
+            viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_REQUEST);
+        }
+
+        if (confirmationDialog.isShowing() &&
+            !viewModel.isActiveNetwork(chainId) &&
+            !viewModel.isActiveNetwork(chainIdOverride))
+        {
+            openChainSelection();
+        }
+    }
+
+    private void displaySessionRequestDetails(WCPeerMeta peer, long chainId, String displayIcon)
+    {
+        Glide.with(this)
+            .load(displayIcon)
+            .circleCrop()
+            .into(icon);
+        peerName.setText(peer.getName());
+        textName.setText(peer.getName());
+        peerUrl.setText(peer.getUrl());
+        txCount.setText(R.string.empty);
+        chainName.setChainID(chainId);
+        chainIcon.setVisibility(View.VISIBLE);
+        chainIcon.bindData(chainId);
+        remotePeerMeta = peer;
+    }
+
+    private void closeConfirmationDialog()
+    {
         if (confirmationDialog != null)
         {
             if (confirmationDialog.isShowing())
@@ -772,33 +819,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 confirmationDialog.forceDismiss();
             }
         }
-
-        String[] accounts = {viewModel.getWallet().address};
-        String displayIcon = (peer.getIcons().size() > 0) ? peer.getIcons().get(0) : DEFAULT_IDON;
-
-        chainIdOverride = chainIdOverride > 0 ? chainIdOverride : (chainId > 0 ? chainId : MAINNET_ID);
-
-        Glide.with(this)
-                .load(displayIcon)
-                .circleCrop()
-                .into(icon);
-        peerName.setText(peer.getName());
-        textName.setText(peer.getName());
-        peerUrl.setText(peer.getUrl());
-        txCount.setText(R.string.empty);
-        chainName.setChainID(chainIdOverride);
-        chainIcon.setVisibility(View.VISIBLE);
-        chainIcon.bindData(chainIdOverride);
-        remotePeerMeta = peer;
-
-        confirmationDialog = new ActionSheetDialog(this, peer, chainId, displayIcon, this);
-        confirmationDialog.show();
-        confirmationDialog.fullExpand();
-
-        viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_REQUEST);
     }
 
-    private void onEthSign(Long id, WCEthereumSignMessage message)
+    private void onEthSign(Long id, WCEthereumSignMessage message, long chainId)
     {
         Signable signable = null;
         lastId = id;
@@ -816,13 +839,67 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 // Drop through
             case PERSONAL_MESSAGE:
                 signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id, SignMessageType.SIGN_PERSONAL_MESSAGE);
+                doSignMessage(signable);
                 break;
             case TYPED_MESSAGE:
                 signable = new EthereumTypedMessage(message.getData(), peerUrl.getText().toString(), id, new CryptoFunctions());
+                if (signable.getChainId() != chainId)
+                {
+                    showErrorDialogIncompatibleNetwork(signable.getCallbackId(), signable.getChainId(), chainId);
+                }
+                else
+                {
+                    doSignMessage(signable);
+                }
                 break;
         }
+    }
 
-        doSignMessage(signable);
+    private void showErrorDialogUnsupportedNetwork(long callbackId, long chainId)
+    {
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            runOnUiThread(() -> {
+                closeErrorDialog();
+                dialog = new AWalletAlertDialog(this, AWalletAlertDialog.ERROR);
+                String message = getString(R.string.error_walletconnect_session_request_unsupported_network, String.valueOf(chainId));
+                dialog.setMessage(message);
+                dialog.setButton(R.string.action_close, v -> {
+                    dialog.dismiss();
+                    dismissed("", callbackId, false);
+                    finish();
+                });
+                dialog.setCancelable(false);
+                dialog.show();
+
+                viewModel.trackError(Analytics.Error.WALLET_CONNECT, message);
+            });
+        }
+    }
+
+    private void showErrorDialogIncompatibleNetwork(long callbackId, long requestingChainId, long activeChainId)
+    {
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            runOnUiThread(() -> {
+                closeErrorDialog();
+                dialog = new AWalletAlertDialog(this, AWalletAlertDialog.ERROR);
+                String message = EthereumNetworkBase.isChainSupported(requestingChainId) ?
+                    getString(R.string.error_eip712_incompatible_network,
+                        EthereumNetworkBase.getShortChainName(requestingChainId),
+                        EthereumNetworkBase.getShortChainName(activeChainId)) :
+                    getString(R.string.error_eip712_unsupported_network, String.valueOf(requestingChainId));
+                dialog.setMessage(message);
+                dialog.setButton(R.string.action_cancel, v -> {
+                    dialog.dismiss();
+                    dismissed("", callbackId, false);
+                });
+                dialog.setCancelable(false);
+                dialog.show();
+
+                viewModel.trackError(Analytics.Error.WALLET_CONNECT, message);
+            });
+        }
     }
 
     private void onFailure(@NonNull Throwable throwable)

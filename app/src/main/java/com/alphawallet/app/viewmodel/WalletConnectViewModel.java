@@ -808,11 +808,6 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
         transactionSigned.postValue(new TransactionReturn(Numeric.toHexString(sigData.signature), w3Tx));
     }
 
-    public void resetTxSignedMutable()
-    {
-        transactionSigned.postValue(null);
-    }
-
     public void signTransaction(long chainId, Web3Transaction tx, SignatureFromKey signatureFromKey)
     {
         createTransactionInteract.signTransaction(chainId, tx, signatureFromKey);
@@ -821,5 +816,11 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     public boolean isActiveNetwork(long chainId)
     {
         return ethereumNetworkRepository.getSelectedFilters().contains(chainId);
+    }
+
+    public void blankLiveData()
+    {
+        transactionFinalised.postValue(null);
+        transactionSigned.postValue(null);
     }
 }

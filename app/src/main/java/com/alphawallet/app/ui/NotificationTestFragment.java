@@ -21,11 +21,11 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.service.NotificationTestService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.NotificationTestViewModel;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.InputAddress;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -40,12 +40,16 @@ public class NotificationTestFragment extends BaseFragment
 
     // Declare the launcher at the top of your Activity/Fragment:
     private TextView currentAddressText;
+
+    private TextView currentChainIdText;
     private TextView resultText;
     private InputAddress addressInput;
-    private MaterialButton fetchButton;
-    private MaterialButton clearButton;
+    private InputAddress chainInput;
+    private MaterialButton subscribeButton;
+    private MaterialButton unsubscribeButton;
     private MaterialButton requestPermissionButton;
     private String address;
+    private String chainId;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
         registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -115,13 +119,36 @@ public class NotificationTestFragment extends BaseFragment
     private void initViews(View view)
     {
         currentAddressText = view.findViewById(R.id.text_current_address);
+        currentChainIdText = view.findViewById(R.id.text_current_chain);
         resultText = view.findViewById(R.id.text_result);
-        fetchButton = view.findViewById(R.id.btn_fetch);
-        fetchButton.setOnClickListener(this);
-        clearButton = view.findViewById(R.id.btn_clear);
-        clearButton.setOnClickListener(this);
+        subscribeButton = view.findViewById(R.id.btn_subscribe);
+        subscribeButton.setOnClickListener(this);
+        unsubscribeButton = view.findViewById(R.id.btn_unsubscribe);
+        unsubscribeButton.setOnClickListener(this);
         requestPermissionButton = view.findViewById(R.id.btn_request_permission);
         requestPermissionButton.setOnClickListener(this);
+        chainInput = view.findViewById(R.id.input_chain);
+        chainInput.getInputView().addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable)
+            {
+                chainId = editable.toString();
+                currentChainIdText.setText(Utils.formatAddress(editable.toString()));
+            }
+        });
         addressInput = view.findViewById(R.id.input_address);
         addressInput.getEditText().setEnabled(false);
         addressInput.getInputView().addTextChangedListener(new TextWatcher()
@@ -163,7 +190,11 @@ public class NotificationTestFragment extends BaseFragment
     {
         address = wallet.address;
 
+        chainId = "1";
+
         currentAddressText.setText(Utils.formatAddress(address));
+
+        currentChainIdText.setText(chainId);
 
         askNotificationPermission();
     }
@@ -172,13 +203,15 @@ public class NotificationTestFragment extends BaseFragment
     public void onClick(View view)
     {
         int id = view.getId();
-        if (id == R.id.btn_fetch)
+        if (id == R.id.btn_subscribe)
         {
-            viewModel.fetchNotifications(address);
+//            viewModel.subscribe(address, chainId);
+            showSubscribeDialog();
         }
-        else if (id == R.id.btn_clear)
+        else if (id == R.id.btn_unsubscribe)
         {
-            clearFields();
+//            viewModel.unsubscribe(address, chainId);
+            showUnsubscribeDialog();
         }
         else if (id == R.id.btn_request_permission)
         {
@@ -242,5 +275,31 @@ public class NotificationTestFragment extends BaseFragment
     {
         Timber.d(data);
         resultText.setText(data);
+    }
+
+    public void showSubscribeDialog()
+    {
+        AWalletAlertDialog dialog = new AWalletAlertDialog(getContext());
+        dialog.setMessage("Calling: " + NotificationTestService.getSubscribeApiPath(address,chainId));
+        dialog.setButton(R.string.action_continue, v-> {
+            viewModel.subscribe(address, chainId);
+        });
+        dialog.setSecondaryButton(R.string.action_cancel, v-> {
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    public void showUnsubscribeDialog()
+    {
+        AWalletAlertDialog dialog = new AWalletAlertDialog(getContext());
+        dialog.setMessage("Calling: " + NotificationTestService.getUnsubscribeApiPath(address,chainId));
+        dialog.setButton(R.string.action_continue, v-> {
+            viewModel.unsubscribe(address, chainId);
+        });
+        dialog.setSecondaryButton(R.string.action_cancel, v-> {
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 }

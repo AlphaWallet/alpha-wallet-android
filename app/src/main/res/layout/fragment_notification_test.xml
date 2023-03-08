@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/settings_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -22,31 +22,72 @@
 
             <com.alphawallet.app.widget.InputAddress
                 android:id="@+id/input_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/standard_16"
+                android:visibility="visible"
                 custom:ens="true"
                 custom:hint="@string/wallet_address"
                 custom:label="@string/wallet_address"
                 custom:nocam="true"
                 custom:show_header="false"
+                tools:visbility="gone" />
+
+            <com.alphawallet.app.widget.InputAddress
+                android:id="@+id/input_chain"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/standard_16"
                 android:visibility="visible"
+                custom:ens="false"
+                custom:hint="@string/hint_network_chain_id"
+                custom:label="@string/hint_network_chain_id"
+                custom:nocam="true"
+                custom:show_header="false"
                 tools:visbility="gone" />
 
-            <TextView
-                style="@style/Aw.Typography.Caption.SemiBold"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/standard_16"
-                android:text="Current Address:" />
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/text_current_address"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/standard_16"
-                android:layout_marginBottom="@dimen/standard_16"
-                tools:text="0x1234abcd" />
+                <TextView
+                    android:id="@+id/label_current_address"
+                    style="@style/Aw.Typography.Caption.SemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/standard_16"
+                    android:text="Current Address:" />
+
+                <TextView
+                    android:id="@+id/text_current_address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_current_address"
+                    android:layout_marginHorizontal="@dimen/standard_16"
+                    android:layout_marginBottom="@dimen/standard_16"
+                    tools:text="0x1234abcd" />
+
+                <TextView
+                    android:id="@+id/label_current_chain"
+                    style="@style/Aw.Typography.Caption.SemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginHorizontal="@dimen/standard_16"
+                    android:text="Current Chain ID:" />
+
+                <TextView
+                    android:id="@+id/text_current_chain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_current_chain"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginHorizontal="@dimen/standard_16"
+                    android:layout_marginBottom="@dimen/standard_16"
+                    tools:text="1" />
+
+            </RelativeLayout>
+
 
             <TextView
                 style="@style/Aw.Typography.Caption.SemiBold"
@@ -85,20 +126,20 @@
         android:padding="@dimen/standard_16">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_clear"
+            android:id="@+id/btn_unsubscribe"
             style="@style/Aw.Component.Button.Secondary"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="@dimen/tiny_8"
             android:layout_weight="1"
-            android:text="Clear" />
+            android:text="Unsubscribe" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_fetch"
+            android:id="@+id/btn_subscribe"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/tiny_8"
             android:layout_weight="1"
-            android:text="Fetch" />
+            android:text="Subscribe" />
     </LinearLayout>
 </RelativeLayout>

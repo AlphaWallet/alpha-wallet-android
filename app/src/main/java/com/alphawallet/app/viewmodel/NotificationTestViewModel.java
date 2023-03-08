@@ -1,16 +1,14 @@
 package com.alphawallet.app.viewmodel;
 
-import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
-
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.NotificationTestService;
 
 import java.util.concurrent.TimeUnit;
@@ -28,12 +26,9 @@ public class NotificationTestViewModel extends BaseViewModel
 {
     private final GenericWalletInteract genericWalletInteract;
     private final PreferenceRepositoryType preferenceRepository;
-
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<String> rawJsonString = new MutableLiveData<>();
-
     private OkHttpClient httpClient;
-
     @Nullable
     private Disposable disposable;
 
@@ -77,14 +72,25 @@ public class NotificationTestViewModel extends BaseViewModel
         defaultWallet.postValue(wallet);
     }
 
-    public void fetchNotifications(String address)
+    public void subscribe(String address, String chainId)
     {
-        disposable = Single.fromCallable(() -> NotificationTestService.get(httpClient).fetchNotifications(address))
+        disposable = Single.fromCallable(() -> NotificationTestService.get(httpClient).subscribe(address, chainId))
             .observeOn(Schedulers.io())
-            .subscribe(this::onNotifications, this::onError);
+            .subscribe(this::onSubscribe, this::onError);
     }
 
-    private void onNotifications(String result)
+    private void onSubscribe(String result)
+    {
+        rawJsonString.postValue(result);
+    }
+    public void unsubscribe(String address, String chainId)
+    {
+        disposable = Single.fromCallable(() -> NotificationTestService.get(httpClient).unsubscribe(address, chainId))
+            .observeOn(Schedulers.io())
+            .subscribe(this::onUnsubscribe, this::onError);
+    }
+
+    private void onUnsubscribe(String result)
     {
         rawJsonString.postValue(result);
     }

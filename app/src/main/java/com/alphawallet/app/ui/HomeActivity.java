@@ -1134,7 +1134,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 if (WalletConnectHelper.isWalletConnectV1(importData))
                 {
                     intent = new Intent(this, WalletConnectActivity.class);
-                    intent.putExtra("qrCode", importData);
+                    intent.putExtra("qrCode", WalletConnectActivity.WC_INTENT + importData);
                 }
                 else
                 {

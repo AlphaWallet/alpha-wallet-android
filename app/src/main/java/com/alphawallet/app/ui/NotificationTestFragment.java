@@ -283,6 +283,7 @@ public class NotificationTestFragment extends BaseFragment
         dialog.setMessage("Calling: " + NotificationTestService.getSubscribeApiPath(address,chainId));
         dialog.setButton(R.string.action_continue, v-> {
             viewModel.subscribe(address, chainId);
+            dialog.dismiss();
         });
         dialog.setSecondaryButton(R.string.action_cancel, v-> {
             dialog.dismiss();
@@ -296,6 +297,7 @@ public class NotificationTestFragment extends BaseFragment
         dialog.setMessage("Calling: " + NotificationTestService.getUnsubscribeApiPath(address,chainId));
         dialog.setButton(R.string.action_continue, v-> {
             viewModel.unsubscribe(address, chainId);
+            dialog.dismiss();
         });
         dialog.setSecondaryButton(R.string.action_cancel, v-> {
             dialog.dismiss();

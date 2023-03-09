@@ -85,7 +85,9 @@ public class NotificationTestService
                 ResponseBody responseBody = response.body();
                 if (responseBody != null)
                 {
-                    return responseBody.string();
+                    String res = responseBody.string();
+                    Timber.d("result ==> " + response.code() + " : " + res);
+                    return res;
                 }
             }
             else
@@ -109,7 +111,7 @@ public class NotificationTestService
         {
             JSONObject json = new JSONObject();
             json.put("wallet", address);
-            json.put("chain", chainId);
+            json.put("chainId", Long.parseLong(chainId));
             body = RequestBody.create(json.toString(), MediaType.parse("application/json"));
         }
         catch (JSONException e)
@@ -120,6 +122,8 @@ public class NotificationTestService
         Uri.Builder builder = new Uri.Builder();
         builder.encodedPath(SUBSCRIBE_API_PATH);
         String url = builder.build().toString();
+
+        Timber.d("request url ==> " + url);
 
         return executeRequest(buildPostRequest(url, body));
     }

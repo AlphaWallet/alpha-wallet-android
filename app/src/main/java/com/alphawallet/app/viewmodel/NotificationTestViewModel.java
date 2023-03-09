@@ -76,6 +76,7 @@ public class NotificationTestViewModel extends BaseViewModel
     {
         disposable = Single.fromCallable(() -> NotificationTestService.get(httpClient).subscribe(address, chainId))
             .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
             .subscribe(this::onSubscribe, this::onError);
     }
 
@@ -87,6 +88,7 @@ public class NotificationTestViewModel extends BaseViewModel
     {
         disposable = Single.fromCallable(() -> NotificationTestService.get(httpClient).unsubscribe(address, chainId))
             .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
             .subscribe(this::onUnsubscribe, this::onError);
     }
 

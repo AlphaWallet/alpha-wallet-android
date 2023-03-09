@@ -18,6 +18,7 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheet;
 import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.token.entity.Signable;
+import com.google.gson.JsonObject;
 import com.walletconnect.web3.wallet.client.Wallet;
 
 import java.util.ArrayList;
@@ -82,6 +83,20 @@ public class WalletConnectV2SessionRequestHandler
         }
         else
         {
+            if (Objects.equals(method, "wallet_getAttestations")){
+
+                Timber.tag("WCv2").d("WC attestation request received");
+
+                JsonObject json = new JsonObject();
+                json.addProperty("ticketId", "123456");
+                json.addProperty("ticketClass", 1);
+                json.addProperty("token", "xyz");
+
+                this.client.approve(sessionRequest, json.toString());
+
+                return;
+            }
+
             Timber.e("Method %s not supported.", method);
         }
     }

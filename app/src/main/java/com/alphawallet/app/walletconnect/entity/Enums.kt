@@ -40,4 +40,7 @@ enum class WCMethod {
     @SerializedName("wallet_addEthereumChain")
     ADD_ETHEREUM_CHAIN,
 
+    @SerializedName("wallet_getAttestations")
+    GET_ATTESTATIONS,
+
 }

@@ -393,6 +393,9 @@ open class WCClient : WebSocketListener() {
             WCMethod.ETH_SIGN_TYPE_DATA -> {
                 signRequest(request, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE)
             }
+            WCMethod.ETH_SIGN_TYPE_DATA_V4 -> {
+                signRequest(request, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE)
+            }
             WCMethod.ETH_SIGN_TRANSACTION -> {
                 val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)

@@ -5,10 +5,12 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,12 +47,12 @@ public class NotificationTestFragment extends BaseFragment
     private TextView resultText;
     private InputAddress addressInput;
     private InputAddress chainInput;
+    private EditText editTopic;
     private MaterialButton subscribeButton;
     private MaterialButton unsubscribeButton;
+    private MaterialButton unsubToTopicButton;
+    private MaterialButton subToTopicButton;
     private MaterialButton requestPermissionButton;
-    private String address;
-    private String chainId;
-
     private final ActivityResultLauncher<String> requestPermissionLauncher =
         registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted)
@@ -65,6 +67,8 @@ public class NotificationTestFragment extends BaseFragment
                 requestPermissionButton.setVisibility(View.VISIBLE);
             }
         });
+    private String address;
+    private String chainId;
 
     private void askNotificationPermission()
     {
@@ -121,6 +125,11 @@ public class NotificationTestFragment extends BaseFragment
         currentAddressText = view.findViewById(R.id.text_current_address);
         currentChainIdText = view.findViewById(R.id.text_current_chain);
         resultText = view.findViewById(R.id.text_result);
+        editTopic = view.findViewById(R.id.edit_topic);
+        subToTopicButton = view.findViewById(R.id.btn_sub_topic);
+        subToTopicButton.setOnClickListener(this);
+        unsubToTopicButton = view.findViewById(R.id.btn_unsub_topic);
+        unsubToTopicButton.setOnClickListener(this);
         subscribeButton = view.findViewById(R.id.btn_subscribe);
         subscribeButton.setOnClickListener(this);
         unsubscribeButton = view.findViewById(R.id.btn_unsubscribe);
@@ -205,17 +214,39 @@ public class NotificationTestFragment extends BaseFragment
         int id = view.getId();
         if (id == R.id.btn_subscribe)
         {
-//            viewModel.subscribe(address, chainId);
             showSubscribeDialog();
         }
         else if (id == R.id.btn_unsubscribe)
         {
-//            viewModel.unsubscribe(address, chainId);
             showUnsubscribeDialog();
         }
         else if (id == R.id.btn_request_permission)
         {
             askNotificationPermission();
+        }
+        else if (id == R.id.btn_sub_topic)
+        {
+            String topic = editTopic.getText().toString();
+            if (TextUtils.isEmpty(topic))
+            {
+                Toast.makeText(getContext(), "Topic is empty or null.", Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                subscribe(editTopic.getText().toString());
+            }
+        }
+        else if (id == R.id.btn_unsub_topic)
+        {
+            String topic = editTopic.getText().toString();
+            if (TextUtils.isEmpty(topic))
+            {
+                Toast.makeText(getContext(), "Topic is empty or null.", Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                unsubscribe(editTopic.getText().toString());
+            }
         }
     }
 
@@ -232,7 +263,8 @@ public class NotificationTestFragment extends BaseFragment
     {
         FirebaseMessaging.getInstance().getToken()
             .addOnCompleteListener(task -> {
-                if (!task.isSuccessful()) {
+                if (!task.isSuccessful())
+                {
                     Timber.e(task.getException(), "Fetching FCM registration token failed");
                     return;
                 }
@@ -280,12 +312,12 @@ public class NotificationTestFragment extends BaseFragment
     public void showSubscribeDialog()
     {
         AWalletAlertDialog dialog = new AWalletAlertDialog(getContext());
-        dialog.setMessage("Calling: " + NotificationTestService.getSubscribeApiPath(address,chainId));
-        dialog.setButton(R.string.action_continue, v-> {
+        dialog.setMessage("Calling: " + NotificationTestService.getSubscribeApiPath(address, chainId));
+        dialog.setButton(R.string.action_continue, v -> {
             viewModel.subscribe(address, chainId);
             dialog.dismiss();
         });
-        dialog.setSecondaryButton(R.string.action_cancel, v-> {
+        dialog.setSecondaryButton(R.string.action_cancel, v -> {
             dialog.dismiss();
         });
         dialog.show();
@@ -294,12 +326,12 @@ public class NotificationTestFragment extends BaseFragment
     public void showUnsubscribeDialog()
     {
         AWalletAlertDialog dialog = new AWalletAlertDialog(getContext());
-        dialog.setMessage("Calling: " + NotificationTestService.getUnsubscribeApiPath(address,chainId));
-        dialog.setButton(R.string.action_continue, v-> {
+        dialog.setMessage("Calling: " + NotificationTestService.getUnsubscribeApiPath(address, chainId));
+        dialog.setButton(R.string.action_continue, v -> {
             viewModel.unsubscribe(address, chainId);
             dialog.dismiss();
         });
-        dialog.setSecondaryButton(R.string.action_cancel, v-> {
+        dialog.setSecondaryButton(R.string.action_cancel, v -> {
             dialog.dismiss();
         });
         dialog.show();

@@ -80,6 +80,7 @@ import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.WCSession;
+import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
@@ -1128,11 +1129,21 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             else if (importData != null && importData.startsWith("wc:"))
             {
-                WCSession session = WCSession.Companion.from(importData);
-                String importPassData = WalletConnectActivity.WC_INTENT + importData;
-                Intent intent = new Intent(this, WalletConnectActivity.class);
-                intent.putExtra("qrCode", importPassData);
+                Intent intent;
+
+                if (WalletConnectHelper.isWalletConnectV1(importData))
+                {
+                    intent = new Intent(this, WalletConnectActivity.class);
+                    intent.putExtra("qrCode", WalletConnectActivity.WC_INTENT + importData);
+                }
+                else
+                {
+                    intent = new Intent(this, WalletConnectV2Activity.class);
+                    intent.putExtra("url", importData);
+                }
+
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+
                 startActivity(intent);
             }
             else if (importPath != null)

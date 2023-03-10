@@ -118,6 +118,8 @@ public class NotificationTestFragment extends BaseFragment
         super.onResume();
 
         initViewModel();
+
+        getToken();
     }
 
     private void initViews(View view)
@@ -303,10 +305,21 @@ public class NotificationTestFragment extends BaseFragment
             });
     }
 
-    public void setData(String data)
+    public void setData(Bundle bundle)
     {
+        String data = bundle.getString("data", "");
+        String title = bundle.getString("title", "");
+        String body = bundle.getString("body", "");
         Timber.d(data);
-        resultText.setText(data);
+        Timber.d(title);
+        Timber.d(body);
+
+        resultText.setText("Data:\n");
+        resultText.append(data);
+        resultText.append("\nTitle:\n");
+        resultText.append(title);
+        resultText.append("\nBody:\n");
+        resultText.append(body);
     }
 
     public void showSubscribeDialog()

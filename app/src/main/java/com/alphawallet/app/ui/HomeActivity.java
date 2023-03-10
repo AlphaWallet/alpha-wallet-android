@@ -432,10 +432,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         super.onNewIntent(startIntent);
         if (startIntent.getAction().equals(C.NOTIFICATION_RECEIVED))
         {
-            String data = startIntent.getStringExtra("data");
             showPage(ACTIVITY);
             NotificationTestFragment frag = (NotificationTestFragment) getFragment(ACTIVITY);
-            frag.setData(data);
+            frag.setData(startIntent.getExtras());
         }
         else
         {

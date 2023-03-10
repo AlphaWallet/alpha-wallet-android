@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
@@ -68,9 +69,16 @@ public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingServic
         // Here FLAG_ACTIVITY_CLEAR_TOP flag is set to clear
         // the activities present in the activity stack,
         // on the top of the Activity that is to be launched
+        Timber.d("body: " + remoteMessage.getNotification().getBody());
+        Timber.d("title: " + remoteMessage.getNotification().getTitle());
+        Timber.d("data: " + remoteMessage.getData().toString());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.setAction(C.NOTIFICATION_RECEIVED);
-        intent.putExtra("data", remoteMessage.getData().toString());
+        Bundle extras = new Bundle();
+        extras.putString("data", remoteMessage.getData().toString());
+        extras.putString("title", remoteMessage.getNotification().getTitle());
+        extras.putString("body", remoteMessage.getNotification().getBody());
+        intent.putExtras(extras);
 
         // Pass the intent to PendingIntent to start the
         // next Activity

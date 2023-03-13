@@ -390,9 +390,8 @@ open class WCClient : WebSocketListener() {
             WCMethod.ETH_PERSONAL_SIGN -> {
                 signRequest(request, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE)
             }
-            WCMethod.ETH_SIGN_TYPE_DATA -> {
-                signRequest(request, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE)
-            }
+            WCMethod.ETH_SIGN_TYPE_DATA,
+            WCMethod.ETH_SIGN_TYPE_DATA_V3,
             WCMethod.ETH_SIGN_TYPE_DATA_V4 -> {
                 signRequest(request, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE)
             }

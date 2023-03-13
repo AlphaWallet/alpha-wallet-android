@@ -40,4 +40,6 @@ public class KeyProviderJNIImpl implements KeyProvider
     public native String getInfuraSecret();
 
     public native String getUnstoppableDomainsKey();
+
+    public native String getOkLinkKey();
 }

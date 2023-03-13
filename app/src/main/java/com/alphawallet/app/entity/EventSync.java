@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 import io.realm.Realm;
 import timber.log.Timber;
@@ -36,6 +37,7 @@ public class EventSync
 {
     public static final long BLOCK_SEARCH_INTERVAL = 100000L;
     public static final long POLYGON_BLOCK_SEARCH_INTERVAL = 3000L;
+    public static final long OKX_BLOCK_SEARCH_INTERVAL = 2000L;
 
     private static final String TAG = "EVENT_SYNC";
     private static final boolean EVENT_SYNC_DEBUGGING = false;
@@ -174,7 +176,7 @@ public class EventSync
 
     public boolean handleEthLogError(Response.Error error, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock, SyncDef sync, Realm realm)
     {
-        if (error.getCode() == -32005 || error.getCode() == -32600)
+        if (error.getMessage().toLowerCase(Locale.ROOT).contains("block")) //trigger on block range error
         {
             long newStartBlock;
             long newEndBlock;
@@ -186,8 +188,8 @@ public class EventSync
                 if (endBlock.getValue().equalsIgnoreCase("latest"))
                 {
                     newStartBlock = startBlockVal.longValue();
-                    newEndBlock = newStartBlock + BLOCK_SEARCH_INTERVAL;
-                    blockSize = BLOCK_SEARCH_INTERVAL;
+                    newEndBlock = newStartBlock + EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
+                    blockSize = EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
                 }
                 else
                 {
@@ -208,7 +210,7 @@ public class EventSync
                 if (endBlock.getValue().equalsIgnoreCase("latest"))
                 {
                     BigInteger currentBlock = TransactionsService.getCurrentBlock(token.tokenInfo.chainId);
-                    blockSize = BLOCK_SEARCH_INTERVAL;
+                    blockSize = EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
                     newEndBlock = currentBlock.longValue();
                 }
                 else
@@ -240,7 +242,7 @@ public class EventSync
         if (startBlock.compareTo(BigInteger.ONE) == 0)
         {
             //initial search, apply full limit
-            return currentBlock - BLOCK_SEARCH_INTERVAL;
+            return currentBlock - EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
         }
         else
         {
@@ -375,7 +377,7 @@ public class EventSync
                 break;
             case DOWNWARD_SYNC_COMPLETE: //finished the event read
                 //next time, start where we originally synced from
-                updateEventReads(realm, getSyncStart(realm), BLOCK_SEARCH_INTERVAL, EventSyncState.UPWARD_SYNC_MAX);
+                updateEventReads(realm, getSyncStart(realm), EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue(), EventSyncState.UPWARD_SYNC_MAX);
                 return;
             case DOWNWARD_SYNC: //successful intermediate downward sync
             case UPWARD_SYNC: //successful intermediate upward sync

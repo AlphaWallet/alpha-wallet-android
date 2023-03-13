@@ -962,4 +962,12 @@
     <string name="enable_required_chains">Activer les chaînes requises?</string>
     <string name="enable_required_chains_message">Les jetons sélectionnés sont sur des chaînes actuellement non sélectionnées, activer les chaînes non sélectionnées?</string>
     <string name="dialog_title_search_token">Rechercher un jeton?</string>
+    <string name="hardware_wallets">Portefeuilles matériels</string>
+    <string name="use_hardware_card">Utiliser une carte matérielle</string>
+    <string name="unsupported_network">Réseau non pris en charge (ID de chaîne: %s)</string>
+    <string name="error_eip712_unsupported_network">Vous avez été invité à signer un message pour une chaîne non prise en charge. (ID: %s)</string>
+    <string name="error_eip712_incompatible_network">Vous avez été invité à signer un message pour la chaîne %1s. Vous êtes actuellement sur la chaîne %2s.</string>
+    <string name="error_eip712_wc2_disabled_network">Vous avez été invité à signer un message pour %s. Veuillez activer cette chaîne pour votre session WalletConnect.</string>
+    <string name="action_view_session">Voir la session</string>
+    <string name="error_walletconnect_session_request_unsupported_network">Impossible de gérer la demande de session d\'une chaîne non prise en charge. (ID: %s)</string>
 </resources>

@@ -5,21 +5,20 @@ import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_
 import android.content.Context;
 import android.widget.FrameLayout;
 
-import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
 
+import com.alphawallet.app.entity.ActionSheetStatus;
 import com.alphawallet.app.entity.ActionSheetInterface;
-import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-
-import java.math.BigInteger;
 
 /**
  * Created by JB on 20/11/2022.
  */
 public abstract class ActionSheet extends BottomSheetDialog implements ActionSheetInterface
 {
+    private ActionSheetStatus actionSheetStatus = ActionSheetStatus.OK;
+
     public ActionSheet(@NonNull Context context)
     {
         super(context);
@@ -49,5 +48,20 @@ public abstract class ActionSheet extends BottomSheetDialog implements ActionShe
             FrameLayout bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
             if (bottomSheet != null) BottomSheetBehavior.from(bottomSheet).setState(STATE_EXPANDED);
         }
+    }
+
+    public void gotAuthorisation(boolean gotAuth)
+    {
+
+    }
+
+    public void setActionSheetStatus(ActionSheetStatus actionSheetStatus)
+    {
+        this.actionSheetStatus = actionSheetStatus;
+    }
+
+    public ActionSheetStatus getActionSheetStatus()
+    {
+        return this.actionSheetStatus;
     }
 }

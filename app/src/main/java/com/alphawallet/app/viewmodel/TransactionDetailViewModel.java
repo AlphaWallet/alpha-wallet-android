@@ -16,7 +16,7 @@ import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
@@ -31,9 +31,11 @@ import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
 
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthTransaction;
@@ -53,7 +55,8 @@ import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 @HiltViewModel
-public class TransactionDetailViewModel extends BaseViewModel {
+public class TransactionDetailViewModel extends BaseViewModel implements TransactionSendHandlerInterface
+{
     private final ExternalBrowserRouter externalBrowserRouter;
 
     private final FindDefaultNetworkInteract networkInteract;
@@ -68,14 +71,24 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private final MutableLiveData<BigInteger> latestBlock = new MutableLiveData<>();
     private final MutableLiveData<Transaction> latestTx = new MutableLiveData<>();
     private final MutableLiveData<Transaction> transaction = new MutableLiveData<>();
-    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
-    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
 
-    public LiveData<BigInteger> latestBlock() {
+    public LiveData<BigInteger> latestBlock()
+    {
         return latestBlock;
     }
-    public LiveData<Transaction> latestTx() { return latestTx; }
-    public LiveData<Transaction> onTransaction() { return transaction; }
+
+    public LiveData<Transaction> latestTx()
+    {
+        return latestTx;
+    }
+
+    public LiveData<Transaction> onTransaction()
+    {
+        return transaction;
+    }
+
     private String walletAddress;
 
     @Nullable
@@ -107,11 +120,15 @@ public class TransactionDetailViewModel extends BaseViewModel {
         setAnalyticsService(analyticsService);
     }
 
-    public MutableLiveData<TransactionData> transactionFinalised()
+    public MutableLiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
     }
-    public MutableLiveData<Throwable> transactionError() { return transactionError; }
+
+    public MutableLiveData<TransactionReturn> transactionError()
+    {
+        return transactionError;
+    }
 
     public void prepare(final long chainId, final String walletAddr)
     {
@@ -121,11 +138,12 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     disposable = tokenRepository.fetchLatestBlockNumber(chainId)
                             .subscribeOn(Schedulers.io())
                             .subscribeOn(AndroidSchedulers.mainThread())
-                            .subscribe(latestBlock::postValue, t -> { this.latestBlock.postValue(BigInteger.ZERO); });
+                            .subscribe(latestBlock::postValue, t -> this.latestBlock.postValue(BigInteger.ZERO));
                 }).subscribe();
     }
 
-    public void showMoreDetails(Context context, Transaction transaction) {
+    public void showMoreDetails(Context context, Transaction transaction)
+    {
         Uri uri = buildEtherscanUri(transaction);
         if (uri != null)
         {
@@ -136,7 +154,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
     public void startPendingTimeDisplay(final String txHash)
     {
         pendingUpdateDisposable = Observable.interval(0, 1, TimeUnit.SECONDS)
-            .doOnNext(l -> displayCurrentPendingTime(txHash)).subscribe();
+                .doOnNext(l -> displayCurrentPendingTime(txHash)).subscribe();
     }
 
     //TODO: move to display new transaction
@@ -299,11 +317,25 @@ public class TransactionDetailViewModel extends BaseViewModel {
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId, String overridenTxHash)
+    public void requestSignature(Web3Transaction finalTx, Wallet wallet, long chainId)
     {
-        disposable = createTransactionInteract
-                .createWithSig(wallet, finalTx, chainId)
-                .subscribe(transactionFinalised::postValue,
-                        transactionError::postValue);
+        createTransactionInteract.requestSignature(finalTx, wallet, chainId, this);
+    }
+
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction w3Tx, SignatureFromKey signatureFromKey)
+    {
+        createTransactionInteract.sendTransaction(wallet, chainId, w3Tx, signatureFromKey);
+    }
+
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        transactionFinalised.postValue(txData);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn error)
+    {
+        transactionError.postValue(error);
     }
 }

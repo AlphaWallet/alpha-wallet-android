@@ -55,6 +55,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
@@ -67,16 +68,16 @@ import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
-import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetSource;
 import com.alphawallet.app.entity.analytics.QrScanResultType;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
@@ -113,6 +114,7 @@ import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.app.widget.AddressBar;
 import com.alphawallet.app.widget.AddressBarListener;
 import com.alphawallet.app.widget.TestNetDialog;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -151,7 +153,7 @@ import timber.log.Timber;
 public class DappBrowserFragment extends BaseFragment implements OnSignTransactionListener, OnSignPersonalMessageListener,
         OnSignTypedMessageListener, OnSignMessageListener, OnEthCallListener, OnWalletAddEthereumChainObjectListener,
         OnWalletActionListener, URLLoadInterface, ItemClickListener, OnDappHomeNavClickListener, DappBrowserSwipeInterface,
-        SignAuthenticationCallback, ActionSheetCallback, TestNetDialog.TestNetDialogCallback
+        ActionSheetCallback, TestNetDialog.TestNetDialogCallback
 {
     public static final String SEARCH = "SEARCH";
     public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
@@ -199,6 +201,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private NetworkInfo activeNetwork;
     private AWalletAlertDialog chainSwapDialog;
     private AWalletAlertDialog resultDialog;
+    private AWalletAlertDialog errorDialog;
     private String loadOnInit; //Web3 needs to be fully set up and initialised before any dapp loading can be done
     private boolean homePressed;
     private AddEthereumChainPrompt addCustomChainDialog;
@@ -675,6 +678,9 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 .get(DappBrowserViewModel.class);
         viewModel.activeNetwork().observe(getViewLifecycleOwner(), this::onNetworkChanged);
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
+        viewModel.transactionFinalised().observe(getViewLifecycleOwner(), this::txWritten);
+        viewModel.transactionSigned().observe(getViewLifecycleOwner(), this::txSigned);
+        viewModel.transactionError().observe(getViewLifecycleOwner(), this::txError);
         activeNetwork = viewModel.getActiveNetwork();
         viewModel.findWallet();
     }
@@ -1173,10 +1179,36 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void handleSignMessage(Signable message)
     {
-        if (confirmationDialog == null || !confirmationDialog.isShowing())
+        if (message.getMessageType() == SignMessageType.SIGN_TYPED_DATA_V3 && message.getChainId() != activeNetwork.chainId)
+        {
+            showErrorDialogIncompatibleNetwork(message.getCallbackId(), message.getChainId(), activeNetwork.chainId);
+        }
+        else if (confirmationDialog == null || !confirmationDialog.isShowing())
         {
             confirmationDialog = new ActionSheetSignDialog(requireActivity(), this, message);
             confirmationDialog.show();
+        }
+    }
+
+    private void showErrorDialogIncompatibleNetwork(long callbackId, long requestingChainId, long activeChainId)
+    {
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            errorDialog = new AWalletAlertDialog(getContext(), AWalletAlertDialog.ERROR);
+            String message = EthereumNetworkBase.isChainSupported(requestingChainId) ?
+                getString(R.string.error_eip712_incompatible_network,
+                    EthereumNetworkBase.getShortChainName(requestingChainId),
+                    EthereumNetworkBase.getShortChainName(activeChainId)) :
+                getString(R.string.error_eip712_unsupported_network, String.valueOf(requestingChainId));
+            errorDialog.setMessage(message);
+            errorDialog.setButton(R.string.action_cancel, v -> {
+                errorDialog.dismiss();
+                dismissed("", callbackId, false);
+            });
+            errorDialog.setCancelable(false);
+            errorDialog.show();
+
+            viewModel.trackError(Analytics.Error.BROWSER, message);
         }
     }
 
@@ -1194,6 +1226,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     {
         web3.onSignCancel(message.getCallbackId());
         confirmationDialog.dismiss();
+    }
+
+    @Override
+    public WalletType getWalletType()
+    {
+        return wallet.type;
     }
 
     @Override
@@ -1256,13 +1294,16 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn rtn)
     {
+        confirmationDialog.dismiss();
+        web3.onSignCancel(rtn.tx.leafPosition);
+
         if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
         resultDialog = new AWalletAlertDialog(requireContext());
         resultDialog.setIcon(ERROR);
         resultDialog.setTitle(R.string.error_transaction_failed);
-        resultDialog.setMessage(throwable.getMessage());
+        resultDialog.setMessage(rtn.throwable.getMessage());
         resultDialog.setButtonText(R.string.button_ok);
         resultDialog.setButtonListener(v -> {
             resultDialog.dismiss();
@@ -1514,19 +1555,14 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                                 copyToClipboard(result.getAddress());
                                 break;
                             case PAYMENT:
+                            case TRANSFER:
                                 props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
                                 viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
 
                                 //EIP681 payment request scanned, should go to send
                                 viewModel.showSend(getContext(), result);
                                 break;
-                            case TRANSFER:
-                                props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
-                                viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
 
-                                //EIP681 transfer, go to send
-                                viewModel.showSend(getContext(), result);
-                                break;
                             case FUNCTION_CALL:
                                 props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
                                 viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
@@ -1830,16 +1866,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         return web3.getScrollY();
     }
 
-    // this is called when the signing is approved by the user (e.g. fingerprint / PIN)
-    @Override
-    public void gotAuthorisation(boolean gotAuth)
-    {
-        if (confirmationDialog != null && confirmationDialog.isShowing())
-        {
-            confirmationDialog.dismiss();
-        }
-    }
-
     @Override
     public void buttonClick(long callbackId, Token baseToken)
     {
@@ -1852,12 +1878,6 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         //switch network
         loadNewNetwork(baseToken.tokenInfo.chainId);
         web3.onWalletActionSuccessful(callbackId, null);
-    }
-
-    @Override
-    public void cancelAuthentication()
-    {
-
     }
 
     /**
@@ -1873,25 +1893,43 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        final SendTransactionInterface callback = new SendTransactionInterface()
-        {
-            @Override
-            public void transactionSuccess(Web3Transaction web3Tx, String hashData)
-            {
-                confirmationDialog.transactionWritten(hashData);
-                web3.onSignTransactionSuccessful(web3Tx, hashData);
-            }
+        viewModel.requestSignature(finalTx, wallet, activeNetwork.chainId);
+    }
 
-            @Override
-            public void transactionError(long callbackId, Throwable error)
-            {
-                confirmationDialog.dismiss();
-                txError(error);
-                web3.onSignCancel(callbackId);
-            }
-        };
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(wallet, activeNetwork.chainId, tx, signature);
+    }
 
-        viewModel.sendTransaction(finalTx, activeNetwork.chainId, callback);
+    @Override
+    public void signTransaction(Web3Transaction tx)
+    {
+        viewModel.requestSignatureOnly(tx, wallet, activeNetwork.chainId);
+    }
+
+    @Override
+    public void completeSignTransaction(Web3Transaction w3Tx, SignatureFromKey signature)
+    {
+        viewModel.signTransaction(activeNetwork.chainId, w3Tx, signature);
+    }
+
+    @Override
+    public void pinAuthorisation(boolean gotAuth)
+    {
+        confirmationDialog.gotAuthorisation(gotAuth);
+    }
+
+    private void txWritten(TransactionReturn txData)
+    {
+        confirmationDialog.transactionWritten(txData.hash);
+        web3.onSignTransactionSuccessful(txData);
+    }
+
+    private void txSigned(TransactionReturn txData)
+    {
+        confirmationDialog.transactionWritten(txData.getDisplayData());
+        web3.onSignTransactionSuccessful(txData);
     }
 
     @Override

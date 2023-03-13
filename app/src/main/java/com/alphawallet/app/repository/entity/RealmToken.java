@@ -6,9 +6,6 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -81,20 +78,23 @@ public class RealmToken extends RealmObject {
         this.addedTime = addedTime;
     }
 
-    public long getAssetUpdateTime() {
-        return updatedTime;
-    }
-    public void setAssetUpdateTime(long updatedTime) {
-        this.updatedTime = updatedTime;
-    }
-
     public String getBalance() {
         return balance;
     }
 
-    public void setBalance(String balance) {
+    public void setBalance(String balance)
+    {
+        if (!balance.equals(this.balance))
+        {
+            this.updatedTime = System.currentTimeMillis();
+        }
         this.balance = balance;
         addedTime = System.currentTimeMillis();
+    }
+
+    public long getBalanceUpdateTime()
+    {
+        return this.updatedTime;
     }
 
     public boolean getEnabled() {

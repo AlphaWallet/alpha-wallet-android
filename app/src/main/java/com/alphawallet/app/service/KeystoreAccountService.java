@@ -6,9 +6,9 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.hardware.SignatureReturnType;
 import com.alphawallet.token.entity.Signable;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -24,6 +24,7 @@ import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletFile;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.crypto.transaction.type.Transaction1559;
 import org.web3j.crypto.transaction.type.TransactionType;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
@@ -265,39 +266,49 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<SignatureFromKey> signTransactionEIP1559(Wallet signer, String toAddress, BigInteger amount, BigInteger gasLimit,
-                                                           BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas, long nonce, byte[] data, long chainId)
+    public Single<SignatureFromKey> signTransaction(Wallet signer, long chainId, RawTransaction rtx)
+    {
+        if (rtx.getTransaction() instanceof Transaction1559)
+        {
+            return signTransactionEIP1559Tx(signer, rtx);
+        }
+        else
+        {
+            return signLegacyTx(signer, chainId, rtx);
+        }
+    }
+
+    private Single<SignatureFromKey> signLegacyTx(Wallet signer, long chainId, RawTransaction rtx)
     {
         return Single.fromCallable(() -> {
-            Sign.SignatureData sigData;
-            String dataStr = data != null ? Numeric.toHexString(data) : "";
-
-            RawTransaction rtx = RawTransaction.createTransaction(
-                    chainId,
-                    BigInteger.valueOf(nonce),
-                    gasLimit,
-                    toAddress,
-                    amount,
-                    dataStr,
-                    maxPriorityFeePerGas,
-                    maxFeePerGas
-            );
-
-            byte[] signData = TransactionEncoder.encode(rtx);
-
+            byte[] signData = TransactionEncoder.encode(rtx, chainId);
             SignatureFromKey returnSig = keyService.signData(signer, signData);
-            sigData = sigFromByteArray(returnSig.signature);
+            Sign.SignatureData sigData = sigFromByteArray(returnSig.signature);
             if (sigData == null)
             {
                 returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
                 returnSig.failMessage = "Incorrect signature length"; //should never see this message
             }
-            returnSig.signature = encode(rtx, sigData);
+            return returnSig;
+        });
+    }
+
+    private Single<SignatureFromKey> signTransactionEIP1559Tx(Wallet signer, RawTransaction rtx)
+    {
+        return Single.fromCallable(() -> {
+            byte[] signData = TransactionEncoder.encode(rtx);
+            SignatureFromKey returnSig = keyService.signData(signer, signData);
+            Sign.SignatureData sigData = sigFromByteArray(returnSig.signature);
+            if (sigData == null)
+            {
+                returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
+                returnSig.failMessage = "Incorrect signature length"; //should never see this message
+            }
             return returnSig;
         }).subscribeOn(Schedulers.io());
     }
 
-    private static byte[] encode(RawTransaction rawTransaction, Sign.SignatureData signatureData)
+    public static byte[] encode(RawTransaction rawTransaction, Sign.SignatureData signatureData)
     {
         List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
         RlpList rlpList = new RlpList(values);

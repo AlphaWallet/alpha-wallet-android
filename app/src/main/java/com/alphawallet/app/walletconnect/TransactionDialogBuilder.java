@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -17,18 +18,19 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 
-import com.alphawallet.app.entity.DAppFunction;
-import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.ActionSheetDialog;
-import com.alphawallet.token.entity.Signable;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -49,19 +51,20 @@ public class TransactionDialogBuilder extends DialogFragment
     private final com.walletconnect.web3.wallet.client.Wallet.Model.SessionRequest sessionRequest;
     private final com.walletconnect.web3.wallet.client.Wallet.Model.Session settledSession;
     private final AWWalletConnectClient awWalletConnectClient;
-    private final boolean signOnly;
+    private final SignType signType;
     private WalletConnectViewModel viewModel;
     private ActionSheetDialog actionSheetDialog;
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> actionSheetDialog.setCurrentGasIndex(result));
+    private boolean isApproved;
 
-    public TransactionDialogBuilder(Activity activity, com.walletconnect.web3.wallet.client.Wallet.Model.SessionRequest sessionRequest, com.walletconnect.web3.wallet.client.Wallet.Model.Session settledSession, AWWalletConnectClient awWalletConnectClient, boolean signOnly)
+    public TransactionDialogBuilder(Activity activity, com.walletconnect.web3.wallet.client.Wallet.Model.SessionRequest sessionRequest, com.walletconnect.web3.wallet.client.Wallet.Model.Session settledSession, AWWalletConnectClient awWalletConnectClient, SignType signType)
     {
         this.activity = activity;
         this.sessionRequest = sessionRequest;
         this.settledSession = settledSession;
         this.awWalletConnectClient = awWalletConnectClient;
-        this.signOnly = signOnly;
+        this.signType = signType;
 
         initViewModel();
     }
@@ -70,20 +73,25 @@ public class TransactionDialogBuilder extends DialogFragment
     {
         viewModel = new ViewModelProvider((ViewModelStoreOwner) activity)
                 .get(WalletConnectViewModel.class);
+        viewModel.blankLiveData();
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionSigned().observe(this, this::txSigned);
+        viewModel.transactionError().observe(this, this::txError);
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState)
     {
+        viewModel.blankLiveData();
         Type listType = new TypeToken<ArrayList<WCEthereumTransaction>>()
         {
         }.getType();
         List<WCEthereumTransaction> list = new Gson().fromJson(sessionRequest.getRequest().getParams(), listType);
         WCEthereumTransaction wcTx = list.get(0);
-        final Web3Transaction w3Tx = new Web3Transaction(wcTx, 0);
-        Wallet fromWallet = viewModel.findWallet(wcTx.getFrom());
-        Token token = viewModel.getTokensService().getTokenOrBase(WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), w3Tx.recipient.toString());
+        final Web3Transaction w3Tx = new Web3Transaction(wcTx, wcTx.hashCode(), signType);
+        final Wallet fromWallet = viewModel.findWallet(wcTx.getFrom());
+        final Token token = viewModel.getTokensService().getTokenOrBase(WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), w3Tx.recipient.toString());
         actionSheetDialog = new ActionSheetDialog(activity, w3Tx, token, "", w3Tx.recipient.toString(), viewModel.getTokensService(), new ActionSheetCallback()
         {
             @Override
@@ -95,13 +103,32 @@ public class TransactionDialogBuilder extends DialogFragment
             @Override
             public void signTransaction(Web3Transaction tx)
             {
-                signMessage(fromWallet, tx, awWalletConnectClient);
+                viewModel.requestSignatureOnly(tx, fromWallet, WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())));
+            }
+
+            @Override
+            public WalletType getWalletType()
+            {
+                return fromWallet.type;
             }
 
             @Override
             public void sendTransaction(Web3Transaction tx)
             {
-                TransactionDialogBuilder.this.sendTransaction(fromWallet, tx, awWalletConnectClient);
+                viewModel.requestSignature(tx, fromWallet, WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())));
+            }
+
+            @Override
+            public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+            {
+                //This is the return from the hardware sign
+                viewModel.sendTransaction(fromWallet, token.tokenInfo.chainId, tx, signature);
+            }
+
+            @Override
+            public void completeSignTransaction(Web3Transaction tx, SignatureFromKey signature)
+            {
+                viewModel.signTransaction(token.tokenInfo.chainId, tx, signature);
             }
 
             @Override
@@ -131,7 +158,7 @@ public class TransactionDialogBuilder extends DialogFragment
             }
         });
         actionSheetDialog.setSigningWallet(fromWallet.address);
-        if (signOnly)
+        if (signType == SignType.SIGN_TX)
         {
             actionSheetDialog.setSignOnly();
         }
@@ -139,6 +166,7 @@ public class TransactionDialogBuilder extends DialogFragment
         actionSheetDialog.setURL(url);
         actionSheetDialog.setCanceledOnTouchOutside(false);
         actionSheetDialog.waitForEstimate();
+        isApproved = false;
 
         byte[] payload = w3Tx.payload != null ? Numeric.hexStringToByteArray(w3Tx.payload) : null;
 
@@ -153,42 +181,27 @@ public class TransactionDialogBuilder extends DialogFragment
         return actionSheetDialog;
     }
 
-    private void signMessage(Wallet fromWallet, Web3Transaction tx, AWWalletConnectClient awWalletConnectClient)
+    private void txWritten(TransactionReturn txData)
     {
-        viewModel.signTransaction(actionSheetDialog.getContext(), tx, new DAppFunction()
+        if (txData != null)
         {
-            @Override
-            public void DAppError(Throwable error, Signable message)
-            {
-                reject(error, awWalletConnectClient);
-            }
-
-            @Override
-            public void DAppReturn(byte[] data, Signable message)
-            {
-                approve(Numeric.toHexString(data), awWalletConnectClient);
-                actionSheetDialog.transactionWritten(".");
-            }
-        }, Objects.requireNonNull(settledSession.getMetaData()).getUrl(), WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), fromWallet);
+            approve(txData.hash, awWalletConnectClient);
+            actionSheetDialog.transactionWritten(txData.hash);
+        }
     }
 
-    private void sendTransaction(Wallet wallet, Web3Transaction tx, AWWalletConnectClient awWalletConnectClient)
+    private void txSigned(TransactionReturn txData)
     {
-        viewModel.sendTransaction(tx, wallet, WalletConnectHelper.getChainId(Objects.requireNonNull(sessionRequest.getChainId())), new SendTransactionInterface()
+        if (txData != null)
         {
-            @Override
-            public void transactionSuccess(Web3Transaction web3Tx, String hashData)
-            {
-                approve(hashData, awWalletConnectClient);
-                actionSheetDialog.transactionWritten(hashData);
-            }
+            approve(txData.hash, awWalletConnectClient);
+            actionSheetDialog.transactionWritten(txData.getDisplayData());
+        }
+    }
 
-            @Override
-            public void transactionError(long callbackId, Throwable error)
-            {
-                reject(error, awWalletConnectClient);
-            }
-        });
+    private void txError(TransactionReturn txError)
+    {
+        reject(txError.throwable, awWalletConnectClient);
     }
 
     private void reject(Throwable error, AWWalletConnectClient awWalletConnectClient)
@@ -200,21 +213,29 @@ public class TransactionDialogBuilder extends DialogFragment
 
     private void approve(String hashData, AWWalletConnectClient awWalletConnectClient)
     {
+        isApproved = true;
         new Handler(Looper.getMainLooper()).postDelayed(() ->
-                awWalletConnectClient.approve(sessionRequest, hashData), 5000);
+                awWalletConnectClient.approve(sessionRequest, hashData), 1000);
     }
 
     @Override
     public void onCancel(@NonNull DialogInterface dialog)
     {
         super.onCancel(dialog);
-        awWalletConnectClient.reject(sessionRequest);
+        if (!isApproved)
+        {
+            awWalletConnectClient.reject(sessionRequest);
+        }
     }
 
     @Override
     public void onDismiss(@NonNull DialogInterface dialog)
     {
         super.onDismiss(dialog);
-        awWalletConnectClient.reject(sessionRequest);
+        //only reject if action wasn't completed
+        if (!isApproved)
+        {
+            awWalletConnectClient.reject(sessionRequest);
+        }
     }
 }

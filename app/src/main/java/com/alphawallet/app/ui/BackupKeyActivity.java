@@ -33,6 +33,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.viewmodel.BackupKeyViewModel;
@@ -773,6 +774,12 @@ public class BackupKeyActivity extends BaseActivity implements
         intent.putExtra("Key", wallet.address);
         if (hasNoLock) intent.putExtra("nolock", true);
         finish();
+    }
+
+    @Override
+    public void gotSignature(SignatureFromKey signature)
+    {
+        //No code here since we don't need to backup hardware key
     }
 
     private void initViewModel()

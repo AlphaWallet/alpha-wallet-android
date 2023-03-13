@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
@@ -15,13 +16,17 @@ import androidx.preference.PreferenceManager;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
+import com.alphawallet.app.entity.ActionSheetStatus;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetMode;
+import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
@@ -36,6 +41,7 @@ import com.alphawallet.app.ui.widget.entity.GasWidgetInterface;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureReturnType;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.math.BigDecimal;
@@ -69,7 +75,8 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private final Token token;
     private final TokensService tokensService;
 
-    private final Web3Transaction candidateTransaction;
+    private final Web3Transaction candidateTransaction; //initial skeleton transaction from hosting activity
+    private Web3Transaction establishedTransaction;     //final transaction to be submitted to blockchain
     private final ActionSheetCallback actionSheetCallback;
     private final long callbackId;
     private SignAuthenticationCallback signCallback;
@@ -78,6 +85,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private boolean actionCompleted;
     private boolean use1559Transactions = false;
     private Transaction transaction;
+    private final WalletType walletType;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
                              String destName, String destAddress, TokensService ts,
@@ -133,9 +141,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         balanceDisplay.setupBalance(token, tokensService, transaction);
         networkDisplay.setNetwork(token.tokenInfo.chainId);
 
-        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
-        functionBar.revealButtons();
-
         gasWidgetInterface = setupGasWidget();
 
         if (!tx.gasLimit.equals(BigInteger.ZERO))
@@ -167,6 +172,22 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         }
 
         setupCancelListeners();
+
+        walletType = actionSheetCallback.getWalletType();
+
+        if (walletType == WalletType.HARDWARE)
+        {
+            functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.use_hardware_card)));
+            functionBar.setClickable(false);
+            //push signing request
+            handleTransactionOperation();
+        }
+        else
+        {
+            functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
+        }
+
+        functionBar.revealButtons();
     }
 
     // wallet connect request
@@ -179,7 +200,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         functionBar = findViewById(R.id.layoutButtons);
 
         toolbar = findViewById(R.id.bottom_sheet_toolbar);
-
 
         this.activity = activity;
         this.actionSheetCallback = actionSheetCallback;
@@ -199,6 +219,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         callbackId = 0;
         gasWidgetLegacy = null;
         gasWidgetInterface = null;
+        walletType = actionSheetCallback.getWalletType();
 
         toolbar.setLogo(activity, iconUrl);
         toolbar.setTitle(wcPeerMeta.getName());
@@ -211,6 +232,9 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         functionList.add(R.string.dialog_reject);
         functionBar.setupFunctions(this, functionList);
         functionBar.revealButtons();
+
+        setActionSheetStatus(EthereumNetworkBase.isChainSupported(chainIdOverride) ?
+            ActionSheetStatus.OK : ActionSheetStatus.ERROR_INVALID_CHAIN);
     }
 
     // switch chain
@@ -247,6 +271,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         walletConnectRequestWidget = null;
         gasWidgetLegacy = null;
         gasWidgetInterface = null;
+        walletType = actionSheetCallback.getWalletType();
 
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(buttonTextId)));
         functionBar.revealButtons();
@@ -279,6 +304,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         tokensService = null;
         candidateTransaction = null;
         actionSheetCallback = null;
+        walletType = WalletType.NOT_DEFINED;
         callbackId = 0;
     }
 
@@ -310,6 +336,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     {
         //sign only, and return signature to process
         mode = ActionSheetMode.SIGN_TRANSACTION;
+        toolbar.setTitle(R.string.dialog_title_sign_transaction);
     }
 
     public void onDestroy()
@@ -329,14 +356,14 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
             addressDetail.setVisibility(View.GONE);
         }
 
-        if (candidateTransaction.value.equals(BigInteger.ZERO))
-        {
-            amountDisplay.setVisibility(View.GONE);
-        }
-        else
+        if (candidateTransaction.value.compareTo(BigInteger.ZERO) > 0 || candidateTransaction.isBaseTransfer())
         {
             amountDisplay.setVisibility(View.VISIBLE);
             amountDisplay.setAmountUsingToken(candidateTransaction.value, tokensService.getServiceToken(token.tokenInfo.chainId), tokensService);
+        }
+        else
+        {
+            amountDisplay.setVisibility(View.GONE);
         }
     }
 
@@ -392,9 +419,17 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         showAmount(getTransactionAmount().toBigInteger());
     }
 
+
     @Override
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public void handleClick(String action, int id)
     {
+        if (walletType == WalletType.HARDWARE)
+        {
+            //TODO: Hardware - Maybe flick a toast to tell user to apply card
+            return;
+        }
+
         switch (mode)
         {
             case SEND_TRANSACTION_WC:
@@ -409,11 +444,11 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                 }
                 else
                 {
-                    sendTransaction();
+                    handleTransactionOperation();
                 }
                 break;
             case SIGN_TRANSACTION:
-                signTransaction();
+                handleTransactionOperation();
                 break;
             case MESSAGE:
                 actionSheetCallback.buttonClick(callbackId, token);
@@ -471,7 +506,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         dialog.setSecondaryButtonText(R.string.cancel_transaction);
         dialog.setButtonListener(v -> {
             dialog.dismiss();
-            sendTransaction();
+            handleTransactionOperation();
         });
         dialog.setSecondaryButtonListener(v -> {
             dialog.dismiss();
@@ -490,6 +525,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         }
     }
 
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     private void showTransactionSuccess()
     {
         switch (mode)
@@ -552,35 +588,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         });
     }
 
-    private void signTransaction()
-    {
-        functionBar.setVisibility(View.GONE);
-
-        //get approval and push transaction
-        //authentication screen
-        signCallback = new SignAuthenticationCallback()
-        {
-            @Override
-            public void gotAuthorisation(boolean gotAuth)
-            {
-                actionCompleted = true;
-                confirmationWidget.startProgressCycle(4);
-                //send the transaction
-                actionSheetCallback.signTransaction(formTransaction());
-                actionSheetCallback.notifyConfirm(mode.getValue());
-            }
-
-            @Override
-            public void cancelAuthentication()
-            {
-                confirmationWidget.hide();
-                functionBar.setVisibility(View.VISIBLE);
-            }
-        };
-
-        actionSheetCallback.getAuthorisation(signCallback);
-    }
-
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public void completeSignRequest(boolean gotAuth)
     {
         if (signCallback != null)
@@ -599,7 +607,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                     break;
 
                 case SIGN_MESSAGE:
-                    actionCompleted = true;
                     //display success and hand back to calling function
                     confirmationWidget.startProgressCycle(1);
                     signCallback.gotAuthorisation(gotAuth);
@@ -615,9 +622,10 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         {
             BigInteger currentGasPrice = gasWidgetInterface.getGasPrice(candidateTransaction.gasPrice); // also recalculates the transaction value
 
-            return new Web3Transaction(
+            establishedTransaction = new Web3Transaction(
                     candidateTransaction.recipient,
                     candidateTransaction.contract,
+                    candidateTransaction.sender,
                     gasWidgetInterface.getValue(),
                     currentGasPrice,
                     gasWidgetInterface.getGasLimit(),
@@ -628,9 +636,10 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         }
         else
         {
-            return new Web3Transaction(
+            establishedTransaction = new Web3Transaction(
                     candidateTransaction.recipient,
                     candidateTransaction.contract,
+                    candidateTransaction.sender,
                     gasWidgetInterface.getValue(),
                     gasWidgetInterface.getGasMax(),
                     gasWidgetInterface.getPriorityFee(),
@@ -640,11 +649,20 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                     candidateTransaction.leafPosition
             );
         }
+
+        return establishedTransaction;
     }
 
-    private void sendTransaction()
+    /**
+     * Either Send or Sign (WalletConnect only) the transaction
+     */
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
+    private void handleTransactionOperation()
     {
-        functionBar.setVisibility(View.GONE);
+        if (walletType != WalletType.HARDWARE)
+        {
+            functionBar.setVisibility(View.GONE);
+        }
 
         //get approval and push transaction
         //authentication screen
@@ -659,8 +677,30 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                     cancelAuthentication();
                     return;
                 }
-                confirmationWidget.startProgressCycle(4);
-                actionSheetCallback.sendTransaction(formTransaction());
+                if (walletType != WalletType.HARDWARE)
+                {
+                    confirmationWidget.startProgressCycle(4);
+                }
+
+                switch (mode)
+                {
+                    case SEND_TRANSACTION:
+                    case SEND_TRANSACTION_DAPP:
+                    case SEND_TRANSACTION_WC:
+                    case SPEEDUP_TRANSACTION:
+                    case CANCEL_TRANSACTION:
+                        actionSheetCallback.sendTransaction(formTransaction());
+                        break;
+                    case SIGN_TRANSACTION:
+                        actionSheetCallback.signTransaction(formTransaction());
+                        break;
+                    case MESSAGE:
+                    case SIGN_MESSAGE:
+                    case WALLET_CONNECT_REQUEST:
+                    case NODE_STATUS_INFO:
+                        break;
+                }
+
                 actionSheetCallback.notifyConfirm(mode.getValue());
             }
 
@@ -669,6 +709,33 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
             {
                 confirmationWidget.hide();
                 functionBar.setVisibility(View.VISIBLE);
+            }
+
+            /**
+             * Return from hardware sign
+             * @param signature
+             */
+            @Override
+            public void gotSignature(SignatureFromKey signature)
+            {
+                if (signature.sigType == SignatureReturnType.SIGNATURE_GENERATED)
+                {
+                    functionBar.setVisibility(View.GONE);
+                    confirmationWidget.startProgressCycle(4);
+                    if (mode == ActionSheetMode.SIGN_TRANSACTION)
+                    {
+                        actionSheetCallback.completeSignTransaction(establishedTransaction, signature);
+                    }
+                    else
+                    {
+                        actionSheetCallback.completeSendTransaction(establishedTransaction, signature);
+                    }
+                }
+                else
+                {
+                    //TODO: Hardware - report error in a better way
+                    activity.runOnUiThread(() -> Toast.makeText(activity, "ERROR: " + signature.failMessage, Toast.LENGTH_SHORT).show());
+                }
             }
         };
 

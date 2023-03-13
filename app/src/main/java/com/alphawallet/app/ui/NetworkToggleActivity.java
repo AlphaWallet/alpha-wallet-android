@@ -146,8 +146,7 @@ public class NetworkToggleActivity extends NetworkBaseActivity
             filterList.addAll(Arrays.asList(testNetAdapter.getSelectedItems()));
         }
         boolean hasClicked = mainNetAdapter.hasSelectedItems() || testNetAdapter.hasSelectedItems();
-        boolean shouldBlankUserSelection = (mainNetAdapter.getSelectedItems().length == 0)
-                || (testnetSwitch.isChecked() && testNetAdapter.getSelectedItems().length == 0);
+        boolean shouldBlankUserSelection = filterList.size() == 0; //This is only set when we want to automatically discover all tokens. If user sets all networks blank it auto-fills them
 
         viewModel.setFilterNetworks(filterList, hasClicked, shouldBlankUserSelection);
         setResult(RESULT_OK, new Intent());

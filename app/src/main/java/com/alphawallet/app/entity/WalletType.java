@@ -12,5 +12,6 @@ public enum WalletType
     WATCH,
     TEXT_MARKER, // used as a separator in wallet view
     KEYSTORE_LEGACY,  // to support keys created from old wallets
-    LARGE_TITLE
+    LARGE_TITLE,
+    HARDWARE,
 }

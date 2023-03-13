@@ -949,4 +949,12 @@
     <string name="enable_required_chains">启用所需的链？</string>
     <string name="enable_required_chains_message">选定的代币位于当前未选择的链上，启用未选择的链？</string>
     <string name="dialog_title_search_token">搜索令牌？</string>
+    <string name="hardware_wallets">硬件钱包</string>
+    <string name="use_hardware_card">使用硬件卡</string>
+    <string name="unsupported_network">不支持的网络（链 ID：%s）</string>
+    <string name="error_eip712_unsupported_network">您被要求为不受支持的链签署消息。(ID: %s)</string>
+    <string name="error_eip712_incompatible_network">您被要求为 %1s 链签署消息。 您目前在 %2s 链上。</string>
+    <string name="error_eip712_wc2_disabled_network">您被要求为 %s 的消息签名。 请为您的 WalletConnect 会话启用此链。</string>
+    <string name="action_view_session">查看会话</string>
+    <string name="error_walletconnect_session_request_unsupported_network">无法处理来自不受支持的链的会话请求。(ID: %s)</string>
 </resources>

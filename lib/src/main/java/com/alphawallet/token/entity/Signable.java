@@ -5,13 +5,23 @@ package com.alphawallet.token.entity;
  * EthereumMessage, EthereumTypedMessage, EthereumTransaction, X.509 message (attestations)
  * etc eventually use from this
  * Weiwu, Aug 2020
-*/
-
-public interface Signable {
+ */
+public interface Signable
+{
     String getMessage();
+
     long getCallbackId();
+
     byte[] getPrehash();
+
     String getOrigin();
+
     CharSequence getUserMessage();
+
     SignMessageType getMessageType();
+
+    default long getChainId()
+    {
+        return -1;
+    }
 }

@@ -11,7 +11,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
@@ -26,6 +26,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.SwapService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
 import com.alphawallet.app.ui.SelectRouteActivity;
 import com.alphawallet.app.ui.SelectSwapProvidersActivity;
 import com.alphawallet.app.ui.widget.entity.ProgressInfo;
@@ -33,6 +34,7 @@ import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -56,7 +58,7 @@ import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 @HiltViewModel
-public class SwapViewModel extends BaseViewModel
+public class SwapViewModel extends BaseViewModel implements TransactionSendHandlerInterface
 {
     private final AssetDefinitionService assetDefinitionService;
     private final PreferenceRepositoryType preferenceRepository;
@@ -72,8 +74,8 @@ public class SwapViewModel extends BaseViewModel
     private final MutableLiveData<Quote> quote = new MutableLiveData<>();
     private final MutableLiveData<Long> network = new MutableLiveData<>();
     private final MutableLiveData<ProgressInfo> progressInfo = new MutableLiveData<>();
-    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
-    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
 
     private Disposable chainsDisposable;
     private Disposable connectionsDisposable;
@@ -141,12 +143,12 @@ public class SwapViewModel extends BaseViewModel
         return progressInfo;
     }
 
-    public LiveData<TransactionData> transactionFinalised()
+    public LiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
     }
 
-    public LiveData<Throwable> transactionError()
+    public LiveData<TransactionReturn> transactionError()
     {
         return transactionError;
     }
@@ -376,17 +378,19 @@ public class SwapViewModel extends BaseViewModel
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void sendTransaction(Quote quote, Wallet wallet, long chainId)
+    public void requestSignature(Quote quote, Wallet wallet, long chainId)
     {
-        sendTransaction(buildWeb3Transaction(quote), wallet, chainId);
+        createTransactionInteract.requestSignature(buildWeb3Transaction(quote), wallet, chainId, this);
     }
 
-    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId)
+    public void requestSignature(Web3Transaction tx, Wallet wallet, long chainId)
     {
-        transactionDisposable = createTransactionInteract
-                .createWithSig2(wallet, finalTx, chainId)
-                .subscribe(transactionFinalised::postValue,
-                        transactionError::postValue);
+        createTransactionInteract.requestSignature(tx, wallet, chainId, this);
+    }
+
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction w3Tx, SignatureFromKey signatureFromKey)
+    {
+        createTransactionInteract.sendTransaction(wallet, chainId, w3Tx, signatureFromKey);
     }
 
     public Web3Transaction buildWeb3Transaction(Quote quote)
@@ -478,5 +482,17 @@ public class SwapViewModel extends BaseViewModel
         {
             getChains();
         }
+    }
+
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        transactionFinalised.postValue(txData);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn error)
+    {
+        transactionError.postValue(error);
     }
 }

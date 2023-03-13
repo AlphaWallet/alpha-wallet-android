@@ -1,17 +1,23 @@
 package com.alphawallet.app.entity;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
+
 import android.net.Uri;
+import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
-import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
-
+import com.alphawallet.app.entity.transactionAPI.TransferFetchType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.Utils;
 
-public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
+public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo
+{
+    private final String ETHERSCAN_API = ".etherscan.";
     private final String BLOCKSCOUT_API = "blockscout";
     private final String MATIC_API = "polygonscan";
+    private final String OKX_API = "oklink";
     private final String PALM_API = "explorer.palm";
 
     public  String backupNodeUrl = null;
@@ -52,10 +58,24 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo {
         else return this.name;
     }
 
-    public boolean usesSeparateNFTTransferQuery()
+    public TransferFetchType[] getTransferQueriesUsed()
     {
-        return (etherscanAPI != null && !etherscanAPI.contains(BLOCKSCOUT_API)
-                && !etherscanAPI.contains(COVALENT) && !etherscanAPI.contains(PALM_API));
+        if (etherscanAPI.contains(COVALENT) || TextUtils.isEmpty(etherscanAPI))
+        {
+            return new TransferFetchType[0];
+        }
+        else if (chainId == GOERLI_ID) //goerli doesn't yet implement erc1155 route TODO: test for when Etherscan Goerli implements ERC1155 tx:
+        {                              // https://api-goerli.etherscan.io/api?module=account&action=token1155tx&address=0x0000000000000000000000000000000000000000
+            return new TransferFetchType[]{TransferFetchType.ERC_20, TransferFetchType.ERC_721};
+        }
+        else if (etherscanAPI.contains(MATIC_API) || etherscanAPI.contains(ETHERSCAN_API) || etherscanAPI.contains(OKX_API))
+        {
+            return new TransferFetchType[]{TransferFetchType.ERC_20, TransferFetchType.ERC_721, TransferFetchType.ERC_1155};
+        }
+        else
+        {
+            return new TransferFetchType[]{TransferFetchType.ERC_20}; // assume it only supports tokenTx, eg Blockscout, Palm
+        }
     }
 
     @Nullable

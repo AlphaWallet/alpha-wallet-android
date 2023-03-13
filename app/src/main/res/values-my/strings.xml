@@ -983,4 +983,12 @@
     <string name="enable_required_chains">လိုအပ်တဲ့ သံကြိုးတွေကို လုပ်ဆောင်နိုင်မလား။</string>
     <string name="enable_required_chains_message">ရွေးချယ်ထားသော အမှတ်အသားများသည် လောလောဆယ် ရွေးချယ်မထားသော သံကြိုးများပေါ်တွင် ရွေးချယ်ထားပြီး ရွေးချယ်မှုမရှိသော သံကြိုးများ ဖြစ်စေနိုင်ပါသလော။</string>
     <string name="dialog_title_search_token">တိုကင်ကို ရှာမလား။</string>
+    <string name="hardware_wallets">ဟာ့ဒ်ဝဲ ဝေါလက်</string>
+    <string name="use_hardware_card">Use Hardware Card</string>
+    <string name="unsupported_network">ပံ့ပိုးမထားသော ကွန်ရက် (ကွင်းဆက် ID- %s)</string>
+    <string name="error_eip712_unsupported_network">ပံ့ပိုးမထားသော ကွင်းဆက်တစ်ခုအတွက် မက်ဆေ့ဂျ်ကို လက်မှတ်ရေးထိုးရန် သင့်အား တောင်းဆိုထားသည်။ (ID: %s)</string>
+    <string name="error_eip712_incompatible_network">%1s ကွင်းဆက်အတွက် မက်ဆေ့ချ်တစ်ခု လက်မှတ်ထိုးရန် သင့်အား တောင်းဆိုထားသည်။ သင်သည် လက်ရှိတွင် %2s ကွင်းဆက်တွင် ရှိနေသည်။</string>
+    <string name="error_eip712_wc2_disabled_network">သင်သည် %s အတွက် မက်ဆေ့ဂျ်ကို လက်မှတ်ထိုးရန် တောင်းဆိုထားသည်။ သင်၏ WalletConnect စက်ရှင်အတွက် ဤကွင်းဆက်ကို ဖွင့်ပါ။</string>
+    <string name="action_view_session">Session ကိုကြည့်ပါ။</string>
+    <string name="error_walletconnect_session_request_unsupported_network">ပံ့ပိုးမထားသော ကွင်းဆက်တစ်ခုမှ ဆက်ရှင်တောင်းဆိုမှုကို မကိုင်တွယ်နိုင်ပါ။ (ID: %s)</string>
 </resources>

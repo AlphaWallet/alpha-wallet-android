@@ -14,9 +14,8 @@ import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
@@ -29,11 +28,16 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.hardware.SignatureReturnType;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.SignableBytes;
+import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigDecimal;
@@ -52,13 +56,13 @@ import io.reactivex.schedulers.Schedulers;
  * Created by James on 21/02/2018.
  */
 @HiltViewModel
-public class TransferTicketDetailViewModel extends BaseViewModel
+public class TransferTicketDetailViewModel extends BaseViewModel implements TransactionSendHandlerInterface
 {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
-    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
-    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
 
     private final GenericWalletInteract genericWalletInteract;
     private final KeyService keyService;
@@ -93,12 +97,12 @@ public class TransferTicketDetailViewModel extends BaseViewModel
         setAnalyticsService(analyticsService);
     }
 
-    public MutableLiveData<TransactionData> transactionFinalised()
+    public MutableLiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
     }
 
-    public MutableLiveData<Throwable> transactionError()
+    public MutableLiveData<TransactionReturn> transactionError()
     {
         return transactionError;
     }
@@ -202,6 +206,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel
 
     private void gotSignature(SignatureFromKey signature)
     {
+        if (signature.sigType == SignatureReturnType.SIGNING_POSTPONED) return;
+
         String universalLink = parser.completeUniversalLink(token.tokenInfo.chainId, linkMessage, signature.signature);
         //Now open the share icon
         universalLinkReady.postValue(universalLink);
@@ -219,12 +225,18 @@ public class TransferTicketDetailViewModel extends BaseViewModel
         }
         else
         {
-            final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
-            disposable = createTransactionInteract.create(defaultWallet.getValue(), token.getAddress(),
-                            BigInteger.ZERO, gasService.getGasPrice(), new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS), data, token.tokenInfo.chainId)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(newTransaction::postValue, this::onError);
+            final byte[] transactionBytes = TokenRepository.createTicketTransferData(to, transferList, token);
+            final Web3Transaction w3tx = new Web3Transaction(
+                    new Address(getWallet().address),
+                    new Address(token.getAddress()),
+                    BigInteger.ZERO,
+                    BigInteger.ZERO,
+                    new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS),
+                    -1,
+                    Numeric.toHexString(transactionBytes),
+                    -1);
+
+            requestSignature(w3tx, getWallet(), token.tokenInfo.chainId);
         }
     }
 
@@ -292,12 +304,14 @@ public class TransferTicketDetailViewModel extends BaseViewModel
         keyService.completeAuthentication(signData);
     }
 
-    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId)
+    public void requestSignature(Web3Transaction finalTx, Wallet wallet, long chainId)
     {
-        disposable = createTransactionInteract
-                .createWithSig(wallet, finalTx, chainId)
-                .subscribe(transactionFinalised::postValue,
-                        transactionError::postValue);
+        createTransactionInteract.requestSignature(finalTx, wallet, chainId, this);
+    }
+
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction w3Tx, SignatureFromKey signatureFromKey)
+    {
+        createTransactionInteract.sendTransaction(wallet, chainId, w3Tx, signatureFromKey);
     }
 
     public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId, long chainId)
@@ -325,5 +339,17 @@ public class TransferTicketDetailViewModel extends BaseViewModel
             intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             context.startActivity(intent);
         }
+    }
+
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        transactionFinalised.postValue(txData);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn txError)
+    {
+        transactionError.postValue(txError);
     }
 }

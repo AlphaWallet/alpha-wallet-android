@@ -1,9 +1,10 @@
 package com.alphawallet.app.walletconnect;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static com.alphawallet.app.entity.cryptokeys.SignatureReturnType.SIGNATURE_GENERATED;
 import static com.walletconnect.web3.wallet.client.Wallet.Model;
 import static com.walletconnect.web3.wallet.client.Wallet.Params;
+
+import static com.alphawallet.hardware.SignatureReturnType.SIGNATURE_GENERATED;
 
 import android.app.Application;
 import android.content.Context;
@@ -19,7 +20,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.walletconnect.NamespaceParser;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
@@ -30,6 +30,7 @@ import com.alphawallet.app.service.WalletConnectV2Service;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.walletconnect.util.WCMethodChecker;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 import com.walletconnect.android.Core;
@@ -108,7 +109,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     public void onSessionRequest(@NonNull Model.SessionRequest sessionRequest)
     {
         String method = sessionRequest.getRequest().getMethod();
-        if ("eth_signTypedData_v4".equals(method))
+        if (method.startsWith("eth_signTypedData"))
         {
             method = "eth_signTypedData";
         }

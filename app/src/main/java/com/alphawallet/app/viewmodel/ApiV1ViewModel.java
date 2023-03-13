@@ -13,8 +13,8 @@ import com.alphawallet.app.api.v1.entity.response.SignPersonalMessageResponse;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
+import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.hardware.SignatureReturnType;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.service.KeyService;
@@ -86,7 +86,7 @@ public class ApiV1ViewModel extends BaseViewModel
         {
             signature.postValue(sig.signature);
         }
-        else
+        else if (sig.sigType != SignatureReturnType.SIGNING_POSTPONED)
         {
             if (TextUtils.isEmpty(sig.failMessage))
             {

@@ -952,4 +952,12 @@
     <string name="enable_required_chains">Aktifkan rantai yang diperlukan?</string>
     <string name="enable_required_chains_message">Token yang dipilih ada di rantai saat ini tidak dipilih, mengaktifkan rantai yang tidak dipilih?</string>
     <string name="dialog_title_search_token">Cari Token?</string>
+    <string name="hardware_wallets">Dompet Perangkat Keras</string>
+    <string name="use_hardware_card">Gunakan Kartu Perangkat Keras</string>
+    <string name="unsupported_network">Jaringan Tidak Didukung (ID Rantai: %s)</string>
+    <string name="error_eip712_unsupported_network">Anda diminta menandatangani pesan untuk rantai yang tidak didukung. (ID: %s)</string>
+    <string name="error_eip712_incompatible_network">Anda diminta menandatangani pesan untuk rantai %1s. Anda saat ini berada di rantai %2s.</string>
+    <string name="error_eip712_wc2_disabled_network">Anda diminta menandatangani pesan untuk %s. Aktifkan rantai ini untuk sesi WalletConnect Anda.</string>
+    <string name="action_view_session">Lihat Sesi</string>
+    <string name="error_walletconnect_session_request_unsupported_network">Tidak dapat menangani permintaan sesi dari rantai yang tidak didukung. (ID: %s)</string>
 </resources>

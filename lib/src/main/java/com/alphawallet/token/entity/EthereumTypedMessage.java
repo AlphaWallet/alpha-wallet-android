@@ -17,6 +17,7 @@ public class EthereumTypedMessage implements Signable
     long leafPosition;
     CharSequence userMessage;
     SignMessageType messageType;
+    long chainId;
 
     public EthereumTypedMessage(byte[] value, CharSequence userMessage, String displayOrigin, long leafPosition)
     {
@@ -56,6 +57,7 @@ public class EthereumTypedMessage implements Signable
     {
         this.structuredData = cryptoFunctions.getStructuredData(messageData);
         this.userMessage = cryptoFunctions.formatEIP721Message(messageData);
+        this.chainId = cryptoFunctions.getChainId(messageData);
         messageType = SignMessageType.SIGN_TYPED_DATA_V3;
     }
 
@@ -102,5 +104,11 @@ public class EthereumTypedMessage implements Signable
     public SignMessageType getMessageType()
     {
         return messageType;
+    }
+
+    @Override
+    public long getChainId()
+    {
+        return chainId;
     }
 }

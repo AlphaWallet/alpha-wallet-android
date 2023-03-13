@@ -46,7 +46,9 @@ import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
+import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -403,6 +405,12 @@ public class TransferTicketDetailActivity extends BaseActivity
             {
 
             }
+
+            @Override
+            public void gotSignature(SignatureFromKey signature)
+            {
+                //TODO: Hardware
+            }
         };
 
         viewModel.getAuthorisation(this, signCallback);
@@ -703,6 +711,12 @@ public class TransferTicketDetailActivity extends BaseActivity
                 dialog.setCancelable(true);
                 dialog.show();
             }
+
+            @Override
+            public void gotSignature(SignatureFromKey signature)
+            {
+                //TODO: Hardware
+            }
         };
 
         confirmationDialog = new AWalletConfirmationDialog(this);
@@ -889,7 +903,13 @@ public class TransferTicketDetailActivity extends BaseActivity
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+        viewModel.requestSignature(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(viewModel.getWallet(), token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -919,19 +939,25 @@ public class TransferTicketDetailActivity extends BaseActivity
         return getGasSettings;
     }
 
-    private void txWritten(TransactionData transactionData)
+    @Override
+    public WalletType getWalletType()
     {
-        actionDialog.transactionWritten(transactionData.txHash);
+        return viewModel.getWallet().type;
+    }
+
+    private void txWritten(TransactionReturn transactionReturn)
+    {
+        actionDialog.transactionWritten(transactionReturn.hash);
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(ERROR);
         dialog.setTitle(R.string.error_transaction_failed);
-        dialog.setMessage(throwable.getMessage());
+        dialog.setMessage(txError.throwable.getMessage());
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();

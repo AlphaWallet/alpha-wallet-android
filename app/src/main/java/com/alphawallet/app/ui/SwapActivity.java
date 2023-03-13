@@ -23,7 +23,7 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetSource;
@@ -47,6 +47,7 @@ import com.alphawallet.app.widget.SwapSettingsDialog;
 import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.app.widget.TokenSelector;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.tools.Numeric;
 import com.google.android.material.button.MaterialButton;
 
@@ -649,24 +650,24 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         }
     }
 
-    private void txWritten(TransactionData transactionData)
+    private void txWritten(TransactionReturn transactionReturn)
     {
         AWalletAlertDialog successDialog = new AWalletAlertDialog(this);
         successDialog.setTitle(R.string.transaction_succeeded);
-        successDialog.setMessage(transactionData.txHash);
+        successDialog.setMessage(transactionReturn.hash);
         successDialog.show();
 
         viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_SUCCESSFUL, confirmationDialogProps);
     }
 
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
         AWalletAlertDialog errorDialog = new AWalletAlertDialog(this);
         errorDialog.setTitle(R.string.error_transaction_failed);
-        errorDialog.setMessage(throwable.getMessage());
+        errorDialog.setMessage(txError.throwable.getMessage());
         errorDialog.show();
 
-        confirmationDialogProps.put(Analytics.PROPS_ERROR_MESSAGE, throwable.getMessage());
+        confirmationDialogProps.put(Analytics.PROPS_ERROR_MESSAGE, txError.throwable.getMessage());
         viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_FAILED, confirmationDialogProps);
     }
 
@@ -757,7 +758,14 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     @Override
     public void sendTransaction(Web3Transaction tx)
     {
-        viewModel.sendTransaction(tx, wallet, settingsDialog.getSelectedChainId());
+        viewModel.requestSignature(tx, wallet, token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        //return from hardware
+        viewModel.sendTransaction(wallet, token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -780,5 +788,11 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
         return gasSettingsLauncher;
+    }
+
+    @Override
+    public WalletType getWalletType()
+    {
+        return wallet.type;
     }
 }

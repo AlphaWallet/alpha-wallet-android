@@ -5,6 +5,7 @@ import com.alphawallet.app.walletconnect.entity.*
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject
+import com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID
 import com.alphawallet.token.tools.Numeric
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.registerTypeAdapter
@@ -370,7 +371,10 @@ open class WCClient : WebSocketListener() {
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 handshakeId = request.id
                 remotePeerId = param.peerId
-                chainId = param.chainId
+                chainId = when (param.chainId.isNullOrEmpty()) {
+                    true -> MAINNET_ID.toString()
+                    false -> param.chainId
+                }
                 onSessionRequest(request.id, param.peerMeta)
             }
             WCMethod.SESSION_UPDATE -> {
@@ -386,7 +390,9 @@ open class WCClient : WebSocketListener() {
             WCMethod.ETH_PERSONAL_SIGN -> {
                 signRequest(request, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE)
             }
-            WCMethod.ETH_SIGN_TYPE_DATA -> {
+            WCMethod.ETH_SIGN_TYPE_DATA,
+            WCMethod.ETH_SIGN_TYPE_DATA_V3,
+            WCMethod.ETH_SIGN_TYPE_DATA_V4 -> {
                 signRequest(request, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE)
             }
             WCMethod.ETH_SIGN_TRANSACTION -> {

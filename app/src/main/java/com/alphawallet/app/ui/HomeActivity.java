@@ -65,7 +65,7 @@ import com.alphawallet.app.entity.MediaLinks;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.NotificationService;
@@ -80,9 +80,12 @@ import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.WCSession;
+import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
+import com.alphawallet.app.widget.SignTransactionDialog;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
@@ -101,7 +104,7 @@ import timber.log.Timber;
 
 @AndroidEntryPoint
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
-        FragmentMessenger, Runnable, SignAuthenticationCallback, ActionSheetCallback, LifecycleObserver, PagerCallback
+        FragmentMessenger, Runnable, ActionSheetCallback, LifecycleObserver, PagerCallback
 {
     @Inject
     AWWalletConnectClient awWalletConnectClient;
@@ -813,25 +816,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public void gotAuthorisation(boolean gotAuth)
-    {
-
-    }
-
-    @Override
-    public void cancelAuthentication()
-    {
-
-    }
-
-    @Override
-    public void createdKey(String keyAddress)
-    {
-        //Key was upgraded
-        //viewModel.upgradeWallet(keyAddress);
-    }
-
-    @Override
     public void loadingComplete()
     {
         int lastId = viewModel.getLastFragmentId();
@@ -967,11 +951,21 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data); // intercept return intent from PIN/Swipe authentications
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+        }
 
         switch (requestCode)
         {
             case DAPP_BARCODE_READER_REQUEST_CODE:
                 getFragment(DAPP_BROWSER).handleQRCode(resultCode, data, this);
+                break;
+            case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
+                if (getSelectedItem() == DAPP_BROWSER)
+                {
+                    getFragment(DAPP_BROWSER).pinAuthorisation(resultCode == RESULT_OK);
+                }
                 break;
             case C.REQUEST_BACKUP_WALLET:
                 String keyBackup = null;
@@ -1135,11 +1129,21 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             else if (importData != null && importData.startsWith("wc:"))
             {
-                WCSession session = WCSession.Companion.from(importData);
-                String importPassData = WalletConnectActivity.WC_INTENT + importData;
-                Intent intent = new Intent(this, WalletConnectActivity.class);
-                intent.putExtra("qrCode", importPassData);
+                Intent intent;
+
+                if (WalletConnectHelper.isWalletConnectV1(importData))
+                {
+                    intent = new Intent(this, WalletConnectActivity.class);
+                    intent.putExtra("qrCode", WalletConnectActivity.WC_INTENT + importData);
+                }
+                else
+                {
+                    intent = new Intent(this, WalletConnectV2Activity.class);
+                    intent.putExtra("url", importData);
+                }
+
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+
                 startActivity(intent);
             }
             else if (importPath != null)
@@ -1173,6 +1177,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
+    public WalletType getWalletType()
+    {
+        return viewModel.defaultWallet().getValue().type;
+    }
+
+    @Override
     public void getAuthorisation(SignAuthenticationCallback callback)
     {
         viewModelWC.getAuthenticationForSignature(viewModel.defaultWallet().getValue(), this, callback);
@@ -1180,6 +1190,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     @Override
     public void sendTransaction(Web3Transaction tx)
+    {
+
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
     {
 
     }

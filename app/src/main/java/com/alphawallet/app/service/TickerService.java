@@ -15,8 +15,8 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -680,7 +680,7 @@ public class TickerService
 
     public static String getPercentageConversion(double d)
     {
-        return BalanceUtils.getScaledValue(BigDecimal.valueOf(d), 2, 2);
+        return BalanceUtils.getScaledValue(BigDecimal.valueOf(d), 0, 2);
     }
 
     private void initCurrency()
@@ -717,7 +717,7 @@ public class TickerService
     }
 
     // Update this list from here: https://api.coingecko.com/api/v3/asset_platforms
-    public static final Map<Long, String> coinGeckoChainIdToAPIName = new HashMap<Long, String>()
+    public static final Map<Long, String> coinGeckoChainIdToAPIName = new HashMap<>()
     {{
         put(MAINNET_ID, "ethereum");
         put(GNOSIS_ID, "xdai");
@@ -728,7 +728,7 @@ public class TickerService
         put(AVALANCHE_ID, "avalanche");
         put(HECO_ID, "huobi-token");
         put(ARBITRUM_MAIN_ID, "arbitrum-one");
-        put(66L, "okex-chain");
+        put(OKX_ID, "okex-chain");
         put(1666600000L, "harmony-shard-0");
         put(321L, "kucoin-community-chain");
         put(88L, "tomochain");
@@ -754,11 +754,10 @@ public class TickerService
     }
 
     // Update from https://api.coingecko.com/api/v3/coins/list
-    public static final Map<Long, String> chainPairs = new HashMap<Long, String>()
+    public static final Map<Long, String> chainPairs = new HashMap<>()
     {{
         put(MAINNET_ID, "ethereum");
         put(CLASSIC_ID, "ethereum-classic");
-        put(POA_ID, "poa-network");
         put(GNOSIS_ID, "xdai");
         put(BINANCE_MAIN_ID, "binancecoin");
         put(HECO_ID, "huobi-token");
@@ -772,6 +771,7 @@ public class TickerService
         put(AURORA_MAINNET_ID, "aurora");
         put(MILKOMEDA_C1_ID, "cardano");
         put(CRONOS_MAIN_ID, "crypto-com-chain");
+        put(OKX_ID, "okb");
     }};
 
     public static boolean validateCoinGeckoAPI(Token token)

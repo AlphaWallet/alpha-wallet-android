@@ -109,7 +109,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     public void onSessionRequest(@NonNull Model.SessionRequest sessionRequest)
     {
         String method = sessionRequest.getRequest().getMethod();
-        if ("eth_signTypedData_v4".equals(method))
+        if (method.startsWith("eth_signTypedData"))
         {
             method = "eth_signTypedData";
         }

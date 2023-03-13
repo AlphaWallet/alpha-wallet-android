@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:custom="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/holding_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/background_grid_icon"
-        android:orientation="vertical"
         custom:strokeColor="?colorSurfaceQuaternary"
         custom:strokeWidth="1dp">
 
     <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingBottom="20dp">
 
         <com.alphawallet.app.widget.NFTImageView
                 android:id="@+id/icon"
@@ -33,19 +33,13 @@
                 tools:text="25"
                 tools:visibility="visible" />
 
-        <ProgressBar
-                android:id="@+id/loading_spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="200dp"
-                android:layout_centerInParent="true"
-                android:padding="@dimen/standard_16"
-                tools:visibility="visible" />
     </RelativeLayout>
 
     <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/background_round_bottom_corners"
+            android:layout_alignParentBottom="true"
             android:padding="@dimen/dp9">
 
         <TextView
@@ -71,4 +65,4 @@
                 tools:visibility="visible" />
 
     </RelativeLayout>
-</LinearLayout>
+</RelativeLayout>

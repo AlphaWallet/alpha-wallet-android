@@ -91,6 +91,7 @@ public class NFTImageView extends RelativeLayout
             else if (model != null) //or fallback to webview if there was some other problem
             {
                 setWebView(model.toString(), ImageType.IMAGE);
+                fallbackLayout.setVisibility(GONE);
             }
             return false;
         }

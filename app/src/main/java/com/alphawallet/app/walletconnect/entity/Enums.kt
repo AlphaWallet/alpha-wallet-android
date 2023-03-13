@@ -25,6 +25,12 @@ enum class WCMethod {
     @SerializedName("eth_signTypedData")
     ETH_SIGN_TYPE_DATA,
 
+    @SerializedName("eth_signTypedData_v3")
+    ETH_SIGN_TYPE_DATA_V3,
+
+    @SerializedName("eth_signTypedData_v4")
+    ETH_SIGN_TYPE_DATA_V4,
+
     @SerializedName("eth_signTransaction")
     ETH_SIGN_TRANSACTION,
 

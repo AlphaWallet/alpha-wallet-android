@@ -91,6 +91,7 @@
         android:layout_gravity="center"
         android:contentDescription="@string/empty"
         android:gravity="center"
+        android:scaleType="fitStart"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"
         app:layout_constraintDimensionRatio="H,1:1"

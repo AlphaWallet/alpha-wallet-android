@@ -173,7 +173,6 @@ public class NFTImageView extends RelativeLayout
         setWebViewHeight((int) getLayoutParams().width);
 
         this.imageUrl = url;
-//        fallbackLayout.setVisibility(View.GONE);
         image.setVisibility(View.VISIBLE);
         webLayout.setVisibility(GONE);
 

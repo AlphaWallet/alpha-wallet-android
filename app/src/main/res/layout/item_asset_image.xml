@@ -20,7 +20,8 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:indeterminateDrawable="@drawable/progress_bar_spinner"
-        tools:visibility="visible" />
+        android:visibility="invisible"
+        tools:visibility="invisible" />
 
     <RelativeLayout
         android:id="@+id/web_view_wrapper"

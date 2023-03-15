@@ -74,7 +74,7 @@ public class NFTImageView extends RelativeLayout
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
-    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>()
+    private final RequestListener<Drawable> requestListener = new RequestListener<>()
     {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
@@ -106,7 +106,6 @@ public class NFTImageView extends RelativeLayout
     };
     private Request loadRequest;
     private String imageUrl;
-    private boolean hasContent;
     private boolean isThumbnail;
 
     public NFTImageView(Context context, @Nullable AttributeSet attrs)
@@ -170,7 +169,7 @@ public class NFTImageView extends RelativeLayout
     {
         if (!Utils.stillAvailable(getContext())) return;
 
-        setWebViewHeight((int) getLayoutParams().width);
+        setWebViewHeight(getLayoutParams().width);
 
         this.imageUrl = url;
         image.setVisibility(View.VISIBLE);
@@ -307,16 +306,6 @@ public class NFTImageView extends RelativeLayout
         fallbackLayout.setVisibility(View.VISIBLE);
         fallbackIcon.bindData(token);
 
-        hasContent = true;
-    }
-
-    public boolean hasContent()
-    {
-        return hasContent;
-    }
-
-    public void showLoadingProgress()
-    {
     }
 
     public boolean shouldLoad(String url)

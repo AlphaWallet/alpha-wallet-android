@@ -20,7 +20,6 @@
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
         android:indeterminateDrawable="@drawable/progress_bar_spinner"
-        android:visibility="gone"
         tools:visibility="visible" />
 
     <RelativeLayout
@@ -61,7 +60,7 @@
         android:layout_height="match_parent"
         android:clickable="false"
         android:focusable="false"
-        android:visibility="gone">
+        android:visibility="invisible">
 
         <com.alphawallet.app.widget.TokenIcon
             android:id="@+id/icon_fallback"

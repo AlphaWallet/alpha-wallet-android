@@ -9,16 +9,8 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.RectF;
-import android.graphics.Shader;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.PictureDrawable;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,11 +22,11 @@ import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
@@ -53,9 +45,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
-import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.transition.Transition;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -90,13 +80,12 @@ public class NFTImageView extends RelativeLayout
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
         {
             //couldn't load using glide
-            Timber.tag("Bella").d("onLoadFailed" + model);
             String msg = e != null ? e.toString() : "";
             if (msg.contains(C.GLIDE_URL_INVALID)) //URL not valid: use the attribute name
             {
                 handler.post(() -> {
-                    progressBar.setVisibility(View.GONE);
-                    fallbackLayout.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(GONE);
+                    fallbackLayout.setVisibility(VISIBLE);
                 });
             }
             else if (model != null) //or fallback to webview if there was some other problem
@@ -109,14 +98,14 @@ public class NFTImageView extends RelativeLayout
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource)
         {
-            progressBar.setVisibility(View.GONE);
+            progressBar.setVisibility(GONE);
+            fallbackLayout.setVisibility(GONE);
             return false;
         }
     };
     private Request loadRequest;
     private String imageUrl;
     private boolean hasContent;
-    private boolean showProgress;
     private boolean isThumbnail;
 
     public NFTImageView(Context context, @Nullable AttributeSet attrs)
@@ -133,9 +122,8 @@ public class NFTImageView extends RelativeLayout
         overlay = findViewById(R.id.overlay_rect);
         mediaPlayer = null;
 
-        webLayout.setVisibility(View.GONE);
-        webView.setVisibility(View.GONE);
-        showProgress = false;
+        webLayout.setVisibility(GONE);
+        webView.setVisibility(GONE);
 
         if (loadRequest != null && loadRequest.isRunning())
         {
@@ -172,8 +160,6 @@ public class NFTImageView extends RelativeLayout
         }
         else if (shouldLoad(asset.getImage()))
         {
-            showLoadingProgress();
-            progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
             loadImage(asset.getImage(), asset.getBackgroundColor(), 16, false);
             playAudioIfAvailable(anim);
         }
@@ -186,9 +172,9 @@ public class NFTImageView extends RelativeLayout
         setWebViewHeight((int) getLayoutParams().width);
 
         this.imageUrl = url;
-        fallbackLayout.setVisibility(View.GONE);
+//        fallbackLayout.setVisibility(View.GONE);
         image.setVisibility(View.VISIBLE);
-        webLayout.setVisibility(View.GONE);
+        webLayout.setVisibility(GONE);
 
         try
         {
@@ -215,127 +201,14 @@ public class NFTImageView extends RelativeLayout
             roundedCorners = new RoundedCorners(corners);
         }
 
-        if (url.toLowerCase(Locale.ROOT).endsWith(".svg")) {
-
-            loadRequest = Glide.with(getContext())
-                    .as(PictureDrawable.class)
-                    .override(Target.SIZE_ORIGINAL)
-                    .timeout(30 * 1000)
-                    .load(url)
-                    .into(createSvgTarget(corners))
-                    .getRequest();
-        } else {
-            loadRequest = Glide.with(getContext())
-                    .load(url)
-                    .transform(new CenterCrop(), roundedCorners)
-                    .transition(withCrossFade())
-                    .override(Target.SIZE_ORIGINAL)
-                    .timeout(30 * 1000)
-                    .listener(requestListener)
-                    .into(new DrawableImageViewTarget(image)).getRequest();
-        }
-    }
-
-    @NonNull
-    private Target<PictureDrawable> createSvgTarget(int corners)
-    {
-        return new Target<>()
-        {
-            @Override
-            public void onStart()
-            {
-
-            }
-
-            @Override
-            public void onStop()
-            {
-
-            }
-
-            @Override
-            public void onDestroy()
-            {
-
-            }
-
-            @Override
-            public void onLoadStarted(@Nullable Drawable placeholder)
-            {
-                // Display a placeholder or loading indicator
-            }
-
-            @Override
-            public void onLoadFailed(@Nullable Drawable errorDrawable)
-            {
-                // Display an error message or fallback image
-            }
-
-            @Override
-            public void onResourceReady(@NonNull PictureDrawable pictureDrawable, @Nullable Transition<? super PictureDrawable> transition)
-            {
-                Bitmap bitmap = Bitmap.createBitmap(pictureDrawable.getIntrinsicWidth(), pictureDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                canvas.drawPicture(pictureDrawable.getPicture());
-
-                Drawable roundedCornerBitmapDrawable = getRoundedCornerBitmapDrawable(bitmap, corners);
-                image.setImageDrawable(roundedCornerBitmapDrawable);
-            }
-
-            @Override
-            public void onLoadCleared(@Nullable Drawable placeholder)
-            {
-                // Reset the target state, such as clearing the ImageView
-            }
-
-            @Override
-            public void getSize(@NonNull SizeReadyCallback cb)
-            {
-
-            }
-
-            @Override
-            public void removeCallback(@NonNull SizeReadyCallback cb)
-            {
-
-            }
-
-            @Override
-            public void setRequest(@Nullable Request request)
-            {
-
-            }
-
-            @Nullable
-            @Override
-            public Request getRequest()
-            {
-                return null;
-            }
-
-        };
-    }
-
-    private Drawable getRoundedCornerBitmapDrawable(Bitmap bitmap, float radius)
-    {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-
-        Bitmap roundedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(roundedBitmap);
-
-        BitmapShader shader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-        Paint paint = new Paint();
-        paint.setShader(shader);
-
-        RectF rect = new RectF(0, 0, width, height);
-        radius += 35;
-        float[] radii = {radius, radius, radius, radius, 0, 0, 0, 0}; // only round the top two corners
-        Path path = new Path();
-        path.addRoundRect(rect, radii, Path.Direction.CW);
-
-        canvas.drawPath(path, paint);
-        return new BitmapDrawable(roundedBitmap);
+        loadRequest = Glide.with(getContext())
+                .load(url)
+                .transform(new CenterCrop(), roundedCorners)
+                .transition(withCrossFade())
+                .override(Target.SIZE_ORIGINAL)
+                .timeout(30 * 1000)
+                .listener(requestListener)
+                .into(new DrawableImageViewTarget(image)).getRequest();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -344,17 +217,25 @@ public class NFTImageView extends RelativeLayout
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
         webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url)
+            {
+                super.onPageFinished(view, url);
+                progressBar.setVisibility(GONE);
+            }
+        });
 
         //determine how to display this URL
         final DisplayType useType = new DisplayType(imageUrl, hint);
 
         handler.post(() -> {
             this.imageUrl = imageUrl;
-            image.setVisibility(View.GONE);
+            image.setVisibility(GONE);
             webLayout.setVisibility(View.VISIBLE);
             webView.setVisibility(View.VISIBLE);
             overlay.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.GONE);
+            progressBar.setVisibility(GONE);
 
             if (useType.getImageType() == ImageType.WEB)
             {
@@ -436,7 +317,6 @@ public class NFTImageView extends RelativeLayout
 
     public void showLoadingProgress()
     {
-        this.showProgress = true;
     }
 
     public boolean shouldLoad(String url)

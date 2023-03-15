@@ -26,22 +26,6 @@ import java.io.InputStream;
 public class AlphaWalletGlideModule extends AppGlideModule
 {
     @Override
-    public void registerComponents(
-            @NonNull Context context, @NonNull Glide glide, @NonNull Registry registry)
-    {
-        registry
-                .register(SVG.class, PictureDrawable.class, new SvgDrawableTranscoder())
-                .append(InputStream.class, SVG.class, new SvgDecoder());
-    }
-
-    // Disable manifest parsing to avoid adding similar modules twice.
-    @Override
-    public boolean isManifestParsingEnabled()
-    {
-        return false;
-    }
-
-    @Override
     public void applyOptions(@NotNull Context context, GlideBuilder builder) {
         builder.setLogLevel(Log.ERROR);
     }

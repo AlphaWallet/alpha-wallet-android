@@ -183,6 +183,13 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         Bundle result = new Bundle();
         result.putBoolean(SYNC_STATUS, token.getTokenCount() != token.getTokenAssets().size());
         getParentFragmentManager().setFragmentResult(SIGNAL_NFT_SYNC, result);
+        forceRedraw();
+    }
+
+    // This is a trick to fix a bug
+    private void forceRedraw()
+    {
+        search.setText("");
     }
 
     private boolean hasTokenScriptOverride(Token t)

@@ -187,7 +187,8 @@ public class NFTImageView extends RelativeLayout
         }
 
 
-        if (url.toLowerCase(Locale.ROOT).contains(".webp")) {
+        if (url.toLowerCase(Locale.ROOT).contains(".webp"))
+        {
             corners += 30;
         }
         Transformation<Bitmap> roundedCorners;
@@ -216,7 +217,8 @@ public class NFTImageView extends RelativeLayout
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
         webView.setWebChromeClient(new WebChromeClient());
-        webView.setWebViewClient(new WebViewClient() {
+        webView.setWebViewClient(new WebViewClient()
+        {
             @Override
             public void onPageFinished(WebView view, String url)
             {

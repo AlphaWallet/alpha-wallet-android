@@ -656,7 +656,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     /**
      * Either Send or Sign (WalletConnect only) the transaction
      */
-    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     private void handleTransactionOperation()
     {
         if (walletType != WalletType.HARDWARE)
@@ -698,7 +697,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                     case SIGN_MESSAGE:
                     case WALLET_CONNECT_REQUEST:
                     case NODE_STATUS_INFO:
-                        break;
+                    default:break;
                 }
 
                 actionSheetCallback.notifyConfirm(mode.getValue());

@@ -105,6 +105,8 @@ public class WalletConnectV2SessionRequestHandler
             default:
                 return false;
         }
+
+        return false;
     }
 
     private WalletConnectV2SessionItem getSessionItem()

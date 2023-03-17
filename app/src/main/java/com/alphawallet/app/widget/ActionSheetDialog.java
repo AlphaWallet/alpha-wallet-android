@@ -697,7 +697,8 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                     case SIGN_MESSAGE:
                     case WALLET_CONNECT_REQUEST:
                     case NODE_STATUS_INFO:
-                    default:break;
+                    default:
+                        break;
                 }
 
                 actionSheetCallback.notifyConfirm(mode.getValue());

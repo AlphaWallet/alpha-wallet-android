@@ -39,6 +39,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, View.OnLongClickListener
 {
 
@@ -312,8 +314,10 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             text24Hours.setTextColor(color);
             image24h.setImageResource(percentage < 0 ? R.drawable.ic_price_down : R.drawable.ic_price_up);
         }
-        catch (Exception ex)
-        { /* Quietly */ }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
 
         //This sets the crypto price value (middle amount)
         BigDecimal currencyChange = new BigDecimal(fiatBalance.doubleValue()).multiply((

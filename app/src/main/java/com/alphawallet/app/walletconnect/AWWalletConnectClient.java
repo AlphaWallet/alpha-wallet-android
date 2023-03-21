@@ -183,9 +183,12 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     {
         String proposerPublicKey = sessionProposal.getProposerPublicKey();
         Params.SessionApprove approve = new Params.SessionApprove(proposerPublicKey, buildNamespaces(sessionProposal, selectedAccounts), sessionProposal.getRelayProtocol());
-        Web3Wallet.INSTANCE.approveSession(approve, sessionApprove -> null, this::onSessionApproveError);
-        callback.onSessionProposalApproved();
-        new Handler().postDelayed(this::updateNotification, 3000);
+        Web3Wallet.INSTANCE.approveSession(approve, sessionApprove -> {
+            Timber.tag(TAG).d("Session approve.");
+            callback.onSessionProposalApproved();
+            new Handler().postDelayed(this::updateNotification, 3000);
+            return null;
+        }, this::onSessionApproveError);
     }
 
     private Map<String, Model.Namespace.Session> buildNamespaces(Model.SessionProposal sessionProposal, List<String> selectedAccounts)
@@ -197,7 +200,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         List<String> accounts = toCAIP10(namespaceParser.getChains(), selectedAccounts);
         for (Map.Entry<String, Model.Namespace.Proposal> entry : namespaces.entrySet())
         {
-            Model.Namespace.Session session = new Model.Namespace.Session(namespaceParser.getChains(), namespaceParser.getWallets(), namespaceParser.getMethods(), namespaceParser.getEvents());
+            Model.Namespace.Session session = new Model.Namespace.Session(namespaceParser.getChains(), accounts, namespaceParser.getMethods(), namespaceParser.getEvents());
             result.put(entry.getKey(), session);
         }
         return result;
@@ -218,7 +221,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
     private Unit onSessionApproveError(Model.Error error)
     {
-        Timber.e(error.getThrowable());
+        Timber.tag(TAG).e(error.getThrowable());
         Toast.makeText(context, error.getThrowable().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
         return null;
     }
@@ -415,7 +418,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     @Override
     public void onSessionSettleResponse(@NonNull Model.SettledSessionResponse settledSessionResponse)
     {
-        Timber.tag(TAG).i("onSessionSettleResponse");
+        Timber.tag(TAG).i("onSessionSettleResponse: " + settledSessionResponse.toString());
     }
 
     @Override

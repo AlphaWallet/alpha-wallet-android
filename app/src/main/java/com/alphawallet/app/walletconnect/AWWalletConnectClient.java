@@ -197,7 +197,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         List<String> accounts = toCAIP10(namespaceParser.getChains(), selectedAccounts);
         for (Map.Entry<String, Model.Namespace.Proposal> entry : namespaces.entrySet())
         {
-            Model.Namespace.Session session = new Model.Namespace.Session(accounts, namespaceParser.getMethods(), namespaceParser.getEvents(), null);
+            Model.Namespace.Session session = new Model.Namespace.Session(namespaceParser.getChains(), namespaceParser.getWallets(), namespaceParser.getMethods(), namespaceParser.getEvents());
             result.put(entry.getKey(), session);
         }
         return result;
@@ -307,7 +307,10 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
             return null;
         });
 
-        Web3Wallet.INSTANCE.initialize(new Params.Init(coreClient), e ->
+        Web3Wallet.INSTANCE.initialize(new Params.Init(coreClient), () -> {
+            Timber.tag(TAG).i("Wallet Connect init success");
+            return null;
+        }, e ->
         {
             Timber.tag(TAG).e("Init failed: %s", e.getThrowable().getMessage());
             return null;

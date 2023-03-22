@@ -65,6 +65,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_RPC_URL;
 import android.text.TextUtils;
 import android.util.LongSparseArray;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
@@ -138,9 +139,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             : FREE_PALM_RPC_URL;
     public static final String PALM_TEST_RPC_URL = usesProductionKey ? "https://palm-testnet.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_PALM_TEST_RPC_URL;
-    public static final String USE_KLAYTN_RPC = usesProductionKey ? "https://node-api.klaytnapi.com/v1/klaytn"
+    public static final String USE_KLAYTN_RPC = usesProductionKey ? "https://klaytn.blockpi.network/v1/rpc/" + keyProvider.getBlockPiCypressKey()
             : KLAYTN_RPC;
-    public static final String USE_KLAYTN_BAOBAB_RPC = usesProductionKey ? "https://node-api.klaytnapi.com/v1/klaytn"
+    public static final String USE_KLAYTN_BAOBAB_RPC = usesProductionKey ? "https://klaytn-baobab.blockpi.network/v1/rpc/" + keyProvider.getBlockPiBaobabKey()
             : KLAYTN_BAOBAB_RPC;
     public static final String CRONOS_MAIN_RPC_URL = "https://evm.cronos.org";
 
@@ -308,13 +309,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer.palm-uat.xyz/tx/", PALM_TEST_ID, PALM_TEST_RPC_FALLBACK_URL,
                     "https://explorer.palm-uat.xyz/api?"));
             put(KLAYTN_ID, new NetworkInfo(C.KLAYTN_NAME, C.KLAYTN_SYMBOL,
-                    USE_KLAYTN_RPC,
-                    "https://scope.klaytn.com/tx/", KLAYTN_ID, KLAYTN_RPC,
-                    "https://klaytn-mainnet.blockscout.com/api?"));
+                USE_KLAYTN_RPC,
+                "https://scope.klaytn.com/tx/", KLAYTN_ID, KLAYTN_RPC,
+                "https://klaytn-mainnet.blockscout.com/api?"));
             put(KLAYTN_BAOBAB_ID, new NetworkInfo(C.KLAYTN_BAOBAB_NAME, C.KLAYTN_SYMBOL,
-                    USE_KLAYTN_BAOBAB_RPC,
-                    "https://baobab.scope.klaytn.com/tx/", KLAYTN_BAOBAB_ID, KLAYTN_BAOBAB_RPC,
-                    "https://klaytn-testnet.blockscout.com/api?"));
+                USE_KLAYTN_BAOBAB_RPC,
+                "https://baobab.scope.klaytn.com/tx/", KLAYTN_BAOBAB_ID, KLAYTN_BAOBAB_RPC,
+                "https://klaytn-testnet.blockscout.com/api?"));
             put(IOTEX_MAINNET_ID, new NetworkInfo(C.IOTEX_NAME, C.IOTEX_SYMBOL,
                     IOTEX_MAINNET_RPC_URL,
                     "https://iotexscan.io/tx/", IOTEX_MAINNET_ID, IOTEX_MAINNET_RPC_FALLBACK_URL,

@@ -112,4 +112,16 @@ public class KeyProviderMockNonProductionImpl implements KeyProvider
     {
         return null;
     }
+
+    @Override
+    public String getBlockPiBaobabKey()
+    {
+        return null;
+    }
+
+    @Override
+    public String getBlockPiCypressKey()
+    {
+        return null;
+    }
 }

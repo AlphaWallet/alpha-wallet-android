@@ -184,9 +184,10 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         String proposerPublicKey = sessionProposal.getProposerPublicKey();
         Params.SessionApprove approve = new Params.SessionApprove(proposerPublicKey, buildNamespaces(sessionProposal, selectedAccounts), sessionProposal.getRelayProtocol());
         Web3Wallet.INSTANCE.approveSession(approve, sessionApprove -> {
-            Timber.tag(TAG).d("Session approve.");
-            callback.onSessionProposalApproved();
-            new Handler().postDelayed(this::updateNotification, 3000);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                updateNotification();
+                callback.onSessionProposalApproved();
+            }, 3000);
             return null;
         }, this::onSessionApproveError);
     }
@@ -418,7 +419,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     @Override
     public void onSessionSettleResponse(@NonNull Model.SettledSessionResponse settledSessionResponse)
     {
-        Timber.tag(TAG).i("onSessionSettleResponse: " + settledSessionResponse.toString());
+        Timber.tag(TAG).i("onSessionSettleResponse: %s", settledSessionResponse.toString());
     }
 
     @Override

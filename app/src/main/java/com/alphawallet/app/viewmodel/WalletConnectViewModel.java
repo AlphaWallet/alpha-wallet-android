@@ -779,7 +779,13 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
             return;
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
-            realm.executeTransactionAsync(r -> {}, onSuccess::run);
+            realm.executeTransactionAsync(r -> {
+                boolean isDeleted = r.where(RealmWCSession.class)
+                        .in("sessionId", sessionIds.toArray(new String[]{}))
+                        .findAll()
+                        .deleteAllFromRealm();
+                Timber.tag(TAG).i("deleteSessions: Success: %s\nList: %s", isDeleted, sessionIds);
+            }, onSuccess::run);;
         }
         catch (Exception e)
         {

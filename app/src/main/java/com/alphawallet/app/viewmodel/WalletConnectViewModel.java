@@ -492,7 +492,8 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
         return records;
     }
 
-    public MutableLiveData<List<WalletConnectSessionItem>> sessions() {
+    public MutableLiveData<List<WalletConnectSessionItem>> sessions()
+    {
         return sessions;
     }
 
@@ -785,7 +786,7 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
                         .findAll()
                         .deleteAllFromRealm();
                 Timber.tag(TAG).i("deleteSessions: Success: %s\nList: %s", isDeleted, sessionIds);
-            }, onSuccess::run);;
+            }, onSuccess::run);
         }
         catch (Exception e)
         {

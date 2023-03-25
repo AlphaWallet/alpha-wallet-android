@@ -60,7 +60,19 @@
         <com.alphawallet.app.widget.AmountDisplayWidget
             android:id="@+id/amount_display"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content" >
+
+        </com.alphawallet.app.widget.AmountDisplayWidget>
+
+        <TextView
+                android:id="@+id/confirmation_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_margin="@dimen/cardview_default_radius"
+                android:paddingStart="@dimen/dp10"
+                android:paddingEnd="@dimen/dp10"
+                android:text="Revise los datos de envio antes de confirmar. ¿Está seguro de confirmar la operación?" />
 
         <com.alphawallet.app.widget.AssetDetailView
             android:id="@+id/asset_detail"

@@ -187,6 +187,9 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
             functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_confirm)));
         }
 
+        gasWidget.setVisibility(View.GONE);
+        gasWidgetLegacy.setVisibility(View.GONE);
+        networkDisplay.setVisibility(View.GONE);
         functionBar.revealButtons();
     }
 

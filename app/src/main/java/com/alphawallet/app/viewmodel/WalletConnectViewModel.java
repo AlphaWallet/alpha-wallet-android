@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -18,7 +19,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.GenericCallback;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
@@ -77,6 +77,7 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionSigned = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<List<WalletConnectSessionItem>> sessions = new MutableLiveData<>();
     protected Disposable disposable;
     private final KeyService keyService;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -413,6 +414,7 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
         {
             deleteSessionV1(session, callback);
         }
+        updateSessions();
     }
 
     private void deleteSessionV2(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
@@ -422,7 +424,6 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
 
     private void deleteSessionV1(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
     {
-        Timber.d("deleteSession: %s", session.sessionId);
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
             realm.executeTransactionAsync(r -> {
@@ -491,9 +492,9 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
         return records;
     }
 
-    public List<WalletConnectSessionItem> getSessions()
+    public MutableLiveData<List<WalletConnectSessionItem>> sessions()
     {
-        return walletConnectInteract.getSessions();
+        return sessions;
     }
 
     public void removePendingRequest(Activity activity, long id)
@@ -703,39 +704,43 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
         }
     }
 
-    // remove wallet connect sessions with no transaction history
-    public void removeEmptySessions(Context context, Runnable onComplete)
+    public void removeSessionsWithoutSignRecords(Context context)
     {
-        // create list of sessions which are inactive and has zero txn/sign
-        // delete them from realm
         getInactiveSessionIds(context, sessions -> {
-            ArrayList<String> sessionIdsToRemove = new ArrayList<>();
-            for (String sessionId : sessions)
-            {
-                // if no txn/sign history found
-                if (getSignRecords(sessionId).isEmpty())
-                {
-                    // add this sessionId to the list of removable
-                    sessionIdsToRemove.add(sessionId);
-                }
-            }
-            deleteSessionsFromRealm(sessionIdsToRemove, onComplete);
+            deleteSessionsFromRealm(filterSessionsWithoutSignRecords(sessions), this::updateSessions);
         });
     }
 
-    // remove all inactive wallet connect sessions
-    public void removeAllSessions(Context context, Runnable onSuccess)
+    @NonNull
+    private ArrayList<String> filterSessionsWithoutSignRecords(List<String> sessions)
+    {
+        ArrayList<String> result = new ArrayList<>();
+        for (String sessionId : sessions)
+        {
+            if (getSignRecords(sessionId).isEmpty())
+            {
+                result.add(sessionId);
+            }
+        }
+        return result;
+    }
+
+    public void updateSessions()
+    {
+        sessions.postValue(walletConnectInteract.getSessions());
+    }
+
+    public void removeInactiveSessions(Context context)
     {
         getInactiveSessionIds(context, list -> {
-            Timber.d("removeAllSessions: sessionsToRemove: %d", list.size());
-            deleteSessionsFromRealm(list, onSuccess);
+            deleteSessionsFromRealm(list, this::updateSessions);
         });
     }
 
     // connects to service to check session state and gives inactive sessions
     private void getInactiveSessionIds(Context context, GenericCallback<List<String>> callback)
     {
-        List<WalletConnectSessionItem> sessionItems = getSessions();        // all sessions in DB
+        List<WalletConnectSessionItem> sessionItems = walletConnectInteract.getSessions();
         ArrayList<String> inactiveSessions = new ArrayList<>();
         ServiceConnection connection = new ServiceConnection()
         {
@@ -771,7 +776,6 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     // deletes the RealmWCSession objects with the given sessionIds present in the list
     private void deleteSessionsFromRealm(List<String> sessionIds, Runnable onSuccess)
     {
-        Timber.d("deleteSessionsFromRealm: sessions: %s", sessionIds);
         if (sessionIds.isEmpty())
             return;
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
@@ -781,12 +785,12 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
                         .in("sessionId", sessionIds.toArray(new String[]{}))
                         .findAll()
                         .deleteAllFromRealm();
-                Timber.d("deleteSessions: Success: %s\nList: %s", isDeleted, sessionIds);
+                Timber.tag(TAG).i("deleteSessions: Success: %s\nList: %s", isDeleted, sessionIds);
             }, onSuccess::run);
         }
         catch (Exception e)
         {
-            Timber.e(e);
+            Timber.tag(TAG).e(e);
         }
     }
 

@@ -47,7 +47,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import timber.log.Timber;
 
 
 /**
@@ -63,7 +62,6 @@ public class WalletConnectSessionActivity extends BaseActivity
     private Button btnConnectWallet;
     private LinearLayout layoutNoActiveSessions;
     private CustomAdapter adapter;
-    private List<WalletConnectSessionItem> wcSessions;
     private final BroadcastReceiver walletConnectChangeReceiver = new BroadcastReceiver()
     {
         @Override
@@ -87,7 +85,6 @@ public class WalletConnectSessionActivity extends BaseActivity
         setContentView(R.layout.activity_wallet_connect_sessions);
         toolbar();
         setTitle(getString(R.string.title_wallet_connect));
-        initViewModel();
 
         recyclerView = findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -104,6 +101,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             viewModel = new ViewModelProvider(this)
                     .get(WalletConnectViewModel.class);
             viewModel.serviceReady().observe(this, this::onServiceReady);
+            viewModel.sessions().observe(this, this::onSessionsUpdated);
         }
 
         if (broadcastManager == null)
@@ -114,47 +112,21 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     private void onServiceReady(Boolean aBoolean)
     {
-        //refresh adapter
-        if (adapter != null)
-        {
-            adapter.notifyDataSetChanged();
-        }
-        else
-        {
-            setupList();
-        }
+
     }
 
-    private void setupList()
+    private void onSessionsUpdated(List<WalletConnectSessionItem> sessionItems)
     {
-        wcSessions = viewModel.getSessions();
-
-        layoutNoActiveSessions.setVisibility(View.VISIBLE);
-        if (wcSessions.isEmpty())
+        if (adapter == null)
         {
-            layoutNoActiveSessions.setVisibility(View.VISIBLE);
-            // remove ghosting when all items deleted
-            if (recyclerView != null)
-            {
-                RecyclerView.Adapter adapter = recyclerView.getAdapter();
-                if (adapter != null)
-                {
-                    adapter.notifyDataSetChanged();
-                }
-            }
+            adapter = new CustomAdapter(sessionItems);
+            recyclerView.setAdapter(adapter);
         }
         else
         {
-            layoutNoActiveSessions.setVisibility(View.GONE);
-            recyclerView = findViewById(R.id.list);
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            adapter = new CustomAdapter();
-            recyclerView.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
+            adapter.updateList(sessionItems);
         }
-
-        adapter = new CustomAdapter();
-        recyclerView.setAdapter(adapter);
+        layoutNoActiveSessions.setVisibility(sessionItems.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -162,7 +134,7 @@ public class WalletConnectSessionActivity extends BaseActivity
     {
         super.onResume();
         initViewModel();
-        setupList();
+        viewModel.updateSessions();
         startConnectionCheck();
 
         viewModel.track(Analytics.Navigation.WALLET_CONNECT_SESSIONS);
@@ -212,20 +184,17 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     private void openDeleteMenu(View v)
     {
-        Timber.d("openDeleteMenu: view: %s", v);
         PopupMenu popupMenu = new PopupMenu(this, v);
         popupMenu.getMenuInflater().inflate(R.menu.menu_wc_sessions_delete, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_delete_empty)
             {
-                // delete empty
-                viewModel.removeEmptySessions(this, this::setupList);
+                viewModel.removeSessionsWithoutSignRecords(this);
                 return true;
             }
             else if (item.getItemId() == R.id.action_delete_all)
             {
-                Timber.d("openDeleteMenu: deleteAll: ");
-                viewModel.removeAllSessions(this, this::setupList);
+                viewModel.removeInactiveSessions(this);
                 return true;
             }
             return false;
@@ -260,7 +229,6 @@ public class WalletConnectSessionActivity extends BaseActivity
                         public void onSessionDisconnected()
                         {
                             runOnUiThread(() -> {
-                                setupList();
                                 awWalletConnectClient.updateNotification();
                             });
                         }
@@ -286,6 +254,13 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>
     {
+        private List<WalletConnectSessionItem> list;
+
+        public CustomAdapter(List<WalletConnectSessionItem> list)
+        {
+            this.list = list;
+        }
+
         @Override
         public CustomAdapter.CustomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
@@ -298,7 +273,7 @@ public class WalletConnectSessionActivity extends BaseActivity
         @Override
         public void onBindViewHolder(CustomAdapter.CustomViewHolder holder, int position)
         {
-            final WalletConnectSessionItem session = wcSessions.get(position);
+            final WalletConnectSessionItem session = list.get(position);
 
             Glide.with(getApplication())
                     .load(session.icon)
@@ -331,7 +306,13 @@ public class WalletConnectSessionActivity extends BaseActivity
         @Override
         public int getItemCount()
         {
-            return wcSessions.size();
+            return list.size();
+        }
+
+        public void updateList(List<WalletConnectSessionItem> list)
+        {
+            this.list = list;
+            notifyDataSetChanged();
         }
 
         class CustomViewHolder extends RecyclerView.ViewHolder

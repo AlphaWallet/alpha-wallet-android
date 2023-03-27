@@ -306,13 +306,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
             {
                 SortedItem headerItem = new HeaderItem(token.group);
                 items.add(tsi);
-                if (notExisted(headerItem))
-                {
-                    items.add(headerItem);
-                }
+                items.add(headerItem);
 
                 SortedItem chainItem = new ChainItem(token.getChain(), token.group);
-                if (notExisted(chainItem))
+                if (doesNotExist(chainItem))
                 {
                     items.add(chainItem);
                 }
@@ -324,7 +321,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         }
     }
 
-    private boolean notExisted(SortedItem token)
+    private boolean doesNotExist(SortedItem token)
     {
         return findItem(token) == -1;
     }

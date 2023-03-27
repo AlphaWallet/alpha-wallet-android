@@ -139,9 +139,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             : FREE_PALM_RPC_URL;
     public static final String PALM_TEST_RPC_URL = usesProductionKey ? "https://palm-testnet.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_PALM_TEST_RPC_URL;
-    public static final String USE_KLAYTN_RPC = usesProductionKey ? "https://klaytn.blockpi.network/v1/rpc/" + keyProvider.getBlockPiCypressKey()
+    public static final String USE_KLAYTN_RPC = !TextUtils.isEmpty(keyProvider.getBlockPiCypressKey()) ? "https://klaytn.blockpi.network/v1/rpc/" + keyProvider.getBlockPiCypressKey()
             : KLAYTN_RPC;
-    public static final String USE_KLAYTN_BAOBAB_RPC = usesProductionKey ? "https://klaytn-baobab.blockpi.network/v1/rpc/" + keyProvider.getBlockPiBaobabKey()
+    public static final String USE_KLAYTN_BAOBAB_RPC = !TextUtils.isEmpty(keyProvider.getBlockPiBaobabKey()) ? "https://klaytn-baobab.blockpi.network/v1/rpc/" + keyProvider.getBlockPiBaobabKey()
             : KLAYTN_BAOBAB_RPC;
     public static final String CRONOS_MAIN_RPC_URL = "https://evm.cronos.org";
 

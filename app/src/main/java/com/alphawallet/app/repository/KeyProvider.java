@@ -37,4 +37,8 @@ public interface KeyProvider
     String getUnstoppableDomainsKey();
 
     String getOkLinkKey();
+
+    String getBlockPiBaobabKey();
+
+    String getBlockPiCypressKey();
 }

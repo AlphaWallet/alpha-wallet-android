@@ -34,6 +34,8 @@ public class HeaderHolder extends BinderViewHolder<TokenGroup> {
                 return getString(R.string.governance_header);
             case NFT:
                 return getString(R.string.collectibles_header);
+            case SPAM:
+                return getString(R.string.spam_header);
         }
     }
 

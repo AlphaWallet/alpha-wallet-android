@@ -65,8 +65,6 @@ public class TokenIcon extends ConstraintLayout
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
         {
-            if (model == null || token == null || !model.toString().toLowerCase().contains(token.getAddress()))
-                return false;
             return false;
         }
 
@@ -99,9 +97,11 @@ public class TokenIcon extends ConstraintLayout
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
         {
-            if (model == null || token == null || !model.toString().toLowerCase().contains(token.getAddress()))
-                return false;
-            handler.post(() -> loadFromAltRepo());
+            if (model != null && token != null && model.toString().toLowerCase().contains(token.getAddress()))
+            {
+                handler.post(() -> loadFromAltRepo());
+            }
+
             return false;
         }
 
@@ -188,10 +188,8 @@ public class TokenIcon extends ConstraintLayout
         {
             return;
         }
-        else
-        {
-            this.token = token;
-        }
+
+        this.token = token;
 
         if (token.isEthereum())
         {
@@ -201,7 +199,7 @@ public class TokenIcon extends ConstraintLayout
 
         if (token.group == TokenGroup.SPAM)
         {
-            bind(token, null);
+            bindSpam(token);
         }
         else
         {
@@ -235,7 +233,7 @@ public class TokenIcon extends ConstraintLayout
 
         if (token.group == TokenGroup.SPAM)
         {
-            bind(token, null);
+            bindSpam(token);
         }
         else
         {
@@ -245,21 +243,24 @@ public class TokenIcon extends ConstraintLayout
 
     private void bind(Token token, IconItem iconItem)
     {
+        bindCommon(token);
+        displayTokenIcon(iconItem);
+    }
+
+    private void bindSpam(Token token)
+    {
+        bindCommon(token);
+        setSpam();
+    }
+
+    private void bindCommon(Token token)
+    {
         this.handler.removeCallbacks(null);
         this.token = token;
 
         statusBackground.setVisibility(View.GONE);
         chainIconBackground.setVisibility(View.GONE);
         chainIcon.setVisibility(View.GONE);
-
-        if (iconItem != null)
-        {
-            displayTokenIcon(iconItem);
-        }
-        else // Spam Token
-        {
-            setSpam();
-        }
     }
 
     public void setChainIcon(long chainId)
@@ -272,7 +273,7 @@ public class TokenIcon extends ConstraintLayout
     public void setSpam()
     {
         textIcon.setVisibility(View.GONE);
-        icon.setImageResource(R.drawable.ic_clock);
+        icon.setImageResource(R.drawable.ic_spam_token);
         circle.setVisibility(View.GONE);
     }
 

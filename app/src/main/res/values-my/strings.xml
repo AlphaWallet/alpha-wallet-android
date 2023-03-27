@@ -991,4 +991,5 @@
     <string name="error_eip712_wc2_disabled_network">သင်သည် %s အတွက် မက်ဆေ့ဂျ်ကို လက်မှတ်ထိုးရန် တောင်းဆိုထားသည်။ သင်၏ WalletConnect စက်ရှင်အတွက် ဤကွင်းဆက်ကို ဖွင့်ပါ။</string>
     <string name="action_view_session">Session ကိုကြည့်ပါ။</string>
     <string name="error_walletconnect_session_request_unsupported_network">ပံ့ပိုးမထားသော ကွင်းဆက်တစ်ခုမှ ဆက်ရှင်တောင်းဆိုမှုကို မကိုင်တွယ်နိုင်ပါ။ (ID: %s)</string>
+    <string name="spam_header">မဟာမိတ်</string>
 </resources>

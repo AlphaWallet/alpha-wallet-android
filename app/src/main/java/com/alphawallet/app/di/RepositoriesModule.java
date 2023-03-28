@@ -17,6 +17,7 @@ import com.alphawallet.app.repository.SwapRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokenRepositoryType;
+import com.alphawallet.app.repository.TokensMappingRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.TransactionLocalSource;
 import com.alphawallet.app.repository.TransactionRepository;
@@ -274,5 +275,12 @@ public class RepositoriesModule
     AnalyticsServiceType provideAnalyticsService(@ApplicationContext Context ctx)
     {
         return new AnalyticsService(ctx);
+    }
+
+    @Singleton
+    @Provides
+    TokensMappingRepository provideTokensMappingRepository(TokenLocalSource localSource, @ApplicationContext Context ctx)
+    {
+        return new TokensMappingRepository(localSource, ctx);
     }
 }

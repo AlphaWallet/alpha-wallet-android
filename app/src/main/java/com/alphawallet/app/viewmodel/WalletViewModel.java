@@ -34,7 +34,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CoinbasePayRepository;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.repository.TokensMappingRepository;
+import com.alphawallet.app.repository.TokensMappingRepositoryType;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -85,7 +85,7 @@ public class WalletViewModel extends BaseViewModel
     private final MutableLiveData<GenericWalletInteract.BackupLevel> backupEvent = new MutableLiveData<>();
     private final MutableLiveData<Pair<Double, Double>> fiatValues = new MutableLiveData<>();
     private final FetchTokensInteract fetchTokensInteract;
-    private final TokensMappingRepository tokensMappingRepository;
+    private final TokensMappingRepositoryType tokensMappingRepository;
     private final TokenDetailRouter tokenDetailRouter;
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
@@ -120,7 +120,7 @@ public class WalletViewModel extends BaseViewModel
             OnRampRepositoryType onRampRepository,
             AnalyticsServiceType analyticsService,
             AWWalletConnectClient awWalletConnectClient,
-            TokensMappingRepository tokensMappingRepository)
+            TokensMappingRepositoryType tokensMappingRepository)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;

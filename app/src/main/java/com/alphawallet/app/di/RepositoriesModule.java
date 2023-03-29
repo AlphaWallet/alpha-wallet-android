@@ -18,6 +18,7 @@ import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TokensMappingRepository;
+import com.alphawallet.app.repository.TokensMappingRepositoryType;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.TransactionLocalSource;
 import com.alphawallet.app.repository.TransactionRepository;
@@ -87,8 +88,8 @@ public class RepositoriesModule
     @Singleton
     @Provides
     EthereumNetworkRepositoryType provideEthereumNetworkRepository(
-            PreferenceRepositoryType preferenceRepository,
-            @ApplicationContext Context context
+        PreferenceRepositoryType preferenceRepository,
+        @ApplicationContext Context context
     )
     {
         return new EthereumNetworkRepository(preferenceRepository, context);
@@ -97,29 +98,29 @@ public class RepositoriesModule
     @Singleton
     @Provides
     WalletRepositoryType provideWalletRepository(
-            PreferenceRepositoryType preferenceRepositoryType,
-            AccountKeystoreService accountKeystoreService,
-            EthereumNetworkRepositoryType networkRepository,
-            WalletDataRealmSource walletDataRealmSource,
-            KeyService keyService)
+        PreferenceRepositoryType preferenceRepositoryType,
+        AccountKeystoreService accountKeystoreService,
+        EthereumNetworkRepositoryType networkRepository,
+        WalletDataRealmSource walletDataRealmSource,
+        KeyService keyService)
     {
         return new WalletRepository(
-                preferenceRepositoryType, accountKeystoreService, networkRepository, walletDataRealmSource, keyService);
+            preferenceRepositoryType, accountKeystoreService, networkRepository, walletDataRealmSource, keyService);
     }
 
     @Singleton
     @Provides
     TransactionRepositoryType provideTransactionRepository(
-            EthereumNetworkRepositoryType networkRepository,
-            AccountKeystoreService accountKeystoreService,
-            TransactionLocalSource inDiskCache,
-            TransactionsService transactionsService)
+        EthereumNetworkRepositoryType networkRepository,
+        AccountKeystoreService accountKeystoreService,
+        TransactionLocalSource inDiskCache,
+        TransactionsService transactionsService)
     {
         return new TransactionRepository(
-                networkRepository,
-                accountKeystoreService,
-                inDiskCache,
-                transactionsService);
+            networkRepository,
+            accountKeystoreService,
+            inDiskCache,
+            transactionsService);
     }
 
     @Singleton
@@ -153,9 +154,9 @@ public class RepositoriesModule
     @Singleton
     @Provides
     TransactionsNetworkClientType provideBlockExplorerClient(
-            OkHttpClient httpClient,
-            Gson gson,
-            RealmManager realmManager)
+        OkHttpClient httpClient,
+        Gson gson,
+        RealmManager realmManager)
     {
         return new TransactionsNetworkClient(httpClient, gson, realmManager);
     }
@@ -163,25 +164,25 @@ public class RepositoriesModule
     @Singleton
     @Provides
     TokenRepositoryType provideTokenRepository(
-            EthereumNetworkRepositoryType ethereumNetworkRepository,
-            TokenLocalSource tokenLocalSource,
-            OkHttpClient httpClient,
-            @ApplicationContext Context context,
-            TickerService tickerService)
+        EthereumNetworkRepositoryType ethereumNetworkRepository,
+        TokenLocalSource tokenLocalSource,
+        OkHttpClient httpClient,
+        @ApplicationContext Context context,
+        TickerService tickerService)
     {
         return new TokenRepository(
-                ethereumNetworkRepository,
-                tokenLocalSource,
-                httpClient,
-                context,
-                tickerService);
+            ethereumNetworkRepository,
+            tokenLocalSource,
+            httpClient,
+            context,
+            tickerService);
     }
 
     @Singleton
     @Provides
-    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository)
+    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, TokensMappingRepositoryType tokensMappingRepository)
     {
-        return new TokensRealmSource(realmManager, ethereumNetworkRepository);
+        return new TokensRealmSource(realmManager, ethereumNetworkRepository, tokensMappingRepository);
     }
 
     @Singleton
@@ -279,8 +280,8 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    TokensMappingRepository provideTokensMappingRepository(TokenLocalSource localSource, @ApplicationContext Context ctx)
+    TokensMappingRepositoryType provideTokensMappingRepository(@ApplicationContext Context ctx)
     {
-        return new TokensMappingRepository(localSource, ctx);
+        return new TokensMappingRepository(ctx);
     }
 }

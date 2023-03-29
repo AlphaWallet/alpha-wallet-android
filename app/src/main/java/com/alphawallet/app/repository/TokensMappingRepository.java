@@ -1,10 +1,8 @@
 package com.alphawallet.app.repository;
 
-import static android.text.format.DateUtils.DAY_IN_MILLIS;
-
 import android.content.Context;
-import android.util.Pair;
 
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TokensMapping;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.util.Utils;
@@ -15,57 +13,85 @@ import com.google.gson.reflect.TypeToken;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-
-public class TokensMappingRepository
+public class TokensMappingRepository implements TokensMappingRepositoryType
 {
     private static final String TOKENS_JSON_FILENAME = "tokens.json";
     private final Context context;
+    private Map<String, TokenGroup> tokenMap;
 
-    public TokensMappingRepository(TokenLocalSource localSource, Context context)
+    public TokensMappingRepository(Context context)
     {
         this.context = context;
 
-        //find when we last updated
-        if (localSource.getLastMappingsUpdate() < (System.currentTimeMillis() - DAY_IN_MILLIS))
+        init();
+    }
+
+    private void init()
+    {
+        if (tokenMap == null)
         {
-            fetchTokenList() //Fetch the token list from assets and store into a pair of mappings, 1st mapping is the derivative tokens with a pointer to their base token. Second is the base token and grouping
-                .map(localSource::storeTokensMapping) //Store these mappings into an optimal database. Note the mappings are not used again, we instead use the realm database
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe()
-                .isDisposed();
+            createMap(Utils.loadJSONFromAsset(context, TOKENS_JSON_FILENAME));
         }
     }
 
-    private Single<Pair<Map<String, ContractAddress>, Map<String, TokenGroup>>> fetchTokenList()
+    private void createMap(String mapping)
     {
-        return Single.fromCallable(() -> {
-            String mapping = Utils.loadJSONFromAsset(context, TOKENS_JSON_FILENAME);
+        tokenMap = new HashMap<>();
+        TokensMapping[] tokensMapping = new Gson().fromJson(mapping, new TypeToken<TokensMapping[]>()
+        {
+        }.getType());
 
-            Map<String, ContractAddress> sourceMap = new HashMap<>();
-            Map<String, TokenGroup> baseMappings = new HashMap<>();
-
-            TokensMapping[] tokensMapping = new Gson().fromJson(mapping, new TypeToken<TokensMapping[]>()
+        if (tokensMapping != null)
+        {
+            for (TokensMapping entry : tokensMapping)
             {
-            }.getType());
-
-            if (tokensMapping != null)
-            {
-                for (TokensMapping thisMapping : tokensMapping)
+                for (ContractAddress address : entry.getContracts())
                 {
-                    ContractAddress baseAddress = thisMapping.getContracts().get(0);
-                    baseMappings.put(baseAddress.getAddressKey(), thisMapping.getGroup()); //insert base mapping (eg DAI on mainnet) along with token type
-                    for (int i = 1; i < thisMapping.getContracts().size(); i++)
-                    {
-                        sourceMap.put(thisMapping.getContracts().get(i).getAddressKey(), baseAddress); //insert mirrored token with pointer to base token (eg DAI on Arbitrum).
-                    }
+                    tokenMap.putIfAbsent(address.getAddressKey(), entry.getGroup());
                 }
             }
+        }
+    }
 
-            return new Pair<>(sourceMap, baseMappings);
-        });
+    @Override
+    public TokenGroup getTokenGroup(long chainId, String address, ContractType type)
+    {
+        if (tokenMap == null) init();
+
+        TokenGroup result = TokenGroup.ASSET;
+
+        TokenGroup g = tokenMap.get(ContractAddress.toAddressKey(chainId, address));
+        if (g != null)
+        {
+            result = g;
+        }
+
+        if (result == TokenGroup.SPAM)
+        {
+            return result;
+        }
+
+        switch (type)
+        {
+            case NOT_SET:
+            case OTHER:
+            case ETHEREUM:
+            case CURRENCY:
+            case CREATION:
+            case DELETED_ACCOUNT:
+            case ERC20:
+            default:
+                return result;
+
+            case ERC721:
+            case ERC721_ENUMERABLE:
+            case ERC875_LEGACY:
+            case ERC875:
+            case ERC1155:
+            case ERC721_LEGACY:
+            case ERC721_TICKET:
+            case ERC721_UNDETERMINED:
+                return TokenGroup.NFT;
+        }
     }
 }

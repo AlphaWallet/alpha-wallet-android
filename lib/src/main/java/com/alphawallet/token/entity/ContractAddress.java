@@ -27,6 +27,11 @@ public class ContractAddress
         return address.toLowerCase() + "-" + chainId;
     }
 
+    public static String toAddressKey(long chainId, String address)
+    {
+        return new ContractAddress(chainId, address).getAddressKey();
+    }
+
     //TODO: Only allow FunctionDefinition to have one contract
     public ContractAddress(FunctionDefinition fd)
     {

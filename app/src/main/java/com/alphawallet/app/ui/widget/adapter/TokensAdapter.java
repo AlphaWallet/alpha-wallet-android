@@ -122,8 +122,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         this.assetService = aService;
         this.tokensService = tService;
         this.managementLauncher = launcher;
-
-        new TokensMappingRepository(aService.getTokenLocalSource());
     }
 
     protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService)
@@ -131,8 +129,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = null;
-
-        new TokensMappingRepository(aService.getTokenLocalSource());
         this.managementLauncher = null;
     }
 

@@ -122,8 +122,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         this.assetService = aService;
         this.tokensService = tService;
         this.managementLauncher = launcher;
-
-        new TokensMappingRepository(aService.getTokenLocalSource());
     }
 
     protected TokensAdapter(TokensAdapterCallback tokensAdapterCallback, AssetDefinitionService aService)
@@ -131,8 +129,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         this.tokensAdapterCallback = tokensAdapterCallback;
         this.assetService = aService;
         this.tokensService = null;
-
-        new TokensMappingRepository(aService.getTokenLocalSource());
         this.managementLauncher = null;
     }
 
@@ -306,13 +302,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
             {
                 SortedItem headerItem = new HeaderItem(token.group);
                 items.add(tsi);
-                if (notExisted(headerItem))
-                {
-                    items.add(headerItem);
-                }
+                items.add(headerItem);
 
                 SortedItem chainItem = new ChainItem(token.getChain(), token.group);
-                if (notExisted(chainItem))
+                if (doesNotExist(chainItem))
                 {
                     items.add(chainItem);
                 }
@@ -324,7 +317,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         }
     }
 
-    private boolean notExisted(SortedItem token)
+    private boolean doesNotExist(SortedItem token)
     {
         return findItem(token) == -1;
     }

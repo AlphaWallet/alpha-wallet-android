@@ -67,8 +67,8 @@ public abstract class EthereumNetworkBase
     public static final String ARBITRUM_RPC_URL = "https://arbitrum-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String PALM_RPC_URL = "https://palm-mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String PALM_TEST_RPC_URL = "https://palm-testnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    public static final String KLAYTN_RPC = "https://public-node-api.klaytnapi.com/v1/cypress";
-    public static final String KLAYTN_BAOBAB_RPC = "https://api.baobab.klaytn.net:8651";
+    public static final String KLAYTN_RPC = "https://klaytn.blockpi.network/v1/rpc/public";
+    public static final String KLAYTN_BAOBAB_RPC = "https://klaytn-baobab.blockpi.network/v1/rpc/public";
     public static final String AURORA_MAINNET_RPC_URL = "https://mainnet.aurora.dev";
     public static final String AURORA_TESTNET_RPC_URL = "https://testnet.aurora.dev";
     public static final String MILKOMEDA_C1_RPC = "https://rpc-mainnet-cardano-evm.c1.milkomeda.com";
@@ -130,7 +130,6 @@ public abstract class EthereumNetworkBase
                     PALM_ID, false));
             put(PALM_TEST_ID, new NetworkInfo("PALM (Test)", "PALM", PALM_TEST_RPC_URL, "https://explorer.palm-uat.xyz/tx/",
                     PALM_TEST_ID, false));
-
             put(KLAYTN_ID, new NetworkInfo("Klaytn Cypress", "KLAY", KLAYTN_RPC, "https://scope.klaytn.com/tx/",
                     KLAYTN_ID, false));
             put(KLAYTN_BAOBAB_ID, new NetworkInfo("Klaytn Baobab (Test)", "KLAY", KLAYTN_BAOBAB_RPC, "https://baobab.scope.klaytn.com/tx/",

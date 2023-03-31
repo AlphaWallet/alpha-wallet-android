@@ -113,4 +113,16 @@ public class KeyProviderMockImpl implements KeyProvider
     {
         return FAKE_KEY_FOR_TESTING;
     }
+
+    @Override
+    public String getBlockPiBaobabKey()
+    {
+        return FAKE_KEY_FOR_TESTING;
+    }
+
+    @Override
+    public String getBlockPiCypressKey()
+    {
+        return FAKE_KEY_FOR_TESTING;
+    }
 }

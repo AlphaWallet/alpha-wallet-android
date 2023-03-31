@@ -78,7 +78,7 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T>
             try
             {
                 props = jsonToBundle(analyticsProperties.get());
-                props.putString(C.APP_NAME, BuildConfig.APPLICATION_ID);
+                props.putString(C.APPLICATION_ID, BuildConfig.APPLICATION_ID);
                 firebaseAnalytics.logEvent(eventName, props);
             }
             catch (JSONException e)
@@ -104,6 +104,8 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T>
             firebaseAnalytics.setUserId(uuid);
             mixpanelAPI.identify(uuid);
             mixpanelAPI.getPeople().identify(uuid);
+            mixpanelAPI.getPeople().set(C.APPLICATION_ID, BuildConfig.APPLICATION_ID);
+
             FirebaseInstanceId.getInstance().getInstanceId()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful())

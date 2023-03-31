@@ -257,7 +257,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
                 {
                     if (actionId == R.string.dialog_approve)
                     {
-                        approve(AWWalletConnectClient.sessionProposal, wallet.address);
+                        approve(AWWalletConnectClient.sessionProposal);
                     }
                     else
                     {
@@ -301,7 +301,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         awWalletConnectClient.reject(sessionProposal, this);
     }
 
-    private void approve(com.walletconnect.web3.wallet.client.Wallet.Model.SessionProposal sessionProposal, String walletAddress)
+    private void approve(com.walletconnect.web3.wallet.client.Wallet.Model.SessionProposal sessionProposal)
     {
         List<Long> disabledNetworks = disabledNetworks(sessionProposal.getRequiredNamespaces());
         if (disabledNetworks.isEmpty())

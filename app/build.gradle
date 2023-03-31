@@ -358,7 +358,7 @@ dependencies {
     //Timber
     implementation 'com.jakewharton.timber:timber:5.0.1'
 
-    implementation('com.walletconnect:web3wallet:1.2.0', {
+    implementation('com.walletconnect:web3wallet:1.4.1', {
         exclude group: 'org.web3j', module: '*'
     })
 

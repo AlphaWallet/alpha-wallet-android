@@ -337,6 +337,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         //sign only, and return signature to process
         mode = ActionSheetMode.SIGN_TRANSACTION;
         toolbar.setTitle(R.string.dialog_title_sign_transaction);
+        use1559Transactions = !candidateTransaction.isLegacyTransaction(); // If doing a sign-only transaction (not send) we must respect ERC-1559 or legacy.
     }
 
     public void onDestroy()

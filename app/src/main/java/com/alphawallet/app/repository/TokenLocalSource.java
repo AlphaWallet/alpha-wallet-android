@@ -76,10 +76,6 @@ public interface TokenLocalSource
 
     void storeAsset(String wallet, Token token, BigInteger tokenId, NFTAsset asset);
 
-    int storeTokensMapping(Pair<Map<String, ContractAddress>, Map<String, TokenGroup>> mappings);
-
-    long getLastMappingsUpdate();
-
     Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters);
 
     Map<String, Long> getTickerTimeMap(long chainId, List<TokenCardMeta> erc20Tokens);
@@ -87,8 +83,6 @@ public interface TokenLocalSource
     void deleteTickers();
 
     Single<List<String>> getTickerUpdateList(List<Long> networkFilter);
-
-    ContractAddress getBaseToken(long chainId, String address);
 
     TokenGroup getTokenGroup(long chainId, String address, ContractType type);
 

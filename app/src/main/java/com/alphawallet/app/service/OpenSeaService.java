@@ -392,13 +392,18 @@ public class OpenSeaService
             ownerOption = "owner_address";
         }
 
-        Uri.Builder builder = new Uri.Builder();
-        builder.encodedPath(api)
+        if (!TextUtils.isEmpty(api))
+        {
+            Uri.Builder builder = new Uri.Builder();
+            builder.encodedPath(api)
                 .appendQueryParameter(ownerOption, address)
                 .appendQueryParameter("limit", String.valueOf(PAGE_SIZE))
                 .appendQueryParameter("offset", String.valueOf(offset));
 
-        return executeRequest(networkId, builder.build().toString());
+            return executeRequest(networkId, builder.build().toString());
+        }
+
+        return JsonUtils.EMPTY_RESULT;
     }
 
     public String fetchAsset(long networkId, String contractAddress, String tokenId)

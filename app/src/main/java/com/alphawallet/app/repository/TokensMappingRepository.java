@@ -18,6 +18,7 @@ public class TokensMappingRepository implements TokensMappingRepositoryType
     private static final String TOKENS_JSON_FILENAME = "tokens.json";
     private final Context context;
     private Map<String, TokenGroup> tokenMap;
+    private Map<String, ContractAddress> contractMappings;
 
     public TokensMappingRepository(Context context)
     {
@@ -28,7 +29,7 @@ public class TokensMappingRepository implements TokensMappingRepositoryType
 
     private void init()
     {
-        if (tokenMap == null)
+        if (tokenMap == null || contractMappings == null)
         {
             createMap(Utils.loadJSONFromAsset(context, TOKENS_JSON_FILENAME));
         }
@@ -37,6 +38,7 @@ public class TokensMappingRepository implements TokensMappingRepositoryType
     private void createMap(String mapping)
     {
         tokenMap = new HashMap<>();
+        contractMappings = new HashMap<>();
         TokensMapping[] tokensMapping = new Gson().fromJson(mapping, new TypeToken<TokensMapping[]>()
         {
         }.getType());
@@ -45,9 +47,18 @@ public class TokensMappingRepository implements TokensMappingRepositoryType
         {
             for (TokensMapping entry : tokensMapping)
             {
+                ContractAddress baseAddress = null;
                 for (ContractAddress address : entry.getContracts())
                 {
                     tokenMap.putIfAbsent(address.getAddressKey(), entry.getGroup());
+                    if (baseAddress == null)
+                    {
+                        baseAddress = address;
+                    }
+                    else
+                    {
+                        contractMappings.putIfAbsent(address.getAddressKey(), baseAddress); // make a note of contracts that mirror base addresses - this should be used in the
+                    }
                 }
             }
         }
@@ -93,5 +104,17 @@ public class TokensMappingRepository implements TokensMappingRepositoryType
             case ERC721_UNDETERMINED:
                 return TokenGroup.NFT;
         }
+    }
+
+    /**
+     * Return the base token this token was initially derived from or self if there's no mapping
+     * @param chainId
+     * @param address
+     * @return
+     */
+    @Override
+    public ContractAddress getBaseToken(long chainId, String address)
+    {
+        return contractMappings.getOrDefault(ContractAddress.toAddressKey(chainId, address), new ContractAddress(chainId, address));
     }
 }

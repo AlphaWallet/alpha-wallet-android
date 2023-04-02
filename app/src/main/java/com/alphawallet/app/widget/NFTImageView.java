@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
@@ -21,6 +22,7 @@ import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -32,9 +34,11 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.util.RoundedTopCorners;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
@@ -47,6 +51,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import timber.log.Timber;
 
@@ -69,7 +74,7 @@ public class NFTImageView extends RelativeLayout
     /**
      * Prevent glide dumping log errors - it is expected that load will fail
      */
-    private final RequestListener<Drawable> requestListener = new RequestListener<Drawable>()
+    private final RequestListener<Drawable> requestListener = new RequestListener<>()
     {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
@@ -79,13 +84,14 @@ public class NFTImageView extends RelativeLayout
             if (msg.contains(C.GLIDE_URL_INVALID)) //URL not valid: use the attribute name
             {
                 handler.post(() -> {
-                    progressBar.setVisibility(View.GONE);
-                    fallbackLayout.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(GONE);
+                    fallbackLayout.setVisibility(VISIBLE);
                 });
             }
             else if (model != null) //or fallback to webview if there was some other problem
             {
                 setWebView(model.toString(), ImageType.IMAGE);
+                fallbackLayout.setVisibility(GONE);
             }
             return false;
         }
@@ -93,14 +99,14 @@ public class NFTImageView extends RelativeLayout
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource)
         {
-            progressBar.setVisibility(View.GONE);
+            progressBar.setVisibility(GONE);
+            fallbackLayout.setVisibility(GONE);
             return false;
         }
     };
     private Request loadRequest;
     private String imageUrl;
-    private boolean hasContent;
-    private boolean showProgress;
+    private boolean isThumbnail;
 
     public NFTImageView(Context context, @Nullable AttributeSet attrs)
     {
@@ -116,9 +122,8 @@ public class NFTImageView extends RelativeLayout
         overlay = findViewById(R.id.overlay_rect);
         mediaPlayer = null;
 
-        webLayout.setVisibility(View.GONE);
-        webView.setVisibility(View.GONE);
-        showProgress = false;
+        webLayout.setVisibility(GONE);
+        webView.setVisibility(GONE);
 
         if (loadRequest != null && loadRequest.isRunning())
         {
@@ -131,12 +136,19 @@ public class NFTImageView extends RelativeLayout
 
     public void setupTokenImageThumbnail(NFTAsset asset)
     {
+        setupTokenImageThumbnail(asset, false);
+    }
+
+    public void setupTokenImageThumbnail(NFTAsset asset, boolean onlyRoundTopCorners)
+    {
         fallbackIcon.setupFallbackTextIcon(asset.getName());
-        loadImage(asset.getThumbnail(), asset.getBackgroundColor(), 1);
+        isThumbnail = true;
+        loadImage(asset.getThumbnail(), asset.getBackgroundColor(), 30, onlyRoundTopCorners);
     }
 
     public void setupTokenImage(NFTAsset asset) throws IllegalArgumentException
     {
+        isThumbnail = false;
         String anim = asset.getAnimation();
         fallbackIcon.setupFallbackTextIcon(asset.getName());
 
@@ -148,23 +160,20 @@ public class NFTImageView extends RelativeLayout
         }
         else if (shouldLoad(asset.getImage()))
         {
-            showLoadingProgress();
-            progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
-            loadImage(asset.getImage(), asset.getBackgroundColor(), 16);
+            loadImage(asset.getImage(), asset.getBackgroundColor(), 16, false);
             playAudioIfAvailable(anim);
         }
     }
 
-    private void loadImage(String url, String backgroundColor, int corners) throws IllegalArgumentException
+    private void loadImage(String url, String backgroundColor, int corners, boolean onlyRoundTopCorners) throws IllegalArgumentException
     {
         if (!Utils.stillAvailable(getContext())) return;
 
-        setWebViewHeight((int)getLayoutParams().width);
+        setWebViewHeight(getLayoutParams().width);
 
         this.imageUrl = url;
-        fallbackLayout.setVisibility(View.GONE);
         image.setVisibility(View.VISIBLE);
-        webLayout.setVisibility(View.GONE);
+        webLayout.setVisibility(GONE);
 
         try
         {
@@ -177,9 +186,24 @@ public class NFTImageView extends RelativeLayout
             holdingView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.transparent));
         }
 
+
+        if (url.toLowerCase(Locale.ROOT).contains(".webp"))
+        {
+            corners += 30;
+        }
+        Transformation<Bitmap> roundedCorners;
+        if (onlyRoundTopCorners)
+        {
+            roundedCorners = new RoundedTopCorners(corners);
+        }
+        else
+        {
+            roundedCorners = new RoundedCorners(corners);
+        }
+
         loadRequest = Glide.with(getContext())
                 .load(url)
-                .transform(new CenterCrop(), new RoundedCorners(corners))
+                .transform(new CenterCrop(), roundedCorners)
                 .transition(withCrossFade())
                 .override(Target.SIZE_ORIGINAL)
                 .timeout(30 * 1000)
@@ -193,17 +217,26 @@ public class NFTImageView extends RelativeLayout
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
         webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebViewClient(new WebViewClient()
+        {
+            @Override
+            public void onPageFinished(WebView view, String url)
+            {
+                super.onPageFinished(view, url);
+                progressBar.setVisibility(GONE);
+            }
+        });
 
         //determine how to display this URL
         final DisplayType useType = new DisplayType(imageUrl, hint);
 
         handler.post(() -> {
             this.imageUrl = imageUrl;
-            image.setVisibility(View.GONE);
+            image.setVisibility(GONE);
             webLayout.setVisibility(View.VISIBLE);
             webView.setVisibility(View.VISIBLE);
             overlay.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.GONE);
+            progressBar.setVisibility(GONE);
 
             if (useType.getImageType() == ImageType.WEB)
             {
@@ -234,6 +267,10 @@ public class NFTImageView extends RelativeLayout
                 String loader = loadFile(getContext(), R.raw.token_graphic).replace("[URL]", imageUrl);
                 String base64 = android.util.Base64.encodeToString(loader.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
                 webView.loadData(base64, "text/html; charset=utf-8", "base64");
+                if (isThumbnail)
+                {
+                    setWebViewHeight(500);
+                }
             }
         });
     }
@@ -271,17 +308,6 @@ public class NFTImageView extends RelativeLayout
         fallbackLayout.setVisibility(View.VISIBLE);
         fallbackIcon.bindData(token);
 
-        hasContent = true;
-    }
-
-    public boolean hasContent()
-    {
-        return hasContent;
-    }
-
-    public void showLoadingProgress()
-    {
-        this.showProgress = true;
     }
 
     public boolean shouldLoad(String url)
@@ -318,7 +344,7 @@ public class NFTImageView extends RelativeLayout
         return (url != null && MimeTypeMap.getFileExtensionFromUrl(url).equals("glb"));
     }
 
-    private static final List<String> audioTypes = new ArrayList<>(Arrays.asList( "mp3", "ogg", "wav", "flac", "aac", "opus", "weba" ));
+    private static final List<String> audioTypes = new ArrayList<>(Arrays.asList("mp3", "ogg", "wav", "flac", "aac", "opus", "weba"));
 
     private boolean isAudio(String url)
     {

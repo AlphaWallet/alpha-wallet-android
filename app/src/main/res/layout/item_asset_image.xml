@@ -4,31 +4,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_holder"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/image_asset"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:scaleType="fitXY"
         android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
         tools:src="@drawable/ic_token_eth" />
 
     <ProgressBar
         android:id="@+id/avatar_progress_spinner"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:indeterminateDrawable="@drawable/progress_bar_spinner"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        android:visibility="invisible"
+        tools:visibility="invisible" />
 
     <RelativeLayout
         android:id="@+id/web_view_wrapper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:padding="4dp"
+        android:visibility="gone" >
 
         <WebView
             android:id="@+id/image_web_view"
@@ -61,7 +61,7 @@
         android:layout_height="match_parent"
         android:clickable="false"
         android:focusable="false"
-        android:visibility="gone">
+        android:visibility="invisible">
 
         <com.alphawallet.app.widget.TokenIcon
             android:id="@+id/icon_fallback"

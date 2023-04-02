@@ -86,13 +86,10 @@ public class WalletConnectV2SessionRequestHandler
         }
     }
 
-    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     private boolean validateChainId(Signable signable)
     {
         switch (signable.getMessageType())
         {
-            case SIGN_ERROR:
-                return false;
             case SIGN_MESSAGE:
             case SIGN_PERSONAL_MESSAGE:
             case SIGN_TYPED_DATA:
@@ -104,9 +101,10 @@ public class WalletConnectV2SessionRequestHandler
             case ATTESTATION:
                 //TODO: Check attestation signing chain
                 return true;
+            case SIGN_ERROR:
+            default:
+                return false;
         }
-
-        return false;
     }
 
     private WalletConnectV2SessionItem getSessionItem()

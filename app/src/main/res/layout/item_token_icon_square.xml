@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/view_container"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:layout_height="match_parent"
     app:layout_constraintDimensionRatio="1:1">
 
     <androidx.constraintlayout.widget.Guideline
@@ -92,6 +91,7 @@
         android:layout_gravity="center"
         android:contentDescription="@string/empty"
         android:gravity="center"
+        android:scaleType="fitStart"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/guidelineInnerBottom"
         app:layout_constraintDimensionRatio="H,1:1"
@@ -106,7 +106,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_gravity="center"
-        android:background="?colorPrimary"
+        android:background="@drawable/background_round_top_corners"
         android:backgroundTint="?colorPrimary"
         android:gravity="center"
         android:lines="1"

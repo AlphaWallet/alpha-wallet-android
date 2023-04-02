@@ -7,8 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -34,8 +32,10 @@ import java.util.Map;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
-public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.ViewHolder> {
+public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.ViewHolder>
+{
     private final Activity activity;
     private final OnAssetClickListener listener;
     private final Token token;
@@ -103,56 +103,48 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         if (item != null && item.requiresReplacement())
         {
             fetchAsset(holder, pair);
-            if (!holder.icon.hasContent())
-            {
-                holder.loadingSpinner.setVisibility(View.VISIBLE);
-            }
         }
     }
 
     private void displayAsset(@NotNull ViewHolder holder, NFTAsset asset, BigInteger tokenId)
     {
-        int assetCount = asset.isCollection() ? asset.getCollectionCount() : asset.getBalance().intValue();
-        int textId = assetCount == 1 ? R.string.asset_description_text : R.string.asset_description_text_plural;
+        displayTitle(holder, asset, token, tokenId);
+        displayImage(holder, asset);
 
-        if (asset.isBlank())
+        holder.layout.setOnClickListener(v -> listener.onAssetClicked(new Pair<>(tokenId, asset)));
+    }
+
+    private void displayImage(@NonNull ViewHolder holder, NFTAsset asset)
+    {
+        if (asset.hasImageAsset())
         {
-            holder.title.setText(String.format("ID #%s", tokenId));
+            holder.icon.setupTokenImageThumbnail(asset, isGrid);
         }
         else
         {
-            if (asset.getName() != null)
-            {
-                holder.title.setText(asset.getName());
-                if (token.isERC721())
-                {
-                    // Hide subtitle containing redundant information
-                    holder.subtitle.setVisibility(View.GONE);
-                }
-                else
-                {
-                    holder.subtitle.setVisibility(View.VISIBLE);
-                    holder.subtitle.setText(activity.getString(textId, assetCount, asset.getAssetCategory(tokenId).getValue()));
-                }
-            }
-            else
-            {
-                holder.title.setText(String.format("ID #%s", tokenId));
-                holder.subtitle.setVisibility(View.GONE);
-            }
-
-            if (asset.hasImageAsset())
-            {
-                holder.icon.setupTokenImageThumbnail(asset);
-            }
-            else
-            {
-                holder.icon.showFallbackLayout(token);
-            }
+            holder.icon.showFallbackLayout(token);
         }
+    }
 
-        holder.layout.setOnClickListener(v -> listener.onAssetClicked(new Pair<>(tokenId, asset)));
-        holder.loadingSpinner.setVisibility(View.GONE);
+    private void displayTitle(@NotNull ViewHolder holder, NFTAsset asset, Token token, BigInteger tokenId)
+    {
+        int assetCount = asset.isCollection() ? asset.getCollectionCount() : asset.getBalance().intValue();
+        int textId = assetCount == 1 ? R.string.asset_description_text : R.string.asset_description_text_plural;
+
+        String title = asset.getName() == null ? String.format("ID #%s", tokenId) : asset.getName();
+        holder.title.setText(title);
+
+        // set subtitle
+        if (token.isERC721())
+        {
+            // Hide subtitle containing redundant information
+            holder.subtitle.setVisibility(View.GONE);
+        }
+        else
+        {
+            holder.subtitle.setText(activity.getString(textId, assetCount, asset.getAssetCategory(tokenId).getValue()));
+            holder.subtitle.setVisibility(View.VISIBLE);
+        }
     }
 
     private void fetchAsset(ViewHolder holder, Pair<BigInteger, NFTAsset> pair)
@@ -273,12 +265,12 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         }
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
-        RelativeLayout layout;
+    static class ViewHolder extends RecyclerView.ViewHolder
+    {
+        ViewGroup layout;
         NFTImageView icon;
         TextView title;
         TextView subtitle;
-        ProgressBar loadingSpinner;
         ImageView arrowRight;
 
         ViewHolder(View view)
@@ -288,7 +280,6 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
             icon = view.findViewById(R.id.icon);
             title = view.findViewById(R.id.title);
             subtitle = view.findViewById(R.id.subtitle);
-            loadingSpinner = view.findViewById(R.id.loading_spinner);
 
             arrowRight = view.findViewById(R.id.arrow_right);
             if (arrowRight != null) arrowRight.setVisibility(View.VISIBLE);

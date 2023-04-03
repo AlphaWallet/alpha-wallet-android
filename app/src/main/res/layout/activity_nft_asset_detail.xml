@@ -34,18 +34,17 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/standard_16"
+                android:layout_marginStart="@dimen/tiny_8"
                 android:layout_marginTop="@dimen/standard_16"
-                android:layout_marginEnd="@dimen/standard_16"
-                android:minHeight="350dp">
+                android:layout_marginEnd="@dimen/tiny_8">
 
                 <com.alphawallet.app.widget.NFTImageView
-                    android:id="@+id/asset_image"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_centerInParent="true"
-                    android:gravity="center"
-                    custom:webview_height="350" />
+                        android:id="@+id/asset_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        android:gravity="center"
+                        custom:webview_height="350"/>
 
             </RelativeLayout>
 

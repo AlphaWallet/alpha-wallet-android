@@ -438,12 +438,8 @@ public class TokenIcon extends ConstraintLayout
         statusBackground.setVisibility(View.GONE);
         chainIconBackground.setVisibility(View.GONE);
         chainIcon.setVisibility(View.GONE);
-
         textIcon.setVisibility(View.GONE);
-        currentRq = Glide.with(this)
-            .load(resourceId)
-            .listener(requestListener)
-            .into(new DrawableImageViewTarget(icon)).getRequest();
+        icon.setImageResource(resourceId);
         icon.setVisibility(View.VISIBLE);
         circle.setVisibility(View.VISIBLE);
     }

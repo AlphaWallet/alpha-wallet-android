@@ -2,6 +2,7 @@ package com.alphawallet.app.ui.widget.adapter;
 
 
 import android.app.Activity;
+import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,6 +45,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
 
     private final List<Pair<BigInteger, NFTAsset>> actualData;
     private final List<Pair<BigInteger, NFTAsset>> displayData;
+    private String lastFilter;
 
     public NFTAssetsAdapter(Activity activity, Token token, OnAssetClickListener listener, OpenSeaService openSeaSvs, boolean isGrid)
     {
@@ -78,6 +80,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
 
         displayData = new ArrayList<>();
         displayData.addAll(actualData);
+        lastFilter = "";
         sortData();
     }
 
@@ -224,6 +227,11 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
 
     public void filter(String searchFilter)
     {
+        if (lastFilter.equalsIgnoreCase(searchFilter)) //avoid search update if not required
+        {
+            return;
+        }
+
         List<Pair<BigInteger, NFTAsset>> filteredList = new ArrayList<>();
         for (Pair<BigInteger, NFTAsset> data : actualData)
         {
@@ -245,6 +253,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
             }
         }
         updateList(filteredList);
+        lastFilter = searchFilter;
     }
 
     @Override

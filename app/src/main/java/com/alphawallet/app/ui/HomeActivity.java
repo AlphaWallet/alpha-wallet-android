@@ -884,13 +884,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void openWalletConnect(String sessionId)
     {
-        if (isForeground)
-        {
-            Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            intent.putExtra("session", sessionId);
-            startActivity(intent);
-        }
+        Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        intent.putExtra("session", sessionId);
+        startActivity(intent);
     }
 
     private void hideDialog()

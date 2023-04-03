@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
+import com.alphawallet.app.App;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.walletconnect.NamespaceParser;
@@ -27,8 +28,8 @@ import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.service.WalletConnectV2Service;
-import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
+import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.walletconnect.util.WCMethodChecker;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.Signable;
@@ -60,8 +61,9 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     private final MutableLiveData<List<WalletConnectSessionItem>> sessionItemMutableLiveData = new MutableLiveData<>(Collections.emptyList());
     private final KeyProvider keyProvider = KeyProviderFactory.get();
     private final LongSparseArray<WalletConnectV2SessionRequestHandler> requestHandlers = new LongSparseArray<>();
-    private HomeActivity activity;
+    private ActionSheetCallback actionSheetCallback;
     private boolean hasConnection;
+    private Application application;
 
     public AWWalletConnectClient(Context context, WalletConnectInteract walletConnectInteract)
     {
@@ -122,8 +124,8 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
         Model.Session settledSession = getSession(sessionRequest.getTopic());
 
-        WalletConnectV2SessionRequestHandler handler = new WalletConnectV2SessionRequestHandler(sessionRequest, settledSession, activity, this);
-        handler.handle(method, activity);
+        WalletConnectV2SessionRequestHandler handler = new WalletConnectV2SessionRequestHandler(sessionRequest, settledSession, App.getInstance().getTopActivity(), this);
+        handler.handle(method, actionSheetCallback);
         requestHandlers.append(sessionRequest.getRequest().getId(), handler);
     }
 
@@ -296,13 +298,14 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         return null;
     }
 
-    public void init(HomeActivity homeActivity)
+    public void setCallback(ActionSheetCallback actionSheetCallback)
     {
-        activity = homeActivity;
+        this.actionSheetCallback = actionSheetCallback;
     }
 
     public void init(Application application)
     {
+        this.application = application;
         Core.Model.AppMetaData appMetaData = getAppMetaData(application);
         String relayServer = String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, keyProvider.getWalletConnectProjectId());
         CoreClient coreClient = CoreClient.INSTANCE;
@@ -378,7 +381,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         final WalletConnectV2SessionRequestHandler requestHandler = getHandler(callbackId);
         if (requestHandler != null)
         {
-            reject(requestHandler.getSessionRequest(), activity.getString(R.string.message_reject_request));
+            reject(requestHandler.getSessionRequest(), application.getString(R.string.message_reject_request));
         }
     }
 

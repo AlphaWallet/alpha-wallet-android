@@ -17,7 +17,8 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.widget.TokenIcon;
 
-public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
+public class TokenGridHolder extends BinderViewHolder<TokenCardMeta>
+{
 
     public static final int VIEW_TYPE = 2005;
 
@@ -30,7 +31,8 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
 
     private TokensAdapterCallback tokensAdapterCallback;
 
-    public TokenGridHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs) {
+    public TokenGridHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs)
+    {
         super(resId, parent);
 
         RelativeLayout ll = findViewById(R.id.token_layout);
@@ -44,8 +46,10 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
     }
 
     @Override
-    public void bind(@Nullable TokenCardMeta tcm, @NonNull Bundle addition) {
-        if (tcm != null) {
+    public void bind(@Nullable TokenCardMeta tcm, @NonNull Bundle addition)
+    {
+        if (tcm != null)
+        {
             Token token = tokensService.getToken(tcm.getChain(), tcm.getAddress());
             if (token == null) return; //TODO: Generate placeholder
             imageIcon.bindData(token, assetDefinition);
@@ -53,14 +57,16 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
             count.setText(getString(R.string.token_count, token.balance.intValue()));
 
             clickLayer.setOnClickListener(v -> {
-                if (tokensAdapterCallback != null) {
+                if (tokensAdapterCallback != null)
+                {
                     tokensAdapterCallback.onTokenClick(v, token, null, true);
                 }
             });
         }
     }
 
-    public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback) {
+    public void setOnTokenClickListener(TokensAdapterCallback tokensAdapterCallback)
+    {
         this.tokensAdapterCallback = tokensAdapterCallback;
     }
 }

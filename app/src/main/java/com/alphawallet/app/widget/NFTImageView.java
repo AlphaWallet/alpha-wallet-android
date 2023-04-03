@@ -38,7 +38,6 @@ import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
@@ -68,7 +67,7 @@ public class NFTImageView extends RelativeLayout
     private int webViewHeight = 0;
     private int heightUpdates;
 
-    private static int STANDARD_THUMBNAIL_HEIGHT = 156; //standard height in dp of thumbnail icon; don't allow lower than this
+    private final static int STANDARD_THUMBNAIL_HEIGHT = 156; //standard height in dp of thumbnail icon; don't allow lower than this
 
     /**
      * Prevent glide dumping log errors - it is expected that load will fail

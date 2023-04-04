@@ -332,7 +332,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private void txWritten(TransactionReturn transactionReturn)
     {
         confirmationDialog.transactionWritten(transactionReturn.hash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
-        viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION_SUCCESSFUL, confirmationDialogProps);
     }
 
     private void calculateEstimateDialog()

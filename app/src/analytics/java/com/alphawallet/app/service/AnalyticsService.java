@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.C;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ServiceErrorException;
 import com.alphawallet.app.repository.KeyProviderFactory;
@@ -49,6 +49,15 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T>
     }
 
     @Override
+    public void increment(String property)
+    {
+        if (preferenceRepository.isAnalyticsEnabled())
+        {
+            mixpanelAPI.getPeople().increment(property, 1);
+        }
+    }
+
+    @Override
     public void track(String eventName)
     {
         if (preferenceRepository.isAnalyticsEnabled())
@@ -78,7 +87,7 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T>
             try
             {
                 props = jsonToBundle(analyticsProperties.get());
-                props.putString(C.APPLICATION_ID, BuildConfig.APPLICATION_ID);
+                props.putString(Analytics.UserProperties.APPLICATION_ID.getValue(), BuildConfig.APPLICATION_ID);
                 firebaseAnalytics.logEvent(eventName, props);
             }
             catch (JSONException e)
@@ -104,7 +113,7 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T>
             firebaseAnalytics.setUserId(uuid);
             mixpanelAPI.identify(uuid);
             mixpanelAPI.getPeople().identify(uuid);
-            mixpanelAPI.getPeople().set(C.APPLICATION_ID, BuildConfig.APPLICATION_ID);
+            mixpanelAPI.getPeople().set(Analytics.UserProperties.APPLICATION_ID.getValue(), BuildConfig.APPLICATION_ID);
 
             FirebaseInstanceId.getInstance().getInstanceId()
                 .addOnCompleteListener(task -> {

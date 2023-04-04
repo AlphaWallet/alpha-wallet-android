@@ -13,13 +13,34 @@ public class Analytics
     public static final String PROPS_SWAP_FROM_TOKEN = "from_token";
     public static final String PROPS_SWAP_TO_TOKEN = "to_token";
     public static final String PROPS_ERROR_MESSAGE = "error_message";
-
     public static final String PROPS_CUSTOM_NETWORK_NAME = "network_name";
     public static final String PROPS_CUSTOM_NETWORK_RPC_URL = "rpc_url";
     public static final String PROPS_CUSTOM_NETWORK_CHAIN_ID = "chain_id";
     public static final String PROPS_CUSTOM_NETWORK_SYMBOL = "symbol";
     public static final String PROPS_CUSTOM_NETWORK_IS_TESTNET = "is_testnet";
+    public static final String PROPS_TRANSACTION_CHAIN_ID = "chain";
+    public static final String PROPS_TRANSACTION_TYPE = "transactionType";
+    public static final String PROPS_TRANSACTION_SPEED_TYPE = "speedType"; // TODO
+    public static final String PROPS_TRANSACTION_IS_ALL_FUNDS = "isAllFunds"; // TODO
 
+    public enum UserProperties
+    {
+        TRANSACTION_COUNT("transactionCount"),
+        TRANSACTION_COUNT_TESTNET("testnetTransactionCount"),
+        APPLICATION_ID("Android Application ID");
+
+        private final String property;
+
+        UserProperties(String property)
+        {
+            this.property = property;
+        }
+
+        public String getValue()
+        {
+            return property;
+        }
+    }
     public enum Navigation
     {
         WALLET("Wallet"),

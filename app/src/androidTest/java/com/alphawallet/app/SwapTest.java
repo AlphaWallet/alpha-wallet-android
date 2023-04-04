@@ -1,8 +1,11 @@
 package com.alphawallet.app;
 
+import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.pressBack;
+import static androidx.test.espresso.action.ViewActions.swipeDown;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
+import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.steps.Steps.createNewWallet;
@@ -19,13 +22,14 @@ public class SwapTest extends BaseE2ETest
     public void should_see_swap_window()
     {
         createNewWallet();
-        click(withText("0 ETH"));
+        Helper.wait(1);
+        click(withText("0 ETH"), 30);
         click(withId(R.id.more_button));
         click(withText("Swap"));
         shouldSee("Select Exchanges");
         click(withText("DODO"));
         pressBack();
-        Helper.wait(5);
+        Helper.wait(20);
         click(allOf(withId(R.id.chain_name), withParent(withId(R.id.layout_chain_name))));
         click(withText("1%"));
         shouldSee("DODO");

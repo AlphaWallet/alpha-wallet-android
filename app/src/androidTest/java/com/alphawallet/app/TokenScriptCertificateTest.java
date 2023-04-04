@@ -54,6 +54,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest
     {
         {
             put("24", new String[]{"0x644022aef70ad515ee186345fd74b005d759f41be8157c2835de3597d943146d", "0xE494323823fdF1A1Ab6ca79d2538C7182690D52a"});
+            put("29", new String[]{"0x5c8843768e0e1916255def80ae7f6197e1f6a2dbcba720038748fc7634e5cffd", "0x162f5e0b63646AAA33a85eA13346F15C5289f901"});
             put("30", new String[]{"0x5c8843768e0e1916255def80ae7f6197e1f6a2dbcba720038748fc7634e5cffd", "0x162f5e0b63646AAA33a85eA13346F15C5289f901"});
             put("32", new String[]{"0x992b442eaa34de3c6ba0b61c75b2e4e0241d865443e313c4fa6ab8ba488a6957", "0xd7Ba01f596a7cc926b96b3B0a037c47A22904c06"});
         }
@@ -116,7 +117,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest
 
         if (!useMumbai)
         {
-            addNewNetwork("Ganache", GANACHE_URL);
+            addNewNetwork("Ganache", "GETH", GANACHE_URL);
         }
 
         selectTestNet(useMumbai ? "Mumbai" : "Ganache");

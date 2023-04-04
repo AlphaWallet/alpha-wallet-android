@@ -9,6 +9,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 
@@ -32,6 +33,8 @@ import org.hamcrest.Matchers;
 import java.util.concurrent.TimeoutException;
 import com.alphawallet.app.R;
 
+import junit.framework.AssertionFailedError;
+
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 
@@ -40,6 +43,7 @@ import java.util.concurrent.TimeoutException;
 public class Helper
 {
     private static final int DEFAULT_TIMEOUT_IN_SECONDS = 30;
+    private static final int BROWSER_TIMEOUT_IN_SECONDS = 5;
 
     public static ViewAction waitUntil(final int viewId, final Matcher<View> matcher)
     {
@@ -304,7 +308,7 @@ public class Helper
 
     private static void waitComplete()
     {
-        for (int i = 0; i < DEFAULT_TIMEOUT_IN_SECONDS; i++)
+        for (int i = 0; i < BROWSER_TIMEOUT_IN_SECONDS; i++)
         {
             try
             {
@@ -320,7 +324,7 @@ public class Helper
 
     private static void waitStart()
     {
-        for (int i = 0; i < DEFAULT_TIMEOUT_IN_SECONDS; i++)
+        for (int i = 0; i < BROWSER_TIMEOUT_IN_SECONDS; i++)
         {
             try
             {
@@ -332,5 +336,18 @@ public class Helper
                 Helper.wait(1);
             }
         }
+    }
+
+    public static boolean hasView(String text)
+    {
+        try {
+            onView(withText(text)).check(matches(isDisplayed()));
+            return true;
+            // View is displayed
+        } catch (Error | Exception e) {
+            // View not displayed
+        }
+
+        return false;
     }
 }

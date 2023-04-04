@@ -3,6 +3,7 @@ package com.alphawallet.app;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.replaceText;
+import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
@@ -15,6 +16,7 @@ import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.steps.Steps.switchToWallet;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.waitUntil;
+import static com.alphawallet.app.util.Helper.waitUntilThenBack;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
@@ -46,7 +48,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest
     private final String contractOwnerPk = "0x69c22d654be7fe75e31fbe26cb56c93ec91144fab67cb71529c8081971635069";
     private final Web3j web3j;
 
-    private final boolean useMumbai = false; //for local testing
+    private final boolean useMumbai = true; //for local testing
 
     private static final Map<String, String[]> WALLETS_ON_GANACHE = new HashMap<String, String[]>()
     {
@@ -77,16 +79,18 @@ public class TokenScriptCertificateTest extends BaseE2ETest
         //create credentials for contract deployment (fixed so we can link to a tokenscript)
         Credentials deployCredentials = Credentials.create(contractOwnerPk);
 
-        //Transfer 1 eth into deployment wallet
-        EthUtils.transferFunds(web3j, credentials, deployCredentials.getAddress(), BigDecimal.ONE);
+        if (!useMumbai)
+        {
+            //Transfer 1 eth into deployment wallet
+            EthUtils.transferFunds(web3j, credentials, deployCredentials.getAddress(), BigDecimal.ONE);
 
-        //Deploy door contract
-        EthUtils.deployContract(web3j, deployCredentials, Contracts.doorContractCode);
+            //Deploy door contract
+            EthUtils.deployContract(web3j, deployCredentials, Contracts.doorContractCode);
 
-        //Always use zero nonce for determining the contract address
-        doorContractAddress = EthUtils.calculateContractAddress(deployCredentials.getAddress(), 0L);
-
-        if (useMumbai)
+            //Always use zero nonce for determining the contract address
+            doorContractAddress = EthUtils.calculateContractAddress(deployCredentials.getAddress(), 0L);
+        }
+        else
         {
             //If using Mumbai for this test:
             doorContractAddress = "0xA0343dfd68FcD7F18153b8AB87936c5A9C1Da20e";
@@ -110,13 +114,17 @@ public class TokenScriptCertificateTest extends BaseE2ETest
 
         assertThat(getWalletAddress(), equalTo(ownerAddress));
 
-        addNewNetwork("Ganache", GANACHE_URL);
+        if (!useMumbai)
+        {
+            addNewNetwork("Ganache", GANACHE_URL);
+        }
+
         selectTestNet(useMumbai ? "Mumbai" : "Ganache");
 
         //Ensure we're on the wallet page
         switchToWallet(ownerAddress);
 
-        Helper.wait(1);
+        Helper.wait(3);
 
         //add the token manually since test doesn't seem to work normally
         click(withId(R.id.action_my_wallet));
@@ -133,9 +141,20 @@ public class TokenScriptCertificateTest extends BaseE2ETest
 
         click(withSubstring("Save"));
 
-        pressBack();
+        Helper.wait(1);
+
+        //only press back if we're on the add / hide screen
+        waitUntilThenBack(withSubstring("Add / Hide Tokens"), 10);
 
         //Swipe up
+        onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());
+
+        Helper.wait(2);
+
+        onView(withId(R.id.coordinator)).perform(swipeUp());
+
+        Helper.wait(2);
+
         onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());
 
         //Select token

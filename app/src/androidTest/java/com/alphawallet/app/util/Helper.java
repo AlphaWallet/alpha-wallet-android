@@ -2,6 +2,7 @@ package com.alphawallet.app.util;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -43,6 +44,47 @@ public class Helper
     public static ViewAction waitUntil(final int viewId, final Matcher<View> matcher)
     {
         return waitUntil(allOf(withId(viewId), matcher), DEFAULT_TIMEOUT_IN_SECONDS);
+    }
+
+    public static ViewAction waitUntilThenBack(final Matcher<View> matcher, int timeoutInSeconds)
+    {
+        return new ViewAction()
+        {
+            @Override
+            public Matcher<View> getConstraints()
+            {
+                return isRoot();
+            }
+
+            @Override
+            public String getDescription()
+            {
+                return "wait for view matches " + matcher.toString() + " during " + timeoutInSeconds + " seconds.";
+            }
+
+            @Override
+            public void perform(final UiController uiController, final View view)
+            {
+                uiController.loopMainThreadUntilIdle();
+                final long startTime = System.currentTimeMillis();
+                final long endTime = startTime + timeoutInSeconds * 1000L;
+
+                do
+                {
+                    for (View child : TreeIterables.breadthFirstViewTraversal(view.getRootView()))
+                    {
+                        if (matcher.matches(child))
+                        {
+                            pressBack();
+                            return;
+                        }
+                    }
+
+                    uiController.loopMainThreadForAtLeast(50);
+                }
+                while (System.currentTimeMillis() < endTime);
+            }
+        };
     }
 
     public static ViewAction waitUntil(final int viewId, final Matcher<View> matcher, int timeoutInSeconds)
@@ -178,6 +220,24 @@ public class Helper
             }
         }
         throw new RuntimeException("Can not find " + matcher.toString());
+    }
+
+    //This is an item inside a list that doesn't scroll (eg TestNet / Mainnet list)
+    public static void clickStaticListItem(Matcher matcher)
+    {
+        for (int i = 0; i < 50; i++)
+        {
+            try
+            {
+                click(matcher, 0);
+                return;
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+        //throw new RuntimeException("Can not find " + matcher.toString());
     }
 
     private static void scrollDown(int list)

@@ -3,12 +3,15 @@ package com.alphawallet.app.steps;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static androidx.test.espresso.Espresso.pressBack;
+import static androidx.test.espresso.action.ViewActions.actionWithAssertions;
 import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
 import static androidx.test.espresso.action.ViewActions.swipeUp;
+import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
+import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static androidx.test.espresso.matcher.ViewMatchers.withHint;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
@@ -18,21 +21,38 @@ import static com.alphawallet.app.assertions.Should.shouldNotSee;
 import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickListItem;
+import static com.alphawallet.app.util.Helper.clickStaticListItem;
 import static com.alphawallet.app.util.Helper.waitForLoadingComplete;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
+import android.view.KeyEvent;
+import android.view.View;
+import android.widget.HorizontalScrollView;
+import android.widget.ScrollView;
+
+import androidx.core.widget.NestedScrollView;
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.ViewInteraction;
+import androidx.test.espresso.action.GeneralLocation;
+import androidx.test.espresso.action.GeneralSwipeAction;
+import androidx.test.espresso.action.Press;
+import androidx.test.espresso.action.Swipe;
 import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.contrib.RecyclerViewActions;
+import androidx.test.espresso.matcher.ViewMatchers;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.assertions.Should;
 import com.alphawallet.app.util.GetTextAction;
 import com.alphawallet.app.util.Helper;
+import com.alphawallet.app.util.ScrollToActionImproved;
 
+import org.hamcrest.Matcher;
 import org.hamcrest.core.AllOf;
 
 /**
@@ -77,17 +97,47 @@ public class Steps
         click(withId(R.id.nav_browser_text));
     }
 
+    private static ViewAction scrollToImproved()
+    {
+        return actionWithAssertions(new ScrollToActionImproved());
+    }
+
     public static void selectTestNet(String name)
     {
         gotoSettingsPage();
         selectMenu("Select Active Networks");
-        toggleSwitch(R.id.mainnet_header);
+        onView(withId(R.id.network_scroller)).perform(swipeUp());
+        Helper.wait(1);
+        onView(allOf(withId(R.id.switch_material), isDescendantOfA(withId(R.id.testnet_header)))).perform(ViewActions.click());
+
         click(withText(R.string.action_enable_testnet));
         Helper.wait(1);
-        clickListItem(R.id.test_list, withSubstring("Görli"));
-        clickListItem(R.id.test_list, withSubstring(name));
+        //toggleSwitch(R.id.testnet_header);
+        //click(withText(R.string.testnet));
+        Helper.wait(1);
+        //
+
+        onView(withSubstring("Görli")).perform(scrollToImproved());
+        clickStaticListItem(withSubstring("Görli"));
+        //onView(withId(R.id.network_scroller)).perform(swfipeUp());
+        //selectActiveNetworks = onView(withText(name));
+        //selectActiveNetworks.perform(scrollTo(), ViewActions.click());
+        onView(withSubstring(name)).perform(scrollToImproved());
+        clickStaticListItem(withSubstring(name));
+        //onView(withId(R.id.network_scroller)).perform(swipeUp());
+        Helper.wait(1);
+        Helper.wait(1);
         pressBack();
     }
+
+//    public static ViewAction swipeUp() {
+//        return actionWithAssertions(
+//                new GeneralSwipeAction(
+//                        Swipe.FAST,
+//                        GeneralLocation.translate(GeneralLocation.BOTTOM_CENTER, 0, -EDGE_FUZZ_FACTOR),
+//                        GeneralLocation.TOP_CENTER,
+//                        Press.FINGER));
+//    }
 
     public static void selectMenu(String text)
     {

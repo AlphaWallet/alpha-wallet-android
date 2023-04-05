@@ -2,7 +2,6 @@ package com.alphawallet.app.ui.widget.adapter;
 
 
 import android.app.Activity;
-import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,7 +32,6 @@ import java.util.Map;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
 
 public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.ViewHolder>
 {
@@ -115,6 +113,10 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         displayImage(holder, asset);
 
         holder.layout.setOnClickListener(v -> listener.onAssetClicked(new Pair<>(tokenId, asset)));
+        holder.layout.setOnLongClickListener(view -> {
+            listener.onAssetLongClicked(new Pair<>(tokenId, asset));
+            return false;
+        });
     }
 
     private void displayImage(@NonNull ViewHolder holder, NFTAsset asset)

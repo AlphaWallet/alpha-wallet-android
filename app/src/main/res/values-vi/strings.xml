@@ -971,4 +971,7 @@
     <string name="action_view_session">Xem phiên</string>
     <string name="error_walletconnect_session_request_unsupported_network">Không thể xử lý yêu cầu phiên từ một chuỗi không được hỗ trợ. (ID: %s)</string>
     <string name="spam_header">Thư rác</string>
+    <string name="create_shortcut_for_token">Tạo lối tắt cho mã thông báo này?</string>
+    <string name="toast_shortcut_created">Đã tạo lối tắt, nhấn và giữ biểu tượng ứng dụng để xem.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Trước khi thực hiện bất kỳ hoạt động nào, hãy nhớ rằng NFT hiện tại không thuộc về ví hoạt động hiện tại, mà là %1$s.</string>
 </resources>

@@ -356,6 +356,12 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
+    public Single<Wallet> findActiveWallet()
+    {
+        return genericWalletInteract
+                .find();
+    }
+
     private void onDefaultWallet(Wallet w)
     {
         progress.postValue(false);
@@ -715,16 +721,15 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         return intent;
     }
 
-    public Single<Intent> getTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)
+    public Intent getTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)
     {
-        return genericWalletInteract.find()
-                .map(wallet -> completeTransferIntent(ctx, token, tokenIds, selection, wallet));
+        return completeTransferIntent(ctx, token, tokenIds, selection, getWallet());
     }
 
     private Intent completeTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection, Wallet wallet)
     {
         Intent intent = new Intent(ctx, TransferNFTActivity.class);
-        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.Key.WALLET, wallet.address);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(tokenIds, true));
@@ -947,5 +952,12 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     public void transactionError(TransactionReturn rtn)
     {
         transactionError.postValue(rtn);
+    }
+
+    public void loadWallet(String address)
+    {
+        disposable = genericWalletInteract
+                .findWallet(address)
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 }

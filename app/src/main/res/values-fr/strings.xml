@@ -971,4 +971,7 @@
     <string name="action_view_session">Voir la session</string>
     <string name="error_walletconnect_session_request_unsupported_network">Impossible de gérer la demande de session d\'une chaîne non prise en charge. (ID: %s)</string>
     <string name="spam_header">Pourriel</string>
+    <string name="create_shortcut_for_token">Créer un raccourci pour ce jeton ?</string>
+    <string name="toast_shortcut_created">Raccourci créé, appuyez longuement sur l\'icône de l\'application pour le voir.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Avant d\'effectuer une opération, gardez à l\'esprit que le NFT actuel n\'appartient pas au portefeuille actif actuel, mais à%1$s.</string>
 </resources>

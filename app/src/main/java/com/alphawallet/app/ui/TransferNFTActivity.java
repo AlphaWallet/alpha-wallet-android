@@ -102,7 +102,9 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                 .get(TransferTicketDetailViewModel.class);
 
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
-        token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        String walletAddress = getIntent().getStringExtra(C.Key.WALLET);
+        viewModel.loadWallet(walletAddress);
+        token = viewModel.getTokenService().getToken(walletAddress, chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
 
         String tokenIds = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         List<BigInteger> tokenIdList = token.stringHexToBigIntegerList(tokenIds);

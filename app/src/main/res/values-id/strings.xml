@@ -961,4 +961,7 @@
     <string name="action_view_session">Lihat Sesi</string>
     <string name="error_walletconnect_session_request_unsupported_network">Tidak dapat menangani permintaan sesi dari rantai yang tidak didukung. (ID: %s)</string>
     <string name="spam_header">Spam</string>
+    <string name="create_shortcut_for_token">Buat pintasan untuk token ini?</string>
+    <string name="toast_shortcut_created">Pintasan dibuat, tekan lama ikon aplikasi untuk melihatnya.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Sebelum melakukan operasi apa pun, perlu diingat bahwa NFT saat ini bukan milik dompet aktif saat ini, tetapi untuk %1$s.</string>
 </resources>

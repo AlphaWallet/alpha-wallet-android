@@ -957,4 +957,7 @@
     <string name="action_view_session">Ver sesión</string>
     <string name="error_walletconnect_session_request_unsupported_network">No se puede manejar la solicitud de sesión de una cadena no admitida. (ID: %s)</string>
     <string name="spam_header">Spam</string>
+    <string name="create_shortcut_for_token">¿Crear un acceso directo para este token?</string>
+    <string name="toast_shortcut_created">Acceso directo creado, mantenga presionado el ícono de la aplicación para verlo.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Antes de realizar cualquier operación, tenga en cuenta que el NFT actual no pertenece a la billetera activa actual, sino a %1$s.</string>
 </resources>

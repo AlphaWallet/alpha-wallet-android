@@ -1033,4 +1033,7 @@
     <string name="action_view_session">View Session</string>
     <string name="error_walletconnect_session_request_unsupported_network">Unable to handle session request from an unsupported chain. (ID: %s)</string>
     <string name="spam_header">Spam</string>
+    <string name="create_shortcut_for_token">Create a shortcut for this token?</string>
+    <string name="toast_shortcut_created">Shortcut created, long press app icon to see it.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Before performing any operation, keep in mind that the current NFT does not belong to the current active wallet, but to %1$s.</string>
 </resources>

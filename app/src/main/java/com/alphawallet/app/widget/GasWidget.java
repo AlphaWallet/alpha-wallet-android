@@ -117,7 +117,12 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
         {
             findViewById(R.id.edit_text).setVisibility(View.VISIBLE);
             setOnClickListener(v -> {
-                Token baseEth = tokensService.getToken(token.tokenInfo.chainId, token.getWallet());
+                String wallet = token.getWallet();
+                Token baseEth = tokensService.getToken(token.tokenInfo.chainId, wallet);
+                if (baseEth == null)
+                {
+                    baseEth = tokensService.getToken(wallet, token.tokenInfo.chainId, token.getAddress());
+                }
                 Intent intent = new Intent(getContext(), GasSettingsActivity.class);
                 intent.putExtra(C.EXTRA_SINGLE_ITEM, currentGasSpeedIndex.ordinal());
                 intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);

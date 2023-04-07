@@ -5,6 +5,7 @@ import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.SIGNAL_NFT_SYNC;
 import static com.alphawallet.app.C.SYNC_STATUS;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,6 +46,7 @@ import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NFTAssetsAdapter;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.divider.ItemOffsetDecoration;
+import com.alphawallet.app.util.ShortcutUtils;
 import com.alphawallet.app.viewmodel.NFTAssetsViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.ethereum.EthereumNetworkBase;
@@ -159,24 +161,8 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         Intent intent = viewModel.showAssetDetails(requireContext(), wallet, token, pair.first);
         intent.setAction(C.ACTION_TOKEN_SHORTCUT);
         intent.putExtra(C.Key.WALLET, wallet.address);
-        ShortcutInfoCompat shortcut = new ShortcutInfoCompat.Builder(requireContext(), token.getAddress())
-                .setShortLabel(getName(token, pair.second))
-                .setLongLabel(getName(token, pair.second))
-                .setIcon(IconCompat.createWithResource(requireContext(), EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId)))
-                .setIntent(intent)
-                .build();
-
-        ShortcutManagerCompat.pushDynamicShortcut(requireContext(), shortcut);
+        ShortcutUtils.createShortcut(pair, intent, requireContext(), token);
         Toast.makeText(requireContext(), R.string.toast_shortcut_created, Toast.LENGTH_SHORT).show();
-    }
-
-    private String getName(Token token, NFTAsset asset)
-    {
-        if (asset.getName() == null)
-        {
-            return token.getFullName();
-        }
-        return asset.getName();
     }
 
     @Override

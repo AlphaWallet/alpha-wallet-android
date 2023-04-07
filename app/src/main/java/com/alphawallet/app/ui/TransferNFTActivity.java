@@ -17,7 +17,6 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
-import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -155,20 +154,7 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
         List<String> shortcutIds = ShortcutUtils.getShortcutIds(getApplicationContext(), token, tokenIdList);
         if (!shortcutIds.isEmpty())
         {
-            AWalletAlertDialog confirmationDialog = new AWalletAlertDialog(this);
-            confirmationDialog.setCancelable(false);
-            confirmationDialog.setTitle("Remove Shortcut");
-            confirmationDialog.setMessage("Transfer this token will remove related shortcut from home screen.");
-            confirmationDialog.setButton(R.string.yes_continue, v -> {
-                ShortcutManagerCompat.removeDynamicShortcuts(getApplicationContext(), shortcutIds);
-                confirmationDialog.dismiss();
-            });
-            confirmationDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-            confirmationDialog.setSecondaryButtonListener(v -> {
-                confirmationDialog.dismiss();
-                finish();
-            });
-            confirmationDialog.show();
+            ShortcutUtils.showConfirmationDialog(this, shortcutIds, "Transfer this token will remove related shortcut from home screen.");
         }
     }
 

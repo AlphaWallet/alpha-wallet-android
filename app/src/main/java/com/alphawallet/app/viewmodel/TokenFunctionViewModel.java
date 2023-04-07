@@ -960,4 +960,9 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
                 .findWallet(address)
                 .subscribe(this::onDefaultWallet, this::onError);
     }
+
+    public Single<Wallet> findWallet(String walletAddress)
+    {
+        return genericWalletInteract.findWallet(walletAddress);
+    }
 }

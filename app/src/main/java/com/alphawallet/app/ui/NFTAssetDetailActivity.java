@@ -37,6 +37,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
+import com.alphawallet.app.util.ShortcutUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -244,23 +245,23 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private void onActiveWalletFetched(Wallet activeWallet)
     {
         String walletAddress = getIntent().getStringExtra(C.Key.WALLET);
-        loadToken(walletAddress);
-        if (!activeWallet.address.equals(walletAddress))
-        {
-            showWarnDialog(walletAddress);
-        }
-    }
-
-    private void loadToken(String walletAddress)
-    {
         viewModel.loadWallet(walletAddress);
-        token = viewModel.getTokensService().getToken(walletAddress, chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
-        setup();
+        String tokenAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        token = viewModel.getTokensService().getToken(walletAddress, chainId, tokenAddress);
+        if (token == null)
+        {
+            ShortcutUtils.showConfirmationDialog(this, List.of(tokenAddress), "Token not existed, remove shortcut?");
+        } else {
+            if (!activeWallet.address.equals(walletAddress))
+            {
+                showWarnDialog(walletAddress);
+            }
+            setup();
+        }
     }
 
     private void showWarnDialog(String walletAddress)
     {
-
         AWalletAlertDialog alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(WARNING);
         alertDialog.setMessage(getApplicationContext().getString(R.string.warn_asset_not_belongs_to_active_wallet, Utils.formatAddress(walletAddress)));
@@ -338,6 +339,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void setupFunctionBar(Wallet wallet)
     {
+        if (token == null) return;
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);

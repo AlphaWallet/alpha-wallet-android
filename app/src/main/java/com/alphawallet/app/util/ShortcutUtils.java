@@ -13,6 +13,9 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ShortcutUtils
 {
@@ -35,5 +38,20 @@ public class ShortcutUtils
             return token.getFullName();
         }
         return asset.getName();
+    }
+
+    public static ArrayList<String> getShortcutIds(Context context, Token token, ArrayList<Pair<BigInteger, NFTAsset>> asset)
+    {
+        List<String> names = asset.stream().map(p -> getName(token, p.second)).collect(Collectors.toList());
+        ArrayList<String> ids = new ArrayList<>();
+        List<ShortcutInfoCompat> dynamicShortcuts = ShortcutManagerCompat.getDynamicShortcuts(context);
+        for (ShortcutInfoCompat dynamicShortcut : dynamicShortcuts)
+        {
+            if (names.contains(dynamicShortcut.getShortLabel()))
+            {
+                ids.add(dynamicShortcut.getId());
+            }
+        }
+        return ids;
     }
 }

@@ -17,6 +17,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -43,6 +44,7 @@ import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.ShortcutUtils;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -144,6 +146,30 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
         functionBar.revealButtons();
 
         setupScreen();
+
+        confirmRemoveShortcuts(assetSelection, token);
+    }
+
+    private void confirmRemoveShortcuts(ArrayList<Pair<BigInteger, NFTAsset>> tokenIdList, Token token)
+    {
+        List<String> shortcutIds = ShortcutUtils.getShortcutIds(getApplicationContext(), token, tokenIdList);
+        if (!shortcutIds.isEmpty())
+        {
+            AWalletAlertDialog confirmationDialog = new AWalletAlertDialog(this);
+            confirmationDialog.setCancelable(false);
+            confirmationDialog.setTitle("Remove Shortcut");
+            confirmationDialog.setMessage("Transfer this token will remove related shortcut from home screen.");
+            confirmationDialog.setButton(R.string.yes_continue, v -> {
+                ShortcutManagerCompat.removeDynamicShortcuts(getApplicationContext(), shortcutIds);
+                confirmationDialog.dismiss();
+            });
+            confirmationDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+            confirmationDialog.setSecondaryButtonListener(v -> {
+                confirmationDialog.dismiss();
+                finish();
+            });
+            confirmationDialog.show();
+        }
     }
 
     private void setupScreen()

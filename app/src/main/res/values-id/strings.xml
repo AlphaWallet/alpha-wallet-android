@@ -966,4 +966,5 @@
     <string name="warn_asset_not_belongs_to_active_wallet">Sebelum melakukan operasi apa pun, perlu diingat bahwa NFT saat ini bukan milik dompet aktif saat ini, tetapi untuk %1$s.</string>
     <string name="remove_shortcut_reminder">Mentransfer token ini akan menghapus pintasan terkait dari layar beranda.</string>
     <string name="remove_shortcut_while_token_not_found">Token tidak ada, hapus pintasan?</string>
+    <string name="title_remove_shortcut">Hapus Pintasan</string>
 </resources>

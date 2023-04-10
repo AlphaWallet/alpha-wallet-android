@@ -963,4 +963,5 @@
     <string name="warn_asset_not_belongs_to_active_wallet">在执行任何操作之前，请记住当前的NFT不属于当前的活动钱包，而是%1$s</string>
     <string name="remove_shortcut_reminder">转移此代币将从主屏幕中删除关联的快捷方式。</string>
     <string name="remove_shortcut_while_token_not_found">代币已不存在，删除快捷方式？</string>
+    <string name="title_remove_shortcut">删除快捷方式</string>
 </resources>

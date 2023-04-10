@@ -63,7 +63,7 @@ public class ShortcutUtils
     {
         AWalletAlertDialog confirmationDialog = new AWalletAlertDialog(activity);
         confirmationDialog.setCancelable(false);
-        confirmationDialog.setTitle("Remove Shortcut");
+        confirmationDialog.setTitle(R.string.title_remove_shortcut);
         confirmationDialog.setMessage(message);
         confirmationDialog.setButton(R.string.yes_continue, v -> {
             ShortcutManagerCompat.removeDynamicShortcuts(activity, shortcutIds);

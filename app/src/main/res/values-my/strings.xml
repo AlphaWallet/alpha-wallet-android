@@ -997,4 +997,5 @@
     <string name="warn_asset_not_belongs_to_active_wallet">မည်သည့်စစ်ဆင်ရေးကိုမဆိုမပြုလုပ်မီလက်ရှိ NFT သည်လက်ရှိတက်ကြွသောပိုက်ဆံအိတ်နှင့်မသက်ဆိုင်ကြောင်းသတိရပါ။%1$s</string>
     <string name="remove_shortcut_reminder">ဤတိုကင်ကို လွှဲပြောင်းခြင်းဖြင့် ဆက်စပ်ဖြတ်လမ်းလင့်ခ်ကို ပင်မစခရင်မှ ဖယ်ရှားပါမည်။</string>
     <string name="remove_shortcut_while_token_not_found">တိုကင်မရှိပါ၊ ဖြတ်လမ်းကို ဖယ်ရှားမလား။</string>
+    <string name="title_remove_shortcut">Shortcut ကို ဖယ်ရှားပါ။</string>
 </resources>

@@ -976,4 +976,5 @@
     <string name="warn_asset_not_belongs_to_active_wallet">Avant d\'effectuer une opération, gardez à l\'esprit que le NFT actuel n\'appartient pas au portefeuille actif actuel, mais à%1$s.</string>
     <string name="remove_shortcut_reminder">Le transfert de ce jeton supprimera le raccourci associé de l\'écran d\'accueil.</string>
     <string name="remove_shortcut_while_token_not_found">Le jeton n\'existe pas, supprimer le raccourci ?</string>
+    <string name="title_remove_shortcut">Supprimer le raccourci</string>
 </resources>

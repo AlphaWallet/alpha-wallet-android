@@ -976,4 +976,5 @@
     <string name="warn_asset_not_belongs_to_active_wallet">Trước khi thực hiện bất kỳ hoạt động nào, hãy nhớ rằng NFT hiện tại không thuộc về ví hoạt động hiện tại, mà là %1$s.</string>
     <string name="remove_shortcut_reminder">Việc chuyển mã thông báo này sẽ xóa phím tắt được liên kết khỏi màn hình chính.</string>
     <string name="remove_shortcut_while_token_not_found">Mã thông báo không tồn tại, xóa phím tắt?</string>
+    <string name="title_remove_shortcut">Xóa phím tắt</string>
 </resources>

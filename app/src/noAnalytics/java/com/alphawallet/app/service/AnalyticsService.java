@@ -12,6 +12,12 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T> {
     }
 
     @Override
+    public void increment(String property)
+    {
+        //No code
+    }
+
+    @Override
     public void track(String eventName)
     {
         //No code

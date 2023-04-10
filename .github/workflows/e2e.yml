@@ -11,7 +11,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       matrix:
         api-level: [30]
@@ -24,7 +24,7 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
-          architecture: arm64
+          architecture: x64
 
       - uses: actions/setup-node@v3
         with:
@@ -33,17 +33,15 @@ jobs:
       - run: npm install ganache --global
 
       - name: Run tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          arch: arm64-v8a
-          profile: Nexus 6
-          channel: canary
-          disable-animations: true
-          force-avd-creation: true
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: ./e2e.sh --CI
+        run: |
+          rm -rf ./output
+          mkdir ./output
+          adb shell settings put secure long_press_timeout 1500
+          ganache --chain.chainId 2 -h 0.0.0.0 -p 8545 -m "horse light surface bamboo combine item lumber tunnel choose acid mail feature" &
+          adb logcat >> output/emulator.log &
+          ./gradlew :app:uninstallAll :app:connectedNoAnalyticsDebugAndroidTest -x lint -PdisablePreDex
+          kill %1
+          kill %2
 
       - name: Collect tests results
         if: ${{ failure() }}

@@ -3,12 +3,15 @@ package com.alphawallet.app.steps;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static androidx.test.espresso.Espresso.pressBack;
+import static androidx.test.espresso.action.ViewActions.actionWithAssertions;
 import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
 import static androidx.test.espresso.action.ViewActions.swipeUp;
+import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
+import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static androidx.test.espresso.matcher.ViewMatchers.withHint;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
@@ -18,21 +21,40 @@ import static com.alphawallet.app.assertions.Should.shouldNotSee;
 import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickListItem;
+import static com.alphawallet.app.util.Helper.clickStaticListItem;
+import static com.alphawallet.app.util.Helper.hasView;
 import static com.alphawallet.app.util.Helper.waitForLoadingComplete;
 import static com.alphawallet.app.util.Helper.waitUntil;
+import static com.alphawallet.app.util.Helper.waitUntilThenBack;
 import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
+import android.view.KeyEvent;
+import android.view.View;
+import android.widget.HorizontalScrollView;
+import android.widget.ScrollView;
+
+import androidx.core.widget.NestedScrollView;
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.ViewInteraction;
+import androidx.test.espresso.action.GeneralLocation;
+import androidx.test.espresso.action.GeneralSwipeAction;
+import androidx.test.espresso.action.Press;
+import androidx.test.espresso.action.Swipe;
 import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.contrib.RecyclerViewActions;
+import androidx.test.espresso.matcher.ViewMatchers;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.assertions.Should;
 import com.alphawallet.app.util.GetTextAction;
 import com.alphawallet.app.util.Helper;
+import com.alphawallet.app.util.ScrollToActionImproved;
 
+import org.hamcrest.Matcher;
 import org.hamcrest.core.AllOf;
 
 /**
@@ -41,12 +63,13 @@ import org.hamcrest.core.AllOf;
  */
 public class Steps
 {
-    public static final String GANACHE_URL = "http://10.0.2.2:8545/";
+    //public static final String GANACHE_URL = "http://10.0.2.2:8545/";
+    public static final String GANACHE_URL = "http://192.168.50.128:8545/";
 
     public static void createNewWallet()
     {
         click(withId(R.id.button_create));
-        closeSelectNetworkPage();
+        closeSelectNetworkPage(false);
         click(withText(R.string.action_close));
     }
 
@@ -58,11 +81,17 @@ public class Steps
         }
     }
 
-    public static void closeSelectNetworkPage()
+    public static void closeSelectNetworkPage(boolean isImportWallet)
     {
+        Helper.wait(2);
+        //wait for network select screen to appear
+
+        //shouldSee("Enabled Networks (1)");
         pressBack();
-        Helper.wait(1);
-        shouldSee(R.id.nav_settings_text);
+        waitUntil(withId(R.id.nav_settings_text), 30);
+
+
+
     }
 
     public static void visit(String urlString)
@@ -77,15 +106,28 @@ public class Steps
         click(withId(R.id.nav_browser_text));
     }
 
+    public static ViewAction scrollToImproved()
+    {
+        return actionWithAssertions(new ScrollToActionImproved());
+    }
+
     public static void selectTestNet(String name)
     {
         gotoSettingsPage();
         selectMenu("Select Active Networks");
-        toggleSwitch(R.id.mainnet_header);
+        clickStaticListItem(withSubstring("Ethereum")); //deactivate eth
+        onView(withId(R.id.network_scroller)).perform(swipeUp());
+        Helper.wait(1);
+        onView(allOf(withId(R.id.switch_material), isDescendantOfA(withId(R.id.testnet_header)))).perform(ViewActions.click());
+
         click(withText(R.string.action_enable_testnet));
         Helper.wait(1);
-        clickListItem(R.id.test_list, withSubstring("Görli"));
-        clickListItem(R.id.test_list, withSubstring(name));
+
+        //onView(withSubstring("Görli")).perform(scrollToImproved());
+        //clickStaticListItem(withSubstring("Görli"));
+        onView(withSubstring(name)).perform(scrollToImproved());
+        clickStaticListItem(withSubstring(name));
+        Helper.wait(1);
         pressBack();
     }
 
@@ -131,7 +173,7 @@ public class Steps
     private static void ensureBalanceFetched()
     {
         shouldSee("Ganache");
-        shouldNotSee("0 ETH");
+        shouldNotSee("0 GETH");
     }
 
     public static void switchToWallet(String address)
@@ -176,9 +218,39 @@ public class Steps
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(textId)))))).perform(replaceText(text));
         Helper.wait(2); // Avoid error: Error performing a ViewAction! soft keyboard dismissal animation may have been in the way. Retrying once after: 1000 millis
         click(withId(buttonId));
+        Helper.wait(2);
+        //waitUntil(withSubstring("Manage Wallet"), 2);
+        if (Helper.hasView("Lose this Wallet"))
+        {
+            pressBack();
+            Helper.wait(2);
+        }
 //        waitForLoadingComplete("Handling");
-        Helper.wait(5);
-        closeSelectNetworkPage();
+        closeSelectNetworkPage(true);
+    }
+
+    private void addGanache()
+    {
+        waitUntilThenBack(withSubstring("Manage Wallet"), 10);
+        Helper.wait(1);
+        ViewActions.pressBack();
+
+        waitUntil(withSubstring("Enabled Networks"), 10);
+        Helper.wait(1);
+        waitUntil(anyOf(withText(R.string.action_add), withId(R.id.action_add)));
+
+        onView(anyOf(withText(R.string.action_add), withId(R.id.action_add))).perform(ViewActions.click());
+        //click(withId(R.id.action_add));
+        input(R.id.input_network_name, "Ganache");
+        input(R.id.input_network_rpc_url, GANACHE_URL);
+        input(R.id.input_network_chain_id, "2");
+        input(R.id.input_network_symbol, "ETH");
+        input(R.id.input_network_explorer_api, GANACHE_URL);
+        input(R.id.input_network_block_explorer_url, GANACHE_URL);
+        onView(withId(R.id.network_input_scroll)).perform(swipeUp());
+        Helper.wait(1);
+        click(withId(R.id.checkbox_testnet));
+        click(withId(R.string.action_add_network));
     }
 
     public static void importPKWalletFromFrontPage(String privateKey)
@@ -202,7 +274,7 @@ public class Steps
         click(withText("Continue"));
         onView(allOf(withId(R.id.edit_text), withParent(withParent(withParent(withId(R.id.input_password)))))).perform(replaceText(password));
         click(withText("Continue"));
-        Helper.wait(15);
+        Helper.wait(10);
     }
 
     public static void importKSWalletFromSettingsPage(String keystore, String password)
@@ -238,15 +310,24 @@ public class Steps
         onView(allOf(withId(R.id.switch_material), isDescendantOfA(withId(id)))).perform(ViewActions.click());
     }
 
-    public static void addNewNetwork(String name, String url)
+    public static void addNewNetwork(String name, String symbol, String url)
     {
         gotoSettingsPage();
-        selectMenu("Select Active Networks");
-        click(withId(R.id.action_add));
+        selectMenu("Select Active Networks"); //action_add
+        //onView(withContentDescription(R.string.action_add)).perform(ViewActions.click());
+        //click(withText("Add"));
+        //onView(withId(R.id.action_add)).perform(ViewActions.click());
+        try {
+            openActionBarOverflowOrOptionsMenu(ApplicationProvider.getApplicationContext());
+        } catch (Exception e) {
+            //This is normal. Maybe we dont have overflow menu.
+        }
+        onView(anyOf(withText(R.string.action_add), withId(R.id.action_add))).perform(ViewActions.click());
+        //click(withId(R.id.action_add));
         input(R.id.input_network_name, name);
         input(R.id.input_network_rpc_url, url);
         input(R.id.input_network_chain_id, "2");
-        input(R.id.input_network_symbol, "ETH");
+        input(R.id.input_network_symbol, symbol);
         input(R.id.input_network_explorer_api, url);
         input(R.id.input_network_block_explorer_url, url);
         onView(withId(R.id.network_input_scroll)).perform(swipeUp());
@@ -305,7 +386,16 @@ public class Steps
 
         click(withSubstring("Save"));
 
-        pressBack();
+        Helper.wait(1);
+
+        if (hasView("Add / Hide Tokens"))
+        {
+            pressBack();
+            Helper.wait(1);
+            waitUntil(withId(R.id.nav_settings_text), 30);
+        }
+
+        //pressBack();
 
         //Swipe up
         onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());

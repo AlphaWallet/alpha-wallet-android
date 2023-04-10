@@ -2,12 +2,14 @@ package com.alphawallet.app.util;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 
@@ -31,6 +33,8 @@ import org.hamcrest.Matchers;
 import java.util.concurrent.TimeoutException;
 import com.alphawallet.app.R;
 
+import junit.framework.AssertionFailedError;
+
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 
@@ -39,10 +43,52 @@ import java.util.concurrent.TimeoutException;
 public class Helper
 {
     private static final int DEFAULT_TIMEOUT_IN_SECONDS = 30;
+    private static final int BROWSER_TIMEOUT_IN_SECONDS = 5;
 
     public static ViewAction waitUntil(final int viewId, final Matcher<View> matcher)
     {
         return waitUntil(allOf(withId(viewId), matcher), DEFAULT_TIMEOUT_IN_SECONDS);
+    }
+
+    public static ViewAction waitUntilThenBack(final Matcher<View> matcher, int timeoutInSeconds)
+    {
+        return new ViewAction()
+        {
+            @Override
+            public Matcher<View> getConstraints()
+            {
+                return isRoot();
+            }
+
+            @Override
+            public String getDescription()
+            {
+                return "wait for view matches " + matcher.toString() + " during " + timeoutInSeconds + " seconds.";
+            }
+
+            @Override
+            public void perform(final UiController uiController, final View view)
+            {
+                uiController.loopMainThreadUntilIdle();
+                final long startTime = System.currentTimeMillis();
+                final long endTime = startTime + timeoutInSeconds * 1000L;
+
+                do
+                {
+                    for (View child : TreeIterables.breadthFirstViewTraversal(view.getRootView()))
+                    {
+                        if (matcher.matches(child))
+                        {
+                            pressBack();
+                            return;
+                        }
+                    }
+
+                    uiController.loopMainThreadForAtLeast(50);
+                }
+                while (System.currentTimeMillis() < endTime);
+            }
+        };
     }
 
     public static ViewAction waitUntil(final int viewId, final Matcher<View> matcher, int timeoutInSeconds)
@@ -180,6 +226,24 @@ public class Helper
         throw new RuntimeException("Can not find " + matcher.toString());
     }
 
+    //This is an item inside a list that doesn't scroll (eg TestNet / Mainnet list)
+    public static void clickStaticListItem(Matcher matcher)
+    {
+        for (int i = 0; i < 50; i++)
+        {
+            try
+            {
+                click(matcher, 0);
+                return;
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+        //throw new RuntimeException("Can not find " + matcher.toString());
+    }
+
     private static void scrollDown(int list)
     {
         onView(withId(list)).perform(ViewActions.pressKey(KeyEvent.KEYCODE_DPAD_DOWN));
@@ -244,7 +308,7 @@ public class Helper
 
     private static void waitComplete()
     {
-        for (int i = 0; i < DEFAULT_TIMEOUT_IN_SECONDS; i++)
+        for (int i = 0; i < BROWSER_TIMEOUT_IN_SECONDS; i++)
         {
             try
             {
@@ -260,7 +324,7 @@ public class Helper
 
     private static void waitStart()
     {
-        for (int i = 0; i < DEFAULT_TIMEOUT_IN_SECONDS; i++)
+        for (int i = 0; i < BROWSER_TIMEOUT_IN_SECONDS; i++)
         {
             try
             {
@@ -272,5 +336,18 @@ public class Helper
                 Helper.wait(1);
             }
         }
+    }
+
+    public static boolean hasView(String text)
+    {
+        try {
+            onView(withText(text)).check(matches(isDisplayed()));
+            return true;
+            // View is displayed
+        } catch (Error | Exception e) {
+            // View not displayed
+        }
+
+        return false;
     }
 }

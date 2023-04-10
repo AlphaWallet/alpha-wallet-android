@@ -291,7 +291,6 @@ public abstract class C {
 
     //Analytics
     public static final String PREF_UNIQUE_ID = "unique_id";
-    public static final String APPLICATION_ID = "Android Application ID";
 
     public static final String ALPHAWALLET_LOGO_URI = "https://alphawallet.com/wp-content/themes/alphawallet/img/logo-horizontal-new.svg";
     public static final String ALPHAWALLET_WEBSITE = "https://alphawallet.com";

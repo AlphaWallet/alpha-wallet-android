@@ -1075,7 +1075,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         try
         {
             if (importData != null) importData = URLDecoder.decode(importData, "UTF-8");
-            DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
+            /*DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
             if (importData != null && importData.startsWith(NotificationService.AWSTARTUP))
             {
                 importData = importData.substring(NotificationService.AWSTARTUP.length());
@@ -1088,7 +1088,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 showPage(DAPP_BROWSER);
                 if (!dappFrag.isDetached()) dappFrag.loadDirect(url);
             }
-            else if (importData != null && importData.length() > 22 && importData.contains(AW_MAGICLINK))
+            else*/ if (importData != null && importData.length() > 22 && importData.contains(AW_MAGICLINK))
             {
                 // Deeplink-based Wallet API
                 ApiV1Request request = new ApiV1Request(importData);
@@ -1110,7 +1110,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     {
                         viewModel.track(Analytics.Action.DEEP_LINK);
                         showPage(DAPP_BROWSER);
-                        if (!dappFrag.isDetached()) dappFrag.loadDirect(link);
+                        //if (!dappFrag.isDetached()) dappFrag.loadDirect(link);
                     }
                     else
                     {

@@ -68,12 +68,14 @@ public class DappBrowserTest extends BaseE2ETest
         onView(withId(R.id.url_tv)).perform(pressKey(KeyEvent.KEYCODE_TAB), pressKey(KeyEvent.KEYCODE_DPAD_DOWN));
         waitUntilLoaded();
         onView(withId(R.id.url_tv)).perform(pressKey(KeyEvent.KEYCODE_ENTER));
+        Helper.wait(2);
         assertUrlContains("alphawallet.app.entity.DApp@");
     }
 
     @Test
     public void should_go_back_when_press_back_button_on_phone()
     {
+        Helper.wait(2);
         visit(URL_DAPP);
         assertUrlContains(URL_DAPP);
         Helper.wait(2);
@@ -85,10 +87,12 @@ public class DappBrowserTest extends BaseE2ETest
     @Test
     public void should_navigate_forward_or_backward()
     {
+        Helper.wait(2);
         visit(URL_DAPP);
         assertUrlContains(URL_DAPP);
         Helper.wait(2);
         click(withId(R.id.back));
+        Helper.wait(2);
         waitUntilLoaded();
         assertUrlContains(DEFAULT_HOME_PAGE);
         Helper.wait(2);

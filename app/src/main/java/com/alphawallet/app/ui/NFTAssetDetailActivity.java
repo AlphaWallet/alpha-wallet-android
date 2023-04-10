@@ -4,6 +4,8 @@ import static android.text.Html.FROM_HTML_MODE_LEGACY;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
+import static java.util.Collections.singletonList;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
@@ -57,6 +59,7 @@ import com.alphawallet.token.entity.XMLDsigDescriptor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -250,7 +253,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         token = viewModel.getTokensService().getToken(walletAddress, chainId, tokenAddress);
         if (token == null)
         {
-            ShortcutUtils.showConfirmationDialog(this, List.of(tokenAddress), getString(R.string.remove_shortcut_while_token_not_found));
+            ShortcutUtils.showConfirmationDialog(this, singletonList(tokenAddress), getString(R.string.remove_shortcut_while_token_not_found));
         } else {
             if (!activeWallet.address.equals(walletAddress))
             {
@@ -343,7 +346,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, singletonList(tokenId));
             functionBar.revealButtons();
             functionBar.setWalletType(wallet.type);
         }
@@ -592,7 +595,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
                 {
                     asset.setSelectedBalance(BigDecimal.ONE);
                 }
-                handleTransactionSuccess.launch(viewModel.getTransferIntent(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset))));
+                handleTransactionSuccess.launch(viewModel.getTransferIntent(this, token, singletonList(tokenId), new ArrayList<>(singletonList(asset))));
             }
         }
     }

@@ -37,7 +37,7 @@ jobs:
           rm -rf ./output
           mkdir ./output
           adb shell settings put secure long_press_timeout 1500
-          ganache --chain.chainId 2 -h 192.168.50.128 -p 8545 -m "horse light surface bamboo combine item lumber tunnel choose acid mail feature" &
+          ganache --chain.chainId 2 -h 0.0.0.0 -p 8545 -m "horse light surface bamboo combine item lumber tunnel choose acid mail feature" &
           adb logcat >> output/emulator.log &
           ./gradlew :app:uninstallAll :app:connectedNoAnalyticsDebugAndroidTest -x lint -PdisablePreDex
           kill %1

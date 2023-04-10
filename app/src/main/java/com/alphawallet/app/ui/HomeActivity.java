@@ -79,7 +79,6 @@ import com.alphawallet.app.viewmodel.BaseNavigationActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
-import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -333,7 +332,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         try
         {
-            awWalletConnectClient.init(this);
+            awWalletConnectClient.setCallback(this);
         }
         catch (Exception e)
         {
@@ -885,13 +884,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void openWalletConnect(String sessionId)
     {
-        if (isForeground)
-        {
-            Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            intent.putExtra("session", sessionId);
-            startActivity(intent);
-        }
+        Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        intent.putExtra("session", sessionId);
+        startActivity(intent);
     }
 
     private void hideDialog()

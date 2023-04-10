@@ -960,4 +960,6 @@
     <string name="create_shortcut_for_token">¿Crear un acceso directo para este token?</string>
     <string name="toast_shortcut_created">Acceso directo creado, mantenga presionado el ícono de la aplicación para verlo.</string>
     <string name="warn_asset_not_belongs_to_active_wallet">Antes de realizar cualquier operación, tenga en cuenta que el NFT actual no pertenece a la billetera activa actual, sino a %1$s.</string>
+    <string name="remove_shortcut_reminder">La transferencia de este token eliminará el acceso directo asociado de la pantalla de inicio.</string>
+    <string name="remove_shortcut_while_token_not_found">El token no existe, ¿eliminar el acceso directo?</string>
 </resources>

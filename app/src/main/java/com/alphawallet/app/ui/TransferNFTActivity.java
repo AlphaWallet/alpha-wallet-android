@@ -154,7 +154,7 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
         List<String> shortcutIds = ShortcutUtils.getShortcutIds(getApplicationContext(), token, tokenIdList);
         if (!shortcutIds.isEmpty())
         {
-            ShortcutUtils.showConfirmationDialog(this, shortcutIds, "Transfer this token will remove related shortcut from home screen.");
+            ShortcutUtils.showConfirmationDialog(this, shortcutIds, getString(R.string.remove_shortcut_reminder));
         }
     }
 

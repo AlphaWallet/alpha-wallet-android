@@ -78,10 +78,4 @@ public class ShortcutUtils
         confirmationDialog.show();
     }
 
-    public static void tryToRemove(Activity activity, Token token, BigInteger tokenId)
-    {
-        ArrayList<String> shortcutIds = ShortcutUtils.getShortcutIds(activity, token, List.of(new Pair<BigInteger, NFTAsset>(tokenId, token.getAssetForToken(tokenId))));
-        showConfirmationDialog(activity, shortcutIds, "Transfer this token will remove related shortcut from home screen.");
-    }
-
 }

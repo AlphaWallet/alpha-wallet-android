@@ -250,7 +250,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         token = viewModel.getTokensService().getToken(walletAddress, chainId, tokenAddress);
         if (token == null)
         {
-            ShortcutUtils.showConfirmationDialog(this, List.of(tokenAddress), "Token not existed, remove shortcut?");
+            ShortcutUtils.showConfirmationDialog(this, List.of(tokenAddress), getString(R.string.remove_shortcut_while_token_not_found));
         } else {
             if (!activeWallet.address.equals(walletAddress))
             {

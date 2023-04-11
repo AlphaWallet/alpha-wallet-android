@@ -299,7 +299,6 @@ public class NewSettingsFragment extends BaseFragment
 
         notificationsSetting =
                 new SettingsItemView.Builder(getContext())
-                        .withType(SettingsItemView.Type.TOGGLE)
                         .withIcon(R.drawable.ic_settings_notifications)
                         .withTitle(R.string.title_notifications)
                         .withListener(this::onNotificationsSettingClicked)
@@ -399,8 +398,6 @@ public class NewSettingsFragment extends BaseFragment
         appVersionText.setText(String.format(Locale.getDefault(), "%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
         TextView tokenScriptVersionText = view.findViewById(R.id.text_tokenscript_compatibility);
         tokenScriptVersionText.setText(TOKENSCRIPT_CURRENT_SCHEMA);
-
-        notificationsSetting.setToggleState(viewModel.getNotificationState());
     }
 
     private void openShowSeedPhrase(Wallet wallet)
@@ -615,7 +612,8 @@ public class NewSettingsFragment extends BaseFragment
 
     private void onNotificationsSettingClicked()
     {
-        viewModel.setNotificationState(notificationsSetting.getToggleState());
+        Intent intent = new Intent(getActivity(), NotificationSettingsActivity.class);
+        requireActivity().startActivity(intent);
     }
 
     private void onBiometricsSettingClicked()

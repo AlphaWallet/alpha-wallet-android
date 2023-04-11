@@ -124,6 +124,17 @@
             android:enabled="true">
         </service>
 
+        <service
+            android:name=".service.AlphaWalletFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+            <meta-data
+                android:name="com.google.firebase.messaging.default_notification_channel_id"
+                android:value="alphawallet" />
+        </service>
+
         <activity
             android:name=".ui.WalletConnectV2Activity"
             android:launchMode="singleTop"
@@ -361,6 +372,10 @@
         <activity
             android:name=".ui.CrashReportSettingsActivity"
             android:label="@string/settings_title_crash_reporting" />
+
+        <activity
+            android:name=".ui.NotificationSettingsActivity"
+            android:label="@string/title_notifications" />
 
         <service
             android:name=".service.PriceAlertsService"

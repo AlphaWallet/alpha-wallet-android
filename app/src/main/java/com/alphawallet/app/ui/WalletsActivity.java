@@ -54,6 +54,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 @AndroidEntryPoint
 public class WalletsActivity extends BaseActivity implements
@@ -100,6 +102,9 @@ public class WalletsActivity extends BaseActivity implements
 
     @Inject
     PreferenceRepositoryType preferenceRepository;
+
+    private Wallet lastActiveWallet;
+    private boolean activeWalletChanged;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -154,8 +159,22 @@ public class WalletsActivity extends BaseActivity implements
             viewModel.noWalletsError().observe(this, this::noWallets);
             viewModel.baseTokens().observe(this, this::updateBaseTokens);
         }
+        viewModel.getWalletInteract().find()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onActiveWalletFetched);
         viewModel.onPrepare(balanceChain, this);
         initViews(); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
+    }
+
+    private void onActiveWalletFetched(Wallet activeWallet)
+    {
+        if (lastActiveWallet != null)
+        {
+            activeWalletChanged = !lastActiveWallet.equals(activeWallet);
+        }
+
+        lastActiveWallet = activeWallet;
     }
 
     private void updateBaseTokens(Map<String, Token[]> walletTokens)
@@ -222,6 +241,10 @@ public class WalletsActivity extends BaseActivity implements
     public void onDestroy()
     {
         super.onDestroy();
+        if (activeWalletChanged)
+        {
+            walletChanged(lastActiveWallet);
+        }
         if (adapter != null) adapter.onDestroy();
         if (viewModel != null) viewModel.onDestroy();
     }

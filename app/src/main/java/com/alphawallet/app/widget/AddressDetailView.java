@@ -71,6 +71,10 @@ public class AddressDetailView extends LinearLayout
         }
     }
 
+    public String getFullAddress(){
+        return textFullAddress.getText().toString();
+    }
+
     public void setupAddress(String address, String ensName, Token destToken)
     {
         boolean hasEns = !TextUtils.isEmpty(ensName);

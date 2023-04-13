@@ -49,6 +49,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import io.realm.Realm;
 
@@ -191,6 +192,10 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         gasWidgetLegacy.setVisibility(View.GONE);
         networkDisplay.setVisibility(View.GONE);
         functionBar.revealButtons();
+
+        //String sourceAddress = Objects.requireNonNull(wallet.getValue()).address;
+        //String amount = amountDisplay.getAmount();
+        //String destinationAddress = addressDetail.getFullAddress();
     }
 
     // wallet connect request
@@ -238,6 +243,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
         setActionSheetStatus(EthereumNetworkBase.isChainSupported(chainIdOverride) ?
             ActionSheetStatus.OK : ActionSheetStatus.ERROR_INVALID_CHAIN);
+
     }
 
     // switch chain

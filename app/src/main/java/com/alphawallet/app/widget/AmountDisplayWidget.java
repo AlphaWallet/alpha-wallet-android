@@ -69,6 +69,10 @@ public class AmountDisplayWidget extends LinearLayout {
         tokensList.setAdapter(adapter);
     }
 
+    public String getAmount(){
+        return amount.getText().toString();
+    }
+
     private String getValueString(BigInteger amount, Token token, TokensService tokensService)
     {
         String formattedValue = BalanceUtils.getScaledValueMinimal(amount, token.tokenInfo.decimals);

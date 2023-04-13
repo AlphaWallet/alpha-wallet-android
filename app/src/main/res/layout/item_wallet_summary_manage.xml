@@ -74,7 +74,6 @@
                 android:layout_marginEnd="@dimen/tiny_8"
                 android:layout_weight="0.7"
                 android:lines="1"
-                android:textIsSelectable="true"
                 android:visibility="gone"
                 app:autoSizeTextType="uniform"
                 tools:text="123,567,890.1234" />
@@ -89,7 +88,6 @@
                 android:gravity="end|center_vertical"
                 android:lines="1"
                 android:textColor="@color/positive"
-                android:textIsSelectable="true"
                 android:visibility="gone"
                 app:autoSizeTextType="uniform"
                 tools:text="+123.45%" />

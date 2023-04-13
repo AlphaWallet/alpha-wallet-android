@@ -957,4 +957,5 @@
     <string name="action_view_session">Ver sesión</string>
     <string name="error_walletconnect_session_request_unsupported_network">No se puede manejar la solicitud de sesión de una cadena no admitida. (ID: %s)</string>
     <string name="spam_header">Spam</string>
+    <string name="dialog_title_sign_in_with_ethereum">Iniciar sesión con Ethereum</string>
 </resources>

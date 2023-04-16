@@ -38,10 +38,12 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
     private final ConfirmationWidget confirmationWidget;
     private final AddressDetailView requesterDetail;
     private final AddressDetailView addressDetail;
+    private final SignDataWidget signWidget;
     private final FunctionButtonBar functionBar;
     private final ActionSheetCallback actionSheetCallback;
     private final Activity activity;
     private final long callbackId;
+    private final Signable signable;
     private boolean actionCompleted;
     private WalletType walletType;
 
@@ -50,27 +52,16 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
         super(callingActivity);
         View view = View.inflate(callingActivity, R.layout.dialog_action_sheet_sign, null);
         setContentView(view);
-        toolbar = findViewById(R.id.bottom_sheet_toolbar);
-        confirmationWidget = findViewById(R.id.confirmation_view);
-        requesterDetail = findViewById(R.id.requester);
-        addressDetail = findViewById(R.id.wallet);
-        functionBar = findViewById(R.id.layoutButtons);
+        toolbar = view.findViewById(R.id.bottom_sheet_toolbar);
+        confirmationWidget = view.findViewById(R.id.confirmation_view);
+        requesterDetail = view.findViewById(R.id.requester);
+        addressDetail = view.findViewById(R.id.wallet);
+        signWidget = view.findViewById(R.id.sign_widget);
+        functionBar = view.findViewById(R.id.layoutButtons);
         callbackId = message.getCallbackId();
         activity = callingActivity;
-
         actionSheetCallback = aCallback;
-
-        requesterDetail.setupRequester(message.getOrigin());
-        SignDataWidget signWidget = findViewById(R.id.sign_widget);
-        signWidget.setupSignData(message);
-
-        toolbar.setTitle(Utils.getSigningTitle(message));
-
-        setupCancelListeners();
-        actionCompleted = false;
-
-        //ensure view fully expanded when locking scroll. Otherwise we may not be able to see our expanded view
-        fullExpand();
+        signable = message;
 
         viewModel = new ViewModelProvider((ViewModelStoreOwner) activity).get(SignDialogViewModel.class);
         viewModel.completed().observe((LifecycleOwner) activity, this::signComplete);
@@ -78,6 +69,38 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
         viewModel.onWallet().observe((LifecycleOwner) activity, this::onWallet);
 
         setCanceledOnTouchOutside(false);
+    }
+
+    private void setupView()
+    {
+        requesterDetail.setupRequester(signable.getOrigin());
+        signWidget.setLockCallback(this);
+        if (isEip4361(signable))
+        {
+            functionBar.setPrimaryButtonEnabled(false);
+            toolbar.setTitle(R.string.dialog_title_sign_in_with_ethereum);
+            signWidget.setupSignData(signable, () -> {
+                functionBar.setPrimaryButtonEnabled(true);
+            });
+        }
+        else
+        {
+            toolbar.setTitle(Utils.getSigningTitle(signable));
+            signWidget.setupSignData(signable);
+        }
+
+        setupCancelListeners();
+        actionCompleted = false;
+
+        //ensure view fully expanded when locking scroll. Otherwise we may not be able to see our expanded view
+        fullExpand();
+    }
+
+    private boolean isEip4361(Signable message)
+    {
+        String userMsg = message.getUserMessage().toString();
+        String domain = Utils.getDomainName(message.getOrigin());
+        return userMsg.contains(domain + " wants you to sign in with your Ethereum account");
     }
 
     private void onWallet(Wallet wallet)
@@ -96,6 +119,8 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
         }
 
         functionBar.revealButtons();
+
+        setupView();
     }
 
     @Override
@@ -103,9 +128,9 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
     {
         ImageView iconView = findViewById(R.id.logo);
         Glide.with(activity)
-                .load(icon)
-                .circleCrop()
-                .into(iconView);
+            .load(icon)
+            .circleCrop()
+            .into(iconView);
     }
 
     @Override

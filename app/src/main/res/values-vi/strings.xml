@@ -971,4 +971,5 @@
     <string name="action_view_session">Xem phiên</string>
     <string name="error_walletconnect_session_request_unsupported_network">Không thể xử lý yêu cầu phiên từ một chuỗi không được hỗ trợ. (ID: %s)</string>
     <string name="spam_header">Thư rác</string>
+    <string name="dialog_title_sign_in_with_ethereum">Đăng nhập bằng Ethereum</string>
 </resources>

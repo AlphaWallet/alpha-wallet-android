@@ -115,6 +115,10 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         displayImage(holder, asset);
 
         holder.layout.setOnClickListener(v -> listener.onAssetClicked(new Pair<>(tokenId, asset)));
+        if (isGrid)
+        {
+            holder.icon.setOnClickListener(v -> listener.onAssetClicked(new Pair<>(tokenId, asset)));
+        }
     }
 
     private void displayImage(@NonNull ViewHolder holder, NFTAsset asset)

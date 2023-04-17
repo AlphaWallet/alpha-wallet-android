@@ -258,7 +258,7 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
                 webView.loadData(base64, "text/html; charset=utf-8", "base64");
                 if (isThumbnail)
                 {
-                    setWebViewHeight(500);
+                    setWebViewHeight(image.getHeight());
                 }
             }
         });

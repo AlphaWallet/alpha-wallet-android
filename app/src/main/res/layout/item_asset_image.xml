@@ -1,107 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:custom="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/layout_holder"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_holder"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <RelativeLayout
-            android:id="@+id/image_view_wrapper"
+        android:id="@+id/image_view_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/image_asset"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
+            app:layout_constraintDimensionRatio="1:1"
+            tools:src="@drawable/ic_token_eth"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/image_overlay_rect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/image_asset"
+            android:layout_alignTop="@id/image_asset"
+            android:layout_alignEnd="@id/image_asset"
+            android:layout_alignBottom="@id/image_asset"
+            android:src="@drawable/mask_rounded_corners"
             android:visibility="visible"
-            tools:visibility="visible">
-
-        <ImageView
-                android:id="@+id/image_asset"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:adjustViewBounds="true"
-                tools:visibility="visible"
-                app:layout_constraintDimensionRatio="1:1"
-                tools:src="@drawable/ic_token_eth" />
-
-        <ImageView
-                android:id="@+id/image_overlay_rect"
-                android:layout_alignStart="@id/image_asset"
-                android:layout_alignEnd="@id/image_asset"
-                android:layout_alignTop="@id/image_asset"
-                android:layout_alignBottom="@id/image_asset"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:src="@drawable/mask_rounded_corners"
-                android:visibility="visible"
-                tools:visibility="visible" />
+            tools:visibility="visible" />
 
 
     </RelativeLayout>
 
     <RelativeLayout
-            android:id="@+id/web_view_wrapper"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            tools:visibility="visible">
+        android:id="@+id/web_view_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <WebView
-                android:id="@+id/image_web_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:focusable="true"
-                android:focusableInTouchMode="true" />
+            android:id="@+id/image_web_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
 
         <ImageView
-                android:id="@+id/overlay"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/select_masking_circle"
-                android:visibility="gone" />
+            android:id="@+id/overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/select_masking_circle"
+            android:visibility="gone" />
 
         <ImageView
-                android:id="@+id/overlay_rect"
-                android:layout_alignStart="@id/image_web_view"
-                android:layout_alignEnd="@id/image_web_view"
-                android:layout_alignTop="@id/image_web_view"
-                android:layout_alignBottom="@id/image_web_view"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:src="@drawable/mask_rounded_corners"
-                android:visibility="visible"
-                tools:visibility="visible" />
+            android:id="@+id/overlay_rect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/image_web_view"
+            android:layout_alignTop="@id/image_web_view"
+            android:layout_alignEnd="@id/image_web_view"
+            android:layout_alignBottom="@id/image_web_view"
+            android:src="@drawable/mask_rounded_corners"
+            android:visibility="visible"
+            tools:visibility="visible" />
 
         <ProgressBar
-                android:id="@+id/avatar_progress_spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:indeterminateDrawable="@drawable/progress_bar_spinner"
-                android:visibility="invisible"
-                tools:visibility="visible" />
+            android:id="@+id/avatar_progress_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:indeterminateDrawable="@drawable/progress_bar_spinner"
+            android:visibility="invisible"
+            tools:visibility="visible" />
 
     </RelativeLayout>
 
     <RelativeLayout
-            android:id="@+id/layout_fallback"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clickable="false"
-            android:focusable="false"
-            tools:visibility="gone"
-            android:visibility="invisible">
+        android:id="@+id/layout_fallback"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="invisible"
+        tools:visibility="gone">
 
         <com.alphawallet.app.widget.TokenIcon
-                android:id="@+id/icon_fallback"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_centerInParent="true"
-                android:clickable="false"
-                android:focusable="false"
-                custom:square="true" />
+            android:id="@+id/icon_fallback"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            custom:square="true" />
     </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

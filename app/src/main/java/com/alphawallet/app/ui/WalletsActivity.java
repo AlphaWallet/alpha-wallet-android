@@ -472,6 +472,7 @@ public class WalletsActivity extends BaseActivity implements
 
     private void onSetWalletDefault(Wallet wallet)
     {
+        activeWalletChanged = false;
         viewModel.changeDefaultWallet(wallet);
     }
 

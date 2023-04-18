@@ -104,7 +104,7 @@ public class WalletsActivity extends BaseActivity implements
     PreferenceRepositoryType preferenceRepository;
 
     private Wallet lastActiveWallet;
-    private boolean activeWalletChanged;
+    private boolean reloadRequired;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -171,7 +171,7 @@ public class WalletsActivity extends BaseActivity implements
     {
         if (lastActiveWallet != null)
         {
-            activeWalletChanged = !lastActiveWallet.equals(activeWallet);
+            reloadRequired = !lastActiveWallet.equals(activeWallet);
         }
 
         lastActiveWallet = activeWallet;
@@ -241,7 +241,7 @@ public class WalletsActivity extends BaseActivity implements
     public void onDestroy()
     {
         super.onDestroy();
-        if (activeWalletChanged)
+        if (reloadRequired)
         {
             walletChanged(lastActiveWallet);
         }
@@ -472,7 +472,7 @@ public class WalletsActivity extends BaseActivity implements
 
     private void onSetWalletDefault(Wallet wallet)
     {
-        activeWalletChanged = false;
+        reloadRequired = false;
         viewModel.changeDefaultWallet(wallet);
     }
 

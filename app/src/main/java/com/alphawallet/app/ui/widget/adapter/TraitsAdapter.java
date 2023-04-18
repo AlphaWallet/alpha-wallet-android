@@ -7,10 +7,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.TooltipCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.opensea.OpenSeaAsset;
+import com.google.android.material.card.MaterialCardView;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -42,6 +44,7 @@ public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder
         OpenSeaAsset.Trait trait = traitList.get(i);
         viewHolder.trait.setText(trait.traitType);
         viewHolder.value.setText(trait.value);
+        TooltipCompat.setTooltipText(viewHolder.layout, trait.value);
 
         if (trait.traitCount > 0)
         {
@@ -71,6 +74,7 @@ public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+        MaterialCardView layout;
         TextView trait;
         TextView value;
         TextView rarity;
@@ -78,6 +82,7 @@ public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder
         ViewHolder(@NonNull View itemView)
         {
             super(itemView);
+            layout = itemView.findViewById(R.id.layout_card);
             trait = itemView.findViewById(R.id.trait);
             value = itemView.findViewById(R.id.value);
             rarity = itemView.findViewById(R.id.rarity);

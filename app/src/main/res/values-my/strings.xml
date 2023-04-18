@@ -998,4 +998,5 @@
     <string name="remove_shortcut_reminder">ဤတိုကင်ကို လွှဲပြောင်းခြင်းဖြင့် ဆက်စပ်ဖြတ်လမ်းလင့်ခ်ကို ပင်မစခရင်မှ ဖယ်ရှားပါမည်။</string>
     <string name="remove_shortcut_while_token_not_found">တိုကင်မရှိပါ၊ ဖြတ်လမ်းကို ဖယ်ရှားမလား။</string>
     <string name="title_remove_shortcut">Shortcut ကို ဖယ်ရှားပါ။</string>
+    <string name="dialog_title_sign_in_with_ethereum">Ethereum ဖြင့် ဝင်ရောက်ပါ။</string>
 </resources>

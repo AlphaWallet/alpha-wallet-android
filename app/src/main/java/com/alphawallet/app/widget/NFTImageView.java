@@ -16,6 +16,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Base64;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
@@ -53,7 +54,7 @@ import timber.log.Timber;
 /**
  * Created by JB on 30/05/2021.
  */
-public class NFTImageView extends RelativeLayout
+public class NFTImageView extends RelativeLayout implements View.OnTouchListener
 {
     private final ImageView image;
     private final RelativeLayout webLayout;
@@ -66,7 +67,6 @@ public class NFTImageView extends RelativeLayout
     private MediaPlayer mediaPlayer;
     private int webViewHeight = 0;
     private int heightUpdates;
-
     private final static int STANDARD_THUMBNAIL_HEIGHT = 156; //standard height in dp of thumbnail icon; don't allow lower than this
 
     /**
@@ -199,10 +199,11 @@ public class NFTImageView extends RelativeLayout
         startImageListener();
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({"SetJavaScriptEnabled", "ClickableViewAccessibility"})
     private void setWebView(String imageUrl, ImageType hint)
     {
         progressBar.setVisibility(VISIBLE);
+        webView.setOnTouchListener(this);
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
         webView.setWebChromeClient(new WebChromeClient());
@@ -257,7 +258,7 @@ public class NFTImageView extends RelativeLayout
                 webView.loadData(base64, "text/html; charset=utf-8", "base64");
                 if (isThumbnail)
                 {
-                    setWebViewHeight(500);
+                    setWebViewHeight(image.getHeight());
                 }
             }
         });
@@ -470,6 +471,26 @@ public class NFTImageView extends RelativeLayout
         {
             mediaPlayer.start();
         }
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent)
+    {
+        switch (motionEvent.getAction())
+        {
+            case MotionEvent.ACTION_DOWN:
+            {
+                break;
+            }
+            case MotionEvent.ACTION_UP:
+            {
+                performClick();
+                break;
+            }
+            default:
+                break;
+        }
+        return true;
     }
 
     private static class DisplayType

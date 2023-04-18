@@ -963,4 +963,5 @@
     <string name="remove_shortcut_reminder">La transferencia de este token eliminará el acceso directo asociado de la pantalla de inicio.</string>
     <string name="remove_shortcut_while_token_not_found">El token no existe, ¿eliminar el acceso directo?</string>
     <string name="title_remove_shortcut">Eliminar acceso directo</string>
+    <string name="dialog_title_sign_in_with_ethereum">Iniciar sesión con Ethereum</string>
 </resources>

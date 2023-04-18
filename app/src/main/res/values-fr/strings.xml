@@ -977,4 +977,5 @@
     <string name="remove_shortcut_reminder">Le transfert de ce jeton supprimera le raccourci associé de l\'écran d\'accueil.</string>
     <string name="remove_shortcut_while_token_not_found">Le jeton n\'existe pas, supprimer le raccourci ?</string>
     <string name="title_remove_shortcut">Supprimer le raccourci</string>
+    <string name="dialog_title_sign_in_with_ethereum">Connectez-vous avec Ethereum</string>
 </resources>

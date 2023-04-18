@@ -977,4 +977,5 @@
     <string name="remove_shortcut_reminder">Việc chuyển mã thông báo này sẽ xóa phím tắt được liên kết khỏi màn hình chính.</string>
     <string name="remove_shortcut_while_token_not_found">Mã thông báo không tồn tại, xóa phím tắt?</string>
     <string name="title_remove_shortcut">Xóa phím tắt</string>
+    <string name="dialog_title_sign_in_with_ethereum">Đăng nhập bằng Ethereum</string>
 </resources>

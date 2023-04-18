@@ -16,6 +16,8 @@ public class AnalyticsProperties
 
     public void put(String key, Object value)
     {
+        if (value == null) return;
+
         try
         {
             props.put(key, value);

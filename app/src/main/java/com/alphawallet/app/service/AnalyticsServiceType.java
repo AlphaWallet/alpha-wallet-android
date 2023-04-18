@@ -2,7 +2,9 @@ package com.alphawallet.app.service;
 
 import com.alphawallet.app.entity.ServiceErrorException;
 
-public interface AnalyticsServiceType<T> {
+public interface AnalyticsServiceType<T>
+{
+    void increment(String property);
 
     void track(String eventName);
 

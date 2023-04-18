@@ -1,69 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:custom="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/holding_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/background_grid_icon"
-        custom:strokeColor="?colorSurfaceQuaternary"
-        custom:strokeWidth="1dp">
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_grid_icon"
+    custom:strokeColor="?colorSurfaceQuaternary"
+    custom:strokeWidth="1dp">
 
     <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:paddingBottom="35dp">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:paddingBottom="35dp">
 
         <com.alphawallet.app.widget.NFTImageView
-                android:id="@+id/icon"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+            android:id="@+id/icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <TextView
-                android:id="@+id/text_count"
-                style="@style/Aw.Typography.Title.SemiBold"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_centerInParent="true"
-                android:background="@drawable/value_amount_overlay"
-                android:backgroundTint="?colorPrimary"
-                android:gravity="center"
-                android:textColor="?colorOnPrimary"
-                android:visibility="gone"
-                tools:text="25"
-                tools:visibility="visible" />
+            android:id="@+id/text_count"
+            style="@style/Aw.Typography.Title.SemiBold"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/value_amount_overlay"
+            android:backgroundTint="?colorPrimary"
+            android:gravity="center"
+            android:textColor="?colorOnPrimary"
+            android:visibility="gone"
+            tools:text="25"
+            tools:visibility="visible" />
 
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/holding_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/background_round_bottom_corners"
+        android:padding="@dimen/dp9">
+
+        <TextView
+            android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/background_round_bottom_corners"
-            android:layout_alignParentBottom="true"
-            android:padding="@dimen/dp9">
+            android:layout_alignParentStart="true"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:singleLine="true"
+            tools:text="Title" />
 
         <TextView
-                android:id="@+id/title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:singleLine="true"
-                tools:text="Title" />
-
-        <TextView
-                android:id="@+id/subtitle"
-                style="@style/Aw.Typography.Sub"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/title"
-                android:gravity="center"
-                android:singleLine="true"
-                android:visibility="gone"
-                tools:text="Subtitle"
-                tools:visibility="visible" />
+            android:id="@+id/subtitle"
+            style="@style/Aw.Typography.Sub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/title"
+            android:gravity="center"
+            android:singleLine="true"
+            android:visibility="gone"
+            tools:text="Subtitle"
+            tools:visibility="visible" />
 
     </RelativeLayout>
 </RelativeLayout>

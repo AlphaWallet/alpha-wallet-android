@@ -113,7 +113,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
         String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
         Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
-        viewModel.loadWallet(wallet.address);
+        if (wallet == null) {
+            viewModel.getCurrentWallet();
+        } else {
+            viewModel.loadWallet(wallet.address);
+        }
 
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = viewModel.getTokenService().getToken(wallet.address, chainId, address);
@@ -137,7 +141,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenView.setOnSetValuesListener(this);
         tokenView.setKeyboardListenerCallback(this);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
-        viewModel.getCurrentWallet();
         parsePass = 0;
     }
 
@@ -640,6 +643,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         //pop open the actionsheet
         confirmationDialog = new ActionSheetSignDialog(this, this, message);
+        confirmationDialog.setSigningWallet(viewModel.getWallet().address);
         confirmationDialog.show();
         confirmationDialog.fullExpand();
     }

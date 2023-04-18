@@ -55,6 +55,7 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 @AndroidEntryPoint
@@ -105,6 +106,7 @@ public class WalletsActivity extends BaseActivity implements
 
     private Wallet lastActiveWallet;
     private boolean reloadRequired;
+    private Disposable disposable;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -159,7 +161,7 @@ public class WalletsActivity extends BaseActivity implements
             viewModel.noWalletsError().observe(this, this::noWallets);
             viewModel.baseTokens().observe(this, this::updateBaseTokens);
         }
-        viewModel.getWalletInteract().find()
+        disposable = viewModel.getWalletInteract().find()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onActiveWalletFetched);
@@ -245,6 +247,10 @@ public class WalletsActivity extends BaseActivity implements
         {
             walletChanged(lastActiveWallet);
         }
+
+        if (disposable != null && !disposable.isDisposed())
+            disposable.dispose();
+
         if (adapter != null) adapter.onDestroy();
         if (viewModel != null) viewModel.onDestroy();
     }

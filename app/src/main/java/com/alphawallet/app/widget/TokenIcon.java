@@ -187,11 +187,6 @@ public class TokenIcon extends ConstraintLayout
      */
     public void bindData(Token token, @NotNull AssetDefinitionService assetDefinition)
     {
-        if (token == null || (this.token != null && this.token.equals(token))) //stop update flicker
-        {
-            return;
-        }
-
         this.token = token;
 
         if (token.isEthereum())

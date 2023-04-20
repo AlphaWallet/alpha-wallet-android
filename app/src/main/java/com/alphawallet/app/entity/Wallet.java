@@ -9,6 +9,7 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.BalanceUtils;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 public class Wallet implements Parcelable
 {
@@ -133,5 +134,20 @@ public class Wallet implements Parcelable
     public boolean watchOnly()
     {
         return type == WalletType.WATCH;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Wallet wallet = (Wallet) o;
+        return Objects.equals(address, wallet.address) && type == wallet.type;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(address, type);
     }
 }

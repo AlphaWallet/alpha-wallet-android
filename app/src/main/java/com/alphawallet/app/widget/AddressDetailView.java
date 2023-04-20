@@ -56,8 +56,8 @@ public class AddressDetailView extends LinearLayout
                 R.styleable.InputView,
                 0, 0);
 
-        TextView recipientText = findViewById(R.id.text_recipient_title);
-        recipientText.setText(a.getResourceId(R.styleable.InputView_label, R.string.recipient));
+        TextView titleTextView = findViewById(R.id.text_address_title);
+        titleTextView.setText(a.getResourceId(R.styleable.InputView_label, R.string.recipient));
     }
 
     public void addMessage(String message, int drawableRes)

@@ -20,7 +20,7 @@
         android:paddingEnd="@dimen/mini_4">
 
         <TextView
-            android:id="@+id/text_recipient_title"
+            android:id="@+id/text_address_title"
             style="@style/Aw.Typography.Label.Widget"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

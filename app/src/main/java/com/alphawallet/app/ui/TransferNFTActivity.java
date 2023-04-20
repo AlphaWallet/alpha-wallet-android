@@ -43,6 +43,7 @@ import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.ShortcutUtils;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -102,7 +103,9 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                 .get(TransferTicketDetailViewModel.class);
 
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
-        token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        String walletAddress = getIntent().getStringExtra(C.Key.WALLET);
+        viewModel.loadWallet(walletAddress);
+        token = viewModel.getTokenService().getToken(walletAddress, chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
 
         String tokenIds = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         List<BigInteger> tokenIdList = token.stringHexToBigIntegerList(tokenIds);
@@ -142,6 +145,17 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
         functionBar.revealButtons();
 
         setupScreen();
+
+        confirmRemoveShortcuts(assetSelection, token);
+    }
+
+    private void confirmRemoveShortcuts(ArrayList<Pair<BigInteger, NFTAsset>> tokenIdList, Token token)
+    {
+        List<String> shortcutIds = ShortcutUtils.getShortcutIds(getApplicationContext(), token, tokenIdList);
+        if (!shortcutIds.isEmpty())
+        {
+            ShortcutUtils.showConfirmationDialog(this, shortcutIds, getString(R.string.remove_shortcut_reminder));
+        }
     }
 
     private void setupScreen()

@@ -992,5 +992,11 @@
     <string name="action_view_session">Session ကိုကြည့်ပါ။</string>
     <string name="error_walletconnect_session_request_unsupported_network">ပံ့ပိုးမထားသော ကွင်းဆက်တစ်ခုမှ ဆက်ရှင်တောင်းဆိုမှုကို မကိုင်တွယ်နိုင်ပါ။ (ID: %s)</string>
     <string name="spam_header">မဟာမိတ်</string>
+    <string name="create_shortcut_for_token">ဤတိုကင်အတွက် ဖြတ်လမ်းတစ်ခု ဖန်တီးမလား။</string>
+    <string name="toast_shortcut_created">ဖြတ်လမ်းလင့်ခ်ကို ဖန်တီးထားပြီး ၎င်းကိုမြင်ရန် အက်ပ်အိုင်ကွန်ကို ကြာကြာနှိပ်ပါ။</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">မည်သည့်စစ်ဆင်ရေးကိုမဆိုမပြုလုပ်မီလက်ရှိ NFT သည်လက်ရှိတက်ကြွသောပိုက်ဆံအိတ်နှင့်မသက်ဆိုင်ကြောင်းသတိရပါ။%1$s</string>
+    <string name="remove_shortcut_reminder">ဤတိုကင်ကို လွှဲပြောင်းခြင်းဖြင့် ဆက်စပ်ဖြတ်လမ်းလင့်ခ်ကို ပင်မစခရင်မှ ဖယ်ရှားပါမည်။</string>
+    <string name="remove_shortcut_while_token_not_found">တိုကင်မရှိပါ၊ ဖြတ်လမ်းကို ဖယ်ရှားမလား။</string>
+    <string name="title_remove_shortcut">Shortcut ကို ဖယ်ရှားပါ။</string>
     <string name="dialog_title_sign_in_with_ethereum">Ethereum ဖြင့် ဝင်ရောက်ပါ။</string>
 </resources>

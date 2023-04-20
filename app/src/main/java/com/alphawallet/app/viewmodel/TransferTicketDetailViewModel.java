@@ -133,10 +133,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel implements Tran
     public void prepare(Token token)
     {
         this.token = token;
-        disposable = genericWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
-
         gasService.startGasPriceCycle(token.tokenInfo.chainId);
     }
 
@@ -351,5 +347,12 @@ public class TransferTicketDetailViewModel extends BaseViewModel implements Tran
     public void transactionError(TransactionReturn txError)
     {
         transactionError.postValue(txError);
+    }
+
+    public void loadWallet(String address)
+    {
+        disposable = genericWalletInteract
+                .findWallet(address)
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 }

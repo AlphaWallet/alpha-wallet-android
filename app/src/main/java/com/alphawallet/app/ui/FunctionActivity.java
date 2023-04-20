@@ -30,6 +30,7 @@ import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionReturn;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
@@ -111,8 +112,15 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         if (tokenIdStr == null || tokenIdStr.length() == 0) tokenIdStr = "0";
 
         String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
+        if (wallet == null) {
+            viewModel.getCurrentWallet();
+        } else {
+            viewModel.loadWallet(wallet.address);
+        }
+
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
-        token = viewModel.getToken(chainId, address);
+        token = viewModel.getTokenService().getToken(wallet.address, chainId, address);
 
         if (token == null)
         {
@@ -133,7 +141,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenView.setOnSetValuesListener(this);
         tokenView.setKeyboardListenerCallback(this);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
-        viewModel.getCurrentWallet();
         parsePass = 0;
     }
 
@@ -636,6 +643,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         //pop open the actionsheet
         confirmationDialog = new ActionSheetSignDialog(this, this, message);
+        confirmationDialog.setSigningWallet(viewModel.getWallet().address);
         confirmationDialog.show();
         confirmationDialog.fullExpand();
     }

@@ -234,8 +234,8 @@ public abstract class C {
     public static final String LINKEDIN_PACKAGE_NAME = "com.linkedin.android";
     public static final String REDDIT_PACKAGE_NAME = "com.reddit.frontpage";
     public static final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
-
     public interface ErrorCode {
+
         int UNKNOWN = 1;
         int CANT_GET_STORE_PASSWORD = 2;
         int ALREADY_ADDED = 3;
@@ -248,8 +248,8 @@ public abstract class C {
         int SWAP_QUOTE_ERROR = 8;
         int SWAP_TIMEOUT_ERROR = 9;
     }
-
     public interface Key {
+
         String WALLET = "wallet";
         String TRANSACTION = "transaction";
         String TICKET_RANGE = "ticket_range";
@@ -275,8 +275,9 @@ public abstract class C {
     public static final String ENS_HISTORY = "ensHistory";
     public static final String ENS_HISTORY_PAIR = "ens_history_pair";
 
+
     public enum TokenStatus {
-        DEFAULT, PENDING, INCOMPLETE
+        DEFAULT, PENDING, INCOMPLETE;
     }
 
     public static final String INTERNET_SEARCH_PREFIX = "https://duckduckgo.com/?q=";
@@ -330,4 +331,7 @@ public abstract class C {
     public static final long LONG_WRITE_TIMEOUT = 30;
 
     public static final String EXTERNAL_APP_DOWNLOAD_LINK = "https://alphawallet.com/download/AlphaWallet-release-build.apk";
+
+    // shortcuts
+    public static final String ACTION_TOKEN_SHORTCUT = "token_shortcut";
 }

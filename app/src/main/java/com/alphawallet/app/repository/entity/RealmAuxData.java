@@ -329,4 +329,24 @@ public class RealmAuxData extends RealmObject
                 .equalTo("tokenAddress", token.getAddress())
                 .limit(historyCount);
     }
+
+    public void setBaseChainBlock(long blockRead)
+    {
+        this.functionId = Long.toString(blockRead);
+    }
+
+    public long getBaseChainBlock()
+    {
+        long baseBlock;
+        try
+        {
+            baseBlock = TextUtils.isEmpty(this.functionId) ? 0 : Long.parseLong(this.functionId);
+        }
+        catch (NumberFormatException e)
+        {
+            baseBlock = 0;
+        }
+
+        return baseBlock;
+    }
 }

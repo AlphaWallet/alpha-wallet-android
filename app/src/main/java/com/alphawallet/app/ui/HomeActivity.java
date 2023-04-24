@@ -44,7 +44,9 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -103,7 +105,7 @@ import timber.log.Timber;
 
 @AndroidEntryPoint
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
-        FragmentMessenger, Runnable, ActionSheetCallback, LifecycleObserver, PagerCallback
+        FragmentMessenger, Runnable, ActionSheetCallback, LifecycleEventObserver, PagerCallback
 {
     @Inject
     AWWalletConnectClient awWalletConnectClient;
@@ -147,34 +149,36 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         updatePrompt = true;
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    private void onMoveToForeground()
-    {
-        Timber.tag("LIFE").d("AlphaWallet into foreground");
-        if (viewModel != null)
-        {
-            viewModel.checkTransactionEngine();
-            viewModel.sendMsgPumpToWC(this);
-        }
-        isForeground = true;
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    private void onMoveToBackground()
-    {
-        Timber.tag("LIFE").d("AlphaWallet into background");
-        if (viewModel != null && !tokenClicked) viewModel.stopTransactionUpdate();
-        if (viewModel != null) viewModel.outOfFocus();
-        isForeground = false;
-    }
-
     @Override
-    public void onTrimMemory(int level)
+    public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event)
     {
-        super.onTrimMemory(level);
-        if (!isForeground)
+        switch (event)
         {
-            onMoveToBackground();
+            case ON_CREATE:
+                break;
+            case ON_START:
+                Timber.tag("LIFE").d("AlphaWallet into foreground");
+                if (viewModel != null)
+                {
+                    viewModel.checkTransactionEngine();
+                    viewModel.sendMsgPumpToWC(this);
+                }
+                isForeground = true;
+                break;
+            case ON_RESUME:
+                break;
+            case ON_PAUSE:
+                break;
+            case ON_STOP:
+                Timber.tag("LIFE").d("AlphaWallet into background");
+                if (viewModel != null && !tokenClicked) viewModel.stopTransactionUpdate();
+                if (viewModel != null) viewModel.outOfFocus();
+                isForeground = false;
+                break;
+            case ON_DESTROY:
+                break;
+            case ON_ANY:
+                break;
         }
     }
 

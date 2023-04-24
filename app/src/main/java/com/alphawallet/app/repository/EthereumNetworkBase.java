@@ -311,11 +311,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(KLAYTN_ID, new NetworkInfo(C.KLAYTN_NAME, C.KLAYTN_SYMBOL,
                 USE_KLAYTN_RPC,
                 "https://scope.klaytn.com/tx/", KLAYTN_ID, KLAYTN_RPC,
-                "https://klaytn-mainnet.blockscout.com/api?"));
+                ""));
             put(KLAYTN_BAOBAB_ID, new NetworkInfo(C.KLAYTN_BAOBAB_NAME, C.KLAYTN_SYMBOL,
                 USE_KLAYTN_BAOBAB_RPC,
                 "https://baobab.scope.klaytn.com/tx/", KLAYTN_BAOBAB_ID, KLAYTN_BAOBAB_RPC,
-                "https://klaytn-testnet.blockscout.com/api?"));
+                ""));
             put(IOTEX_MAINNET_ID, new NetworkInfo(C.IOTEX_NAME, C.IOTEX_SYMBOL,
                     IOTEX_MAINNET_RPC_URL,
                     "https://iotexscan.io/tx/", IOTEX_MAINNET_ID, IOTEX_MAINNET_RPC_FALLBACK_URL,

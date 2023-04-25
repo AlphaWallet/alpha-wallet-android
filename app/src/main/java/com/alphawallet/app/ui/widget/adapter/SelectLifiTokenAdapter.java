@@ -21,11 +21,11 @@ import java.util.List;
 public class SelectLifiTokenAdapter extends RecyclerView.Adapter<SelectLifiTokenAdapter.ViewHolder>
 {
     private final List<LifiToken> displayData;
-    private final SelectLifiTokenDialog.SelectLifiTokenDialogEventListener callback;
+    private final SelectLifiTokenDialog.EventListener callback;
     private final TokenFilter tokenFilter;
     private String selectedTokenAddress;
 
-    public SelectLifiTokenAdapter(List<LifiToken> tokens, SelectLifiTokenDialog.SelectLifiTokenDialogEventListener callback)
+    public SelectLifiTokenAdapter(List<LifiToken> tokens, SelectLifiTokenDialog.EventListener callback)
     {
         tokenFilter = new TokenFilter(tokens);
         this.callback = callback;

@@ -56,7 +56,7 @@ public class SelectLifiTokenDialog extends BottomSheetDialog
         btnClose.setOnClickListener(v -> dismiss());
     }
 
-    public SelectLifiTokenDialog(List<LifiToken> tokenItems, Activity activity, SelectLifiTokenDialogEventListener callback)
+    public SelectLifiTokenDialog(List<LifiToken> tokenItems, Activity activity, EventListener callback)
     {
         this(activity);
 
@@ -100,7 +100,7 @@ public class SelectLifiTokenDialog extends BottomSheetDialog
         adapter.setSelectedToken(address);
     }
 
-    public interface SelectLifiTokenDialogEventListener
+    public interface EventListener
     {
         void onChainSelected(LifiToken tokenItem);
     }

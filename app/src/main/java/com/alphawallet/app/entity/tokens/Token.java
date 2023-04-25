@@ -501,7 +501,6 @@ public class Token
             name = transaction.getOperationName(ctx, this, getWallet());
         }
 
-
         return name;
     }
 
@@ -601,10 +600,21 @@ public class Token
     public String getTokenName(AssetDefinitionService assetService, int count)
     {
         //see if this token is covered by any contract
-        if (assetService.hasDefinition(tokenInfo.chainId, tokenInfo.address))
+        if (assetService != null && assetService.hasDefinition(tokenInfo.chainId, tokenInfo.address))
         {
-            if (tokenInfo.name != null) return tokenInfo.name;
-            else return assetService.getAssetDefinition(tokenInfo.chainId, getAddress()).getTokenName(count);
+            String name = assetService.getAssetDefinition(tokenInfo.chainId, getAddress()).getTokenName(count);
+            if (isNonFungible() && !TextUtils.isEmpty(name))
+            {
+                return name;
+            }
+            else if (!TextUtils.isEmpty(tokenInfo.name))
+            {
+                return tokenInfo.name;
+            }
+            else
+            {
+                return name;
+            }
         }
         else
         {

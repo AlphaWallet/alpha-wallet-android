@@ -7,8 +7,10 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.token.entity.ContractAddress;
 
@@ -87,4 +89,9 @@ public interface TokenLocalSource
     TokenGroup getTokenGroup(long chainId, String address, ContractType type);
 
     void updateTicker(long chainId, String address, TokenTicker ticker);
+    Single<TokenInfo> storeTokenInfo(Wallet wallet, TokenInfo tInfo, ContractType type);
+
+    Token fetchAttestation(long chainId, Wallet wallet, String address, BigInteger tokenId);
+
+    List<Token> fetchAttestations(long chainId, String walletAddress, String tokenAddress);
 }

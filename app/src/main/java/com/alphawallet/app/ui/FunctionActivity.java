@@ -189,6 +189,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         action = functions.get(actionMethod);
         List<Attribute> localAttrs = (action != null && action.attributes != null) ? new ArrayList<>(action.attributes.values()) : null;
 
+        TokenScriptResult.Attribute attestation = viewModel.getAssetDefinitionService().getAvailableAttestation(token, action, tokenId);
+        if (attestation != null)
+        {
+            onAttr(attestation);
+        }
+
         viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

@@ -40,12 +40,15 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.ContractLocator;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -62,6 +65,7 @@ import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.BuyEthOptionsView;
 import com.alphawallet.app.widget.LargeTitleView;
 import com.alphawallet.app.widget.NotificationView;
@@ -110,6 +114,7 @@ public class WalletFragment extends BaseFragment implements
     private LargeTitleView largeTitleView;
     private ActivityResultLauncher<Intent> handleBackupClick;
     private ActivityResultLauncher<Intent> tokenManagementLauncher;
+    private AWalletAlertDialog dialog;
 
 
     @Inject
@@ -239,6 +244,7 @@ public class WalletFragment extends BaseFragment implements
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
         viewModel.onUpdatedTokens().observe(getViewLifecycleOwner(), this::updateMetas);
+        viewModel.attestationError().observe(getViewLifecycleOwner(), this::attestationError);
         viewModel.getTokensService().startWalletSync(this);
         viewModel.activeWalletConnectSessions().observe(getViewLifecycleOwner(), walletConnectSessionItems -> {
             adapter.showActiveWalletConnectSessions(walletConnectSessionItems);
@@ -295,6 +301,15 @@ public class WalletFragment extends BaseFragment implements
             systemView.hide();
             viewModel.checkDeleteMetas(metas);
             viewModel.calculateFiatValues();
+            checkAttestationNotice(metas);
+        }
+    }
+
+    private void checkAttestationNotice(TokenCardMeta[] metas)
+    {
+        if (metas.length == 1 && metas[0].group == TokenGroup.ATTESTATION)
+        {
+            Toast.makeText(getActivity(), "Attestation Imported", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -459,9 +474,12 @@ public class WalletFragment extends BaseFragment implements
         {
             getParentFragmentManager().setFragmentResult(C.TOKEN_CLICK, new Bundle());
             selectedToken = view;
-            Token clickOrigin = viewModel.getTokenFromService(token);
-            if (clickOrigin == null) clickOrigin = token;
-            viewModel.showTokenDetail(getActivity(), clickOrigin);
+            /*Token clickOrigin = viewModel.getTokenFromService(token);
+            if (clickOrigin == null || token.getInterfaceSpec() == ContractType.ATTESTATION)
+            {
+                clickOrigin = token;
+            }*/
+            viewModel.showTokenDetail(getActivity(), token);
             handler.postDelayed(this, 700);
         }
     }
@@ -764,6 +782,30 @@ public class WalletFragment extends BaseFragment implements
         Intent intent = new Intent(getActivity(), NetworkToggleActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
         networkSettingsHandler.launch(intent);
+    }
+
+    public void importAttestation(QRResult attestation)
+    {
+        viewModel.importAttestation(attestation);
+    }
+
+    private void attestationError(String message)
+    {
+        if (dialog == null)
+        {
+            dialog = new AWalletAlertDialog(requireContext());
+        }
+        else
+        {
+            dialog.dismiss();
+        }
+
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.attestation);
+        dialog.setMessage(message);
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
     }
 
     public class SwipeCallback extends ItemTouchHelper.SimpleCallback

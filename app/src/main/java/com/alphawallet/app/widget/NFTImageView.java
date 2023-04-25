@@ -171,6 +171,11 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
         }
     }
 
+    public void setImageResource(int resourceId)
+    {
+        image.setImageResource(resourceId);
+    }
+
     private void loadImage(String url, String backgroundColor) throws IllegalArgumentException
     {
         if (!Utils.stillAvailable(getContext())) return;

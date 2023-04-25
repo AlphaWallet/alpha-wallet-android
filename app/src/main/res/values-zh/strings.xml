@@ -965,4 +965,6 @@
     <string name="remove_shortcut_while_token_not_found">代币已不存在，删除快捷方式？</string>
     <string name="title_remove_shortcut">删除快捷方式</string>
     <string name="dialog_title_sign_in_with_ethereum">使用以太坊登录</string>
+    <string name="attestations_header">证明</string>
+    <string name="attestation">证明</string>
 </resources>

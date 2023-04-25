@@ -978,4 +978,6 @@
     <string name="remove_shortcut_while_token_not_found">Le jeton n\'existe pas, supprimer le raccourci ?</string>
     <string name="title_remove_shortcut">Supprimer le raccourci</string>
     <string name="dialog_title_sign_in_with_ethereum">Connectez-vous avec Ethereum</string>
+    <string name="attestations_header">Attestations</string>
+    <string name="attestation">Attestation</string>
 </resources>

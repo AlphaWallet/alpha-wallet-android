@@ -35,10 +35,12 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BuyCryptoInterface;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ItemClick;
 import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -167,7 +169,26 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         this.token = token;
         functions = assetSvs.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         assetService = assetSvs;
-        getFunctionMap(assetSvs);
+        getFunctionMap(assetSvs, token.getInterfaceSpec());
+    }
+
+    public void setupAttestationFunctions(StandardFunctionInterface functionInterface, AssetDefinitionService assetSvs, Token token, NonFungibleAdapterInterface adp)
+    {
+        callStandardFunctions = functionInterface;
+        adapter = adp;
+        selection.clear();
+        this.token = token;
+        functions = assetSvs.getAttestationFunctionMap(token.tokenInfo.chainId, token.getAddress(), ((Attestation)token).getAttestationId());
+        selection.add(((Attestation)token).getAttestationId());
+        assetService = assetSvs;
+        showButtons = true;
+
+        for (Map.Entry<String, TSAction> entry : functions.entrySet())
+        {
+            addFunction(new ItemClick(entry.getKey(), 0));
+        }
+
+        showButtons();
     }
 
     /**
@@ -668,7 +689,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         return false;
     }
 
-    private void getFunctionMap(AssetDefinitionService assetSvs)
+    private void getFunctionMap(AssetDefinitionService assetSvs, ContractType type)
     {
         try
         {
@@ -682,7 +703,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         findViewById(R.id.wait_buttons).setVisibility(View.VISIBLE);
 
         //get the available map for this collection
-        assetSvs.fetchFunctionMap(token, selection)
+        assetSvs.fetchFunctionMap(token, selection, type)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(availabilityMap -> setupTokenMap(token, availabilityMap), this::onMapFetchError)

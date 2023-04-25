@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.entity.opensea.OpenSeaAsset;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.ERC1155Token;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.util.Utils;
@@ -55,6 +56,7 @@ public class NFTAsset implements Parcelable
     private static final String DESCRIPTION = "description";
     private static final String IMAGE_ORIGINAL_URL = "image_original_url";
     private static final String IMAGE_ANIMATION = "animation_url";
+    private static final String ATTESTATION_ASSET = "__Attestation";
     private static final String[] IMAGE_DESIGNATORS = {IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW, IMAGE_ANIMATION};
     private static final String[] SVG_OVERRIDE = {IMAGE_ORIGINAL_URL, IMAGE, IMAGE_URL, IMAGE_ANIMATION};
     private static final String[] IMAGE_THUMBNAIL_DESIGNATORS = {IMAGE_PREVIEW, IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_ANIMATION};
@@ -101,6 +103,15 @@ public class NFTAsset implements Parcelable
         balance = BigDecimal.ONE;
         assetMap.put(NAME, "ID #" + tokenId.toString());
         assetMap.put(LOADING_TOKEN, ".");
+    }
+
+    public NFTAsset(Attestation att)
+    {
+        assetMap.put(ATTESTATION_ASSET, att.getName());
+        attributeMap.put(NAME, "Attestation");
+        attributeMap.put(ID, att.getAttestationId().toString());
+
+        balance = BigDecimal.ONE;
     }
 
     public NFTAsset(NFTAsset asset)
@@ -522,7 +533,11 @@ public class NFTAsset implements Parcelable
 
     public Category getAssetCategory(BigInteger tokenId)
     {
-        if (tokenIdList != null && isCollection())
+        if (assetMap.containsKey(ATTESTATION_ASSET))
+        {
+            return Category.ATTESTATION;
+        }
+        else if (tokenIdList != null && isCollection())
         {
             return Category.COLLECTION;
         }
@@ -553,9 +568,19 @@ public class NFTAsset implements Parcelable
         return this.openSeaAsset;
     }
 
+    public boolean isAttestation()
+    {
+        return assetMap.containsKey(ATTESTATION_ASSET);
+    }
+
+    public String getTokenIdStr()
+    {
+        return attributeMap.getOrDefault(ID, "1");
+    }
+
     public enum Category
     {
-        NFT("NFT"), FT("Fungible Token"), COLLECTION("Collection"), SEMI_FT("Semi-Fungible");
+        NFT("NFT"), FT("Fungible Token"), COLLECTION("Collection"), SEMI_FT("Semi-Fungible"), ATTESTATION("Attestation");
 
         private final String category;
 

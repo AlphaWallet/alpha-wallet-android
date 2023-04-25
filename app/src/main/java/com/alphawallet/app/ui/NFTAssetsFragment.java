@@ -38,6 +38,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -130,7 +131,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         }
         else
         {
-            handleTransactionSuccess.launch(viewModel.showAssetDetails(requireContext(), wallet, token, item.first));
+            handleTransactionSuccess.launch(viewModel.showAssetDetails(requireContext(), wallet, token, item.first, item.second));
         }
     }
 
@@ -158,7 +159,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
     private void createShortcuts(Pair<BigInteger, NFTAsset> pair)
     {
-        Intent intent = viewModel.showAssetDetails(requireContext(), wallet, token, pair.first);
+        Intent intent = viewModel.showAssetDetails(requireContext(), wallet, token, pair.first, pair.second);
         intent.setAction(C.ACTION_TOKEN_SHORTCUT);
         intent.putExtra(C.Key.WALLET, wallet.address);
         ShortcutUtils.createShortcut(pair, intent, requireContext(), token);
@@ -168,7 +169,8 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     @Override
     public void onTokenClick(View view, Token token, List<BigInteger> tokenIds, boolean selected)
     {
-        handleTransactionSuccess.launch(viewModel.showAssetDetails(requireContext(), wallet, token, tokenIds.get(0)));
+        NFTAsset asset = token.getAssetForToken(tokenIds.get(0));
+        handleTransactionSuccess.launch(viewModel.showAssetDetails(requireContext(), wallet, token, tokenIds.get(0), asset));
     }
 
     @Override
@@ -210,10 +212,22 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
             searchLayout.setVisibility(View.VISIBLE);
             adapter = new NFTAssetsAdapter(getActivity(), token, this, viewModel.getOpenseaService(), isGridView);
             search.addTextChangedListener(setupTextWatcher((NFTAssetsAdapter)adapter));
+
+            attachAttestations();
         }
 
         recyclerView.setAdapter(adapter);
         checkSyncStatus();
+    }
+
+    private void attachAttestations()
+    {
+        //has attestations?
+        List<Token> attns = viewModel.getTokensService().getAttestations(token.tokenInfo.chainId, token.getAddress());
+        if (attns.size() > 0)
+        {
+            ((NFTAssetsAdapter) adapter).attachAttestations(attns.toArray(new Token[0]));
+        }
     }
 
     private void checkSyncStatus()

@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.token.tools.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -49,7 +50,29 @@ public class QRResult implements Parcelable
         this.address = data;
     }
 
-
+    public QRResult(String attestation, long chainId, String contractAddress)
+    {
+        try
+        {
+            //attestation should be a hex string
+            BigInteger attestationBI = Numeric.toBigInt(attestation);
+            if (Utils.isAddressValid(contractAddress) && chainId > 0 && attestationBI.compareTo(BigInteger.ZERO) > 0)
+            {
+                this.type = EIP681Type.ATTESTATION;
+                this.chainId = chainId;
+                this.address = contractAddress;
+                this.functionDetail = attestation;
+            }
+            else
+            {
+                throw new Exception("Not a valid attestation");
+            }
+        }
+        catch (Exception e)
+        {
+            this.type = EIP681Type.OTHER;
+        }
+    }
 
     private void defaultParams()
     {
@@ -253,5 +276,17 @@ public class QRResult implements Parcelable
     private boolean isEIP681()
     {
         return (!isEmpty(protocol) && protocol.equalsIgnoreCase("ethereum"));
+    }
+
+    public String getAttestation()
+    {
+        if (type == EIP681Type.ATTESTATION)
+        {
+            return functionDetail;
+        }
+        else
+        {
+            return "";
+        }
     }
 }

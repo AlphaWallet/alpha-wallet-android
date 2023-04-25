@@ -78,6 +78,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private TokenFunctionViewModel viewModel;
     private Token token;
     private BigInteger tokenId;
+    private NFTAsset asset;
     private String sequenceId;
     private ActionSheetDialog confirmationDialog;
     private AWalletAlertDialog dialog;
@@ -155,6 +156,12 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (viewModel != null)
         {
             progressBar.setVisibility(View.VISIBLE);
+            viewModel.prepare();
+            if (asset == null || !asset.isAttestation())
+            {
+                viewModel.getAsset(token, tokenId);
+                progressBar.setVisibility(View.VISIBLE);
+            }
             tokenImage.onResume();
         }
         else
@@ -185,7 +192,10 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     @Override
     public boolean onCreateOptionsMenu(@NonNull Menu menu)
     {
-        getMenuInflater().inflate(R.menu.menu_refresh, menu);
+        if (asset == null || !asset.isAttestation())
+        {
+            getMenuInflater().inflate(R.menu.menu_refresh, menu);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -231,6 +241,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
+        asset = getIntent().getParcelableExtra(C.EXTRA_NFTASSET);
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
         if (C.ACTION_TOKEN_SHORTCUT.equals(getIntent().getAction()))
         {
@@ -238,10 +249,22 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
         else
         {
-            Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
-            viewModel.loadWallet(wallet.address);
-            token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
-            setup();
+                Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
+                viewModel.loadWallet(wallet.address);
+                token = resolveAssetToken();
+                setup();
+        }
+    }
+
+    private Token resolveAssetToken()
+    {
+        if (asset != null && asset.isAttestation())
+        {
+            return viewModel.getTokenService().getAttestation(chainId, token.getAddress(), tokenId);
+        }
+        else
+        {
+            return viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         }
     }
 
@@ -254,7 +277,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (token == null)
         {
             ShortcutUtils.showConfirmationDialog(this, singletonList(tokenAddress), getString(R.string.remove_shortcut_while_token_not_found));
-        } else {
+        }
+        else
+        {
             if (!activeWallet.address.equals(walletAddress))
             {
                 showWarnDialog(walletAddress);
@@ -286,8 +311,16 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel.checkTokenScriptValidity(token);
         setTitle(token.tokenInfo.name);
         updateDefaultTokenData();
-        viewModel.updateLocalAttributes(token, tokenId);
         viewModel.getAsset(token, tokenId);
+
+        if (asset != null && asset.isAttestation())
+        {
+            setupAttestation();
+        }
+        else
+        {
+            viewModel.updateLocalAttributes(token, tokenId);
+        }
     }
 
     private void initViewModel()
@@ -313,6 +346,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             certificateToolbar.stopDownload();
             certificateToolbar.setVisibility(View.VISIBLE);
             viewModel.checkTokenScriptValidity(token);
+
+            setTitle(token.getTokenName(viewModel.getAssetDefinitionService(), 1));
 
             //now re-load the verbs
             setupFunctionBar(viewModel.getWallet());
@@ -346,7 +381,14 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, singletonList(tokenId));
+            if (asset.isAttestation())
+            {
+                functionBar.setupAttestationFunctions(this, viewModel.getAssetDefinitionService(), token, null);
+            }
+            else
+            {
+                functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
+            }
             functionBar.revealButtons();
             functionBar.setWalletType(wallet.type);
         }
@@ -551,6 +593,12 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private void onOpenSeaAsset(OpenSeaAsset openSeaAsset)
     {
         loadFromOpenSeaData(openSeaAsset);
+    }
+
+    private void setupAttestation()
+    {
+        tokenImage.setImageResource(R.drawable.zero_one);
+        progressBar.setVisibility(View.GONE);
     }
 
     /**

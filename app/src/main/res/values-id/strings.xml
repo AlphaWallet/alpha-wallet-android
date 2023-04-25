@@ -968,4 +968,6 @@
     <string name="remove_shortcut_while_token_not_found">Token tidak ada, hapus pintasan?</string>
     <string name="title_remove_shortcut">Hapus Pintasan</string>
     <string name="dialog_title_sign_in_with_ethereum">Masuk dengan Ethereum</string>
+    <string name="attestations_header">Pengesahan</string>
+    <string name="attestation">Pengesahan</string>
 </resources>

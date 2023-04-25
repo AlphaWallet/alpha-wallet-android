@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Objects;
 
-public class Token
+public class LifiToken
 {
     @SerializedName("address")
     @Expose
@@ -47,7 +47,7 @@ public class Token
     {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Token lToken = (Token) o;
+        LifiToken lToken = (LifiToken) o;
         return address.equals(lToken.address) && symbol.equals(lToken.symbol);
     }
 

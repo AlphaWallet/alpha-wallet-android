@@ -10,22 +10,22 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.lifi.Token;
+import com.alphawallet.app.entity.lifi.LifiToken;
 import com.alphawallet.app.widget.AddressIcon;
-import com.alphawallet.app.widget.SelectTokenDialog;
+import com.alphawallet.app.widget.SelectLifiTokenDialog;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.ViewHolder>
+public class SelectLifiTokenAdapter extends RecyclerView.Adapter<SelectLifiTokenAdapter.ViewHolder>
 {
-    private final List<Token> displayData;
-    private final SelectTokenDialog.SelectTokenDialogEventListener callback;
+    private final List<LifiToken> displayData;
+    private final SelectLifiTokenDialog.SelectLifiTokenDialogEventListener callback;
     private final TokenFilter tokenFilter;
     private String selectedTokenAddress;
 
-    public SelectTokenAdapter(List<Token> tokens, SelectTokenDialog.SelectTokenDialogEventListener callback)
+    public SelectLifiTokenAdapter(List<LifiToken> tokens, SelectLifiTokenDialog.SelectLifiTokenDialogEventListener callback)
     {
         tokenFilter = new TokenFilter(tokens);
         this.callback = callback;
@@ -46,7 +46,7 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        Token item = displayData.get(position);
+        LifiToken item = displayData.get(position);
         if (item != null)
         {
             holder.name.setText(item.name);
@@ -79,7 +79,7 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
         updateList(tokenFilter.filterBy(keyword));
     }
 
-    public void updateList(List<Token> filteredList)
+    public void updateList(List<LifiToken> filteredList)
     {
         displayData.clear();
         displayData.addAll(filteredList);

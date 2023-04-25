@@ -6,8 +6,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import com.alphawallet.app.entity.lifi.Action;
 import com.alphawallet.app.entity.lifi.Estimate;
 import com.alphawallet.app.entity.lifi.GasCost;
-import com.alphawallet.app.entity.lifi.Quote;
-import com.alphawallet.app.entity.lifi.Token;
+import com.alphawallet.app.entity.lifi.LifiToken;
 
 import org.junit.Test;
 
@@ -21,13 +20,13 @@ public class SwapUtilsTest
         ArrayList<GasCost> gasCostList = new ArrayList<>();
         GasCost gasCost1 = new GasCost();
         gasCost1.amount = "1000000000000000000";
-        gasCost1.token = new Token();
+        gasCost1.token = new LifiToken();
         gasCost1.token.symbol = "ETH";
         gasCost1.token.decimals = 18;
 
         GasCost gasCost2 = new GasCost();
         gasCost2.amount = "2000000000000000000";
-        gasCost2.token = new Token();
+        gasCost2.token = new LifiToken();
         gasCost2.token.symbol = "MATIC";
         gasCost2.token.decimals = 18;
 
@@ -42,7 +41,7 @@ public class SwapUtilsTest
     {
         GasCost gasCost = new GasCost();
         gasCost.amount = "1000000000000000000";
-        gasCost.token = new Token();
+        gasCost.token = new LifiToken();
         gasCost.token.symbol = "ETH";
         gasCost.token.decimals = 18;
 
@@ -53,7 +52,7 @@ public class SwapUtilsTest
     public void should_return_formatted_minimum_received()
     {
         Action action = new Action();
-        action.toToken = new Token();
+        action.toToken = new LifiToken();
         action.toToken.decimals = 6;
         action.toToken.symbol = "ETH";
 
@@ -70,8 +69,8 @@ public class SwapUtilsTest
     public void should_return_formatted_current_price()
     {
         Action action = new Action();
-        action.fromToken = new Token();
-        action.toToken = new Token();
+        action.fromToken = new LifiToken();
+        action.toToken = new LifiToken();
         action.fromToken.priceUSD = "2000";
         action.fromToken.symbol = "ETH";
         action.fromToken.decimals = 18;

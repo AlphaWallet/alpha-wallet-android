@@ -1,5 +1,6 @@
 package com.alphawallet.app.repository.entity;
 
+import android.text.TextUtils;
 import android.util.Base64;
 
 import com.alphawallet.app.util.Utils;
@@ -111,6 +112,13 @@ public class RealmAttestation extends RealmObject
     public boolean supportsChain(List<Long> networkFilters)
     {
         HashSet<Long> knownChains = new HashSet<>(Utils.longListToArray(chains));
+
+        //validate attestation
+        if (TextUtils.isEmpty(id))
+        {
+            return false;
+        }
+
         for (long chainId : knownChains)
         {
             if (networkFilters.contains(chainId))

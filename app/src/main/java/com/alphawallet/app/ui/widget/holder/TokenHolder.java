@@ -195,7 +195,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
 
         balanceCoin.setVisibility(View.VISIBLE);
-        tokenIcon.setIsAttestation(attestation.getSymbol());
+        tokenIcon.setIsAttestation(attestation.getSymbol(), data.getChain());
         token = attestation;
         blankTickerInfo();
     }

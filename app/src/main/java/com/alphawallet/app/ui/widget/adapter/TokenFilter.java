@@ -4,7 +4,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
-import com.alphawallet.app.entity.lifi.Token;
+import com.alphawallet.app.entity.lifi.LifiToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +13,9 @@ import java.util.Locale;
 
 public class TokenFilter
 {
-    private final List<Token> tokens;
+    private final List<LifiToken> tokens;
 
-    public TokenFilter(List<Token> tokens)
+    public TokenFilter(List<LifiToken> tokens)
     {
         this.tokens = tokens;
         removeBadTokens();
@@ -23,10 +23,10 @@ public class TokenFilter
 
     private void removeBadTokens()
     {
-        ListIterator<Token> iterator = this.tokens.listIterator();
+        ListIterator<LifiToken> iterator = this.tokens.listIterator();
         while (iterator.hasNext())
         {
-            Token t = iterator.next();
+            LifiToken t = iterator.next();
             if (TextUtils.isEmpty(t.name) || TextUtils.isEmpty(t.symbol))
             {
                 iterator.remove();
@@ -34,13 +34,13 @@ public class TokenFilter
         }
     }
 
-    public List<Token> filterBy(String keyword)
+    public List<LifiToken> filterBy(String keyword)
     {
         String lowerCaseKeyword = lowerCase(keyword);
 
-        List<Token> result = new ArrayList<>();
+        List<LifiToken> result = new ArrayList<>();
         // First filter: Add all entries that start with the keyword on top of the list.
-        for (Token lToken : this.tokens)
+        for (LifiToken lToken : this.tokens)
         {
             String name = lowerCase(lToken.name);
             String symbol = lowerCase(lToken.symbol);
@@ -52,7 +52,7 @@ public class TokenFilter
         }
 
         // Second filter: Add the rest of the entries that contain the keyword on top of the list.
-        for (Token lToken : this.tokens)
+        for (LifiToken lToken : this.tokens)
         {
             String name = lowerCase(lToken.name);
             String symbol = lowerCase(lToken.symbol);

@@ -16,7 +16,7 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.lifi.Token;
+import com.alphawallet.app.entity.lifi.LifiToken;
 import com.alphawallet.app.util.Utils;
 import com.google.android.material.button.MaterialButton;
 
@@ -35,7 +35,7 @@ public class TokenSelector extends LinearLayout
     private final TextView error;
     private Runnable runnable;
     private TokenSelectorEventListener callback;
-    private Token tokenItem;
+    private LifiToken tokenItem;
 
     public TokenSelector(Context context, AttributeSet attrs)
     {
@@ -143,7 +143,7 @@ public class TokenSelector extends LinearLayout
         setVisibility(View.VISIBLE);
     }
 
-    public void init(Token tokenItem)
+    public void init(LifiToken tokenItem)
     {
         this.tokenItem = tokenItem;
 
@@ -189,7 +189,7 @@ public class TokenSelector extends LinearLayout
         });
     }
 
-    public Token getToken()
+    public LifiToken getToken()
     {
         return this.tokenItem;
     }
@@ -255,7 +255,7 @@ public class TokenSelector extends LinearLayout
         /**
          * Triggered when a new Token is selected.
          **/
-        void onSelectionChanged(Token token);
+        void onSelectionChanged(LifiToken token);
 
         /**
          * Triggered when the `Max` button is clicked.

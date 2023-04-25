@@ -5,12 +5,12 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 import org.junit.Test;
 
-public class TokenTest
+public class LifiTokenTest
 {
     @Test
     public void getFiatValue()
     {
-        Token lToken = new Token();
+        LifiToken lToken = new LifiToken();
         lToken.priceUSD = "6.72";
         lToken.balance = "1";
 
@@ -20,7 +20,7 @@ public class TokenTest
     @Test
     public void getFiatValue_should_handle_exception()
     {
-        Token lToken = new Token();
+        LifiToken lToken = new LifiToken();
         lToken.priceUSD = "6.72";
         lToken.balance = "";
         assertThat(lToken.getFiatValue(), equalTo(0.0));

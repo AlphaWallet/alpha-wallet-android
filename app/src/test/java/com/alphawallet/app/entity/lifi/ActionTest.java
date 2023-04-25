@@ -11,8 +11,8 @@ public class ActionTest
     public void should_return_current_price()
     {
         Action action = new Action();
-        action.fromToken = new Token();
-        action.toToken = new Token();
+        action.fromToken = new LifiToken();
+        action.toToken = new LifiToken();
         action.fromToken.priceUSD = "5";
         action.fromToken.decimals = 18;
         action.toToken.priceUSD = "1000";

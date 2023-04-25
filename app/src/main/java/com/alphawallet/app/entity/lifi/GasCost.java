@@ -15,5 +15,5 @@ public class GasCost
 
     @SerializedName("token")
     @Expose
-    public Token token;
+    public LifiToken token;
 }

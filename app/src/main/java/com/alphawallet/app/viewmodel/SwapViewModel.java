@@ -17,7 +17,7 @@ import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
 import com.alphawallet.app.entity.lifi.Quote;
 import com.alphawallet.app.entity.lifi.SwapProvider;
-import com.alphawallet.app.entity.lifi.Token;
+import com.alphawallet.app.entity.lifi.LifiToken;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.SwapRepositoryType;
@@ -197,7 +197,7 @@ public class SwapViewModel extends BaseViewModel implements TransactionSendHandl
                 .subscribe(this::onConnections, this::onConnectionsError);
     }
 
-    public void getQuote(Token source, Token dest, String address, String amount, String slippage, String allowExchanges)
+    public void getQuote(LifiToken source, LifiToken dest, String address, String amount, String slippage, String allowExchanges)
     {
         if (!isValidAmount(amount)) return;
         if (hasEnoughBalance(source, amount))
@@ -243,7 +243,7 @@ public class SwapViewModel extends BaseViewModel implements TransactionSendHandl
         postError(C.ErrorCode.SWAP_QUOTE_ERROR, Objects.requireNonNull(t.getMessage()));
     }
 
-    public boolean hasEnoughBalance(Token source, String amount)
+    public boolean hasEnoughBalance(LifiToken source, String amount)
     {
         BigDecimal bal = new BigDecimal(getBalance(source));
         BigDecimal reqAmount = new BigDecimal(amount);
@@ -354,7 +354,7 @@ public class SwapViewModel extends BaseViewModel implements TransactionSendHandl
                 && result.contains("tool");
     }
 
-    public String getBalance(Token token)
+    public String getBalance(LifiToken token)
     {
         com.alphawallet.app.entity.tokens.Token t;
         if (token.isNativeToken())
@@ -442,8 +442,8 @@ public class SwapViewModel extends BaseViewModel implements TransactionSendHandl
 
     public void getRoutes(Activity activity,
                           ActivityResultLauncher<Intent> launcher,
-                          Token source,
-                          Token dest,
+                          LifiToken source,
+                          LifiToken dest,
                           String address,
                           String amount,
                           String slippage)

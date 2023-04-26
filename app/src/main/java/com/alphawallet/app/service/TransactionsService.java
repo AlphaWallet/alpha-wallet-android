@@ -55,8 +55,8 @@ public class TransactionsService
     private final TransactionsNetworkClientType transactionsClient;
     private final TransactionLocalSource transactionsCache;
     private int currentChainIndex;
-    private boolean nftCheck;
     private boolean firstCycle;
+    private boolean firstTxCycle;
 
     private final LongSparseArray<Long> chainTransferCheckTimes = new LongSparseArray<>(); //TODO: Use this to coordinate token checks on chains
     private final LongSparseArray<Long> chainTransactionCheckTimes = new LongSparseArray<>();
@@ -102,8 +102,8 @@ public class TransactionsService
         if (TextUtils.isEmpty(tokensService.getCurrentAddress())) return;
 
         currentChainIndex = 0;
-        nftCheck = false;
         firstCycle = true;
+        firstTxCycle = true;
 
         transactionsClient.checkRequiresAuxReset(tokensService.getCurrentAddress());
 
@@ -111,11 +111,7 @@ public class TransactionsService
             fetchTransactionDisposable.dispose();
         fetchTransactionDisposable = null;
         //reset transaction timers
-        if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
-        {
-            transactionCheckCycle = Observable.interval(START_CHECK_DELAY, CHECK_CYCLE, TimeUnit.SECONDS)
-                    .doOnNext(l -> checkTransactionQueue()).subscribe();
-        }
+        startTransactionCheckCycle(START_CHECK_DELAY);
 
         readTransferCycle();
 
@@ -123,6 +119,15 @@ public class TransactionsService
         {
             pendingTransactionCheckCycle = Observable.interval(CHECK_CYCLE, CHECK_CYCLE, TimeUnit.SECONDS)
                     .doOnNext(l -> checkPendingTransactions()).subscribe();
+        }
+    }
+
+    private void startTransactionCheckCycle(long checkCycleTime)
+    {
+        if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
+        {
+            transactionCheckCycle = Observable.interval(START_CHECK_DELAY, checkCycleTime, TimeUnit.SECONDS)
+                    .doOnNext(l -> checkTransactionQueue()).subscribe();
         }
     }
 
@@ -272,8 +277,39 @@ public class TransactionsService
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
+
+                checkFirstCycleCompletion();
             }
         }
+    }
+
+    private void checkFirstCycleCompletion()
+    {
+        if (firstTxCycle && hasCompletedFirstCycle())
+        {
+            Timber.tag(TAG).d("Completed first cycle of checks");
+            if (transactionCheckCycle != null && !transactionCheckCycle.isDisposed())
+            {
+                transactionCheckCycle.dispose();
+            }
+            transactionCheckCycle = null;
+            firstTxCycle = false;
+            startTransactionCheckCycle(CHECK_CYCLE);
+        }
+    }
+
+    private boolean hasCompletedFirstCycle()
+    {
+        for (int i = 0; i < chainTransactionCheckTimes.size(); i++)
+        {
+            long checkTime = chainTransactionCheckTimes.valueAt(i);
+            if (checkTime < ethereumNetworkRepository.getAvailableNetworkList().length + 1)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private Token getRequiresTransactionUpdate()
@@ -286,6 +322,11 @@ public class TransactionsService
 
         for (long chainId : chains)
         {
+            NetworkInfo thisInfo = ethereumNetworkRepository.getNetworkByChain(chainId);
+            if (TextUtils.isEmpty(thisInfo.etherscanAPI))
+            {
+                continue;
+            }
             long checkTime = chainTransactionCheckTimes.get(chainId, 0L);
             if (checkTime == 0L)
             {
@@ -299,7 +340,7 @@ public class TransactionsService
         }
 
         //check lowest value
-        if ((System.currentTimeMillis() - oldestCheck) > 45* DateUtils.SECOND_IN_MILLIS)
+        if ((System.currentTimeMillis() - oldestCheck) > 45 * DateUtils.SECOND_IN_MILLIS)
         {
             chainTransactionCheckTimes.put(checkChainId, System.currentTimeMillis());
             return tokensService.getServiceToken(checkChainId);
@@ -438,7 +479,6 @@ public class TransactionsService
         chainTransactionCheckTimes.clear();
 
         currentChainIndex = 0;
-        nftCheck = false;
     }
 
     public static void addTransactionHashFetch(String txHash, long chainId, String wallet)
@@ -524,7 +564,7 @@ public class TransactionsService
         if (txData.second.compareTo(BigInteger.ZERO) > 0)
         {
             return EventUtils.getBlockDetails(txData.first.getResult().getBlockHash(), web3j)
-                    .map(blockReceipt -> new Pair<>(txData.first, blockReceipt.getBlock().getTimestamp().longValue()));
+                        .map(blockReceipt -> new Pair<>(txData.first, blockReceipt.getBlock().getTimestamp().longValue()));
         }
         else
         {
@@ -585,6 +625,15 @@ public class TransactionsService
                         }
                     }, Timber::w).isDisposed();
         }
+    }
+
+    public Single<Transaction> fetchTransaction(String currentAddress, String hash, long chainId)
+    {
+        return doTransactionFetch(hash, chainId)
+                .map(fetchedTx -> {
+                    transactionsCache.putTransaction(new Wallet(currentAddress), fetchedTx);
+                    return fetchedTx;
+                });
     }
 
     private boolean checkTransactionReceipt(String txHash, long chainId) throws IOException

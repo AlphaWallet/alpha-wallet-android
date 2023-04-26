@@ -157,7 +157,7 @@ public class TransactionRepository implements TransactionRepositoryType
             {
                 newTx = new Transaction(txHash, "0", "0", System.currentTimeMillis() / 1000, itx.getNonce().intValue(), from.address,
                         itx.getTo(), itx.getValue().toString(10), "0", itx.getGasPrice().toString(10), itx.getData(),
-                        itx.getGasLimit().toString(10), chainId, contractAddr);
+                        itx.getGasLimit().toString(10), chainId, contractAddr, ""); //TODO: Function Name
             }
 
             inDiskCache.putTransaction(from, newTx);
@@ -174,7 +174,7 @@ public class TransactionRepository implements TransactionRepositoryType
 
             Transaction newTx = new Transaction(txHash, "0", "0", System.currentTimeMillis() / 1000, nonce.intValue(), from.address,
                     toAddress, value.toString(10), "0", gasPrice.toString(10), data,
-                    gasLimit.toString(10), chainId, "");
+                    gasLimit.toString(10), chainId, "", ""); //TODO: Function Name
             //newTx.completeSetup(from.address);
             inDiskCache.putTransaction(from, newTx);
             transactionsService.markPending(newTx);

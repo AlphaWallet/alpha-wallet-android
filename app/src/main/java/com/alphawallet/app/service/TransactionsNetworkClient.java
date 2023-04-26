@@ -2,7 +2,6 @@ package com.alphawallet.app.service;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
-import static com.alphawallet.app.repository.TransactionsRealmCache.convert;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_ID;
@@ -24,7 +23,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.ERC1155Token;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
@@ -48,6 +46,8 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -130,16 +130,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      *
      * Transaction sync strategy:
      *
-     * Unsynced or out of sync:
+     * 1. Always sync downward from latest block to the last scan to get newest transactions (latest transactions are the most important)
      *
-     * Read first 2400 transactions (3 pages) from top down.
-     *
-     * Delete any transactions in database older than 2400th stored tx
-     *
-     * Synced:
-     *
-     * Read upwards from sync point
-     *
+     * 2. Check the count of synced transactions; sync up to 800
+     * If we don't reach the previous fetch then execute a second fetch.
      *
      * On user scrolling down transaction list: if user is nearing bottom transaction limit begin fetching next 800
      *
@@ -152,6 +146,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      * If not first sync, sync upward from existing entry.
      * If reading more than one page, blank database and start from first sync.
      *
+     * SyncBlock: set to current lastBlock read if zero. If it is zero, then at finality remove all transactions before writing the new ones
+     * Then write the lowest block we have read in.
+     *
+     *
      * @param svs
      * @param networkInfo
      * @param lastBlock
@@ -162,17 +160,32 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         return Single.fromCallable(() -> {
             long lastBlockNumber = lastBlock + 1;
-            Map<String, Transaction> updates = new HashMap<>();
-            Transaction lastTransaction = null;
+            List<Transaction> sortedTx = null;
             try (Realm instance = realmManager.getRealmInstance(svs.getCurrentAddress()))
             {
-                if (lastBlockNumber == 1) //first read of account. Read first 2 pages
+                long syncToBlock = getTokenBlockRead(instance, networkInfo.chainId, TransferFetchType.ETHEREUM);
+                if (syncToBlock == 0)
                 {
-                    lastTransaction = syncDownwards(updates, instance, svs, networkInfo, tokenAddress, 9999999999L);
+                    lastBlockNumber = 0;
                 }
-                else // try to sync upwards from the last read
+
+                sortedTx = syncDownwards(svs, networkInfo, tokenAddress, lastBlockNumber, 999999999);
+
+                if (sortedTx.size() > 0)
                 {
-                    lastTransaction = syncUpwards(updates, instance, svs, networkInfo, tokenAddress, lastBlockNumber);
+                    String highestBlockStr = sortedTx.get(sortedTx.size() - 1).blockNumber;
+
+                    storeLatestBlockRead(svs.getCurrentAddress(), networkInfo.chainId, tokenAddress, highestBlockStr);
+
+                    if (syncToBlock == 0 || sortedTx.size() == PAGESIZE * SYNC_PAGECOUNT)
+                    {
+                        //blank all entries
+                        eraseAllTransactions(instance, networkInfo.chainId);
+                        writeTokenBlockRead(instance, networkInfo.chainId, Long.parseLong(sortedTx.get(0).blockNumber), TransferFetchType.ETHEREUM);
+                    }
+
+                    //now write transactions
+                    writeTransactions(instance, sortedTx);
                 }
             }
             catch (JSONException e)
@@ -183,14 +196,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             {
                 Timber.e(e);
             }
-            finally
-            {
-                //ensure transaction check time is always written
-                String lastBlockRead = (lastTransaction != null) ? lastTransaction.blockNumber : String.valueOf(lastBlock);
-                storeLatestBlockRead(svs.getCurrentAddress(), networkInfo.chainId, tokenAddress, lastBlockRead);
-            }
 
-            return updates.values().toArray(new Transaction[0]);
+            return sortedTx != null ? sortedTx.toArray(new Transaction[0]) : new Transaction[0];
         }).subscribeOn(Schedulers.io());
     }
 
@@ -199,100 +206,37 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      *
      * Note that this call is the only place that the 'earliest transaction' block can be written from.
      */
-    private Transaction syncDownwards(Map<String, Transaction> updates, Realm instance, TokensService svs, NetworkInfo networkInfo, String tokenAddress, long startingBlockNumber) throws Exception
+    private List<Transaction> syncDownwards(TokensService svs, NetworkInfo networkInfo, String tokenAddress, long lowBlockNumber, long highBlockNumber) throws Exception
     {
         int page = 1;
-        List<Transaction> txList = new ArrayList<>();
+        HashMap<String, Transaction> txMap = new HashMap<>();
         boolean continueReading = true;
 
         while (continueReading) // only SYNC_PAGECOUNT pages at a time for each check, to avoid congestion
         {
-            EtherscanTransaction[] myTxs = readTransactions(networkInfo, svs, tokenAddress, String.valueOf(startingBlockNumber), false, page++, PAGESIZE);
+            EtherscanTransaction[] myTxs = readTransactions(networkInfo, svs, tokenAddress, String.valueOf(lowBlockNumber), String.valueOf(highBlockNumber), false, page++);
             if (myTxs.length == 0) break;
-            getRelatedTransactionList(txList, myTxs, svs.getCurrentAddress(), networkInfo.chainId);
-
-            writeTransactions(instance, txList); //record transactions here
-            writeUpdates(updates, txList);
+            populateTransactionMap(txMap, myTxs, networkInfo.chainId); //use all transactions (wallet address null)
 
             if (page > SYNC_PAGECOUNT) continueReading = false;
 
             if (myTxs.length < PAGESIZE)
             {
                 continueReading = false;
-                //store earliest transaction
-                Transaction lastTransaction = findSortedTransaction(instance, networkInfo.chainId, Sort.ASCENDING);
-                if (lastTransaction != null) storeEarliestBlockRead(instance, networkInfo.chainId, tokenAddress, Long.parseLong(lastTransaction.blockNumber));
             }
         }
 
-        Transaction firstTransaction = findSortedTransaction(instance, networkInfo.chainId, Sort.DESCENDING);
-
-        return firstTransaction;
+        return sortTransactions(txMap.values());
     }
 
-    private Transaction findSortedTransaction(Realm r, long chainId, Sort sort)
+    private void populateTransactionMap(HashMap<String, Transaction> txMap, EtherscanTransaction[] myTxs, long chainId)
     {
-        RealmTransaction item = r.where(RealmTransaction.class)
-                .equalTo("chainId", chainId)
-                .sort("timeStamp", sort)
-                .findFirst();
-
-        if (item != null)
-        {
-            return convert(item);
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    private void writeUpdates(Map<String, Transaction> updates, List<Transaction> txList)
-    {
-        if (updates != null)
-        {
-            for (Transaction tx : txList)
-            {
-                updates.put(tx.hash, tx);
-            }
-        }
-    }
-
-    private Transaction syncUpwards(Map<String, Transaction> updates, Realm instance, TokensService svs, NetworkInfo networkInfo, String tokenAddress, long lastBlockNumber) throws Exception
-    {
-        int page = 1;
-        List<Transaction> txList = new ArrayList<>();
-        Transaction lastTransaction;
-
-        //only sync upwards by 1 page. If not sufficient then reset; delete DB and start again
-        EtherscanTransaction[] myTxs = readTransactions(networkInfo, svs, tokenAddress, String.valueOf(lastBlockNumber), true, page, PAGESIZE);
-        if (myTxs.length == 0) { return null; }
-        else if (myTxs.length == PAGESIZE)
-        {
-            //too big, erase transaction list and start from top
-            deleteAllChainTransactions(instance, networkInfo.chainId, svs.getCurrentAddress());
-            lastTransaction = syncDownwards(updates, instance, svs, networkInfo, tokenAddress, 999999999L); //re-sync downwards from top
-            return lastTransaction;
-        }
-        else
-        {
-            getRelatedTransactionList(txList, myTxs, svs.getCurrentAddress(), networkInfo.chainId);
-            writeTransactions(instance, txList); //record transactions here
-            writeUpdates(updates, txList);
-            lastTransaction = findSortedTransaction(instance, networkInfo.chainId, Sort.DESCENDING); //myTxs[myTxs.length-1]; //latest transaction
-            return lastTransaction;
-        }
-    }
-
-    private void getRelatedTransactionList(List<Transaction> txList, EtherscanTransaction[] myTxs, String walletAddress, long chainId)
-    {
-        txList.clear();
         for (EtherscanTransaction etx : myTxs)
         {
-            Transaction tx = etx.createTransaction(walletAddress, chainId);
+            Transaction tx = etx.createTransaction(null, chainId);
             if (tx != null)
             {
-                txList.add(tx);
+                txMap.put(tx.hash, tx);
             }
         }
     }
@@ -382,12 +326,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         });
     }
 
-    private EtherscanTransaction[] readTransactions(NetworkInfo networkInfo, TokensService svs, String tokenAddress, String firstBlock, boolean ascending, int page, int pageSize) throws JSONException
+    private EtherscanTransaction[] readTransactions(NetworkInfo networkInfo, TokensService svs, String tokenAddress, String lowBlock, String highBlock, boolean ascending, int page) throws JSONException
     {
         if (networkInfo == null) return new EtherscanTransaction[0];
         if (networkInfo.etherscanAPI.contains(COVALENT))
         {
-            return readCovalentTransactions(svs, tokenAddress, networkInfo, ascending, page, pageSize);
+            return readCovalentTransactions(svs, tokenAddress, networkInfo, ascending, page, PAGESIZE);
         }
         else if (networkInfo.chainId == OKX_ID)
         {
@@ -409,14 +353,15 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             if (ascending)
             {
                 sb.append("&startblock=");
-                sb.append(firstBlock);
+                sb.append(lowBlock);
                 sb.append("&endblock=999999999&sort=");
             }
             else
             {
-                sb.append("&startblock=0");
+                sb.append("&startblock=");
+                sb.append(lowBlock);
                 sb.append("&endblock=");
-                sb.append(firstBlock);
+                sb.append(highBlock);
                 sb.append("&sort=");
             }
 
@@ -426,7 +371,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 sb.append("&page=");
                 sb.append(page);
                 sb.append("&offset=");
-                sb.append(pageSize);
+                sb.append(PAGESIZE);
             }
 
             sb.append(getNetworkAPIToken(networkInfo));
@@ -489,7 +434,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                     Timber.d("DIAGNOSE: " + oldestBlockRead + " : " + oldestPossibleBlock);
                     if (oldestBlockRead > 0 && oldestBlockRead != oldestPossibleBlock)
                     {
-                        syncDownwards(null, instance, svs, network, svs.getCurrentAddress(), oldestBlockRead);
+                        List<Transaction> syncTx = syncDownwards(svs, network, svs.getCurrentAddress(), 0, oldestBlockRead);
+                        writeTransactions(instance, syncTx);
                     }
 
                     //now re-read last blocks from DB
@@ -829,6 +775,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             switch (tfType)
             {
+                case ETHEREUM:
+                    return rd.getBaseChainBlock();
                 case ERC_20:
                 default:
                     return rd.getResultTime();
@@ -855,6 +803,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
             switch (tfType)
             {
+                case ETHEREUM:
+                    rd.setBaseChainBlock(lastBlockChecked);
+                    break;
                 case ERC_20:
                 default:
                     rd.setResultTime(lastBlockChecked);
@@ -1247,5 +1198,34 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         ERC1155Token newToken = new ERC1155Token(info, null, 0, networkInfo.getShortName());
         newToken.setTokenWallet(walletAddress);
         return newToken;
+    }
+
+    private void eraseAllTransactions(Realm instance, long chainId)
+    {
+        instance.executeTransaction(r -> {
+            RealmResults<RealmTransaction> realmTx = r.where(RealmTransaction.class)
+                    .equalTo("chainId", chainId)
+                    .findAll();
+
+            realmTx.deleteAllFromRealm();
+        });
+    }
+
+    private List<Transaction> sortTransactions(Collection<Transaction> txCollection)
+    {
+        List<Transaction> txList = new ArrayList<>(txCollection);
+
+        Collections.sort(txList, (t1, t2) -> {
+            long block1 = Long.parseLong(t1.blockNumber);
+            long block2 = Long.parseLong(t2.blockNumber);
+
+            if (block1 == block2)
+            {
+                block2++;
+            }
+            return Long.compare(block1, block2);
+        });
+
+        return txList;
     }
 }

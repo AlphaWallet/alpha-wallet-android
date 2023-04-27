@@ -90,6 +90,10 @@
         <item name="android:textSize">@dimen/sp12</item>
     </style>
 
+    <style name="Aw.Typography.BottomNavigation">
+        <item name="android:textSize">13sp</item>
+    </style>
+
     <style name="Aw.Typography.Error">
         <item name="android:textColor">?colorError</item>
     </style>

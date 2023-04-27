@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="?android:attr/actionBarSize"
+    android:layout_height="@dimen/bottom_navigation_bar"
     android:background="?colorSurface"
     android:orientation="vertical">
 
@@ -18,7 +18,7 @@
 
         <TextView
             android:id="@+id/nav_wallet_text"
-            style="@style/Aw.Typography.Small"
+            style="@style/Aw.Typography.BottomNavigation"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -30,7 +30,7 @@
 
         <TextView
             android:id="@+id/nav_activity_text"
-            style="@style/Aw.Typography.Small"
+            style="@style/Aw.Typography.BottomNavigation"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -41,8 +41,20 @@
             app:drawableTopCompat="@drawable/ic_tab_activity" />
 
         <TextView
+            android:id="@+id/nav_send"
+            style="@style/Aw.Typography.BottomNavigation"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/action_send"
+            android:textColor="@color/selector_bottom_navigation"
+            app:drawableTint="@color/selector_bottom_navigation"
+            app:drawableTopCompat="@drawable/ic_arrow_send" />
+
+        <TextView
             android:id="@+id/nav_browser_text"
-            style="@style/Aw.Typography.Small"
+            style="@style/Aw.Typography.BottomNavigation"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -63,7 +75,7 @@
 
             <TextView
                 android:id="@+id/nav_settings_text"
-                style="@style/Aw.Typography.Small"
+                style="@style/Aw.Typography.BottomNavigation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"

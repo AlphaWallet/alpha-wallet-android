@@ -23,4 +23,18 @@ public class SendTokenRouter {
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivityForResult(intent, C.COMPLETED_TRANSACTION);
     }
+
+    // TODO: Check if this could be further refactored
+    public void open(Activity context, Wallet wallet, Token token) {
+        Intent intent = new Intent(context, SendActivity.class);
+        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, wallet.address);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
+        intent.putExtra(C.EXTRA_NETWORKID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_SYMBOL, token.getSymbol());
+        intent.putExtra(C.EXTRA_DECIMALS, token.tokenInfo.decimals);
+        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.EXTRA_AMOUNT, (QRResult)null);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        context.startActivityForResult(intent, C.COMPLETED_TRANSACTION);
+    }
 }

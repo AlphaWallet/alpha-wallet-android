@@ -1,6 +1,9 @@
 package com.alphawallet.app.repository;
 
+import android.util.Pair;
+
 import com.alphawallet.app.entity.CurrencyItem;
+import com.alphawallet.app.entity.tokens.Token;
 
 import java.util.Set;
 
@@ -123,4 +126,8 @@ public interface PreferenceRepositoryType
     boolean isCrashReportingEnabled();
 
     void setCrashReportingEnabled(boolean isEnabled);
+
+    void setLastSentToken(Token address);
+
+    Pair<String, Long> getLastSentToken();
 }

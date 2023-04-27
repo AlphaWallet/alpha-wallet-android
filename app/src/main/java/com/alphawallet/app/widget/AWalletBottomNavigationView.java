@@ -6,7 +6,6 @@ import static com.alphawallet.app.entity.WalletPage.SETTINGS;
 import static com.alphawallet.app.entity.WalletPage.WALLET;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -14,7 +13,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.core.content.res.ResourcesCompat;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.WalletPage;
@@ -27,10 +25,10 @@ public class AWalletBottomNavigationView extends LinearLayout
     private final TextView walletLabel;
     private final TextView settingsBadge;
     private final TextView settingsLabel;
+
+    private final TextView sendButton;
     private final RelativeLayout settingsTab;
     private final TextView activityLabel;
-    private final Typeface regularTypeface;
-    private final Typeface semiboldTypeface;
     private final ArrayList<String> settingsBadgeKeys = new ArrayList<>();
     private OnBottomNavigationItemSelectedListener listener;
     private WalletPage selectedItem;
@@ -41,6 +39,7 @@ public class AWalletBottomNavigationView extends LinearLayout
         inflate(context, R.layout.layout_bottom_navigation, this);
         walletLabel = findViewById(R.id.nav_wallet_text);
         activityLabel = findViewById(R.id.nav_activity_text);
+        sendButton = findViewById(R.id.nav_send);
         dappBrowserLabel = findViewById(R.id.nav_browser_text);
         settingsTab = findViewById(R.id.settings_tab);
         settingsLabel = findViewById(R.id.nav_settings_text);
@@ -51,11 +50,13 @@ public class AWalletBottomNavigationView extends LinearLayout
         dappBrowserLabel.setOnClickListener(v -> selectItem(DAPP_BROWSER));
         settingsTab.setOnClickListener(v -> selectItem(SETTINGS));
 
-        regularTypeface = ResourcesCompat.getFont(getContext(), R.font.font_regular);
-        semiboldTypeface = ResourcesCompat.getFont(getContext(), R.font.font_semibold);
-
         // set wallet fragment selected on start
         setSelectedItem(WALLET);
+    }
+
+    public void setSendButtonListener(View.OnClickListener listener)
+    {
+        sendButton.setOnClickListener(listener);
     }
 
     public void setListener(OnBottomNavigationItemSelectedListener listener)
@@ -81,19 +82,15 @@ public class AWalletBottomNavigationView extends LinearLayout
         {
             case DAPP_BROWSER:
                 dappBrowserLabel.setSelected(true);
-                dappBrowserLabel.setTypeface(semiboldTypeface);
                 break;
             case WALLET:
                 walletLabel.setSelected(true);
-                walletLabel.setTypeface(semiboldTypeface);
                 break;
             case SETTINGS:
                 settingsLabel.setSelected(true);
-                settingsLabel.setTypeface(semiboldTypeface);
                 break;
             case ACTIVITY:
                 activityLabel.setSelected(true);
-                activityLabel.setTypeface(semiboldTypeface);
                 break;
         }
     }
@@ -101,13 +98,9 @@ public class AWalletBottomNavigationView extends LinearLayout
     private void deselectAll()
     {
         dappBrowserLabel.setSelected(false);
-        dappBrowserLabel.setTypeface(regularTypeface);
         walletLabel.setSelected(false);
-        walletLabel.setTypeface(regularTypeface);
         settingsLabel.setSelected(false);
-        settingsLabel.setTypeface(regularTypeface);
         activityLabel.setSelected(false);
-        activityLabel.setTypeface(regularTypeface);
     }
 
     public void setSettingsBadgeCount(int count)

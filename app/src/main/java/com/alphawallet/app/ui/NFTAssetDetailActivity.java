@@ -157,11 +157,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         {
             progressBar.setVisibility(View.VISIBLE);
             viewModel.prepare();
-            if (asset == null || !asset.isAttestation())
-            {
-                viewModel.getAsset(token, tokenId);
-                progressBar.setVisibility(View.VISIBLE);
-            }
+            getIntentData();
             tokenImage.onResume();
         }
         else
@@ -249,10 +245,10 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
         else
         {
-                Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
-                viewModel.loadWallet(wallet.address);
-                token = resolveAssetToken();
-                setup();
+            Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
+            viewModel.loadWallet(wallet.address);
+            token = resolveAssetToken();
+            setup();
         }
     }
 
@@ -284,6 +280,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             {
                 showWarnDialog(walletAddress);
             }
+            asset = token.getAssetForToken(tokenId);
             setup();
         }
     }
@@ -293,10 +290,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         AWalletAlertDialog alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(WARNING);
         alertDialog.setMessage(getApplicationContext().getString(R.string.warn_asset_not_belongs_to_active_wallet, Utils.formatAddress(walletAddress)));
-        alertDialog.setButton(R.string.yes_continue, v ->
-        {
-            alertDialog.dismiss();
-        });
+        alertDialog.setButton(R.string.yes_continue, v -> alertDialog.dismiss());
         alertDialog.setSecondaryButton(R.string.dialog_cancel_back, view -> {
             alertDialog.dismiss();
             finish();
@@ -381,7 +375,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-            if (asset.isAttestation())
+            if (asset != null && asset.isAttestation())
             {
                 functionBar.setupAttestationFunctions(this, viewModel.getAssetDefinitionService(), token, null);
             }

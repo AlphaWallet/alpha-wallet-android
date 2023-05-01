@@ -1042,4 +1042,5 @@
     <string name="dialog_title_sign_in_with_ethereum">Sign in with Ethereum</string>
     <string name="attestations_header">Attestations</string>
     <string name="attestation">Attestation</string>
+    <string name="error_no_balance_to_swap">No available balance to swap</string>
 </resources>

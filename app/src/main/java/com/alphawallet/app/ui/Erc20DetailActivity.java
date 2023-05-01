@@ -45,6 +45,7 @@ import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModel;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
@@ -63,8 +64,7 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 @AndroidEntryPoint
-public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface, BuyCryptoInterface
-{
+public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface, BuyCryptoInterface {
     Erc20DetailViewModel viewModel;
 
     public static final int HISTORY_LENGTH = 5;
@@ -82,47 +82,43 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private ViewPager2 viewPager;
 
+    private AWalletAlertDialog aDialog;
+
     private static class DetailPage {
         private final int tabNameResourceId;
         private final Fragment fragment;
 
-        DetailPage(int tabNameResourceId, Fragment fragment)
-        {
+        DetailPage(int tabNameResourceId, Fragment fragment) {
             this.tabNameResourceId = tabNameResourceId;
             this.fragment = fragment;
         }
 
-        public Pair<String, Fragment> init(Context context, Bundle bundle)
-        {
+        public Pair<String, Fragment> init(Context context, Bundle bundle) {
             this.fragment.setArguments(bundle);
             return new Pair<>(context.getString(tabNameResourceId), fragment);
         }
     }
 
-    private final DetailPage[] detailPages = new DetailPage[] {
+    private final DetailPage[] detailPages = new DetailPage[]{
             new DetailPage(R.string.tab_info, new TokenInfoFragment()),
             new DetailPage(R.string.tab_activity, new TokenActivityFragment()),
             new DetailPage(R.string.tab_alert, new TokenAlertsFragment())
     };
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState)
-    {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_erc20_token_detail);
         symbol = null;
         toolbar();
         setupViewModel();
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(C.EXTRA_SYMBOL))
-        {
+        if (savedInstanceState != null && savedInstanceState.containsKey(C.EXTRA_SYMBOL)) {
             symbol = savedInstanceState.getString(C.EXTRA_ACTION_NAME);
             wallet = savedInstanceState.getParcelable(WALLET);
             long chainId = savedInstanceState.getLong(C.EXTRA_CHAIN_ID, MAINNET_ID);
             token = viewModel.getTokensService().getToken(chainId, savedInstanceState.getString(C.EXTRA_ADDRESS));
-        }
-        else
-        {
+        } else {
             getIntentData();
         }
 
@@ -134,8 +130,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         setUpRecentTransactionsView();
     }
 
-    private void initViews()
-    {
+    private void initViews() {
         Bundle bundle = new Bundle();
         //Samoa TODO: Use TokensService getToken in the 3 fragments
         bundle.putString(C.EXTRA_ADDRESS, token.getAddress());
@@ -176,19 +171,16 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         TabUtils.decorateTabLayout(this, tabLayout);
     }
 
-    private List<Pair<String, Fragment>> getPages(Bundle bundle)
-    {
+    private List<Pair<String, Fragment>> getPages(Bundle bundle) {
         List<Pair<String, Fragment>> pages = new ArrayList<>();
-        for (int i = 0; i< detailPages.length; i++) {
+        for (int i = 0; i < detailPages.length; i++) {
             pages.add(i, detailPages[i].init(this, bundle));
         }
         return pages;
     }
 
-    private void setupButtons()
-    {
-        if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
-        {
+    private void setupButtons() {
+        if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH) {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
             functionBar.setupBuyFunction(this, viewModel.getOnRampRepository());
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
@@ -197,10 +189,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
     }
 
-    private void setupViewModel()
-    {
-        if (viewModel == null)
-        {
+    private void setupViewModel() {
+        if (viewModel == null) {
             viewModel = new ViewModelProvider(this)
                     .get(Erc20DetailViewModel.class);
             viewModel.newScriptFound().observe(this, this::onNewScript);
@@ -210,62 +200,56 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
     }
 
-    private void startScriptDownload(Boolean status)
-    {
+    private void startScriptDownload(Boolean status) {
         CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
         certificateToolbar.setVisibility(View.VISIBLE);
-        if (status)
-        {
+        if (status) {
             certificateToolbar.startDownload();
-        }
-        else
-        {
+        } else {
             certificateToolbar.stopDownload();
             certificateToolbar.hideCertificateResource();
         }
     }
 
-    private void onNewScript(Boolean hasNewScript)
-    {
+    private void onNewScript(Boolean hasNewScript) {
         final TokenGroup group = viewModel.getTokensService().getTokenGroup(token);
         //found a new tokenscript for this token, create a new meta with balance set to trigger view update; view will update the token name
         tokenViewAdapter.updateToken(new TokenCardMeta(token.tokenInfo.chainId, token.getAddress(), "force_update",
-                token.updateBlancaTime, token.lastTxCheck, token.getInterfaceSpec(), group));
+                token.updateBlancaTime, token.lastTxCheck, token.getInterfaceSpec(), group
+        ));
         viewModel.checkTokenScriptValidity(token); //check script signature
         CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
         certificateToolbar.stopDownload();
         setupButtons();
     }
 
-    private void onSignature(XMLDsigDescriptor descriptor)
-    {
+    private void onSignature(XMLDsigDescriptor descriptor) {
         CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
         certificateToolbar.onSigData(descriptor, this);
     }
 
-    private void setUpRecentTransactionsView()
-    {
+    private void setUpRecentTransactionsView() {
         if (activityHistoryList != null) return;
         activityHistoryList = findViewById(R.id.history_list);
         ActivityAdapter adapter = new ActivityAdapter(viewModel.getTokensService(), viewModel.getTransactionsInteract(),
-                viewModel.getAssetDefinitionService());
+                viewModel.getAssetDefinitionService()
+        );
 
         adapter.setDefaultWallet(wallet);
 
         //TODO: Fix Realm leak
         activityHistoryList.setupAdapter(adapter);
         activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
-                token, viewModel.getTokensService(), HISTORY_LENGTH);
+                token, viewModel.getTokensService(), HISTORY_LENGTH
+        );
     }
 
-    private void setUpTokenView()
-    {
+    private void setUpTokenView() {
         if (tokenViewAdapter != null) return;
         tokenView = findViewById(R.id.token_view);
         tokenView.setLayoutManager(new LinearLayoutManager(this) {
             @Override
-            public boolean canScrollVertically()
-            {
+            public boolean canScrollVertically() {
                 return false;
             }
         });
@@ -277,8 +261,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         viewModel.checkTokenScriptValidity(token);
     }
 
-    private void getIntentData()
-    {
+    private void getIntentData() {
         if (symbol != null) return;
 
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
@@ -292,8 +275,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public void onSaveInstanceState(@NotNull Bundle outState)
-    {
+    public void onSaveInstanceState(@NotNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(C.EXTRA_SYMBOL, symbol);
         outState.putParcelable(WALLET, wallet);
@@ -301,8 +283,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         outState.putString(C.EXTRA_ADDRESS, token.getAddress());
     }
 
-    private void setTokenListener()
-    {
+    private void setTokenListener() {
         if (realm == null) realm = viewModel.getRealmInstance(wallet);
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
         String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
@@ -311,18 +292,15 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 .greaterThan("addedTime", System.currentTimeMillis() - 5 * DateUtils.MINUTE_IN_MILLIS).findAllAsync();
         realmTokenUpdates.addChangeListener(realmTokens -> {
             if (realmTokens.size() == 0) return;
-            for (RealmToken t : realmTokens)
-            {
+            for (RealmToken t : realmTokens) {
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), t.getBalance(),
-                        t.getUpdateTime(), t.getLastTxTime(), t.getContractType(), group);
+                        t.getUpdateTime(), t.getLastTxTime(), t.getContractType(), group
+                );
                 meta.isEnabled = t.isEnabled();
 
-                if (tokenMeta == null)
-                {
+                if (tokenMeta == null) {
                     tokenMeta = meta;
-                }
-                else if (!tokenMeta.balance.equals(meta.balance))
-                {
+                } else if (!tokenMeta.balance.equals(meta.balance)) {
                     playNotification();
                 }
 
@@ -331,44 +309,34 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         });
     }
 
-    private void playNotification()
-    {
-        try
-        {
+    private void playNotification() {
+        try {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             Ringtone r = RingtoneManager.getRingtone(this, notification);
             r.play();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             //empty
         }
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
+    public boolean onCreateOptionsMenu(Menu menu) {
 //        getMenuInflater().inflate(R.menu.menu_show_contract, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        if (item.getItemId() == android.R.id.home)
-        {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
             finish();
-        }
-        else if (item.getItemId() == R.id.action_show_contract)
-        {
+        } else if (item.getItemId() == R.id.action_show_contract) {
             viewModel.showContractInfo(this, wallet, token);
         }
         return false;
     }
 
     @Override
-    protected void onDestroy()
-    {
+    protected void onDestroy() {
         super.onDestroy();
         if (activityHistoryList != null) activityHistoryList.onDestroy();
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
@@ -377,32 +345,27 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public void onPause()
-    {
+    public void onPause() {
         super.onPause();
         viewModel.getTokensService().clearFocusToken();
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
-        if (viewModel == null)
-        {
+        if (viewModel == null) {
             restartView();
-        }
-        else
-        {
+        } else {
             activityHistoryList.resetAdapter();
             activityHistoryList.startActivityListeners(viewModel.getRealmInstance(wallet), wallet,
-                    token, viewModel.getTokensService(), HISTORY_LENGTH);
+                    token, viewModel.getTokensService(), HISTORY_LENGTH
+            );
             viewModel.getTokensService().setFocusToken(token);
             viewModel.restartServices();
         }
     }
 
-    private void restartView()
-    {
+    private void restartView() {
         setupViewModel();
         getIntentData();
         setUpTokenView();
@@ -410,8 +373,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public void handleTokenScriptFunction(String function, List<BigInteger> selection)
-    {
+    public void handleTokenScriptFunction(String function, List<BigInteger> selection) {
         Intent intent = new Intent(this, FunctionActivity.class);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
@@ -423,30 +385,25 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public void showSend()
-    {
+    public void showSend() {
         viewModel.showSendToken(this, wallet, token);
     }
 
     @Override
-    public void showReceive()
-    {
+    public void showReceive() {
         viewModel.showMyAddress(this, wallet, token);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         String transactionHash = null;
 
-        switch (requestCode)
-        {
+        switch (requestCode) {
             case C.COMPLETED_TRANSACTION: //completed a transaction send and got with either a hash or a null
                 if (data != null) transactionHash = data.getStringExtra(C.EXTRA_TXHASH);
-                if (transactionHash != null)
-                {
+                if (transactionHash != null) {
                     //switch to activity view
                     viewPager.setCurrentItem(1);        // 0-INFO, 1-ACTIVITY, 2-ALERTS
                 }
@@ -455,35 +412,36 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public void handleClick(String action, int actionId)
-    {
-        if (actionId == R.string.convert_to_xdai)
-        {
+    public void handleClick(String action, int actionId) {
+        if (actionId == R.string.convert_to_xdai) {
             openDapp(C.XDAI_BRIDGE_DAPP);
-        }
-        else if (actionId == R.string.swap_with_quickswap)
-        {
+        } else if (actionId == R.string.swap_with_quickswap) {
             String queryPath = "?use=v2&inputCurrency=" + (token.isEthereum() ? ETH_SYMBOL : token.getAddress());
             openDapp(C.QUICKSWAP_EXCHANGE_DAPP + queryPath);
-        }
-        else if (actionId == R.string.swap)
-        {
+        } else if (actionId == R.string.swap) {
             //openDapp(formatOneInchCall(token));
-            new SwapRouter().open(this, token, wallet);
+            //todo: Check balance before routing
+            if (token.hasPositiveBalance()) {
+                new SwapRouter().open(this, token, wallet);
+            } else {
+                aDialog = new AWalletAlertDialog(this);
+                aDialog.setIcon(AWalletAlertDialog.ERROR);
+                aDialog.setTitle(R.string.app_name);
+                aDialog.setMessage(R.string.error_no_balance_to_swap);
+                aDialog.setButtonText(R.string.action_cancel);
+                aDialog.setButtonListener(v -> aDialog.dismiss());
+                aDialog.show();
+            }
         }
     }
 
-    private String formatOneInchCall(Token token)
-    {
+    private String formatOneInchCall(Token token) {
         String token1;
         String token2;
-        if (token.isERC20())
-        {
+        if (token.isERC20()) {
             token1 = token.getAddress();
             token2 = EthereumNetworkBase.getNetworkInfo(token.tokenInfo.chainId).symbol;
-        }
-        else
-        {
+        } else {
             token1 = token.tokenInfo.symbol;
             token2 = "";
         }
@@ -492,8 +450,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 .replace("[TOKEN1]", token1).replace("[TOKEN2]", token2);
     }
 
-    private void openDapp(String dappURL)
-    {
+    private void openDapp(String dappURL) {
         //switch to dappbrowser and open at dappURL
         Intent intent = new Intent();
         intent.putExtra(C.DAPP_URL_LOAD, dappURL);
@@ -503,8 +460,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public void handleBuyFunction(Token token)
-    {
+    public void handleBuyFunction(Token token) {
         Intent intent = viewModel.getBuyIntent(wallet.address, token);
         setResult(RESULT_OK, intent);
         viewModel.track(Analytics.Action.BUY_WITH_RAMP);

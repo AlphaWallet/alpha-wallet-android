@@ -966,4 +966,5 @@
     <string name="dialog_title_sign_in_with_ethereum">Iniciar sesión con Ethereum</string>
     <string name="attestations_header">Certificados</string>
     <string name="attestation">Atestación</string>
+    <string name="error_no_balance_to_swap">No hay saldo disponible para canjear</string>
 </resources>

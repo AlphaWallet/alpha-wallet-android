@@ -980,4 +980,5 @@
     <string name="dialog_title_sign_in_with_ethereum">Đăng nhập bằng Ethereum</string>
     <string name="attestations_header">Chứng thực</string>
     <string name="attestation">Chứng thực</string>
+    <string name="error_no_balance_to_swap">Không có số dư khả dụng để hoán đổi</string>
 </resources>

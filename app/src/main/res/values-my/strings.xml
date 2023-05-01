@@ -1001,4 +1001,5 @@
     <string name="dialog_title_sign_in_with_ethereum">Ethereum ဖြင့် ဝင်ရောက်ပါ။</string>
     <string name="attestations_header">စုံစမ်းစစ်ဆေးမှုများ</string>
     <string name="attestation">စုံစမ်းစစ်ဆေးခြင်း</string>
+    <string name="error_no_balance_to_swap">സ്വാപ്പ് ചെയ്യാൻ ബാലൻസ് ലഭ്യമല്ല</string>
 </resources>

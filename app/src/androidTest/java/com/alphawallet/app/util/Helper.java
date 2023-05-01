@@ -215,7 +215,7 @@ public class Helper
         {
             try
             {
-                click(matcher, 0);
+                click(matcher, 1);
                 return;
             }
             catch (Exception e)
@@ -229,11 +229,11 @@ public class Helper
     //This is an item inside a list that doesn't scroll (eg TestNet / Mainnet list)
     public static void clickStaticListItem(Matcher matcher)
     {
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 49; i++)
         {
             try
             {
-                click(matcher, 0);
+                click(matcher, 1);
                 return;
             }
             catch (Exception e)

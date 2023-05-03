@@ -391,7 +391,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
             if (transaction.transactionInput == null || transaction.transactionInput.type == TransactionType.CONTRACT_CALL)
             {
-                eventAction.setText(transferData.getTitle(transaction));
+                eventAction.setText(transferData.getTitle());
             }
         }
     }

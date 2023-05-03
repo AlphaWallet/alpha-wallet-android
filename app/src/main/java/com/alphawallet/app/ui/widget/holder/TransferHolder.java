@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -34,27 +35,32 @@ import com.alphawallet.token.tools.TokenDefinition;
 import java.math.BigInteger;
 import java.util.Map;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
 /**
  * Created by JB on 17/12/2020.
  */
 public class TransferHolder extends BinderViewHolder<TokenTransferData> implements View.OnClickListener
 {
     public static final int VIEW_TYPE = 2017;
-
     private final TokenIcon tokenIcon;
     private final TextView date;
     private final TextView type;
     private final TextView address;
     private final TextView value;
-
+    private final ProgressBar txLoad;
     private final AssetDefinitionService assetDefinition;
     private Token token;
     private TokenTransferData transferData;
-
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final TokensService tokensService;
     private String hashKey;
     private boolean fromTokenView;
+
+    @Nullable
+    private Disposable disposable;
 
     public TransferHolder(ViewGroup parent, TokensService service, FetchTransactionsInteract interact,
                           AssetDefinitionService svs)
@@ -65,12 +71,12 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         address = findViewById(R.id.address);
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
+        txLoad = findViewById(R.id.loading_transaction);
         tokensService = service;
         itemView.setOnClickListener(this);
         assetDefinition = svs;
 
         fetchTransactionsInteract = interact;
-
     }
 
     @Override
@@ -79,19 +85,45 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         fromTokenView = false;
         transferData = data;
         String walletAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
-        //pull event details from DB
-        Transaction tx = fetchTransactionsInteract.fetchCached(walletAddress, data.hash);
+
         token = tokensService.getToken(data.chainId, data.tokenAddress);
-
-        if (tx == null) { return; }
-
         if (token == null)
         {
             token = tokensService.getToken(data.chainId, walletAddress);
         }
 
-        String sym = token != null ? token.getShortSymbol() : getContext().getString(R.string.eth);
+        //pull event details from DB
+        Transaction tx = fetchTransactionsInteract.fetchCached(walletAddress, data.hash);
+
+        if (disposable != null && !disposable.isDisposed())
+        {
+            disposable.dispose();
+        }
+
         tokenIcon.bindData(token, assetDefinition);
+
+        //We haven't yet fetched the underlying transaction. Fetch and display
+        if (tx == null)
+        {
+            txLoad.setVisibility(View.VISIBLE);
+            //load the transaction and restart the bind.
+            disposable = fetchTransactionsInteract.fetchFromNode(walletAddress, data.chainId, data.hash)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(fetchedTransaction -> bindView(data, fetchedTransaction),
+                            err -> bindView(data, null)); //Can still build limited view with no fetched tx - better than a blank view
+        }
+        else
+        {
+            bindView(data, tx);
+        }
+    }
+
+    private void bindView(TokenTransferData data, Transaction tx)
+    {
+        txLoad.setVisibility(View.GONE);
+
+        String sym = token != null ? token.getShortSymbol() : getContext().getString(R.string.eth);
         String itemView = null;
 
         if (data.getTimeStamp() % 1000 != 0)
@@ -121,7 +153,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
             value.setText(getString(R.string.valueSymbol, transactionValue, sym));
         }
 
-        CharSequence typeValue = Utils.createFormattedValue(getContext(), getTitle(data, tx), token);
+        CharSequence typeValue = Utils.createFormattedValue(getContext(), getTitle(data), token);
 
         type.setText(typeValue);
         address.setText(data.getDetail(getContext(), tx, token, itemView));
@@ -148,7 +180,11 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
             return "";
         }
 
-        tx.getDestination(token); //build decoded input
+        if (tx != null)
+        {
+            tx.getDestination(token); //build decoded input
+        }
+
         Map<String, EventResult> resultMap = eventData.getEventResultMap();
         String value = "";
         switch (eventData.eventName)
@@ -171,7 +207,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
                 }
                 break;
             default:
-                if (token != null)
+                if (token != null && tx != null)
                 {
                     value = token.isEthereum() ? token.getTransactionValue(tx, TRANSACTION_BALANCE_PRECISION) : tx.getOperationResult(token, TRANSACTION_BALANCE_PRECISION);
                 }
@@ -181,10 +217,10 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         return value;
     }
 
-    private String getTitle(TokenTransferData eventData, Transaction tx)
+    private String getTitle(TokenTransferData eventData)
     {
         //TODO: pick up item-view
-        int titleResource = eventData.getTitle(tx);
+        int titleResource = eventData.getTitle();
         if (titleResource == 0)
         {
             return eventData.eventName;

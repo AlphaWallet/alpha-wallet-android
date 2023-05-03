@@ -648,12 +648,12 @@ public class EventSync
         if (activityName.equals("receive"))
         {
             instance.where(RealmTransfer.class)
-                    .equalTo("hash", hash)
+                    .like("hash", RealmTransfer.databaseKey(token.tokenInfo.chainId, hash))
                     .findAll().deleteAllFromRealm();
         }
 
         RealmTransfer matchingEntry = instance.where(RealmTransfer.class)
-                .equalTo("hash", hash)
+                .equalTo("hash", RealmTransfer.databaseKey(token.tokenInfo.chainId, hash))
                 .equalTo("tokenAddress", token.tokenInfo.address)
                 .equalTo("eventName", activityName)
                 .equalTo("transferDetail", valueList)
@@ -662,7 +662,7 @@ public class EventSync
         if (matchingEntry == null) //prevent duplicates
         {
             matchingEntry = instance.createObject(RealmTransfer.class);
-            matchingEntry.setHash(hash);
+            matchingEntry.setHashKey(token.tokenInfo.chainId, hash);
             matchingEntry.setTokenAddress(token.tokenInfo.address);
         }
 

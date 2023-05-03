@@ -47,4 +47,6 @@ public interface TransactionRepositoryType
     RawTransaction formatRawTransaction(Web3Transaction w3Tx, long nonce, long chainId);
 
     Single<String> sendTransaction(Wallet from, RawTransaction rtx, SignatureFromKey sigData, long chainId);
+
+    Single<Transaction> fetchTransactionFromNode(String walletAddress, long chainId, String hash);
 }

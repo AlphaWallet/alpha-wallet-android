@@ -46,6 +46,7 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,6 +56,7 @@ import java.util.Map;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -67,11 +69,15 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private static final String TAG = "TXNETCLIENT";
     private final int PAGESIZE = 800;
     private final int SYNC_PAGECOUNT = 2; //how many pages to read when we first sync the account - means we store the first 1600 transactions only
-    public static final int TRANSFER_RESULT_MAX = 250; //check 200 records when we first get a new account
+    private final int TRANSFER_RESULT_MAX = 500;
     //Note: if user wants to view transactions older than this, we fetch from etherscan on demand.
     //Generally this would only happen when watching extremely active accounts for curiosity
     private final String BLOCK_ENTRY = "-erc20blockCheck-";
-    private final int AUX_DATABASE_ID = 30; //increment this to do a one off refresh the AUX database, in case of changed design etc
+    private final int AUX_DATABASE_ID = 25; //increment this to do a one off refresh the AUX database, in case of changed design etc
+
+    private final int TRANSACTION_FETCH_LIMIT = 20; //Limit on the number of transactions fetched when we receive transfer updates
+                                                    //Note that if the tx isn't fetched here, it is fetched automatically if the user scrolls down their activity list
+                                                    //This speeds up the first time account sync - potentially there may be hundreds of new transactions here
     private final String DB_RESET = BLOCK_ENTRY + AUX_DATABASE_ID;
     private final String ETHERSCAN_API_KEY;
     private final String BSC_EXPLORER_API_KEY;
@@ -413,6 +419,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      * This is the function called when a user scrolls to the bottom of a transaction list.
      * First try to provide more transactions from the stored database. If there aren't any more then populate another page (800) from etherscan
      *
+     * TODO: We should also check transfers over the same block range
+     *
      * @param svs
      * @param network
      * @param lastTxTime
@@ -481,21 +489,48 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     private EtherscanEvent[] fetchEvents(Realm instance, String walletAddress, NetworkInfo networkInfo, TransferFetchType tfType) throws JSONException
     {
         EtherscanEvent[] events;
-        //get last tokencheck
-        long lastBlockChecked = getTokenBlockRead(instance, networkInfo.chainId, tfType);
+        List<EtherscanEvent> eventList = new ArrayList<>();
+        //get oldest record
+        long lastBlockFound = getTokenBlockRead(instance, networkInfo.chainId, tfType);
 
         if (networkInfo.chainId == OKX_ID)
         {
-           events = OkLinkService.get(httpClient).getEtherscanEvents(walletAddress, lastBlockChecked, tfType);
+           events = OkLinkService.get(httpClient).getEtherscanEvents(walletAddress, lastBlockFound, tfType);
+           eventList = new ArrayList<>(Arrays.asList(events));
         }
         else
         {
-            //fetch transfers from end point
-            String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, lastBlockChecked, tfType.getValue());
-            events = getEtherscanEvents(fetchTransactions);
+            long upperBlock = 99999999999L;
+            long lowerBlock = (lastBlockFound == 0) ? 1 : lastBlockFound;
+
+            while (true)
+            {
+                String fetchTransactions = readNextTxBatch(walletAddress, networkInfo, upperBlock, lowerBlock, tfType.getValue());
+                events = getEtherscanEvents(fetchTransactions);
+
+                if (events.length == 0)
+                {
+                    break;
+                }
+
+                upperBlock = Long.parseLong(events[events.length - 1].blockNumber) - 1;
+                eventList.addAll(Arrays.asList(events));
+                if (events.length == TRANSFER_RESULT_MAX && eventList.size() > TRANSFER_RESULT_MAX)
+                {
+                    //If still above the last read, blank all following reads to avoid 'sync-holes'. The new events read above will be added on the return
+                    //TODO: See above - need to sync the lowest block here to the lowest block in the transaction reads
+                    //      This is so we can add a 'view all transactions' button which takes the user to the relevant Etherscan/Blockscout page.
+                    blankTransferData(instance, networkInfo.chainId);
+                }
+
+                if (eventList.size() > TRANSFER_RESULT_MAX || events.length < TRANSFER_RESULT_MAX)
+                {
+                    break;
+                }
+            }
         }
 
-        return events;
+        return eventList.toArray(new EtherscanEvent[0]);
     }
 
     private int processEtherscanEvents(Realm instance, String walletAddress, NetworkInfo networkInfo,
@@ -637,18 +672,17 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long currentBlock, String queryType)
+    private String readNextTxBatch(String walletAddress, NetworkInfo networkInfo, long upperBlock, long lowerBlock, String queryType)
     {
         if (TextUtils.isEmpty(networkInfo.etherscanAPI) || networkInfo.etherscanAPI.contains(COVALENT)) return JSON_EMPTY_RESULT; //Covalent transfers are handled elsewhere
         String result = JSON_EMPTY_RESULT;
-        if (currentBlock == 0) currentBlock = 1;
+        if (lowerBlock == 0) lowerBlock = 1;
 
         String fullUrl = networkInfo.etherscanAPI + "module=account&action=" + queryType +
-            "&startblock=" + currentBlock + "&endblock=9999999999" +
+            "&startblock=" + lowerBlock + "&endblock=" + upperBlock +
             "&address=" + walletAddress +
             "&page=1&offset=" + TRANSFER_RESULT_MAX +
-            "&sort=asc" + getNetworkAPIToken(networkInfo);
-
+            "&sort=desc" + getNetworkAPIToken(networkInfo);
 
         if (networkInfo.isCustom && !Utils.isValidUrl(networkInfo.etherscanAPI))
         {
@@ -1004,7 +1038,10 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             //For now; just use first token
             ev.patchFirstTokenID();
 
-            String valueList = VALUES.replace(TO_TOKEN, ev.to).replace(FROM_TOKEN, ev.from).replace(AMOUNT_TOKEN, scanAsNFT ? ev.tokenID : ev.value);
+            //Sometimes the value for TokenID in Etherscan is in the value field.
+            String tokenValue = (scanAsNFT && ev.tokenID != null) ? ev.tokenID : (ev.value != null) ? ev.value : "0";
+
+            String valueList = VALUES.replace(TO_TOKEN, ev.to).replace(FROM_TOKEN, ev.from).replace(AMOUNT_TOKEN, tokenValue);
             if (!TextUtils.isEmpty(ev.tokenValue))
             {
                 valueList = valueList + "count,uint256," + ev.tokenValue;
@@ -1023,7 +1060,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
 
         instance.executeTransaction(r -> {
-            storeTransferData(r, transferEventMap);
+            storeTransferData(r, networkInfo.chainId, transferEventMap);
             storeTransactions(r, txWriteMap, networkInfo.etherscanAPI.contains(COVALENT) ? null : txFetches); //store the transaction data and initiate tx fetch if not already known
         });
 
@@ -1074,12 +1111,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private void storeTransferData(Realm instance, Map<String, List<TransferEvent>> transferEventMap)
+    private void storeTransferData(Realm instance, long chainId, Map<String, List<TransferEvent>> transferEventMap)
     {
         for (Map.Entry<String, List<TransferEvent>> entry : transferEventMap.entrySet())
         {
             RealmTransfer realmPeek = instance.where(RealmTransfer.class)
-                    .equalTo("hash", entry.getKey())
+                    .equalTo("hash", RealmTransfer.databaseKey(chainId, entry.getKey()))
                     .findFirst();
 
             if (realmPeek != null) continue;
@@ -1088,12 +1125,23 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             for (TransferEvent thisEvent : entry.getValue())
             {
                 RealmTransfer realmTransfer = instance.createObject(RealmTransfer.class);
-                realmTransfer.setHash(entry.getKey());
+                realmTransfer.setHashKey(chainId, entry.getKey());
                 realmTransfer.setTokenAddress(thisEvent.contractAddress);
                 realmTransfer.setEventName(thisEvent.activityName);
                 realmTransfer.setTransferDetail(thisEvent.valueList);
             }
         }
+    }
+
+    private void blankTransferData(Realm instance, long chainId)
+    {
+        instance.executeTransaction(r -> {
+            RealmResults<RealmTransfer> realmTx = r.where(RealmTransfer.class)
+                    .like("hash", "*-" + chainId, Case.INSENSITIVE)
+                    .findAll();
+
+            realmTx.deleteAllFromRealm();
+        });
     }
 
     /**
@@ -1136,9 +1184,14 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      */
     private void fetchRequiredTransactions(long chainId, HashSet<String> txFetches, String walletAddress)
     {
+        int txLimitCount = 0;
         for (String txHash : txFetches)
         {
             TransactionsService.addTransactionHashFetch(txHash, chainId, walletAddress);
+            if (txLimitCount++ > TRANSACTION_FETCH_LIMIT)
+            {
+                break;
+            }
         }
     }
 

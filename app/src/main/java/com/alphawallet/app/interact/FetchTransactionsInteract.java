@@ -8,6 +8,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -70,5 +71,10 @@ public class FetchTransactionsInteract {
     public void restartTransactionService()
     {
         transactionRepository.restartService();
+    }
+
+    public Single<Transaction> fetchFromNode(String walletAddress, long chainId, String hash)
+    {
+        return transactionRepository.fetchTransactionFromNode(walletAddress, chainId, hash);
     }
 }

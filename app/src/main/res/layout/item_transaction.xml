@@ -21,6 +21,16 @@
         android:layout_gravity="center"
         android:orientation="horizontal">
 
+        <ProgressBar
+                android:id="@+id/loading_transaction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:indeterminateTint="@color/azure"
+                android:paddingEnd="@dimen/token_icon"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
         <LinearLayout
             android:id="@+id/value_layout"
             android:layout_width="wrap_content"

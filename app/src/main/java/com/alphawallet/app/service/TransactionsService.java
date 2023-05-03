@@ -135,7 +135,7 @@ public class TransactionsService
     {
         if (tokenTransferCheckCycle != null && !tokenTransferCheckCycle.isDisposed()) tokenTransferCheckCycle.dispose();
 
-        tokenTransferCheckCycle = Observable.interval(firstCycle ? START_CHECK_DELAY / 3 : (START_CHECK_DELAY * 15) + 1,
+        tokenTransferCheckCycle = Observable.interval(firstCycle ? START_CHECK_DELAY : (START_CHECK_DELAY * 15) + 1,
                         firstCycle ? CHECK_CYCLE / 3 : CHECK_CYCLE, TimeUnit.SECONDS)
                 .doOnNext(l -> checkTransfers()).subscribe();
     }
@@ -181,8 +181,12 @@ public class TransactionsService
         }
 
         long chainId = filters.get(currentChainIndex);
-        readTokenMoves(chainId); //check NFTs for same chain on next iteration or advance to next chain
-        currentChainIndex = getNextChainIndex(currentChainIndex, chainId, filters);
+        boolean initiateRead = readTokenMoves(chainId); //check NFTs for same chain on next iteration or advance to next chain
+
+        if (initiateRead)
+        {
+            currentChainIndex = getNextChainIndex(currentChainIndex, chainId, filters);
+        }
     }
 
     private int getNextChainIndex(int currentIndex, long chainId, List<Long> filters)
@@ -228,11 +232,20 @@ public class TransactionsService
         }
     }
 
-    private void readTokenMoves(long chainId)
+    private boolean readTokenMoves(long chainId)
     {
         //check if this route has combined NFT
         final NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
-        if (info == null || info.getTransferQueriesUsed().length == 0) return;
+        if (info == null || info.getTransferQueriesUsed().length == 0)
+        {
+            return true;
+        }
+
+        if (eventFetch != null && !eventFetch.isDisposed())
+        {
+            return false;
+        }
+
         TransferFetchType tfType = apiFetchProgress.get(chainId, TransferFetchType.ERC_20);
         if (tfType.ordinal() > 0)
         {
@@ -244,6 +257,8 @@ public class TransactionsService
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(count -> handleMoveCheck(info.chainId, tfType.ordinal() > 0), this::gotReadErr);
+
+        return true;
     }
 
     private void gotReadErr(Throwable e)
@@ -627,7 +642,7 @@ public class TransactionsService
         }
     }
 
-    public Single<Transaction> fetchTransaction(String currentAddress, String hash, long chainId)
+    public Single<Transaction> fetchTransaction(String currentAddress, long chainId, String hash)
     {
         return doTransactionFetch(hash, chainId)
                 .map(fetchedTx -> {

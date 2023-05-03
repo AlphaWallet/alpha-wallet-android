@@ -231,6 +231,12 @@ public class TransactionRepository implements TransactionRepositoryType
         transactionsService.startUpdateCycle();
     }
 
+    public Single<Transaction> fetchTransactionFromNode(String walletAddress, long chainId, String hash)
+    {
+        return transactionsService.fetchTransaction(walletAddress, chainId, hash)
+                .map(tx -> inDiskCache.putTransaction(new Wallet(walletAddress), tx));
+    }
+
     private Single<BigInteger> getNonceForTransaction(Web3j web3j, String wallet, long nonce)
     {
         if (nonce != -1) //use supplied nonce

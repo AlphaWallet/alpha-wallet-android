@@ -235,7 +235,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
     @Override
-    public void putTransaction(Wallet wallet, final Transaction tx)
+    public Transaction putTransaction(Wallet wallet, final Transaction tx)
     {
         try (Realm instance = realmManager.getRealmInstance(wallet))
         {
@@ -258,6 +258,8 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             //do not record
             Timber.w(e);
         }
+
+        return tx;
     }
 
     @Override

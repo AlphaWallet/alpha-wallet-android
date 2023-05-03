@@ -37,7 +37,7 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
         this.transferDetail = transferDetail;
     }
 
-    public int getTitle(Transaction tx)
+    public int getTitle()
     {
         //catch standard Token events
         switch (eventName)

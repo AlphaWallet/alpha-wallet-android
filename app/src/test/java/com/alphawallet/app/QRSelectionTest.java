@@ -175,6 +175,12 @@ public class QRSelectionTest
             {
                 return null;
             }
+
+            @Override
+            public Single<Transaction> fetchTransactionFromNode(String walletAddress, long chainId, String hash)
+            {
+                return null;
+            }
         };
 
         signatureGenerateInteract = new SignatureGenerateInteract(null)

@@ -85,8 +85,8 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         fromTokenView = false;
         transferData = data;
         String walletAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
-        token = tokensService.getToken(data.chainId, data.tokenAddress);
 
+        token = tokensService.getToken(data.chainId, data.tokenAddress);
         if (token == null)
         {
             token = tokensService.getToken(data.chainId, walletAddress);
@@ -99,6 +99,8 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         {
             disposable.dispose();
         }
+
+        tokenIcon.bindData(token, assetDefinition);
 
         //We haven't yet fetched the underlying transaction. Fetch and display
         if (tx == null)
@@ -122,7 +124,6 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         txLoad.setVisibility(View.GONE);
 
         String sym = token != null ? token.getShortSymbol() : getContext().getString(R.string.eth);
-        tokenIcon.bindData(token, assetDefinition);
         String itemView = null;
 
         if (data.getTimeStamp() % 1000 != 0)

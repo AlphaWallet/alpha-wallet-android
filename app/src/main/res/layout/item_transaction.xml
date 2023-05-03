@@ -27,7 +27,6 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:indeterminateTint="@color/azure"
-                android:paddingEnd="@dimen/token_icon"
                 android:visibility="gone"
                 tools:visibility="visible" />
 

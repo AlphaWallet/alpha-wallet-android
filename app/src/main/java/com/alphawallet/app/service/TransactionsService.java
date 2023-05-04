@@ -59,20 +59,16 @@ public class TransactionsService
     private int currentChainIndex;
     private boolean firstCycle;
     private boolean firstTxCycle;
-
     private final LongSparseArray<Long> chainTransferCheckTimes = new LongSparseArray<>(); //TODO: Use this to coordinate token checks on chains
     private final LongSparseArray<Long> chainTransactionCheckTimes = new LongSparseArray<>();
     private static final LongSparseArray<CurrentBlockTime> currentBlocks = new LongSparseArray<>();
     private static final ConcurrentLinkedQueue<String> requiredTransactions = new ConcurrentLinkedQueue<>();
-
     private final LongSparseArray<TransferFetchType> apiFetchProgress = new LongSparseArray<>();
 
     private final static int TRANSACTION_DROPPED = -1;
     private final static int TRANSACTION_SEEN = -2;
-
     private final static long START_CHECK_DELAY = 3;
     private final static long CHECK_CYCLE = 15;
-
     @Nullable
     private Disposable fetchTransactionDisposable;
     @Nullable
@@ -85,6 +81,7 @@ public class TransactionsService
     private Disposable pendingTransactionCheckCycle;
     @Nullable
     private Disposable transactionResolve;
+    private boolean fromBackground;
 
     public TransactionsService(TokensService tokensService,
                                EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
@@ -97,6 +94,12 @@ public class TransactionsService
         this.transactionsClient = transactionsClient;
         this.transactionsCache = transactionsCache;
         this.transactionNotificationService = transactionNotificationService;
+    }
+
+    public void fetchTransactionsFromBackground()
+    {
+        fromBackground = true;
+        fetchTransactions();
     }
 
     private void fetchTransactions()
@@ -450,6 +453,11 @@ public class TransactionsService
                 else
                 {
                     transactionNotificationService.showNotification(tx, token);
+                    if (fromBackground)
+                    {
+                        fromBackground = false;
+                        stopService();
+                    }
                 }
             }
         }

@@ -52,8 +52,7 @@ public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingServic
         // If recipient is active wallet, start transaction fetch
         if (body != null && body.to.equalsIgnoreCase(prefs.getCurrentWalletAddress()))
         {
-            transactionsService.resumeFocus();
-            transactionsService.restartService();
+            transactionsService.fetchTransactionsFromBackground();
         }
     }
 }

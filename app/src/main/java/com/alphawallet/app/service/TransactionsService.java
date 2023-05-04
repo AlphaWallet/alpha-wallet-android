@@ -453,7 +453,7 @@ public class TransactionsService
                 else
                 {
                     transactionNotificationService.showNotification(tx, token);
-                    if (fromBackground)
+                    if (fromBackground && !tokensService.isOnFocus())
                     {
                         fromBackground = false;
                         stopService();

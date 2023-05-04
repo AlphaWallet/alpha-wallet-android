@@ -19,6 +19,7 @@ import com.alphawallet.app.entity.transactionAPI.TransferFetchType;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
+import com.alphawallet.app.util.TransactionNotificationService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 
@@ -53,6 +54,7 @@ public class TransactionsService
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionsNetworkClientType transactionsClient;
+    private final TransactionNotificationService transactionNotificationService;
     private final TransactionLocalSource transactionsCache;
     private int currentChainIndex;
     private boolean firstCycle;
@@ -87,14 +89,14 @@ public class TransactionsService
     public TransactionsService(TokensService tokensService,
                                EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                TransactionsNetworkClientType transactionsClient,
-                               TransactionLocalSource transactionsCache)
+                               TransactionLocalSource transactionsCache,
+                               TransactionNotificationService transactionNotificationService)
     {
         this.tokensService = tokensService;
         this.ethereumNetworkRepository = ethereumNetworkRepositoryType;
         this.transactionsClient = transactionsClient;
         this.transactionsCache = transactionsCache;
-
-        fetchTransactions();
+        this.transactionNotificationService = transactionNotificationService;
     }
 
     private void fetchTransactions()
@@ -435,14 +437,20 @@ public class TransactionsService
      */
     private void checkTokens(Transaction[] txList)
     {
-        for (int i = 0; i < txList.length - 1; i++)
+        for (int i = 0; i < txList.length; i++)
         {
             Transaction tx = txList[i];
             if (!tx.hasError() && tx.hasData()) //is this a successful contract transaction?
             {
                 Token token = tokensService.getToken(tx.chainId, tx.to);
                 if (token == null && tx.to != null)
+                {
                     tokensService.addUnknownTokenToCheckPriority(new ContractAddress(tx.chainId, tx.to));
+                }
+                else
+                {
+                    transactionNotificationService.showNotification(tx, token);
+                }
             }
         }
     }

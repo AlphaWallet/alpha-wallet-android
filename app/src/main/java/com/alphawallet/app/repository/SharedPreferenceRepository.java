@@ -45,7 +45,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String SELECTED_SWAP_PROVIDERS_KEY = "selected_exchanges";
     private static final String ANALYTICS_KEY = "analytics_key";
     private static final String CRASH_REPORTING_KEY = "crash_reporting_key";
-
+    private static final String WALLET_CREATION_TIME = "wallet_creation_time";
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
     private static final String NEW_WALLET = "new_wallet_";
@@ -408,6 +408,25 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public void setCrashReportingEnabled(boolean isEnabled)
     {
         pref.edit().putBoolean(CRASH_REPORTING_KEY, isEnabled).apply();
+    }
+
+    @Override
+    public long getWalletCreationTime()
+    {
+        long creationTime = pref.getLong(WALLET_CREATION_TIME, -1);
+        if (creationTime == -1)
+        {
+            creationTime = System.currentTimeMillis() / 1000;
+            pref.edit().putLong(WALLET_CREATION_TIME, creationTime).apply();
+        }
+        return creationTime;
+
+    }
+
+    @Override
+    public void setWalletCreationTime(long walletCreationTime)
+    {
+        pref.edit().putLong(WALLET_CREATION_TIME, walletCreationTime).apply();
     }
 
     @NonNull

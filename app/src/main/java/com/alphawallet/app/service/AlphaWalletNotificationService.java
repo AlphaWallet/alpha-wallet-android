@@ -3,12 +3,14 @@ package com.alphawallet.app.service;
 import android.net.Uri;
 
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.C;
 import com.alphawallet.app.util.JsonUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -26,9 +28,28 @@ public class AlphaWalletNotificationService
     public static AlphaWalletNotificationService instance;
     private final OkHttpClient httpClient;
 
+    public AlphaWalletNotificationService()
+    {
+        this.httpClient = new OkHttpClient.Builder()
+            .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
+            .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
+            .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
+            .build();
+    }
+
     public AlphaWalletNotificationService(OkHttpClient httpClient)
     {
         this.httpClient = httpClient;
+    }
+
+    public static AlphaWalletNotificationService get()
+    {
+        if (instance == null)
+        {
+            instance = new AlphaWalletNotificationService();
+        }
+        return instance;
     }
 
     public static AlphaWalletNotificationService get(OkHttpClient httpClient)
@@ -38,22 +59,6 @@ public class AlphaWalletNotificationService
             instance = new AlphaWalletNotificationService(httpClient);
         }
         return instance;
-    }
-
-    public static String getSubscribeApiPath(String address, String chainId)
-    {
-        Uri.Builder builder = new Uri.Builder();
-        builder.encodedPath(SUBSCRIBE_API_PATH);
-        return builder.build().toString();
-    }
-
-    public static String getUnsubscribeApiPath(String address, String chainId)
-    {
-        Uri.Builder builder = new Uri.Builder();
-        builder.encodedPath(UNSUBSCRIBE_API_PATH)
-            .appendEncodedPath(address)
-            .appendEncodedPath(chainId);
-        return builder.build().toString();
     }
 
     private Request buildPostRequest(String api, RequestBody requestBody)
@@ -85,9 +90,7 @@ public class AlphaWalletNotificationService
                 ResponseBody responseBody = response.body();
                 if (responseBody != null)
                 {
-                    String res = responseBody.string();
-                    Timber.d("result ==> " + response.code() + " : " + res);
-                    return res;
+                    return responseBody.string();
                 }
             }
             else
@@ -122,8 +125,6 @@ public class AlphaWalletNotificationService
         Uri.Builder builder = new Uri.Builder();
         builder.encodedPath(SUBSCRIBE_API_PATH);
         String url = builder.build().toString();
-
-        Timber.d("request url ==> " + url);
 
         return executeRequest(buildPostRequest(url, body));
     }

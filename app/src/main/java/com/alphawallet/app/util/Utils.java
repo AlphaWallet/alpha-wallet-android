@@ -556,6 +556,28 @@ public class Utils
         }
     }
 
+    public static String formatTxHash(String txHash)
+    {
+        if (isValidTxHash(txHash))
+        {
+            txHash = Keys.toChecksumAddress(txHash);
+            String result = "";
+            String firstSix = txHash.substring(0, 6);
+            String lastSix = txHash.substring(txHash.length() - 4);
+            return result + firstSix + "..." + lastSix;
+        }
+        else
+        {
+            return "0x";
+        }
+    }
+
+    public static boolean isValidTxHash(String txHash)
+    {
+        return !TextUtils.isEmpty(txHash) &&
+            WalletUtils.isValidAddress(txHash, 64);
+    }
+
     /**
      * Just enough for diagnosis of most errors
      *

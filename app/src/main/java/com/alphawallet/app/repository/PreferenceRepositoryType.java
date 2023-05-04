@@ -123,4 +123,8 @@ public interface PreferenceRepositoryType
     boolean isCrashReportingEnabled();
 
     void setCrashReportingEnabled(boolean isEnabled);
+
+    long getWalletCreationTime();
+
+    void setWalletCreationTime(long walletCreationTime);
 }

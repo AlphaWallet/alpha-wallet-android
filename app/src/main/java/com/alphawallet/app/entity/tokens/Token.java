@@ -17,6 +17,7 @@ import com.alphawallet.app.entity.EventSync;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
+import com.alphawallet.app.entity.TransactionType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
@@ -502,6 +503,29 @@ public class Token
         }
 
         return name;
+    }
+
+    public TransactionType getTransactionType(Transaction transaction)
+    {
+        if (isEthereum() && !transaction.hasInput())
+        {
+            if (transaction.value.equals("0") && transaction.hasInput())
+            {
+                return TransactionType.CONTRACT_CALL;
+            }
+            else if (transaction.from.equalsIgnoreCase(tokenWallet))
+            {
+                return TransactionType.SEND;
+            }
+            else
+            {
+               return TransactionType.RECEIVED;
+            }
+        }
+        else
+        {
+            return transaction.getTransactionType(this, getWallet());
+        }
     }
 
     /**

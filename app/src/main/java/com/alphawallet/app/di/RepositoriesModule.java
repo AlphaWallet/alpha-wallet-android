@@ -46,6 +46,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsNetworkClient;
 import com.alphawallet.app.service.TransactionsNetworkClientType;
 import com.alphawallet.app.service.TransactionsService;
+import com.alphawallet.app.util.TransactionNotificationService;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -215,9 +216,10 @@ public class RepositoriesModule
     TransactionsService provideTransactionsServices(TokensService tokensService,
                                                     EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                                     TransactionsNetworkClientType transactionsNetworkClientType,
-                                                    TransactionLocalSource transactionLocalSource)
+                                                    TransactionLocalSource transactionLocalSource,
+                                                    TransactionNotificationService transactionNotificationService)
     {
-        return new TransactionsService(tokensService, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource);
+        return new TransactionsService(tokensService, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource, transactionNotificationService);
     }
 
     @Singleton
@@ -283,5 +285,13 @@ public class RepositoriesModule
     TokensMappingRepositoryType provideTokensMappingRepository(@ApplicationContext Context ctx)
     {
         return new TokensMappingRepository(ctx);
+    }
+
+    @Singleton
+    @Provides
+    TransactionNotificationService provideTransactionNotificationService(@ApplicationContext Context ctx,
+                                                                      PreferenceRepositoryType preferenceRepositoryType)
+    {
+        return new TransactionNotificationService(ctx, preferenceRepositoryType);
     }
 }

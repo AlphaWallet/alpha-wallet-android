@@ -23,6 +23,7 @@ import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
+import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmTransaction;
@@ -58,21 +59,57 @@ import io.realm.Realm;
 public class TransactionDetailViewModel extends BaseViewModel implements TransactionSendHandlerInterface
 {
     private final ExternalBrowserRouter externalBrowserRouter;
-
     private final FindDefaultNetworkInteract networkInteract;
     private final TokenRepositoryType tokenRepository;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final CreateTransactionInteract createTransactionInteract;
-
+    private final GenericWalletInteract genericWalletInteract;
     private final KeyService keyService;
     private final TokensService tokenService;
     private final GasService gasService;
-
+    private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<BigInteger> latestBlock = new MutableLiveData<>();
     private final MutableLiveData<Transaction> latestTx = new MutableLiveData<>();
     private final MutableLiveData<Transaction> transaction = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
+    private String walletAddress;
+    @Nullable
+    private Disposable findWalletDisposable;
+    @Nullable
+    private Disposable pendingUpdateDisposable;
+    @Nullable
+    private Disposable currentBlockUpdateDisposable;
+
+    @Inject
+    TransactionDetailViewModel(
+        GenericWalletInteract genericWalletInteract,
+        FindDefaultNetworkInteract findDefaultNetworkInteract,
+        ExternalBrowserRouter externalBrowserRouter,
+        TokenRepositoryType tokenRepository,
+        TokensService tokenService,
+        FetchTransactionsInteract fetchTransactionsInteract,
+        KeyService keyService,
+        GasService gasService,
+        CreateTransactionInteract createTransactionInteract,
+        AnalyticsServiceType analyticsService)
+    {
+        this.genericWalletInteract = genericWalletInteract;
+        this.networkInteract = findDefaultNetworkInteract;
+        this.externalBrowserRouter = externalBrowserRouter;
+        this.tokenService = tokenService;
+        this.tokenRepository = tokenRepository;
+        this.fetchTransactionsInteract = fetchTransactionsInteract;
+        this.keyService = keyService;
+        this.gasService = gasService;
+        this.createTransactionInteract = createTransactionInteract;
+        setAnalyticsService(analyticsService);
+    }
+
+    public LiveData<Wallet> wallet()
+    {
+        return wallet;
+    }
 
     public LiveData<BigInteger> latestBlock()
     {
@@ -89,37 +126,6 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
         return transaction;
     }
 
-    private String walletAddress;
-
-    @Nullable
-    private Disposable pendingUpdateDisposable;
-
-    @Nullable
-    private Disposable currentBlockUpdateDisposable;
-
-    @Inject
-    TransactionDetailViewModel(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
-            ExternalBrowserRouter externalBrowserRouter,
-            TokenRepositoryType tokenRepository,
-            TokensService tokenService,
-            FetchTransactionsInteract fetchTransactionsInteract,
-            KeyService keyService,
-            GasService gasService,
-            CreateTransactionInteract createTransactionInteract,
-            AnalyticsServiceType analyticsService)
-    {
-        this.networkInteract = findDefaultNetworkInteract;
-        this.externalBrowserRouter = externalBrowserRouter;
-        this.tokenService = tokenService;
-        this.tokenRepository = tokenRepository;
-        this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.keyService = keyService;
-        this.gasService = gasService;
-        this.createTransactionInteract = createTransactionInteract;
-        setAnalyticsService(analyticsService);
-    }
-
     public MutableLiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
@@ -130,16 +136,23 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
         return transactionError;
     }
 
-    public void prepare(final long chainId, final String walletAddr)
+    public void prepare(final long chainId)
     {
-        walletAddress = walletAddr;
+        findWalletDisposable = genericWalletInteract.find()
+            .subscribe(w -> onWallet(w, chainId), this::onError);
+    }
+
+    private void onWallet(Wallet w, long chainId)
+    {
+        wallet.postValue(w);
+        walletAddress = w.address;
         currentBlockUpdateDisposable = Observable.interval(0, 6, TimeUnit.SECONDS)
-                .doOnNext(l -> {
-                    disposable = tokenRepository.fetchLatestBlockNumber(chainId)
-                            .subscribeOn(Schedulers.io())
-                            .subscribeOn(AndroidSchedulers.mainThread())
-                            .subscribe(latestBlock::postValue, t -> this.latestBlock.postValue(BigInteger.ZERO));
-                }).subscribe();
+            .doOnNext(l -> {
+                disposable = tokenRepository.fetchLatestBlockNumber(chainId)
+                    .subscribeOn(Schedulers.io())
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(latestBlock::postValue, t -> this.latestBlock.postValue(BigInteger.ZERO));
+            }).subscribe();
     }
 
     public void showMoreDetails(Context context, Transaction transaction)
@@ -154,7 +167,7 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
     public void startPendingTimeDisplay(final String txHash)
     {
         pendingUpdateDisposable = Observable.interval(0, 1, TimeUnit.SECONDS)
-                .doOnNext(l -> displayCurrentPendingTime(txHash)).subscribe();
+            .doOnNext(l -> displayCurrentPendingTime(txHash)).subscribe();
     }
 
     //TODO: move to display new transaction
@@ -223,8 +236,10 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
 
     public void onDispose()
     {
-        if (pendingUpdateDisposable != null && !pendingUpdateDisposable.isDisposed()) pendingUpdateDisposable.dispose();
-        if (currentBlockUpdateDisposable != null && !currentBlockUpdateDisposable.isDisposed()) currentBlockUpdateDisposable.dispose();
+        if (pendingUpdateDisposable != null && !pendingUpdateDisposable.isDisposed())
+            pendingUpdateDisposable.dispose();
+        if (currentBlockUpdateDisposable != null && !currentBlockUpdateDisposable.isDisposed())
+            currentBlockUpdateDisposable.dispose();
     }
 
     public void fetchTransaction(Wallet wallet, String txHash, long chainId)
@@ -235,9 +250,9 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
             //fetch Transaction from chain
             Web3j web3j = getWeb3jService(chainId);
             disposable = EventUtils.getTransactionDetails(txHash, web3j)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(Schedulers.io())
-                    .subscribe(ethTx -> storeTx(ethTx, wallet, chainId, web3j), this::onError);
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(ethTx -> storeTx(ethTx, wallet, chainId, web3j), this::onError);
         }
         else
         {
@@ -256,11 +271,11 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
 
         org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction().get();
         disposable = EventUtils.getBlockDetails(ethTx.getBlockHash(), web3j)
-                .map(ethBlock -> new Transaction(ethTx, chainId, true, ethBlock.getBlock().getTimestamp().longValue()))
-                .map(tx -> writeTransaction(wallet, tx))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(transaction::postValue, this::onError);
+            .map(ethBlock -> new Transaction(ethTx, chainId, true, ethBlock.getBlock().getTimestamp().longValue()))
+            .map(tx -> writeTransaction(wallet, tx))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(transaction::postValue, this::onError);
     }
 
     private Transaction writeTransaction(Wallet wallet, Transaction tx)
@@ -269,8 +284,8 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
         {
             instance.beginTransaction();
             RealmTransaction realmTx = instance.where(RealmTransaction.class)
-                    .equalTo("hash", tx.hash)
-                    .findFirst();
+                .equalTo("hash", tx.hash)
+                .findFirst();
 
             if (realmTx == null) realmTx = instance.createObject(RealmTransaction.class, tx.hash);
             TransactionsRealmCache.fill(realmTx, tx);
@@ -337,5 +352,27 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
     public void transactionError(TransactionReturn error)
     {
         transactionError.postValue(error);
+    }
+
+    @Override
+    protected void onCleared()
+    {
+        super.onCleared();
+        if (disposable != null && disposable.isDisposed())
+        {
+            disposable.dispose();
+        }
+        if (findWalletDisposable != null && findWalletDisposable.isDisposed())
+        {
+            findWalletDisposable.dispose();
+        }
+        if (pendingUpdateDisposable != null && pendingUpdateDisposable.isDisposed())
+        {
+            pendingUpdateDisposable.dispose();
+        }
+        if (currentBlockUpdateDisposable != null && currentBlockUpdateDisposable.isDisposed())
+        {
+            currentBlockUpdateDisposable.dispose();
+        }
     }
 }

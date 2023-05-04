@@ -465,6 +465,27 @@ public class Transaction implements Parcelable
         return txName;
     }
 
+    public TransactionType getTransactionType(Token token, String walletAddress)
+    {
+        String txName = null;
+        if (isPending())
+        {
+            return TransactionType.UNKNOWN;
+        }
+        else if (hasInput())
+        {
+            decodeTransactionInput(walletAddress);
+            if (token.isEthereum() && shouldShowSymbol(token))
+            {
+                transactionInput.type = TransactionType.CONTRACT_CALL;
+            }
+
+            return transactionInput.type;
+        }
+
+        return TransactionType.UNKNOWN;
+    }
+
     public boolean hasInput()
     {
         return input != null && input.length() >= 10;

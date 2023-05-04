@@ -38,10 +38,8 @@ public class TransactionNotificationService
     public boolean shouldShowNotification(Transaction tx, Token t)
     {
         TransactionType txType = t.getTransactionType(tx);
-        return (
-            txType.equals(TransactionType.TRANSFER_FROM) ||
-                txType.equals(TransactionType.RECEIVED) ||
-                txType.equals(TransactionType.RECEIVE_FROM)) &&
+        return (txType.equals(TransactionType.RECEIVED) ||
+            txType.equals(TransactionType.RECEIVE_FROM)) &&
             tx.to.equalsIgnoreCase(preferenceRepository.getCurrentWalletAddress()) &&
             tx.timeStamp > preferenceRepository.getWalletCreationTime();
     }

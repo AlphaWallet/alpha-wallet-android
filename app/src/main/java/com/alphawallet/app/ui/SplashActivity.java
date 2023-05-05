@@ -116,8 +116,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         }
         else
         {
-            viewModel.setWatchOnly(wallets[0]);
-            viewModel.setCurrentWalletAddress(wallets[0].address);
+            viewModel.doWalletStartupActions(wallets[0]);
             handler.postDelayed(this, CustomViewSettings.startupDelay());
         }
     }
@@ -180,7 +179,6 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     @Override
     public void run()
     {
-        viewModel.recordWalletCreationTime();
         new HomeRouter().open(this, true);
         finish();
     }

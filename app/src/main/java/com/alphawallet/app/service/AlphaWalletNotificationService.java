@@ -4,7 +4,9 @@ import android.net.Uri;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.util.JsonUtils;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +14,9 @@ import org.json.JSONObject;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Single;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -24,41 +29,20 @@ public class AlphaWalletNotificationService
     private static final String BASE_API_URL = BuildConfig.NOTIFICATION_API_BASE_URL;
     public static final String SUBSCRIBE_API_PATH = BASE_API_URL + "/subscriptions";
     public static final String UNSUBSCRIBE_API_PATH = BASE_API_URL + "/subscriptions";
-
-    public static AlphaWalletNotificationService instance;
     private final OkHttpClient httpClient;
+    private final WalletRepositoryType walletRepository;
+    private Disposable disposable;
 
-    public AlphaWalletNotificationService()
+    public AlphaWalletNotificationService(WalletRepositoryType walletRepository)
     {
+        this.walletRepository = walletRepository;
+
         this.httpClient = new OkHttpClient.Builder()
             .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
             .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
             .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
             .build();
-    }
-
-    public AlphaWalletNotificationService(OkHttpClient httpClient)
-    {
-        this.httpClient = httpClient;
-    }
-
-    public static AlphaWalletNotificationService get()
-    {
-        if (instance == null)
-        {
-            instance = new AlphaWalletNotificationService();
-        }
-        return instance;
-    }
-
-    public static AlphaWalletNotificationService get(OkHttpClient httpClient)
-    {
-        if (instance == null)
-        {
-            instance = new AlphaWalletNotificationService(httpClient);
-        }
-        return instance;
     }
 
     private Request buildPostRequest(String api, RequestBody requestBody)
@@ -107,7 +91,7 @@ public class AlphaWalletNotificationService
         return JsonUtils.EMPTY_RESULT;
     }
 
-    public String subscribe(String address, String chainId)
+    private RequestBody buildSubscribeRequest(String address, String chainId)
     {
         RequestBody body = null;
         try
@@ -122,21 +106,80 @@ public class AlphaWalletNotificationService
             Timber.e(e);
         }
 
+        return body;
+    }
+
+    public Single<String> subscribe(long chainId)
+    {
+        return walletRepository.getDefaultWallet()
+            .flatMap(wallet -> doSubscribe(wallet.address, chainId));
+    }
+
+    private Single<String> doSubscribe(String address, long chainId)
+    {
+        subscribeToFirebaseTopic(address, chainId);
+
         Uri.Builder builder = new Uri.Builder();
         builder.encodedPath(SUBSCRIBE_API_PATH);
         String url = builder.build().toString();
 
-        return executeRequest(buildPostRequest(url, body));
+        return Single.fromCallable(() ->
+            executeRequest(buildPostRequest(url, buildSubscribeRequest(address, String.valueOf(chainId)))));
     }
 
-    public String unsubscribe(String address, String chainId)
+    public Single<String> unsubscribe(long chainId)
     {
+        return walletRepository.getDefaultWallet()
+            .flatMap(wallet -> doUnsubscribe(wallet.address, chainId));
+    }
+
+    // TODO: Delete when unsubscribe is implemented
+    public void unsubscribeToTopic(long chainId)
+    {
+        disposable = walletRepository.getDefaultWallet()
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .subscribe(wallet -> unsubscribeToFirebaseTopic(wallet.address, chainId));
+    }
+
+    public Single<String> doUnsubscribe(String address, long chainId)
+    {
+        unsubscribeToFirebaseTopic(address, chainId);
+
         Uri.Builder builder = new Uri.Builder();
         builder.encodedPath(UNSUBSCRIBE_API_PATH)
             .appendEncodedPath(address)
-            .appendEncodedPath(chainId);
+            .appendEncodedPath(String.valueOf(chainId));
         String url = builder.build().toString();
 
-        return executeRequest(buildDeleteRequest(url));
+        return Single.fromCallable(() -> executeRequest(buildDeleteRequest(url)));
+    }
+
+    private void subscribeToFirebaseTopic(String address, long chainId)
+    {
+        String topic = address + "-" + chainId;
+        FirebaseMessaging.getInstance().subscribeToTopic(topic)
+            .addOnCompleteListener(task -> {
+                String msg = "Subscribed to " + topic;
+                if (!task.isSuccessful())
+                {
+                    msg = "Subscribe failed";
+                }
+                Timber.d(msg);
+            });
+    }
+
+    public void unsubscribeToFirebaseTopic(String address, long chainId)
+    {
+        String topic = address + "-" + chainId;
+        FirebaseMessaging.getInstance().unsubscribeFromTopic(topic)
+            .addOnCompleteListener(task -> {
+                String msg = "Unsubscribed to" + topic;
+                if (!task.isSuccessful())
+                {
+                    msg = "Unsubscribe failed";
+                }
+                Timber.d(msg);
+            });
     }
 }

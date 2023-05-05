@@ -28,6 +28,7 @@ import com.alphawallet.app.repository.WalletDataRealmSource;
 import com.alphawallet.app.repository.WalletRepository;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.service.AccountKeystoreService;
+import com.alphawallet.app.service.AlphaWalletNotificationService;
 import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AnalyticsService;
 import com.alphawallet.app.service.AnalyticsServiceType;
@@ -290,8 +291,15 @@ public class RepositoriesModule
     @Singleton
     @Provides
     TransactionNotificationService provideTransactionNotificationService(@ApplicationContext Context ctx,
-                                                                      PreferenceRepositoryType preferenceRepositoryType)
+                                                                         PreferenceRepositoryType preferenceRepositoryType)
     {
         return new TransactionNotificationService(ctx, preferenceRepositoryType);
+    }
+
+    @Singleton
+    @Provides
+    AlphaWalletNotificationService provideAlphaWalletNotificationService(WalletRepositoryType walletRepository)
+    {
+        return new AlphaWalletNotificationService(walletRepository);
     }
 }

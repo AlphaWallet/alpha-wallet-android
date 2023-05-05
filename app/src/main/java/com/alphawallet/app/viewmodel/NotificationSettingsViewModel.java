@@ -1,82 +1,73 @@
 package com.alphawallet.app.viewmodel;
 
 import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AlphaWalletNotificationService;
+import com.alphawallet.app.util.JsonUtils;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
-import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 @HiltViewModel
 public class NotificationSettingsViewModel extends BaseViewModel
 {
-    private final GenericWalletInteract genericWalletInteract;
+    private final AlphaWalletNotificationService alphaWalletNotificationService;
     private final PreferenceRepositoryType preferenceRepository;
-    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<String> subscribe = new MutableLiveData<>();
-    private final MutableLiveData<String> unsubscribe = new MutableLiveData<>();
     @Nullable
     private Disposable disposable;
 
     @Inject
     NotificationSettingsViewModel(
-        GenericWalletInteract genericWalletInteract,
+        AlphaWalletNotificationService alphaWalletNotificationService,
         PreferenceRepositoryType preferenceRepository)
     {
-        this.genericWalletInteract = genericWalletInteract;
+        this.alphaWalletNotificationService = alphaWalletNotificationService;
         this.preferenceRepository = preferenceRepository;
     }
 
-    public LiveData<Wallet> defaultWallet()
+    public void subscribe(long chainId)
     {
-        return defaultWallet;
-    }
-
-    public LiveData<String> subscribe()
-    {
-        return subscribe;
-    }
-
-    public LiveData<String> unsubscribe()
-    {
-        return unsubscribe;
-    }
-
-    public void prepare()
-    {
-        disposable = genericWalletInteract
-            .find()
-            .subscribe(this::onDefaultWallet, this::onError);
-    }
-
-    private void onDefaultWallet(Wallet wallet)
-    {
-        defaultWallet.postValue(wallet);
-    }
-
-    public void subscribe(String address, String chainId)
-    {
-        disposable = Single.fromCallable(() -> AlphaWalletNotificationService.get().subscribe(address, chainId))
+        disposable = alphaWalletNotificationService.subscribe(chainId)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
-            .subscribe(subscribe::postValue, this::onError);
+            .subscribe(this::onSubscribe, this::onError);
     }
 
-    public void unsubscribe(String address, String chainId)
+    public void unsubscribe(long chainId)
     {
-        disposable = Single.fromCallable(() -> AlphaWalletNotificationService.get().unsubscribe(address, chainId))
+        disposable = alphaWalletNotificationService.unsubscribe(chainId)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
-            .subscribe(unsubscribe::postValue, this::onError);
+            .subscribe(this::onUnsubscribe, this::onError);
+    }
+
+    // TODO: Delete when unsubscribe is implemented
+    public void unsubscribeToTopic(long chainId)
+    {
+        alphaWalletNotificationService.unsubscribeToTopic(chainId);
+    }
+
+    private void onSubscribe(String result)
+    {
+        if (result.equals(JsonUtils.EMPTY_RESULT))
+        {
+            Timber.d("subscribe result => " + result);
+            // TODO: Subscribe unsuccessful
+        }
+    }
+
+    private void onUnsubscribe(String result)
+    {
+        if (result.equals(JsonUtils.EMPTY_RESULT))
+        {
+            Timber.d("unsubscribe result => " + result);
+            // TODO: Unsubscribe unsuccessful
+        }
     }
 
     public boolean getToggleState()

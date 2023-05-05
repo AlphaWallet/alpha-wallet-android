@@ -14,10 +14,9 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.viewmodel.NotificationSettingsViewModel;
 import com.alphawallet.app.widget.SettingsItemView;
-import com.google.firebase.messaging.FirebaseMessaging;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
@@ -26,15 +25,13 @@ import timber.log.Timber;
 public class NotificationSettingsActivity extends BaseActivity
 {
     private NotificationSettingsViewModel viewModel;
-    private SettingsItemView notifications;
-    private Wallet wallet;
     private final ActivityResultLauncher<String> requestPermissionLauncher =
         registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted)
             {
                 // FCM SDK (and your app) can post notifications.
                 Toast.makeText(this, "Permission granted.", Toast.LENGTH_SHORT).show();
-                viewModel.subscribe(wallet.address, "1");
+                viewModel.subscribe(1);
             }
             else
             {
@@ -42,6 +39,7 @@ public class NotificationSettingsActivity extends BaseActivity
                 Toast.makeText(this, "Permission not granted.", Toast.LENGTH_SHORT).show();
             }
         });
+    private SettingsItemView notifications;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -63,25 +61,6 @@ public class NotificationSettingsActivity extends BaseActivity
     {
         viewModel = new ViewModelProvider(this)
             .get(NotificationSettingsViewModel.class);
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-        viewModel.subscribe().observe(this, this::onSubscribe);
-        viewModel.unsubscribe().observe(this, this::onUnsubscribe);
-        viewModel.prepare();
-    }
-
-    private void onSubscribe(String result)
-    {
-        subscribe(wallet.address + "-1");
-    }
-
-    private void onUnsubscribe(String result)
-    {
-        unsubscribe(wallet.address + "-1");
-    }
-
-    private void onDefaultWallet(Wallet wallet)
-    {
-        this.wallet = wallet;
     }
 
     private void initializeSettings()
@@ -110,7 +89,7 @@ public class NotificationSettingsActivity extends BaseActivity
         }
         else
         {
-            viewModel.unsubscribe(wallet.address, "1");
+            viewModel.unsubscribeToTopic(EthereumNetworkBase.MAINNET_ID);
         }
     }
 
@@ -124,7 +103,7 @@ public class NotificationSettingsActivity extends BaseActivity
             {
                 // FCM SDK (and your app) can post notifications.
                 Timber.d("Permission granted.");
-                viewModel.subscribe(wallet.address, "1");
+                viewModel.subscribe(EthereumNetworkBase.MAINNET_ID);
             }
             else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS))
             {
@@ -142,33 +121,7 @@ public class NotificationSettingsActivity extends BaseActivity
         }
         else
         {
-            viewModel.subscribe(wallet.address, "1");
+            viewModel.subscribe(EthereumNetworkBase.MAINNET_ID);
         }
-    }
-
-    private void subscribe(String topic)
-    {
-        FirebaseMessaging.getInstance().subscribeToTopic(topic)
-            .addOnCompleteListener(task -> {
-                String msg = "Subscribed to " + topic;
-                if (!task.isSuccessful())
-                {
-                    msg = "Subscribe failed";
-                }
-                Timber.d(msg);
-            });
-    }
-
-    private void unsubscribe(String topic)
-    {
-        FirebaseMessaging.getInstance().unsubscribeFromTopic(topic)
-            .addOnCompleteListener(task -> {
-                String msg = "Unsubscribed to" + topic;
-                if (!task.isSuccessful())
-                {
-                    msg = "Unsubscribe failed";
-                }
-                Timber.d(msg);
-            });
     }
 }

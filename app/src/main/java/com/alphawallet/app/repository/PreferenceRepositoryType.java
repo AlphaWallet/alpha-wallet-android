@@ -127,4 +127,8 @@ public interface PreferenceRepositoryType
     long getWalletCreationTime();
 
     void setWalletCreationTime(long walletCreationTime);
+
+    void setFirebaseMessagingToken(String token);
+
+    String getFirebaseMessagingToken();
 }

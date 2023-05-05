@@ -18,7 +18,7 @@ public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingServic
     @Inject
     TransactionsService transactionsService;
     @Inject
-    PreferenceRepositoryType prefs;
+    PreferenceRepositoryType preferenceRepository;
 
     /**
      * There are two scenarios when onNewToken is called:
@@ -33,6 +33,7 @@ public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingServic
     public void onNewToken(@NonNull String token)
     {
 //         sendRegistrationToServer(token);
+        preferenceRepository.setFirebaseMessagingToken(token);
     }
 
     private void sendRegistrationToServer(String token)
@@ -50,7 +51,7 @@ public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingServic
         DataMessage.Body body = new Gson().fromJson(remoteMessage.getData().get("body"), DataMessage.Body.class);
 
         // If recipient is active wallet, start transaction fetch
-        if (body != null && body.to.equalsIgnoreCase(prefs.getCurrentWalletAddress()))
+        if (body != null && body.to.equalsIgnoreCase(preferenceRepository.getCurrentWalletAddress()))
         {
             transactionsService.fetchTransactionsFromBackground();
         }

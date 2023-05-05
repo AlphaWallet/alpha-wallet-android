@@ -1004,4 +1004,6 @@
     <string name="dialog_title_gas_estimation_failed">ဓာတ်ငွေ့ ခန့်မှန်းချက် မအောင်မြင်ပါ။</string>
     <string name="dialog_message_gas_estimation_failed">ဓာတ်ငွေ့ ခန့်မှန်းချက် မှားယွင်းနေသည်- \"%s\". ငွေပေးငွေယူ လုပ်ဆောင်မှု ပျက်သွားဖွယ်ရှိသည်။ အတင်းပို့ချင်တာလား။</string>
     <string name="action_proceed">ရှေ့ဆက်ပါ။</string>
+    <string name="setting_title_notification_incoming_tokens">အဝင်တိုကင်များ</string>
+    <string name="setting_description_notification_incoming_tokens">သင့်အသက်ဝင်နေသော ပိုက်ဆံအိတ်မှ တိုကင်များကို လက်ခံရရှိသည့်အခါ အကြောင်းကြားချက်များကို ပြပါ။</string>
 </resources>

@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -47,7 +46,7 @@ public class NotificationSettingsActivity extends BaseActivity
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_generic_settings);
+        setContentView(R.layout.activity_notification_settings);
 
         toolbar();
 
@@ -69,17 +68,9 @@ public class NotificationSettingsActivity extends BaseActivity
 
     private void initializeSettings(Wallet wallet)
     {
-        notifications = new SettingsItemView.Builder(this)
-            .withType(SettingsItemView.Type.TOGGLE)
-            .withIcon(R.drawable.ic_settings_notifications)
-            .withTitle(R.string.title_notifications)
-            .withListener(() -> onNotificationsClicked(wallet))
-            .build();
-
+        notifications = findViewById(R.id.setting_transaction_notification);
+        notifications.setListener(() -> onNotificationsClicked(wallet));
         notifications.setToggleState(viewModel.getToggleState(wallet.address));
-
-        LinearLayout advancedSettingsLayout = findViewById(R.id.layout);
-        advancedSettingsLayout.addView(notifications);
     }
 
     private void onNotificationsClicked(Wallet wallet)

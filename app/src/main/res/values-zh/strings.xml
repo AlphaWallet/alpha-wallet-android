@@ -970,4 +970,6 @@
     <string name="dialog_title_gas_estimation_failed">气体估计失败</string>
     <string name="dialog_message_gas_estimation_failed">气体估计错误：\"%s\"。 事务执行很可能会失败。 是否要强制发送？</string>
     <string name="action_proceed">继续</string>
+    <string name="setting_title_notification_incoming_tokens">传入令牌</string>
+    <string name="setting_description_notification_incoming_tokens">当您的活动钱包收到令牌时显示通知。</string>
 </resources>

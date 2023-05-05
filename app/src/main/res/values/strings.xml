@@ -1045,4 +1045,6 @@
     <string name="dialog_title_gas_estimation_failed">Gas Estimation Failed</string>
     <string name="dialog_message_gas_estimation_failed">Gas estimation errored: \"%s\". The transaction execution will likely fail. Do you want to force sending?</string>
     <string name="action_proceed">Proceed</string>
+    <string name="setting_title_notification_incoming_tokens">Incoming Tokens</string>
+    <string name="setting_description_notification_incoming_tokens">Show notifications when tokens are received by your active wallet.</string>
 </resources>

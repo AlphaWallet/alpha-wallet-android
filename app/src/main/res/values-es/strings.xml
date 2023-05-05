@@ -969,4 +969,6 @@
     <string name="dialog_title_gas_estimation_failed">Estimación de gas fallida</string>
     <string name="dialog_message_gas_estimation_failed">Estimación de gas con error: \"%s\". Es probable que la ejecución de la transacción falle. ¿Quieres forzar el envío?</string>
     <string name="action_proceed">Proceder</string>
+    <string name="setting_title_notification_incoming_tokens">Fichas entrantes</string>
+    <string name="setting_description_notification_incoming_tokens">Muestre notificaciones cuando su billetera activa reciba tokens.</string>
 </resources>

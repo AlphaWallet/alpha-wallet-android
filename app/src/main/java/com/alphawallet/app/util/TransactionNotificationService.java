@@ -34,28 +34,6 @@ public class TransactionNotificationService
         this.preferenceRepository = preferenceRepositoryType;
     }
 
-
-    public boolean shouldShowNotification(Transaction tx, Token t)
-    {
-        TransactionType txType = t.getTransactionType(tx);
-        return (txType.equals(TransactionType.RECEIVED) ||
-            txType.equals(TransactionType.RECEIVE_FROM)) &&
-            tx.to.equalsIgnoreCase(preferenceRepository.getCurrentWalletAddress()) &&
-            tx.timeStamp > preferenceRepository.getWalletCreationTime();
-    }
-
-    private Intent buildIntent(Transaction tx, Token t)
-    {
-        Intent intent = new Intent(context, TransactionDetailActivity.class);
-        intent.putExtra(C.EXTRA_TXHASH, tx.hash);
-        intent.putExtra(C.EXTRA_CHAIN_ID, t.tokenInfo.chainId);
-        intent.putExtra(C.EXTRA_ADDRESS, t.getAddress());
-        intent.putExtra(C.FROM_NOTIFICATION, true);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-        return intent;
-    }
-
     public void showNotification(Transaction tx, Token t)
     {
         if (!shouldShowNotification(tx, t))
@@ -86,6 +64,28 @@ public class TransactionNotificationService
         }
 
         notificationManager.notify(id, buildNotification(pendingIntent, tx, t));
+    }
+
+    public boolean shouldShowNotification(Transaction tx, Token t)
+    {
+        TransactionType txType = t.getTransactionType(tx);
+        return (txType.equals(TransactionType.RECEIVED) ||
+            txType.equals(TransactionType.RECEIVE_FROM)) &&
+            !preferenceRepository.isWatchOnly() &&
+            tx.to.equalsIgnoreCase(preferenceRepository.getCurrentWalletAddress()) &&
+            tx.timeStamp > preferenceRepository.getWalletCreationTime();
+    }
+
+    private Intent buildIntent(Transaction tx, Token t)
+    {
+        Intent intent = new Intent(context, TransactionDetailActivity.class);
+        intent.putExtra(C.EXTRA_TXHASH, tx.hash);
+        intent.putExtra(C.EXTRA_CHAIN_ID, t.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, t.getAddress());
+        intent.putExtra(C.FROM_NOTIFICATION, true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        return intent;
     }
 
     private Notification buildNotification(PendingIntent pendingIntent, Transaction tx, Token t)

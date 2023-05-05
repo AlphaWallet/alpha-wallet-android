@@ -16,6 +16,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingService
 {
     @Inject
+    TokensService tokensService;
+    @Inject
     TransactionsService transactionsService;
     @Inject
     PreferenceRepositoryType preferenceRepository;
@@ -50,8 +52,10 @@ public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingServic
         super.onMessageReceived(remoteMessage);
         DataMessage.Body body = new Gson().fromJson(remoteMessage.getData().get("body"), DataMessage.Body.class);
 
-        // If recipient is active wallet, start transaction fetch
-        if (body != null && body.to.equalsIgnoreCase(preferenceRepository.getCurrentWalletAddress()))
+        // If recipient is active wallet and app is on background, fetch transactions
+        if (body != null &&
+            body.to.equalsIgnoreCase(preferenceRepository.getCurrentWalletAddress()) &&
+            !tokensService.isOnFocus())
         {
             transactionsService.fetchTransactionsFromBackground();
         }

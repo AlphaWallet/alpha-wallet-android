@@ -4,7 +4,6 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AlphaWalletNotificationService;
-import com.alphawallet.app.util.JsonUtils;
 
 import javax.inject.Inject;
 
@@ -35,7 +34,7 @@ public class NotificationSettingsViewModel extends BaseViewModel
         disposable = alphaWalletNotificationService.subscribe(chainId)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
-            .subscribe(this::onSubscribe, this::onError);
+            .subscribe(result -> Timber.d("subscribe result => " + result), Timber::e);
     }
 
     public void unsubscribe(long chainId)
@@ -43,31 +42,13 @@ public class NotificationSettingsViewModel extends BaseViewModel
         disposable = alphaWalletNotificationService.unsubscribe(chainId)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
-            .subscribe(this::onUnsubscribe, this::onError);
+            .subscribe(result -> Timber.d("unsubscribe result => " + result), Timber::e);
     }
 
     // TODO: Delete when unsubscribe is implemented
     public void unsubscribeToTopic(long chainId)
     {
         alphaWalletNotificationService.unsubscribeToTopic(chainId);
-    }
-
-    private void onSubscribe(String result)
-    {
-        if (result.equals(JsonUtils.EMPTY_RESULT))
-        {
-            Timber.d("subscribe result => " + result);
-            // TODO: Subscribe unsuccessful
-        }
-    }
-
-    private void onUnsubscribe(String result)
-    {
-        if (result.equals(JsonUtils.EMPTY_RESULT))
-        {
-            Timber.d("unsubscribe result => " + result);
-            // TODO: Unsubscribe unsuccessful
-        }
     }
 
     public boolean getToggleState()

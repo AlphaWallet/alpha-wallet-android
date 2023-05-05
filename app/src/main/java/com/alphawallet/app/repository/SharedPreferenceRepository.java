@@ -19,7 +19,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String DEFAULT_NETWORK_NAME_KEY = "default_network_name";
     private static final String NETWORK_FILTER_KEY = "network_filters";
     private static final String CUSTOM_NETWORKS_KEY = "custom_networks";
-    private static final String NOTIFICATIONS_KEY = "notifications";
+    private static final String TRANSACTION_NOTIFICATIONS_ENABLED = "transaction_notifications_enabled";
     private static final String THEME_KEY = "theme";
     private static final String DEFAULT_SET_KEY = "default_net_set";
     private static final String LOCALE_KEY = "locale";
@@ -118,16 +118,6 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public String getNetworkFilterList()
     {
         return pref.getString(NETWORK_FILTER_KEY, "");
-    }
-
-    @Override
-    public boolean getNotificationsState() {
-        return pref.getBoolean(NOTIFICATIONS_KEY, true);
-    }
-
-    @Override
-    public void setNotificationState(boolean state) {
-        pref.edit().putBoolean(NOTIFICATIONS_KEY, state).apply();
     }
 
     @Override
@@ -367,13 +357,13 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public boolean isNewWallet(String address)
     {
-        return pref.getBoolean(keyOf(address), false);
+        return pref.getBoolean(getAddressKey(NEW_WALLET, address), false);
     }
 
     @Override
     public void setNewWallet(String address, boolean isNewWallet)
     {
-        pref.edit().putBoolean(keyOf(address), isNewWallet).apply();
+        pref.edit().putBoolean(getAddressKey(NEW_WALLET, address), isNewWallet).apply();
     }
 
     @Override
@@ -456,9 +446,19 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         pref.edit().putLong(WALLET_CREATION_TIME, walletCreationTime).apply();
     }
 
+    @Override
+    public boolean isTransactionNotificationsEnabled(String address) {
+        return pref.getBoolean(getAddressKey(TRANSACTION_NOTIFICATIONS_ENABLED, address), true);
+    }
+
+    @Override
+    public void setTransactionNotificationEnabled(String address, boolean state) {
+        pref.edit().putBoolean(getAddressKey(TRANSACTION_NOTIFICATIONS_ENABLED, address), state).apply();
+    }
+
     @NonNull
-    private String keyOf(String address)
+    private String getAddressKey(String key, String address)
     {
-        return NEW_WALLET + address.toLowerCase(Locale.ENGLISH);
+        return key + address.toLowerCase(Locale.ENGLISH);
     }
 }

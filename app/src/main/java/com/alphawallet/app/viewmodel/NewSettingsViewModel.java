@@ -112,16 +112,6 @@ public class NewSettingsViewModel extends BaseViewModel
         manageWalletsRouter.open(context, clearStack);
     }
 
-    public boolean getNotificationState()
-    {
-        return preferenceRepository.getNotificationsState();
-    }
-
-    public void setNotificationState(boolean notificationState)
-    {
-        preferenceRepository.setNotificationState(notificationState);
-    }
-
     @Override
     protected void onCleared()
     {

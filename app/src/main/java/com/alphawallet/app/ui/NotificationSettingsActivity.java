@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.viewmodel.NotificationSettingsViewModel;
 import com.alphawallet.app.widget.SettingsItemView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
@@ -53,37 +54,40 @@ public class NotificationSettingsActivity extends BaseActivity
         setTitle(getString(R.string.title_notifications));
 
         initViewModel();
-
-        initializeSettings();
     }
 
     private void initViewModel()
     {
-        viewModel = new ViewModelProvider(this)
-            .get(NotificationSettingsViewModel.class);
+        viewModel = new ViewModelProvider(this).get(NotificationSettingsViewModel.class);
+        viewModel.wallet().observe(this, this::onWallet);
     }
 
-    private void initializeSettings()
+    private void onWallet(Wallet wallet)
+    {
+        initializeSettings(wallet);
+    }
+
+    private void initializeSettings(Wallet wallet)
     {
         notifications = new SettingsItemView.Builder(this)
             .withType(SettingsItemView.Type.TOGGLE)
             .withIcon(R.drawable.ic_settings_notifications)
             .withTitle(R.string.title_notifications)
-            .withListener(this::onNotificationsClicked)
+            .withListener(() -> onNotificationsClicked(wallet))
             .build();
 
-        notifications.setToggleState(viewModel.getToggleState());
+        notifications.setToggleState(viewModel.getToggleState(wallet.address));
 
         LinearLayout advancedSettingsLayout = findViewById(R.id.layout);
         advancedSettingsLayout.addView(notifications);
     }
 
-    private void onNotificationsClicked()
+    private void onNotificationsClicked(Wallet wallet)
     {
-        boolean isEnabled = viewModel.getToggleState();
+        boolean isEnabled = viewModel.getToggleState(wallet.address);
         notifications.setToggleState(!isEnabled);
-        viewModel.setToggleState(!isEnabled);
-        if (viewModel.getToggleState())
+        viewModel.setToggleState(wallet.address, !isEnabled);
+        if (viewModel.getToggleState(wallet.address))
         {
             askNotificationPermission();
         }

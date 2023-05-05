@@ -22,10 +22,6 @@ public interface PreferenceRepositoryType
 
     void setCustomRPCNetworks(String networks);
 
-    boolean getNotificationsState();
-
-    void setNotificationState(boolean state);
-
     String getDefaultLocale();
 
     boolean isFindWalletAddressDialogShown();
@@ -134,4 +130,8 @@ public interface PreferenceRepositoryType
     void setFirebaseMessagingToken(String token);
 
     String getFirebaseMessagingToken();
+
+    boolean isTransactionNotificationsEnabled(String address);
+
+    void setTransactionNotificationEnabled(String address, boolean isEnabled);
 }

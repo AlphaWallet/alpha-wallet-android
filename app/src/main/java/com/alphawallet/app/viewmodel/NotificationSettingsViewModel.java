@@ -1,7 +1,11 @@
 package com.alphawallet.app.viewmodel;
 
 import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AlphaWalletNotificationService;
 
@@ -15,18 +19,39 @@ import timber.log.Timber;
 @HiltViewModel
 public class NotificationSettingsViewModel extends BaseViewModel
 {
+    private final GenericWalletInteract genericWalletInteract;
     private final AlphaWalletNotificationService alphaWalletNotificationService;
     private final PreferenceRepositoryType preferenceRepository;
+
+    private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
+    @Nullable
+    private Disposable findWalletDisposable;
     @Nullable
     private Disposable disposable;
 
     @Inject
     NotificationSettingsViewModel(
+        GenericWalletInteract genericWalletInteract,
         AlphaWalletNotificationService alphaWalletNotificationService,
         PreferenceRepositoryType preferenceRepository)
     {
+        this.genericWalletInteract = genericWalletInteract;
         this.alphaWalletNotificationService = alphaWalletNotificationService;
         this.preferenceRepository = preferenceRepository;
+
+        prepare();
+    }
+
+    public LiveData<Wallet> wallet()
+    {
+        return wallet;
+    }
+
+    private void prepare()
+    {
+        findWalletDisposable = genericWalletInteract
+            .find()
+            .subscribe(wallet::setValue, this::onError);
     }
 
     public void subscribe(long chainId)
@@ -51,14 +76,14 @@ public class NotificationSettingsViewModel extends BaseViewModel
         alphaWalletNotificationService.unsubscribeToTopic(chainId);
     }
 
-    public boolean getToggleState()
+    public boolean getToggleState(String address)
     {
-        return preferenceRepository.getNotificationsState();
+        return preferenceRepository.isTransactionNotificationsEnabled(address);
     }
 
-    public void setToggleState(boolean state)
+    public void setToggleState(String address, boolean state)
     {
-        preferenceRepository.setNotificationState(state);
+        preferenceRepository.setTransactionNotificationEnabled(address, state);
     }
 
     @Override

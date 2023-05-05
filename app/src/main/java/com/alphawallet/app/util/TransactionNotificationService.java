@@ -68,11 +68,14 @@ public class TransactionNotificationService
 
     public boolean shouldShowNotification(Transaction tx, Token t)
     {
+        String walletAddress = preferenceRepository.getCurrentWalletAddress();
         TransactionType txType = t.getTransactionType(tx);
+
         return (txType.equals(TransactionType.RECEIVED) ||
             txType.equals(TransactionType.RECEIVE_FROM)) &&
             !preferenceRepository.isWatchOnly() &&
-            tx.to.equalsIgnoreCase(preferenceRepository.getCurrentWalletAddress()) &&
+            preferenceRepository.isTransactionNotificationsEnabled(walletAddress) &&
+            tx.to.equalsIgnoreCase(walletAddress) &&
             tx.timeStamp > preferenceRepository.getWalletCreationTime();
     }
 

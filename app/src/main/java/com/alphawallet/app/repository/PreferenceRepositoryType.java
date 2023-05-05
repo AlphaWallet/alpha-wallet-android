@@ -111,6 +111,9 @@ public interface PreferenceRepositoryType
     boolean isNewWallet(String address);
 
     void setNewWallet(String address, boolean isNewWallet);
+    void setWatchOnly(boolean watchOnly);
+
+    boolean isWatchOnly();
 
     Set<String> getSelectedSwapProviders();
 

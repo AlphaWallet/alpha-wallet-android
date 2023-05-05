@@ -50,6 +50,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
     private static final String NEW_WALLET = "new_wallet_";
+    private static final String WATCH_ONLY = "watch_only";
 
     private final SharedPreferences pref;
 
@@ -373,6 +374,18 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public void setNewWallet(String address, boolean isNewWallet)
     {
         pref.edit().putBoolean(keyOf(address), isNewWallet).apply();
+    }
+
+    @Override
+    public boolean isWatchOnly()
+    {
+        return pref.getBoolean(WATCH_ONLY, false);
+    }
+
+    @Override
+    public void setWatchOnly(boolean watchOnly)
+    {
+        pref.edit().putBoolean(WATCH_ONLY, watchOnly).apply();
     }
 
     @Override

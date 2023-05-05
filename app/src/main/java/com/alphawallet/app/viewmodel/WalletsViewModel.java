@@ -209,6 +209,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
      */
     public void changeDefaultWallet(Wallet wallet)
     {
+        preferenceRepository.setWatchOnly(wallet.type == WalletType.WATCH);
         preferenceRepository.setNewWallet(wallet.address, false);
         disposable = setDefaultWalletInteract
                 .set(wallet)

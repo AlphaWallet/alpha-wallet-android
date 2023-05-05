@@ -181,4 +181,9 @@ public class SplashViewModel extends BaseViewModel
     {
         preferenceRepository.setCurrentWalletAddress(address);
     }
+
+    public void setWatchOnly(Wallet wallet)
+    {
+        preferenceRepository.setWatchOnly(wallet.type == WalletType.WATCH);
+    }
 }

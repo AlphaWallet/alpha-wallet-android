@@ -397,6 +397,7 @@ public class WalletsActivity extends BaseActivity implements
      */
     private void onNewWalletCreated(Wallet wallet)
     {
+        viewModel.subscribeToNotifications();
         updateCurrentWallet(wallet);
         hideToolbar();
         callNewWalletPage(wallet);
@@ -408,6 +409,7 @@ public class WalletsActivity extends BaseActivity implements
      */
     private void walletChanged(Wallet wallet)
     {
+        viewModel.subscribeToNotifications();
         updateCurrentWallet(wallet);
         viewModel.showHome(this);
     }

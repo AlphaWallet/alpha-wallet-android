@@ -76,7 +76,7 @@ public class NodeStatusAdapter extends RecyclerView.Adapter<NodeStatusAdapter.Vi
             else
             {
                 holder.status.setBackgroundResource(R.drawable.ic_node_not_responding);
-                holder.status.setTag(R.drawable.ic_node_not_responding);
+                holder.status.setTag(404);
             }
             holder.status.setVisibility(View.VISIBLE);
             holder.loader.setVisibility(View.GONE);

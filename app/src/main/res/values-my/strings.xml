@@ -1006,4 +1006,5 @@
     <string name="action_proceed">ရှေ့ဆက်ပါ။</string>
     <string name="setting_title_notification_incoming_tokens">အဝင်တိုကင်များ</string>
     <string name="setting_description_notification_incoming_tokens">သင့်အသက်ဝင်နေသော ပိုက်ဆံအိတ်မှ တိုကင်များကို လက်ခံရရှိသည့်အခါ အကြောင်းကြားချက်များကို ပြပါ။</string>
+    <string name="notification_message_incoming_token">Wallet %1s သည် %3s ထံမှ %2s ကို လက်ခံရရှိခဲ့သည်။ ငွေပေးငွေယူအသေးစိတ်များကိုကြည့်ရန် ဤနေရာကို တို့ပါ။</string>
 </resources>

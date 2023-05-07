@@ -985,4 +985,5 @@
     <string name="action_proceed">Procéder</string>
     <string name="setting_title_notification_incoming_tokens">Jetons entrants</string>
     <string name="setting_description_notification_incoming_tokens">Afficher les notifications lorsque les jetons sont reçus par votre portefeuille actif.</string>
+    <string name="notification_message_incoming_token">Le portefeuille %1s a reçu %2s de %3s. Appuyez ici pour afficher les détails de la transaction.</string>
 </resources>

@@ -972,4 +972,5 @@
     <string name="action_proceed">继续</string>
     <string name="setting_title_notification_incoming_tokens">传入令牌</string>
     <string name="setting_description_notification_incoming_tokens">当您的活动钱包收到令牌时显示通知。</string>
+    <string name="notification_message_incoming_token">钱包 %1s 已从 %3s 收到 %2s。 点击此处查看交易详情。</string>
 </resources>

@@ -1047,4 +1047,5 @@
     <string name="action_proceed">Proceed</string>
     <string name="setting_title_notification_incoming_tokens">Incoming Tokens</string>
     <string name="setting_description_notification_incoming_tokens">Show notifications when tokens are received by your active wallet.</string>
+    <string name="notification_message_incoming_token">Wallet %1s has received %2s from %3s. Tap here to view transaction details.</string>
 </resources>

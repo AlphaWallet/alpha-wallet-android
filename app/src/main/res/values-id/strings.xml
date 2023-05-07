@@ -975,4 +975,5 @@
     <string name="action_proceed">Melanjutkan</string>
     <string name="setting_title_notification_incoming_tokens">Token Masuk</string>
     <string name="setting_description_notification_incoming_tokens">Tampilkan pemberitahuan saat token diterima oleh dompet aktif Anda.</string>
+    <string name="notification_message_incoming_token">Dompet %1s telah menerima %2s dari %3s. Ketuk di sini untuk melihat detail transaksi.</string>
 </resources>

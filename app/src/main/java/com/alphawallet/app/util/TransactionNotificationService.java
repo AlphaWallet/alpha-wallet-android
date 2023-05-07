@@ -115,8 +115,10 @@ public class TransactionNotificationService
 
     private String getBody(Transaction tx, Token t)
     {
-        String body = "Tap here to view transaction details.";
-
-        return body;
+        return context.getString(R.string.notification_message_incoming_token,
+            Utils.formatAddress(preferenceRepository.getCurrentWalletAddress()),
+            t.getTransactionResultValue(tx),
+            Utils.formatAddress(tx.from)
+        );
     }
 }

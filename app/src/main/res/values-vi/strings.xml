@@ -985,4 +985,5 @@
     <string name="action_proceed">Tiếp tục</string>
     <string name="setting_title_notification_incoming_tokens">Mã thông báo đến</string>
     <string name="setting_description_notification_incoming_tokens">Hiển thị thông báo khi ví hoạt động của bạn nhận được mã thông báo.</string>
+    <string name="notification_message_incoming_token">Ví %1s đã nhận được %2s từ %3s. Nhấn vào đây để xem chi tiết giao dịch.</string>
 </resources>

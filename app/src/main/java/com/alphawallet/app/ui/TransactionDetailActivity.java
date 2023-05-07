@@ -33,6 +33,7 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
@@ -101,6 +102,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     private String txHash;
     private long chainId;
     private String tokenAddress;
+    private boolean isFromNotification;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -119,6 +121,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         txHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
         chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         tokenAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        isFromNotification = getIntent().getBooleanExtra(C.FROM_NOTIFICATION, false);
 
         viewModel.prepare(chainId);
     }
@@ -358,7 +361,11 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        if (item.getItemId() == R.id.action_share)
+        if (item.getItemId() == android.R.id.home)
+        {
+            onBackPressed();
+        }
+        else if (item.getItemId() == R.id.action_share)
         {
             viewModel.shareTransactionDetail(this, transaction);
         }
@@ -543,5 +550,18 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         });
         dialog.show();
         confirmationDialog.dismiss();
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        if (isFromNotification)
+        {
+            new HomeRouter().open(this, true);
+        }
+        else
+        {
+            super.onBackPressed();
+        }
     }
 }

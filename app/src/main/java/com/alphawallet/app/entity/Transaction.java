@@ -402,6 +402,25 @@ public class Transaction implements Parcelable
     }
 
     /**
+     * Returns operation without the need for precision
+     *
+     */
+    public String getOperationResult(Token token)
+    {
+        //get amount here. will be amount + symbol if appropriate
+        if (hasInput())
+        {
+            decodeTransactionInput(token.getWallet());
+            String value = transactionInput.getOperationValue(token, this);
+            return value;
+        }
+        else
+        {
+            return token.getTransactionValue(this);
+        }
+    }
+
+    /**
      * Can the contract call be valid if the operation token is Ethereum?
      *
      * @param token

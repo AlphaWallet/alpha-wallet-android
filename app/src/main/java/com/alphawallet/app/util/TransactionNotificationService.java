@@ -110,15 +110,7 @@ public class TransactionNotificationService
 
     private String getTitle(Transaction tx, Token t)
     {
-        String formattedBal = "";
-        if (t.isEthereum() || t.isERC20())
-        {
-            formattedBal = BalanceUtils.getScaledValue(tx.value, t.tokenInfo.decimals);
-        }
-
-        String title = t.getOperationName(tx, context) + " " + formattedBal + " " + t.getSymbol();
-
-        return title;
+        return t.getOperationName(tx, context) + " " + t.getTransactionResultValue(tx);
     }
 
     private String getBody(Transaction tx, Token t)

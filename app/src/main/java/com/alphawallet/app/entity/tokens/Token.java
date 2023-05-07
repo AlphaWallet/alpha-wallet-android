@@ -611,6 +611,40 @@ public class Token
         }
     }
 
+    /**
+     * Returns transaction result value without the need for precision
+     *
+     */
+    public String getTransactionResultValue(Transaction transaction)
+    {
+        if (isEthereum() && !transaction.hasInput())
+        {
+            //basic eth transaction
+            return getTransactionValue(transaction) + " " + getSymbol();
+        }
+        else if (transaction.hasInput())
+        {
+            //smart contract call
+            return transaction.getOperationResult(this);
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    /**
+     * Returns non-prefixed transaction value without the need for precision
+     *
+     */
+    public String getTransactionValue(Transaction transaction)
+    {
+        if (transaction.hasError()) return "";
+        else if (transaction.value.equals("0") || transaction.value.equals("0x0")) return "0";
+        return BalanceUtils.getScaledValue(transaction.value, tokenInfo.decimals);
+    }
+
+
     public boolean shouldShowSymbol(Transaction transaction)
     {
         return ((isEthereum() && !transaction.hasInput()) || (transaction.shouldShowSymbol(this)));

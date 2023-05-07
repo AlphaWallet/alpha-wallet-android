@@ -3,8 +3,6 @@ package com.alphawallet.token.entity;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.ethereum.NetworkInfo;
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
@@ -61,10 +59,6 @@ public class MagicLinkInfo
                 return xDaiMagicLinkDomain;
             case (int)GOERLI_ID:
                 return goerliMagicLinkDomain;
-            case (int)ARTIS_SIGMA1_ID:
-                return artisSigma1MagicLinkDomain;
-            case (int)ARTIS_TAU1_ID:
-                return artisTau1MagicLinkDomain;
         }
     }
 
@@ -83,10 +77,6 @@ public class MagicLinkInfo
                 return GNOSIS_ID;
             case goerliMagicLinkDomain:
                 return GOERLI_ID;
-            case artisSigma1MagicLinkDomain:
-                return ARTIS_SIGMA1_ID;
-            case artisTau1MagicLinkDomain:
-                return ARTIS_TAU1_ID;
         }
     }
 
@@ -102,10 +92,6 @@ public class MagicLinkInfo
                 return xDaiEtherscan;
             case (int)GOERLI_ID:
                 return goerliEtherscan;
-            case (int)ARTIS_SIGMA1_ID:
-                return artisSigma1Etherscan;
-            case (int)ARTIS_TAU1_ID:
-                return artisTau1Etherscan;
         }
     }
 

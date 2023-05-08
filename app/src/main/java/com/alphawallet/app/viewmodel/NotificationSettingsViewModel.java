@@ -81,9 +81,9 @@ public class NotificationSettingsViewModel extends BaseViewModel
         return preferenceRepository.isTransactionNotificationsEnabled(address);
     }
 
-    public void setToggleState(String address, boolean state)
+    public void setToggleState(String address, boolean enabled)
     {
-        preferenceRepository.setTransactionNotificationEnabled(address, state);
+        preferenceRepository.setTransactionNotificationEnabled(address, enabled);
     }
 
     @Override

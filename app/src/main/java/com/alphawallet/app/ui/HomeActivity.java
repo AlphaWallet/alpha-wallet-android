@@ -145,9 +145,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             else
             {
-                // TODO: Inform user that that your app will not show notifications.
                 Toast.makeText(this, getString(R.string.message_deny_request_post_notifications_permission), Toast.LENGTH_LONG).show();
-                viewModel.unsubscribeToNotifications();
             }
         });
 
@@ -361,7 +359,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void onDefaultWallet(Wallet wallet)
     {
-        // TODO: Uncomment once backend service is implemented
+        // TODO: [Notifications] Uncomment once backend service is implemented
 //        if (!viewModel.isWatchOnlyWallet() && !viewModel.isPostNotificationsPermissionRequested(wallet.address))
 //        {
 //            viewModel.setPostNotificationsPermissionRequested(wallet.address);
@@ -1314,7 +1312,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     this,
                     Manifest.permission.POST_NOTIFICATIONS,
                     ok -> requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS),
-                    cancel -> viewModel.unsubscribeToNotifications()
+                    cancel -> {}
                 );
             }
             else

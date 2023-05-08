@@ -70,7 +70,7 @@ public class NotificationSettingsViewModel extends BaseViewModel
             .subscribe(result -> Timber.d("unsubscribe result => " + result), Timber::e);
     }
 
-    // TODO: Delete when unsubscribe is implemented
+    // TODO: [Notifications] Delete when unsubscribe is implemented
     public void unsubscribeToTopic(long chainId)
     {
         alphaWalletNotificationService.unsubscribeToTopic(chainId);

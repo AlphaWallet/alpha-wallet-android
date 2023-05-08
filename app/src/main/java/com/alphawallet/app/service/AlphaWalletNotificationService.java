@@ -133,7 +133,7 @@ public class AlphaWalletNotificationService
             .flatMap(wallet -> doUnsubscribe(wallet.address, chainId));
     }
 
-    // TODO: Delete when unsubscribe is implemented
+    // TODO: [Notifications] Delete when unsubscribe is implemented
     public void unsubscribeToTopic(long chainId)
     {
         disposable = walletRepository.getDefaultWallet()

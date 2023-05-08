@@ -16,9 +16,11 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.util.PermissionUtils;
 import com.alphawallet.app.viewmodel.NotificationSettingsViewModel;
 import com.alphawallet.app.widget.PermissionRationaleDialog;
 import com.alphawallet.app.widget.SettingsItemView;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -79,45 +81,16 @@ public class NotificationSettingsActivity extends BaseActivity
         viewModel.setTransactionNotificationsEnabled(wallet.address, !isEnabled);
 
         // TODO: [Notifications] Uncomment when backend service is implemented
-//        if (viewModel.getToggleState(wallet.address))
+//        if (viewModel.isTransactionNotificationsEnabled(wallet.address))
 //        {
-//            requestPostNotificationsPermission();
+//            if (PermissionUtils.requestPostNotificationsPermission(this, requestPermissionLauncher))
+//            {
+//                viewModel.subscribe(MAINNET_ID);
+//            }
 //        }
 //        else
 //        {
 //            viewModel.unsubscribeToTopic(EthereumNetworkBase.MAINNET_ID);
 //        }
-    }
-
-    private void requestPostNotificationsPermission()
-    {
-        // This is only necessary for API level >= 33 (TIRAMISU)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-        {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-                PackageManager.PERMISSION_GRANTED)
-            {
-                // FCM SDK (and your app) can post notifications.
-                viewModel.subscribe(MAINNET_ID);
-            }
-            else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS))
-            {
-                PermissionRationaleDialog.show(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS,
-                    ok -> requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS),
-                    cancel -> {}
-                );
-            }
-            else
-            {
-                // Directly ask for the permission
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-            }
-        }
-        else
-        {
-            viewModel.subscribe(MAINNET_ID);
-        }
     }
 }

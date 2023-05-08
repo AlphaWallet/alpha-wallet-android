@@ -75,6 +75,7 @@ import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.util.PermissionUtils;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
@@ -85,7 +86,6 @@ import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
-import com.alphawallet.app.widget.PermissionRationaleDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -363,7 +363,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 //        if (!viewModel.isWatchOnlyWallet() && !viewModel.isPostNotificationsPermissionRequested(wallet.address))
 //        {
 //            viewModel.setPostNotificationsPermissionRequested(wallet.address);
-//            requestPostNotificationsPermission();
+//            if (PermissionUtils.requestPostNotificationsPermission(this, requestPermissionLauncher))
+//            {
+//                viewModel.subscribeToNotifications();
+//            }
 //        }
 
         if (viewModel.checkNewWallet(wallet.address))
@@ -1293,37 +1296,5 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         ((WalletFragment)getFragment(WALLET)).importAttestation(attestation);
-    }
-
-    private void requestPostNotificationsPermission()
-    {
-        // This is only necessary for API level >= 33 (TIRAMISU)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-        {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-                PackageManager.PERMISSION_GRANTED)
-            {
-                // FCM SDK (and your app) can post notifications.
-                viewModel.subscribeToNotifications();
-            }
-            else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS))
-            {
-                PermissionRationaleDialog.show(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS,
-                    ok -> requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS),
-                    cancel -> {}
-                );
-            }
-            else
-            {
-                // Directly ask for the permission
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-            }
-        }
-        else
-        {
-            viewModel.subscribeToNotifications();
-        }
     }
 }

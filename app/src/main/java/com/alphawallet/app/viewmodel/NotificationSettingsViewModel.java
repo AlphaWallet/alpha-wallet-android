@@ -94,5 +94,9 @@ public class NotificationSettingsViewModel extends BaseViewModel
         {
             disposable.dispose();
         }
+        if (findWalletDisposable != null)
+        {
+            findWalletDisposable.dispose();
+        }
     }
 }

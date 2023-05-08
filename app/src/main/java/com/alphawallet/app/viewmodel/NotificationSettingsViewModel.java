@@ -76,12 +76,12 @@ public class NotificationSettingsViewModel extends BaseViewModel
         alphaWalletNotificationService.unsubscribeToTopic(chainId);
     }
 
-    public boolean getToggleState(String address)
+    public boolean isTransactionNotificationsEnabled(String address)
     {
         return preferenceRepository.isTransactionNotificationsEnabled(address);
     }
 
-    public void setToggleState(String address, boolean enabled)
+    public void setTransactionNotificationsEnabled(String address, boolean enabled)
     {
         preferenceRepository.setTransactionNotificationEnabled(address, enabled);
     }

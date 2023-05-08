@@ -86,7 +86,7 @@ public class WalletActionsViewModel extends BaseViewModel
     {
         // TODO: [Notifications] Reactivate this when unsubscribe is implemented
 //        notificationDisposable =
-//            alphaWalletNotificationService.unsubscribe(1)
+//            alphaWalletNotificationService.unsubscribe(EthereumNetworkBase.MAINNET_ID)
 //                .observeOn(Schedulers.io())
 //                .subscribeOn(Schedulers.io())
 //                .subscribe(result -> Timber.d("unsubscribe result => " + result), Timber::e);

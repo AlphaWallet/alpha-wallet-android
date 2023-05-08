@@ -19,7 +19,6 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.viewmodel.NotificationSettingsViewModel;
 import com.alphawallet.app.widget.PermissionRationaleDialog;
 import com.alphawallet.app.widget.SettingsItemView;
-import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -70,14 +69,14 @@ public class NotificationSettingsActivity extends BaseActivity
     {
         notifications = findViewById(R.id.setting_transaction_notification);
         notifications.setListener(() -> onNotificationsClicked(wallet));
-        notifications.setToggleState(viewModel.getToggleState(wallet.address));
+        notifications.setToggleState(viewModel.isTransactionNotificationsEnabled(wallet.address));
     }
 
     private void onNotificationsClicked(Wallet wallet)
     {
-        boolean isEnabled = viewModel.getToggleState(wallet.address);
+        boolean isEnabled = viewModel.isTransactionNotificationsEnabled(wallet.address);
         notifications.setToggleState(!isEnabled);
-        viewModel.setToggleState(wallet.address, !isEnabled);
+        viewModel.setTransactionNotificationsEnabled(wallet.address, !isEnabled);
 
         // TODO: [Notifications] Uncomment when backend service is implemented
 //        if (viewModel.getToggleState(wallet.address))

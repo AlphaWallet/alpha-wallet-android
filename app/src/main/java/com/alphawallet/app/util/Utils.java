@@ -547,8 +547,8 @@ public class Utils
             address = Keys.toChecksumAddress(address);
             String result = "";
             String firstSix = address.substring(0, 6);
-            String lastSix = address.substring(address.length() - 4);
-            return result + firstSix + "..." + lastSix;
+            String lastFour = address.substring(address.length() - 4);
+            return result + firstSix + "..." + lastFour;
         }
         else
         {
@@ -563,8 +563,8 @@ public class Utils
             txHash = Keys.toChecksumAddress(txHash);
             String result = "";
             String firstSix = txHash.substring(0, 6);
-            String lastSix = txHash.substring(txHash.length() - 4);
-            return result + firstSix + "..." + lastSix;
+            String lastFour = txHash.substring(txHash.length() - 4);
+            return result + firstSix + "..." + lastFour;
         }
         else
         {

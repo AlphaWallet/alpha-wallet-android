@@ -38,7 +38,6 @@ public class AlphaWalletNotificationService
 
         this.httpClient = new OkHttpClient.Builder()
             .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
-            .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
             .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
             .build();

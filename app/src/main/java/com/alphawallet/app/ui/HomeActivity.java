@@ -1323,5 +1323,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             }
         }
+        else
+        {
+            viewModel.subscribeToNotifications();
+        }
     }
 }

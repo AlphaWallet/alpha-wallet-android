@@ -45,9 +45,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleEventObserver;
-import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.OnLifecycleEvent;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -87,6 +85,7 @@ import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
+import com.alphawallet.app.widget.PermissionRationaleDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -137,6 +136,20 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private boolean isForeground;
     private volatile boolean tokenClicked = false;
     private String openLink;
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+        registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted)
+            {
+                // FCM SDK (and your app) can post notifications.
+                viewModel.subscribeToNotifications();
+            }
+            else
+            {
+                // TODO: Inform user that that your app will not show notifications.
+                Toast.makeText(this, getString(R.string.message_deny_request_post_notifications_permission), Toast.LENGTH_LONG).show();
+                viewModel.unsubscribeToNotifications();
+            }
+        });
 
     public HomeActivity()
     {
@@ -348,6 +361,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void onDefaultWallet(Wallet wallet)
     {
+        // TODO: Uncomment once backend service is implemented
+//        if (!viewModel.isWatchOnlyWallet() && !viewModel.isPostNotificationsPermissionRequested(wallet.address))
+//        {
+//            viewModel.setPostNotificationsPermissionRequested(wallet.address);
+//            requestPostNotificationsPermission();
+//        }
+
         if (viewModel.checkNewWallet(wallet.address))
         {
             viewModel.setNewWallet(wallet.address, false);
@@ -1275,5 +1295,33 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         ((WalletFragment)getFragment(WALLET)).importAttestation(attestation);
+    }
+
+    private void requestPostNotificationsPermission()
+    {
+        // This is only necessary for API level >= 33 (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED)
+            {
+                // FCM SDK (and your app) can post notifications.
+                viewModel.subscribeToNotifications();
+            }
+            else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS))
+            {
+                PermissionRationaleDialog.show(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                    ok -> requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS),
+                    cancel -> viewModel.unsubscribeToNotifications()
+                );
+            }
+            else
+            {
+                // Directly ask for the permission
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
     }
 }

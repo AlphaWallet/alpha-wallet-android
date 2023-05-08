@@ -19,7 +19,8 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String DEFAULT_NETWORK_NAME_KEY = "default_network_name";
     private static final String NETWORK_FILTER_KEY = "network_filters";
     private static final String CUSTOM_NETWORKS_KEY = "custom_networks";
-    private static final String TRANSACTION_NOTIFICATIONS_ENABLED = "transaction_notifications_enabled";
+    private static final String TRANSACTION_NOTIFICATIONS_ENABLED = "transaction_notifications_enabled_";
+    private static final String POST_NOTIFICATIONS_PERMISSION_REQUESTED = "post_notifications_permission_requested_";
     private static final String THEME_KEY = "theme";
     private static final String DEFAULT_SET_KEY = "default_net_set";
     private static final String LOCALE_KEY = "locale";
@@ -454,6 +455,16 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setTransactionNotificationEnabled(String address, boolean state) {
         pref.edit().putBoolean(getAddressKey(TRANSACTION_NOTIFICATIONS_ENABLED, address), state).apply();
+    }
+
+    @Override
+    public boolean isPostNotificationsPermissionRequested(String address) {
+        return pref.getBoolean(getAddressKey(POST_NOTIFICATIONS_PERMISSION_REQUESTED, address), false);
+    }
+
+    @Override
+    public void setPostNotificationsPermissionRequested(String address, boolean hasRequested) {
+        pref.edit().putBoolean(getAddressKey(POST_NOTIFICATIONS_PERMISSION_REQUESTED, address), hasRequested).apply();
     }
 
     @NonNull

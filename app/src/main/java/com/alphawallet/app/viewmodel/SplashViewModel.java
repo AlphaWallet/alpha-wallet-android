@@ -36,7 +36,6 @@ public class SplashViewModel extends BaseViewModel
     private final FetchWalletsInteract fetchWalletsInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final KeyService keyService;
-    private final AlphaWalletNotificationService alphaWalletNotificationService;
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private final MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
 
@@ -45,13 +44,11 @@ public class SplashViewModel extends BaseViewModel
         FetchWalletsInteract fetchWalletsInteract,
         PreferenceRepositoryType preferenceRepository,
         KeyService keyService,
-        AlphaWalletNotificationService alphaWalletNotificationService,
         AnalyticsServiceType analyticsService)
     {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.preferenceRepository = preferenceRepository;
         this.keyService = keyService;
-        this.alphaWalletNotificationService = alphaWalletNotificationService;
         setAnalyticsService(analyticsService);
         // increase launch count
 //        this.preferenceRepository.incrementLaunchCount();
@@ -181,9 +178,5 @@ public class SplashViewModel extends BaseViewModel
         preferenceRepository.setCurrentWalletAddress(wallet.address);
         preferenceRepository.setWalletCreationTime(System.currentTimeMillis() / 1000);
         preferenceRepository.setWatchOnly(isWatchOnlyWallet);
-        if (!isWatchOnlyWallet)
-        {
-            alphaWalletNotificationService.subscribe(1);
-        }
     }
 }

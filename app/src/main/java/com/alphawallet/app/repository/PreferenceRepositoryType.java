@@ -134,4 +134,8 @@ public interface PreferenceRepositoryType
     boolean isTransactionNotificationsEnabled(String address);
 
     void setTransactionNotificationEnabled(String address, boolean isEnabled);
+
+    boolean isPostNotificationsPermissionRequested(String address);
+
+    void setPostNotificationsPermissionRequested(String address, boolean hasRequested);
 }

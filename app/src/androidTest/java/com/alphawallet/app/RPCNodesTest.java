@@ -30,7 +30,7 @@ public class RPCNodesTest extends BaseE2ETest
         selectMenu("Select Active Networks");
         Helper.wait(1);
         click(withId(R.id.action_node_status));
-        Helper.wait(3);
+        Helper.wait(20);
 
         onView(withId(R.id.main_list)).check(matches(not(hasDescendant(allOf(withId(R.id.image_status), hasBackgroundResource(R.drawable.ic_node_not_responding))))));
         onView(withId(R.id.test_list)).check(matches(not(hasDescendant(allOf(withId(R.id.image_status), hasBackgroundResource(R.drawable.ic_node_not_responding))))));

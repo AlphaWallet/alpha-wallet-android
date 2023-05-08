@@ -77,7 +77,7 @@ public class TransactionNotificationService
             !preferenceRepository.isWatchOnly() &&
             preferenceRepository.isTransactionNotificationsEnabled(walletAddress) &&
             tx.to.equalsIgnoreCase(walletAddress) &&
-            tx.timeStamp > preferenceRepository.getWalletCreationTime();
+            tx.timeStamp > preferenceRepository.getWalletCreationTime(walletAddress);
     }
 
     private Intent buildIntent(Transaction tx, Token t)

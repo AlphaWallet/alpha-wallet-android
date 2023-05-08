@@ -175,7 +175,6 @@ public class SplashViewModel extends BaseViewModel
     public void doWalletStartupActions(Wallet wallet)
     {
         preferenceRepository.setCurrentWalletAddress(wallet.address);
-        preferenceRepository.setWalletCreationTime(System.currentTimeMillis() / 1000);
         preferenceRepository.setWatchOnly(wallet.watchOnly());
     }
 }

@@ -46,7 +46,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String SELECTED_SWAP_PROVIDERS_KEY = "selected_exchanges";
     private static final String ANALYTICS_KEY = "analytics_key";
     private static final String CRASH_REPORTING_KEY = "crash_reporting_key";
-    private static final String WALLET_CREATION_TIME = "wallet_creation_time";
+    private static final String WALLET_CREATION_TIME = "wallet_creation_time_";
     private static final String FIREBASE_MESSAGING_TOKEN = "firebase_messaging_token";
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
@@ -416,16 +416,19 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public long getWalletCreationTime()
+    public long getWalletCreationTime(String address)
     {
-        long creationTime = pref.getLong(WALLET_CREATION_TIME, -1);
+        return pref.getLong(getAddressKey(WALLET_CREATION_TIME, address), -1);
+    }
+
+    @Override
+    public void setWalletCreationTime(String address, long walletCreationTime)
+    {
+        long creationTime = pref.getLong(getAddressKey(WALLET_CREATION_TIME, address), -1);
         if (creationTime == -1)
         {
-            creationTime = System.currentTimeMillis() / 1000;
-            pref.edit().putLong(WALLET_CREATION_TIME, creationTime).apply();
+            pref.edit().putLong(getAddressKey(WALLET_CREATION_TIME, address), walletCreationTime).apply();
         }
-        return creationTime;
-
     }
 
     @Override
@@ -439,12 +442,6 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     {
         return pref.getString(FIREBASE_MESSAGING_TOKEN, "");
 
-    }
-
-    @Override
-    public void setWalletCreationTime(long walletCreationTime)
-    {
-        pref.edit().putLong(WALLET_CREATION_TIME, walletCreationTime).apply();
     }
 
     @Override

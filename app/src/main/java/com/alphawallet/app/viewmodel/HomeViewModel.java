@@ -218,6 +218,7 @@ public class HomeViewModel extends BaseViewModel
 
     private void onDefaultWallet(final Wallet wallet)
     {
+        preferenceRepository.setWalletCreationTime(wallet.address, System.currentTimeMillis() / 1000);
         preferenceRepository.setWatchOnly(wallet.watchOnly());
         defaultWallet.setValue(wallet);
     }

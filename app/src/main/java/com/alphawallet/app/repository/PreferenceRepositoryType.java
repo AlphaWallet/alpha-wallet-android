@@ -123,9 +123,9 @@ public interface PreferenceRepositoryType
 
     void setCrashReportingEnabled(boolean isEnabled);
 
-    long getWalletCreationTime();
+    long getWalletCreationTime(String address);
 
-    void setWalletCreationTime(long walletCreationTime);
+    void setWalletCreationTime(String address, long walletCreationTime);
 
     void setFirebaseMessagingToken(String token);
 

@@ -1,4 +1,4 @@
-package com.alphawallet.app.util;
+package com.alphawallet.app.service;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -17,6 +17,7 @@ import com.alphawallet.app.entity.TransactionType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.ui.TransactionDetailActivity;
+import com.alphawallet.app.util.Utils;
 
 public class TransactionNotificationService
 {

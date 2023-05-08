@@ -47,7 +47,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsNetworkClient;
 import com.alphawallet.app.service.TransactionsNetworkClientType;
 import com.alphawallet.app.service.TransactionsService;
-import com.alphawallet.app.util.TransactionNotificationService;
+import com.alphawallet.app.service.TransactionNotificationService;
 import com.google.gson.Gson;
 
 import java.io.File;

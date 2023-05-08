@@ -19,7 +19,6 @@ import com.alphawallet.app.entity.transactionAPI.TransferFetchType;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
-import com.alphawallet.app.util.TransactionNotificationService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 

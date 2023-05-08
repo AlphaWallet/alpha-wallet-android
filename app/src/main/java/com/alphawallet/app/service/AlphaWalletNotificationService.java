@@ -174,7 +174,7 @@ public class AlphaWalletNotificationService
         String topic = address + "-" + chainId;
         FirebaseMessaging.getInstance().unsubscribeFromTopic(topic)
             .addOnCompleteListener(task -> {
-                String msg = "Unsubscribed to" + topic;
+                String msg = "Unsubscribed to " + topic;
                 if (!task.isSuccessful())
                 {
                     msg = "Unsubscribe failed";

@@ -221,7 +221,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         disposable = alphaWalletNotificationService.subscribe(1)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
-            .subscribe(result -> Timber.d("subscribe result => " + result), Timber::e);
+            .subscribe(result -> Timber.d("subscribe result => %s", result), Timber::e);
     }
 
     public void onPrepare(long chainId, SyncCallback cb)

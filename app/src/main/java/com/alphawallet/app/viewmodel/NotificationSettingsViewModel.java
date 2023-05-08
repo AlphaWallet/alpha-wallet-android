@@ -59,7 +59,7 @@ public class NotificationSettingsViewModel extends BaseViewModel
         disposable = alphaWalletNotificationService.subscribe(chainId)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
-            .subscribe(result -> Timber.d("subscribe result => " + result), Timber::e);
+            .subscribe(result -> Timber.d("subscribe result => %s", result), Timber::e);
     }
 
     public void unsubscribe(long chainId)
@@ -67,7 +67,7 @@ public class NotificationSettingsViewModel extends BaseViewModel
         disposable = alphaWalletNotificationService.unsubscribe(chainId)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
-            .subscribe(result -> Timber.d("unsubscribe result => " + result), Timber::e);
+            .subscribe(result -> Timber.d("unsubscribe result => %s", result), Timber::e);
     }
 
     // TODO: [Notifications] Delete when unsubscribe is implemented

@@ -276,9 +276,9 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    AnalyticsServiceType provideAnalyticsService(@ApplicationContext Context ctx)
+    AnalyticsServiceType provideAnalyticsService(@ApplicationContext Context ctx, PreferenceRepositoryType preferenceRepository)
     {
-        return new AnalyticsService(ctx);
+        return new AnalyticsService(ctx, preferenceRepository);
     }
 
     @Singleton

@@ -8,7 +8,7 @@ import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ServiceErrorException;
 import com.alphawallet.app.repository.KeyProviderFactory;
-import com.alphawallet.app.repository.SharedPreferenceRepository;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -26,13 +26,13 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T>
 {
     private final MixpanelAPI mixpanelAPI;
     private final FirebaseAnalytics firebaseAnalytics;
-    private final SharedPreferenceRepository preferenceRepository;
+    private final PreferenceRepositoryType preferenceRepository;
 
-    public AnalyticsService(Context context)
+    public AnalyticsService(Context context, PreferenceRepositoryType preferenceRepository)
     {
+        this.preferenceRepository = preferenceRepository;
         mixpanelAPI = MixpanelAPI.getInstance(context, KeyProviderFactory.get().getAnalyticsKey());
         firebaseAnalytics = FirebaseAnalytics.getInstance(context);
-        preferenceRepository = new SharedPreferenceRepository(context);
     }
 
     public static Bundle jsonToBundle(JSONObject jsonObject) throws JSONException

@@ -218,7 +218,7 @@ public class HomeViewModel extends BaseViewModel
 
     private void onDefaultWallet(final Wallet wallet)
     {
-        preferenceRepository.setWatchOnly(wallet.type == WalletType.WATCH);
+        preferenceRepository.setWatchOnly(wallet.watchOnly());
         defaultWallet.setValue(wallet);
     }
 
@@ -838,12 +838,12 @@ public class HomeViewModel extends BaseViewModel
 
     public void subscribeToNotifications()
     {
-        alphaWalletNotificationService.subscribe(1);
+        alphaWalletNotificationService.subscribe(com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
     }
 
     public void unsubscribeToNotifications()
     {
-        alphaWalletNotificationService.unsubscribeToTopic(1);
+        alphaWalletNotificationService.unsubscribeToTopic(com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
     }
 
     public void setPostNotificationsPermissionRequested(String address)

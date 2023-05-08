@@ -209,7 +209,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
      */
     public void changeDefaultWallet(Wallet wallet)
     {
-        preferenceRepository.setWatchOnly(wallet.type == WalletType.WATCH);
+        preferenceRepository.setWatchOnly(wallet.watchOnly());
         preferenceRepository.setNewWallet(wallet.address, false);
         disposable = setDefaultWalletInteract
                 .set(wallet)
@@ -218,7 +218,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
 
     public void subscribeToNotifications()
     {
-        disposable = alphaWalletNotificationService.subscribe(1)
+        disposable = alphaWalletNotificationService.subscribe(MAINNET_ID)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .subscribe(result -> Timber.d("subscribe result => %s", result), Timber::e);

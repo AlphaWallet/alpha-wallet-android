@@ -14,6 +14,7 @@ import com.alphawallet.app.interact.ExportWalletInteract;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.AlphaWalletNotificationService;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import javax.inject.Inject;
 
@@ -83,7 +84,7 @@ public class WalletActionsViewModel extends BaseViewModel
 
     private void prepareForDeletion()
     {
-        // TODO: Reactivate this when unsubscribe is implemented
+        // TODO: [Notifications] Reactivate this when unsubscribe is implemented
 //        notificationDisposable =
 //            alphaWalletNotificationService.unsubscribe(1)
 //                .observeOn(Schedulers.io())
@@ -91,7 +92,7 @@ public class WalletActionsViewModel extends BaseViewModel
 //                .subscribe(result -> Timber.d("unsubscribe result => " + result), Timber::e);
 
         // For now, unsubscribe to firebase topic
-        alphaWalletNotificationService.unsubscribeToTopic(1);
+        alphaWalletNotificationService.unsubscribeToTopic(EthereumNetworkBase.MAINNET_ID);
     }
 
     public void deleteWallet(Wallet wallet)

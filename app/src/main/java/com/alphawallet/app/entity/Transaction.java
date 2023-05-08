@@ -411,8 +411,7 @@ public class Transaction implements Parcelable
         if (hasInput())
         {
             decodeTransactionInput(token.getWallet());
-            String value = transactionInput.getOperationValue(token, this);
-            return value;
+            return transactionInput.getOperationValue(token, this);
         }
         else
         {
@@ -470,7 +469,7 @@ public class Transaction implements Parcelable
         {
             txName = ctx.getString(R.string.status_pending);
         }
-        else if (hasInput())
+        if (hasInput())
         {
             decodeTransactionInput(walletAddress);
             if (token.isEthereum() && shouldShowSymbol(token))

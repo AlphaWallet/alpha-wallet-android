@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -30,7 +32,7 @@ public class NotificationSettingsActivity extends BaseActivity
             if (isGranted)
             {
                 // FCM SDK (and your app) can post notifications.
-                viewModel.subscribe(1);
+                viewModel.subscribe(MAINNET_ID);
             }
             else
             {
@@ -97,7 +99,7 @@ public class NotificationSettingsActivity extends BaseActivity
                 PackageManager.PERMISSION_GRANTED)
             {
                 // FCM SDK (and your app) can post notifications.
-                viewModel.subscribe(EthereumNetworkBase.MAINNET_ID);
+                viewModel.subscribe(MAINNET_ID);
             }
             else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS))
             {
@@ -116,7 +118,7 @@ public class NotificationSettingsActivity extends BaseActivity
         }
         else
         {
-            viewModel.subscribe(EthereumNetworkBase.MAINNET_ID);
+            viewModel.subscribe(MAINNET_ID);
         }
     }
 }

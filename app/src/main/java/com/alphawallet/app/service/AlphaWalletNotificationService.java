@@ -27,8 +27,7 @@ import timber.log.Timber;
 public class AlphaWalletNotificationService
 {
     private static final String BASE_API_URL = BuildConfig.NOTIFICATION_API_BASE_URL;
-    public static final String SUBSCRIBE_API_PATH = BASE_API_URL + "/subscriptions";
-    public static final String UNSUBSCRIBE_API_PATH = BASE_API_URL + "/subscriptions";
+    public static final String SUBSCRIPTIONS_API_PATH = BASE_API_URL + "/subscriptions";
     private final OkHttpClient httpClient;
     private final WalletRepositoryType walletRepository;
     private Disposable disposable;
@@ -120,7 +119,7 @@ public class AlphaWalletNotificationService
         subscribeToFirebaseTopic(address, chainId);
 
         Uri.Builder builder = new Uri.Builder();
-        builder.encodedPath(SUBSCRIBE_API_PATH);
+        builder.encodedPath(SUBSCRIPTIONS_API_PATH);
         String url = builder.build().toString();
 
         return Single.fromCallable(() ->
@@ -147,7 +146,7 @@ public class AlphaWalletNotificationService
         unsubscribeToFirebaseTopic(address, chainId);
 
         Uri.Builder builder = new Uri.Builder();
-        builder.encodedPath(UNSUBSCRIBE_API_PATH)
+        builder.encodedPath(SUBSCRIPTIONS_API_PATH)
             .appendEncodedPath(address)
             .appendEncodedPath(String.valueOf(chainId));
         String url = builder.build().toString();

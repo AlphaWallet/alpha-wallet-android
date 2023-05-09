@@ -44,6 +44,7 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionReturn;
@@ -825,7 +826,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         final byte[] transactionBytes = viewModel.getERC721TransferBytes(txSendAddress, token.getAddress(), ticketIds, token.tokenInfo.chainId);
         if (token.isEthereum())
         {
-            checkConfirm(BigInteger.valueOf(GAS_LIMIT_MIN), transactionBytes, txSendAddress, txSendAddress);
+            checkConfirm(new GasEstimate(BigInteger.valueOf(GAS_LIMIT_MIN)), transactionBytes, txSendAddress, txSendAddress);
         }
         else
         {
@@ -841,8 +842,9 @@ public class TransferTicketDetailActivity extends BaseActivity
 
     private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
-        Timber.w(throwable.getMessage());
-        checkConfirm(BigInteger.ZERO, transactionBytes, txSendAddress, resolvedAddress);
+        Timber.e(throwable);
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        displayErrorMessage(throwable.getMessage());
     }
 
     private void calculateEstimateDialog()
@@ -859,7 +861,7 @@ public class TransferTicketDetailActivity extends BaseActivity
     /**
      * Called to check if we're ready to send user to confirm screen / activity sheet popup
      */
-    private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
+    private void checkConfirm(GasEstimate estimate, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
 
         Web3Transaction w3tx = new Web3Transaction(
@@ -867,11 +869,17 @@ public class TransferTicketDetailActivity extends BaseActivity
                 new Address(token.getAddress()),
                 BigInteger.ZERO,
                 BigInteger.ZERO,
-                sendGasLimit,
+                estimate.getValue(),
                 -1,
                 Numeric.toHexString(transactionBytes),
                 -1);
-        if (sendGasLimit.equals(BigInteger.ZERO))
+
+        if (!TextUtils.isEmpty(estimate.getError()))
+        {
+            if (dialog != null && dialog.isShowing()) dialog.dismiss();
+            displayErrorMessage(estimate.getError());
+        }
+        else if (estimate.getValue().equals(BigInteger.ZERO))
         {
             estimateError(w3tx, transactionBytes, txSendAddress, resolvedAddress);
         }
@@ -977,7 +985,7 @@ public class TransferTicketDetailActivity extends BaseActivity
         dialog.setSecondaryButtonText(R.string.action_cancel);
         dialog.setButtonListener(v -> {
             BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
-            checkConfirm(gasEstimate, transactionBytes, txSendAddress, resolvedAddress);
+            checkConfirm(new GasEstimate(gasEstimate), transactionBytes, txSendAddress, resolvedAddress);
         });
 
         dialog.setSecondaryButtonListener(v -> {

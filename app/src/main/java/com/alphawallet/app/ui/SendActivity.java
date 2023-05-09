@@ -26,6 +26,7 @@ import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
@@ -576,14 +577,14 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
-        Timber.w(throwable);
-        checkConfirm(BigInteger.ZERO, transactionBytes, txSendAddress, resolvedAddress);
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        displayErrorMessage(throwable.getMessage());
     }
 
     /**
      * Called to check if we're ready to send user to confirm screen / activity sheet popup
      */
-    private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
+    private void checkConfirm(final GasEstimate estimate, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
         BigInteger ethValue = token.isEthereum() ? sendAmount.toBigInteger() : BigInteger.ZERO;
         long leafCode = amountInput.isSendAll() ? -2 : -1;
@@ -593,12 +594,17 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                 new Address(wallet.address),
                 ethValue,
                 sendGasPrice.toBigInteger(),
-                sendGasLimit,
+                estimate.getValue(),
                 -1,
                 Numeric.toHexString(transactionBytes),
                 leafCode);
 
-        if (sendGasLimit.equals(BigInteger.ZERO))
+        if (estimate.hasError())
+        {
+            if (dialog != null && dialog.isShowing()) dialog.dismiss();
+            displayErrorMessage(estimate.getError());
+        }
+        else if (estimate.getValue().equals(BigInteger.ZERO))
         {
             estimateError(w3tx, transactionBytes, txSendAddress, resolvedAddress);
         }
@@ -705,7 +711,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         dialog.setSecondaryButtonText(R.string.action_cancel);
         dialog.setButtonListener(v -> {
             BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
-            checkConfirm(gasEstimate, transactionBytes, txSendAddress, resolvedAddress);
+            checkConfirm(new GasEstimate(gasEstimate), transactionBytes, txSendAddress, resolvedAddress);
         });
 
         dialog.setSecondaryButtonListener(v -> {

@@ -459,6 +459,19 @@ public class TransactionsService
                     }
                 }
             }
+            else
+            {
+                Token token = tokensService.getToken(tx.chainId, tx.to);
+                if (token != null)
+                {
+                    transactionNotificationService.showNotification(tx, token);
+                    if (fromBackground && !tokensService.isOnFocus())
+                    {
+                        fromBackground = false;
+                        stopService();
+                    }
+                }
+            }
         }
     }
 

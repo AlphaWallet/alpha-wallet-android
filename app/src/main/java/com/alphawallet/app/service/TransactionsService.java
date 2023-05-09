@@ -439,38 +439,30 @@ public class TransactionsService
      */
     private void checkTokens(Transaction[] txList)
     {
-        for (int i = 0; i < txList.length; i++)
+        for (Transaction tx : txList)
         {
-            Transaction tx = txList[i];
-            if (!tx.hasError() && tx.hasData()) //is this a successful contract transaction?
+            Token token = tokensService.getToken(tx.chainId, tx.to);
+            boolean isSuccessfulContractTx = !tx.hasError() && tx.hasData();
+            if (isSuccessfulContractTx && (token == null && tx.to != null))
             {
-                Token token = tokensService.getToken(tx.chainId, tx.to);
-                if (token == null && tx.to != null)
-                {
-                    tokensService.addUnknownTokenToCheckPriority(new ContractAddress(tx.chainId, tx.to));
-                }
-                else
-                {
-                    transactionNotificationService.showNotification(tx, token);
-                    if (fromBackground && !tokensService.isOnFocus())
-                    {
-                        fromBackground = false;
-                        stopService();
-                    }
-                }
+                tokensService.addUnknownTokenToCheckPriority(new ContractAddress(tx.chainId, tx.to));
             }
             else
             {
-                Token token = tokensService.getToken(tx.chainId, tx.to);
-                if (token != null)
-                {
-                    transactionNotificationService.showNotification(tx, token);
-                    if (fromBackground && !tokensService.isOnFocus())
-                    {
-                        fromBackground = false;
-                        stopService();
-                    }
-                }
+                showTransactionNotification(tx, token);
+            }
+        }
+    }
+
+    private void showTransactionNotification(Transaction transaction, Token token)
+    {
+        if (token != null)
+        {
+            transactionNotificationService.showNotification(transaction, token);
+            if (fromBackground && !tokensService.isOnFocus())
+            {
+                fromBackground = false;
+                stopService();
             }
         }
     }

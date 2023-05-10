@@ -2,7 +2,6 @@ package com.alphawallet.app.service;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.COVALENT;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
@@ -709,7 +708,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         catch (Exception e)
         {
-            if (networkInfo.chainId != ARTIS_TAU1_ID && BuildConfig.DEBUG) Timber.e(e);
+            Timber.e(e);
         }
 
         return result;

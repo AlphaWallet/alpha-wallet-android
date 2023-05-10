@@ -6,8 +6,10 @@ import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
+import static androidx.test.espresso.matcher.ViewMatchers.withTagValue;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.util.Helper.waitUntil;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
@@ -28,6 +30,11 @@ public class Should
     public static void shouldNotSee(String text)
     {
         onView(isRoot()).perform(waitUntil(not(withSubstring(text)), TIMEOUT_IN_SECONDS));
+    }
+
+    public static void shouldNotSeeTag(int tagId)
+    {
+        onView(isRoot()).perform(waitUntil(not(withTagValue(equalTo(tagId))), TIMEOUT_IN_SECONDS));
     }
 
     public static void shouldNotSee(int id)

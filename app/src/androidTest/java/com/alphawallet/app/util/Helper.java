@@ -14,19 +14,24 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.KeyEvent;
 import android.view.View;
 
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
 
+import androidx.core.content.ContextCompat;
 import androidx.test.espresso.PerformException;
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.matcher.BoundedMatcher;
 import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 
@@ -215,7 +220,7 @@ public class Helper
         {
             try
             {
-                click(matcher, 0);
+                click(matcher, 1);
                 return;
             }
             catch (Exception e)
@@ -229,11 +234,11 @@ public class Helper
     //This is an item inside a list that doesn't scroll (eg TestNet / Mainnet list)
     public static void clickStaticListItem(Matcher matcher)
     {
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 49; i++)
         {
             try
             {
-                click(matcher, 0);
+                click(matcher, 1);
                 return;
             }
             catch (Exception e)
@@ -349,5 +354,23 @@ public class Helper
         }
 
         return false;
+    }
+
+    public static Matcher<View> hasBackgroundResource(final int resourceId) {
+        return new BoundedMatcher<>(ImageView.class)
+        {
+            @Override
+            protected boolean matchesSafely(ImageView imageView)
+            {
+                Drawable expectedDrawable = ContextCompat.getDrawable(imageView.getContext(), resourceId);
+                return expectedDrawable != null && imageView.getBackground().getConstantState().equals(expectedDrawable.getConstantState());
+            }
+
+            @Override
+            public void describeTo(Description description)
+            {
+                description.appendText("has background resource with id " + resourceId);
+            }
+        };
     }
 }

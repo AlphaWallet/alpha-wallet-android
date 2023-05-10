@@ -7,7 +7,6 @@ import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.text.TextUtils;
@@ -231,22 +230,7 @@ public class GasService implements ContractGasProvider
 
     private BigInteger fixGasPrice(BigInteger gasPrice, long chainId)
     {
-        if (gasPrice.compareTo(BigInteger.ZERO) > 0)
-        {
-            return gasPrice;
-        }
-        else
-        {
-            //gas price from node is zero
-            switch ((int)chainId)
-            {
-                default:
-                    return gasPrice;
-                case (int)ARTIS_TAU1_ID:
-                    //this node incorrectly returns gas price zero, use 1 Gwei
-                    return new BigInteger(C.DEFAULT_XDAI_GAS_PRICE);
-            }
-        }
+        return gasPrice;
     }
 
     private Single<Boolean> updateEtherscanGasPrices(String gasOracleAPI)

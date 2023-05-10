@@ -2,7 +2,6 @@ package com.alphawallet.app.service;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
@@ -142,7 +141,6 @@ public class TickerService
         mainTickerUpdate = updateCurrencyConversion()
                 .flatMap(this::updateTickersFromOracle)
                 .flatMap(this::fetchTickersSeparatelyIfRequired)
-                .flatMap(this::addArtisTicker)
                 .map(this::checkTickers)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -493,20 +491,6 @@ public class TickerService
         return ethTickers.get(chainId);
     }
 
-    private Single<Integer> addArtisTicker(int tickerCount)
-    {
-        return convertPair("EUR", currentCurrencySymbolTxt)
-                .flatMap(this::getSigmaTicker)
-                .map(this::addArtisTickers)
-                .map(ticker -> (tickerCount + 2));
-    }
-
-    private TokenTicker addArtisTickers(TokenTicker tokenTicker)
-    {
-        ethTickers.put(ARTIS_SIGMA1_ID, tokenTicker);
-        return tokenTicker;
-    }
-
     private TokenTicker decodeCoinGeckoTicker(JSONObject eth)
     {
         TokenTicker tTicker;
@@ -644,17 +628,6 @@ public class TickerService
                     .observeOn(Schedulers.io())
                     .subscribe().isDisposed();
         }
-    }
-
-    private Single<TokenTicker> getSigmaTicker(double rate)
-    {
-        return Single.fromCallable(() -> {
-            String percentageChange = "0.00";
-            double conversion = (1.0 / 13.7603) * rate; //13.7603 ATS = 1 EUR
-            String price_usd = String.valueOf(conversion);
-            String image = "https://artis.eco/i/favicon.png";
-            return new TokenTicker(price_usd, percentageChange, currentCurrencySymbolTxt, image, System.currentTimeMillis());
-        });
     }
 
     private void onTickersError(Throwable throwable)

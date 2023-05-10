@@ -1133,28 +1133,12 @@ public class Utils
         }
     }
 
-//    public static byte[] getAttestationBytes(String url)
-//    {
-//        return Base64.decode(getAttestationString(url), Base64.DEFAULT);
-//    }
-//
-//    public static String getDecodedAttestation(String url)
-//    {
-//        return Hex.byteArrayToHexString(getAttestationBytes(url));
-//    }
-
-    public static void unzip(String url)
+    public static String decompress(String url)
     {
-//        byte[] attestationBytes = getAttestationBytes(url);
-//        String decodedAttestation = getDecodedAttestation(url);
-//        String decodedAttestationNoPrefix = decodedAttestation.substring(2);
-
-        String attestation = getAttestationString(url);
-
-        Timber.d("decompressed: " + decompress(attestation));
+       return inflateData(getAttestationString(url));
     }
 
-    public static String decompress(String deflatedData)
+    public static String inflateData(String deflatedData)
     {
         byte[] deflatedBytes;
 

@@ -14,5 +14,6 @@ public enum EIP681Type
     MAGIC_LINK,
     OTHER_PROTOCOL,
     ATTESTATION,
-    OTHER
+    OTHER,
+    EAS_ATTESTATION
 }

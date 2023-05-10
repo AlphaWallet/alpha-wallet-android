@@ -4,8 +4,6 @@ import androidx.activity.result.ActivityResult;
 
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
-import java.math.BigInteger;
-
 /**
  * Created by JB on 16/01/2021.
  */
@@ -22,7 +20,7 @@ public interface ActionSheetInterface
     {
     }
 
-    default void setGasEstimate(BigInteger estimate)
+    default void setGasEstimate(GasEstimate estimate)
     {
     }
 

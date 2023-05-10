@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.EIP1559FeeOracleResult;
 import com.alphawallet.app.entity.FeeHistory;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SuggestEIP1559Kt;
@@ -337,8 +338,8 @@ public class GasService implements ContractGasProvider
         return succeeded;
     }
 
-    public Single<BigInteger> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress,
-                                                   BigInteger amount, Wallet wallet, final BigInteger defaultLimit)
+    public Single<GasEstimate> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress,
+                                                     BigInteger amount, Wallet wallet, final BigInteger defaultLimit)
     {
         String txData = "";
         if (transactionBytes != null && transactionBytes.length > 0)
@@ -364,30 +365,30 @@ public class GasService implements ContractGasProvider
         }
     }
 
-    private BigInteger convertToGasLimit(EthEstimateGas estimate, BigInteger defaultLimit)
+    private GasEstimate convertToGasLimit(EthEstimateGas estimate, BigInteger defaultLimit)
     {
         if (estimate.hasError())
         {
             if (estimate.getError().getCode() == -32000) //out of gas
             {
-                return defaultLimit;
+                return new GasEstimate(defaultLimit, estimate.getError().getMessage());
             }
             else
             {
-                return BigInteger.ZERO;
+                return new GasEstimate(BigInteger.ZERO, estimate.getError().getMessage());
             }
         }
         else if (estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0)
         {
-            return estimate.getAmountUsed();
+            return new GasEstimate(estimate.getAmountUsed());
         }
         else if (defaultLimit == null || defaultLimit.equals(BigInteger.ZERO))
         {
-            return new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS); //cautious gas limit
+            return new GasEstimate(new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS));
         }
         else
         {
-            return defaultLimit;
+            return new GasEstimate(defaultLimit);
         }
     }
 

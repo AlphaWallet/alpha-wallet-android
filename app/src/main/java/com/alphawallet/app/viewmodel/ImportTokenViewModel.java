@@ -441,7 +441,7 @@ public class ImportTokenViewModel extends BaseViewModel implements TransactionSe
             gasService.calculateGasEstimate(tradeData, importOrder.chainId, wallet.getValue().address, order.amount, wallet.getValue(), BigInteger.ZERO)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::performImportFinal).isDisposed();
+                    .subscribe(gasEstimate -> performImportFinal(gasEstimate.getValue())).isDisposed();
         }
         catch (Exception e)
         {

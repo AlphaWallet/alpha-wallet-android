@@ -966,4 +966,7 @@
     <string name="dialog_title_sign_in_with_ethereum">Iniciar sesión con Ethereum</string>
     <string name="attestations_header">Certificados</string>
     <string name="attestation">Atestación</string>
+    <string name="dialog_title_gas_estimation_failed">Estimación de gas fallida</string>
+    <string name="dialog_message_gas_estimation_failed">Estimación de gas con error: \"%s\". Es probable que la ejecución de la transacción falle. ¿Quieres forzar el envío?</string>
+    <string name="action_proceed">Proceder</string>
 </resources>

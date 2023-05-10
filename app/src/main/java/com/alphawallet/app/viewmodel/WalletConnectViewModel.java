@@ -16,6 +16,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.GenericCallback;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -239,16 +240,16 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
         createTransactionInteract.sendTransaction(wallet, chainId, tx, signatureFromKey);
     }
 
-    public Single<BigInteger> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount, BigInteger defaultLimit)
+    public Single<GasEstimate> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount, BigInteger defaultLimit)
     {
         return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet, defaultLimit);
     }
 
-    public Single<BigInteger> calculateGasEstimate(Wallet wallet, Web3Transaction transaction, long chainId)
+    public Single<GasEstimate> calculateGasEstimate(Wallet wallet, Web3Transaction transaction, long chainId)
     {
         if (transaction.isBaseTransfer())
         {
-            return Single.fromCallable(() -> BigInteger.valueOf(C.GAS_LIMIT_MIN));
+            return Single.fromCallable(() -> new GasEstimate(BigInteger.valueOf(C.GAS_LIMIT_MIN)));
         }
         else
         {

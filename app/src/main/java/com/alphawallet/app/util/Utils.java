@@ -29,11 +29,13 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.util.pattern.Patterns;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -1135,7 +1137,46 @@ public class Utils
 
     public static String decompress(String url)
     {
-       return inflateData(getAttestationString(url));
+        Timber.d(toAttestationJson(inflateData(getAttestationString(url))));
+        return toAttestationJson(inflateData(getAttestationString(url)));
+//       return inflateData(getAttestationString(url));
+    }
+
+    private static String toAttestationJson(String jsonString)
+    {
+        // Remove the square brackets
+        jsonString = jsonString.substring(1, jsonString.length() - 1);
+        String[] e = jsonString.split(",");
+
+        // Clean the strings
+        for (int i = 0; i < e.length; i++) {
+            e[i] = e[i].trim();
+            e[i] = e[i].replaceAll("\"", "");
+        }
+
+        EasAttestation easAttestation =
+            new EasAttestation(
+                e[0],
+                Long.parseLong(e[1]),
+                e[2],
+                e[3],
+                e[4],
+                Long.parseLong(e[5]),
+                e[6],
+                e[7],
+                e[8],
+                e[9],
+                Long.parseLong(e[10]),
+                Long.parseLong(e[11]),
+                e[12],
+                Boolean.parseBoolean(e[13]),
+                e[14],
+                Long.parseLong(e[15])
+            );
+
+        String attestationJson = new Gson().toJson(easAttestation);
+
+        return attestationJson;
     }
 
     public static String inflateData(String deflatedData)

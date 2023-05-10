@@ -45,14 +45,17 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpString;
 import org.web3j.utils.Numeric;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
@@ -65,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.Inflater;
 
 import timber.log.Timber;
 
@@ -1060,47 +1064,76 @@ public class Utils
         int hashIndex = url.indexOf("#attestation=");
         if (hashIndex >= 0)
         {
-            return url.substring(hashIndex + 13);
+            url = url.substring(hashIndex + 13);
         }
-        return "";
-    }
-
-    public static byte[] getAttestationBytes(String url)
-    {
-        return Base64.decode(getAttestationString(url), Base64.DEFAULT);
-    }
-
-    public static String getDecodedAttestation(String url)
-    {
-        return Hex.byteArrayToHexString(getAttestationBytes(url));
-    }
-
-    public static byte[] hexStringToByteArray(String s)
-    {
-        //clean prefix
-        s = s.substring(2);
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2)
+        try
         {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                + Character.digit(s.charAt(i + 1), 16));
+            String decoded = URLDecoder.decode(url, StandardCharsets.UTF_8.name());
+            Timber.d("decoded url: " + decoded);
+            return decoded;
         }
-        return data;
+        catch (UnsupportedEncodingException e)
+        {
+            Timber.e(e);
+            return "";
+        }
     }
+
+//    public static byte[] getAttestationBytes(String url)
+//    {
+//        return Base64.decode(getAttestationString(url), Base64.DEFAULT);
+//    }
+//
+//    public static String getDecodedAttestation(String url)
+//    {
+//        return Hex.byteArrayToHexString(getAttestationBytes(url));
+//    }
 
     public static void unzip(String url)
     {
+//        byte[] attestationBytes = getAttestationBytes(url);
+//        String decodedAttestation = getDecodedAttestation(url);
+//        String decodedAttestationNoPrefix = decodedAttestation.substring(2);
+
         String attestation = getAttestationString(url);
-        byte[] attestationBytes = getAttestationBytes(url);
-        String decodedAttestation = getDecodedAttestation(url);
-        String decodedAttestationNoPrefix = decodedAttestation.substring(2);
 
-        Timber.d("attestation: " + attestation);
-        Timber.d("attestationBytes: " + new String(attestationBytes));
-        Timber.d("decodedAttestation: " + decodedAttestation);
-        Timber.d("decodedAttestationNoPrefix: " + decodedAttestationNoPrefix);
+        Timber.d("decompressed: " + decompress(attestation));
+    }
 
-        // TODO: Unzip here
+    public static String decompress(String deflatedData)
+    {
+        byte[] deflatedBytes;
+
+        deflatedBytes = Base64.decode(deflatedData, Base64.DEFAULT);
+
+        Inflater inflater = new Inflater();
+        inflater.setInput(deflatedBytes);
+
+        byte[] inflatedData;
+
+        try
+        {
+            // Inflate the data
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            while (!inflater.finished())
+            {
+                int inflatedBytes = inflater.inflate(buffer);
+                outputStream.write(buffer, 0, inflatedBytes);
+            }
+            inflater.end();
+
+            inflatedData = outputStream.toByteArray();
+
+            // Convert the inflated bytes to a string
+            String inflatedString = new String(inflatedData);
+
+            return inflatedString;
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+            return "";
+        }
     }
 }

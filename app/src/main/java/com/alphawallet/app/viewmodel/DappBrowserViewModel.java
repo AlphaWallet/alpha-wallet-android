@@ -20,6 +20,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.DApp;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
@@ -402,11 +403,11 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
         return tokensService;
     }
 
-    public Single<BigInteger> calculateGasEstimate(Wallet wallet, Web3Transaction transaction, long chainId)
+    public Single<GasEstimate> calculateGasEstimate(Wallet wallet, Web3Transaction transaction, long chainId)
     {
         if (transaction.isBaseTransfer())
         {
-            return Single.fromCallable(() -> BigInteger.valueOf(C.GAS_LIMIT_MIN));
+            return Single.fromCallable(() -> new GasEstimate(BigInteger.valueOf(C.GAS_LIMIT_MIN)));
         }
         else
         {

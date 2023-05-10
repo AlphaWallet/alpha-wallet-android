@@ -17,6 +17,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Transaction;
@@ -640,13 +641,13 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(estimate -> buildNewConfirmation(estimate, w3tx),
-                        error -> buildNewConfirmation(BigInteger.ZERO, w3tx)); //node didn't like this tx
+                        error -> buildNewConfirmation(new GasEstimate(BigInteger.ZERO), w3tx)); //node didn't like this tx
     }
 
-    private void buildNewConfirmation(BigInteger estimate, Web3Transaction w3tx)
+    private void buildNewConfirmation(GasEstimate estimate, Web3Transaction w3tx)
     {
         gasEstimateComplete.postValue(new Web3Transaction(
-                w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, estimate, w3tx.nonce, w3tx.payload, w3tx.description));
+                w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, estimate.getValue(), w3tx.nonce, w3tx.payload, w3tx.description));
     }
 
     @Override

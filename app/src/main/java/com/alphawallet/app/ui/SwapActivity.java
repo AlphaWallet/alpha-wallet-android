@@ -21,6 +21,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionReturn;
@@ -326,7 +327,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                     "", w3Tx.recipient.toString(), viewModel.getTokensService(), this);
             confDialog.setURL(quote.swapProvider.name);
             confDialog.setCanceledOnTouchOutside(false);
-            confDialog.setGasEstimate(Numeric.toBigInt(quote.transactionRequest.gasLimit));
+            confDialog.setGasEstimate(new GasEstimate(Numeric.toBigInt(quote.transactionRequest.gasLimit)));
 
             confirmationDialogProps = new AnalyticsProperties();
             confirmationDialogProps.put(Analytics.PROPS_ACTION_SHEET_SOURCE, ActionSheetSource.SWAP.getValue());

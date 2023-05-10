@@ -38,16 +38,18 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.ActionSheet;
 import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 import com.walletconnect.android.Core;
 import com.walletconnect.android.CoreClient;
+import com.walletconnect.android.cacao.signature.SignatureType;
 import com.walletconnect.android.relay.ConnectionType;
+import com.walletconnect.android.relay.NetworkClientTimeout;
 import com.walletconnect.web3.wallet.client.Wallet;
 import com.walletconnect.web3.wallet.client.Wallet.Model.Session;
 import com.walletconnect.web3.wallet.client.Web3Wallet;
-import com.walletconnect.web3.wallet.utils.CacaoSigner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,6 +57,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import kotlin.Unit;
@@ -327,7 +330,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         Core.Model.AppMetaData appMetaData = getAppMetaData(application);
         String relayServer = String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, keyProvider.getWalletConnectProjectId());
         CoreClient coreClient = CoreClient.INSTANCE;
-        coreClient.initialize(appMetaData, relayServer, ConnectionType.AUTOMATIC, application, null, error -> {
+        coreClient.initialize(appMetaData, relayServer, ConnectionType.AUTOMATIC, application, null, null, new NetworkClientTimeout(30, TimeUnit.SECONDS), error -> {
             Timber.w(error.throwable);
             return null;
         });
@@ -359,7 +362,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         String[] icons = {C.ALPHA_WALLET_LOGO_URL};
         String description = "The ultimate Web3 Wallet to power your tokens.";
         String redirect = "kotlin-responder-wc:/request";
-        return new Core.Model.AppMetaData(name, description, url, Arrays.asList(icons), redirect);
+        return new Core.Model.AppMetaData(name, description, url, Arrays.asList(icons), redirect, null);
     }
 
     public void shutdown()
@@ -435,99 +438,56 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         String activeWallet = preferenceRepository.getCurrentWalletAddress();
         String issuer = ISS_DID_PREFIX + formatCAIP10(authRequest.payloadParams.chainId, activeWallet);
         String message = Web3Wallet.INSTANCE.formatMessage(new Params.FormatMessage(authRequest.payloadParams, issuer));
-
         String origin = authRequest.payloadParams.domain;
-        new Handler(Looper.getMainLooper()).post(() -> doShowApprovalDialog(activeWallet, message, authRequest.getId(), origin));
+
+        new Handler(Looper.getMainLooper()).post(() -> doShowApprovalDialog(activeWallet, message, authRequest.getId(), origin, issuer));
     }
 
-    private void doShowApprovalDialog(String walletAddress, String message, long requestId, String origin)
+    private void doShowApprovalDialog(String walletAddress, String message, long requestId, String origin, String issuer)
     {
-        ActionSheet actionSheet = new ActionSheetSignDialog(App.getInstance().getTopActivity(), newActionSheetCallback(requestId, message), createSignable(message, origin) );
+        EthereumMessage ethereumMessage = new EthereumMessage(message, origin, 0,
+                SignMessageType.SIGN_MESSAGE);
+        ActionSheet actionSheet = new ActionSheetSignDialog(App.getInstance().getTopActivity(), newActionSheetCallback(requestId, message, issuer), ethereumMessage);
         actionSheet.setSigningWallet(walletAddress);
         actionSheet.show();
     }
 
-    private Signable createSignable(String message, String origin)
-    {
-        return new Signable()
-        {
-            @Override
-            public String getMessage()
-            {
-                return message;
-            }
-
-            @Override
-            public long getCallbackId()
-            {
-                return 0;
-            }
-
-            @Override
-            public byte[] getPrehash()
-            {
-                return new byte[0];
-            }
-
-            @Override
-            public String getOrigin()
-            {
-                return origin;
-            }
-
-            @Override
-            public CharSequence getUserMessage()
-            {
-                return message;
-            }
-
-            @Override
-            public SignMessageType getMessageType()
-            {
-                return SignMessageType.SIGN_IN_WITH_ETH;
-            }
-        };
-    }
-
-    private ActionSheetCallback newActionSheetCallback(long requestId, String message)
+    private ActionSheetCallback newActionSheetCallback(long requestId, String message, String issuer)
     {
         return new ActionSheetCallback()
         {
             @Override
             public void getAuthorisation(SignAuthenticationCallback callback)
             {
-                Web3Wallet.INSTANCE.respondAuthRequest(
-                        new Wallet.Params.AuthRequestResponse.Result(
-                                requestId,
-                                CacaoSigner.INSTANCE.(message, PRIVATE_KEY_1, SignatureType.EIP191),
-                                issuer = ISSUER
-                        )
-                ) { error ->
-                    Log.e(tag(this), error.throwable.stackTraceToString())
-
-                AuthRequestStore.removeActiveSession(request)
-            }
-
-                AuthRequestStore.addActiveSession(request)
-
             }
 
             @Override
             public void sendTransaction(Web3Transaction tx)
             {
-
             }
 
             @Override
             public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
             {
-
             }
 
             @Override
             public void dismissed(String txHash, long callbackId, boolean actionCompleted)
             {
-
+                if (actionCompleted)
+                {
+                    closeWalletConnectActivity();
+                }
+                else
+                {
+                    Web3Wallet.INSTANCE.respondAuthRequest(new Params.AuthRequestResponse.Error(requestId, 0, "User rejected request."), (authRequestResponse) -> {
+                        closeWalletConnectActivity();
+                        return null;
+                    }, (error) -> {
+                        closeWalletConnectActivity();
+                        return null;
+                    });
+                }
             }
 
             @Override
@@ -547,7 +507,32 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
             {
                 return null;
             }
+
+            @Override
+            public void signingComplete(SignatureFromKey signature, Signable message)
+            {
+                Web3Wallet.INSTANCE.respondAuthRequest(
+                        new Wallet.Params.AuthRequestResponse.Result(
+                                requestId,
+                                new Model.Cacao.Signature(SignatureType.EIP191.header, Numeric.toHexString(signature.signature), null),
+                                issuer
+                        ), (authRequestResponse) -> {
+                            Timber.i("Sign in with Ethereum succeed.");
+                            return null;
+                        }, (error) -> {
+                            Timber.w("Sign in with Ethereum failed.");
+                            Timber.w(error.throwable);
+                            return null;
+                        });
+            }
         };
+    }
+
+    private void closeWalletConnectActivity()
+    {
+        new Handler(Looper.getMainLooper()).post(() -> {
+            App.getInstance().getTopActivity().onBackPressed();
+        });
     }
 
 

@@ -392,14 +392,9 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                 Numeric.toHexString(transactionBytes),
                 -1);
 
-        if (!TextUtils.isEmpty(estimate.getError()))
+        if (estimate.hasError() || estimate.getValue().equals(BigInteger.ZERO))
         {
-            if (dialog != null && dialog.isShowing()) dialog.dismiss();
-            displayErrorMessage(estimate.getError());
-        }
-        else if (estimate.getValue().equals(BigInteger.ZERO))
-        {
-            estimateError(w3tx, transactionBytes, txSendAddress, resolvedAddress);
+            estimateError(estimate, w3tx, transactionBytes, txSendAddress, resolvedAddress);
         }
         else
         {
@@ -495,14 +490,20 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
         actionDialog.dismiss();
     }
 
-    private void estimateError(final Web3Transaction w3tx, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
+    private void estimateError(GasEstimate estimate, final Web3Transaction w3tx, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(WARNING);
-        dialog.setTitle(R.string.confirm_transaction);
-        dialog.setMessage(R.string.error_transaction_may_fail);
-        dialog.setButtonText(R.string.button_ok);
+        dialog.setTitle(estimate.hasError() ?
+            R.string.dialog_title_gas_estimation_failed :
+            R.string.confirm_transaction
+        );
+        String message = estimate.hasError() ?
+            getString(R.string.dialog_message_gas_estimation_failed, estimate.getError()) :
+            getString(R.string.error_transaction_may_fail);
+        dialog.setMessage(message);
+        dialog.setButtonText(R.string.action_proceed);
         dialog.setSecondaryButtonText(R.string.action_cancel);
         dialog.setButtonListener(v -> {
             BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);

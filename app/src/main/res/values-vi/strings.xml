@@ -980,4 +980,7 @@
     <string name="dialog_title_sign_in_with_ethereum">Đăng nhập bằng Ethereum</string>
     <string name="attestations_header">Chứng thực</string>
     <string name="attestation">Chứng thực</string>
+    <string name="dialog_title_gas_estimation_failed">Ước tính khí không thành công</string>
+    <string name="dialog_message_gas_estimation_failed">Lỗi ước tính gas: \"%s\". Việc thực hiện giao dịch có thể sẽ thất bại. Bạn có muốn buộc gửi không?</string>
+    <string name="action_proceed">Tiếp tục</string>
 </resources>

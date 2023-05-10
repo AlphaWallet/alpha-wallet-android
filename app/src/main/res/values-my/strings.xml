@@ -1001,4 +1001,7 @@
     <string name="dialog_title_sign_in_with_ethereum">Ethereum ဖြင့် ဝင်ရောက်ပါ။</string>
     <string name="attestations_header">စုံစမ်းစစ်ဆေးမှုများ</string>
     <string name="attestation">စုံစမ်းစစ်ဆေးခြင်း</string>
+    <string name="dialog_title_gas_estimation_failed">ဓာတ်ငွေ့ ခန့်မှန်းချက် မအောင်မြင်ပါ။</string>
+    <string name="dialog_message_gas_estimation_failed">ဓာတ်ငွေ့ ခန့်မှန်းချက် မှားယွင်းနေသည်- \"%s\". ငွေပေးငွေယူ လုပ်ဆောင်မှု ပျက်သွားဖွယ်ရှိသည်။ အတင်းပို့ချင်တာလား။</string>
+    <string name="action_proceed">ရှေ့ဆက်ပါ။</string>
 </resources>

@@ -19,6 +19,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
+import android.util.Base64;
 import android.util.TypedValue;
 import android.webkit.URLUtil;
 
@@ -1041,5 +1042,65 @@ public class Utils
     public static boolean isAlphaWallet(Context context)
     {
         return context.getPackageName().equals("io.stormbird.wallet");
+    }
+
+    public static boolean hasAttestation(String url)
+    {
+        int hashIndex = url.indexOf("#attestation=");
+        if (hashIndex >= 0)
+        {
+            url = url.substring(hashIndex + 13);
+        }
+
+        return url.length() > 10;
+    }
+
+    public static String getAttestationString(String url)
+    {
+        int hashIndex = url.indexOf("#attestation=");
+        if (hashIndex >= 0)
+        {
+            return url.substring(hashIndex + 13);
+        }
+        return "";
+    }
+
+    public static byte[] getAttestationBytes(String url)
+    {
+        return Base64.decode(getAttestationString(url), Base64.DEFAULT);
+    }
+
+    public static String getDecodedAttestation(String url)
+    {
+        return Hex.byteArrayToHexString(getAttestationBytes(url));
+    }
+
+    public static byte[] hexStringToByteArray(String s)
+    {
+        //clean prefix
+        s = s.substring(2);
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2)
+        {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                + Character.digit(s.charAt(i + 1), 16));
+        }
+        return data;
+    }
+
+    public static void unzip(String url)
+    {
+        String attestation = getAttestationString(url);
+        byte[] attestationBytes = getAttestationBytes(url);
+        String decodedAttestation = getDecodedAttestation(url);
+        String decodedAttestationNoPrefix = decodedAttestation.substring(2);
+
+        Timber.d("attestation: " + attestation);
+        Timber.d("attestationBytes: " + new String(attestationBytes));
+        Timber.d("decodedAttestation: " + decodedAttestation);
+        Timber.d("decodedAttestationNoPrefix: " + decodedAttestationNoPrefix);
+
+        // TODO: Unzip here
     }
 }

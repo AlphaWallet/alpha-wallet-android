@@ -72,12 +72,25 @@ public class TransactionNotificationService
         String walletAddress = preferenceRepository.getCurrentWalletAddress();
         TransactionType txType = t.getTransactionType(tx);
 
-        return (txType.equals(TransactionType.RECEIVED) ||
-            txType.equals(TransactionType.RECEIVE_FROM)) &&
+        // Base token received
+        boolean receivedBaseToken =
+            (txType.equals(TransactionType.RECEIVED) ||
+                txType.equals(TransactionType.RECEIVE_FROM)) &&
+                tx.to.equalsIgnoreCase(walletAddress);
+
+        // ERC-20/721/1155 received
+        boolean receivedNftOrErc20 =
+            tx.transactionInput != null &&
+                tx.transactionInput.containsAddress(walletAddress) &&
+                !tx.from.equalsIgnoreCase(walletAddress) &&
+                (txType.equals(TransactionType.RECEIVED) ||
+                    txType.equals(TransactionType.RECEIVE_FROM) ||
+                    txType.equals(TransactionType.TRANSFER_TO));
+
+        return (receivedBaseToken || receivedNftOrErc20) &&
             !preferenceRepository.isWatchOnly() &&
-            preferenceRepository.isTransactionNotificationsEnabled(walletAddress) &&
-            tx.to.equalsIgnoreCase(walletAddress) &&
-            tx.timeStamp > preferenceRepository.getWalletCreationTime(walletAddress);
+            tx.timeStamp > preferenceRepository.getWalletCreationTime(walletAddress) &&
+            preferenceRepository.isTransactionNotificationsEnabled(walletAddress);
     }
 
     private Intent buildIntent(Transaction tx, Token t)
@@ -111,7 +124,7 @@ public class TransactionNotificationService
 
     private String getTitle(Transaction tx, Token t)
     {
-        return t.getOperationName(tx, context) + " " + t.getTransactionResultValue(tx);
+        return context.getString(R.string.received) + " " + t.getTransactionResultValue(tx);
     }
 
     private String getBody(Transaction tx, Token t)

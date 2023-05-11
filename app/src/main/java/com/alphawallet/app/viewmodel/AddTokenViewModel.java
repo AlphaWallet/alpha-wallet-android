@@ -1,5 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -20,10 +21,10 @@ import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.router.TransferRequestRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
-import com.alphawallet.app.ui.SendActivity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -208,28 +209,9 @@ public class AddTokenViewModel extends BaseViewModel
         findWallet();
     }
 
-    public void showSend(Context ctx, QRResult result, Token token)
+    public void showSend(Activity ctx, QRResult result)
     {
-        Intent intent = new Intent(ctx, SendActivity.class);
-        boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);
-        String address = wallet.getValue().address;
-        int decimals = 18;
-
-        if (sendingTokens)
-        {
-            address = result.getAddress();
-            decimals = token.tokenInfo.decimals;
-        }
-
-        intent.putExtra(C.EXTRA_SENDING_TOKENS, sendingTokens);
-        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
-        intent.putExtra(C.EXTRA_NETWORKID, token.tokenInfo.chainId);
-        intent.putExtra(C.EXTRA_SYMBOL, ethereumNetworkRepository.getNetworkByChain(result.chainId).symbol);
-        intent.putExtra(C.EXTRA_DECIMALS, decimals);
-        intent.putExtra(C.Key.WALLET, wallet.getValue());
-        intent.putExtra(C.EXTRA_AMOUNT, result);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        ctx.startActivity(intent);
+        new TransferRequestRouter().open(ctx, result);
     }
 
     private List<Long> getNetworkIds()

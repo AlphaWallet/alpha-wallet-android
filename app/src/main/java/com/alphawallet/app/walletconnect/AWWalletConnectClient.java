@@ -447,12 +447,12 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     {
         EthereumMessage ethereumMessage = new EthereumMessage(message, origin, 0,
                 SignMessageType.SIGN_MESSAGE);
-        ActionSheet actionSheet = new ActionSheetSignDialog(App.getInstance().getTopActivity(), newActionSheetCallback(requestId, message, issuer), ethereumMessage);
+        ActionSheet actionSheet = new ActionSheetSignDialog(App.getInstance().getTopActivity(), newActionSheetCallback(requestId, issuer), ethereumMessage);
         actionSheet.setSigningWallet(walletAddress);
         actionSheet.show();
     }
 
-    private ActionSheetCallback newActionSheetCallback(long requestId, String message, String issuer)
+    private ActionSheetCallback newActionSheetCallback(long requestId, String issuer)
     {
         return new ActionSheetCallback()
         {

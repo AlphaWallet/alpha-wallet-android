@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
-public class Tokens
+public class LifiTokenUtils
 {
     public static void sortValue(List<LifiToken> tokenItems)
     {

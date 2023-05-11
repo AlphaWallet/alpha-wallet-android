@@ -38,7 +38,7 @@ import com.alphawallet.app.ui.widget.entity.ProgressInfo;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.SwapUtils;
 import com.alphawallet.app.viewmodel.SwapViewModel;
-import com.alphawallet.app.viewmodel.Tokens;
+import com.alphawallet.app.viewmodel.LifiTokenUtils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
@@ -420,7 +420,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void initFromDialog(List<LifiToken> fromTokens)
     {
-        Tokens.sortValue(fromTokens);
+        LifiTokenUtils.sortValue(fromTokens);
         sourceTokenDialog = new SelectLifiTokenDialog(fromTokens, this, tokenItem -> {
             sourceSelector.init(tokenItem);
             sourceTokenDialog.dismiss();
@@ -429,8 +429,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
 
     private void initToDialog(List<LifiToken> toTokens)
     {
-        Tokens.sortName(toTokens);
-        Tokens.sortValue(toTokens);
+        LifiTokenUtils.sortName(toTokens);
+        LifiTokenUtils.sortValue(toTokens);
         destTokenDialog = new SelectLifiTokenDialog(toTokens, this, tokenItem -> {
             destSelector.init(tokenItem);
             destTokenDialog.dismiss();

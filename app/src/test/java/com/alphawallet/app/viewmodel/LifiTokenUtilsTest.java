@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.alphawallet.app.entity.lifi.LifiToken;
+import com.alphawallet.app.util.LifiTokenUtils;
 
 import org.junit.Test;
 

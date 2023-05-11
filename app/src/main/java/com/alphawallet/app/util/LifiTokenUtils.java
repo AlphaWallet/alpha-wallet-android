@@ -1,4 +1,4 @@
-package com.alphawallet.app.viewmodel;
+package com.alphawallet.app.util;
 
 
 import com.alphawallet.app.entity.lifi.LifiToken;

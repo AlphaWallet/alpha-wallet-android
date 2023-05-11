@@ -6,6 +6,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import androidx.annotation.NonNull;
 
 import com.alphawallet.app.entity.lifi.LifiToken;
+import com.alphawallet.app.util.LifiTokenFilter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class LifiTokenFilterTest
 {
-    private TokenFilter tokenFilter;
+    private LifiTokenFilter lifiTokenFilter;
 
     @Before
     public void setUp() throws Exception
@@ -25,13 +26,13 @@ public class LifiTokenFilterTest
         list.add(createToken("Solana", "SOL", "2"));
         list.add(createToken("Binance", "BNB", "3"));
         list.add(createToken("", "", "4"));
-        tokenFilter = new TokenFilter(list);
+        lifiTokenFilter = new LifiTokenFilter(list);
     }
 
     @Test
     public void nameContains()
     {
-        List<LifiToken> result = tokenFilter.filterBy("an");
+        List<LifiToken> result = lifiTokenFilter.filterBy("an");
         assertThat(result.size(), equalTo(2));
         assertThat(result.get(0).name, equalTo("Solana"));
         assertThat(result.get(1).name, equalTo("Binance"));
@@ -40,7 +41,7 @@ public class LifiTokenFilterTest
     @Test
     public void nameStartsWith()
     {
-        List<LifiToken> result = tokenFilter.filterBy("So");
+        List<LifiToken> result = lifiTokenFilter.filterBy("So");
         assertThat(result.size(), equalTo(1));
         assertThat(result.get(0).name, equalTo("Solana"));
     }
@@ -48,7 +49,7 @@ public class LifiTokenFilterTest
     @Test
     public void symbolContains()
     {
-        List<LifiToken> result = tokenFilter.filterBy("B");
+        List<LifiToken> result = lifiTokenFilter.filterBy("B");
         assertThat(result.size(), equalTo(1));
         assertThat(result.get(0).name, equalTo("Binance"));
     }
@@ -56,7 +57,7 @@ public class LifiTokenFilterTest
     @Test
     public void symbolStartsWith()
     {
-        List<LifiToken> result = tokenFilter.filterBy("S");
+        List<LifiToken> result = lifiTokenFilter.filterBy("S");
         assertThat(result.size(), equalTo(1));
         assertThat(result.get(0).name, equalTo("Solana"));
     }
@@ -64,11 +65,11 @@ public class LifiTokenFilterTest
     @Test
     public void should_be_case_insensitive()
     {
-        List<LifiToken> result = tokenFilter.filterBy("s");
+        List<LifiToken> result = lifiTokenFilter.filterBy("s");
         assertThat(result.size(), equalTo(1));
         assertThat(result.get(0).name, equalTo("Solana"));
 
-        result = tokenFilter.filterBy("b");
+        result = lifiTokenFilter.filterBy("b");
         assertThat(result.size(), equalTo(1));
         assertThat(result.get(0).name, equalTo("Binance"));
     }
@@ -80,9 +81,9 @@ public class LifiTokenFilterTest
         list.add(createToken("Solana", "SOL", "2"));
         list.add(createToken("WETH", "WETH", "2"));
         list.add(createToken("Ethereum", "ETH", "1"));
-        tokenFilter = new TokenFilter(list);
+        lifiTokenFilter = new LifiTokenFilter(list);
 
-        List<LifiToken> result = tokenFilter.filterBy("eth");
+        List<LifiToken> result = lifiTokenFilter.filterBy("eth");
         assertThat(result.size(), equalTo(2));
         assertThat(result.get(0).name, equalTo("Ethereum"));
         assertThat(result.get(1).name, equalTo("WETH"));

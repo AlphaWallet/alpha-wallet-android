@@ -249,14 +249,14 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             }
             else
             {
-                viewModel.showSend(this, currentResult, token);
+                viewModel.showSend(this, currentResult);
                 finish();
             }
         }
         else
         {
             //launch send payment screen for eth transaction
-            viewModel.showSend(this, currentResult, viewModel.getToken(currentResult.chainId, viewModel.wallet().getValue().address));
+            viewModel.showSend(this, currentResult);
             finish();
         }
     }

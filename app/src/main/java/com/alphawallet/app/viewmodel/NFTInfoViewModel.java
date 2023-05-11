@@ -65,15 +65,6 @@ public class NFTInfoViewModel extends BaseViewModel {
         return this.assetDefinitionService;
     }
 
-    public void showSendToken(Activity act, Wallet wallet, Token token)
-    {
-        if (token != null)
-        {
-            new SendTokenRouter().open(act, wallet.address, token.getSymbol(), token.tokenInfo.decimals,
-                    wallet, token, token.tokenInfo.chainId);
-        }
-    }
-
     public void checkTokenScriptValidity(Token token)
     {
         disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)

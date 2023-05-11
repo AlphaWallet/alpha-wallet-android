@@ -96,15 +96,6 @@ public class NFTViewModel extends BaseViewModel {
         return this.assetDefinitionService;
     }
 
-    public void showSendToken(Activity act, Wallet wallet, Token token)
-    {
-        if (token != null)
-        {
-            new SendTokenRouter().open(act, wallet.address, token.getSymbol(), token.tokenInfo.decimals,
-                    wallet, token, token.tokenInfo.chainId);
-        }
-    }
-
     public Realm getRealmInstance(Wallet wallet)
     {
         return tokensService.getRealmInstance(wallet);

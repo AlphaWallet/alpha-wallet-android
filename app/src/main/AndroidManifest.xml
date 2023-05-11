@@ -362,6 +362,10 @@
             android:name=".ui.CrashReportSettingsActivity"
             android:label="@string/settings_title_crash_reporting" />
 
+        <activity
+            android:name=".ui.TransferRequestActivity"
+            android:label="Payment Request" />
+
         <service
             android:name=".service.PriceAlertsService"
             android:enabled="true"

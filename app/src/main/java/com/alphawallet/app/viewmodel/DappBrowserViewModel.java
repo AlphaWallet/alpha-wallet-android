@@ -31,6 +31,7 @@ import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.router.TransferRequestRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
@@ -42,7 +43,6 @@ import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
-import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.util.DappBrowserUtils;
@@ -267,22 +267,9 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
         keyService.failedAuthentication(signData);
     }
 
-    public void showSend(Context ctx, QRResult result)
+    public void showSend(Activity ctx, QRResult result)
     {
-        Intent intent = new Intent(ctx, SendActivity.class);
-        boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);
-        String address = defaultWallet.getValue().address;
-        int decimals = 18;
-
-        intent.putExtra(C.EXTRA_SENDING_TOKENS, sendingTokens);
-        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
-        intent.putExtra(C.EXTRA_NETWORKID, result.chainId);
-        intent.putExtra(C.EXTRA_SYMBOL, ethereumNetworkRepository.getNetworkByChain(result.chainId).symbol);
-        intent.putExtra(C.EXTRA_DECIMALS, decimals);
-        intent.putExtra(C.Key.WALLET, defaultWallet.getValue());
-        intent.putExtra(C.EXTRA_AMOUNT, result);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        ctx.startActivity(intent);
+        new TransferRequestRouter().open(ctx, result);
     }
 
     public void requestSignature(Web3Transaction finalTx, Wallet wallet, long chainId)

@@ -425,7 +425,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     @Override
     public void showSend()
     {
-        viewModel.showSendToken(this, wallet, token);
+        viewModel.showSendToken(this, token);
     }
 
     @Override

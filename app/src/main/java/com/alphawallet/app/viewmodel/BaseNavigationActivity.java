@@ -5,6 +5,7 @@ import android.view.View;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.WalletPage;
+import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.widget.AWalletBottomNavigationView;
@@ -16,9 +17,7 @@ public class BaseNavigationActivity extends BaseActivity implements AWalletBotto
         nav = findViewById(R.id.nav);
         nav.setListener(this);
         nav.setSendButtonListener(v -> {
-            Intent intent = new Intent(this, SendActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+            new SendTokenRouter().open(this);
         });
     }
 

@@ -328,7 +328,11 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     {
         errorText.setVisibility(View.GONE);
         setWaitingSpinner(false);
-        bindAvatar(address, ens);
+        if (!TextUtils.isEmpty(address) && !TextUtils.isEmpty(ens))
+        {
+            bindAvatar(address, ens);
+        }
+
         if (addressReadyCallback != null)
         {
             addressReadyCallback.resolvedAddress(address, ens);
@@ -550,6 +554,16 @@ public class InputAddress extends RelativeLayout implements ItemClickListener, E
     public long getChain()
     {
         return chainOverride;
+    }
+
+    public void showControls(boolean show)
+    {
+        pasteItem.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    public void setEditable(boolean editable)
+    {
+        editText.setEnabled(editable);
     }
 
     /*public void setEnsNodeNotSyncCallback(EnsNodeNotSyncCallback callback)

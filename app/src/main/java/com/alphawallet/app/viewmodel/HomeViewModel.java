@@ -49,9 +49,11 @@ import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmWCSession;
+import com.alphawallet.app.router.TransferRequestRouter;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
@@ -61,7 +63,6 @@ import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportWalletActivity;
-import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
@@ -374,8 +375,7 @@ public class HomeViewModel extends BaseViewModel
                 case TRANSFER:
                     props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
                     track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
-
-                    showSend(activity, qrResult);
+                    new TransferRequestRouter().open(activity, qrResult);
                     break;
                 case FUNCTION_CALL:
                     props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
@@ -420,7 +420,7 @@ public class HomeViewModel extends BaseViewModel
         View.OnClickListener listener = v -> {
             if (v.getId() == R.id.send_to_this_address_action)
             {
-                showSend(activity, qrResult);
+                new SendTokenRouter().open(activity, qrResult.getAddress());
             }
             else if (v.getId() == R.id.add_custom_token_action)
             {
@@ -474,24 +474,6 @@ public class HomeViewModel extends BaseViewModel
         BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) contentView.getParent());
         dialog.setOnShowListener(dialog -> behavior.setPeekHeight(contentView.getHeight()));
         dialog.show();
-    }
-
-    public void showSend(Activity ctx, QRResult result)
-    {
-        Intent intent = new Intent(ctx, SendActivity.class);
-        boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);
-        String address = defaultWallet.getValue().address;
-        int decimals = 18;
-
-        intent.putExtra(C.EXTRA_SENDING_TOKENS, sendingTokens);
-        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
-        intent.putExtra(C.EXTRA_NETWORKID, result.chainId);
-        intent.putExtra(C.EXTRA_SYMBOL, ethereumNetworkRepository.getNetworkByChain(result.chainId).symbol);
-        intent.putExtra(C.EXTRA_DECIMALS, decimals);
-        intent.putExtra(C.Key.WALLET, defaultWallet.getValue());
-        intent.putExtra(C.EXTRA_AMOUNT, result);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        ctx.startActivity(intent);
     }
 
     public void showMyAddress(Activity activity)

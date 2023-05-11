@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.lifi.LifiToken;
+import com.alphawallet.app.util.LifiTokenFilter;
 import com.alphawallet.app.widget.AddressIcon;
 import com.alphawallet.app.widget.SelectLifiTokenDialog;
 import com.google.android.material.radiobutton.MaterialRadioButton;
@@ -22,12 +23,12 @@ public class SelectLifiTokenAdapter extends RecyclerView.Adapter<SelectLifiToken
 {
     private final List<LifiToken> displayData;
     private final SelectLifiTokenDialog.EventListener callback;
-    private final TokenFilter tokenFilter;
+    private final LifiTokenFilter lifiTokenFilter;
     private String selectedTokenAddress;
 
     public SelectLifiTokenAdapter(List<LifiToken> tokens, SelectLifiTokenDialog.EventListener callback)
     {
-        tokenFilter = new TokenFilter(tokens);
+        lifiTokenFilter = new LifiTokenFilter(tokens);
         this.callback = callback;
         displayData = new ArrayList<>();
         displayData.addAll(tokens);
@@ -76,7 +77,7 @@ public class SelectLifiTokenAdapter extends RecyclerView.Adapter<SelectLifiToken
 
     public void filter(String keyword)
     {
-        updateList(tokenFilter.filterBy(keyword));
+        updateList(lifiTokenFilter.filterBy(keyword));
     }
 
     public void updateList(List<LifiToken> filteredList)

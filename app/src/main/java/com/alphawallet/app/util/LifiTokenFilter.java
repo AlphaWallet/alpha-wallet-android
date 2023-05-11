@@ -1,4 +1,4 @@
-package com.alphawallet.app.ui.widget.adapter;
+package com.alphawallet.app.util;
 
 import android.text.TextUtils;
 
@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 
-public class TokenFilter
+public class LifiTokenFilter
 {
     private final List<LifiToken> tokens;
 
-    public TokenFilter(List<LifiToken> tokens)
+    public LifiTokenFilter(List<LifiToken> tokens)
     {
         this.tokens = tokens;
         removeBadTokens();

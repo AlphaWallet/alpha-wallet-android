@@ -19,6 +19,8 @@ import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.token.entity.ContractAddress;
 
+import java.math.BigInteger;
+
 /**
  * Created by JB on 12/07/2020.
  */
@@ -41,18 +43,25 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type, TokenGroup group)
     {
-        this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress);
+        this(chainId, tokenAddress, balance, timeStamp, svs, name, symbol, type, group, BigInteger.ZERO);
+    }
+
+    public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type, TokenGroup group, BigInteger attnId)
+    {
+        this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress)
+                + (attnId.compareTo(BigInteger.ZERO) > 0 ? ("-" + attnId) : "")
+                + (group == TokenGroup.ATTESTATION ? "-att" : "");
         this.lastUpdate = timeStamp;
         this.type = type;
         this.balance = balance;
-        this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum());
+        this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum(), group, attnId);
         this.filterText = symbol + "'" + name;
         this.group = group;
     }
 
     public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, long lastTxUpdate, ContractType type, TokenGroup group)
     {
-        this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress);
+        this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress) + (group == TokenGroup.ATTESTATION ? "-att" : "");
         this.lastUpdate = timeStamp;
         this.lastTxUpdate = lastTxUpdate;
         this.type = type;
@@ -69,7 +78,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.lastTxUpdate = token.lastTxCheck;
         this.type = token.getInterfaceSpec();
         this.balance = token.balance.toString();
-        this.nameWeight = calculateTokenNameWeight(token.tokenInfo.chainId, token.tokenInfo.address, null, token.getName(), token.getSymbol(), isEthereum());
+        this.nameWeight = calculateTokenNameWeight(token.tokenInfo.chainId, token.tokenInfo.address, null, token.getName(), token.getSymbol(), isEthereum(), token.group, BigInteger.ZERO);
         this.filterText = filterText;
         this.group = token.group;
         this.isEnabled = TextUtils.isEmpty(filterText) || !filterText.equals(CHECK_MARK);
@@ -150,11 +159,10 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     public long getChain()
     {
-        int chainPos = tokenId.lastIndexOf('-') + 1;
-        if (chainPos < tokenId.length())
+        String[] parts = tokenId.split("-");
+        if (parts.length > 1)
         {
-            String chainStr = tokenId.substring(chainPos);
-            return Long.parseLong(chainStr);
+            return Long.parseLong(parts[1]);
         }
         else
         {
@@ -162,7 +170,20 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         }
     }
 
-    private long calculateTokenNameWeight(long chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth)
+    public BigInteger getTokenID()
+    {
+        String[] parts = tokenId.split("-");
+        if (parts.length > 2)
+        {
+            return new BigInteger(parts[2]);
+        }
+        else
+        {
+            return BigInteger.ZERO;
+        }
+    }
+
+    private long calculateTokenNameWeight(long chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth, TokenGroup group, BigInteger attnId)
     {
         int weight = 1000; //ensure base eth types are always displayed first
         String name = svs != null ? svs.getTokenName(chainId, tokenAddress, 1) : null;
@@ -208,6 +229,11 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         weight += tokenAddress.hashCode()%1753; //prime modulus factor for disambiguation
 
         if (weight < 2) weight = 2;
+
+        if (group == TokenGroup.ATTESTATION)
+        {
+            weight += (attnId.longValue() + 1);
+        }
 
         return weight;
     }

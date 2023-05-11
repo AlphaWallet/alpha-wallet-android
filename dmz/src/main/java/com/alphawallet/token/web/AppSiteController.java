@@ -124,7 +124,7 @@ public class AppSiteController implements AttributeInterface
     {
         if (universalLink.equals("wc"))
         {
-            return "If you are using AlphaWallet with WalletConnect, please launch the AlphaWallet app";
+            return "If you are using AlphaWallet with WalletConnect and facing issues please take the following steps:<br/><br/>\nTry using WalletConnect V2 (or latest version)<br/>\nTry launching the application from within AlphaWallet app's Browser tab.<br/>";
         }
         String domain = request.getServerName();
         ParseMagicLink parser = new ParseMagicLink(cryptoFunctions, null);

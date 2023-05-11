@@ -22,6 +22,7 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokendata.TokenUpdateType;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
@@ -513,10 +514,9 @@ public class TokensService
         tokenRepository.addImageUrl(networkId, address, imageUrl);
     }
 
-    public Single<TokenInfo> update(String address, long chainId, ContractType type) {
-        return tokenRepository.update(address, chainId, type)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+    public Single<TokenInfo> update(String address, long chainId, ContractType type)
+    {
+        return tokenRepository.update(address, chainId, type);
     }
 
     private void checkIssueTokens()
@@ -555,6 +555,26 @@ public class TokensService
     public Single<BigDecimal> getChainBalance(String walletAddress, long chainId)
     {
         return tokenRepository.fetchChainBalance(walletAddress, chainId);
+    }
+
+    public Single<TokenInfo> storeTokenInfo(Wallet wallet, TokenInfo tInfo, ContractType type)
+    {
+        return tokenRepository.determineCommonType(tInfo)
+                .map(contractType -> checkDefaultType(contractType, type))
+                        .flatMap(contractType -> tokenRepository.storeTokenInfo(wallet, tInfo, type));
+    }
+
+    //Fix undermined contract type
+    private ContractType checkDefaultType(ContractType contractType, ContractType defaultType)
+    {
+        switch (contractType)
+        {
+            case OTHER:
+            case ERC721_UNDETERMINED:
+                return defaultType;
+            default:
+                return contractType;
+        }
     }
 
     // Note that this routine works across different wallets, so there's no usage of currentAddress
@@ -1205,5 +1225,26 @@ public class TokensService
             }
             return true;
         });
+    }
+
+    public Token getToken(String walletAddress, long chainId, String tokenAddress)
+    {
+        if (walletAddress == null)
+        {
+            walletAddress = currentAddress;
+        }
+        if (TextUtils.isEmpty(walletAddress) || TextUtils.isEmpty(tokenAddress)) return null;
+        else return tokenRepository.fetchToken(chainId, walletAddress, tokenAddress.toLowerCase());
+    }
+
+    public Token getAttestation(long chainId, String addr, BigInteger tokenId)
+    {
+        //fetch attestation
+        return tokenRepository.fetchAttestation(chainId, currentAddress, addr.toLowerCase(), tokenId);
+    }
+
+    public List<Token> getAttestations(long chainId, String address)
+    {
+        return tokenRepository.fetchAttestations(chainId, currentAddress, address);
     }
 }

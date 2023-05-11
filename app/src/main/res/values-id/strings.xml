@@ -961,5 +961,16 @@
     <string name="action_view_session">Lihat Sesi</string>
     <string name="error_walletconnect_session_request_unsupported_network">Tidak dapat menangani permintaan sesi dari rantai yang tidak didukung. (ID: %s)</string>
     <string name="spam_header">Spam</string>
+    <string name="create_shortcut_for_token">Buat pintasan untuk token ini?</string>
+    <string name="toast_shortcut_created">Pintasan dibuat, tekan lama ikon aplikasi untuk melihatnya.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Sebelum melakukan operasi apa pun, perlu diingat bahwa NFT saat ini bukan milik dompet aktif saat ini, tetapi untuk %1$s.</string>
+    <string name="remove_shortcut_reminder">Mentransfer token ini akan menghapus pintasan terkait dari layar beranda.</string>
+    <string name="remove_shortcut_while_token_not_found">Token tidak ada, hapus pintasan?</string>
+    <string name="title_remove_shortcut">Hapus Pintasan</string>
     <string name="dialog_title_sign_in_with_ethereum">Masuk dengan Ethereum</string>
+    <string name="attestations_header">Pengesahan</string>
+    <string name="attestation">Pengesahan</string>
+    <string name="dialog_title_gas_estimation_failed">Estimasi Gas Gagal</string>
+    <string name="dialog_message_gas_estimation_failed">Gas estimation errored: \"%s\". The transaction execution will likely fail. Do you want to force sending?</string>
+    <string name="action_proceed">Melanjutkan</string>
 </resources>

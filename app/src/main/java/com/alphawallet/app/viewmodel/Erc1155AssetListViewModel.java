@@ -46,6 +46,7 @@ public class Erc1155AssetListViewModel extends BaseViewModel {
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
+        intent.putExtra(C.EXTRA_NFTASSET, token.getAssetForToken(tokenId));
         intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString());
         intent.putExtra(C.EXTRA_STATE, ERC1155Token.getNFTTokenId(tokenId).toString());
         return intent;

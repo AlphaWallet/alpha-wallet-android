@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -36,6 +37,7 @@ import com.alphawallet.token.tools.Convert;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.Locale;
 
@@ -119,6 +121,12 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
             tokenLayout.setVisibility(View.VISIBLE);
 
+            if (data.group == TokenGroup.ATTESTATION)
+            {
+                handleAttestation(data);
+                return;
+            }
+
             if (EthereumNetworkRepository.isPriorityToken(token))
             {
                 extendedInfo.setVisibility(View.GONE);
@@ -172,6 +180,26 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     }
 
+    private void handleAttestation(TokenCardMeta data)
+    {
+        Attestation attestation = (Attestation) tokensService.getAttestation(data.getChain(), data.getAddress(), data.getTokenID());
+        balanceEth.setText(shortTitle());
+        BigInteger attestationId = attestation.getAttestationId();
+        if (attestationId.compareTo(BigInteger.ZERO) > 0)
+        {
+            balanceCoin.setText(getString(R.string.valueSymbol, "AttestationId", attestationId.toString()));
+        }
+        else
+        {
+            balanceCoin.setText(getString(R.string.valueSymbol, "1", token.getSymbol()));
+        }
+
+        balanceCoin.setVisibility(View.VISIBLE);
+        tokenIcon.setIsAttestation(attestation.getSymbol(), data.getChain());
+        token = attestation;
+        blankTickerInfo();
+    }
+
     private void populateTicker(TokenGroup group)
     {
         resetTickerViews();
@@ -207,10 +235,15 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
         else
         {
-            //Ethereum token without a ticker
-            balanceCurrency.setVisibility(View.GONE);
-            layoutAppreciation.setVisibility(View.GONE);
+            blankTickerInfo();
         }
+    }
+
+    private void blankTickerInfo()
+    {
+        //Ethereum token without a ticker
+        balanceCurrency.setVisibility(View.GONE);
+        layoutAppreciation.setVisibility(View.GONE);
     }
 
     private void maskSpamOrStaleTicker(TokenTicker ticker, TokenGroup group)

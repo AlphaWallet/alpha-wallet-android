@@ -23,6 +23,7 @@ public class FunctionDefinition
     public long resultTime = 0;
     public BigInteger tokenId;
     public EthereumTransaction tx;
+    public String namedTypeReturn;
 
     public int getTokenRequirement()
     {

@@ -18,6 +18,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.ActionSheetStatus;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -25,10 +26,9 @@ import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetMode;
-import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmTransaction;
@@ -41,6 +41,7 @@ import com.alphawallet.app.ui.widget.entity.GasWidgetInterface;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.hardware.SignatureReturnType;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
@@ -63,7 +64,8 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private final BalanceDisplayWidget balanceDisplay;
     private final NetworkDisplayWidget networkDisplay;
     private final ConfirmationWidget confirmationWidget;
-    private final AddressDetailView addressDetail;
+    private final AddressDetailView senderAddressDetail;
+    private final AddressDetailView receiptAddressDetail;
     private final AmountDisplayWidget amountDisplay;
     private final AssetDetailView assetDetailView;
     private final FunctionButtonBar functionBar;
@@ -106,7 +108,8 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         networkDisplay = findViewById(R.id.network_display_widget);
         confirmationWidget = findViewById(R.id.confirmation_view);
         detailWidget = findViewById(R.id.detail_widget);
-        addressDetail = findViewById(R.id.recipient);
+        senderAddressDetail = findViewById(R.id.sender);
+        receiptAddressDetail = findViewById(R.id.recipient);
         amountDisplay = findViewById(R.id.amount_display);
         assetDetailView = findViewById(R.id.asset_detail);
         functionBar = findViewById(R.id.layoutButtons);
@@ -145,12 +148,13 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
         if (!tx.gasLimit.equals(BigInteger.ZERO))
         {
-            setGasEstimate(tx.gasLimit);
+            setGasEstimate(new GasEstimate(tx.gasLimit));
         }
 
         updateAmount();
 
-        addressDetail.setupAddress(destAddress, destName, tokensService.getToken(token.tokenInfo.chainId, destAddress));
+        senderAddressDetail.setupAddress(token.getWallet(), "", null);
+        receiptAddressDetail.setupAddress(destAddress, destName, tokensService.getToken(token.tokenInfo.chainId, destAddress));
 
         if (token.isNonFungible())
         {
@@ -209,7 +213,8 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         balanceDisplay = null;
         networkDisplay = null;
         confirmationWidget = null;
-        addressDetail = null;
+        senderAddressDetail = null;
+        receiptAddressDetail = null;
         amountDisplay = null;
         assetDetailView = null;
         detailWidget = null;
@@ -260,7 +265,8 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         balanceDisplay = null;
         networkDisplay = null;
         confirmationWidget = null;
-        addressDetail = null;
+        senderAddressDetail = null;
+        receiptAddressDetail = null;
         amountDisplay = null;
         assetDetailView = null;
         detailWidget = null;
@@ -293,7 +299,8 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         balanceDisplay = null;
         networkDisplay = null;
         confirmationWidget = null;
-        addressDetail = null;
+        senderAddressDetail = null;
+        receiptAddressDetail = null;
         amountDisplay = null;
         assetDetailView = null;
         functionBar = null;
@@ -354,7 +361,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
         if (candidateTransaction.isConstructor())
         {
-            addressDetail.setVisibility(View.GONE);
+            receiptAddressDetail.setVisibility(View.GONE);
         }
 
         if (candidateTransaction.value.compareTo(BigInteger.ZERO) > 0 || candidateTransaction.isBaseTransfer())
@@ -409,7 +416,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         gasWidgetInterface.setupResendSettings(mode, candidateTransaction.gasPrice);
         balanceDisplay.setVisibility(View.GONE);
         networkDisplay.setVisibility(View.GONE);
-        addressDetail.setVisibility(View.GONE);
+        receiptAddressDetail.setVisibility(View.GONE);
         detailWidget.setVisibility(View.GONE);
         amountDisplay.setVisibility(View.GONE);
     }
@@ -744,10 +751,24 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     }
 
     //Takes gas estimate from calling activity (eg WalletConnectActivity) and updates dialog
-    public void setGasEstimate(BigInteger estimate)
+//    public void setGasEstimate(BigInteger estimate)
+//    {
+//        gasWidgetInterface.setGasEstimate(estimate);
+//        functionBar.setPrimaryButtonEnabled(true);
+//    }
+
+    @Override
+    public void setGasEstimate(GasEstimate estimate)
     {
-        gasWidgetInterface.setGasEstimate(estimate);
-        functionBar.setPrimaryButtonEnabled(true);
+        if (!TextUtils.isEmpty(estimate.getError())) // Display error
+        {
+
+        }
+        else
+        {
+            gasWidgetInterface.setGasEstimate(estimate.getValue());
+            functionBar.setPrimaryButtonEnabled(true);
+        }
     }
 
     private void showAmount(BigInteger amountVal)
@@ -808,7 +829,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         SharedPreferenceRepository prefs = new SharedPreferenceRepository(getContext());
         if (!prefs.getCurrentWalletAddress().equalsIgnoreCase(address))
         {
-            addressDetail.addMessage(getContext().getString(R.string.message_wc_wallet_different_from_active_wallet), R.drawable.ic_red_warning);
+            receiptAddressDetail.addMessage(getContext().getString(R.string.message_wc_wallet_different_from_active_wallet), R.drawable.ic_red_warning);
         }
     }
 }

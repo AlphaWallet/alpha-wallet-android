@@ -52,6 +52,7 @@ import org.web3j.crypto.Keys;
 public class TokenIcon extends ConstraintLayout
 {
     private final ImageView icon;
+    private final ImageView iconSecondary;
     private final TextView textIcon;
     private final ImageView statusIcon;
     private final ImageView circle;
@@ -62,7 +63,8 @@ public class TokenIcon extends ConstraintLayout
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final boolean squareToken;
     private TokensAdapterCallback tokensAdapterCallback;
-    private Token token;
+    private volatile Token token;
+
     private final RequestListener<Drawable> requestListenerTW = new RequestListener<Drawable>()
     {
         @Override
@@ -80,11 +82,16 @@ public class TokenIcon extends ConstraintLayout
                 IconItem.secondaryFound(token.tokenInfo.chainId, token.getAddress());
             }
             if (token == null || !model.toString().toLowerCase().contains(token.getAddress()))
+            {
                 return false;
+            }
 
-            textIcon.setVisibility(View.GONE);
-            icon.setVisibility(View.VISIBLE);
-            icon.setImageDrawable(resource);
+            handler.post(() -> {
+                textIcon.setVisibility(View.GONE);
+                iconSecondary.setVisibility(View.VISIBLE);
+                iconSecondary.setImageDrawable(resource);
+            });
+
             return false;
         }
     };
@@ -111,9 +118,11 @@ public class TokenIcon extends ConstraintLayout
         @Override
         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource)
         {
-            textIcon.setVisibility(View.GONE);
-            icon.setVisibility(View.VISIBLE);
-            icon.setImageDrawable(resource);
+            handler.post(() -> {
+                textIcon.setVisibility(View.GONE);
+                icon.setVisibility(View.VISIBLE);
+                icon.setImageDrawable(resource);
+            });
             return false;
         }
     };
@@ -127,6 +136,7 @@ public class TokenIcon extends ConstraintLayout
         inflate(context, squareToken ? R.layout.item_token_icon_square : R.layout.item_token_icon, this);
 
         icon = findViewById(R.id.icon);
+        iconSecondary = findViewById(R.id.icon_secondary);
         textIcon = findViewById(R.id.text_icon);
         statusIcon = findViewById(R.id.status_icon);
         circle = findViewById(R.id.circle);
@@ -170,12 +180,14 @@ public class TokenIcon extends ConstraintLayout
 
     public void clearLoad()
     {
+        iconSecondary.setVisibility(View.INVISIBLE);
         handler.removeCallbacks(null);
         if (currentRq != null && currentRq.isRunning())
         {
+            currentRq.pause();
             currentRq.clear();
             handler.removeCallbacksAndMessages(null);
-            Glide.with(this).clear(icon);
+            token = null;
         }
     }
 
@@ -187,11 +199,6 @@ public class TokenIcon extends ConstraintLayout
      */
     public void bindData(Token token, @NotNull AssetDefinitionService assetDefinition)
     {
-        if (token == null || (this.token != null && this.token.equals(token))) //stop update flicker
-        {
-            return;
-        }
-
         this.token = token;
 
         if (token.isEthereum())
@@ -261,6 +268,7 @@ public class TokenIcon extends ConstraintLayout
         this.handler.removeCallbacks(null);
         this.token = token;
 
+        iconSecondary.setVisibility(View.INVISIBLE);
         statusBackground.setVisibility(View.GONE);
         chainIconBackground.setVisibility(View.GONE);
         chainIcon.setVisibility(View.GONE);
@@ -378,10 +386,9 @@ public class TokenIcon extends ConstraintLayout
 
         currentRq = Glide.with(this)
             .load(this.fallbackIconUrl)
-            .placeholder(R.drawable.ic_token_eth)
             .apply(optionalCircleCrop)
             .listener(requestListenerTW)
-            .into(new DrawableImageViewTarget(icon)).getRequest();
+            .into(new DrawableImageViewTarget(iconSecondary)).getRequest();
     }
 
     /**
@@ -459,5 +466,14 @@ public class TokenIcon extends ConstraintLayout
             icon.setColorFilter(null);
             icon.setImageAlpha(255);
         }
+    }
+
+    public void setIsAttestation(String symbol, long chainId)
+    {
+        loadImageFromResource(R.drawable.zero_one);
+        textIcon.setVisibility(View.VISIBLE);
+        textIcon.setBackgroundResource(0);
+        textIcon.setText(Utils.getIconisedText(symbol));
+        setChainIcon(chainId);
     }
 }

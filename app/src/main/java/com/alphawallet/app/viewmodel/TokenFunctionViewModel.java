@@ -17,6 +17,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Transaction;
@@ -356,6 +357,12 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
+    public Single<Wallet> findActiveWallet()
+    {
+        return genericWalletInteract
+                .find();
+    }
+
     private void onDefaultWallet(Wallet w)
     {
         progress.postValue(false);
@@ -634,13 +641,13 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(estimate -> buildNewConfirmation(estimate, w3tx),
-                        error -> buildNewConfirmation(BigInteger.ZERO, w3tx)); //node didn't like this tx
+                        error -> buildNewConfirmation(new GasEstimate(BigInteger.ZERO), w3tx)); //node didn't like this tx
     }
 
-    private void buildNewConfirmation(BigInteger estimate, Web3Transaction w3tx)
+    private void buildNewConfirmation(GasEstimate estimate, Web3Transaction w3tx)
     {
         gasEstimateComplete.postValue(new Web3Transaction(
-                w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, estimate, w3tx.nonce, w3tx.payload, w3tx.description));
+                w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, estimate.getValue(), w3tx.nonce, w3tx.payload, w3tx.description));
     }
 
     @Override
@@ -715,16 +722,15 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         return intent;
     }
 
-    public Single<Intent> getTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)
+    public Intent getTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)
     {
-        return genericWalletInteract.find()
-                .map(wallet -> completeTransferIntent(ctx, token, tokenIds, selection, wallet));
+        return completeTransferIntent(ctx, token, tokenIds, selection, getWallet());
     }
 
     private Intent completeTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection, Wallet wallet)
     {
         Intent intent = new Intent(ctx, TransferNFTActivity.class);
-        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.Key.WALLET, wallet.address);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(tokenIds, true));
@@ -889,7 +895,7 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     public void updateLocalAttributes(Token token, BigInteger tokenId)
     {
         //Fetch Allowed attributes, then call updateAllowedAttributes
-        assetDefinitionService.fetchFunctionMap(token, Collections.singletonList(tokenId))
+        assetDefinitionService.fetchFunctionMap(token, Collections.singletonList(tokenId), token.getInterfaceSpec())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(availableActions -> updateAllowedAttrs(token, availableActions), this::onError)
@@ -947,5 +953,17 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     public void transactionError(TransactionReturn rtn)
     {
         transactionError.postValue(rtn);
+    }
+
+    public void loadWallet(String address)
+    {
+        disposable = genericWalletInteract
+                .findWallet(address)
+                .subscribe(this::onDefaultWallet, this::onError);
+    }
+
+    public Single<Wallet> findWallet(String walletAddress)
+    {
+        return genericWalletInteract.findWallet(walletAddress);
     }
 }

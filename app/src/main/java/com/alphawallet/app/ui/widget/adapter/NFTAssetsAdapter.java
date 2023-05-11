@@ -2,7 +2,6 @@ package com.alphawallet.app.ui.widget.adapter;
 
 
 import android.app.Activity;
-import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.OpenSeaService;
@@ -33,7 +33,6 @@ import java.util.Map;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
 
 public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.ViewHolder>
 {
@@ -84,6 +83,19 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         sortData();
     }
 
+    //TODO: Attestations should be attached to the backing Token if available
+    public void attachAttestations(Token[] attestations)
+    {
+        for (Token att : attestations)
+        {
+            Attestation thisAttn = (Attestation)att;
+            NFTAsset attestationAsset = new NFTAsset(thisAttn);
+            displayData.add(new Pair<>(thisAttn.getAttestationId(), attestationAsset));
+        }
+
+        sortData();
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
@@ -115,6 +127,12 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         displayImage(holder, asset);
 
         holder.layout.setOnClickListener(v -> listener.onAssetClicked(new Pair<>(tokenId, asset)));
+
+        holder.layout.setOnLongClickListener(view -> {
+            listener.onAssetLongClicked(new Pair<>(tokenId, asset));
+            return false;
+        });
+
         if (isGrid)
         {
             holder.icon.setOnClickListener(v -> listener.onAssetClicked(new Pair<>(tokenId, asset)));

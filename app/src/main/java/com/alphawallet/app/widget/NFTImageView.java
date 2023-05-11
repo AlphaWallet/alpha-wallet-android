@@ -35,6 +35,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -44,6 +45,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -167,6 +169,11 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
             loadImage(asset.getImage(), asset.getBackgroundColor());
             playAudioIfAvailable(anim);
         }
+    }
+
+    public void setImageResource(int resourceId)
+    {
+        image.setImageResource(resourceId);
     }
 
     private void loadImage(String url, String backgroundColor) throws IllegalArgumentException
@@ -367,6 +374,20 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
     {
         fallbackLayout.setVisibility(View.VISIBLE);
         fallbackIcon.bindData(token);
+        fallbackIcon.setOnTokenClickListener(new TokensAdapterCallback()
+        {
+            @Override
+            public void onTokenClick(View view, Token token, List<BigInteger> tokenIds, boolean selected)
+            {
+                performClick();
+            }
+
+            @Override
+            public void onLongTokenClick(View view, Token token, List<BigInteger> tokenIds)
+            {
+
+            }
+        });
     }
 
     private boolean shouldLoad(String url)

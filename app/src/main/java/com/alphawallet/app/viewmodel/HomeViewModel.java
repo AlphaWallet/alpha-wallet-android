@@ -396,6 +396,11 @@ public class HomeViewModel extends BaseViewModel
                 case OTHER:
                     qrCode = null;
                     break;
+                case OTHER_PROTOCOL:
+                    break;
+                case ATTESTATION:
+                    ((HomeActivity)activity).importAttestation(qrResult);
+                    break;
             }
         }
         catch (Exception e)
@@ -635,6 +640,7 @@ public class HomeViewModel extends BaseViewModel
     private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception
     {
         Locale locale = ctx.getResources().getConfiguration().getLocales().get(0);
+        //AttestationParser ap = new AttestationParser(xmlInputStream, locale, null);
         return new TokenDefinition(
             xmlInputStream, locale, null);
     }
@@ -675,6 +681,11 @@ public class HomeViewModel extends BaseViewModel
             }
 
             iStream.close();
+
+            disposable = assetDefinitionService.resetAttributes(td)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(System.out::println);
         }
         catch (Exception e)
         {

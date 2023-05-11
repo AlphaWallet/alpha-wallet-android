@@ -971,5 +971,16 @@
     <string name="action_view_session">Xem phiên</string>
     <string name="error_walletconnect_session_request_unsupported_network">Không thể xử lý yêu cầu phiên từ một chuỗi không được hỗ trợ. (ID: %s)</string>
     <string name="spam_header">Thư rác</string>
+    <string name="create_shortcut_for_token">Tạo lối tắt cho mã thông báo này?</string>
+    <string name="toast_shortcut_created">Đã tạo lối tắt, nhấn và giữ biểu tượng ứng dụng để xem.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Trước khi thực hiện bất kỳ hoạt động nào, hãy nhớ rằng NFT hiện tại không thuộc về ví hoạt động hiện tại, mà là %1$s.</string>
+    <string name="remove_shortcut_reminder">Việc chuyển mã thông báo này sẽ xóa phím tắt được liên kết khỏi màn hình chính.</string>
+    <string name="remove_shortcut_while_token_not_found">Mã thông báo không tồn tại, xóa phím tắt?</string>
+    <string name="title_remove_shortcut">Xóa phím tắt</string>
     <string name="dialog_title_sign_in_with_ethereum">Đăng nhập bằng Ethereum</string>
+    <string name="attestations_header">Chứng thực</string>
+    <string name="attestation">Chứng thực</string>
+    <string name="dialog_title_gas_estimation_failed">Ước tính khí không thành công</string>
+    <string name="dialog_message_gas_estimation_failed">Lỗi ước tính gas: \"%s\". Việc thực hiện giao dịch có thể sẽ thất bại. Bạn có muốn buộc gửi không?</string>
+    <string name="action_proceed">Tiếp tục</string>
 </resources>

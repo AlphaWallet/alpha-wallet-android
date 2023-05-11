@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.AuthenticationFailType;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 
 public abstract class BaseActivity extends AppCompatActivity
@@ -161,5 +162,15 @@ public abstract class BaseActivity extends AppCompatActivity
 
             authCallback = null;
         }
+    }
+
+    protected void displayErrorMessage(String message)
+    {
+        AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.title_dialog_error);
+        dialog.setMessage(message);
+        dialog.setButtonText(R.string.ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
     }
 }

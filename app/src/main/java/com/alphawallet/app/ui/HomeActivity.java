@@ -44,7 +44,9 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -57,11 +59,13 @@ import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
 import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.entity.MediaLinks;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
@@ -103,7 +107,7 @@ import timber.log.Timber;
 
 @AndroidEntryPoint
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
-        FragmentMessenger, Runnable, ActionSheetCallback, LifecycleObserver, PagerCallback
+        FragmentMessenger, Runnable, ActionSheetCallback, LifecycleEventObserver, PagerCallback
 {
     @Inject
     AWWalletConnectClient awWalletConnectClient;
@@ -147,34 +151,36 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         updatePrompt = true;
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    private void onMoveToForeground()
-    {
-        Timber.tag("LIFE").d("AlphaWallet into foreground");
-        if (viewModel != null)
-        {
-            viewModel.checkTransactionEngine();
-            viewModel.sendMsgPumpToWC(this);
-        }
-        isForeground = true;
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    private void onMoveToBackground()
-    {
-        Timber.tag("LIFE").d("AlphaWallet into background");
-        if (viewModel != null && !tokenClicked) viewModel.stopTransactionUpdate();
-        if (viewModel != null) viewModel.outOfFocus();
-        isForeground = false;
-    }
-
     @Override
-    public void onTrimMemory(int level)
+    public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event)
     {
-        super.onTrimMemory(level);
-        if (!isForeground)
+        switch (event)
         {
-            onMoveToBackground();
+            case ON_CREATE:
+                break;
+            case ON_START:
+                Timber.tag("LIFE").d("AlphaWallet into foreground");
+                if (viewModel != null)
+                {
+                    viewModel.checkTransactionEngine();
+                    viewModel.sendMsgPumpToWC(this);
+                }
+                isForeground = true;
+                break;
+            case ON_RESUME:
+                break;
+            case ON_PAUSE:
+                break;
+            case ON_STOP:
+                Timber.tag("LIFE").d("AlphaWallet into background");
+                if (viewModel != null && !tokenClicked) viewModel.stopTransactionUpdate();
+                if (viewModel != null) viewModel.outOfFocus();
+                isForeground = false;
+                break;
+            case ON_DESTROY:
+                break;
+            case ON_ANY:
+                break;
         }
     }
 
@@ -1071,7 +1077,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         try
         {
             if (importData != null) importData = URLDecoder.decode(importData, "UTF-8");
-            /*DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
+            DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
             if (importData != null && importData.startsWith(NotificationService.AWSTARTUP))
             {
                 importData = importData.substring(NotificationService.AWSTARTUP.length());
@@ -1084,7 +1090,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 showPage(DAPP_BROWSER);
                 if (!dappFrag.isDetached()) dappFrag.loadDirect(url);
             }
-            else*/ if (importData != null && importData.length() > 22 && importData.contains(AW_MAGICLINK))
+            else if (importData != null && importData.length() > 22 && importData.contains(AW_MAGICLINK))
             {
                 // Deeplink-based Wallet API
                 ApiV1Request request = new ApiV1Request(importData);
@@ -1259,5 +1265,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             return WalletPage.values().length;
         }
+    }
+
+    public void importAttestation(QRResult attestation)
+    {
+        if (attestation.type != EIP681Type.ATTESTATION)
+        {
+            return;
+        }
+
+        ((WalletFragment)getFragment(WALLET)).importAttestation(attestation);
     }
 }

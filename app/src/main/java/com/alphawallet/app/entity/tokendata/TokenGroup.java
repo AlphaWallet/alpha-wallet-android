@@ -9,5 +9,6 @@ public enum TokenGroup
     DEFI,
     GOVERNANCE,
     NFT,
-    SPAM
+    SPAM,
+    ATTESTATION
 }

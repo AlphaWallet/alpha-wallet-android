@@ -14,9 +14,33 @@ public class RealmTransfer extends RealmObject
 
     public String getHash()
     {
-        return hash;
+        String[] split = hash.split("-");
+        if (split.length > 0)
+        {
+            return split[0];
+        }
+        else
+        {
+            return "";
+        }
     }
-    public void setHash(String hash) { this.hash = hash; }
+    public void setHashKey(long chainId, String hash)
+    {
+        this.hash = databaseKey(chainId, hash);
+    }
+
+    public long getChain()
+    {
+        String[] split = hash.split("-");
+        if (split.length > 1)
+        {
+            return Long.parseLong(split[1]);
+        }
+        else
+        {
+            return 0L;
+        }
+    }
 
     public String getTokenAddress()
     {
@@ -46,5 +70,10 @@ public class RealmTransfer extends RealmObject
     public void setEventName(String eventName)
     {
         this.eventName = eventName;
+    }
+
+    public static String databaseKey(long chainId, String hash)
+    {
+        return hash + "-" + chainId;
     }
 }

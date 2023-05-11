@@ -774,6 +774,11 @@ public abstract class TokenscriptFunction
         });
     }
 
+    public String callSmartContract(long chainId, String contractAddress, Function function)
+    {
+        return callSmartContractFunction(TokenRepository.getWeb3jService(chainId), function, contractAddress, ZERO_ADDRESS);
+    }
+
     private String callSmartContractFunction(Web3j web3j,
                                              Function function, String contractAddress, String walletAddr)
     {

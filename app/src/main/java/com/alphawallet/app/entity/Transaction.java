@@ -55,6 +55,7 @@ public class Transaction implements Parcelable
     public final String input;
     public final String error;
     public final long chainId;
+    public final String functionName;
 
     public boolean isConstructor = false;
     public TransactionInput transactionInput = null;
@@ -82,6 +83,7 @@ public class Transaction implements Parcelable
         chainId = 0;
         maxFeePerGas = "";
         maxPriorityFee = "";
+        functionName = "";
     }
 
     public boolean isPending()
@@ -131,6 +133,7 @@ public class Transaction implements Parcelable
         this.isConstructor = isConstructor;
         this.maxFeePerGas = "";
         this.maxPriorityFee = "";
+        this.functionName = "";
     }
 
     public Transaction(Web3Transaction tx, long chainId, String wallet)
@@ -151,6 +154,7 @@ public class Transaction implements Parcelable
         this.isConstructor = tx.isConstructor();
         this.maxFeePerGas = tx.maxFeePerGas.toString();
         this.maxPriorityFee = tx.maxPriorityFeePerGas.toString();
+        this.functionName = "";
     }
 
     public Transaction(CovalentTransaction cTx, long chainId, long transactionTime)
@@ -181,6 +185,7 @@ public class Transaction implements Parcelable
         this.chainId = chainId;
         this.maxFeePerGas = "";
         this.maxPriorityFee = "";
+        this.functionName = "";
     }
 
     public Transaction(org.web3j.protocol.core.methods.response.Transaction ethTx, long chainId, boolean isSuccess, long timeStamp)
@@ -221,10 +226,11 @@ public class Transaction implements Parcelable
         this.chainId = chainId;
         this.maxFeePerGas = ethTx.getMaxFeePerGas();
         this.maxPriorityFee = ethTx.getMaxPriorityFeePerGas();
+        this.functionName = "";
     }
 
     public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
-                       String value, String gas, String gasPrice, String input, String gasUsed, long chainId, String contractAddress)
+                       String value, String gas, String gasPrice, String input, String gasUsed, long chainId, String contractAddress, String functionName)
     {
         //Is it a constructor?
         if (!TextUtils.isEmpty(contractAddress))
@@ -253,6 +259,7 @@ public class Transaction implements Parcelable
         this.chainId = chainId;
         this.maxFeePerGas = "";
         this.maxPriorityFee = "";
+        this.functionName = functionName;
     }
 
     public Transaction(String hash, String isError, String blockNumber, long timeStamp, int nonce, String from, String to,
@@ -284,6 +291,7 @@ public class Transaction implements Parcelable
         this.input = input;
         this.gasUsed = gasUsed;
         this.chainId = chainId;
+        this.functionName = "";
     }
 
     protected Transaction(Parcel in)
@@ -303,6 +311,7 @@ public class Transaction implements Parcelable
         chainId = in.readLong();
         maxFeePerGas = in.readString();
         maxPriorityFee = in.readString();
+        functionName = in.readString();
     }
 
     public static final Creator<Transaction> CREATOR = new Creator<Transaction>()
@@ -344,6 +353,7 @@ public class Transaction implements Parcelable
         dest.writeLong(chainId);
         dest.writeString(maxFeePerGas);
         dest.writeString(maxPriorityFee);
+        dest.writeString(functionName);
     }
 
     public boolean isRelated(String contractAddress, String walletAddress)

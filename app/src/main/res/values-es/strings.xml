@@ -957,5 +957,16 @@
     <string name="action_view_session">Ver sesión</string>
     <string name="error_walletconnect_session_request_unsupported_network">No se puede manejar la solicitud de sesión de una cadena no admitida. (ID: %s)</string>
     <string name="spam_header">Spam</string>
+    <string name="create_shortcut_for_token">¿Crear un acceso directo para este token?</string>
+    <string name="toast_shortcut_created">Acceso directo creado, mantenga presionado el ícono de la aplicación para verlo.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Antes de realizar cualquier operación, tenga en cuenta que el NFT actual no pertenece a la billetera activa actual, sino a %1$s.</string>
+    <string name="remove_shortcut_reminder">La transferencia de este token eliminará el acceso directo asociado de la pantalla de inicio.</string>
+    <string name="remove_shortcut_while_token_not_found">El token no existe, ¿eliminar el acceso directo?</string>
+    <string name="title_remove_shortcut">Eliminar acceso directo</string>
     <string name="dialog_title_sign_in_with_ethereum">Iniciar sesión con Ethereum</string>
+    <string name="attestations_header">Certificados</string>
+    <string name="attestation">Atestación</string>
+    <string name="dialog_title_gas_estimation_failed">Estimación de gas fallida</string>
+    <string name="dialog_message_gas_estimation_failed">Estimación de gas con error: \"%s\". Es probable que la ejecución de la transacción falle. ¿Quieres forzar el envío?</string>
+    <string name="action_proceed">Proceder</string>
 </resources>

@@ -18,7 +18,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.okx.TokenListReponse;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
@@ -282,6 +281,19 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Token fetchAttestation(long chainId, String walletAddress, String address, BigInteger tokenId)
+    {
+        Wallet wallet = new Wallet(walletAddress);
+        return localSource.fetchAttestation(chainId, wallet, address, tokenId);
+    }
+
+    @Override
+    public List<Token> fetchAttestations(long chainId, String walletAddress, String tokenAddress)
+    {
+        return localSource.fetchAttestations(chainId, walletAddress, tokenAddress);
+    }
+
+    @Override
     public TokenTicker getTokenTicker(Token token)
     {
         return localSource.getCurrentTicker(token);
@@ -422,6 +434,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Single<TokenInfo> storeTokenInfo(Wallet wallet, TokenInfo tInfo, ContractType type)
+    {
+        return localSource.storeTokenInfo(wallet, tInfo, type);
+    }
+
+    @Override
     public String getTokenImageUrl(long networkId, String address)
     {
         return localSource.getTokenImageUrl(networkId, address);
@@ -547,6 +565,7 @@ public class TokenRepository implements TokenRepositoryType {
     private BigDecimal updateERC1155Balance(Token token, Wallet wallet)
     {
         BigDecimal newBalance;
+        token.setTokenWallet(wallet.address);
         try (Realm realm = getRealmInstance(wallet))
         {
             newBalance = token.updateBalance(realm);

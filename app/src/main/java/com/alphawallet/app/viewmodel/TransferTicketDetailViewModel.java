@@ -12,6 +12,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DisplayState;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.TransactionReturn;
@@ -133,10 +134,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel implements Tran
     public void prepare(Token token)
     {
         this.token = token;
-        disposable = genericWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
-
         gasService.startGasPriceCycle(token.tokenInfo.chainId);
     }
 
@@ -289,7 +286,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel implements Tran
         keyService.completeAuthentication(signData);
     }
 
-    public Single<BigInteger> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
+    public Single<GasEstimate> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
     {
         return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet, BigInteger.ZERO);
     }
@@ -351,5 +348,12 @@ public class TransferTicketDetailViewModel extends BaseViewModel implements Tran
     public void transactionError(TransactionReturn txError)
     {
         transactionError.postValue(txError);
+    }
+
+    public void loadWallet(String address)
+    {
+        disposable = genericWalletInteract
+                .findWallet(address)
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 }

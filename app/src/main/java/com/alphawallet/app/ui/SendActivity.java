@@ -1,9 +1,7 @@
 package com.alphawallet.app.ui;
 
-import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,8 +10,6 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -25,9 +21,8 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.EIP681Type;
+import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.GasEstimate;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -38,6 +33,7 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.router.TransferRequestRouter;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -54,10 +50,10 @@ import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.InputAmount;
+import com.alphawallet.app.widget.SelectTokenDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.Convert;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 
@@ -75,28 +71,31 @@ import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 @AndroidEntryPoint
-public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
+public class SendActivity extends BaseActivity implements
+    AmountReadyCallback,
+    StandardFunctionInterface,
+    AddressReadyCallback,
+    ActionSheetCallback,
+    SelectTokenDialog.OnTokenClickListener
 {
     private static final BigDecimal NEGATIVE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
-
-    SendViewModel viewModel;
-
+    private final Handler handler = new Handler();
+    private SendViewModel viewModel;
     private Wallet wallet;
     private Token token;
-    private final Handler handler = new Handler();
     private AWalletAlertDialog dialog;
-
-    private QRResult currentResult;
-
     private InputAmount amountInput;
     private InputAddress addressInput;
-    private String sendAddress;
+    private FunctionButtonBar functionBar;
+    private String sendAddress = null;
     private String ensAddress;
-    private BigDecimal sendAmount;
-    private BigDecimal sendGasPrice;
+    private BigDecimal sendAmount = NEGATIVE;
+    private BigDecimal sendGasPrice = BigDecimal.ZERO;
     private ActionSheetDialog confirmationDialog;
+    private final ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+        result -> confirmationDialog.setCurrentGasIndex(result));
+    private SelectTokenDialog selectTokenDialog;
     private AWalletAlertDialog alertDialog;
-
     @Nullable
     private Disposable calcGasCost;
 
@@ -104,68 +103,76 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_send);
+
         toolbar();
 
+        setTitle("Send");
+
+        initViewModel();
+
+        initViews();
+
+//        evaluateQrResult(getIntent().getParcelableExtra(C.EXTRA_AMOUNT));
+
+        viewModel.prepare();
+    }
+
+    private void initViews()
+    {
+        amountInput = findViewById(R.id.input_amount);
+        addressInput = findViewById(R.id.input_address);
+        functionBar = findViewById(R.id.layoutButtons);
+
+        amountInput.setListener(v -> viewModel.fetchTokens());
+        addressInput.setAddressCallback(this);
+    }
+
+    private void initViewModel()
+    {
         viewModel = new ViewModelProvider(this)
-                .get(SendViewModel.class);
-
-        String contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        long currentChain = getIntent().getLongExtra(C.EXTRA_NETWORKID, MAINNET_ID);
-        wallet = getIntent().getParcelableExtra(WALLET);
-        token = viewModel.getToken(currentChain, getIntent().getStringExtra(C.EXTRA_ADDRESS));
-        QRResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
-
+            .get(SendViewModel.class);
+        viewModel.wallet().observe(this, this::onWallet);
+        viewModel.tokens().observe(this, this::onTokens);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
+        viewModel.error().observe(this, this::onError);
+    }
 
-        sendAddress = null;
-        sendGasPrice = BigDecimal.ZERO;
-        sendAmount = NEGATIVE;
+    private void onWallet(Wallet wallet)
+    {
+        this.wallet = wallet;
 
-        if (!checkTokenValidity(currentChain, contractAddress))
+        String recipientAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        String tokenAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
+        long tokenChainId = getIntent().getLongExtra(C.EXTRA_NETWORKID, -1);
+
+        if (!TextUtils.isEmpty(recipientAddress)) // From address qr
         {
-            return;
+            addressInput.setAddress(recipientAddress);
+            viewModel.fetchTokens();
         }
-
-        setTitle(getString(R.string.action_send_tkn, token.getShortName()));
-        setupTokenContent();
-
-        if (result != null)
+        else if (!TextUtils.isEmpty(tokenAddress) && tokenChainId != -1) // From token detail
         {
-            //restore payment request
-            validateEIP681Request(result, true);
+            token = viewModel.getToken(tokenChainId, tokenAddress);
+            setupTokenContent(token);
+        }
+        else // From bottom nav
+        {
+            viewModel.fetchTokens();
         }
     }
 
-    @Override
-    protected void onResume()
+    private void onTokens(List<Token> tokens)
     {
-        super.onResume();
-
-        QRResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
-
-        if (result != null && (result.type == EIP681Type.PAYMENT || result.type == EIP681Type.TRANSFER))
-        {
-            handleClick("", R.string.action_next);
-        }
+        selectTokenDialog = new SelectTokenDialog(tokens, this, this);
+        selectTokenDialog.show();
     }
 
-    private boolean checkTokenValidity(long currentChain, String contractAddress)
+    private void onError(ErrorEnvelope errorEnvelope)
     {
-        if (token == null || token.tokenInfo == null)
-        {
-            //bad token - try to load from service
-            token = viewModel.getToken(currentChain, contractAddress);
-
-            if (token == null)
-            {
-                //TODO: possibly invoke token finder in tokensService
-                finish();
-            }
-        }
-
-        return (token != null);
+        displayToast(errorEnvelope.message);
     }
 
     private void onBack()
@@ -284,7 +291,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                         break;
                     default:
                         Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
-                                "Code: " + resultCode
+                            "Code: " + resultCode
                         ));
                         break;
                 }
@@ -344,107 +351,24 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     private void validateEIP681Request(QRResult result, boolean overrideNetwork)
     {
-        if (dialog != null) dialog.dismiss();
-        //check chain
-        if (result == null)
-        {
-            displayScanError();
-            return;
-        }
-
-        NetworkInfo info = viewModel.getNetworkInfo(result.chainId);
-        if (info == null)
-        {
-            displayScanError();
-            return;
-        }
-        else if (result.type != EIP681Type.ADDRESS && result.chainId != token.tokenInfo.chainId && token.isEthereum())
-        {
-            //Display chain change warning
-            currentResult = result;
-            showChainChangeDialog(result.chainId);
-            return;
-        }
-
-        TextView sendText = findViewById(R.id.text_payment_request);
-
         switch (result.type)
         {
             case ADDRESS:
                 addressInput.setAddress(result.getAddress());
                 break;
-
             case PAYMENT:
-                //correct chain and asset type
-                String ethAmount = Convert.getConvertedValue(new BigDecimal(result.weiValue), Convert.Unit.ETHER.getFactor());
-                sendText.setVisibility(View.VISIBLE);
-                sendText.setText(R.string.transfer_request);
-                token = viewModel.getToken(result.chainId, wallet.address);
-                addressInput.setAddress(result.getAddress());
-                amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
-                amountInput.setAmount(ethAmount);
-                setupTokenContent();
-                break;
-
             case TRANSFER:
-                Token resultToken = viewModel.getToken(result.chainId, result.getAddress());
-                if (resultToken == null)
-                {
-                    currentResult = result;
-                    showTokenFetch();
-                    viewModel.fetchToken(result.chainId, result.getAddress(), wallet.address);
-                }
-                else if (resultToken.isERC20())
-                {
-                    //ERC20 send request
-                    token = resultToken;
-                    setupTokenContent();
-                    amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
-                    //convert token amount into scaled value
-                    String convertedAmount = Convert.getConvertedValue(result.tokenAmount, token.tokenInfo.decimals);
-                    amountInput.setAmount(convertedAmount);
-                    addressInput.setAddress(result.functionToAddress);
-                    sendText.setVisibility(View.VISIBLE);
-                    sendText.setText(getString(R.string.token_transfer_request, resultToken.getFullName()));
-                }
-                //TODO: Handle NFT eg ERC721
+                new TransferRequestRouter().open(this, result);
                 break;
-
             case FUNCTION_CALL:
                 //Generic function call, not handled yet
                 displayScanError(R.string.toast_qr_code_no_address, getString(R.string.no_tokens));
                 if (result.functionToAddress != null)
                     addressInput.setAddress(result.functionToAddress);
                 break;
-
             default:
                 displayScanError();
         }
-    }
-
-    private void showChainChangeDialog(long chainId)
-    {
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
-        dialog = new AWalletAlertDialog(this);
-        dialog.setIcon(AWalletAlertDialog.WARNING);
-        dialog.setTitle(R.string.change_chain_request);
-        dialog.setMessage(R.string.change_chain_message);
-        dialog.setButtonText(R.string.dialog_ok);
-        dialog.setButtonListener(v -> {
-            //we should change the chain.
-            token = viewModel.getToken(chainId, token.getAddress());
-            amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
-            dialog.dismiss();
-            validateEIP681Request(currentResult, false);
-        });
-        dialog.setSecondaryButtonText(R.string.action_cancel);
-        dialog.setSecondaryButtonListener(v -> {
-            dialog.dismiss();
-            //proceed without changing the chain
-            currentResult.chainId = token.tokenInfo.chainId;
-            validateEIP681Request(currentResult, false);
-        });
-        dialog.show();
     }
 
     private void displayScanError()
@@ -486,20 +410,19 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         //    addressInput.setEnsNodeNotSyncCallback(null); // prevent leak by removing reference to activity method
     }
 
-    private void setupTokenContent()
+    private void setupTokenContent(Token token)
     {
-        amountInput = findViewById(R.id.input_amount);
+        this.token = token;
+        setTitle(getString(R.string.action_send_tkn, token.getSymbol()));
         amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
-        addressInput = findViewById(R.id.input_address);
-        addressInput.setAddressCallback(this);
         addressInput.setChainOverrideForWalletConnect(token.tokenInfo.chainId);
         //addressInput.setEnsHandlerNodeSyncFlag(true);   // allow node sync
         //addressInput.setEnsNodeNotSyncCallback(this::showNodeNotSyncSheet);  // callback to invoke if node not synced
-        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
         functionBar.revealButtons();
         List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_next));
         functionBar.setupFunctions(this, functions);
         viewModel.startGasCycle(token.tokenInfo.chainId);
+        amountInput.focus();
     }
 
     @Override
@@ -507,7 +430,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     {
         //validate that we have sufficient balance
         if ((token.isEthereum() && token.balance.subtract(value).compareTo(BigDecimal.ZERO) > 0) // if sending base ethereum then check we have more than just the value
-                || (token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0)) // contract token, check sufficient token balance (gas widget will check sufficient gas)
+            || (token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0)) // contract token, check sufficient token balance (gas widget will check sufficient gas)
         {
             sendAmount = value;
             sendGasPrice = gasPrice;
@@ -554,7 +477,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     private void calculateTransactionCost()
     {
         if ((calcGasCost != null && !calcGasCost.isDisposed()) ||
-                (confirmationDialog != null && confirmationDialog.isShowing())) return;
+            (confirmationDialog != null && confirmationDialog.isShowing())) return;
 
         if (sendAmount.compareTo(NEGATIVE) > 0 && Utils.isAddressValid(sendAddress))
         {
@@ -568,10 +491,10 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             calculateEstimateDialog();
             //form payload and calculate tx cost
             calcGasCost = viewModel.calculateGasEstimate(wallet, transactionBytes, token.tokenInfo.chainId, txDestAddress, BigDecimal.ZERO)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(estimate -> checkConfirm(estimate, transactionBytes, txDestAddress, txSendAddress),
-                            error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress));
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(estimate -> checkConfirm(estimate, transactionBytes, txDestAddress, txSendAddress),
+                    error -> handleError(error, transactionBytes, token.getAddress(), txSendAddress));
         }
     }
 
@@ -589,15 +512,15 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         BigInteger ethValue = token.isEthereum() ? sendAmount.toBigInteger() : BigInteger.ZERO;
         long leafCode = amountInput.isSendAll() ? -2 : -1;
         Web3Transaction w3tx = new Web3Transaction(
-                new Address(txSendAddress),
-                token.isEthereum() ? null : new Address(token.getAddress()),
-                new Address(wallet.address),
-                ethValue,
-                sendGasPrice.toBigInteger(),
-                estimate.getValue(),
-                -1,
-                Numeric.toHexString(transactionBytes),
-                leafCode);
+            new Address(txSendAddress),
+            token.isEthereum() ? null : new Address(token.getAddress()),
+            new Address(wallet.address),
+            ethValue,
+            sendGasPrice.toBigInteger(),
+            estimate.getValue(),
+            -1,
+            Numeric.toHexString(transactionBytes),
+            leafCode);
 
         if (estimate.hasError() || estimate.getValue().equals(BigInteger.ZERO))
         {
@@ -607,7 +530,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         {
             if (dialog != null && dialog.isShowing()) dialog.dismiss();
             confirmationDialog = new ActionSheetDialog(this, w3tx, token, ensAddress,
-                    resolvedAddress, viewModel.getTokenService(), this);
+                resolvedAddress, viewModel.getTokenService(), this);
             confirmationDialog.setCanceledOnTouchOutside(false);
             confirmationDialog.show();
             sendAmount = NEGATIVE;
@@ -652,9 +575,6 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         }
     }
 
-    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> confirmationDialog.setCurrentGasIndex(result));
-
     @Override
     public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
@@ -678,6 +598,11 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     private void txWritten(TransactionReturn txData)
     {
         confirmationDialog.transactionWritten(txData.hash);
+        viewModel.setLastSentToken(token);
+//        viewModel.setLastSentTokenAddress(txData.tx.contract != null ?
+//            txData.tx.contract.toString() :
+//            txData.tx.sender.toString()
+//        );
     }
 
     //Transaction failed to be sent
@@ -703,7 +628,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         dialog.setTitle(estimate.hasError() ?
             R.string.dialog_title_gas_estimation_failed :
             R.string.confirm_transaction
-            );
+        );
         String message = estimate.hasError() ?
             getString(R.string.dialog_message_gas_estimation_failed, estimate.getError()) :
             getString(R.string.error_transaction_may_fail);
@@ -772,5 +697,16 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
             dialog.dismiss();
         });
         dialog.show();
+    }
+
+    @Override
+    public void onTokenClicked(Token token)
+    {
+        if (selectTokenDialog != null && selectTokenDialog.isShowing())
+        {
+            selectTokenDialog.dismiss();
+        }
+        setupTokenContent(token);
+        Timber.d("juz here onTokenClicked");
     }
 }

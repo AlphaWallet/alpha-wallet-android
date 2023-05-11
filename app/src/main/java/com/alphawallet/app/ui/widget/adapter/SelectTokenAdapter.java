@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui.widget.adapter;
 
+import android.annotation.SuppressLint;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.util.TokenFilter2;
+import com.alphawallet.app.util.TokenFilter;
 import com.alphawallet.app.widget.SelectTokenDialog;
 import com.alphawallet.app.widget.TokenIcon;
 
@@ -21,13 +22,13 @@ import java.util.List;
 public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.ViewHolder>
 {
     private final List<Token> displayData;
-    private final TokenFilter2 tokenFilter;
+    private final TokenFilter tokenFilter;
     private final SelectTokenDialog.OnTokenClickListener listener;
 
     public SelectTokenAdapter(List<Token> tokens, SelectTokenDialog.OnTokenClickListener listener)
     {
         this.listener = listener;
-        tokenFilter = new TokenFilter2(tokens);
+        tokenFilter = new TokenFilter(tokens);
         displayData = new ArrayList<>();
         displayData.addAll(tokens);
     }
@@ -73,11 +74,12 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
         updateList(tokenFilter.filterBy(keyword));
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateList(List<Token> filteredList)
     {
         displayData.clear();
         displayData.addAll(filteredList);
-        notifyItemRangeChanged(0, filteredList.size());
+        notifyDataSetChanged();
     }
 
     @Override
@@ -102,6 +104,4 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
             tokenIcon = view.findViewById(R.id.token_icon);
         }
     }
-
-
 }

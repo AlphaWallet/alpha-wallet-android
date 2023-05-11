@@ -10,7 +10,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TokensTest
+public class LifiTokenUtilsTest
 {
     @Test
     public void sort_token_by_fiat_value_in_DESC()
@@ -20,7 +20,7 @@ public class TokensTest
         list.add(createToken("Binance Smart Chain", "BNB", "0x1", 1));
         list.add(createToken("Solana", "SOL", "0x2", 2));
 
-        Tokens.sortValue(list);
+        LifiTokenUtils.sortValue(list);
 
         assertThat(list.get(0).symbol, equalTo("SOL"));
         assertThat(list.get(1).symbol, equalTo("BNB"));
@@ -35,7 +35,7 @@ public class TokensTest
         list.add(createToken("Binance Smart Chain", "BNB", "0x1", 0));
         list.add(createToken("Solana", "SOL", "0x2", 0));
 
-        Tokens.sortName(list);
+        LifiTokenUtils.sortName(list);
 
         assertThat(list.get(0).symbol, equalTo("BNB"));
         assertThat(list.get(1).symbol, equalTo("ETH"));
@@ -50,7 +50,7 @@ public class TokensTest
         list.add(createToken("Stox", "STX", "0x0000000000000000000000000000000000000000", 0));
         list.add(createToken("stETH", "stETH", "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", 0));
 
-        Tokens.sortName(list);
+        LifiTokenUtils.sortName(list);
 
         assertThat(list.get(0).symbol, equalTo("stETH"));
         assertThat(list.get(1).symbol, equalTo("STX"));
@@ -64,7 +64,7 @@ public class TokensTest
         list.add(createToken("Stox", "STX", "0x0", 0));
         list.add(createToken("stETH", "stETH", "0x3", 0));
 
-        Tokens.sortName(list);
+        LifiTokenUtils.sortName(list);
 
         assertThat(list.get(0).symbol, equalTo("stETH"));
         assertThat(list.get(1).symbol, equalTo("STX"));

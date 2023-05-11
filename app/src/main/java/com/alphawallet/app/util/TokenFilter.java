@@ -1,5 +1,7 @@
 package com.alphawallet.app.util;
 
+import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 
 import com.alphawallet.app.entity.tokens.Token;
@@ -8,17 +10,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class TokenFilter2
+public class TokenFilter
 {
     private final List<Token> tokens;
 
-    public TokenFilter2(List<Token> tokens)
+    private final List<Token> copy;
+
+    public TokenFilter(List<Token> tokens)
     {
         this.tokens = tokens;
+        this.copy = new ArrayList<>();
+        this.copy.addAll(tokens);
     }
 
     public List<Token> filterBy(String keyword)
     {
+        if (TextUtils.isEmpty(keyword)) return copy;
+
         String lowerCaseKeyword = lowerCase(keyword);
 
         List<Token> result = new ArrayList<>();

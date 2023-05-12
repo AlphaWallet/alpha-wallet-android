@@ -74,7 +74,7 @@ public class NFTAssetsViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString());
-        intent.putExtra(C.EXTRA_NFTASSET, asset);
+        if (asset != null) intent.putExtra(C.EXTRA_NFTASSET, asset);
         return intent;
     }
 }

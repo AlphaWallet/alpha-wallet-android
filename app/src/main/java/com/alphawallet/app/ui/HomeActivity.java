@@ -1297,4 +1297,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         ((WalletFragment)getFragment(WALLET)).importAttestation(attestation);
     }
+
+    public void importEASAttestation(QRResult attestation)
+    {
+        if (attestation.type != EIP681Type.EAS_ATTESTATION)
+        {
+            return;
+        }
+
+        ((WalletFragment)getFragment(WALLET)).importEASAttestation(attestation);
+    }
 }

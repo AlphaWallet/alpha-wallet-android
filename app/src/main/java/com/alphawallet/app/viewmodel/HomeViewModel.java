@@ -368,7 +368,7 @@ public class HomeViewModel extends BaseViewModel
             switch (qrResult.type)
             {
                 case EAS_ATTESTATION:
-                    // TODO:
+                    ((HomeActivity) activity).importEASAttestation(qrResult);
                     break;
                 case ADDRESS:
                     props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS.getValue());
@@ -426,7 +426,6 @@ public class HomeViewModel extends BaseViewModel
 
     private void showActionSheet(Activity activity, QRResult qrResult)
     {
-
         View.OnClickListener listener = v -> {
             if (v.getId() == R.id.send_to_this_address_action)
             {

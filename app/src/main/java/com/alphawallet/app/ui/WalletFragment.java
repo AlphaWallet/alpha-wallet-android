@@ -789,6 +789,11 @@ public class WalletFragment extends BaseFragment implements
         viewModel.importAttestation(attestation);
     }
 
+    public void importEASAttestation(QRResult attestation)
+    {
+        viewModel.importEASAttestation(attestation);
+    }
+
     private void attestationError(String message)
     {
         if (dialog == null)

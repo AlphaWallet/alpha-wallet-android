@@ -2,7 +2,6 @@ package com.alphawallet.app.viewmodel;
 
 import static com.alphawallet.app.C.EXTRA_ADDRESS;
 import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.widget.CopyTextView.KEY_ADDRESS;
 
 import android.app.Activity;
@@ -23,6 +22,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -44,7 +44,6 @@ import com.alphawallet.app.repository.TokensMappingRepositoryType;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.repository.entity.RealmAttestation;
-import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.router.CoinbasePayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
@@ -62,6 +61,7 @@ import com.alphawallet.app.widget.WalletFragmentActionsView;
 import com.alphawallet.token.entity.AttestationValidationStatus;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
@@ -79,7 +79,6 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -666,5 +665,50 @@ public class WalletViewModel extends BaseViewModel
         }
 
         return attn;
+    }
+
+    public void importEASAttestation(QRResult qrAttn)
+    {
+        //validate attestation
+        //get chain and address
+        EasAttestation easAttn = new Gson().fromJson(qrAttn.functionDetail, EasAttestation.class);
+
+        //validation UID:
+
+        storeAttestation(easAttn)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(attn -> completeImport(easAttn, attn), this::onError)
+                .isDisposed();
+    }
+
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
+    private Single<Attestation> storeAttestation(EasAttestation attestation)
+    {
+        //Use Default key unless specified
+        Attestation attn = assetDefinitionService.validateAttestation(attestation);
+        switch (attn.isValid())
+        {
+            case Pass:
+                //return storeAttestationInternal(attestation, attn);
+            case Expired:
+            case Issuer_Not_Valid:
+            case Incorrect_Subject:
+                attestationError.postValue(attn.isValid().getValue());
+                break;
+        }
+
+        return Single.fromCallable(() -> attn);
+    }
+
+    private void completeImport(EasAttestation attestation, Attestation tokenAttn)
+    {
+        /*if (tokenAttn.isValid() == AttestationValidationStatus.Pass)
+        {
+            TokenCardMeta tcmAttestation = new TokenCardMeta(attestation.chainId, attestation.getAddress(), "1", System.currentTimeMillis(),
+                    assetDefinitionService, tokenAttn.tokenInfo.name, tokenAttn.tokenInfo.symbol, tokenAttn.getBaseTokenType(), TokenGroup.ATTESTATION, tokenAttn.getAttestationId());
+            tcmAttestation.isEnabled = true;
+            updatedTokens.postValue(new TokenCardMeta[]{tcmAttestation});
+        }*/
     }
 }

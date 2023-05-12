@@ -26,6 +26,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.QueryResponse;
 import com.alphawallet.app.entity.TokenLocator;
@@ -44,6 +45,8 @@ import com.alphawallet.app.repository.entity.RealmTokenScriptData;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.HomeViewModel;
+import com.alphawallet.app.web3j.StructuredData;
+import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.ethereum.NetworkInfo;
 import com.alphawallet.token.entity.ActionModifier;
@@ -76,6 +79,7 @@ import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;
@@ -2992,5 +2996,78 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return att;
+    }
+
+    public Attestation validateAttestation(EasAttestation attestation)
+    {
+        Attestation att = null;
+        //1. Resolve UID. For now, just use default: This should be on a switch for chains
+        String defaultUID = "0x4455598d3ec459c4af59335f7729fea0f50ced46cb1cd67914f5349d44142ec1";
+        String recoverAttestationSigner = recoverSigner(attestation);
+
+        //1. Validate signer via key attestation service (using UID).
+        //2. Decode the ABI encoded payload.
+        //3.
+
+        //
+
+
+
+
+
+
+        /*NetworkInfo networkInfo = EthereumNetworkBase.getNetworkByChain(tInfo.chainId);
+        att = new Attestation(tInfo, networkInfo.name, Numeric.hexStringToByteArray(attestation));
+        att.setTokenWallet(tokensService.getCurrentAddress());
+
+        //call validation function and get details
+        TokenDefinition.Attestation definitionAtt = td.getAttestation();
+        //can we get the details?
+
+        if (definitionAtt != null && definitionAtt.function != null)
+        {
+            //pull return type
+            FunctionDefinition fd = definitionAtt.function;
+            //add attestation to attr map
+            //call function
+            org.web3j.abi.datatypes.Function transaction = tokenscriptUtility.generateTransactionFunction(att, BigInteger.ZERO, td, fd, this);
+            transaction = new Function(fd.method, transaction.getInputParameters(), td.getAttestationReturnTypes()); //set return types
+
+            //call and handle result
+            String result = tokenscriptUtility.callSmartContract(tInfo.chainId, tInfo.address, transaction);
+
+            //break down result
+            List<Type> values = FunctionReturnDecoder.decode(result, transaction.getOutputParameters());
+
+            //interpret these values
+            att.handleValidation(td.getValidation(values));
+        }*/
+
+        return att;
+    }
+
+    private String recoverSigner(EasAttestation attestation)
+    {
+        String recoveredAddress = "";
+
+        try
+        {
+            StructuredDataEncoder dataEncoder = new StructuredDataEncoder(attestation.getEIP712Attestation());
+            byte[] hash = dataEncoder.hashStructuredData();
+            byte[] r = Numeric.hexStringToByteArray(attestation.getR());
+            byte[] s = Numeric.hexStringToByteArray(attestation.getS());
+            byte v = (byte)(attestation.getV() & 0xFF);
+
+            Sign.SignatureData sig = new Sign.SignatureData(v, r, s);
+
+            BigInteger key = Sign.signedMessageHashToKey(hash, sig);
+            recoveredAddress = "0x" + Keys.getAddress(key);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return recoveredAddress;
     }
 }

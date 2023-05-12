@@ -112,15 +112,11 @@ public class TransferRequestActivity extends BaseActivity implements
         amountInput = findViewById(R.id.input_amount);
         addressInput = findViewById(R.id.input_address);
         functionBar = findViewById(R.id.layoutButtons);
-
         addressInput.setAddressCallback(this);
-        amountInput.hideCaret();
-
-        //TODO Send: set uneditable amount and address input.
-        amountInput.setEnabled(false);
-//        addressInput.setEnabled(false);
         addressInput.setEditable(false);
         addressInput.showControls(false);
+        amountInput.setEditable(false);
+        amountInput.showControls(false);
 
         progressDialog = new AWalletAlertDialog(this);
         progressDialog.setTitle(R.string.searching_for_token);
@@ -164,10 +160,12 @@ public class TransferRequestActivity extends BaseActivity implements
         }
         else if (result.type == EIP681Type.PAYMENT)
         {
+            setTitle(getString(R.string.title_payment_request));
             token = viewModel.getToken(result.chainId, wallet.address);
         }
         else if (result.type == EIP681Type.TRANSFER)
         {
+            setTitle(getString(R.string.transfer_request));
             token = viewModel.getToken(result.chainId, result.getAddress());
         }
 
@@ -177,7 +175,7 @@ public class TransferRequestActivity extends BaseActivity implements
         }
         else
         {
-            Timber.d("You don't have this token, attempt to fetch");
+            // You don't have this token, attempt to fetch
             showProgress(true);
             viewModel.fetchToken(result.chainId, result.getAddress(), wallet.address);
         }
@@ -232,21 +230,11 @@ public class TransferRequestActivity extends BaseActivity implements
         evaluateToken(token);
     }
 
-//    private void onTokens(List<Token> tokens)
-//    {
-//        // Filter tokens here.
-//        selectTokenDialog = new SelectTokenDialog(tokens, this, this);
-//        selectTokenDialog.show();
-//    }
-
     private void setupTokenContent(Token token)
     {
         this.token = token;
         amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
         addressInput.setChainOverrideForWalletConnect(token.tokenInfo.chainId);
-
-        setTitle(getString(R.string.action_send_tkn, token.getSymbol()));
-
         functionBar.revealButtons();
         functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_next)));
         viewModel.startGasCycle(token.tokenInfo.chainId);

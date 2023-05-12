@@ -983,4 +983,5 @@
     <string name="title_request_post_notifications_permission">Dapatkan pemberitahuan</string>
     <string name="message_deny_request_post_notifications_permission">Anda tidak akan menerima notifikasi saat AlphaWallet ada di latar belakang. Anda dapat mengubahnya dengan membuka Setelan > Notifikasi</string>
     <string name="minted">Minted</string>
+    <string name="title_payment_request">Permintaan pembayaran</string>
 </resources>

@@ -82,5 +82,6 @@
     <dimen name="bottom_sheet_corner_radius">12dp</dimen>
     <dimen name="bottom_sheet_handle_width">60dp</dimen>
     <dimen name="bottom_sheet_handle_height">5dp</dimen>
+    <dimen name="corner_radius_max">100dp</dimen>
 
 </resources>

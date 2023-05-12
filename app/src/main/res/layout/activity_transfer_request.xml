@@ -26,18 +26,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/text_payment_request"
-                    style="@style/Aw.Typography.Title.SemiBold"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginHorizontal="@dimen/standard_16"
-                    android:layout_marginVertical="@dimen/small_12"
-                    android:visibility="gone"
-                    tools:text="@string/transfer_request"
-                    tools:visibility="visible" />
-
                 <com.alphawallet.app.widget.InputAmount
                     android:id="@+id/input_amount"
                     android:layout_width="match_parent"

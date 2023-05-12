@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:id="@+id/layout_chain_name"
+    android:background="@drawable/background_chain_name"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:paddingStart="@dimen/standard_16"
+    android:paddingEnd="@dimen/standard_16"
+    android:paddingVertical="@dimen/mini_4">
 
     <TextView
         android:id="@+id/_text_chain_name"
+        style="@style/Aw.Typography.Caption.SemiBold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|end"
-        android:fontFamily="@font/font_bold"
-        android:padding="2dp"
-        android:background="@drawable/background_chain_name"
+        android:maxLines="1"
         android:text="@string/ethereum"
         android:textColor="@color/white"
-        android:maxLines="1"
-        android:textSize="12sp"
         android:visibility="visible" />
 
     <!-- <TextView

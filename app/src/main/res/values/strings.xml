@@ -410,7 +410,7 @@
     <string name="blockchain">%1$s Blockchain</string>
     <string name="currency_00" translatable="false">0.00 %s</string>
     <string name="telegram">Telegram (Customer Support)</string>
-    <string name="transfer_request">Transfer request</string>
+    <string name="transfer_request">Transfer Request</string>
     <string name="token_transfer_request">Token transfer request: %1$s</string>
     <string name="generate_payment_request">Generate Payment Request</string>
     <string name="enter_the_requested_amount">Enter the requested amount:</string>
@@ -1055,4 +1055,5 @@
     <string name="title_request_post_notifications_permission">Get notified</string>
     <string name="message_deny_request_post_notifications_permission">You will not receive notifications while AlphaWallet is in the background. You can change this by going to Settings > Notifications</string>
     <string name="minted">Minted</string>
+    <string name="title_payment_request">Payment Request</string>
 </resources>

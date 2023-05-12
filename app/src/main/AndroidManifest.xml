@@ -364,7 +364,7 @@
 
         <activity
             android:name=".ui.TransferRequestActivity"
-            android:label="Payment Request" />
+            android:label="@string/transfer_request" />
 
         <service
             android:name=".service.PriceAlertsService"

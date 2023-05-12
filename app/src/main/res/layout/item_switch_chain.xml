@@ -4,7 +4,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
@@ -31,8 +30,9 @@
                 android:id="@+id/name_old_chain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                custom:font_size="10"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/mini_4"
+                custom:font_size="10" />
 
         </LinearLayout>
 
@@ -63,8 +63,9 @@
                 android:id="@+id/name_new_chain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                custom:font_size="10"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/mini_4"
+                custom:font_size="10" />
         </LinearLayout>
 
     </LinearLayout>

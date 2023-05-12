@@ -983,4 +983,5 @@
     <string name="dialog_title_gas_estimation_failed">Ước tính khí không thành công</string>
     <string name="dialog_message_gas_estimation_failed">Lỗi ước tính gas: \"%s\". Việc thực hiện giao dịch có thể sẽ thất bại. Bạn có muốn buộc gửi không?</string>
     <string name="action_proceed">Tiếp tục</string>
+    <string name="title_payment_request">Đề nghị thanh toán</string>
 </resources>

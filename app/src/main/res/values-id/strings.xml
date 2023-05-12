@@ -973,4 +973,5 @@
     <string name="dialog_title_gas_estimation_failed">Estimasi Gas Gagal</string>
     <string name="dialog_message_gas_estimation_failed">Gas estimation errored: \"%s\". The transaction execution will likely fail. Do you want to force sending?</string>
     <string name="action_proceed">Melanjutkan</string>
+    <string name="title_payment_request">Permintaan pembayaran</string>
 </resources>

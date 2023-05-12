@@ -410,7 +410,7 @@
     <string name="blockchain">%1$s Blockchain</string>
     <string name="currency_00" translatable="false">0.00 %s</string>
     <string name="telegram">Telegram (Customer Support)</string>
-    <string name="transfer_request">Transfer request</string>
+    <string name="transfer_request">Transfer Request</string>
     <string name="token_transfer_request">Token transfer request: %1$s</string>
     <string name="generate_payment_request">Generate Payment Request</string>
     <string name="enter_the_requested_amount">Enter the requested amount:</string>
@@ -1045,4 +1045,5 @@
     <string name="dialog_title_gas_estimation_failed">Gas Estimation Failed</string>
     <string name="dialog_message_gas_estimation_failed">Gas estimation errored: \"%s\". The transaction execution will likely fail. Do you want to force sending?</string>
     <string name="action_proceed">Proceed</string>
+    <string name="title_payment_request">Payment Request</string>
 </resources>

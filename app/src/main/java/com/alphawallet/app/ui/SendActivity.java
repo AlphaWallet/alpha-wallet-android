@@ -125,8 +125,8 @@ public class SendActivity extends BaseActivity implements
         addressInput = findViewById(R.id.input_address);
         functionBar = findViewById(R.id.layoutButtons);
 
-        amountInput.setListener(v -> viewModel.fetchTokens());
         addressInput.setAddressCallback(this);
+        amountInput.setListener(v -> showTokenSelectDialog());
     }
 
     private void initViewModel()
@@ -151,7 +151,7 @@ public class SendActivity extends BaseActivity implements
         if (!TextUtils.isEmpty(recipientAddress)) // From address qr
         {
             addressInput.setAddress(recipientAddress);
-            viewModel.fetchTokens();
+            showTokenSelectDialog();
         }
         else if (!TextUtils.isEmpty(tokenAddress) && tokenChainId != -1) // From token detail
         {
@@ -160,14 +160,17 @@ public class SendActivity extends BaseActivity implements
         }
         else // From bottom nav
         {
-            viewModel.fetchTokens();
+            showTokenSelectDialog();
         }
     }
 
     private void onTokens(List<Token> tokens)
     {
         selectTokenDialog = new SelectTokenDialog(tokens, this, this);
-        selectTokenDialog.show();
+        if (!selectTokenDialog.isShowing())
+        {
+            selectTokenDialog.show();
+        }
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -699,6 +702,11 @@ public class SendActivity extends BaseActivity implements
         dialog.show();
     }
 
+    private void showTokenSelectDialog()
+    {
+        viewModel.fetchTokens();
+    }
+
     @Override
     public void onTokenClicked(Token token)
     {
@@ -707,6 +715,5 @@ public class SendActivity extends BaseActivity implements
             selectTokenDialog.dismiss();
         }
         setupTokenContent(token);
-        Timber.d("juz here onTokenClicked");
     }
 }

@@ -1,6 +1,15 @@
 package com.alphawallet.app.entity;
 
 
+import com.alphawallet.token.tools.Numeric;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.math.BigInteger;
+
+import timber.log.Timber;
+
 public class EasAttestation
 {
     public String version;
@@ -20,7 +29,7 @@ public class EasAttestation
     public String data;
     public long nonce;
 
-    public EasAttestation(String version, long chainId, String verifyingContract, String r, String s, long v, String recipient, String uid, String schema, String signer, long time, long expirationTime, String refUID, boolean revocable, String data, long nonce)
+    public EasAttestation(String version, long chainId, String verifyingContract, String r, String s, long v, String signer, String uid, String schema, String recipient, long time, long expirationTime, String refUID, boolean revocable, String data, long nonce)
     {
         this.version = version;
         this.chainId = chainId;
@@ -122,7 +131,14 @@ public class EasAttestation
 
     public String getSchema()
     {
-        return schema;
+        if (schema.equals("0"))
+        {
+            return Numeric.toHexStringWithPrefixZeroPadded(BigInteger.ZERO, 64);
+        }
+        else
+        {
+            return schema;
+        }
     }
 
     public void setSchema(String schema)
@@ -162,7 +178,14 @@ public class EasAttestation
 
     public String getRefUID()
     {
-        return refUID;
+        if (refUID.equals("0"))
+        {
+            return Numeric.toHexStringWithPrefixZeroPadded(BigInteger.ZERO, 64);
+        }
+        else
+        {
+            return refUID;
+        }
     }
 
     public void setRefUID(String refUID)
@@ -198,5 +221,70 @@ public class EasAttestation
     public void setNonce(long nonce)
     {
         this.nonce = nonce;
+    }
+
+    public String getEIP712Attestation()
+    {
+        JSONObject eip712 = new JSONObject();
+
+        try
+        {
+            JSONObject types = new JSONObject();
+            JSONArray jsonType = new JSONArray();
+            putElement(jsonType, "name", "string");
+            putElement(jsonType, "version", "string");
+            putElement(jsonType, "chainId", "uint256");
+            putElement(jsonType, "verifyingContract", "address");
+            types.put("EIP712Domain", jsonType);
+
+            JSONArray attest = new JSONArray();
+            putElement(attest, "schema", "bytes32");
+            putElement(attest, "recipient", "address");
+            putElement(attest, "time", "uint64");
+            putElement(attest, "expirationTime", "uint64");
+            putElement(attest, "revocable", "bool");
+            putElement(attest, "refUID", "bytes32");
+            putElement(attest, "data", "bytes");
+
+            types.put("Attest", attest);
+
+            eip712.put("types", types);
+
+            JSONObject jsonDomain = new JSONObject();
+            jsonDomain.put("name", "EAS Attestation");
+            jsonDomain.put("version", version);
+            jsonDomain.put("chainId", chainId);
+            jsonDomain.put("verifyingContract", verifyingContract);
+
+            //"primaryType": "Attest",
+            eip712.put("primaryType", "Attest");
+            eip712.put("domain", jsonDomain);
+
+            JSONObject jsonMessage = new JSONObject();
+            jsonMessage.put("time", time);
+            jsonMessage.put("data", data);
+            jsonMessage.put("expirationTime", expirationTime);
+            jsonMessage.put("recipient", recipient);
+            jsonMessage.put("refUID", getRefUID());
+            jsonMessage.put("revocable", revocable);
+            jsonMessage.put("schema", getSchema());
+
+            eip712.put("message", jsonMessage);
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
+
+        return eip712.toString();
+    }
+
+    private void putElement(JSONArray jsonType, String name, String type) throws Exception
+    {
+        JSONObject element = new JSONObject();
+        element.put("name", name);
+        element.put("type", type);
+
+        jsonType.put(element);
     }
 }

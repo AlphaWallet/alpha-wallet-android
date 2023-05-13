@@ -18,6 +18,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.ActionSheetStatus;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -36,7 +37,6 @@ import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.TransactionSuccessActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
-import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.GasWidgetInterface;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
@@ -148,7 +148,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
         if (!tx.gasLimit.equals(BigInteger.ZERO))
         {
-            setGasEstimate(tx.gasLimit);
+            setGasEstimate(new GasEstimate(tx.gasLimit));
         }
 
         updateAmount();
@@ -751,10 +751,24 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     }
 
     //Takes gas estimate from calling activity (eg WalletConnectActivity) and updates dialog
-    public void setGasEstimate(BigInteger estimate)
+//    public void setGasEstimate(BigInteger estimate)
+//    {
+//        gasWidgetInterface.setGasEstimate(estimate);
+//        functionBar.setPrimaryButtonEnabled(true);
+//    }
+
+    @Override
+    public void setGasEstimate(GasEstimate estimate)
     {
-        gasWidgetInterface.setGasEstimate(estimate);
-        functionBar.setPrimaryButtonEnabled(true);
+        if (!TextUtils.isEmpty(estimate.getError())) // Display error
+        {
+
+        }
+        else
+        {
+            gasWidgetInterface.setGasEstimate(estimate.getValue());
+            functionBar.setPrimaryButtonEnabled(true);
+        }
     }
 
     private void showAmount(BigInteger amountVal)

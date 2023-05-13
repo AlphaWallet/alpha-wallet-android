@@ -1056,9 +1056,12 @@ public class Utils
         if (hashIndex >= 0)
         {
             url = url.substring(hashIndex + 13);
+            return url.length() > 10;
         }
-
-        return url.length() > 10;
+        else
+        {
+            return false;
+        }
     }
 
     public static String getAttestationString(String url)

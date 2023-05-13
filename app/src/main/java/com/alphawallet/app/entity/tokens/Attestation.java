@@ -27,6 +27,7 @@ public class Attestation extends Token
     private BigInteger attestationId;
     private String attestationSubject;
     private String issuerKey;
+    private boolean issuerValid;
     private String issuerAddress;
     private long validFrom;
     private long validUntil;
@@ -61,6 +62,7 @@ public class Attestation extends Token
         isValid = attValidation._isValid;
         additionalMembers = attValidation.additionalMembers;
         issuerKey = attValidation._issuerKey;
+        issuerValid = attValidation._issuerValid || (!TextUtils.isEmpty(issuerKey) && (TextUtils.isEmpty(issuerAddress) || !issuerKey.equalsIgnoreCase(issuerAddress)));
     }
 
     public AttestationValidationStatus isValid()
@@ -78,10 +80,14 @@ public class Attestation extends Token
         }
 
         //Check issuer - if not valid issuer fail.
-        if (!TextUtils.isEmpty(issuerKey) && (TextUtils.isEmpty(issuerAddress) || !issuerKey.equalsIgnoreCase(issuerAddress)))
+        if (!issuerValid)
         {
             return AttestationValidationStatus.Issuer_Not_Valid;
         }
+//        if (!TextUtils.isEmpty(issuerKey) && (TextUtils.isEmpty(issuerAddress) || !issuerKey.equalsIgnoreCase(issuerAddress)))
+//        {
+//
+//        }
 
         return AttestationValidationStatus.Pass;
     }

@@ -13,6 +13,8 @@ import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.entity.tokens.Attestation;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.repository.TokensMappingRepository;
@@ -382,6 +384,30 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
                 TokenSortedItem tsi = (TokenSortedItem) si;
                 TokenCardMeta thisToken = tsi.value;
                 if (thisToken.tokenId.equalsIgnoreCase(id))
+                {
+                    return items.removeItemAt(i);
+                }
+            }
+        }
+        return null;
+    }
+
+    //TokenCardMeta tcmAttestation = new TokenCardMeta(attestation.chainId, attestation.getAddress(), "1", System.currentTimeMillis(),
+    //                    assetDefinitionService, tokenAttn.tokenInfo.name, tokenAttn.tokenInfo.symbol, tokenAttn.getBaseTokenType(), TokenGroup.ATTESTATION, tokenAttn.getAttestationId());
+    //            tcmAttestation.isEnabled = true;
+    public SortedItem<TokenCardMeta> removeAttestation(Token token)
+    {
+        Attestation attn = (Attestation)token;
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                TokenSortedItem tsi = (TokenSortedItem) si;
+                TokenCardMeta thisToken = tsi.value;
+                //Attestation attestation = (Attestation) tokensService.getAttestation(data.getChain(), data.getAddress(), data.getTokenID());
+                if (thisToken.getTokenID().compareTo(attn.getAttestationId()) == 0 && thisToken.getAddress().equalsIgnoreCase(token.getAddress())
+                        && thisToken.getChain() == token.tokenInfo.chainId)
                 {
                     return items.removeItemAt(i);
                 }

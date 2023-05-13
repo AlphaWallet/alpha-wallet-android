@@ -16,9 +16,10 @@ public class AttestationValidation
     public final String _subjectAddress;
     public final BigInteger _attestationId;
     public final boolean _isValid;
+    public final boolean _issuerValid;
     public final Map<String, Type<?>> additionalMembers;
 
-    public AttestationValidation(String issuerAddress, String subjectAddress, BigInteger attestationId, boolean isValid, String issuerKey, Map<String, Type<?>> additional)
+    public AttestationValidation(String issuerAddress, String subjectAddress, BigInteger attestationId, boolean isValid, boolean issuerValid, String issuerKey, Map<String, Type<?>> additional)
     {
         _issuerAddress = issuerAddress;
         _subjectAddress = subjectAddress;
@@ -26,6 +27,7 @@ public class AttestationValidation
         _isValid = isValid;
         additionalMembers = additional;
         _issuerKey = issuerKey;
+        _issuerValid = issuerValid;
     }
 
     // Not a traditional builder pattern, but more appropriate for this use.
@@ -35,6 +37,7 @@ public class AttestationValidation
         private String subjectAddress;
         private BigInteger attestationId;
         private boolean isValid = false; //default to false; must provide this method
+        private boolean issuerValid = false;
         private String issuerKey;
         public Map<String, Type<?>> additionalMembers;
 
@@ -71,7 +74,12 @@ public class AttestationValidation
 
         public AttestationValidation build()
         {
-            return new AttestationValidation(issuerAddress, subjectAddress, attestationId, isValid, issuerKey, additionalMembers);
+            return new AttestationValidation(issuerAddress, subjectAddress, attestationId, isValid, issuerValid, issuerKey, additionalMembers);
+        }
+
+        public void issuerValid(Boolean value)
+        {
+            issuerValid = value;
         }
     }
 }

@@ -1079,6 +1079,9 @@ public class TokenDefinition
             //handle magic values plus generic
             switch (element.name)
             {
+                case "_issuerValid":
+                    builder.issuerValid((Boolean)values.get(index++).getValue());
+                    break;
                 case "_issuerAddress":
                     builder.issuerAddress((String)values.get(index++).getValue());
                     break;

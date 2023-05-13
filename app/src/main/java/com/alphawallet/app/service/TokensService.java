@@ -564,6 +564,11 @@ public class TokensService
                         .flatMap(contractType -> tokenRepository.storeTokenInfo(wallet, tInfo, type));
     }
 
+    public Single<TokenInfo> storeTokenInfoDirect(Wallet wallet, TokenInfo tInfo, ContractType type)
+    {
+        return tokenRepository.storeTokenInfo(wallet, tInfo, type);
+    }
+
     //Fix undermined contract type
     private ContractType checkDefaultType(ContractType contractType, ContractType defaultType)
     {

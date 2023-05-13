@@ -573,6 +573,7 @@ public class WalletViewModel extends BaseViewModel
         //Get token information - assume attestation is based on NFT
         //TODO: First validate Attestation
         tokensService.update(attestation.getAddress(), attestation.chainId, ContractType.ERC721)
+                .flatMap(tInfo -> getTokensService().storeTokenInfoDirect(getWallet(), tInfo, ContractType.ERC721))
                 .flatMap(tInfo -> storeAttestation(attestation, tInfo))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -674,7 +675,6 @@ public class WalletViewModel extends BaseViewModel
         EasAttestation easAttn = new Gson().fromJson(qrAttn.functionDetail, EasAttestation.class);
 
         //validation UID:
-
         storeAttestation(easAttn)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -710,5 +710,23 @@ public class WalletViewModel extends BaseViewModel
             tcmAttestation.isEnabled = true;
             updatedTokens.postValue(new TokenCardMeta[]{tcmAttestation});
         }*/
+    }
+
+    public void removeAttestation(Token token)
+    {
+        try (Realm realm = realmManager.getRealmInstance(defaultWallet.getValue()))
+        {
+            realm.executeTransactionAsync(r -> {
+                String key = ((Attestation)token).getDatabaseKey();
+                RealmAttestation realmAttn = r.where(RealmAttestation.class)
+                        .equalTo("address", key)
+                        .findFirst();
+
+                if (realmAttn != null)
+                {
+                    realmAttn.deleteFromRealm();
+                }
+            });
+        }
     }
 }

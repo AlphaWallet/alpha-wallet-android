@@ -256,7 +256,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         if (asset != null && asset.isAttestation())
         {
-            return viewModel.getTokenService().getAttestation(chainId, token.getAddress(), tokenId);
+            return viewModel.getTokenService().getAttestation(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS), tokenId);
         }
         else
         {
@@ -305,7 +305,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel.checkTokenScriptValidity(token);
         setTitle(token.tokenInfo.name);
         updateDefaultTokenData();
-        viewModel.getAsset(token, tokenId);
 
         if (asset != null && asset.isAttestation())
         {
@@ -313,6 +312,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
         else
         {
+            viewModel.getAsset(token, tokenId);
             viewModel.updateLocalAttributes(token, tokenId);
         }
     }
@@ -442,19 +442,19 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
-    private void loadAssetFromMetadata(NFTAsset asset)
+    private void loadAssetFromMetadata(NFTAsset loadedAsset)
     {
-        if (asset != null)
+        if (loadedAsset != null)
         {
-            updateTokenImage(asset);
+            updateTokenImage(loadedAsset);
 
-            addMetaDataInfo(asset);
+            addMetaDataInfo(loadedAsset);
 
-            nftAttributeLayout.bind(token, asset);
+            nftAttributeLayout.bind(token, loadedAsset);
 
             clearRefreshAnimation();
 
-            loadFromOpenSeaData(asset.getOpenSeaAsset());
+            loadFromOpenSeaData(loadedAsset.getOpenSeaAsset());
 
             final List<Attribute> attrs = new ArrayList<>();
 
@@ -591,7 +591,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void setupAttestation()
     {
-        tokenImage.setImageResource(R.drawable.zero_one);
+        tokenImage.setImageResource(R.drawable.zero_one_block);
         progressBar.setVisibility(View.GONE);
     }
 

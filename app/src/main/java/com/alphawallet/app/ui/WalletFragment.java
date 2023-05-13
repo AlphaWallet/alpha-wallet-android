@@ -850,8 +850,17 @@ public class WalletFragment extends BaseFragment implements
             else if (viewHolder instanceof TokenHolder)
             {
                 Token token = ((TokenHolder) viewHolder).token;
-                viewModel.setTokenEnabled(token, false);
-                SortedItem<TokenCardMeta> removedToken = adapter.removeToken(token.tokenInfo.chainId, token.getAddress());
+                SortedItem<TokenCardMeta> removedToken;
+                if (token.getInterfaceSpec() == ContractType.ATTESTATION)
+                {
+                    viewModel.removeAttestation(token);
+                    removedToken = adapter.removeAttestation(token);
+                }
+                else
+                {
+                    viewModel.setTokenEnabled(token, false);
+                    removedToken = adapter.removeToken(token.tokenInfo.chainId, token.getAddress());
+                }
 
                 if (getContext() != null)
                 {

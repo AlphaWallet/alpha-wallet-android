@@ -78,7 +78,7 @@ public class TransactionNotificationService
 
         boolean defaultCase =
             !preferenceRepository.isWatchOnly() &&
-                tx.timeStamp > preferenceRepository.getWalletCreationTime(walletAddress) &&
+                tx.timeStamp > preferenceRepository.getLoginTime(walletAddress) &&
                 preferenceRepository.isTransactionNotificationsEnabled(walletAddress);
 
         if (te == null)

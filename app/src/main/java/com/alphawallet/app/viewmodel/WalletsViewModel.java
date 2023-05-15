@@ -632,4 +632,9 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(wallet -> setNewWallet(wallet), this::onCreateWalletError);
     }
+
+    public void logIn(String address)
+    {
+        preferenceRepository.logIn(address);
+    }
 }

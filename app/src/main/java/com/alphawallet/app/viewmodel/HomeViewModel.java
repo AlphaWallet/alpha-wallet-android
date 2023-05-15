@@ -38,7 +38,6 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Version;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
-import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.QrScanResultType;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -218,7 +217,6 @@ public class HomeViewModel extends BaseViewModel
 
     private void onDefaultWallet(final Wallet wallet)
     {
-        preferenceRepository.setWalletCreationTime(wallet.address, System.currentTimeMillis() / 1000);
         preferenceRepository.setWatchOnly(wallet.watchOnly());
         defaultWallet.setValue(wallet);
     }

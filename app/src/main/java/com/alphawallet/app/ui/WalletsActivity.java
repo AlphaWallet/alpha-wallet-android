@@ -418,6 +418,8 @@ public class WalletsActivity extends BaseActivity implements
 
     private void updateCurrentWallet(Wallet wallet)
     {
+        viewModel.logIn(wallet.address);
+
         if (adapter == null)
         {
             recreate();

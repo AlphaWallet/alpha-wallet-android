@@ -15,7 +15,6 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.service.AlphaWalletNotificationService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.KeyService;
 
@@ -174,6 +173,7 @@ public class SplashViewModel extends BaseViewModel
 
     public void doWalletStartupActions(Wallet wallet)
     {
+        preferenceRepository.logIn(wallet.address);
         preferenceRepository.setCurrentWalletAddress(wallet.address);
         preferenceRepository.setWatchOnly(wallet.watchOnly());
     }

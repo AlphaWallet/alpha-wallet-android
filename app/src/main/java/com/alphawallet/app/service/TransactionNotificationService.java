@@ -100,7 +100,7 @@ public class TransactionNotificationService
         }
         else
         {
-            if (isRecipient(walletAddress, te.valueList))
+            if (defaultCase && isRecipient(walletAddress, te.valueList))
             {
                 boolean isMintEvent = isMintEvent(te.valueList);
                 return buildNotification(

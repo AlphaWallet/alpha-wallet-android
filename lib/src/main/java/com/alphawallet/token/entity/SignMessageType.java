@@ -12,5 +12,4 @@ public enum SignMessageType
     SIGN_TYPED_DATA_V3,
     SIGN_TYPED_DATA_V4,
     ATTESTATION,
-    SIGN_IN_WITH_ETH
 }

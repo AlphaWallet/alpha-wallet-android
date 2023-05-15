@@ -362,11 +362,12 @@ dependencies {
     //Timber
     implementation 'com.jakewharton.timber:timber:5.0.1'
 
-    implementation('com.walletconnect:web3wallet:1.4.1', {
+    implementation 'com.walletconnect:android-bom:1.9.3'
+    implementation('com.walletconnect:web3wallet:1.7.3', {
         exclude group: 'org.web3j', module: '*'
     })
 
-    implementation('com.walletconnect:android-core:1.9.0', {
+    implementation('com.walletconnect:android-core:1.14.3', {
         exclude group: 'org.web3j', module: '*'
     })
 

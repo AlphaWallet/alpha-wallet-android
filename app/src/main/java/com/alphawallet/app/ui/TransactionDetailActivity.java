@@ -200,13 +200,13 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
         setupVisibilities();
 
-        String from = transaction.from != null ? Utils.formatAddress(transaction.from) : "";
+        String from = transaction.from != null ? transaction.from : "";
         fromValue.setText(from);
 
-        String to = transaction.to != null ? Utils.formatAddress(transaction.to) : "";
+        String to = transaction.to != null ? transaction.to : "";
         toValue.setText(to);
 
-        String hash = transaction.hash != null ? Utils.formatTxHash(transaction.hash) : "";
+        String hash = transaction.hash != null ? transaction.hash : "";
         txHashView.setText(hash);
 
         txnTime.setText(Utils.localiseUnixDate(getApplicationContext(), transaction.timeStamp));
@@ -234,7 +234,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         if (targetToken.isEthereum()) return;
         tokenDetailsLayout.setVisibility(View.VISIBLE);
         icon.bindData(targetToken, viewModel.getTokenService());
-        address.setText(Utils.formatAddress(Keys.toChecksumAddress(targetToken.getAddress())));
+        address.setText(Keys.toChecksumAddress(targetToken.getAddress()));
         tokenName.setText(targetToken.getFullName());
     }
 

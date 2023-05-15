@@ -13,8 +13,9 @@
         style="@style/Aw.Component.Button.TextIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:ellipsize="middle"
         app:icon="@drawable/ic_copy"
-        tools:text="0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4"/>
+        tools:text="0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_address"

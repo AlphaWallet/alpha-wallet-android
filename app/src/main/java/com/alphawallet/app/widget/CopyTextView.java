@@ -12,15 +12,14 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.util.Utils;
 import com.google.android.material.button.MaterialButton;
 
 public class CopyTextView extends LinearLayout
 {
     public static final String KEY_ADDRESS = "key_address";
-
     private final Context context;
     private MaterialButton button;
-
     private int textResId;
     private int gravity;
     private int lines;
@@ -28,6 +27,7 @@ public class CopyTextView extends LinearLayout
     private boolean boldFont;
     private boolean removePadding;
     private float marginRight;
+    private String originalText;
 
     public CopyTextView(Context context, AttributeSet attrs)
     {
@@ -44,9 +44,9 @@ public class CopyTextView extends LinearLayout
     private void getAttrs(Context context, AttributeSet attrs)
     {
         TypedArray a = context.getTheme().obtainStyledAttributes(
-                attrs,
-                R.styleable.CopyTextView,
-                0, 0
+            attrs,
+            R.styleable.CopyTextView,
+            0, 0
         );
 
         try
@@ -84,26 +84,33 @@ public class CopyTextView extends LinearLayout
 
     public String getText()
     {
-        return button.getText().toString();
+        return originalText;
     }
 
     public void setText(CharSequence text)
     {
-        if (TextUtils.isEmpty(text))
+        originalText = text.toString();
+
+        setVisibility(TextUtils.isEmpty(originalText) ? View.GONE : View.VISIBLE);
+
+        if (Utils.isAddressValid(originalText))
         {
-            setVisibility(View.GONE);
+            button.setText(Utils.formatAddress(originalText, 10));
+        }
+        else if (Utils.isTxHashValid(originalText))
+        {
+            button.setText(Utils.formatTxHash(originalText, 10));
         }
         else
         {
-            setVisibility(View.VISIBLE);
-            button.setText(text.toString());
+            button.setText(originalText);
         }
     }
 
     private void copyToClipboard()
     {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, button.getText().toString());
+        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, originalText);
         if (clipboard != null)
         {
             clipboard.setPrimaryClip(clip);

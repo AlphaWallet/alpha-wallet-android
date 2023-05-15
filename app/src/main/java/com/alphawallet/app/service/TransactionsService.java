@@ -16,6 +16,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.entity.transactionAPI.TransferFetchType;
+import com.alphawallet.app.entity.transactions.TransferEvent;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -260,7 +262,7 @@ public class TransactionsService
         eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, tfType)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(count -> handleMoveCheck(info.chainId, tfType.ordinal() > 0), this::gotReadErr);
+                .subscribe(tfMap -> handleMoveCheck(info.chainId, tfType.ordinal() > 0, tfMap), this::gotReadErr);
 
         return true;
     }
@@ -271,11 +273,38 @@ public class TransactionsService
         Timber.e(e);
     }
 
-    private void handleMoveCheck(long chainId, boolean isNFT)
+    private void handleMoveCheck(long chainId, boolean isNFT, Map<String, List<TransferEvent>> tfMap)
     {
         chainTransferCheckTimes.put(chainId, System.currentTimeMillis());
         if (isNFT) tokensService.checkingChain(0); //this flags to TokensService that the check is complete. This avoids race condition
         eventFetch = null;
+
+        checkForIncomingTransfers(tfMap);
+    }
+
+    private void checkForIncomingTransfers(Map<String, List<TransferEvent>> tfMap)
+    {
+        for (Map.Entry<String, List<TransferEvent>> entry : tfMap.entrySet())
+        {
+            //only need to check first entry in list
+            List<TransferEvent> teList = entry.getValue();
+            if (teList.size() > 0)
+            {
+                TransferEvent te = teList.get(0);
+
+                //How it looks like. Transfer of NFT tokenId #13 from 0xa20... to 0xc067 ... for contract 0x2020 ...:
+                //activityName: sent or received (haven't added 'mint' yet, may do)
+                //contractAddress: 0x2020 ...
+                //tokenValue: "13" (string)
+                //valueList="from,address,0xa20...,to,address,0xc067...,amount,uint256,13"
+
+                //You should haven enough to display the notification here. Note in TransferHolder to convert the tokenValue for ERC20 you use this:
+                //BigDecimal val = (vResult != null) ? new BigDecimal(tokenValue) : BigDecimal.ZERO;
+                //        String humanReadableValue = BalanceUtils.getScaledValueFixed(val,
+                //                tokenInfo.decimals, TRANSACTION_BALANCE_PRECISION);
+
+            }
+        }
     }
 
     private void checkTransactionQueue()

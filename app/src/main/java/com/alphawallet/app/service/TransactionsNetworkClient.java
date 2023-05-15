@@ -11,6 +11,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 
 import android.text.TextUtils;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
@@ -28,6 +29,7 @@ import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.transactionAPI.TransferFetchType;
+import com.alphawallet.app.entity.transactions.TransferEvent;
 import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.TransactionsRealmCache;
@@ -468,21 +470,21 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
      * @return
      */
     @Override
-    public Single<Integer> readTransfers(String walletAddress, NetworkInfo networkInfo, TokensService svs, TransferFetchType tfType)
+    public Single<Map<String, List<TransferEvent>>> readTransfers(String walletAddress, NetworkInfo networkInfo, TokensService svs, TransferFetchType tfType)
     {
         return Single.fromCallable(() -> {
             //get latest block read
-            int eventCount = 0;
+            Map<String, List<TransferEvent>> tfMap = new HashMap<>();
             try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
             {
                 EtherscanEvent[] events = fetchEvents(instance, walletAddress, networkInfo, tfType);
-                eventCount = processEtherscanEvents(instance, walletAddress, networkInfo, svs, events, tfType);
+                tfMap = processEtherscanEvents(instance, walletAddress, networkInfo, svs, events, tfType);
             }
             catch (Exception e)
             {
                 Timber.e(e);
             }
-            return eventCount;
+            return tfMap;
         }).observeOn(Schedulers.io());
     }
 
@@ -533,10 +535,13 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         return eventList.toArray(new EtherscanEvent[0]);
     }
 
-    private int processEtherscanEvents(Realm instance, String walletAddress, NetworkInfo networkInfo,
+    private Map<String, List<TransferEvent>> processEtherscanEvents(Realm instance, String walletAddress, NetworkInfo networkInfo,
                                         TokensService svs, EtherscanEvent[] events, TransferFetchType tfType) throws Exception
     {
-        if (events.length == 0) return 0;
+        if (events.length == 0)
+        {
+            return new HashMap<>();
+        }
 
         long lastBlockChecked = getTokenBlockRead(instance, networkInfo.chainId, tfType);
 
@@ -544,12 +549,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         Map<String, Boolean> tokenTypes = writeTokens(walletAddress, networkInfo, events, svs, tfType);
 
         //we know all these events are relevant to the wallet, and they are all ERC20 events
-        long highestBlockRead = writeEvents(instance, events, walletAddress, networkInfo, tokenTypes, lastBlockChecked);
+        Pair<Long, Map<String, List<TransferEvent>>> txPair = writeEvents(instance, events, walletAddress, networkInfo, tokenTypes, lastBlockChecked);
 
         //and update the top block read
-        writeTokenBlockRead(instance, networkInfo.chainId, highestBlockRead + 1, tfType);
+        writeTokenBlockRead(instance, networkInfo.chainId, txPair.first + 1, tfType);
 
-        return events.length;
+        return txPair.second;
     }
 
     private Map<String, Boolean> writeTokens(String walletAddress, NetworkInfo networkInfo, EtherscanEvent[] events, TokensService svs, TransferFetchType tfType)
@@ -1007,8 +1012,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
     }
 
-    private long writeEvents   (Realm instance, EtherscanEvent[] events, String walletAddress,
-                                @NonNull NetworkInfo networkInfo, final Map<String, Boolean> tokenTypes, long lastBlockRead) throws Exception
+    private Pair<Long, Map<String, List<TransferEvent>>> writeEvents(Realm instance, EtherscanEvent[] events, String walletAddress,
+                                                                     @NonNull NetworkInfo networkInfo, final Map<String, Boolean> tokenTypes, long lastBlockRead) throws Exception
     {
         String TO_TOKEN = "[TO_ADDRESS]";
         String FROM_TOKEN = "[FROM_ADDRESS]";
@@ -1048,7 +1053,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             }
 
             List<TransferEvent> thisHashList = transferEventMap.computeIfAbsent(tx.hash, k -> new ArrayList<>());
-            thisHashList.add(new TransferEvent(valueList, activityName, ev.contractAddress));
+            thisHashList.add(new TransferEvent(valueList, activityName, ev.contractAddress, tokenValue));
 
             //add to transaction write list
             txWriteMap.put(ev.contractAddress, tx);
@@ -1065,7 +1070,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         });
 
         fetchRequiredTransactions(networkInfo.chainId, txFetches, walletAddress);
-        return highestBlockRead;
+        return new Pair<>(highestBlockRead, transferEventMap);
     }
 
     private void storeTransactions(Realm r, Map<String, Transaction> txWriteMap, HashSet<String> txFetches)
@@ -1094,20 +1099,6 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
                 TransactionsRealmCache.fill(realmTx, tx);
                 realmTx.setContractAddress(contractAddress); //for indexing by contract (eg Token Activity)
             }
-        }
-    }
-
-    private static class TransferEvent
-    {
-        public final String valueList;
-        public final String activityName;
-        public final String contractAddress;
-
-        public TransferEvent(String valueList, String activityName, String contractAddress)
-        {
-            this.activityName = activityName;
-            this.valueList = valueList;
-            this.contractAddress = contractAddress;
         }
     }
 

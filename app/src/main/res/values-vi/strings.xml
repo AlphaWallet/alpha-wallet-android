@@ -985,10 +985,12 @@
     <string name="action_proceed">Tiếp tục</string>
     <string name="setting_title_notification_incoming_tokens">Mã thông báo đến</string>
     <string name="setting_description_notification_incoming_tokens">Hiển thị thông báo khi ví hoạt động của bạn nhận được mã thông báo.</string>
-    <string name="notification_message_incoming_token">Ví %1s đã nhận được %2s từ %3s. Nhấn vào đây để xem chi tiết giao dịch.</string>
+    <string name="notification_message_incoming_token_with_recipient">Ví %1s đã nhận được %2s từ %3s. Nhấn vào đây để xem chi tiết giao dịch.</string>
+    <string name="notification_message_incoming_token">Ví %1s đã nhận được %2s. Nhấn vào đây để xem chi tiết giao dịch.</string>
     <string name="btn_ok_request_post_notifications_permission">Tôi muốn nhận thông báo</string>
     <string name="btn_skip">Bỏ qua ngay bây giờ</string>
     <string name="body_request_post_notifications_permission">Mặc dù AlphaWallet ở chế độ nền nhưng nó có thể gửi cho bạn thông báo về các sự kiện khác nhau, chẳng hạn như khi ví của bạn nhận được mã thông báo.</string>
     <string name="title_request_post_notifications_permission">Nhận được thông báo</string>
     <string name="message_deny_request_post_notifications_permission">Bạn sẽ không nhận được thông báo khi AlphaWallet ở chế độ nền. Bạn có thể thay đổi điều này bằng cách đi tới Cài đặt > Thông báo</string>
+    <string name="minted">Minted</string>
 </resources>

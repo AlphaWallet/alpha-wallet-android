@@ -971,10 +971,12 @@
     <string name="action_proceed">Proceder</string>
     <string name="setting_title_notification_incoming_tokens">Fichas entrantes</string>
     <string name="setting_description_notification_incoming_tokens">Muestre notificaciones cuando su billetera activa reciba tokens.</string>
-    <string name="notification_message_incoming_token">La billetera %1s ha recibido %2s de %3s. Toque aquí para ver los detalles de la transacción.</string>
+    <string name="notification_message_incoming_token_with_recipient">La billetera %1s ha recibido %2s de %3s. Toque aquí para ver los detalles de la transacción.</string>
+    <string name="notification_message_incoming_token">La cartera %1s ha recibido %2s. Toque aquí para ver los detalles de la transacción.</string>
     <string name="btn_ok_request_post_notifications_permission">Quiero recibir notificaciones</string>
     <string name="btn_skip">Saltar por ahora</string>
     <string name="body_request_post_notifications_permission">Mientras AlphaWallet está en segundo plano, puede enviarle notificaciones de varios eventos, como cuando su billetera recibe tokens.</string>
     <string name="title_request_post_notifications_permission">Ser notificado</string>
     <string name="message_deny_request_post_notifications_permission">No recibirá notificaciones mientras AlphaWallet esté en segundo plano. Puede cambiar esto yendo a Configuración > Notificaciones</string>
+    <string name="minted">Minted</string>
 </resources>

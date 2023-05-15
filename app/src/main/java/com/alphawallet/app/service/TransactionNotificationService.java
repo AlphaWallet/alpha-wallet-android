@@ -7,7 +7,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.alphawallet.app.C;
@@ -15,9 +17,13 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionType;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.transactions.TransferEvent;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.ui.TransactionDetailActivity;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
+
+import java.util.Locale;
 
 public class TransactionNotificationService
 {
@@ -35,13 +41,8 @@ public class TransactionNotificationService
         this.preferenceRepository = preferenceRepositoryType;
     }
 
-    public void showNotification(Transaction tx, Token t)
+    public void showNotification(Transaction tx, Token t, TransferEvent te)
     {
-        if (!shouldShowNotification(tx, t))
-        {
-            return;
-        }
-
         int id = tx.hash != null ? tx.hash.hashCode() : 0;
 
         PendingIntent pendingIntent
@@ -64,31 +65,58 @@ public class TransactionNotificationService
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
-        notificationManager.notify(id, buildNotification(pendingIntent, tx, t));
+        Notification n = createNotification(pendingIntent, tx, t, te);
+        if (n != null)
+        {
+            notificationManager.notify(id, n);
+        }
     }
 
-    public boolean shouldShowNotification(Transaction tx, Token t)
+    public Notification createNotification(PendingIntent intent, Transaction tx, Token t, @Nullable TransferEvent te)
     {
         String walletAddress = preferenceRepository.getCurrentWalletAddress();
-        TransactionType txType = t.getTransactionType(tx);
 
-        // Base token received
-        boolean receivedBaseToken =
-            (txType.equals(TransactionType.RECEIVED) ||
-                txType.equals(TransactionType.RECEIVE_FROM)) &&
-                tx.to.equalsIgnoreCase(walletAddress);
-
-        // ERC-20/721/1155 received
-        boolean receivedNftOrErc20 =
-            !tx.from.equalsIgnoreCase(walletAddress) &&
-                (txType.equals(TransactionType.RECEIVED) ||
-                    txType.equals(TransactionType.RECEIVE_FROM) ||
-                    txType.equals(TransactionType.TRANSFER_TO));
-
-        return (receivedBaseToken || receivedNftOrErc20) &&
+        boolean defaultCase =
             !preferenceRepository.isWatchOnly() &&
-            tx.timeStamp > preferenceRepository.getWalletCreationTime(walletAddress) &&
-            preferenceRepository.isTransactionNotificationsEnabled(walletAddress);
+                tx.timeStamp > preferenceRepository.getWalletCreationTime(walletAddress) &&
+                preferenceRepository.isTransactionNotificationsEnabled(walletAddress);
+
+        if (te == null)
+        {
+            TransactionType txType = t.getTransactionType(tx);
+            boolean receivedBaseToken =
+                (txType.equals(TransactionType.RECEIVED) ||
+                    txType.equals(TransactionType.RECEIVE_FROM)) &&
+                    tx.to.equalsIgnoreCase(walletAddress);
+
+            if (defaultCase && receivedBaseToken)
+            {
+                return buildNotification(
+                    intent,
+                    context.getString(R.string.received),
+                    t.getTransactionResultValue(tx),
+                    tx.from);
+            }
+        }
+        else
+        {
+            if (isRecipient(walletAddress, te.valueList))
+            {
+                boolean isMintEvent = isMintEvent(te.valueList);
+                return buildNotification(
+                    intent,
+                    isMintEvent ?
+                        context.getString(R.string.minted) :
+                        context.getString(R.string.received),
+                    getReadableValue(t, te.tokenValue) + " " + t.getSymbol(),
+                    isMintEvent ?
+                        "" :
+                        tx.from
+                );
+            }
+        }
+
+        return null;
     }
 
     private Intent buildIntent(Transaction tx, Token t)
@@ -103,7 +131,7 @@ public class TransactionNotificationService
         return intent;
     }
 
-    private Notification buildNotification(PendingIntent pendingIntent, Transaction tx, Token t)
+    private Notification buildNotification(PendingIntent pendingIntent, String event, String value, String fromAddress)
     {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_logo)
@@ -111,26 +139,63 @@ public class TransactionNotificationService
             .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})
             .setOnlyAlertOnce(true)
             .setContentIntent(pendingIntent)
-            .setContentTitle(getTitle(tx, t))
-            .setContentText(getBody(tx, t))
+            .setContentTitle(getTitle(event, value))
+            .setContentText(getBody(value, fromAddress))
             .setStyle(new NotificationCompat.BigTextStyle()
-                .bigText(getBody(tx, t))
+                .bigText(getBody(value, fromAddress))
             );
 
         return builder.build();
     }
 
-    private String getTitle(Transaction tx, Token t)
+    private String getTitle(String event, String value)
     {
-        return context.getString(R.string.received) + " " + t.getTransactionResultValue(tx);
+        return event + " " + value;
     }
 
-    private String getBody(Transaction tx, Token t)
+    private String getBody(String value, String fromAddress)
     {
-        return context.getString(R.string.notification_message_incoming_token,
-            Utils.formatAddress(preferenceRepository.getCurrentWalletAddress()),
-            t.getTransactionResultValue(tx),
-            Utils.formatAddress(tx.from)
-        );
+        if (TextUtils.isEmpty(fromAddress))
+        {
+            return context.getString(R.string.notification_message_incoming_token,
+                Utils.formatAddress(preferenceRepository.getCurrentWalletAddress()),
+                value
+            );
+        }
+        else
+        {
+            return context.getString(R.string.notification_message_incoming_token_with_recipient,
+                Utils.formatAddress(preferenceRepository.getCurrentWalletAddress()),
+                value,
+                Utils.formatAddress(fromAddress)
+            );
+        }
+    }
+
+    private boolean isMintEvent(String input)
+    {
+        String searchText = "from,address,";
+        int startIndex = input.indexOf(searchText) + searchText.length();
+        int endIndex = input.indexOf(",", startIndex);
+        String from = input.substring(startIndex, endIndex);
+        return from.equalsIgnoreCase(C.BURN_ADDRESS);
+    }
+
+    private boolean isRecipient(String walletAddress, String input)
+    {
+        String validationString = "to,address," + walletAddress.toLowerCase(Locale.ROOT);
+        return input.toLowerCase(Locale.ROOT).contains(validationString);
+    }
+
+    private String getReadableValue(Token t, String tokenValue)
+    {
+        if (t.isERC20())
+        {
+            return BalanceUtils.getScaledValue(tokenValue, t.tokenInfo.decimals);
+        }
+        else
+        {
+            return "#" + tokenValue;
+        }
     }
 }

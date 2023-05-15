@@ -298,7 +298,7 @@ public class TransactionsService
     private void onTransactionFetched(Transaction tx, TransferEvent te)
     {
         Token token = tokensService.getToken(tx.chainId, te.contractAddress);
-        showTransactionNotification(tx, token);
+        showTransactionNotification(tx, token, te);
     }
 
     private void checkTransactionQueue()
@@ -472,16 +472,16 @@ public class TransactionsService
             }
             else
             {
-                showTransactionNotification(tx, token);
+                showTransactionNotification(tx, token, null);
             }
         }
     }
 
-    private void showTransactionNotification(Transaction transaction, Token token)
+    private void showTransactionNotification(Transaction transaction, Token token, TransferEvent te)
     {
         if (token != null)
         {
-            transactionNotificationService.showNotification(transaction, token);
+            transactionNotificationService.showNotification(transaction, token, te);
             if (fromBackground && !tokensService.isOnFocus())
             {
                 fromBackground = false;

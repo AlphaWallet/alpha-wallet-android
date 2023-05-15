@@ -80,9 +80,7 @@ public class TransactionNotificationService
 
         // ERC-20/721/1155 received
         boolean receivedNftOrErc20 =
-            tx.transactionInput != null &&
-                tx.transactionInput.containsAddress(walletAddress) &&
-                !tx.from.equalsIgnoreCase(walletAddress) &&
+            !tx.from.equalsIgnoreCase(walletAddress) &&
                 (txType.equals(TransactionType.RECEIVED) ||
                     txType.equals(TransactionType.RECEIVE_FROM) ||
                     txType.equals(TransactionType.TRANSFER_TO));

@@ -32,6 +32,7 @@ import org.web3j.utils.Numeric;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -279,32 +280,25 @@ public class TransactionsService
         if (isNFT) tokensService.checkingChain(0); //this flags to TokensService that the check is complete. This avoids race condition
         eventFetch = null;
 
-        checkForIncomingTransfers(tfMap);
+        checkForIncomingTransfers(chainId, tfMap);
     }
 
-    private void checkForIncomingTransfers(Map<String, List<TransferEvent>> tfMap)
+    private void checkForIncomingTransfers(long chainId, Map<String, List<TransferEvent>> tfMap)
     {
-        for (Map.Entry<String, List<TransferEvent>> entry : tfMap.entrySet())
-        {
-            //only need to check first entry in list
-            List<TransferEvent> teList = entry.getValue();
-            if (teList.size() > 0)
-            {
-                TransferEvent te = teList.get(0);
+        tfMap.entrySet().stream()
+            .filter(entry -> !entry.getValue().isEmpty())
+            .map(entry -> new AbstractMap.SimpleEntry<>(entry.getValue().get(0), entry.getKey()))
+            .filter(entry -> entry.getKey().activityName.equalsIgnoreCase("received"))
+            .forEach(entry -> fetchTransaction(tokensService.getCurrentAddress(), chainId, entry.getValue())
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .subscribe(t -> onTransactionFetched(t, entry.getKey()), Timber::e));
+    }
 
-                //How it looks like. Transfer of NFT tokenId #13 from 0xa20... to 0xc067 ... for contract 0x2020 ...:
-                //activityName: sent or received (haven't added 'mint' yet, may do)
-                //contractAddress: 0x2020 ...
-                //tokenValue: "13" (string)
-                //valueList="from,address,0xa20...,to,address,0xc067...,amount,uint256,13"
-
-                //You should haven enough to display the notification here. Note in TransferHolder to convert the tokenValue for ERC20 you use this:
-                //BigDecimal val = (vResult != null) ? new BigDecimal(tokenValue) : BigDecimal.ZERO;
-                //        String humanReadableValue = BalanceUtils.getScaledValueFixed(val,
-                //                tokenInfo.decimals, TRANSACTION_BALANCE_PRECISION);
-
-            }
-        }
+    private void onTransactionFetched(Transaction tx, TransferEvent te)
+    {
+        Token token = tokensService.getToken(tx.chainId, te.contractAddress);
+        showTransactionNotification(tx, token);
     }
 
     private void checkTransactionQueue()

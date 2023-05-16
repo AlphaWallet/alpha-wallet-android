@@ -90,7 +90,7 @@ public class NFTAssetsAdapter extends RecyclerView.Adapter<NFTAssetsAdapter.View
         {
             Attestation thisAttn = (Attestation)att;
             NFTAsset attestationAsset = new NFTAsset(thisAttn);
-            displayData.add(new Pair<>(thisAttn.getAttestationId(), attestationAsset));
+            //displayData.add(new Pair<>(thisAttn.getAttestationUID(), attestationAsset));
         }
 
         sortData();

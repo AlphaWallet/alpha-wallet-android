@@ -260,14 +260,7 @@ public class EasAttestation
             eip712.put("primaryType", "Attest");
             eip712.put("domain", jsonDomain);
 
-            JSONObject jsonMessage = new JSONObject();
-            jsonMessage.put("time", time);
-            jsonMessage.put("data", data);
-            jsonMessage.put("expirationTime", expirationTime);
-            jsonMessage.put("recipient", recipient);
-            jsonMessage.put("refUID", getRefUID());
-            jsonMessage.put("revocable", revocable);
-            jsonMessage.put("schema", getSchema());
+            JSONObject jsonMessage = formMessage();
 
             eip712.put("message", jsonMessage);
         }
@@ -277,6 +270,37 @@ public class EasAttestation
         }
 
         return eip712.toString();
+    }
+
+    public String getEIP712Message()
+    {
+        String message;
+        try
+        {
+            JSONObject jsonMessage = formMessage();
+            message = jsonMessage.toString();
+        }
+        catch (Exception e)
+        {
+            message = "";
+            Timber.e(e);
+        }
+
+        return message;
+    }
+
+    private JSONObject formMessage() throws Exception
+    {
+        JSONObject jsonMessage = new JSONObject();
+        jsonMessage.put("time", time);
+        jsonMessage.put("data", data);
+        jsonMessage.put("expirationTime", expirationTime);
+        jsonMessage.put("recipient", recipient);
+        jsonMessage.put("refUID", getRefUID());
+        jsonMessage.put("revocable", revocable);
+        jsonMessage.put("schema", getSchema());
+
+        return jsonMessage;
     }
 
     private void putElement(JSONArray jsonType, String name, String type) throws Exception

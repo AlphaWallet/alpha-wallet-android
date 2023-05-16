@@ -131,7 +131,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenIds = token.stringHexToBigIntegerList(tokenIdStr);
         tokenId = tokenIds.get(0);
         tokenView = findViewById(R.id.web3_tokenview);
-
         tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.setWalletAddress(new Address(token.getWallet()));
         tokenView.setupWindowCallback(this);
@@ -189,7 +188,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         action = functions.get(actionMethod);
         List<Attribute> localAttrs = (action != null && action.attributes != null) ? new ArrayList<>(action.attributes.values()) : null;
 
-        TokenScriptResult.Attribute attestation = viewModel.getAssetDefinitionService().getAvailableAttestation(token, action, tokenId);
+        TokenScriptResult.Attribute attestation = viewModel.getAssetDefinitionService().getAvailableAttestation(token, action, getIntent().getStringExtra(C.EXTRA_ATTESTATION_ID));
         if (attestation != null)
         {
             onAttr(attestation);

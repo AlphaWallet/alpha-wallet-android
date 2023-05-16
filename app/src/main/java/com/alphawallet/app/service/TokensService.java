@@ -1242,10 +1242,10 @@ public class TokensService
         else return tokenRepository.fetchToken(chainId, walletAddress, tokenAddress.toLowerCase());
     }
 
-    public Token getAttestation(long chainId, String addr, BigInteger tokenId)
+    public Token getAttestation(long chainId, String addr, String attnId)
     {
         //fetch attestation
-        return tokenRepository.fetchAttestation(chainId, currentAddress, addr.toLowerCase(), tokenId);
+        return tokenRepository.fetchAttestation(chainId, currentAddress, addr.toLowerCase(), attnId);
     }
 
     public List<Token> getAttestations(long chainId, String address)

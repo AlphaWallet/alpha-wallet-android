@@ -1088,4 +1088,9 @@ public class Token
     {
         return null;
     }
+
+    public void addAssetElements(NFTAsset asset, Context ctx)
+    {
+
+    }
 }

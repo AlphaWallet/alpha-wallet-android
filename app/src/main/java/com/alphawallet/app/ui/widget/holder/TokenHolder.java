@@ -104,8 +104,19 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
         try
         {
+            tokenLayout.setVisibility(View.VISIBLE);
             token = tokensService.getToken(data.getChain(), data.getAddress());
-            if (token == null)
+            if (token != null)
+            {
+                token.group = data.getTokenGroup();
+            }
+
+            if (data.group == TokenGroup.ATTESTATION)
+            {
+                handleAttestation(data);
+                return;
+            }
+            else if (token == null)
             {
                 fillEmpty();
                 return;
@@ -115,16 +126,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
                 //edge condition - looking at a contract as an account
                 Token backupChain = tokensService.getToken(data.getChain(), "eth");
                 if (backupChain != null) token = backupChain;
-            }
-
-            token.group = data.getTokenGroup();
-
-            tokenLayout.setVisibility(View.VISIBLE);
-
-            if (data.group == TokenGroup.ATTESTATION)
-            {
-                handleAttestation(data);
-                return;
             }
 
             if (EthereumNetworkRepository.isPriorityToken(token))
@@ -182,18 +183,18 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void handleAttestation(TokenCardMeta data)
     {
-        Attestation attestation = (Attestation) tokensService.getAttestation(data.getChain(), data.getAddress(), data.getTokenID());
-        balanceEth.setText(shortTitle());
-        BigInteger attestationId = attestation.getAttestationId();
-        if (attestationId.compareTo(BigInteger.ZERO) > 0)
+        Attestation attestation = (Attestation) tokensService.getAttestation(data.getChain(), data.getAddress(), data.getAttestationId());
+        //TODO: Take name from schema data if available
+        if (token != null)
         {
-            balanceCoin.setText(getString(R.string.valueSymbol, "AttestationId", attestationId.toString()));
+            balanceEth.setText(shortTitle());
         }
         else
         {
-            balanceCoin.setText(getString(R.string.valueSymbol, "1", token.getSymbol()));
+            balanceEth.setText(attestation.tokenInfo.name);
         }
-
+        //BigInteger attestationId = attestation.getAttestationUID();
+        balanceCoin.setText(attestation.getAttestationDescription());
         balanceCoin.setVisibility(View.VISIBLE);
         tokenIcon.setIsAttestation(attestation.getSymbol(), data.getChain());
         token = attestation;

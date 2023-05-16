@@ -3,6 +3,9 @@ package com.alphawallet.app.service;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
@@ -76,8 +79,17 @@ import org.jetbrains.annotations.NotNull;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.Bytes;
+import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.DynamicStruct;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.StaticStruct;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.Web3j;
@@ -100,6 +112,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2595,9 +2608,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return resolveAttrs(token, tokenId, definition, attrList, itemView);
     }
 
-    public TokenScriptResult.Attribute getAvailableAttestation(Token token, TSAction action, BigInteger tokenId)
+    public TokenScriptResult.Attribute getAvailableAttestation(Token token, TSAction action, String attnId)
     {
-        Attestation att = (action != null && action.modifier == ActionModifier.ATTESTATION) ? (Attestation) tokensService.getAttestation(token.tokenInfo.chainId, token.getAddress(), tokenId) : null;
+        Attestation att = (action != null && action.modifier == ActionModifier.ATTESTATION) ? (Attestation) tokensService.getAttestation(token.tokenInfo.chainId, token.getAddress(), attnId) : null;
         if (att != null)
         {
             return new TokenScriptResult.Attribute("attestation", "attestation", BigInteger.ZERO, Numeric.toHexString(att.getAttestation()));
@@ -2608,9 +2621,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public Map<String, TSAction> getAttestationFunctionMap(long chainId, String address, BigInteger tokenId)
+    public Map<String, TSAction> getAttestationFunctionMap(long chainId, String address, String attnId)
     {
-        Token att = tokensService.getAttestation(chainId, address, tokenId);
+        Token att = tokensService.getAttestation(chainId, address, attnId);
         TokenDefinition td = getAssetDefinition(chainId, address);
         Map<String, TSAction> actions = new HashMap<>();
         if (att != null && td != null)
@@ -2998,52 +3011,153 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return att;
     }
 
-    public Attestation validateAttestation(EasAttestation attestation)
+    public Attestation validateAttestation(EasAttestation attestation, String importedAttestation)
     {
-        Attestation att = null;
-        //1. Resolve UID. For now, just use default: This should be on a switch for chains
-        String defaultUID = "0x4455598d3ec459c4af59335f7729fea0f50ced46cb1cd67914f5349d44142ec1";
         String recoverAttestationSigner = recoverSigner(attestation);
 
         //1. Validate signer via key attestation service (using UID).
-        //2. Decode the ABI encoded payload.
-        //3.
+        //call validate
+        SchemaRecord schemaRecord = fetchSchemaRecord(attestation.getChainId(), getKeySchemaUID(attestation.getChainId()));
+        boolean attestationValid = checkAttestationIssuer(schemaRecord, attestation.getChainId(), recoverAttestationSigner);
 
-        //
+        //2. Decode the ABI encoded payload to pull out the info. ABI Decode the schema bytes
+        //initially we need a hardcoded schema - this should be fetched from the schema record EAS contract
+        //fetch the schema of the attestation
+        SchemaRecord attestationSchema = fetchSchemaRecord(attestation.getChainId(), attestation.schema);
+        //convert into functionDecode
+        List<String> names = new ArrayList<>();
+        List<Type> values = decodeAttestationData(attestation.data, attestationSchema.schema, names);
 
+        NetworkInfo networkInfo = EthereumNetworkBase.getNetworkByChain(attestation.getChainId());
+        //For EAS attestation use the EAS contract as the token base
+        TokenInfo tInfo = Utils.getDefaultAttestationInfo(attestation.getChainId());
+        Attestation localAttestation = new Attestation(tInfo, networkInfo.name, importedAttestation.getBytes(StandardCharsets.UTF_8));
 
+        localAttestation.handleEASAttestation(attestation, names, values, attestationValid);
+        localAttestation.setTokenWallet(tokensService.getCurrentAddress());
+        return localAttestation;
+    }
 
-
-
-
-        /*NetworkInfo networkInfo = EthereumNetworkBase.getNetworkByChain(tInfo.chainId);
-        att = new Attestation(tInfo, networkInfo.name, Numeric.hexStringToByteArray(attestation));
-        att.setTokenWallet(tokensService.getCurrentAddress());
-
-        //call validation function and get details
-        TokenDefinition.Attestation definitionAtt = td.getAttestation();
-        //can we get the details?
-
-        if (definitionAtt != null && definitionAtt.function != null)
+    private List<Type> decodeAttestationData(String attestationData, String decodeSchema, List<String> names)
+    {
+        List<TypeReference<?>> returnTypes = new ArrayList<TypeReference<?>>();
+        //build decoder
+        String[] typeData = decodeSchema.split(",");
+        for (String typeElement : typeData)
         {
-            //pull return type
-            FunctionDefinition fd = definitionAtt.function;
-            //add attestation to attr map
-            //call function
-            org.web3j.abi.datatypes.Function transaction = tokenscriptUtility.generateTransactionFunction(att, BigInteger.ZERO, td, fd, this);
-            transaction = new Function(fd.method, transaction.getInputParameters(), td.getAttestationReturnTypes()); //set return types
+            String[] data = typeElement.split(" ");
+            String type = data[0];
+            String name = data[1];
+            if (type.startsWith("uint") || type.startsWith("int"))
+            {
+                type = "uint";
+            }
+            else if (type.startsWith("bytes") && !type.equals("bytes"))
+            {
+                type = "bytes32";
+            }
 
-            //call and handle result
-            String result = tokenscriptUtility.callSmartContract(tInfo.chainId, tInfo.address, transaction);
+            TypeReference<?> tRef = null;
 
-            //break down result
-            List<Type> values = FunctionReturnDecoder.decode(result, transaction.getOutputParameters());
+            switch (type)
+            {
+                case "uint":
+                    tRef = new TypeReference<Uint256>() { };
+                    break;
+                case "address":
+                    tRef = new TypeReference<Address>() { };
+                    break;
+                case "bytes32":
+                    tRef = new TypeReference<Bytes32>() { };
+                    break;
+                case "string":
+                    tRef = new TypeReference<Utf8String>() { };
+                    break;
+                case "bytes":
+                    tRef = new TypeReference<Bytes>() { };
+                    break;
+                case "bool":
+                    tRef = new TypeReference<Bool>() { };
+                    break;
+                default:
+                    break;
+            }
 
-            //interpret these values
-            att.handleValidation(td.getValidation(values));
-        }*/
+            if (tRef != null)
+            {
+                returnTypes.add(tRef);
+            }
+            else
+            {
+                Timber.e("Unhandled type!");
+                returnTypes.add(new TypeReference<Uint256>() { });
+            }
 
-        return att;
+            names.add(name);
+        }
+
+        //decode the schema and populate the Attestation element
+        return FunctionReturnDecoder.decode(attestationData, org.web3j.abi.Utils.convert(returnTypes));
+    }
+
+    public static class SchemaRecord extends DynamicStruct
+    {
+        public byte[] uid;
+        public Address resolver;
+        public boolean revocable;
+        public String schema;
+
+        public SchemaRecord(byte[] uid, Address resolver, boolean revocable, String schema) {
+            super(
+                    new org.web3j.abi.datatypes.generated.Bytes32(uid),
+                    new org.web3j.abi.datatypes.Address(resolver.getValue()),
+                    new org.web3j.abi.datatypes.Bool(revocable),
+                    new org.web3j.abi.datatypes.Utf8String(schema));
+            this.uid = uid;
+            this.resolver = resolver;
+            this.revocable = revocable;
+            this.schema = schema;
+        }
+
+        public SchemaRecord(Bytes32 uid, Address resolver, Bool revocable, Utf8String schema) {
+            super(uid, resolver, revocable, schema);
+            this.uid = uid.getValue();
+            this.resolver = resolver;
+            this.revocable = revocable.getValue();
+            this.schema = schema.getValue();
+        }
+    }
+
+    private SchemaRecord fetchSchemaRecord(long chainId, String schemaUID)
+    {
+        //1. Resolve UID. For now, just use default: This should be on a switch for chains
+        String globalResolver = getEASSchemaContract(chainId);
+
+        //format transaction to get key resolver
+        Function getKeyResolver2 = new Function("getSchema",
+                Collections.singletonList(new Bytes32(Numeric.hexStringToByteArray(schemaUID))),
+                Collections.singletonList(new TypeReference<SchemaRecord>() {}));
+
+        String result = tokenscriptUtility.callSmartContract(chainId, globalResolver, getKeyResolver2);
+        List<Type> values = FunctionReturnDecoder.decode(result, getKeyResolver2.getOutputParameters());
+
+        return (SchemaRecord)values.get(0);
+    }
+
+    private boolean checkAttestationIssuer(SchemaRecord schemaRecord, long chainId, String signer)
+    {
+        String rootKeyUID = getDefaultRootKeyUID(chainId);
+        //pull the key resolver
+        Address resolverAddr = schemaRecord.resolver;
+        //call the resolver to test key validity
+        Function validateKey = new Function("validateSignature",
+                Arrays.asList((new Bytes32(Numeric.hexStringToByteArray(rootKeyUID))),
+                        new Address(signer)),
+                Collections.singletonList(new TypeReference<Bool>() {}));
+
+        String result = tokenscriptUtility.callSmartContract(chainId, resolverAddr.getValue(), validateKey);
+        List<Type> values = FunctionReturnDecoder.decode(result, validateKey.getOutputParameters());
+        return ((Bool)values.get(0)).getValue();
     }
 
     private String recoverSigner(EasAttestation attestation)
@@ -3069,5 +3183,92 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return recoveredAddress;
+    }
+
+    // NB Java 11 doesn't have support for switching on a 'long' :(
+    public static String getEASContract(long chainId)
+    {
+        if (chainId == MAINNET_ID)
+        {
+            return "0xA1207F3BBa224E2c9c3c6D5aF63D0eb1582Ce587";
+        }
+        else if (chainId == ARBITRUM_MAIN_ID)
+        {
+            return "0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458";
+        }
+        else if (chainId == SEPOLIA_TESTNET_ID)
+        {
+            return "0xC2679fBD37d54388Ce493F1DB75320D236e1815e";
+        }
+        else
+        {
+            //Support Optimism Goerli (0xC2679fBD37d54388Ce493F1DB75320D236e1815e)
+            return "";
+        }
+    }
+
+    private String getEASSchemaContract(long chainId)
+    {
+        if (chainId == MAINNET_ID)
+        {
+            return "0xA7b39296258348C78294F95B872b282326A97BDF";
+        }
+        else if (chainId == ARBITRUM_MAIN_ID)
+        {
+            return "0xA310da9c5B885E7fb3fbA9D66E9Ba6Df512b78eB";
+        }
+        else if (chainId == SEPOLIA_TESTNET_ID)
+        {
+            return "0x0a7E2Ff54e76B8E6659aedc9103FB21c038050D0";
+        }
+        else
+        {
+            //Support Optimism Goerli (0x7b24C7f8AF365B4E308b6acb0A7dfc85d034Cb3f)
+            return "";
+        }
+    }
+
+    //UID of schema used for keys on each chain - the resolver is tied to this UID
+    private String getKeySchemaUID(long chainId)
+    {
+        if (chainId == MAINNET_ID)
+        {
+            return "";
+        }
+        else if (chainId == ARBITRUM_MAIN_ID)
+        {
+            return "";
+        }
+        else if (chainId == SEPOLIA_TESTNET_ID)
+        {
+            return "0x4455598d3ec459c4af59335f7729fea0f50ced46cb1cd67914f5349d44142ec1";
+        }
+        else
+        {
+            //Support Optimism Goerli (0x7b24C7f8AF365B4E308b6acb0A7dfc85d034Cb3f)
+            return "";
+        }
+    }
+
+    // If not specified
+    private String getDefaultRootKeyUID(long chainId)
+    {
+        if (chainId == MAINNET_ID)
+        {
+            return "";
+        }
+        else if (chainId == ARBITRUM_MAIN_ID)
+        {
+            return "";
+        }
+        else if (chainId == SEPOLIA_TESTNET_ID)
+        {
+            return "0xee99de42f544fa9a47caaf8d4a4426c1104b6d7a9df7f661f892730f1b5b1e23";
+        }
+        else
+        {
+            //Support Optimism Goerli (0x7b24C7f8AF365B4E308b6acb0A7dfc85d034Cb3f)
+            return "";
+        }
     }
 }

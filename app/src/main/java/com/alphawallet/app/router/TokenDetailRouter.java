@@ -74,7 +74,8 @@ public class TokenDetailRouter
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_CHAIN_ID, chainId);
         intent.putExtra(C.EXTRA_ADDRESS, address);
-        intent.putExtra(C.EXTRA_TOKEN_ID, asset.getTokenIdStr());
+        intent.putExtra(C.EXTRA_TOKEN_ID, "1");
+        intent.putExtra(C.EXTRA_ATTESTATION_ID, asset.getAttestationID());
         intent.putExtra(C.EXTRA_NFTASSET, asset);
         context.startActivityForResult(intent, C.TERMINATE_ACTIVITY);
     }

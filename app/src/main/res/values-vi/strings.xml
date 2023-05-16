@@ -994,4 +994,6 @@
     <string name="title_request_post_notifications_permission">Nhận được thông báo</string>
     <string name="message_deny_request_post_notifications_permission">Bạn sẽ không nhận được thông báo khi AlphaWallet ở chế độ nền. Bạn có thể thay đổi điều này bằng cách đi tới Cài đặt > Thông báo</string>
     <string name="minted">Minted</string>
+    <string name="valid_from">Có hiệu lực từ ngày</string>
+    <string name="valid_until">Có hiệu lực</string>
 </resources>

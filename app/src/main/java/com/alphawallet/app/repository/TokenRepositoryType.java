@@ -102,7 +102,7 @@ public interface TokenRepositoryType
 
     Single<TokenInfo> storeTokenInfo(Wallet wallet, TokenInfo tInfo, ContractType type);
 
-    Token fetchAttestation(long chainId, String currentAddress, String toLowerCase, BigInteger tokenId);
+    Token fetchAttestation(long chainId, String currentAddress, String toLowerCase, String attnId);
 
     List<Token> fetchAttestations(long chainId, String walletAddress, String tokenAddress);
 }

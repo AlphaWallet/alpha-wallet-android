@@ -402,6 +402,24 @@ public class Transaction implements Parcelable
     }
 
     /**
+     * Returns operation without the need for precision
+     *
+     */
+    public String getOperationResult(Token token)
+    {
+        //get amount here. will be amount + symbol if appropriate
+        if (hasInput())
+        {
+            decodeTransactionInput(token.getWallet());
+            return transactionInput.getOperationValue(token, this);
+        }
+        else
+        {
+            return token.getTransactionValue(this);
+        }
+    }
+
+    /**
      * Can the contract call be valid if the operation token is Ethereum?
      *
      * @param token
@@ -451,7 +469,7 @@ public class Transaction implements Parcelable
         {
             txName = ctx.getString(R.string.status_pending);
         }
-        else if (hasInput())
+        if (hasInput())
         {
             decodeTransactionInput(walletAddress);
             if (token.isEthereum() && shouldShowSymbol(token))
@@ -463,6 +481,27 @@ public class Transaction implements Parcelable
         }
 
         return txName;
+    }
+
+    public TransactionType getTransactionType(Token token, String walletAddress)
+    {
+        String txName = null;
+        if (isPending())
+        {
+            return TransactionType.UNKNOWN;
+        }
+        else if (hasInput())
+        {
+            decodeTransactionInput(walletAddress);
+            if (token.isEthereum() && shouldShowSymbol(token))
+            {
+                transactionInput.type = TransactionType.CONTRACT_CALL;
+            }
+
+            return transactionInput.type;
+        }
+
+        return TransactionType.UNKNOWN;
     }
 
     public boolean hasInput()

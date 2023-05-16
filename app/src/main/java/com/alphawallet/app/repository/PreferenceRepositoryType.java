@@ -22,10 +22,6 @@ public interface PreferenceRepositoryType
 
     void setCustomRPCNetworks(String networks);
 
-    boolean getNotificationsState();
-
-    void setNotificationState(boolean state);
-
     String getDefaultLocale();
 
     boolean isFindWalletAddressDialogShown();
@@ -111,6 +107,9 @@ public interface PreferenceRepositoryType
     boolean isNewWallet(String address);
 
     void setNewWallet(String address, boolean isNewWallet);
+    void setWatchOnly(boolean watchOnly);
+
+    boolean isWatchOnly();
 
     Set<String> getSelectedSwapProviders();
 
@@ -123,4 +122,20 @@ public interface PreferenceRepositoryType
     boolean isCrashReportingEnabled();
 
     void setCrashReportingEnabled(boolean isEnabled);
+
+    long getLoginTime(String address);
+
+    void logIn(String address);
+
+    void setFirebaseMessagingToken(String token);
+
+    String getFirebaseMessagingToken();
+
+    boolean isTransactionNotificationsEnabled(String address);
+
+    void setTransactionNotificationEnabled(String address, boolean isEnabled);
+
+    boolean isPostNotificationsPermissionRequested(String address);
+
+    void setPostNotificationsPermissionRequested(String address, boolean hasRequested);
 }

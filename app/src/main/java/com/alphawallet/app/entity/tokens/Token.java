@@ -17,6 +17,7 @@ import com.alphawallet.app.entity.EventSync;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
+import com.alphawallet.app.entity.TransactionType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
@@ -504,6 +505,29 @@ public class Token
         return name;
     }
 
+    public TransactionType getTransactionType(Transaction transaction)
+    {
+        if (isEthereum() && !transaction.hasInput())
+        {
+            if (transaction.value.equals("0") && transaction.hasInput())
+            {
+                return TransactionType.CONTRACT_CALL;
+            }
+            else if (transaction.from.equalsIgnoreCase(tokenWallet))
+            {
+                return TransactionType.SEND;
+            }
+            else
+            {
+               return TransactionType.RECEIVED;
+            }
+        }
+        else
+        {
+            return transaction.getTransactionType(this, getWallet());
+        }
+    }
+
     /**
      * Balance in human readable form, fixed decimal width eg 14.5000
      * @return formatted balance
@@ -586,6 +610,40 @@ public class Token
             return "";
         }
     }
+
+    /**
+     * Returns transaction result value without the need for precision
+     *
+     */
+    public String getTransactionResultValue(Transaction transaction)
+    {
+        if (isEthereum() && !transaction.hasInput())
+        {
+            //basic eth transaction
+            return getTransactionValue(transaction) + " " + getSymbol();
+        }
+        else if (transaction.hasInput())
+        {
+            //smart contract call
+            return transaction.getOperationResult(this);
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    /**
+     * Returns non-prefixed transaction value without the need for precision
+     *
+     */
+    public String getTransactionValue(Transaction transaction)
+    {
+        if (transaction.hasError()) return "";
+        else if (transaction.value.equals("0") || transaction.value.equals("0x0")) return "0";
+        return BalanceUtils.getScaledValue(transaction.value, tokenInfo.decimals);
+    }
+
 
     public boolean shouldShowSymbol(Transaction transaction)
     {

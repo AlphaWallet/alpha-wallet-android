@@ -1,102 +1,134 @@
 package com.alphawallet.app.viewmodel;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.alphawallet.app.BuildConfig;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.alphawallet.app.C;
-
-import dagger.hilt.android.lifecycle.HiltViewModel;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
-
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.DeleteWalletInteract;
 import com.alphawallet.app.interact.ExportWalletInteract;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.router.HomeRouter;
+import com.alphawallet.app.service.AlphaWalletNotificationService;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
+
 @HiltViewModel
-public class WalletActionsViewModel extends BaseViewModel {
+public class WalletActionsViewModel extends BaseViewModel
+{
     private final static String TAG = WalletActionsViewModel.class.getSimpleName();
 
     private final HomeRouter homeRouter;
     private final DeleteWalletInteract deleteWalletInteract;
     private final ExportWalletInteract exportWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
-
+    private final AlphaWalletNotificationService alphaWalletNotificationService;
     private final MutableLiveData<Integer> saved = new MutableLiveData<>();
     private final MutableLiveData<Boolean> deleted = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> exportWalletError = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> deleteWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isTaskRunning = new MutableLiveData<>();
+    private Disposable notificationDisposable;
 
     @Inject
     WalletActionsViewModel(
-            HomeRouter homeRouter,
-            DeleteWalletInteract deleteWalletInteract,
-            ExportWalletInteract exportWalletInteract,
-            FetchWalletsInteract fetchWalletsInteract) {
+        HomeRouter homeRouter,
+        DeleteWalletInteract deleteWalletInteract,
+        ExportWalletInteract exportWalletInteract,
+        FetchWalletsInteract fetchWalletsInteract,
+        AlphaWalletNotificationService alphaWalletNotificationService
+    )
+    {
         this.deleteWalletInteract = deleteWalletInteract;
         this.exportWalletInteract = exportWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
+        this.alphaWalletNotificationService = alphaWalletNotificationService;
         this.homeRouter = homeRouter;
     }
 
-    public LiveData<ErrorEnvelope> exportWalletError() {
+    public LiveData<ErrorEnvelope> exportWalletError()
+    {
         return exportWalletError;
     }
 
-    public LiveData<ErrorEnvelope> deleteWalletError() {
+    public LiveData<ErrorEnvelope> deleteWalletError()
+    {
         return deleteWalletError;
     }
 
-    public LiveData<Boolean> deleted() {
+    public LiveData<Boolean> deleted()
+    {
         return deleted;
     }
 
-    public LiveData<Integer> saved() {
+    public LiveData<Integer> saved()
+    {
         return saved;
     }
 
-    public LiveData<Boolean> isTaskRunning() {
+    public LiveData<Boolean> isTaskRunning()
+    {
         return isTaskRunning;
     }
 
-    public void deleteWallet(Wallet wallet) {
-        isTaskRunning.postValue(true);
-        disposable = deleteWalletInteract
-                .delete(wallet)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onDelete, this::onDeleteWalletError);
+    private void prepareForDeletion()
+    {
+        // TODO: [Notifications] Reactivate this when unsubscribe is implemented
+//        notificationDisposable =
+//            alphaWalletNotificationService.unsubscribe(EthereumNetworkBase.MAINNET_ID)
+//                .observeOn(Schedulers.io())
+//                .subscribeOn(Schedulers.io())
+//                .subscribe(result -> Timber.d("unsubscribe result => " + result), Timber::e);
+
+        // For now, unsubscribe to firebase topic
+        alphaWalletNotificationService.unsubscribeToTopic(EthereumNetworkBase.MAINNET_ID);
     }
 
-    private void onDeleteWalletError(Throwable throwable) {
+    public void deleteWallet(Wallet wallet)
+    {
+        isTaskRunning.postValue(true);
+        prepareForDeletion();
+        disposable = deleteWalletInteract
+            .delete(wallet)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(this::onDelete, this::onDeleteWalletError);
+    }
+
+    private void onDeleteWalletError(Throwable throwable)
+    {
         isTaskRunning.postValue(false);
         deleteWalletError.postValue(
-                new ErrorEnvelope(C.ErrorCode.UNKNOWN, TextUtils.isEmpty(throwable.getLocalizedMessage())
-                        ? throwable.getMessage() : throwable.getLocalizedMessage()));
+            new ErrorEnvelope(C.ErrorCode.UNKNOWN, TextUtils.isEmpty(throwable.getLocalizedMessage())
+                ? throwable.getMessage() : throwable.getLocalizedMessage()));
     }
 
-    private void onDelete(Wallet[] wallets) {
+    private void onDelete(Wallet[] wallets)
+    {
         isTaskRunning.postValue(false);
         deleted.postValue(true);
     }
 
     @Override
-    protected void onError(Throwable throwable) {
+    protected void onError(Throwable throwable)
+    {
         isTaskRunning.postValue(false);
         super.onError(throwable);
     }
 
-    public void showHome(Context context) {
+    public void showHome(Context context)
+    {
         homeRouter.open(context, true);
     }
 

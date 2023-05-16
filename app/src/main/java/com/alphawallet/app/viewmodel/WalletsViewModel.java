@@ -35,6 +35,7 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
+import com.alphawallet.app.service.AlphaWalletNotificationService;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TickerService;
@@ -63,6 +64,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 @HiltViewModel
 public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallback
@@ -81,6 +83,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private final AssetDefinitionService assetService;
     private final PreferenceRepositoryType preferenceRepository;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final AlphaWalletNotificationService alphaWalletNotificationService;
     private final TokenRepositoryType tokenRepository;
     private final TickerService tickerService;
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
@@ -115,21 +118,23 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
 
     @Inject
     WalletsViewModel(
-            SetDefaultWalletInteract setDefaultWalletInteract,
-            FetchWalletsInteract fetchWalletsInteract,
-            GenericWalletInteract genericWalletInteract,
-            ImportWalletInteract importWalletInteract,
-            ImportWalletRouter importWalletRouter,
-            HomeRouter homeRouter,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
-            KeyService keyService,
-            EthereumNetworkRepositoryType ethereumNetworkRepository,
-            TokenRepositoryType tokenRepository,
-            TickerService tickerService,
-            AssetDefinitionService assetService,
-            PreferenceRepositoryType preferenceRepository,
-            @ApplicationContext Context context)
+        AlphaWalletNotificationService alphaWalletNotificationService,
+        SetDefaultWalletInteract setDefaultWalletInteract,
+        FetchWalletsInteract fetchWalletsInteract,
+        GenericWalletInteract genericWalletInteract,
+        ImportWalletInteract importWalletInteract,
+        ImportWalletRouter importWalletRouter,
+        HomeRouter homeRouter,
+        FindDefaultNetworkInteract findDefaultNetworkInteract,
+        KeyService keyService,
+        EthereumNetworkRepositoryType ethereumNetworkRepository,
+        TokenRepositoryType tokenRepository,
+        TickerService tickerService,
+        AssetDefinitionService assetService,
+        PreferenceRepositoryType preferenceRepository,
+        @ApplicationContext Context context)
     {
+        this.alphaWalletNotificationService = alphaWalletNotificationService;
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.genericWalletInteract = genericWalletInteract;
@@ -204,10 +209,19 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
      */
     public void changeDefaultWallet(Wallet wallet)
     {
+        preferenceRepository.setWatchOnly(wallet.watchOnly());
         preferenceRepository.setNewWallet(wallet.address, false);
         disposable = setDefaultWalletInteract
                 .set(wallet)
                 .subscribe(() -> changeDefaultWallet.postValue(wallet), this::onError);
+    }
+
+    public void subscribeToNotifications()
+    {
+        disposable = alphaWalletNotificationService.subscribe(MAINNET_ID)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .subscribe(result -> Timber.d("subscribe result => %s", result), Timber::e);
     }
 
     public void onPrepare(long chainId, SyncCallback cb)
@@ -617,5 +631,10 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(wallet -> setNewWallet(wallet), this::onCreateWalletError);
+    }
+
+    public void logIn(String address)
+    {
+        preferenceRepository.logIn(address);
     }
 }

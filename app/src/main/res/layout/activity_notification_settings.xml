@@ -1,0 +1,33 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_simple_toolbar" />
+
+    <View style="@style/Aw.Component.Separator" />
+
+    <LinearLayout
+        android:id="@+id/layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+    <com.alphawallet.app.widget.SettingsItemView
+        android:id="@+id/setting_transaction_notification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:settingIcon="-1"
+        app:settingTitle="@string/setting_title_notification_incoming_tokens"
+        app:settingType="toggle" />
+
+    <TextView
+        style="@style/Aw.Typography.Sub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/standard_16"
+        android:text="@string/setting_description_notification_incoming_tokens" />
+
+</LinearLayout>

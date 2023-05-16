@@ -1004,4 +1004,14 @@
     <string name="dialog_title_gas_estimation_failed">ဓာတ်ငွေ့ ခန့်မှန်းချက် မအောင်မြင်ပါ။</string>
     <string name="dialog_message_gas_estimation_failed">ဓာတ်ငွေ့ ခန့်မှန်းချက် မှားယွင်းနေသည်- \"%s\". ငွေပေးငွေယူ လုပ်ဆောင်မှု ပျက်သွားဖွယ်ရှိသည်။ အတင်းပို့ချင်တာလား။</string>
     <string name="action_proceed">ရှေ့ဆက်ပါ။</string>
+    <string name="setting_title_notification_incoming_tokens">အဝင်တိုကင်များ</string>
+    <string name="setting_description_notification_incoming_tokens">သင့်အသက်ဝင်နေသော ပိုက်ဆံအိတ်မှ တိုကင်များကို လက်ခံရရှိသည့်အခါ အကြောင်းကြားချက်များကို ပြပါ။</string>
+    <string name="notification_message_incoming_token_with_recipient">Wallet %1s သည် %3s ထံမှ %2s ကို လက်ခံရရှိခဲ့သည်။ ငွေပေးငွေယူအသေးစိတ်များကိုကြည့်ရန် ဤနေရာကို တို့ပါ။</string>
+    <string name="notification_message_incoming_token">Wallet %1s သည် %2s ကို လက်ခံရရှိခဲ့သည်။ ငွေပေးငွေယူအသေးစိတ်များကိုကြည့်ရန် ဤနေရာကို တို့ပါ။</string>
+    <string name="btn_ok_request_post_notifications_permission">အကြောင်းကြားချက်များကို လက်ခံရယူလိုပါသည်။</string>
+    <string name="btn_skip">လောလောဆယ် ကျော်သွားပါ။</string>
+    <string name="body_request_post_notifications_permission">AlphaWallet သည် နောက်ခံတွင် ရှိနေစဉ်၊ သင့်ပိုက်ဆံအိတ်မှ တိုကင်များ လက်ခံရရှိသည့်အခါကဲ့သို့ ဖြစ်ရပ်အမျိုးမျိုးအတွက် အကြောင်းကြားချက်များကို ပေးပို့နိုင်ပါသည်။</string>
+    <string name="title_request_post_notifications_permission">အကြောင်းကြားပါ။</string>
+    <string name="message_deny_request_post_notifications_permission">AlphaWallet နောက်ခံတွင် ရှိနေစဉ်တွင် သင်သည် အကြောင်းကြားချက်များကို လက်ခံရရှိမည်မဟုတ်ပါ။ ဆက်တင်များ > အကြောင်းကြားချက်များသို့ သွားခြင်းဖြင့် ၎င်းကို ပြောင်းလဲနိုင်သည်။</string>
+    <string name="minted">Minted</string>
 </resources>

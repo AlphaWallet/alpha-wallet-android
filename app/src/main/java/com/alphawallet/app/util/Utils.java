@@ -547,13 +547,67 @@ public class Utils
             address = Keys.toChecksumAddress(address);
             String result = "";
             String firstSix = address.substring(0, 6);
-            String lastSix = address.substring(address.length() - 4);
-            return result + firstSix + "..." + lastSix;
+            String lastFour = address.substring(address.length() - 4);
+            return result + firstSix + "..." + lastFour;
         }
         else
         {
             return "0x";
         }
+    }
+
+    public static String formatAddress(String address, int frontCharCount)
+    {
+        if (isAddressValid(address))
+        {
+            address = Keys.toChecksumAddress(address);
+            String result = "";
+            String front = address.substring(0, frontCharCount + 2);
+            String back = address.substring(address.length() - 4);
+            return result + front + "..." + back;
+        }
+        else
+        {
+            return "0x";
+        }
+    }
+
+    public static String formatTxHash(String txHash)
+    {
+        if (isTxHashValid(txHash))
+        {
+            txHash = Keys.toChecksumAddress(txHash);
+            String result = "";
+            String firstSix = txHash.substring(0, 6);
+            String lastFour = txHash.substring(txHash.length() - 4);
+            return result + firstSix + "..." + lastFour;
+        }
+        else
+        {
+            return "0x";
+        }
+    }
+
+    public static String formatTxHash(String txHash, int frontCharCount)
+    {
+        if (isTxHashValid(txHash))
+        {
+            txHash = Keys.toChecksumAddress(txHash);
+            String result = "";
+            String front = txHash.substring(0, frontCharCount + 2);
+            String back = txHash.substring(txHash.length() - 4);
+            return result + front + "..." + back;
+        }
+        else
+        {
+            return "0x";
+        }
+    }
+
+    public static boolean isTxHashValid(String txHash)
+    {
+        return !TextUtils.isEmpty(txHash) &&
+            WalletUtils.isValidAddress(txHash, 64);
     }
 
     /**

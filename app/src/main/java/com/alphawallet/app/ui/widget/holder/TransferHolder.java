@@ -25,6 +25,7 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.TokenActivity;
+import com.alphawallet.app.ui.TransactionDetailActivity;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.TokenIcon;
@@ -256,10 +257,10 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
     @Override
     public void onClick(View view)
     {
-        Intent intent = new Intent(getContext(), TokenActivity.class);
+        Intent intent = new Intent(getContext(), TransactionDetailActivity.class);
         intent.putExtra(C.EXTRA_TXHASH, hashKey);
-        intent.putExtra(C.EXTRA_STATE, fromTokenView);
-        intent.putExtra(C.EXTRA_TOKEN_ID, transferData);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         getContext().startActivity(intent);
     }

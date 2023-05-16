@@ -1247,4 +1247,9 @@ public class TokensService
     {
         return tokenRepository.fetchAttestations(chainId, currentAddress, address);
     }
+
+    public boolean isOnFocus()
+    {
+        return appHasFocus;
+    }
 }

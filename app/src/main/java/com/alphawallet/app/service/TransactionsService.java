@@ -16,6 +16,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.entity.transactionAPI.TransferFetchType;
+import com.alphawallet.app.entity.transactions.TransferEvent;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
@@ -31,8 +32,10 @@ import org.web3j.utils.Numeric;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -53,24 +56,21 @@ public class TransactionsService
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionsNetworkClientType transactionsClient;
+    private final TransactionNotificationService transactionNotificationService;
     private final TransactionLocalSource transactionsCache;
     private int currentChainIndex;
     private boolean firstCycle;
     private boolean firstTxCycle;
-
     private final LongSparseArray<Long> chainTransferCheckTimes = new LongSparseArray<>(); //TODO: Use this to coordinate token checks on chains
     private final LongSparseArray<Long> chainTransactionCheckTimes = new LongSparseArray<>();
     private static final LongSparseArray<CurrentBlockTime> currentBlocks = new LongSparseArray<>();
     private static final ConcurrentLinkedQueue<String> requiredTransactions = new ConcurrentLinkedQueue<>();
-
     private final LongSparseArray<TransferFetchType> apiFetchProgress = new LongSparseArray<>();
 
     private final static int TRANSACTION_DROPPED = -1;
     private final static int TRANSACTION_SEEN = -2;
-
     private final static long START_CHECK_DELAY = 3;
     private final static long CHECK_CYCLE = 15;
-
     @Nullable
     private Disposable fetchTransactionDisposable;
     @Nullable
@@ -83,17 +83,24 @@ public class TransactionsService
     private Disposable pendingTransactionCheckCycle;
     @Nullable
     private Disposable transactionResolve;
+    private boolean fromBackground;
 
     public TransactionsService(TokensService tokensService,
                                EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                TransactionsNetworkClientType transactionsClient,
-                               TransactionLocalSource transactionsCache)
+                               TransactionLocalSource transactionsCache,
+                               TransactionNotificationService transactionNotificationService)
     {
         this.tokensService = tokensService;
         this.ethereumNetworkRepository = ethereumNetworkRepositoryType;
         this.transactionsClient = transactionsClient;
         this.transactionsCache = transactionsCache;
+        this.transactionNotificationService = transactionNotificationService;
+    }
 
+    public void fetchTransactionsFromBackground()
+    {
+        fromBackground = true;
         fetchTransactions();
     }
 
@@ -256,7 +263,7 @@ public class TransactionsService
         eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, tfType)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(count -> handleMoveCheck(info.chainId, tfType.ordinal() > 0), this::gotReadErr);
+                .subscribe(tfMap -> handleMoveCheck(info.chainId, tfType.ordinal() > 0, tfMap), this::gotReadErr);
 
         return true;
     }
@@ -267,11 +274,31 @@ public class TransactionsService
         Timber.e(e);
     }
 
-    private void handleMoveCheck(long chainId, boolean isNFT)
+    private void handleMoveCheck(long chainId, boolean isNFT, Map<String, List<TransferEvent>> tfMap)
     {
         chainTransferCheckTimes.put(chainId, System.currentTimeMillis());
         if (isNFT) tokensService.checkingChain(0); //this flags to TokensService that the check is complete. This avoids race condition
         eventFetch = null;
+
+        checkForIncomingTransfers(chainId, tfMap);
+    }
+
+    private void checkForIncomingTransfers(long chainId, Map<String, List<TransferEvent>> tfMap)
+    {
+        tfMap.entrySet().stream()
+            .filter(entry -> !entry.getValue().isEmpty())
+            .map(entry -> new AbstractMap.SimpleEntry<>(entry.getValue().get(0), entry.getKey()))
+            .filter(entry -> entry.getKey().activityName.equalsIgnoreCase("received"))
+            .forEach(entry -> fetchTransaction(tokensService.getCurrentAddress(), chainId, entry.getValue())
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .subscribe(t -> onTransactionFetched(t, entry.getKey()), Timber::e));
+    }
+
+    private void onTransactionFetched(Transaction tx, TransferEvent te)
+    {
+        Token token = tokensService.getToken(tx.chainId, te.contractAddress);
+        showTransactionNotification(tx, token, te);
     }
 
     private void checkTransactionQueue()
@@ -435,14 +462,30 @@ public class TransactionsService
      */
     private void checkTokens(Transaction[] txList)
     {
-        for (int i = 0; i < txList.length - 1; i++)
+        for (Transaction tx : txList)
         {
-            Transaction tx = txList[i];
-            if (!tx.hasError() && tx.hasData()) //is this a successful contract transaction?
+            Token token = tokensService.getToken(tx.chainId, tx.to);
+            boolean isSuccessfulContractTx = !tx.hasError() && tx.hasData();
+            if (isSuccessfulContractTx && (token == null && tx.to != null))
             {
-                Token token = tokensService.getToken(tx.chainId, tx.to);
-                if (token == null && tx.to != null)
-                    tokensService.addUnknownTokenToCheckPriority(new ContractAddress(tx.chainId, tx.to));
+                tokensService.addUnknownTokenToCheckPriority(new ContractAddress(tx.chainId, tx.to));
+            }
+            else
+            {
+                showTransactionNotification(tx, token, null);
+            }
+        }
+    }
+
+    private void showTransactionNotification(Transaction transaction, Token token, TransferEvent te)
+    {
+        if (token != null)
+        {
+            transactionNotificationService.showNotification(transaction, token, te);
+            if (fromBackground && !tokensService.isOnFocus())
+            {
+                fromBackground = false;
+                stopService();
             }
         }
     }

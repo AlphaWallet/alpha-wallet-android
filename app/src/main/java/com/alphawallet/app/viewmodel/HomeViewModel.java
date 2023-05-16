@@ -52,6 +52,7 @@ import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.AlphaWalletNotificationService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
@@ -122,6 +123,7 @@ public class HomeViewModel extends BaseViewModel
     private final ExternalBrowserRouter externalBrowserRouter;
     private final OkHttpClient httpClient;
     private final RealmManager realmManager;
+    private final AlphaWalletNotificationService alphaWalletNotificationService;
     private final MutableLiveData<String> walletName = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> splashActivity = new MutableLiveData<>();
@@ -145,7 +147,8 @@ public class HomeViewModel extends BaseViewModel
         AnalyticsServiceType analyticsService,
         ExternalBrowserRouter externalBrowserRouter,
         OkHttpClient httpClient,
-        RealmManager realmManager)
+        RealmManager realmManager,
+        AlphaWalletNotificationService alphaWalletNotificationService)
     {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
@@ -160,6 +163,7 @@ public class HomeViewModel extends BaseViewModel
         this.externalBrowserRouter = externalBrowserRouter;
         this.httpClient = httpClient;
         this.realmManager = realmManager;
+        this.alphaWalletNotificationService = alphaWalletNotificationService;
         setAnalyticsService(analyticsService);
         this.preferenceRepository.incrementLaunchCount();
     }
@@ -213,6 +217,7 @@ public class HomeViewModel extends BaseViewModel
 
     private void onDefaultWallet(final Wallet wallet)
     {
+        preferenceRepository.setWatchOnly(wallet.watchOnly());
         defaultWallet.setValue(wallet);
     }
 
@@ -828,5 +833,30 @@ public class HomeViewModel extends BaseViewModel
             }
             return null;
         };
+    }
+
+    public void subscribeToNotifications()
+    {
+        alphaWalletNotificationService.subscribe(com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
+    }
+
+    public void unsubscribeToNotifications()
+    {
+        alphaWalletNotificationService.unsubscribeToTopic(com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
+    }
+
+    public void setPostNotificationsPermissionRequested(String address)
+    {
+        preferenceRepository.setPostNotificationsPermissionRequested(address, true);
+    }
+
+    public boolean isPostNotificationsPermissionRequested(String address)
+    {
+        return preferenceRepository.isPostNotificationsPermissionRequested(address);
+    }
+
+    public boolean isWatchOnlyWallet()
+    {
+        return preferenceRepository.isWatchOnly();
     }
 }

@@ -234,6 +234,8 @@ public abstract class C {
     public static final String LINKEDIN_PACKAGE_NAME = "com.linkedin.android";
     public static final String REDDIT_PACKAGE_NAME = "com.reddit.frontpage";
     public static final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
+    public static final String FROM_NOTIFICATION = "from_notification";
+
     public interface ErrorCode {
 
         int UNKNOWN = 1;

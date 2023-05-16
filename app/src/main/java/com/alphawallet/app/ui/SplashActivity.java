@@ -34,12 +34,26 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class SplashActivity extends BaseActivity implements CreateWalletCallbackInterface, Runnable
 {
     private SplashViewModel viewModel;
-
-    private Handler handler = new Handler(Looper.getMainLooper());
     private String errorMessage;
+    private final Runnable displayError = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            AWalletAlertDialog aDialog = new AWalletAlertDialog(getThisActivity());
+            aDialog.setTitle(R.string.key_error);
+            aDialog.setIcon(AWalletAlertDialog.ERROR);
+            aDialog.setMessage(errorMessage);
+            aDialog.setButtonText(R.string.dialog_ok);
+            aDialog.setButtonListener(v -> aDialog.dismiss());
+            aDialog.show();
+        }
+    };
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
-    protected void attachBaseContext(Context base) {
+    protected void attachBaseContext(Context base)
+    {
         super.attachBaseContext(base);
     }
 
@@ -47,14 +61,12 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_splash);
 
         //detect previous launch
         viewModel = new ViewModelProvider(this)
-                .get(SplashViewModel.class);
-
+            .get(SplashViewModel.class);
         viewModel.cleanAuxData(getApplicationContext());
-
-        setContentView(R.layout.activity_splash);
         viewModel.wallets().observe(this, this::onWallets);
         viewModel.createWallet().observe(this, this::onWalletCreate);
         viewModel.fetchWallets();
@@ -75,7 +87,8 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         onWallets(wallets);
     }
 
-    private void onWallets(Wallet[] wallets) {
+    private void onWallets(Wallet[] wallets)
+    {
         //event chain should look like this:
         //1. check if wallets are empty:
         //      - yes, get either create a new account or take user to wallet page if SHOW_NEW_ACCOUNT_PROMPT is set
@@ -103,12 +116,14 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         }
         else
         {
+            viewModel.doWalletStartupActions(wallets[0]);
             handler.postDelayed(this, CustomViewSettings.startupDelay());
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
@@ -148,21 +163,6 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         errorMessage = message;
         if (handler != null) handler.post(displayError);
     }
-
-    Runnable displayError = new Runnable()
-    {
-        @Override
-        public void run()
-        {
-            AWalletAlertDialog aDialog = new AWalletAlertDialog(getThisActivity());
-            aDialog.setTitle(R.string.key_error);
-            aDialog.setIcon(AWalletAlertDialog.ERROR);
-            aDialog.setMessage(errorMessage);
-            aDialog.setButtonText(R.string.dialog_ok);
-            aDialog.setButtonListener(v -> aDialog.dismiss());
-            aDialog.show();
-        }
-    };
 
     @Override
     public void cancelAuthentication()

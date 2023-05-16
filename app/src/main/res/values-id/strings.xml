@@ -973,4 +973,14 @@
     <string name="dialog_title_gas_estimation_failed">Estimasi Gas Gagal</string>
     <string name="dialog_message_gas_estimation_failed">Gas estimation errored: \"%s\". The transaction execution will likely fail. Do you want to force sending?</string>
     <string name="action_proceed">Melanjutkan</string>
+    <string name="setting_title_notification_incoming_tokens">Token Masuk</string>
+    <string name="setting_description_notification_incoming_tokens">Tampilkan pemberitahuan saat token diterima oleh dompet aktif Anda.</string>
+    <string name="notification_message_incoming_token_with_recipient">Dompet %1s telah menerima %2s dari %3s. Ketuk di sini untuk melihat detail transaksi.</string>
+    <string name="notification_message_incoming_token">Dompet %1s telah menerima %2s. Ketuk di sini untuk melihat detail transaksi.</string>
+    <string name="btn_ok_request_post_notifications_permission">Saya ingin menerima pemberitahuan</string>
+    <string name="btn_skip">Lewati untuk saat ini</string>
+    <string name="body_request_post_notifications_permission">Saat AlphaWallet berada di latar belakang, AlphaWallet dapat mengirimi Anda notifikasi untuk berbagai acara, seperti saat dompet Anda menerima token.</string>
+    <string name="title_request_post_notifications_permission">Dapatkan pemberitahuan</string>
+    <string name="message_deny_request_post_notifications_permission">Anda tidak akan menerima notifikasi saat AlphaWallet ada di latar belakang. Anda dapat mengubahnya dengan membuka Setelan > Notifikasi</string>
+    <string name="minted">Minted</string>
 </resources>

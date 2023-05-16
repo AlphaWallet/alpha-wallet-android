@@ -45,9 +45,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleEventObserver;
-import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.OnLifecycleEvent;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -77,6 +75,7 @@ import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.util.PermissionUtils;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
@@ -137,6 +136,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private boolean isForeground;
     private volatile boolean tokenClicked = false;
     private String openLink;
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+        registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted)
+            {
+                // FCM SDK (and your app) can post notifications.
+                viewModel.subscribeToNotifications();
+            }
+            else
+            {
+                Toast.makeText(this, getString(R.string.message_deny_request_post_notifications_permission), Toast.LENGTH_LONG).show();
+            }
+        });
 
     public HomeActivity()
     {
@@ -348,6 +359,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void onDefaultWallet(Wallet wallet)
     {
+        // TODO: [Notifications] Uncomment once backend service is implemented
+//        if (!viewModel.isWatchOnlyWallet() && !viewModel.isPostNotificationsPermissionRequested(wallet.address))
+//        {
+//            viewModel.setPostNotificationsPermissionRequested(wallet.address);
+//            if (PermissionUtils.requestPostNotificationsPermission(this, requestPermissionLauncher))
+//            {
+//                viewModel.subscribeToNotifications();
+//            }
+//        }
+
         if (viewModel.checkNewWallet(wallet.address))
         {
             viewModel.setNewWallet(wallet.address, false);

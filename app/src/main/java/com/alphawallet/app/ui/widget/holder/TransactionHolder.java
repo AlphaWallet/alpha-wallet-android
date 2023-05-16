@@ -20,6 +20,7 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.TokenActivity;
+import com.alphawallet.app.ui.TransactionDetailActivity;
 import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.ChainName;
@@ -142,9 +143,10 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     @Override
     public void onClick(View view)
     {
-        Intent intent = new Intent(getContext(), TokenActivity.class);
+        Intent intent = new Intent(getContext(), TransactionDetailActivity.class);
         intent.putExtra(C.EXTRA_TXHASH, transaction.hash);
-        intent.putExtra(C.EXTRA_STATE, fromTokenView);
+        intent.putExtra(C.EXTRA_CHAIN_ID, getOperationToken().tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, getOperationToken().getAddress());
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         getContext().startActivity(intent);
     }

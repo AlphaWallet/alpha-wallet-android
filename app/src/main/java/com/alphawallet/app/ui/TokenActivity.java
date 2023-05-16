@@ -127,6 +127,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     @Nullable
     private Disposable fetchMetadata = null;
+    private Wallet wallet;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -264,6 +265,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
 
     private void onWallet(Wallet wallet)
     {
+        this.wallet = wallet;
         if (!TextUtils.isEmpty(eventKey))
         {
             handleEvent(wallet);

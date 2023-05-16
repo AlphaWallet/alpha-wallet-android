@@ -28,6 +28,7 @@ import com.alphawallet.app.repository.WalletDataRealmSource;
 import com.alphawallet.app.repository.WalletRepository;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.service.AccountKeystoreService;
+import com.alphawallet.app.service.AlphaWalletNotificationService;
 import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AnalyticsService;
 import com.alphawallet.app.service.AnalyticsServiceType;
@@ -46,6 +47,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsNetworkClient;
 import com.alphawallet.app.service.TransactionsNetworkClientType;
 import com.alphawallet.app.service.TransactionsService;
+import com.alphawallet.app.service.TransactionNotificationService;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -215,9 +217,10 @@ public class RepositoriesModule
     TransactionsService provideTransactionsServices(TokensService tokensService,
                                                     EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                                     TransactionsNetworkClientType transactionsNetworkClientType,
-                                                    TransactionLocalSource transactionLocalSource)
+                                                    TransactionLocalSource transactionLocalSource,
+                                                    TransactionNotificationService transactionNotificationService)
     {
-        return new TransactionsService(tokensService, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource);
+        return new TransactionsService(tokensService, ethereumNetworkRepositoryType, transactionsNetworkClientType, transactionLocalSource, transactionNotificationService);
     }
 
     @Singleton
@@ -273,9 +276,9 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    AnalyticsServiceType provideAnalyticsService(@ApplicationContext Context ctx)
+    AnalyticsServiceType provideAnalyticsService(@ApplicationContext Context ctx, PreferenceRepositoryType preferenceRepository)
     {
-        return new AnalyticsService(ctx);
+        return new AnalyticsService(ctx, preferenceRepository);
     }
 
     @Singleton
@@ -283,5 +286,20 @@ public class RepositoriesModule
     TokensMappingRepositoryType provideTokensMappingRepository(@ApplicationContext Context ctx)
     {
         return new TokensMappingRepository(ctx);
+    }
+
+    @Singleton
+    @Provides
+    TransactionNotificationService provideTransactionNotificationService(@ApplicationContext Context ctx,
+                                                                         PreferenceRepositoryType preferenceRepositoryType)
+    {
+        return new TransactionNotificationService(ctx, preferenceRepositoryType);
+    }
+
+    @Singleton
+    @Provides
+    AlphaWalletNotificationService provideAlphaWalletNotificationService(WalletRepositoryType walletRepository)
+    {
+        return new AlphaWalletNotificationService(walletRepository);
     }
 }

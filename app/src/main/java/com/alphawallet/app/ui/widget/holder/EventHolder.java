@@ -24,6 +24,7 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.TokenActivity;
+import com.alphawallet.app.ui.TransactionDetailActivity;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.ChainName;
@@ -47,22 +48,20 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnClickListener
 {
     public static final int VIEW_TYPE = 2016;
-
     private final TokenIcon tokenIcon;
     private final TextView date;
     private final TextView type;
     private final TextView address;
     private final TextView value;
-
     private final AssetDefinitionService assetDefinition;
     private final AdapterCallback refreshSignaller;
     private Token token;
     private BigInteger tokenId = BigInteger.ZERO;
-
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final TokensService tokensService;
     private String eventKey;
     private boolean fromTokenView;
+    private Transaction transaction;
 
     public EventHolder(ViewGroup parent, TokensService service, FetchTransactionsInteract interact,
                        AssetDefinitionService svs, AdapterCallback signaller)
@@ -90,9 +89,9 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         tokenId = BigInteger.ZERO;
 
         RealmAuxData eventData = fetchTransactionsInteract.fetchEvent(walletAddress, eventKey);
-        Transaction tx = fetchTransactionsInteract.fetchCached(walletAddress, data.hash);
+        transaction = fetchTransactionsInteract.fetchCached(walletAddress, data.hash);
 
-        if (eventData == null || tx == null)
+        if (eventData == null || transaction == null)
         {
             // probably caused by a new script detected. Signal to holder we need a reset
             refreshSignaller.resetRequired();
@@ -112,7 +111,7 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
             if (view != null) itemView = view.tokenView;
         }
 
-        String transactionValue = getEventAmount(eventData, tx);
+        String transactionValue = getEventAmount(eventData, transaction);
 
         if (TextUtils.isEmpty(transactionValue))
         {
@@ -127,7 +126,7 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
 
         type.setText(typeValue);
         //symbol.setText(sym);
-        address.setText(eventData.getDetail(getContext(), tx, itemView));// getDetail(eventData, resultMap));
+        address.setText(eventData.getDetail(getContext(), transaction, itemView));// getDetail(eventData, resultMap));
         tokenIcon.setStatusIcon(eventData.getEventStatusType());
         tokenIcon.setChainIcon(token.tokenInfo.chainId);
 
@@ -208,10 +207,10 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     @Override
     public void onClick(View view)
     {
-        Intent intent = new Intent(getContext(), TokenActivity.class);
-        intent.putExtra(C.EXTRA_TOKEN_ID, Numeric.toHexStringNoPrefix(tokenId)); //pass tokenId if event concerns tokenId
-        intent.putExtra(C.EXTRA_ACTION_NAME, eventKey);
-        intent.putExtra(C.EXTRA_STATE, fromTokenView);
+        Intent intent = new Intent(getContext(), TransactionDetailActivity.class);
+        intent.putExtra(C.EXTRA_TXHASH, transaction.hash);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         getContext().startActivity(intent);
     }

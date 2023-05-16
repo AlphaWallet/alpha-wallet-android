@@ -19,7 +19,8 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String DEFAULT_NETWORK_NAME_KEY = "default_network_name";
     private static final String NETWORK_FILTER_KEY = "network_filters";
     private static final String CUSTOM_NETWORKS_KEY = "custom_networks";
-    private static final String NOTIFICATIONS_KEY = "notifications";
+    private static final String TRANSACTION_NOTIFICATIONS_ENABLED = "transaction_notifications_enabled_";
+    private static final String POST_NOTIFICATIONS_PERMISSION_REQUESTED = "post_notifications_permission_requested_";
     private static final String THEME_KEY = "theme";
     private static final String DEFAULT_SET_KEY = "default_net_set";
     private static final String LOCALE_KEY = "locale";
@@ -45,10 +46,12 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String SELECTED_SWAP_PROVIDERS_KEY = "selected_exchanges";
     private static final String ANALYTICS_KEY = "analytics_key";
     private static final String CRASH_REPORTING_KEY = "crash_reporting_key";
-
+    private static final String WALLET_LOGIN_TIME = "wallet_login_time_";
+    private static final String FIREBASE_MESSAGING_TOKEN = "firebase_messaging_token";
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
     private static final String NEW_WALLET = "new_wallet_";
+    private static final String WATCH_ONLY = "watch_only";
 
     private final SharedPreferences pref;
 
@@ -116,16 +119,6 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public String getNetworkFilterList()
     {
         return pref.getString(NETWORK_FILTER_KEY, "");
-    }
-
-    @Override
-    public boolean getNotificationsState() {
-        return pref.getBoolean(NOTIFICATIONS_KEY, true);
-    }
-
-    @Override
-    public void setNotificationState(boolean state) {
-        pref.edit().putBoolean(NOTIFICATIONS_KEY, state).apply();
     }
 
     @Override
@@ -365,13 +358,25 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public boolean isNewWallet(String address)
     {
-        return pref.getBoolean(keyOf(address), false);
+        return pref.getBoolean(getAddressKey(NEW_WALLET, address), false);
     }
 
     @Override
     public void setNewWallet(String address, boolean isNewWallet)
     {
-        pref.edit().putBoolean(keyOf(address), isNewWallet).apply();
+        pref.edit().putBoolean(getAddressKey(NEW_WALLET, address), isNewWallet).apply();
+    }
+
+    @Override
+    public boolean isWatchOnly()
+    {
+        return pref.getBoolean(WATCH_ONLY, false);
+    }
+
+    @Override
+    public void setWatchOnly(boolean watchOnly)
+    {
+        pref.edit().putBoolean(WATCH_ONLY, watchOnly).apply();
     }
 
     @Override
@@ -410,9 +415,54 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
         pref.edit().putBoolean(CRASH_REPORTING_KEY, isEnabled).apply();
     }
 
-    @NonNull
-    private String keyOf(String address)
+    @Override
+    public long getLoginTime(String address)
     {
-        return NEW_WALLET + address.toLowerCase(Locale.ENGLISH);
+        return pref.getLong(getAddressKey(WALLET_LOGIN_TIME, address), -1);
+    }
+
+    @Override
+    public void logIn(String address)
+    {
+        pref.edit().putLong(getAddressKey(WALLET_LOGIN_TIME, address), System.currentTimeMillis() / 1000).apply();
+    }
+
+    @Override
+    public void setFirebaseMessagingToken(String token)
+    {
+        pref.edit().putString(FIREBASE_MESSAGING_TOKEN, token).apply();
+    }
+
+    @Override
+    public String getFirebaseMessagingToken()
+    {
+        return pref.getString(FIREBASE_MESSAGING_TOKEN, "");
+
+    }
+
+    @Override
+    public boolean isTransactionNotificationsEnabled(String address) {
+        return pref.getBoolean(getAddressKey(TRANSACTION_NOTIFICATIONS_ENABLED, address), true);
+    }
+
+    @Override
+    public void setTransactionNotificationEnabled(String address, boolean state) {
+        pref.edit().putBoolean(getAddressKey(TRANSACTION_NOTIFICATIONS_ENABLED, address), state).apply();
+    }
+
+    @Override
+    public boolean isPostNotificationsPermissionRequested(String address) {
+        return pref.getBoolean(getAddressKey(POST_NOTIFICATIONS_PERMISSION_REQUESTED, address), false);
+    }
+
+    @Override
+    public void setPostNotificationsPermissionRequested(String address, boolean hasRequested) {
+        pref.edit().putBoolean(getAddressKey(POST_NOTIFICATIONS_PERMISSION_REQUESTED, address), hasRequested).apply();
+    }
+
+    @NonNull
+    private String getAddressKey(String key, String address)
+    {
+        return key + address.toLowerCase(Locale.ENGLISH);
     }
 }

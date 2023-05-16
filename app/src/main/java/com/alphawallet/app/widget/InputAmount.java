@@ -406,14 +406,22 @@ public class InputAmount extends LinearLayout
 
     private void updateEquivalent()
     {
-        if (getTickerQuery() == null || TextUtils.isEmpty(getTickerQuery().findFirst().getPrice()))
+        if (getTickerQuery() == null)
         {
             equivalent.setVisibility(View.GONE);
             switchButton.setVisibility(View.GONE);
             return;
         }
 
-        double cryptoRate = Double.parseDouble(getTickerQuery().findFirst().getPrice());
+        RealmTokenTicker rtt = getTickerQuery().findFirst();
+        if (rtt == null)
+        {
+            equivalent.setVisibility(View.GONE);
+            switchButton.setVisibility(View.GONE);
+            return;
+        }
+
+        double cryptoRate = Double.parseDouble(rtt.getPrice());
         BigDecimal amount = editText.getBigDecimalValue();
         BigDecimal rate = new BigDecimal(cryptoRate);
 
@@ -421,7 +429,7 @@ public class InputAmount extends LinearLayout
         if (showingCrypto)
         {
             value = amount.multiply(rate).setScale(2, RoundingMode.CEILING);
-            equivalent.setText(String.format("%s %s", getTickerQuery().findFirst().getCurrencySymbol(), value));
+            equivalent.setText(String.format("%s %s", rtt.getCurrencySymbol(), value));
         }
         else
         {

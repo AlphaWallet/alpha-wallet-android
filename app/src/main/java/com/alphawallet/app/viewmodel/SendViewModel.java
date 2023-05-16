@@ -188,6 +188,11 @@ public class SendViewModel extends BaseViewModel implements TransactionSendHandl
         return networkRepository.getNetworkByChain(chainId);
     }
 
+    public boolean isValidChain(long chainId)
+    {
+        return networkRepository.getNetworkByChain(chainId) != null;
+    }
+
     public boolean isNetworkEnabled(long chainId)
     {
         return networkRepository.getFilterNetworkList().contains(chainId);

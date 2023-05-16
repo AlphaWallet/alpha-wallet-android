@@ -154,11 +154,26 @@ public class TransferRequestActivity extends BaseActivity implements
     {
         this.wallet = wallet;
 
-        if (!isValidChain(result.chainId))
+        long chainId = result.chainId;
+
+        if (!viewModel.isValidChain(chainId))
         {
+            displayToast(getString(R.string.chain_not_support, String.valueOf(chainId)));
             finish();
         }
-        else if (result.type == EIP681Type.PAYMENT)
+        else if (!viewModel.isNetworkEnabled(chainId))
+        {
+            showChainChangeDialog();
+        }
+        else
+        {
+            findToken();
+        }
+    }
+
+    private void findToken()
+    {
+        if (result.type == EIP681Type.PAYMENT)
         {
             setTitle(getString(R.string.title_payment_request));
             token = viewModel.getToken(result.chainId, wallet.address);
@@ -208,21 +223,6 @@ public class TransferRequestActivity extends BaseActivity implements
             displayToast("NFTs not supported yet.");
             finish();
         }
-    }
-
-    private boolean isValidChain(long chainId)
-    {
-        if (viewModel.getNetworkInfo(chainId) == null)
-        {
-            displayToast(getString(R.string.chain_not_support, String.valueOf(chainId)));
-            return false;
-        }
-        if (!viewModel.isNetworkEnabled(chainId))
-        {
-            displayToast("Network not enabled");
-            return false;
-        }
-        return true;
     }
 
     private void onFinalisedToken(Token token)
@@ -566,33 +566,25 @@ public class TransferRequestActivity extends BaseActivity implements
         dialog.show();
     }
 
-//    private void showChainChangeDialog(long chainId)
-//    {
-//        if (dialog != null && dialog.isShowing()) dialog.dismiss();
-//
-//        token = viewModel.getToken(chainId, wallet.address);
-//
-//        dialog = new AWalletAlertDialog(this);
-//        dialog.setIcon(AWalletAlertDialog.WARNING);
-//        dialog.setTitle(R.string.change_chain_request);
-//        dialog.setMessage(R.string.change_chain_message);
-//        dialog.setButtonText(R.string.dialog_ok);
-//        dialog.setButtonListener(v -> {
-//            //we should change the chain.
-//            token = viewModel.getToken(chainId, token.getAddress());
-//            amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
-//            dialog.dismiss();
-//            validateEIP681Request(currentResult, false);
-//        });
-//        dialog.setSecondaryButtonText(R.string.action_cancel);
-//        dialog.setSecondaryButtonListener(v -> {
-//            dialog.dismiss();
-//            //proceed without changing the chain
-//            currentResult.chainId = token.tokenInfo.chainId;
-//            validateEIP681Request(currentResult, false);
-//        });
-//        dialog.show();
-//    }
+    private void showChainChangeDialog()
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.WARNING);
+        dialog.setTitle(R.string.change_chain_request);
+        dialog.setMessage(R.string.change_chain_message);
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> {
+            findToken();
+            dialog.dismiss();
+        });
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+            finish();
+        });
+        dialog.show();
+    }
 
     private void showProgress(Boolean showProgress)
     {

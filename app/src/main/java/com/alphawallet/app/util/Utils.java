@@ -1,5 +1,6 @@
 package com.alphawallet.app.util;
 
+import static com.alphawallet.app.service.AssetDefinitionService.getEASContract;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
@@ -31,6 +32,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.util.pattern.Patterns;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
@@ -1060,6 +1062,22 @@ public class Utils
         }
         else
         {
+            //detect a base64 attestation
+            try
+            {
+                byte[] tryBase64Data = Base64.decode(url, Base64.DEFAULT); //is this a base64 string?
+
+                if (tryBase64Data.length > 0 )
+                {
+                    return true;
+                }
+            }
+            catch (IllegalArgumentException e)
+            {
+                // no action, return false;
+                Timber.w(e);
+            }
+
             return false;
         }
     }
@@ -1067,21 +1085,24 @@ public class Utils
     public static String getAttestationString(String url)
     {
         int hashIndex = url.indexOf("#attestation=");
-        if (hashIndex >= 0)
+        String decoded;
+        if (hashIndex >= 0) //EAS style attestations have the magic link style
         {
             url = url.substring(hashIndex + 13);
+            decoded = URLDecoder.decode(url, StandardCharsets.UTF_8);
         }
-        try
+        else
         {
-            String decoded = URLDecoder.decode(url, StandardCharsets.UTF_8.name());
-            Timber.d("decoded url: " + decoded);
-            return decoded;
+            decoded = url;
         }
-        catch (UnsupportedEncodingException e)
-        {
-            Timber.e(e);
-            return "";
-        }
+
+        Timber.d("decoded url: %s", decoded);
+        return decoded;
+    }
+
+    public static TokenInfo getDefaultAttestationInfo(long chainId)
+    {
+        return new TokenInfo(getEASContract(chainId), "EAS Attestation", "ATTN", 0, true, chainId);
     }
 
     public static String decompress(String url)
@@ -1123,16 +1144,12 @@ public class Utils
                 Long.parseLong(e[15])
             );
 
-        String attestationJson = new Gson().toJson(easAttestation);
-
-        return attestationJson;
+        return new Gson().toJson(easAttestation);
     }
 
     public static String inflateData(String deflatedData)
     {
-        byte[] deflatedBytes;
-
-        deflatedBytes = Base64.decode(deflatedData, Base64.DEFAULT);
+        byte[] deflatedBytes = Base64.decode(deflatedData, Base64.DEFAULT);
 
         Inflater inflater = new Inflater();
         inflater.setInput(deflatedBytes);
@@ -1154,9 +1171,7 @@ public class Utils
             inflatedData = outputStream.toByteArray();
 
             // Convert the inflated bytes to a string
-            String inflatedString = new String(inflatedData);
-
-            return inflatedString;
+            return new String(inflatedData);
         }
         catch (Exception e)
         {

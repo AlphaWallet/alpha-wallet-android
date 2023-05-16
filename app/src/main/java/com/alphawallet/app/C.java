@@ -122,6 +122,7 @@ public abstract class C {
     public static final String EXTRA_TOKEN_ID = "TID";
     public static final String EXTRA_TOKEN_BALANCE = "BALANCE";
     public static final String EXTRA_TOKENID_LIST = "TOKENIDLIST";
+    public static final String EXTRA_ATTESTATION_ID = "ATTNID";
     public static final String EXTRA_NFTASSET_LIST = "NFTASSET_LIST";
     public static final String EXTRA_NFTASSET = "NFTASSET";
     public static final String ERC875RANGE = "ERC875RANGE";
@@ -234,6 +235,7 @@ public abstract class C {
     public static final String LINKEDIN_PACKAGE_NAME = "com.linkedin.android";
     public static final String REDDIT_PACKAGE_NAME = "com.reddit.frontpage";
     public static final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
+
     public interface ErrorCode {
 
         int UNKNOWN = 1;

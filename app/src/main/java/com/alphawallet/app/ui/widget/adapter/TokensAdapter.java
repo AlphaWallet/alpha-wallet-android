@@ -17,7 +17,6 @@ import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
-import com.alphawallet.app.repository.TokensMappingRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
@@ -392,12 +391,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         return null;
     }
 
-    //TokenCardMeta tcmAttestation = new TokenCardMeta(attestation.chainId, attestation.getAddress(), "1", System.currentTimeMillis(),
-    //                    assetDefinitionService, tokenAttn.tokenInfo.name, tokenAttn.tokenInfo.symbol, tokenAttn.getBaseTokenType(), TokenGroup.ATTESTATION, tokenAttn.getAttestationId());
-    //            tcmAttestation.isEnabled = true;
     public SortedItem<TokenCardMeta> removeAttestation(Token token)
     {
         Attestation attn = (Attestation)token;
+        String attnKey = attn.getDatabaseKey().toLowerCase();
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
@@ -405,9 +402,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
             {
                 TokenSortedItem tsi = (TokenSortedItem) si;
                 TokenCardMeta thisToken = tsi.value;
-                //Attestation attestation = (Attestation) tokensService.getAttestation(data.getChain(), data.getAddress(), data.getTokenID());
-                if (thisToken.getTokenID().compareTo(attn.getAttestationId()) == 0 && thisToken.getAddress().equalsIgnoreCase(token.getAddress())
-                        && thisToken.getChain() == token.tokenInfo.chainId)
+
+                if (thisToken.tokenId.toLowerCase().startsWith(attnKey))
                 {
                     return items.removeItemAt(i);
                 }

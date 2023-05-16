@@ -49,6 +49,7 @@ public class NFTAsset implements Parcelable
     };
     private static final String LOADING_TOKEN = "*Loading*";
     private static final String ID = "id";
+    private static final String ATTN_ID = "attn_id";
     private static final String NAME = "name";
     private static final String IMAGE = "image";
     private static final String IMAGE_URL = "image_url";
@@ -109,7 +110,7 @@ public class NFTAsset implements Parcelable
     {
         assetMap.put(ATTESTATION_ASSET, att.getName());
         attributeMap.put(NAME, "Attestation");
-        attributeMap.put(ID, att.getAttestationId().toString());
+        attributeMap.put(ID, att.getAttestationUID());
 
         balance = BigDecimal.ONE;
     }
@@ -576,6 +577,16 @@ public class NFTAsset implements Parcelable
     public String getTokenIdStr()
     {
         return attributeMap.getOrDefault(ID, "1");
+    }
+
+    public String getAttestationID()
+    {
+        return attributeMap.getOrDefault(ID, "1");
+    }
+
+    public void addAttribute(String name, String value)
+    {
+        attributeMap.put(name, value);
     }
 
     public enum Category

@@ -983,4 +983,6 @@
     <string name="dialog_title_gas_estimation_failed">Échec de l\'estimation du gaz</string>
     <string name="dialog_message_gas_estimation_failed">Estimation de gaz erronée: \"%s\". L\'exécution de la transaction échouera probablement. Voulez-vous forcer l\'envoi?</string>
     <string name="action_proceed">Procéder</string>
+    <string name="valid_from">Valable à Compter</string>
+    <string name="valid_until">Valable Jusque</string>
 </resources>

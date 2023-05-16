@@ -586,7 +586,7 @@ public class WalletViewModel extends BaseViewModel
         if (tokenAttn.isValid() == AttestationValidationStatus.Pass)
         {
             TokenCardMeta tcmAttestation = new TokenCardMeta(attestation.chainId, attestation.getAddress(), "1", System.currentTimeMillis(),
-                    assetDefinitionService, tokenAttn.tokenInfo.name, tokenAttn.tokenInfo.symbol, tokenAttn.getBaseTokenType(), TokenGroup.ATTESTATION, tokenAttn.getAttestationId());
+                    assetDefinitionService, tokenAttn.tokenInfo.name, tokenAttn.tokenInfo.symbol, tokenAttn.getBaseTokenType(), TokenGroup.ATTESTATION, tokenAttn.getAttestationUID());
             tcmAttestation.isEnabled = true;
             updatedTokens.postValue(new TokenCardMeta[]{tcmAttestation});
         }
@@ -634,10 +634,7 @@ public class WalletViewModel extends BaseViewModel
                                 realmAttn = r.createObject(RealmAttestation.class, key);
                             }
 
-                            realmAttn.setAttestation(attestation.getAttestation());
-                            realmAttn.setChain(tInfo.chainId);
-                            realmAttn.setName(tInfo.name);
-                            realmAttn.setId(attn.getAttestationId().toString());
+                            attn.populateRealmAttestation(realmAttn);
                         });
                     }
                     catch (Exception e)
@@ -675,7 +672,7 @@ public class WalletViewModel extends BaseViewModel
         EasAttestation easAttn = new Gson().fromJson(qrAttn.functionDetail, EasAttestation.class);
 
         //validation UID:
-        storeAttestation(easAttn)
+        storeAttestation(easAttn, qrAttn.functionDetail)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(attn -> completeImport(easAttn, attn), this::onError)
@@ -683,33 +680,62 @@ public class WalletViewModel extends BaseViewModel
     }
 
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
-    private Single<Attestation> storeAttestation(EasAttestation attestation)
+    private Single<Attestation> storeAttestation(EasAttestation attestation, String importedAttestation)
     {
         //Use Default key unless specified
-        Attestation attn = assetDefinitionService.validateAttestation(attestation);
-        switch (attn.isValid())
-        {
-            case Pass:
-                //return storeAttestationInternal(attestation, attn);
-            case Expired:
-            case Issuer_Not_Valid:
-            case Incorrect_Subject:
-                attestationError.postValue(attn.isValid().getValue());
-                break;
-        }
+        return Single.fromCallable(() -> {
+            Attestation attn = assetDefinitionService.validateAttestation(attestation, importedAttestation);
+            switch (attn.isValid())
+            {
+                case Pass:
+                    return storeAttestationInternal(attestation, attn, importedAttestation);
+                case Expired:
+                case Issuer_Not_Valid:
+                case Incorrect_Subject:
+                    attestationError.postValue(attn.isValid().getValue());
+                    break;
+            }
 
-        return Single.fromCallable(() -> attn);
+            return attn;
+        });
+    }
+
+    private Attestation storeAttestationInternal(EasAttestation attestation, Attestation attn, String importedAttestation)
+    {
+        try (Realm realm = realmManager.getRealmInstance(defaultWallet.getValue()))
+        {
+            realm.executeTransaction(r -> {
+                String key = attn.getDatabaseKey();
+                RealmAttestation realmAttn = r.where(RealmAttestation.class)
+                        .equalTo("address", key)
+                        .findFirst();
+
+                if (realmAttn == null)
+                {
+                    realmAttn = r.createObject(RealmAttestation.class, key);
+                }
+
+                realmAttn.setId(importedAttestation);
+                attn.populateRealmAttestation(realmAttn);
+            });
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return attn;
     }
 
     private void completeImport(EasAttestation attestation, Attestation tokenAttn)
     {
-        /*if (tokenAttn.isValid() == AttestationValidationStatus.Pass)
+        if (tokenAttn.isValid() == AttestationValidationStatus.Pass)
         {
-            TokenCardMeta tcmAttestation = new TokenCardMeta(attestation.chainId, attestation.getAddress(), "1", System.currentTimeMillis(),
-                    assetDefinitionService, tokenAttn.tokenInfo.name, tokenAttn.tokenInfo.symbol, tokenAttn.getBaseTokenType(), TokenGroup.ATTESTATION, tokenAttn.getAttestationId());
+            TokenCardMeta tcmAttestation = new TokenCardMeta(attestation.chainId, tokenAttn.getAddress(), "1", System.currentTimeMillis(),
+                    assetDefinitionService, tokenAttn.tokenInfo.name, tokenAttn.tokenInfo.symbol, tokenAttn.getBaseTokenType(),
+                    TokenGroup.ATTESTATION, tokenAttn.getAttestationUID());
             tcmAttestation.isEnabled = true;
             updatedTokens.postValue(new TokenCardMeta[]{tcmAttestation});
-        }*/
+        }
     }
 
     public void removeAttestation(Token token)

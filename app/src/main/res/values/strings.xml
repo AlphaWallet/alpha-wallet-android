@@ -1045,4 +1045,6 @@
     <string name="dialog_title_gas_estimation_failed">Gas Estimation Failed</string>
     <string name="dialog_message_gas_estimation_failed">Gas estimation errored: \"%s\". The transaction execution will likely fail. Do you want to force sending?</string>
     <string name="action_proceed">Proceed</string>
+    <string name="valid_from">Valid From</string>
+    <string name="valid_until">Valid Until</string>
 </resources>

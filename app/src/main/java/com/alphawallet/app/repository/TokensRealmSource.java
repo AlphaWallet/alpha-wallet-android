@@ -95,9 +95,14 @@ public class TokensRealmSource implements TokenLocalSource
         return eventAddress.toLowerCase() + "-" + chainId + "-" + namedType + "-" + filter + "-eventBlock";
     }
 
-    public static String attestationDatabaseKey(long chainId, String address, BigInteger tokenId)
+    public static String attestationDatabaseKey(long chainId, String address, String attnId)
     {
-        return address.toLowerCase() + "-" + chainId + "-" + tokenId.toString();
+        return address.toLowerCase() + "-" + chainId + "-" + attnId;
+    }
+
+    public static String attestationDatabaseKey(long chainId, String address, BigInteger conferenceId, BigInteger ticketId)
+    {
+        return address.toLowerCase() + "-" + chainId + "-" + conferenceId.toString() + "-" + ticketId.toString();
     }
 
     public static String convertStringBalance(String balance, ContractType type)
@@ -303,22 +308,28 @@ public class TokensRealmSource implements TokenLocalSource
         }
     }
 
-    @Override
-    public Token fetchAttestation(long chainId, Wallet wallet, String address, BigInteger tokenId)
+    private Token fetchAttestation(long chainId, Wallet wallet, RealmAttestation rAttn)
     {
-        Token token = fetchToken(chainId, wallet, address);
+        Token token = fetchToken(chainId, wallet, rAttn.getTokenAddress());
+        TokenInfo tInfo = token != null ? token.tokenInfo : Utils.getDefaultAttestationInfo(chainId);
+        Attestation att = new Attestation(tInfo, ethereumNetworkRepository.getNetworkByChain(chainId).getShortName(), rAttn.getAttestation());
+        att.setTokenWallet(wallet.address);
+        att.loadAttestationData(rAttn);
+        return att;
+    }
+
+    @Override
+    public Token fetchAttestation(long chainId, Wallet wallet, String address, String attnId)
+    {
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             RealmAttestation realmAttestation = realm.where(RealmAttestation.class)
-                    .equalTo("address", attestationDatabaseKey(chainId, address, tokenId))
+                    .equalTo("address", attestationDatabaseKey(chainId, address, attnId))
                     .findFirst();
 
             if (realmAttestation != null)
             {
-                Attestation att = new Attestation(token.tokenInfo, token.getNetworkName(), realmAttestation.getAttestation());
-                att.setTokenWallet(wallet.address);
-                att.loadAttestationData(realmAttestation); //TODO: Store issuer, expiry dates etc in Realm
-                return att;
+                return fetchAttestation(chainId, wallet, realmAttestation);
             }
         }
 
@@ -1027,10 +1038,10 @@ public class TokensRealmSource implements TokenLocalSource
                     if (rAtt.supportsChain(networkFilters))
                     {
                         long chainId = rAtt.getChains().get(0);
-                        Token token = fetchToken(chainId, wallet, rAtt.getTokenAddress());
+                        Attestation attn = (Attestation) fetchAttestation(chainId, wallet, rAtt);
                         TokenCardMeta tcmAttestation = new TokenCardMeta(chainId,
                                 rAtt.getTokenAddress(), "1", System.currentTimeMillis(),
-                                svs, rAtt.getName(), token.tokenInfo.symbol, token.getInterfaceSpec(), TokenGroup.ATTESTATION, new BigInteger(rAtt.getId()));
+                                svs, rAtt.getName(), attn.tokenInfo.symbol, attn.getBaseTokenType(), TokenGroup.ATTESTATION, attn.getAttestationUID());
                         tcmAttestation.isEnabled = true;
                         metaList.add(tcmAttestation);
                     }

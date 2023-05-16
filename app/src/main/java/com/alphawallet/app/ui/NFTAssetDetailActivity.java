@@ -256,7 +256,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         if (asset != null && asset.isAttestation())
         {
-            return viewModel.getTokenService().getAttestation(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS), tokenId);
+            return viewModel.getTokenService().getAttestation(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS), asset.getAttestationID());
         }
         else
         {
@@ -593,6 +593,13 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         tokenImage.setImageResource(R.drawable.zero_one_block);
         progressBar.setVisibility(View.GONE);
+        NFTAsset attnAsset = new NFTAsset();
+        token.addAssetElements(attnAsset, this);
+        tivTokenId.setVisibility(View.GONE);
+        tokenDescription.setVisibility(View.GONE);
+
+        //now populate
+        nftAttributeLayout.bind(token, attnAsset);
     }
 
     /**

@@ -281,10 +281,10 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Token fetchAttestation(long chainId, String walletAddress, String address, BigInteger tokenId)
+    public Token fetchAttestation(long chainId, String walletAddress, String address, String attnId)
     {
         Wallet wallet = new Wallet(walletAddress);
-        return localSource.fetchAttestation(chainId, wallet, address, tokenId);
+        return localSource.fetchAttestation(chainId, wallet, address, attnId);
     }
 
     @Override

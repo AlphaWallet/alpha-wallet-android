@@ -198,13 +198,13 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     {
         setContentView(R.layout.activity_eip681);
         initViews();
-        findViewById(R.id.toolbar_title).setVisibility(View.GONE);
-        setTitle("");
+        setTitle(getString(R.string.generate_payment_request));
         displayAddress = Keys.toChecksumAddress(wallet.address);
         networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork);
         currentMode = AddressMode.MODE_POS;
         layoutInputAmount.setVisibility(View.VISIBLE);
-
+        copyWalletName = findViewById(R.id.copy_wallet_name);
+        copyWalletName.setVisibility(View.GONE);
         amountInput = findViewById(R.id.input_amount);
         setupPOSMode(networkInfo);
     }
@@ -214,6 +214,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         if (token == null) token = viewModel.getTokenService().getToken(info.chainId, wallet.address);
         amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
         amountInput.setAmount("");
+        amountInput.focus();
         updateCryptoAmount(BigDecimal.ZERO);
     }
 

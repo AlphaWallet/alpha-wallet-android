@@ -842,6 +842,7 @@
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
     <string name="action_reset_network" >Reiniciar</string>
     <string name="wc_methods">Métodos</string>
+    <string name="wc_events">Evento</string>
     <string name="wc_card_subtitle">Conexiones activas a Dapp basado en navegador</string>
     <string name="wc_disconnect">El usuario desconecta la sesión.</string>
     <string name="wc_sign_dapp_name">Nombre</string>

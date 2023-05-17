@@ -119,6 +119,21 @@
                 android:divider="@null"
                 android:dividerHeight="@dimen/tiny_8" />
 
+            <TextView
+                    style="@style/Aw.Typography.Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/base_24"
+                    android:layout_marginBottom="@dimen/mini_4"
+                    android:paddingHorizontal="@dimen/standard_16"
+                    android:text="@string/wc_events" />
+
+            <ListView
+                    android:id="@+id/event_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:divider="@null"
+                    android:dividerHeight="@dimen/tiny_8" />
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

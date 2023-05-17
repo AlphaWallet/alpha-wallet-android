@@ -27,6 +27,7 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.walletconnect.NamespaceParser;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.ui.widget.adapter.ChainAdapter;
+import com.alphawallet.app.ui.widget.adapter.EventAdapter;
 import com.alphawallet.app.ui.widget.adapter.MethodAdapter;
 import com.alphawallet.app.ui.widget.adapter.WalletAdapter;
 import com.alphawallet.app.util.LayoutHelper;
@@ -66,6 +67,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     private ListView walletList;
     private ListView chainList;
     private ListView methodList;
+    private ListView eventsList;
     private FunctionButtonBar functionBar;
     private WalletAdapter walletAdapter;
     private WalletConnectV2SessionItem session;
@@ -112,6 +114,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         walletList = findViewById(R.id.wallet_list);
         chainList = findViewById(R.id.chain_list);
         methodList = findViewById(R.id.method_list);
+        eventsList = findViewById(R.id.event_list);
         functionBar = findViewById(R.id.layoutButtons);
 
         progressBar.setVisibility(View.VISIBLE);
@@ -228,8 +231,8 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         }
 
         chainList.setAdapter(new ChainAdapter(this, session.chains));
-
         methodList.setAdapter(new MethodAdapter(this, session.methods));
+        eventsList.setAdapter(new EventAdapter(this, session.events));
 
         resizeList();
 
@@ -273,6 +276,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     {
         LayoutHelper.resizeList(chainList);
         LayoutHelper.resizeList(methodList);
+        LayoutHelper.resizeList(eventsList);
     }
 
     private void endSessionDialog()

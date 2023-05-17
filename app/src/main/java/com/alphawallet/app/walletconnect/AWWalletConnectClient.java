@@ -23,10 +23,10 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.entity.walletconnect.NamespaceParser;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.WalletConnectInteract;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import kotlin.Unit;
 import timber.log.Timber;
@@ -211,17 +212,36 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
     private Map<String, Model.Namespace.Session> buildNamespaces(Model.SessionProposal sessionProposal, List<String> selectedAccounts)
     {
-        Map<String, Model.Namespace.Session> result = new HashMap<>();
-        Map<String, Model.Namespace.Proposal> namespaces = sessionProposal.getRequiredNamespaces();
-        NamespaceParser namespaceParser = new NamespaceParser();
-        namespaceParser.parseProposal(namespaces);
-        List<String> accounts = toCAIP10(namespaceParser.getChains(), selectedAccounts);
-        for (Map.Entry<String, Model.Namespace.Proposal> entry : namespaces.entrySet())
+        Map<String, Model.Namespace.Session> supportedNamespaces = Collections.singletonMap("eip155", new Model.Namespace.Session(
+                getSupportedChains(),
+                toCAIP10(getSupportedChains(), selectedAccounts),
+                getSupportedMethods(),
+                getSupportedEvents()));
+        try
         {
-            Model.Namespace.Session session = new Model.Namespace.Session(namespaceParser.getChains(), accounts, namespaceParser.getMethods(), namespaceParser.getEvents());
-            result.put(entry.getKey(), session);
+            return Web3Wallet.INSTANCE.generateApprovedNamespaces(sessionProposal, supportedNamespaces);
         }
-        return result;
+        catch (Exception e)
+        {
+            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+            Timber.tag(TAG).e(e);
+        }
+        return new HashMap<>();
+    }
+
+    private List<String> getSupportedMethods()
+    {
+        return Arrays.asList("eth_sendTransaction", "eth_signTransaction", "eth_signTypedData", "eth_signTypedData_v3", "eth_signTypedData_v4", "personal_sign", "eth_sign");
+    }
+
+    private List<String> getSupportedEvents()
+    {
+        return Arrays.asList("chainChanged", "accountsChanged");
+    }
+
+    private List<String> getSupportedChains()
+    {
+        return EthereumNetworkBase.getAllNetworks().stream().map(chainId -> "eip155:" + String.valueOf(chainId)).collect(Collectors.toList());
     }
 
     private List<String> toCAIP10(List<String> chains, List<String> selectedAccounts)
@@ -246,7 +266,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     private Unit onSessionApproveError(Model.Error error)
     {
         Timber.tag(TAG).e(error.getThrowable());
-        Toast.makeText(context, error.getThrowable().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, error.getThrowable().getLocalizedMessage(), Toast.LENGTH_LONG).show();
         return null;
     }
 

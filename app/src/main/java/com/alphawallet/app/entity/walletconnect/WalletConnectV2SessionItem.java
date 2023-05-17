@@ -15,6 +15,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
     public List<String> chains = new ArrayList<>();
     public List<String> wallets = new ArrayList<>();
     public List<String> methods = new ArrayList<>();
+    public List<String> events = new ArrayList<>();
 
     public WalletConnectV2SessionItem(Wallet.Model.Session s)
     {
@@ -28,8 +29,9 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         NamespaceParser namespaceParser = new NamespaceParser();
         namespaceParser.parseSession(s.getNamespaces());
         chains = namespaceParser.getChains();
-        methods = namespaceParser.getMethods();
         wallets = namespaceParser.getWallets();
+        methods = namespaceParser.getMethods();
+        events = namespaceParser.getEvents();
     }
 
     public WalletConnectV2SessionItem(Parcel in)
@@ -43,6 +45,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         in.readStringList(chains);
         in.readStringList(wallets);
         in.readStringList(methods);
+        in.readStringList(events);
     }
 
     public WalletConnectV2SessionItem()
@@ -61,6 +64,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         namespaceParser.parseProposal(sessionProposal.getRequiredNamespaces());
         item.chains.addAll(namespaceParser.getChains());
         item.methods.addAll(namespaceParser.getMethods());
+        item.events.addAll(namespaceParser.getEvents());
         return item;
     }
 
@@ -82,6 +86,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         dest.writeStringList(chains);
         dest.writeStringList(wallets);
         dest.writeStringList(methods);
+        dest.writeStringList(events);
     }
 
     public static final Parcelable.Creator<WalletConnectV2SessionItem> CREATOR = new Parcelable.Creator<>()

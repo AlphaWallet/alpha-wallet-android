@@ -878,6 +878,7 @@
     <string name="experimental_1559_tx_sub">Experimental 1559 Transactions</string>
     <string name="action_reset_network" >ပြန်လည်သတ်မှတ်ပါ။</string>
     <string name="wc_methods">နည်းလမ်းများ</string>
+    <string name="wc_events">ပွဲ</string>
     <string name="wc_card_subtitle">ဘရောက်ဆာအခြေခံ Dapp သို့ ချိတ်ဆက်မှုများ</string>
     <string name="wc_disconnect">အသုံးပြုသူသည် စက်ရှင်ကို ချိတ်ဆက်မှုဖြုတ်သည်။.</string>
     <string name="wc_sign_dapp_name">နာမည်</string>

@@ -1269,4 +1269,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         preferences.commit();
     }
+
+    public static List<Long> getAllNetworks()
+    {
+        ArrayList<Long> list = new ArrayList<>();
+        list.addAll(hasValue);
+        list.addAll(testnetList);
+        return list;
+    }
 }

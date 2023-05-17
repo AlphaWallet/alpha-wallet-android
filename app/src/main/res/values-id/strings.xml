@@ -756,6 +756,8 @@
     <string name="hint_network_block_explorer_url">URL Penelusur Transaksi</string>
     <string name="action_add_network">Tambahkan Jaringan</string>
     <string name="action_reset_network">Atur ulang</string>
+    <string name="wc_methods">Metode</string>
+    <string name="wc_events">Peristiwa</string>
     <string name="error_invalid_url">URL tidak berlaku</string>
 
     <string name="text_speedup_note">Perhatikan bahwa mempercepat transaksi ini tidak menjamin transaksi asli Anda akan dipercepat. Jika upaya Anda berhasil, Anda akan dikenakan biaya penambang seperti di atas.</string>

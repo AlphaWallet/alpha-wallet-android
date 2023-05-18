@@ -1,4 +1,4 @@
-package com.alphawallet.app.viewmodel;
+package com.alphawallet.app.util;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;

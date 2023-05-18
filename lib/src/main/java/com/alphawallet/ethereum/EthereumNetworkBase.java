@@ -13,8 +13,6 @@ public abstract class EthereumNetworkBase
     public static final long CLASSIC_ID = 61;
     public static final long GNOSIS_ID = 100;
     public static final long GOERLI_ID = 5;
-    public static final long ARTIS_SIGMA1_ID = 246529;
-    public static final long ARTIS_TAU1_ID = 246785;
     public static final long BINANCE_TEST_ID = 97;
     public static final long BINANCE_MAIN_ID = 56;
     public static final long HECO_ID = 128;
@@ -49,8 +47,6 @@ public abstract class EthereumNetworkBase
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
     public static final String XDAI_RPC_URL = "https://rpc.gnosischain.com";
     public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
-    public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
     public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
     public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed.binance.org";
     public static final String HECO_RPC_URL = "https://http-mainnet.hecochain.com";
@@ -89,12 +85,8 @@ public abstract class EthereumNetworkBase
                     CLASSIC_ID, false));
             put(GNOSIS_ID, new NetworkInfo("Gnosis", "xDAi", XDAI_RPC_URL, "https://blockscout.com/xdai/mainnet/tx/",
                     GNOSIS_ID, false));
-            put(ARTIS_SIGMA1_ID, new NetworkInfo("ARTIS sigma1", "ATS", ARTIS_SIGMA1_RPC_URL, "https://explorer.sigma1.artis.network/tx/",
-                    ARTIS_SIGMA1_ID, false));
             put(GOERLI_ID, new NetworkInfo("Görli (Test)", "GÖETH", GOERLI_RPC_URL, "https://goerli.etherscan.io/tx/",
                     GOERLI_ID, false));
-            put(ARTIS_TAU1_ID, new NetworkInfo("ARTIS tau1 (Test)", "ATS", ARTIS_TAU1_RPC_URL, "https://explorer.tau1.artis.network/tx/",
-                    ARTIS_TAU1_ID, false));
             put(BINANCE_TEST_ID, new NetworkInfo("BSC TestNet (Test)", "T-BSC", BINANCE_TEST_RPC_URL, "https://explorer.binance.org/smart-testnet/tx/",
                     BINANCE_TEST_ID, false));
             put(BINANCE_MAIN_ID, new NetworkInfo("Binance (BSC)", "BSC", BINANCE_MAIN_RPC_URL, "https://explorer.binance.org/smart/tx/",

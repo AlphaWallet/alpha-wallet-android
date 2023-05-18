@@ -10,8 +10,6 @@ import static com.alphawallet.app.util.Utils.isValidUrl;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_GOERLI_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_ID;
@@ -157,8 +155,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //See the declaration of NetworkInfo - it has a member backupNodeUrl. Put your secondary node here.
 
     public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
-    public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
-    public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
     public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
     public static final String BINANCE_TEST_FALLBACK_RPC_URL = "https://data-seed-prebsc-2-s1.binance.org:8545";
     public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed.binance.org";
@@ -177,12 +173,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //If your wallet prioritises xDai for example, you may want to move the XDAI_ID to the front of this list,
     //Then xDai would appear as the first token at the top of the wallet
     private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
-            MAINNET_ID, GNOSIS_ID, POLYGON_ID, CLASSIC_ID, ARTIS_SIGMA1_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
+            MAINNET_ID, GNOSIS_ID, POLYGON_ID, CLASSIC_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
             FANTOM_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID, OKX_ID));
 
     private static final List<Long> testnetList = new ArrayList<>(Arrays.asList(
             GOERLI_ID, BINANCE_TEST_ID, HECO_TEST_ID, CRONOS_TEST_ID, OPTIMISM_GOERLI_TEST_ID, ARBITRUM_GOERLI_TEST_ID, KLAYTN_BAOBAB_ID,
-            FANTOM_TEST_ID, IOTEX_TESTNET_ID, FUJI_TEST_ID, POLYGON_TEST_ID, MILKOMEDA_C1_TEST_ID, ARTIS_TAU1_ID,
+            FANTOM_TEST_ID, IOTEX_TESTNET_ID, FUJI_TEST_ID, POLYGON_TEST_ID, MILKOMEDA_C1_TEST_ID,
             SEPOLIA_TESTNET_ID, AURORA_TESTNET_ID, PALM_TEST_ID));
 
     private static final List<Long> deprecatedNetworkList = new ArrayList<>(Arrays.asList(
@@ -233,18 +229,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     XDAI_RPC_URL,
                     "https://blockscout.com/xdai/mainnet/tx/", GNOSIS_ID,
                     "https://rpc.ankr.com/gnosis", "https://blockscout.com/xdai/mainnet/api?"));
-            put(ARTIS_SIGMA1_ID, new NetworkInfo(C.ARTIS_SIGMA1_NETWORK, C.ARTIS_SIGMA1_SYMBOL,
-                    ARTIS_SIGMA1_RPC_URL,
-                    "https://explorer.sigma1.artis.network/tx/", ARTIS_SIGMA1_ID,
-                    ARTIS_SIGMA1_RPC_URL, "https://explorer.sigma1.artis.network/api?"));
             put(GOERLI_ID, new NetworkInfo(C.GOERLI_NETWORK_NAME, C.GOERLI_SYMBOL,
                     GOERLI_RPC_URL,
                     "https://goerli.etherscan.io/tx/", GOERLI_ID,
                     GOERLI_FALLBACK_RPC_URL, "https://api-goerli.etherscan.io/api?"));
-            put(ARTIS_TAU1_ID, new NetworkInfo(C.ARTIS_TAU1_NETWORK, C.ARTIS_TAU1_SYMBOL,
-                    ARTIS_TAU1_RPC_URL,
-                    "https://explorer.tau1.artis.network/tx/", ARTIS_TAU1_ID,
-                    ARTIS_TAU1_RPC_URL, "https://explorer.tau1.artis.network/api?"));
             put(BINANCE_TEST_ID, new NetworkInfo(C.BINANCE_TEST_NETWORK, C.BINANCE_SYMBOL,
                     BINANCE_TEST_RPC_URL,
                     "https://testnet.bscscan.com/tx/", BINANCE_TEST_ID,
@@ -370,8 +358,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(CLASSIC_ID, R.drawable.ic_icons_network_etc); //classic_logo
             put(GNOSIS_ID, R.drawable.ic_icons_network_gnosis);
             put(GOERLI_ID, R.drawable.ic_goerli);
-            put(ARTIS_SIGMA1_ID, R.drawable.ic_artis_sigma_logo);
-            put(ARTIS_TAU1_ID, R.drawable.ic_artis_tau_logo);
             put(BINANCE_MAIN_ID, R.drawable.ic_binance_logo);
             put(BINANCE_TEST_ID, R.drawable.ic_icons_tokens_bnb_testnet);
             put(HECO_ID, R.drawable.ic_heco_logo);
@@ -410,8 +396,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(CLASSIC_ID, R.drawable.ic_icons_network_etc);
             put(GNOSIS_ID, R.drawable.ic_icons_network_gnosis);
             put(GOERLI_ID, R.drawable.ic_goerli);
-            put(ARTIS_SIGMA1_ID, R.drawable.ic_icons_network_artis);
-            put(ARTIS_TAU1_ID, R.drawable.ic_artis_tau_logo);
             put(BINANCE_MAIN_ID, R.drawable.ic_icons_network_bsc);
             put(BINANCE_TEST_ID, R.drawable.ic_icons_tokens_bnb_testnet);
             put(HECO_ID, R.drawable.ic_icons_network_heco);
@@ -450,8 +434,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(CLASSIC_ID, R.color.classic);
             put(GNOSIS_ID, R.color.xdai);
             put(GOERLI_ID, R.color.goerli);
-            put(ARTIS_SIGMA1_ID, R.color.artis_sigma1);
-            put(ARTIS_TAU1_ID, R.color.artis_tau1);
             put(BINANCE_MAIN_ID, R.color.binance_main);
             put(BINANCE_TEST_ID, R.color.binance_test);
             put(HECO_ID, R.color.heco_main);

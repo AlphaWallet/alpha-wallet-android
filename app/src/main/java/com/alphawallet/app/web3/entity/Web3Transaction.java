@@ -10,11 +10,11 @@ import android.text.style.StyleSpan;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.app.entity.walletconnect.SignType;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.StyledStringBuilder;
 import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction;
-import com.alphawallet.token.entity.MagicLinkInfo;
 
 import org.web3j.protocol.core.methods.request.Transaction;
 
@@ -348,9 +348,12 @@ public class Web3Transaction implements Parcelable
         sb.setStyle(new StyleSpan(Typeface.BOLD));
         sb.append(gasLimit.toString()).append("\n");
 
-        sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_nonce)).append(": \n");
-        sb.setStyle(new StyleSpan(Typeface.BOLD));
-        sb.append(String.valueOf(nonce)).append("\n");
+        if (nonce >= 0)
+        {
+            sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_nonce)).append(": \n");
+            sb.setStyle(new StyleSpan(Typeface.BOLD));
+            sb.append(String.valueOf(nonce)).append("\n");
+        }
 
         if (!TextUtils.isEmpty(payload))
         {
@@ -361,13 +364,16 @@ public class Web3Transaction implements Parcelable
 
         sb.startStyleGroup().append("\n").append(ctx.getString(R.string.subtitle_network)).append(": \n");
         sb.setStyle(new StyleSpan(Typeface.BOLD));
-        sb.append(MagicLinkInfo.getNetworkNameById(chainId));
+        sb.append(EthereumNetworkBase.getNetworkInfo(chainId).getShortName()).append("\n");
 
         if (isLegacyTransaction())
         {
-            sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_price)).append(": \n");
-            sb.setStyle(new StyleSpan(Typeface.BOLD));
-            sb.append(BalanceUtils.weiToGwei(gasPrice)).append("\n");
+            if (gasPrice.compareTo(BigInteger.ZERO) > 0)
+            {
+                sb.startStyleGroup().append("\n").append(ctx.getString(R.string.label_gas_price)).append(": \n");
+                sb.setStyle(new StyleSpan(Typeface.BOLD));
+                sb.append(BalanceUtils.weiToGwei(gasPrice)).append("\n");
+            }
         }
         else
         {
@@ -403,7 +409,7 @@ public class Web3Transaction implements Parcelable
             sb.append("Payload: ").append(payload).append(" : ");
         }
 
-        sb.append("Network: ").append(MagicLinkInfo.getNetworkNameById(chainId)).append(" : ");
+        sb.append("Network: ").append(EthereumNetworkBase.getNetworkInfo(chainId).getShortName()).append(" : ");
 
         if (isLegacyTransaction())
         {

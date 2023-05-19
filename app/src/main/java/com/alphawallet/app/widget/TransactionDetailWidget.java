@@ -9,15 +9,15 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
-import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.token.tools.Numeric;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -25,9 +25,11 @@ public class TransactionDetailWidget extends LinearLayout
 {
     private final TextView textTransactionSummary;
     private final TextView textFullDetails;
+    private final TextView textFunctionName;
     private final LinearLayout layoutDetails;
     private final LinearLayout layoutHolder;
-    private final LinearLayout layoutSummary;
+    private final LinearLayout layoutHeader;
+    private final ProgressBar progressBar;
     private ActionSheetInterface sheetInterface;
 
     public TransactionDetailWidget(Context context, @Nullable AttributeSet attrs)
@@ -36,39 +38,48 @@ public class TransactionDetailWidget extends LinearLayout
         inflate(context, R.layout.transaction_detail_widget, this);
         textTransactionSummary = findViewById(R.id.text_transaction_summary);
         textFullDetails = findViewById(R.id.text_full_details);
+        textFunctionName = findViewById(R.id.text_function_name);
         layoutDetails = findViewById(R.id.layout_detail);
         layoutHolder = findViewById(R.id.layout_holder);
-        layoutSummary = findViewById(R.id.layout_summary);
+        layoutHeader = findViewById(R.id.layout_header);
+        progressBar = findViewById(R.id.progress);
     }
 
-    public void setupTransaction(Web3Transaction w3tx, long chainId, String walletAddress, String symbol,
-                                 @NotNull ActionSheetInterface asIf)
+    public void setupTransaction(Web3Transaction w3tx, long chainId, String symbol,
+                                 @NotNull ActionSheetInterface asIf, String functionName)
     {
-        layoutHolder.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
+        textTransactionSummary.setVisibility(View.VISIBLE);
         textFullDetails.setText(w3tx.getFormattedTransaction(getContext(), chainId, symbol));
         sheetInterface = asIf;
 
-        if (!TextUtils.isEmpty(w3tx.description))
+        if (!TextUtils.isEmpty(functionName))
+        {
+            textTransactionSummary.setText(functionName);
+            textFunctionName.setText(functionName);
+        }
+        else if (!TextUtils.isEmpty(w3tx.description))
         {
             textTransactionSummary.setText(w3tx.description);
         }
         else
         {
-            TransactionInput transactionInput = Transaction.decoder.decodeInput(w3tx, chainId, walletAddress);
-            textTransactionSummary.setText(transactionInput.buildFunctionCallText());
+            String displayText = ("0x" + Numeric.cleanHexPrefix(w3tx.payload)).substring(0, 10);
+            textTransactionSummary.setText(displayText);
+            textFunctionName.setText(displayText);
         }
 
         layoutHolder.setOnClickListener(v -> {
             if (layoutDetails.getVisibility() == View.GONE)
             {
                 layoutDetails.setVisibility(View.VISIBLE);
-                layoutSummary.setVisibility(View.GONE);
+                layoutHeader.setVisibility(View.GONE);
                 sheetInterface.lockDragging(true);
             }
             else
             {
                 layoutDetails.setVisibility(View.GONE);
-                layoutSummary.setVisibility(View.VISIBLE);
+                layoutHeader.setVisibility(View.VISIBLE);
                 sheetInterface.lockDragging(false);
             }
         });

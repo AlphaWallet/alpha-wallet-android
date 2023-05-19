@@ -3,8 +3,6 @@ package com.alphawallet.token.entity;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.ethereum.NetworkInfo;
 
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_SIGMA1_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
@@ -23,8 +21,6 @@ public class MagicLinkInfo
     private static final String callistoMagicLinkDomain = "callisto.aw.app";
     private static final String xDaiMagicLinkDomain = "xdai.aw.app";
     private static final String goerliMagicLinkDomain = "goerli.aw.app";
-    private static final String artisSigma1MagicLinkDomain = "artissigma1.aw.app";
-    private static final String artisTau1MagicLinkDomain = "artistau1.aw.app";
     private static final String customMagicLinkDomain = "custom.aw.app";
 
     //Etherscan domains
@@ -33,8 +29,6 @@ public class MagicLinkInfo
     private static final String callistoEtherscan = "https://etherscan.io/"; //TODO: determine callisto etherscan
     private static final String xDaiEtherscan = "https://blockscout.com/poa/dai/";
     private static final String goerliEtherscan = "https://goerli.etherscan.io/";
-    private static final String artisSigma1Etherscan = "https://explorer.sigma1.artis.network/";
-    private static final String artisTau1Etherscan = "https://explorer.tau1.artis.network/";
 
     public static String getNetworkNameById(long networkId) {
         NetworkInfo info = EthereumNetworkBase.getNetworkByChain(networkId);
@@ -61,10 +55,6 @@ public class MagicLinkInfo
                 return xDaiMagicLinkDomain;
             case (int)GOERLI_ID:
                 return goerliMagicLinkDomain;
-            case (int)ARTIS_SIGMA1_ID:
-                return artisSigma1MagicLinkDomain;
-            case (int)ARTIS_TAU1_ID:
-                return artisTau1MagicLinkDomain;
         }
     }
 
@@ -83,10 +73,6 @@ public class MagicLinkInfo
                 return GNOSIS_ID;
             case goerliMagicLinkDomain:
                 return GOERLI_ID;
-            case artisSigma1MagicLinkDomain:
-                return ARTIS_SIGMA1_ID;
-            case artisTau1MagicLinkDomain:
-                return ARTIS_TAU1_ID;
         }
     }
 
@@ -102,10 +88,6 @@ public class MagicLinkInfo
                 return xDaiEtherscan;
             case (int)GOERLI_ID:
                 return goerliEtherscan;
-            case (int)ARTIS_SIGMA1_ID:
-                return artisSigma1Etherscan;
-            case (int)ARTIS_TAU1_ID:
-                return artisTau1Etherscan;
         }
     }
 

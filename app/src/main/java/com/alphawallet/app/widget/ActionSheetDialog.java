@@ -3,10 +3,13 @@ package com.alphawallet.app.widget;
 import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -26,6 +29,8 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
+import com.alphawallet.app.util.SendDisplayJsonProcesser;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
@@ -87,6 +92,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private boolean use1559Transactions = false;
     private Transaction transaction;
     private final WalletType walletType;
+
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
                              String destName, String destAddress, TokensService ts,
@@ -193,6 +199,8 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         networkDisplay.setVisibility(View.GONE);
         functionBar.revealButtons();
 
+
+        showActionSheet();
         //String sourceAddress = Objects.requireNonNull(wallet.getValue()).address;
         //String amount = amountDisplay.getAmount();
         //String destinationAddress = addressDetail.getFullAddress();
@@ -347,6 +355,25 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         mode = ActionSheetMode.SIGN_TRANSACTION;
         toolbar.setTitle(R.string.dialog_title_sign_transaction);
     }
+
+
+    public void showActionSheet() {
+        try {
+            String[] messages = SendDisplayJsonProcesser.getJsonResponse();
+            for (String lineaTexto : messages) {
+                createTextView(lineaTexto);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createTextView(String text) {
+        TextView textView = new TextView(context);
+        textView.setText(text);
+        linearLayout.addView(textView);
+    }
+
 
     public void onDestroy()
     {

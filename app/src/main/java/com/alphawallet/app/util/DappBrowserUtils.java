@@ -38,13 +38,6 @@ public class DappBrowserUtils extends AppCompatActivity {
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
     private static final String MY_DAPPS_FILE = "mydapps";
     private static final String DAPPS_HISTORY_FILE = "dappshistory";
-
-    //private static Wallet wallet;
-    //private static Web3ViewClient webViewClient;
-    //private static AddressMode currentMode = AddressMode.MODE_ADDRESS;
-    //private static SignPersonalMessageRequest signRequest;
-    //private static SignTypedDataRequest signRequest;
-    //private static String address = MyAddressActivity.getDisplayAddress();
     private static String DEFAULT_HOMEPAGE = "http://192.168.100.149:8000/customers/register?wallet=";
     private static final String POLYGON_HOMEPAGE = "http://192.168.100.149:8000/customers/register?wallet=";
 

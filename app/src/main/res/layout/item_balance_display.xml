@@ -1,76 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
     <View style="@style/Aw.Component.Separator" />
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingVertical="@dimen/standard_16"
-        android:paddingStart="@dimen/standard_16"
-        android:paddingEnd="@dimen/mini_4">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="@dimen/standard_16"
+            android:paddingStart="@dimen/standard_16"
+            android:paddingEnd="@dimen/mini_4">
 
         <TextView
-            style="@style/Aw.Typography.Label.Widget"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="@integer/widget_label"
-            android:gravity="start|center_vertical"
-            android:text="@string/balance" />
+                style="@style/Aw.Typography.Label.Widget"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="@integer/widget_label"
+                android:gravity="start|center_vertical"
+                android:text="@string/balance" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/relativeLayout2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/small_12"
-            android:layout_weight="@integer/widget_content"
-            android:orientation="vertical"
-            custom:layout_constraintBottom_toTopOf="@+id/text_new_balance"
-            custom:layout_constraintTop_toTopOf="@+id/text_new_balance">
+                android:id="@+id/relativeLayout2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/small_12"
+                android:layout_weight="@integer/widget_content"
+                android:orientation="vertical"
+                custom:layout_constraintBottom_toTopOf="@+id/text_new_balance"
+                custom:layout_constraintTop_toTopOf="@+id/text_new_balance">
 
             <com.alphawallet.app.widget.TokenIcon
-                android:id="@+id/token_icon"
-                android:layout_width="@dimen/token_icon"
-                android:layout_height="@dimen/token_icon"
-                android:visibility="gone"
-                custom:layout_constrainedHeight="true"
-                custom:layout_constrainedWidth="true"
-                custom:layout_constraintDimensionRatio="W,1:1"
-                custom:layout_constraintStart_toStartOf="parent"
-                custom:layout_constraintTop_toTopOf="parent" />
+                    android:id="@+id/token_icon"
+                    android:layout_width="@dimen/token_icon"
+                    android:layout_height="@dimen/token_icon"
+                    android:visibility="gone"
+                    custom:layout_constrainedHeight="true"
+                    custom:layout_constrainedWidth="true"
+                    custom:layout_constraintDimensionRatio="W,1:1"
+                    custom:layout_constraintStart_toStartOf="parent"
+                    custom:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/text_balance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                custom:layout_constraintStart_toEndOf="@id/token_icon"
-                custom:layout_constraintTop_toTopOf="parent"
-                tools:text="35.4236 ETH" />
+                    android:id="@+id/text_balance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    custom:layout_constraintStart_toEndOf="@id/token_icon"
+                    custom:layout_constraintTop_toTopOf="parent"
+                    tools:text="35.4236 ETH" />
 
             <TextView
-                android:id="@+id/text_new_balance"
-                style="@style/Aw.Typography.Sub"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/mini_4"
-                android:gravity="start"
-                custom:layout_constraintStart_toEndOf="@id/token_icon"
-                custom:layout_constraintTop_toBottomOf="@id/text_balance"
-                tools:text="(New: 31.1818 ETH)" />
+                    android:id="@+id/text_new_balance"
+                    style="@style/Aw.Typography.Sub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/mini_4"
+                    android:gravity="start"
+                    custom:layout_constraintStart_toEndOf="@id/token_icon"
+                    custom:layout_constraintTop_toBottomOf="@id/text_balance"
+                    tools:text="(New: 31.1818 ETH)" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="@integer/widget_control" />
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="@integer/widget_control" />
 
     </LinearLayout>
 

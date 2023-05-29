@@ -65,6 +65,7 @@ import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
+import com.alphawallet.app.util.SendDisplayJsonProcesser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.walletconnect.WCClient;
@@ -218,6 +219,7 @@ public class HomeViewModel extends BaseViewModel
         defaultWallet.setValue(wallet);
         if(this.counter == 0){
             DappBrowserUtils.setWallet(defaultWallet);
+            SendDisplayJsonProcesser.setSenderWalletAddress(defaultWallet);
             this.counter ++;
         }
     }

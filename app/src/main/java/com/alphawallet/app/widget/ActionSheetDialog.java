@@ -67,6 +67,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private final GasWidget2 gasWidget;
     private final GasWidget gasWidgetLegacy;
     private final BalanceDisplayWidget balanceDisplay;
+    private final JsonViewWidget jsonDisplay;
     private final NetworkDisplayWidget networkDisplay;
     private final ConfirmationWidget confirmationWidget;
     private final AddressDetailView addressDetail;
@@ -117,6 +118,11 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         amountDisplay = findViewById(R.id.amount_display);
         assetDetailView = findViewById(R.id.asset_detail);
         functionBar = findViewById(R.id.layoutButtons);
+
+        SendDisplayJsonProcesser.setRecipientWalletAddress(destAddress);
+        jsonDisplay = findViewById(R.id.json_detail);
+        jsonDisplay.getJsonData();
+
         this.activity = activity;
         if (activity instanceof HomeActivity)
         {
@@ -199,11 +205,10 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         networkDisplay.setVisibility(View.GONE);
         functionBar.revealButtons();
 
-
-        showActionSheet();
-        //String sourceAddress = Objects.requireNonNull(wallet.getValue()).address;
-        //String amount = amountDisplay.getAmount();
-        //String destinationAddress = addressDetail.getFullAddress();
+        balanceDisplay.setVisibility(View.GONE);
+        addressDetail.setVisibility(View.GONE);
+        amountDisplay.setVisibility(View.GONE);
+        jsonDisplay.setVisibility(View.VISIBLE);
     }
 
     // wallet connect request
@@ -223,6 +228,9 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         walletConnectRequestWidget = findViewById(R.id.wallet_connect_widget);
         gasWidget = null;
         balanceDisplay = null;
+
+        jsonDisplay = null;
+
         networkDisplay = null;
         confirmationWidget = null;
         addressDetail = null;
@@ -275,6 +283,9 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
         gasWidget = null;
         balanceDisplay = null;
+
+        jsonDisplay = null;
+
         networkDisplay = null;
         confirmationWidget = null;
         addressDetail = null;
@@ -308,6 +319,9 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         gasWidget = null;
         gasWidgetLegacy = null;
         balanceDisplay = null;
+
+        jsonDisplay = null;
+
         networkDisplay = null;
         confirmationWidget = null;
         addressDetail = null;
@@ -355,25 +369,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         mode = ActionSheetMode.SIGN_TRANSACTION;
         toolbar.setTitle(R.string.dialog_title_sign_transaction);
     }
-
-
-    public void showActionSheet() {
-        try {
-            String[] messages = SendDisplayJsonProcesser.getJsonResponse();
-            for (String lineaTexto : messages) {
-                createTextView(lineaTexto);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void createTextView(String text) {
-        TextView textView = new TextView(context);
-        textView.setText(text);
-        linearLayout.addView(textView);
-    }
-
 
     public void onDestroy()
     {

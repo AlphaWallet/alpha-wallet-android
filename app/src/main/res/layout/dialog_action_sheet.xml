@@ -74,12 +74,10 @@
                 android:paddingEnd="@dimen/dp10"
                 android:text="Revise los datos de envio antes de confirmar. ¿Está seguro de confirmar la operación?" />-->
 
-        <com.alphawallet.app.widget.AmountDisplayWidget
+        <com.alphawallet.app.widget.JsonViewWidget
                 android:id="@+id/json_detail"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-        </com.alphawallet.app.widget.AmountDisplayWidget>
+                android:layout_height="wrap_content"/>
 
         <com.alphawallet.app.widget.AssetDetailView
             android:id="@+id/asset_detail"
@@ -89,8 +87,6 @@
             tools:visibility="visible" >
 
         </com.alphawallet.app.widget.AssetDetailView>
-
-        <View style="@style/Aw.Component.Separator" />
 
         <com.alphawallet.app.widget.ConfirmationWidget
             android:id="@+id/confirmation_view"

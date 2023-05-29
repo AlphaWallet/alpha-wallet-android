@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <View style="@style/Aw.Component.Separator" />
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="301dp"
+            android:orientation="horizontal"
+            android:paddingVertical="@dimen/standard_16"
+            android:paddingStart="@dimen/standard_16"
+            android:paddingEnd="@dimen/mini_4"
+            tools:ignore="UselessParent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/relativeLayout2"
+                android:layout_width="0dp"
+                android:layout_height="278dp"
+                android:layout_marginHorizontal="@dimen/small_12"
+                android:layout_weight="@integer/widget_content"
+                android:orientation="vertical"
+                custom:layout_constraintEnd_toEndOf="parent"
+                custom:layout_constraintHorizontal_bias="0.5"
+                custom:layout_constraintStart_toStartOf="parent"
+                tools:layout_editor_absoluteX="28dp"
+                tools:layout_editor_absoluteY="16dp">
+
+            <TextView
+                    android:id="@+id/jsonLine1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="start"
+                    custom:layout_constraintEnd_toEndOf="parent"
+                    custom:layout_constraintStart_toStartOf="parent"
+                    custom:layout_constraintTop_toTopOf="parent"
+                    tools:text="35.4236 ETH" />
+
+            <TextView
+                    android:id="@+id/jsonLine2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="60dp"
+                    android:gravity="start"
+                    custom:layout_constraintEnd_toEndOf="parent"
+                    custom:layout_constraintStart_toStartOf="parent"
+                    custom:layout_constraintTop_toTopOf="parent"
+                    tools:text="35.4236 ETH" />
+
+            <TextView
+                    android:id="@+id/jsonLine3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="110dp"
+                    android:gravity="start"
+                    custom:layout_constraintEnd_toEndOf="parent"
+                    custom:layout_constraintStart_toStartOf="parent"
+                    custom:layout_constraintTop_toTopOf="parent"
+                    tools:text="35.4236 ETH" />
+
+            <TextView
+                    android:id="@+id/jsonLine4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="160dp"
+                    android:gravity="start"
+                    custom:layout_constraintEnd_toEndOf="parent"
+                    custom:layout_constraintStart_toStartOf="parent"
+                    custom:layout_constraintTop_toTopOf="parent"
+                    tools:text="35.4236 ETH" />
+
+            <TextView
+                    android:id="@+id/jsonLine5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="210dp"
+                    android:gravity="start"
+                    custom:layout_constraintEnd_toEndOf="parent"
+                    custom:layout_constraintStart_toStartOf="parent"
+                    custom:layout_constraintTop_toTopOf="parent"
+                    tools:text="35.4236 ETH" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>

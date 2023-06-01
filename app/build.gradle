@@ -161,6 +161,7 @@ android {
     }
     buildTypes {
         debug {
+            applicationIdSuffix ".debug"
             minifyEnabled false
             shrinkResources false
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'),
@@ -172,7 +173,7 @@ android {
                 signingConfig signingConfigs.release
             }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            }
+        }
     }
     packagingOptions {
         exclude 'META-INF/NOTICE' // will not include NOTICE file
@@ -387,4 +388,3 @@ dependencies {
 
 // WARNING WARNING WARNING
 // don't add any additional things here without first search "China" in this file
-

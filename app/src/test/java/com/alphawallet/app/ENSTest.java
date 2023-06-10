@@ -113,7 +113,7 @@ public class ENSTest
     public void testAvatarAddressResolve() throws Exception
     {
         assertEquals(
-            ensResolver.resolveAvatarFromAddress("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"), ("eip155:1/erc721:0x222222222291749DE47895C0c0A9B17e4fcA8268/29"));
+            ensResolver.resolveAvatarFromAddress("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63"), ("https://i.seadn.io/gae/YQkllWnEGUqjfI-OlNyALjHdpzTY8tIKAp0XgUINuw4756Lfc3CVMC5WUFqnODYFzqfuWyrg3xfe-2AAYcRoBIEX2KyFUttfLrfMkQ?w=500&auto=format"));
     }
 
     @Test

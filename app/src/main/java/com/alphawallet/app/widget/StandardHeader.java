@@ -63,21 +63,29 @@ public class StandardHeader extends LinearLayout
             if (showTextControl)
             {
                 textControl.setVisibility(View.VISIBLE);
-                textControl.setText(controlText);
             }
             else
             {
                 textControl.setVisibility(View.GONE);
             }
 
+            if (controlText != -1)
+            {
+                textControl.setText(controlText);
+            }
+
             if (showImageControl)
             {
                 imageControl.setVisibility(View.VISIBLE);
-                imageControl.setImageResource(controlImageRes);
             }
             else
             {
                 imageControl.setVisibility(View.GONE);
+            }
+
+            if (controlImageRes != -1)
+            {
+                imageControl.setImageResource(controlImageRes);
             }
         }
         finally

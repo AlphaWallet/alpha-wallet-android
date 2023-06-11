@@ -3,12 +3,14 @@ package com.alphawallet.app.repository;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CurrencyItem;
+import com.alphawallet.app.entity.tokens.Token;
 
 import java.util.HashSet;
 import java.util.Locale;
@@ -52,6 +54,8 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String LAUNCH_COUNT = "launch_count";
     private static final String NEW_WALLET = "new_wallet_";
     private static final String WATCH_ONLY = "watch_only";
+    private static final String LAST_SENT_TOKEN_ADDRESS = "last_sent_token_address";
+    private static final String LAST_SENT_TOKEN_CHAIN_ID = "last_sent_token_chain_id";
 
     private final SharedPreferences pref;
 
@@ -458,6 +462,22 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setPostNotificationsPermissionRequested(String address, boolean hasRequested) {
         pref.edit().putBoolean(getAddressKey(POST_NOTIFICATIONS_PERMISSION_REQUESTED, address), hasRequested).apply();
+    }
+
+    @Override
+    public void setLastSentToken(Token token)
+    {
+        pref.edit().putString(LAST_SENT_TOKEN_ADDRESS, token.tokenInfo.address).apply();
+        pref.edit().putLong(LAST_SENT_TOKEN_CHAIN_ID, token.tokenInfo.chainId).apply();
+    }
+
+    @Override
+    public Pair<String, Long> getLastSentToken()
+    {
+        return new Pair<>(
+            pref.getString(LAST_SENT_TOKEN_ADDRESS, ""),
+            pref.getLong(LAST_SENT_TOKEN_CHAIN_ID, 0)
+        );
     }
 
     @NonNull

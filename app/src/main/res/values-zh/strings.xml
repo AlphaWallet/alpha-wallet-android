@@ -981,4 +981,5 @@
     <string name="title_request_post_notifications_permission">得到通知</string>
     <string name="message_deny_request_post_notifications_permission">当 AlphaWallet 处于后台时，您将不会收到通知。 您可以通过转到“设置”>“通知”来更改此设置</string>
     <string name="minted">Minted</string>
+    <string name="title_payment_request">付钱请求</string>
 </resources>

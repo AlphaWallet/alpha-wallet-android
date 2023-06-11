@@ -980,4 +980,5 @@
     <string name="title_request_post_notifications_permission">Ser notificado</string>
     <string name="message_deny_request_post_notifications_permission">No recibirá notificaciones mientras AlphaWallet esté en segundo plano. Puede cambiar esto yendo a Configuración > Notificaciones</string>
     <string name="minted">Minted</string>
+    <string name="title_payment_request">Solicitud de pago</string>
 </resources>

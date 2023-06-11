@@ -2,9 +2,7 @@ package com.alphawallet.app.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -20,6 +18,7 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
  */
 public class ChainName extends LinearLayout
 {
+    private final LinearLayout layout;
     private final TextView chainName;
     private boolean invertNameColour;
 
@@ -27,6 +26,7 @@ public class ChainName extends LinearLayout
     {
         super(context, attrs);
         inflate(context, R.layout.item_chain_name, this);
+        layout = findViewById(R.id.layout_chain_name);
         chainName = findViewById(R.id._text_chain_name);
         getAttrs(context, attrs);
     }
@@ -41,12 +41,12 @@ public class ChainName extends LinearLayout
             if (invertNameColour)
             {
                 chainName.setTextColor(getContext().getColor(EthereumNetworkBase.getChainColour(chainId)));
-                chainName.setBackgroundResource(R.drawable.background_chain_inverse);
+                layout.setBackgroundResource(R.drawable.background_chain_inverse);
             }
             else
             {
                 chainName.setTextColor(getContext().getColor(R.color.white));
-                chainName.getBackground().setTint(ContextCompat.getColor(getContext(),
+                layout.getBackground().setTint(ContextCompat.getColor(getContext(),
                     EthereumNetworkBase.getChainColour(chainId)));
             }
         }
@@ -59,15 +59,15 @@ public class ChainName extends LinearLayout
     private void getAttrs(Context context, AttributeSet attrs)
     {
         TypedArray a = context.getTheme().obtainStyledAttributes(
-                attrs,
-                R.styleable.InputView,
-                0, 0
+            attrs,
+            R.styleable.InputView,
+            0, 0
         );
 
         try
         {
-            int fontSize = a.getInteger(R.styleable.InputView_font_size, 12);
-            chainName.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+//            int fontSize = a.getInteger(R.styleable.InputView_font_size, 12);
+//            chainName.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
             invertNameColour = a.getBoolean(R.styleable.InputView_invert, false);
         }
         finally

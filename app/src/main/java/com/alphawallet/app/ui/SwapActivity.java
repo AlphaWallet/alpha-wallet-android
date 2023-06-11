@@ -32,17 +32,17 @@ import com.alphawallet.app.entity.analytics.TokenSwapEvent;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
 import com.alphawallet.app.entity.lifi.Quote;
-import com.alphawallet.app.entity.lifi.Token;
+import com.alphawallet.app.entity.lifi.LifiToken;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.ProgressInfo;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.SwapUtils;
 import com.alphawallet.app.viewmodel.SwapViewModel;
-import com.alphawallet.app.viewmodel.Tokens;
+import com.alphawallet.app.util.LifiTokenUtils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
-import com.alphawallet.app.widget.SelectTokenDialog;
+import com.alphawallet.app.widget.SelectLifiTokenDialog;
 import com.alphawallet.app.widget.StandardHeader;
 import com.alphawallet.app.widget.SwapSettingsDialog;
 import com.alphawallet.app.widget.TokenInfoView;
@@ -65,8 +65,8 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private SwapViewModel viewModel;
     private TokenSelector sourceSelector;
     private TokenSelector destSelector;
-    private SelectTokenDialog sourceTokenDialog;
-    private SelectTokenDialog destTokenDialog;
+    private SelectLifiTokenDialog sourceTokenDialog;
+    private SelectLifiTokenDialog destTokenDialog;
     private ActionSheetDialog confirmationDialog;
     private SwapSettingsDialog settingsDialog;
     private AWalletAlertDialog progressDialog;
@@ -86,7 +86,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     private TextView chainName;
     private com.alphawallet.app.entity.tokens.Token token;
     private Wallet wallet;
-    private Token sourceToken;
+    private LifiToken sourceToken;
     private List<Chain> chains;
     private String selectedRouteProvider;
     private CountDownTimer getQuoteTimer;
@@ -256,7 +256,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             }
 
             @Override
-            public void onSelectionChanged(Token token)
+            public void onSelectionChanged(LifiToken token)
             {
                 sourceTokenChanged(token);
             }
@@ -264,7 +264,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             @Override
             public void onMaxClicked()
             {
-                Token token = sourceSelector.getToken();
+                LifiToken token = sourceSelector.getToken();
                 if (token == null)
                 {
                     return;
@@ -293,7 +293,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
             }
 
             @Override
-            public void onSelectionChanged(Token token)
+            public void onSelectionChanged(LifiToken token)
             {
                 destTokenChanged(token);
             }
@@ -342,7 +342,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         return confDialog;
     }
 
-    private void destTokenChanged(Token token)
+    private void destTokenChanged(LifiToken token)
     {
         destSelector.setBalance(viewModel.getBalance(token));
 
@@ -355,7 +355,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         getAvailableRoutes();
     }
 
-    private void sourceTokenChanged(Token token)
+    private void sourceTokenChanged(LifiToken token)
     {
         if (destSelector.getToken() == null)
         {
@@ -404,7 +404,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     }
 
     // The source token should default to the token selected in the main wallet dialog (ie the token from the intent).
-    private void initSourceToken(Token selectedToken)
+    private void initSourceToken(LifiToken selectedToken)
     {
         if (selectedToken != null)
         {
@@ -418,20 +418,20 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
         }
     }
 
-    private void initFromDialog(List<Token> fromTokens)
+    private void initFromDialog(List<LifiToken> fromTokens)
     {
-        Tokens.sortValue(fromTokens);
-        sourceTokenDialog = new SelectTokenDialog(fromTokens, this, tokenItem -> {
+        LifiTokenUtils.sortValue(fromTokens);
+        sourceTokenDialog = new SelectLifiTokenDialog(fromTokens, this, tokenItem -> {
             sourceSelector.init(tokenItem);
             sourceTokenDialog.dismiss();
         });
     }
 
-    private void initToDialog(List<Token> toTokens)
+    private void initToDialog(List<LifiToken> toTokens)
     {
-        Tokens.sortName(toTokens);
-        Tokens.sortValue(toTokens);
-        destTokenDialog = new SelectTokenDialog(toTokens, this, tokenItem -> {
+        LifiTokenUtils.sortName(toTokens);
+        LifiTokenUtils.sortValue(toTokens);
+        destTokenDialog = new SelectLifiTokenDialog(toTokens, this, tokenItem -> {
             destSelector.init(tokenItem);
             destTokenDialog.dismiss();
         });
@@ -509,13 +509,13 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     {
         if (!connections.isEmpty())
         {
-            List<Token> fromTokens = new ArrayList<>();
-            List<Token> toTokens = new ArrayList<>();
-            Token selectedToken = null;
+            List<LifiToken> fromTokens = new ArrayList<>();
+            List<LifiToken> toTokens = new ArrayList<>();
+            LifiToken selectedToken = null;
 
             for (Connection c : connections)
             {
-                for (Token t : c.fromTokens)
+                for (LifiToken t : c.fromTokens)
                 {
                     if (!fromTokens.contains(t))
                     {
@@ -534,7 +534,7 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
                     }
                 }
 
-                for (Token t : c.toTokens)
+                for (LifiToken t : c.toTokens)
                 {
                     if (!toTokens.contains(t))
                     {

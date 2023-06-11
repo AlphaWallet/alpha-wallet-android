@@ -1,14 +1,15 @@
-package com.alphawallet.app.viewmodel;
+package com.alphawallet.app.util;
 
-import com.alphawallet.app.entity.lifi.Token;
+
+import com.alphawallet.app.entity.lifi.LifiToken;
 
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
-public class Tokens
+public class LifiTokenUtils
 {
-    public static void sortValue(List<Token> tokenItems)
+    public static void sortValue(List<LifiToken> tokenItems)
     {
         Collections.sort(tokenItems, (l, r) -> {
             if (l.isNativeToken())
@@ -28,7 +29,7 @@ public class Tokens
         });
     }
 
-    public static void sortName(List<Token> tokenItems)
+    public static void sortName(List<LifiToken> tokenItems)
     {
         Collections.sort(tokenItems, (l, r) -> {
             if (l.isNativeToken())

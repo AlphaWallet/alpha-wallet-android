@@ -4,7 +4,7 @@ import android.net.Uri;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.lifi.RouteOptions;
-import com.alphawallet.app.entity.lifi.Token;
+import com.alphawallet.app.entity.lifi.LifiToken;
 import com.alphawallet.app.repository.SwapRepository;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.JsonUtils;
@@ -125,8 +125,8 @@ public class SwapService
         return Single.fromCallable(() -> fetchPairs(from, to));
     }
 
-    public Single<String> getQuote(Token source,
-                                   Token dest,
+    public Single<String> getQuote(LifiToken source,
+                                   LifiToken dest,
                                    String address,
                                    String amount,
                                    String slippage,
@@ -135,8 +135,8 @@ public class SwapService
         return Single.fromCallable(() -> fetchQuote(source, dest, address, amount, slippage, allowExchanges));
     }
 
-    public Single<String> getRoutes(Token source,
-                                    Token dest,
+    public Single<String> getRoutes(LifiToken source,
+                                    LifiToken dest,
                                     String address,
                                     String amount,
                                     String slippage,
@@ -180,8 +180,8 @@ public class SwapService
         return executeRequest(builder.build().toString());
     }
 
-    public String fetchQuote(Token source,
-                             Token dest,
+    public String fetchQuote(LifiToken source,
+                             LifiToken dest,
                              String address,
                              String amount,
                              String slippage,
@@ -200,8 +200,8 @@ public class SwapService
         return executeRequest(builder.build().toString());
     }
 
-    public String fetchRoutes(Token source,
-                              Token dest,
+    public String fetchRoutes(LifiToken source,
+                              LifiToken dest,
                               String address,
                               String amount,
                               String slippage,

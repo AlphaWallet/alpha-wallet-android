@@ -1015,4 +1015,5 @@
     <string name="title_request_post_notifications_permission">အကြောင်းကြားပါ။</string>
     <string name="message_deny_request_post_notifications_permission">AlphaWallet နောက်ခံတွင် ရှိနေစဉ်တွင် သင်သည် အကြောင်းကြားချက်များကို လက်ခံရရှိမည်မဟုတ်ပါ။ ဆက်တင်များ > အကြောင်းကြားချက်များသို့ သွားခြင်းဖြင့် ၎င်းကို ပြောင်းလဲနိုင်သည်။</string>
     <string name="minted">Minted</string>
+    <string name="title_payment_request">ငွေပေးချေမှုတောင်းဆိုခြင်း။</string>
 </resources>

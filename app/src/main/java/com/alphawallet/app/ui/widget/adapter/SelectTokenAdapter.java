@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui.widget.adapter;
 
+import android.annotation.SuppressLint;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,10 +11,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.lifi.Token;
-import com.alphawallet.app.widget.AddressIcon;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.util.TokenFilter;
 import com.alphawallet.app.widget.SelectTokenDialog;
-import com.google.android.material.radiobutton.MaterialRadioButton;
+import com.alphawallet.app.widget.TokenIcon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +22,13 @@ import java.util.List;
 public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.ViewHolder>
 {
     private final List<Token> displayData;
-    private final SelectTokenDialog.SelectTokenDialogEventListener callback;
     private final TokenFilter tokenFilter;
-    private String selectedTokenAddress;
+    private final SelectTokenDialog.OnTokenClickListener listener;
 
-    public SelectTokenAdapter(List<Token> tokens, SelectTokenDialog.SelectTokenDialogEventListener callback)
+    public SelectTokenAdapter(List<Token> tokens, SelectTokenDialog.OnTokenClickListener listener)
     {
+        this.listener = listener;
         tokenFilter = new TokenFilter(tokens);
-        this.callback = callback;
         displayData = new ArrayList<>();
         displayData.addAll(tokens);
     }
@@ -37,26 +37,22 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
-        int buttonTypeId = R.layout.item_token_select;
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(buttonTypeId, parent, false);
+            .inflate(R.layout.item_select_token, parent, false);
         return new ViewHolder(itemView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        Token item = displayData.get(position);
-        if (item != null)
+        holder.setIsRecyclable(false);
+        Token token = displayData.get(position);
+        if (token != null)
         {
-            holder.name.setText(item.name);
-            holder.name.append(" (");
-            holder.name.append(item.symbol);
-            holder.name.append(")");
+            holder.name.setText(token.tokenInfo.name);
+            holder.tokenIcon.bindData(token);
 
-            holder.tokenIcon.bindData(item.logoURI, item.chainId, selectedTokenAddress, item.symbol);
-
-            String balance = item.balance;
+            String balance = token.getStringBalanceForUI(token.tokenInfo.decimals);
             if (!TextUtils.isEmpty(balance))
             {
                 holder.balance.setText(balance);
@@ -67,10 +63,9 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
                 holder.balance.setText("0 ");
             }
 
-            holder.radio.setChecked(item.address.equalsIgnoreCase(selectedTokenAddress));
-            holder.balance.append(item.symbol);
+            holder.balance.append(token.getSymbol());
 
-            holder.itemLayout.setOnClickListener(v -> callback.onChainSelected(item));
+            holder.itemLayout.setOnClickListener(v -> listener.onTokenClicked(token));
         }
     }
 
@@ -79,16 +74,11 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
         updateList(tokenFilter.filterBy(keyword));
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateList(List<Token> filteredList)
     {
         displayData.clear();
         displayData.addAll(filteredList);
-        notifyDataSetChanged();
-    }
-
-    public void setSelectedToken(String address)
-    {
-        selectedTokenAddress = address;
         notifyDataSetChanged();
     }
 
@@ -100,16 +90,14 @@ public class SelectTokenAdapter extends RecyclerView.Adapter<SelectTokenAdapter.
 
     static class ViewHolder extends RecyclerView.ViewHolder
     {
-        MaterialRadioButton radio;
         TextView name;
         TextView balance;
         View itemLayout;
-        AddressIcon tokenIcon;
+        TokenIcon tokenIcon;
 
         ViewHolder(View view)
         {
             super(view);
-            radio = view.findViewById(R.id.radio);
             name = view.findViewById(R.id.name);
             balance = view.findViewById(R.id.balance);
             itemLayout = view.findViewById(R.id.layout_list_item);

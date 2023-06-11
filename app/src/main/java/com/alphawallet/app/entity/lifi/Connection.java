@@ -17,9 +17,9 @@ public class Connection
 
     @SerializedName("fromTokens")
     @Expose
-    public List<Token> fromTokens;
+    public List<LifiToken> fromTokens;
 
     @SerializedName("toTokens")
     @Expose
-    public List<Token> toTokens;
+    public List<LifiToken> toTokens;
 }

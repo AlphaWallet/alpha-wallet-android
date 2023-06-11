@@ -6,11 +6,9 @@ import static org.robolectric.Shadows.shadowOf;
 
 import android.content.Intent;
 
-import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.alphawallet.app.ui.CoinbasePayActivity;
-import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.shadows.ShadowApp;
 import com.alphawallet.shadows.ShadowKeyProviderFactory;

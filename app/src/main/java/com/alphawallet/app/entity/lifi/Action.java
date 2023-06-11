@@ -18,11 +18,11 @@ public class Action
 
     @SerializedName("fromToken")
     @Expose
-    public Token fromToken;
+    public LifiToken fromToken;
 
     @SerializedName("toToken")
     @Expose
-    public Token toToken;
+    public LifiToken toToken;
 
     @SerializedName("fromAmount")
     @Expose

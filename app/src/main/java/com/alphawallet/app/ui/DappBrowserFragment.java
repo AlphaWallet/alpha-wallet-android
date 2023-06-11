@@ -1560,7 +1560,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                                 viewModel.track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
 
                                 //EIP681 payment request scanned, should go to send
-                                viewModel.showSend(getContext(), result);
+                                viewModel.showSend(getActivity(), result);
                                 break;
 
                             case FUNCTION_CALL:

@@ -377,6 +377,10 @@
             android:name=".ui.NotificationSettingsActivity"
             android:label="@string/title_notifications" />
 
+        <activity
+            android:name=".ui.TransferRequestActivity"
+            android:label="@string/transfer_request" />
+
         <service
             android:name=".service.PriceAlertsService"
             android:enabled="true"

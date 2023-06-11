@@ -15,11 +15,12 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(Parameterized.class)
-public class TokensMappingTest {
+public class LifiTokenUtilsMappingTest
+{
     private String groupString;
     private TokenGroup groupEnum;
 
-    public TokensMappingTest(String groupString, TokenGroup groupEnum) {
+    public LifiTokenUtilsMappingTest(String groupString, TokenGroup groupEnum) {
         this.groupString = groupString;
         this.groupEnum = groupEnum;
     }

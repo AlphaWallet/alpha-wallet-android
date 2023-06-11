@@ -3,12 +3,10 @@ package com.alphawallet.app.ui;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -20,7 +18,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
-import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.Operation;
@@ -31,16 +29,10 @@ import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.router.TransferRequestRouter;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
-import com.alphawallet.app.util.KeyboardUtils;
-import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SendViewModel;
 import com.alphawallet.app.web3.entity.Address;
@@ -50,19 +42,16 @@ import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.InputAmount;
-import com.alphawallet.app.widget.SelectTokenDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.hardware.SignatureFromKey;
-import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.tools.Convert;
 import com.alphawallet.token.tools.Numeric;
-import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -71,12 +60,11 @@ import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 @AndroidEntryPoint
-public class SendActivity extends BaseActivity implements
+public class TransferRequestActivity extends BaseActivity implements
     AmountReadyCallback,
     StandardFunctionInterface,
     AddressReadyCallback,
-    ActionSheetCallback,
-    SelectTokenDialog.OnTokenClickListener
+    ActionSheetCallback
 {
     private static final BigDecimal NEGATIVE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
     private final Handler handler = new Handler();
@@ -84,6 +72,8 @@ public class SendActivity extends BaseActivity implements
     private Wallet wallet;
     private Token token;
     private AWalletAlertDialog dialog;
+    private AWalletAlertDialog progressDialog;
+    private QRResult result;
     private InputAmount amountInput;
     private InputAddress addressInput;
     private FunctionButtonBar functionBar;
@@ -94,8 +84,6 @@ public class SendActivity extends BaseActivity implements
     private ActionSheetDialog confirmationDialog;
     private final ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
         result -> confirmationDialog.setCurrentGasIndex(result));
-    private SelectTokenDialog selectTokenDialog;
-    private AWalletAlertDialog alertDialog;
     @Nullable
     private Disposable calcGasCost;
 
@@ -104,19 +92,19 @@ public class SendActivity extends BaseActivity implements
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_send);
+        setContentView(R.layout.activity_transfer_request);
 
         toolbar();
 
-        setTitle("Send");
-
-        initViewModel();
+        setTitle(R.string.empty);
 
         initViews();
 
-//        evaluateQrResult(getIntent().getParcelableExtra(C.EXTRA_AMOUNT));
+        initViewModel();
 
-        viewModel.prepare();
+        result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
+
+        evaluateQrResult(result);
     }
 
     private void initViews()
@@ -124,53 +112,132 @@ public class SendActivity extends BaseActivity implements
         amountInput = findViewById(R.id.input_amount);
         addressInput = findViewById(R.id.input_address);
         functionBar = findViewById(R.id.layoutButtons);
-
         addressInput.setAddressCallback(this);
-        amountInput.setListener(v -> showTokenSelectDialog());
+        addressInput.setEditable(false);
+        addressInput.showControls(false);
+        amountInput.setEditable(false);
+        amountInput.showControls(false);
+
+        progressDialog = new AWalletAlertDialog(this);
+        progressDialog.setTitle(R.string.searching_for_token);
+        progressDialog.setIcon(AWalletAlertDialog.NONE);
+        progressDialog.setProgressMode();
+        progressDialog.setCancelable(false);
     }
 
     private void initViewModel()
     {
-        viewModel = new ViewModelProvider(this)
-            .get(SendViewModel.class);
+        viewModel = new ViewModelProvider(this).get(SendViewModel.class);
         viewModel.wallet().observe(this, this::onWallet);
-        viewModel.tokens().observe(this, this::onTokens);
+        viewModel.finalisedToken().observe(this, this::onFinalisedToken);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
         viewModel.error().observe(this, this::onError);
+        viewModel.progress().observe(this, this::showProgress);
+    }
+
+    private void evaluateQrResult(QRResult r)
+    {
+        if (r != null)
+        {
+            this.result = r;
+            viewModel.prepare();
+        }
+        else
+        {
+            displayScanError();
+            finish();
+        }
     }
 
     private void onWallet(Wallet wallet)
     {
         this.wallet = wallet;
 
-        String recipientAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
-        String tokenAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        long tokenChainId = getIntent().getLongExtra(C.EXTRA_NETWORKID, -1);
+        long chainId = result.chainId;
 
-        if (!TextUtils.isEmpty(recipientAddress)) // From address qr
+        if (!viewModel.isValidChain(chainId))
         {
-            addressInput.setAddress(recipientAddress);
-            showTokenSelectDialog();
+            displayToast(getString(R.string.chain_not_support, String.valueOf(chainId)));
+            finish();
         }
-        else if (!TextUtils.isEmpty(tokenAddress) && tokenChainId != -1) // From token detail
+        else if (!viewModel.isNetworkEnabled(chainId))
         {
-            token = viewModel.getToken(tokenChainId, tokenAddress);
-            setupTokenContent(token);
+            showChainChangeDialog();
         }
-        else // From bottom nav
+        else
         {
-            showTokenSelectDialog();
+            findToken();
         }
     }
 
-    private void onTokens(List<Token> tokens)
+    private void findToken()
     {
-        selectTokenDialog = new SelectTokenDialog(tokens, this, this);
-        if (!selectTokenDialog.isShowing())
+        if (result.type == EIP681Type.PAYMENT)
         {
-            selectTokenDialog.show();
+            setTitle(getString(R.string.title_payment_request));
+            token = viewModel.getToken(result.chainId, wallet.address);
         }
+        else if (result.type == EIP681Type.TRANSFER)
+        {
+            setTitle(getString(R.string.transfer_request));
+            token = viewModel.getToken(result.chainId, result.getAddress());
+        }
+
+        if (token != null)
+        {
+            evaluateToken(token);
+        }
+        else
+        {
+            // You don't have this token, attempt to fetch
+            showProgress(true);
+            viewModel.fetchToken(result.chainId, result.getAddress(), wallet.address);
+        }
+    }
+
+    private void evaluateToken(Token token)
+    {
+        if (token != null && token.balance.equals(BigDecimal.ZERO))
+        {
+            displayToast("Wallet does not have requested token");
+            showProgress(false);
+            finish();
+        }
+        else if (token != null && token.isERC20())
+        {
+            setupTokenContent(token);
+            addressInput.setAddress(result.functionToAddress);
+            amountInput.setAmount(result.tokenAmount.toString());
+            amountInput.getInputAmount();
+        }
+        else if (token != null && token.isEthereum())
+        {
+            setupTokenContent(token);
+            addressInput.setAddress(result.getAddress());
+            amountInput.setAmount(Convert.getConvertedValue(new BigDecimal(result.weiValue), Convert.Unit.ETHER.getFactor()));
+            amountInput.getInputAmount();
+        }
+        else // TODO: Handle NFT
+        {
+            displayToast("NFTs not supported yet.");
+            finish();
+        }
+    }
+
+    private void onFinalisedToken(Token token)
+    {
+        evaluateToken(token);
+    }
+
+    private void setupTokenContent(Token token)
+    {
+        this.token = token;
+        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+        addressInput.setChainOverrideForWalletConnect(token.tokenInfo.chainId);
+        functionBar.revealButtons();
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_next)));
+        viewModel.startGasCycle(token.tokenInfo.chainId);
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -178,36 +245,20 @@ public class SendActivity extends BaseActivity implements
         displayToast(errorEnvelope.message);
     }
 
-    private void onBack()
-    {
-        finish();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        return super.onCreateOptionsMenu(menu);
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
         if (item.getItemId() == android.R.id.home)
         {
-            onBack();
+            onBackPressed();
         }
-        else if (item.getItemId() == R.id.action_show_contract)
-        {
-            viewModel.showContractInfo(this, wallet, token);
-        }
-
         return false;
     }
 
     @Override
     public void onBackPressed()
     {
-        onBack();
+        finish();
     }
 
     @Override
@@ -220,125 +271,16 @@ public class SendActivity extends BaseActivity implements
                 taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
                 requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
             }
-
             if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
             {
                 if (confirmationDialog != null && confirmationDialog.isShowing())
                     confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
-            }
-            else if (requestCode == C.BARCODE_READER_REQUEST_CODE)
-            {
-                switch (resultCode)
-                {
-                    case Activity.RESULT_OK:
-                        if (data != null)
-                        {
-                            String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
-
-                            //if barcode is still null, ensure we don't GPF
-                            if (qrCode == null)
-                            {
-                                //Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
-                                displayScanError();
-                                return;
-                            }
-                            else
-                            {
-                                QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
-                                QRResult result = parser.parse(qrCode);
-                                String extracted_address = null;
-                                if (result != null)
-                                {
-                                    extracted_address = result.getAddress();
-                                    switch (result.getProtocol())
-                                    {
-                                        case "address":
-                                            addressInput.setAddress(extracted_address);
-                                            break;
-                                        case "ethereum":
-                                            //EIP681 protocol
-                                            validateEIP681Request(result, false);
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                }
-                                else //try magiclink
-                                {
-                                    ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
-                                    try
-                                    {
-                                        if (magicParser.parseUniversalLink(qrCode).chainId > 0) //see if it's a valid link
-                                        {
-                                            //let's try to import the link
-                                            viewModel.showImportLink(this, qrCode);
-                                            finish();
-                                            return;
-                                        }
-                                    }
-                                    catch (SalesOrderMalformed e)
-                                    {
-                                        e.printStackTrace();
-                                    }
-                                }
-
-                                if (extracted_address == null)
-                                {
-                                    displayScanError();
-                                }
-                            }
-                        }
-                        break;
-                    case QRScannerActivity.DENY_PERMISSION:
-                        showCameraDenied();
-                        break;
-                    default:
-                        Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
-                            "Code: " + resultCode
-                        ));
-                        break;
-                }
             }
             else
             {
                 super.onActivityResult(requestCode, resultCode, data);
             }
         }
-    }
-
-    private void startWalletConnect(String qrCode)
-    {
-        Intent intent = new Intent(this, WalletConnectActivity.class);
-        intent.putExtra("qrCode", qrCode);
-        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
-        startActivity(intent);
-        setResult(RESULT_OK);
-        finish();
-    }
-
-    private void showCameraDenied()
-    {
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
-        dialog = new AWalletAlertDialog(this);
-        dialog.setTitle(R.string.title_dialog_error);
-        dialog.setMessage(R.string.error_camera_permission_denied);
-        dialog.setIcon(ERROR);
-        dialog.setButtonText(R.string.button_ok);
-        dialog.setButtonListener(v -> {
-            dialog.dismiss();
-        });
-        dialog.show();
-    }
-
-    private void showTokenFetch()
-    {
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
-        dialog = new AWalletAlertDialog(this);
-        dialog.setTitle(R.string.searching_for_token);
-        dialog.setIcon(AWalletAlertDialog.NONE);
-        dialog.setProgressMode();
-        dialog.setCancelable(false);
-        dialog.show();
     }
 
     private void calculateEstimateDialog()
@@ -352,40 +294,19 @@ public class SendActivity extends BaseActivity implements
         dialog.show();
     }
 
-    private void validateEIP681Request(QRResult result, boolean overrideNetwork)
-    {
-        switch (result.type)
-        {
-            case ADDRESS:
-                addressInput.setAddress(result.getAddress());
-                break;
-            case PAYMENT:
-            case TRANSFER:
-                new TransferRequestRouter().open(this, result);
-                break;
-            case FUNCTION_CALL:
-                //Generic function call, not handled yet
-                displayScanError(R.string.toast_qr_code_no_address, getString(R.string.no_tokens));
-                if (result.functionToAddress != null)
-                    addressInput.setAddress(result.functionToAddress);
-                break;
-            default:
-                displayScanError();
-        }
-    }
-
     private void displayScanError()
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(AWalletAlertDialog.ERROR);
         dialog.setTitle(R.string.toast_qr_code_no_address);
-        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonText(R.string.dialog_cancel_back);
         dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.setCanceledOnTouchOutside(false);
         dialog.show();
     }
 
-    private void displayScanError(int titleId, String message)
+    private void displayError(int titleId, String message)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
@@ -409,31 +330,12 @@ public class SendActivity extends BaseActivity implements
         if (handler != null) handler.removeCallbacksAndMessages(null);
         if (amountInput != null) amountInput.onDestroy();
         if (confirmationDialog != null) confirmationDialog.onDestroy();
-        //if (addressInput != null)
-        //    addressInput.setEnsNodeNotSyncCallback(null); // prevent leak by removing reference to activity method
-    }
-
-    private void setupTokenContent(Token token)
-    {
-        this.token = token;
-        setTitle(getString(R.string.action_send_tkn, token.getSymbol()));
-        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
-        addressInput.setChainOverrideForWalletConnect(token.tokenInfo.chainId);
-        //addressInput.setEnsHandlerNodeSyncFlag(true);   // allow node sync
-        //addressInput.setEnsNodeNotSyncCallback(this::showNodeNotSyncSheet);  // callback to invoke if node not synced
-        functionBar.revealButtons();
-        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_next));
-        functionBar.setupFunctions(this, functions);
-        viewModel.startGasCycle(token.tokenInfo.chainId);
-        amountInput.focus();
     }
 
     @Override
     public void amountReady(BigDecimal value, BigDecimal gasPrice)
     {
-        //validate that we have sufficient balance
-        if ((token.isEthereum() && token.balance.subtract(value).compareTo(BigDecimal.ZERO) > 0) // if sending base ethereum then check we have more than just the value
-            || (token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0)) // contract token, check sufficient token balance (gas widget will check sufficient gas)
+        if (isBalanceSufficient(value))
         {
             sendAmount = value;
             sendGasPrice = gasPrice;
@@ -442,20 +344,22 @@ public class SendActivity extends BaseActivity implements
         else
         {
             sendAmount = NEGATIVE;
-            //insufficient balance
             amountInput.showError(true, 0);
-            //if currently resolving ENS, stop
             addressInput.stopNameCheck();
         }
+    }
+
+    private boolean isBalanceSufficient(BigDecimal value)
+    {
+        return (token.isEthereum() && token.balance.subtract(value).compareTo(BigDecimal.ZERO) > 0) // if sending base ethereum then check we have more than just the value
+            || (token.getBalanceRaw().subtract(value).compareTo(BigDecimal.ZERO) >= 0);
     }
 
     @Override
     public void handleClick(String action, int actionId)
     {
-        //clicked the next button
         if (actionId == R.string.action_next)
         {
-            KeyboardUtils.hideKeyboard(getCurrentFocus());
             amountInput.getInputAmount();
             addressInput.getAddress();
         }
@@ -507,10 +411,7 @@ public class SendActivity extends BaseActivity implements
         displayErrorMessage(throwable.getMessage());
     }
 
-    /**
-     * Called to check if we're ready to send user to confirm screen / activity sheet popup
-     */
-    private void checkConfirm(final GasEstimate estimate, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
+    private void checkConfirm(GasEstimate estimate, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
         BigInteger ethValue = token.isEthereum() ? sendAmount.toBigInteger() : BigInteger.ZERO;
         long leafCode = amountInput.isSendAll() ? -2 : -1;
@@ -540,11 +441,6 @@ public class SendActivity extends BaseActivity implements
         }
     }
 
-    /**
-     * ActionSheetCallback, comms hooks for the ActionSheetDialog to trigger authentication & send transactions
-     *
-     * @param callback
-     */
     @Override
     public void getAuthorisation(SignAuthenticationCallback callback)
     {
@@ -560,14 +456,12 @@ public class SendActivity extends BaseActivity implements
     @Override
     public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
     {
-        //complete sending the transaction
         viewModel.sendTransaction(wallet, token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
     public void dismissed(String txHash, long callbackId, boolean actionCompleted)
     {
-        //ActionSheet was dismissed
         if (!TextUtils.isEmpty(txHash))
         {
             Intent intent = new Intent();
@@ -602,16 +496,11 @@ public class SendActivity extends BaseActivity implements
     {
         confirmationDialog.transactionWritten(txData.hash);
         viewModel.setLastSentToken(token);
-//        viewModel.setLastSentTokenAddress(txData.tx.contract != null ?
-//            txData.tx.contract.toString() :
-//            txData.tx.sender.toString()
-//        );
     }
 
-    //Transaction failed to be sent
     private void txError(TransactionReturn txError)
     {
-        Timber.d("txError: %s", txError.throwable.getMessage());
+        Timber.e(txError.throwable);
         if (txError.throwable instanceof SocketTimeoutException)
         {
             showTxnTimeoutDialog();
@@ -642,37 +531,12 @@ public class SendActivity extends BaseActivity implements
             BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
             checkConfirm(new GasEstimate(gasEstimate), transactionBytes, txSendAddress, resolvedAddress);
         });
-        dialog.setSecondaryButtonListener(v -> dialog.dismiss());
-        dialog.show();
-    }
 
-    void showNodeNotSyncSheet()
-    {
-        Timber.d("showNodeNotSync: ");
-        try
-        {
-            if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
-            alertDialog = new AWalletAlertDialog(this, R.drawable.ic_warning);
-            alertDialog.setTitle(R.string.title_ens_lookup_warning);
-            alertDialog.setMessage(R.string.message_ens_node_not_sync);
-            alertDialog.setButtonText(R.string.action_cancel);
-            alertDialog.setButtonListener(v -> alertDialog.dismiss());
-            alertDialog.setSecondaryButtonText(R.string.ignore);
-            alertDialog.setSecondaryButtonListener(v -> {
-                //addressInput.setEnsHandlerNodeSyncFlag(false);  // skip node sync check
-                // re enter current input to resolve again
-                String currentInput = addressInput.getEditText().getText().toString();
-                addressInput.getEditText().setText("");
-                addressInput.getEditText().setText(currentInput);
-                addressInput.getEditText().setSelection(currentInput.length());
-                alertDialog.dismiss();
-            });
-            alertDialog.show();
-        }
-        catch (Exception e)
-        {
-            Timber.e(e);
-        }
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 
     void showTxnErrorDialog(Throwable t)
@@ -702,18 +566,38 @@ public class SendActivity extends BaseActivity implements
         dialog.show();
     }
 
-    private void showTokenSelectDialog()
+    private void showChainChangeDialog()
     {
-        viewModel.fetchTokens();
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.WARNING);
+        dialog.setTitle(R.string.change_chain_request);
+        dialog.setMessage(R.string.change_chain_message);
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> {
+            findToken();
+            dialog.dismiss();
+        });
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+            finish();
+        });
+        dialog.show();
     }
 
-    @Override
-    public void onTokenClicked(Token token)
+    private void showProgress(Boolean showProgress)
     {
-        if (selectTokenDialog != null && selectTokenDialog.isShowing())
+        if (progressDialog != null)
         {
-            selectTokenDialog.dismiss();
+            if (showProgress)
+            {
+                progressDialog.show();
+            }
+            else
+            {
+                progressDialog.dismiss();
+            }
         }
-        setupTokenContent(token);
     }
 }

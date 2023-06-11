@@ -3,8 +3,6 @@ package com.alphawallet.app.entity.lifi;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
-
 public class FeeCost
 {
     @SerializedName("name")
@@ -17,7 +15,7 @@ public class FeeCost
 
     @SerializedName("token")
     @Expose
-    public Token token;
+    public LifiToken token;
 
     @SerializedName("amount")
     @Expose

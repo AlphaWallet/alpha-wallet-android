@@ -45,6 +45,7 @@
                     custom:ens="true"
                     custom:hint="@string/recipient_address"
                     custom:label="@string/recipient"
+                    custom:nocam="true"
                     custom:show_header="true" />
 
             </LinearLayout>

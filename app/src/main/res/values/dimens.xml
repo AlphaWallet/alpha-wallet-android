@@ -78,8 +78,10 @@
     <!-- Component Dimens -->
     <dimen name="dialog_corner_radius">4dp</dimen>
     <dimen name="action_sheet_header">60dp</dimen>
+    <dimen name="bottom_navigation_bar">60dp</dimen>
     <dimen name="bottom_sheet_corner_radius">12dp</dimen>
     <dimen name="bottom_sheet_handle_width">60dp</dimen>
     <dimen name="bottom_sheet_handle_height">5dp</dimen>
+    <dimen name="corner_radius_max">100dp</dimen>
 
 </resources>

@@ -1,15 +1,21 @@
 package com.alphawallet.app.widget;
 
+import static com.alphawallet.app.C.GAS_LIMIT_MIN;
+import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
@@ -26,6 +32,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
 import com.alphawallet.app.ui.widget.entity.NumericInput;
 import com.alphawallet.app.util.BalanceUtils;
+import com.google.android.material.button.MaterialButton;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,9 +48,6 @@ import io.realm.Realm;
 import io.realm.RealmQuery;
 import timber.log.Timber;
 
-import static com.alphawallet.app.C.GAS_LIMIT_MIN;
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
-
 /**
  * Created by JB on 10/11/2020.
  */
@@ -54,9 +58,15 @@ public class InputAmount extends LinearLayout
     private final TextView symbolText;
     private final TokenIcon icon;
     private final StandardHeader header;
-    private final TextView availableSymbol;
+    private final RelativeLayout headerLayout;
+    private final ChainName chainName;
     private final TextView availableAmount;
+    private final TextView equivalent;
     private final TextView allFunds;
+    private final ImageView switchButton;
+    private final ImageView caret;
+    private final LinearLayout clickMore;
+    private final MaterialButton selectTokenButton;
     private final ProgressBar gasFetch;
     private Token token;
     private Realm realm;
@@ -68,12 +78,12 @@ public class InputAmount extends LinearLayout
     private final Handler handler = new Handler(Looper.getMainLooper());
     private AmountReadyCallback amountReadyCallback;
     private boolean amountReady;
-
+    private boolean showingCrypto;
+    private boolean isEditable = true;
     //These need to be members because the listener is shut down if the object doesn't exist
     private RealmTokenTicker realmTickerUpdate;
     private RealmToken realmTokenUpdate;
 
-    private boolean showingCrypto;
 
     public InputAmount(Context context, AttributeSet attrs)
     {
@@ -85,16 +95,50 @@ public class InputAmount extends LinearLayout
         symbolText = findViewById(R.id.text_token_symbol);
         icon = findViewById(R.id.token_icon);
         header = findViewById(R.id.header);
-        availableSymbol = findViewById(R.id.text_symbol);
+        headerLayout = findViewById(R.id.layout_header);
+        chainName = findViewById(R.id.chain);
         availableAmount = findViewById(R.id.text_available);
         allFunds = findViewById(R.id.text_all_funds);
         gasFetch = findViewById(R.id.gas_fetch_progress);
+        clickMore = findViewById(R.id.layout_more_click);
+        selectTokenButton = findViewById(R.id.btn_select_token);
+        switchButton = findViewById(R.id.btn_switch);
+        caret = findViewById(R.id.expand_more);
+        equivalent = findViewById(R.id.equivalent);
         showingCrypto = !CustomViewSettings.inputAmountFiatDefault();
         amountReady = false;
 
         setupAttrs(context, attrs);
+    }
 
-        setupViewListeners();
+    private void setupAttrs(Context context, AttributeSet attrs)
+    {
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+            attrs,
+            R.styleable.InputView,
+            0, 0
+        );
+
+        try
+        {
+            boolean showHeader = a.getBoolean(R.styleable.InputView_show_header, true);
+            boolean showAllFunds = a.getBoolean(R.styleable.InputView_show_allFunds, true);
+            boolean showChainName = a.getBoolean(R.styleable.InputView_showChainName, true);
+            boolean currencyMode = a.getBoolean(R.styleable.InputView_currencyMode, false);
+            int headerTextId = a.getResourceId(R.styleable.InputView_label, R.string.amount);
+            headerLayout.setVisibility(showHeader ? View.VISIBLE : View.GONE);
+            allFunds.setVisibility(showAllFunds ? View.VISIBLE : View.GONE);
+            header.setText(headerTextId);
+            if (currencyMode)
+            {
+                symbolText.setText(TickerService.getCurrencySymbolTxt());
+                icon.showLocalCurrency();
+            }
+        }
+        finally
+        {
+            a.recycle();
+        }
     }
 
     /**
@@ -105,21 +149,34 @@ public class InputAmount extends LinearLayout
      * @param assetDefinitionService
      * @param svs
      */
-    public void setupToken(@NotNull Token token, @Nullable AssetDefinitionService assetDefinitionService,
-                           @NotNull TokensService svs, @NotNull AmountReadyCallback amountCallback)
+    public void setupToken(@NotNull Token token,
+                           @Nullable AssetDefinitionService assetDefinitionService,
+                           @NotNull TokensService svs,
+                           @NotNull AmountReadyCallback amountCallback)
     {
         this.token = token;
         this.tokensService = svs;
         this.assetService = assetDefinitionService;
         this.amountReadyCallback = amountCallback;
-        icon.bindData(token, assetService);
-        header.getChainName().setChainID(token.tokenInfo.chainId);
-        updateAvailableBalance();
-
         this.realm = tokensService.getWalletRealmInstance();
         this.tickerRealm = tokensService.getTickerRealmInstance();
+
+        selectTokenButton.setVisibility(View.GONE);
+        clickMore.setVisibility(View.VISIBLE);
+        chainName.setVisibility(View.VISIBLE);
+        chainName.setChainID(token.tokenInfo.chainId);
+
+        icon.bindData(token, assetService);
+
         bindDataSource();
+
         setupAllFunds();
+
+        setupViewListeners();
+
+        updateAvailableBalance();
+
+        updateEquivalent();
     }
 
     public void getInputAmount()
@@ -215,14 +272,14 @@ public class InputAmount extends LinearLayout
         if (realmTokenUpdate != null) realmTokenUpdate.removeAllChangeListeners();
 
         realmTokenUpdate = realm.where(RealmToken.class)
-                .equalTo("address", databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase()), Case.INSENSITIVE)
-                .findFirstAsync();
+            .equalTo("address", databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase()), Case.INSENSITIVE)
+            .findFirstAsync();
 
         //if the token doesn't exist yet, first ask the TokensService to pick it up
         tokensService.storeToken(token);
 
         realmTokenUpdate.addChangeListener(realmToken -> {
-            RealmToken rt = (RealmToken)realmToken;
+            RealmToken rt = (RealmToken) realmToken;
             if (rt.isValid() && exactAmount.compareTo(BigDecimal.ZERO) == 0)
             {
                 token = tokensService.getToken(rt.getChainId(), rt.getTokenAddress());
@@ -231,37 +288,59 @@ public class InputAmount extends LinearLayout
         });
     }
 
+    public void setListener(OnClickListener listener)
+    {
+        if (listener != null)
+        {
+            caret.setVisibility(View.VISIBLE);
+            clickMore.setOnClickListener(listener);
+            selectTokenButton.setOnClickListener(listener);
+        }
+        else
+        {
+            caret.setVisibility(View.GONE);
+        }
+    }
+
     private void setupViewListeners()
     {
-        LinearLayout clickMore = findViewById(R.id.layout_more_click);
+        if (getTickerQuery() != null && isEditable)
+        {
+            switchButton.setVisibility(View.VISIBLE);
+            switchButton.setOnClickListener(v -> {
+                RealmTokenTicker rtt = getTickerQuery().findFirst();
+                if (showingCrypto && rtt != null)
+                {
+                    showingCrypto = false;
+                    startTickerListener();
+                }
+                else
+                {
+                    showingCrypto = true;
+                    if (tickerRealm != null)
+                        tickerRealm.removeAllChangeListeners(); //stop ticker listener
+                }
 
-        clickMore.setOnClickListener(v -> {
-            //on down caret clicked - switch to fiat currency equivalent if there's a ticker
-            if (getTickerQuery() == null) return;
+                updateAvailableBalance();
+                updateEquivalent();
+            });
+        }
+        else
+        {
+            switchButton.setVisibility(View.GONE);
+        }
 
-            RealmTokenTicker rtt = getTickerQuery().findFirst();
-            if (showingCrypto && rtt != null)
-            {
-                showingCrypto = false;
-                startTickerListener();
-            }
-            else
-            {
-                showingCrypto = true;
-                if (tickerRealm != null) tickerRealm.removeAllChangeListeners(); //stop ticker listener
-            }
-
-            updateAvailableBalance();
-        });
-
-        editText.addTextChangedListener(new TextWatcher() {
+        editText.addTextChangedListener(new TextWatcher()
+        {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
 
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
                 if (editText.hasFocus())
                 {
                     exactAmount = BigDecimal.ZERO; //invalidate the 'all funds' amount
@@ -270,7 +349,9 @@ public class InputAmount extends LinearLayout
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void afterTextChanged(Editable s)
+            {
+                updateEquivalent();
                 if (editText.hasFocus())
                 {
                     amountReadyCallback.updateCryptoAmount(getWeiInputAmount());
@@ -295,7 +376,7 @@ public class InputAmount extends LinearLayout
         if (tickerRealm != null)
         {
             return tickerRealm.where(RealmTokenTicker.class)
-                    .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()));
+                .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()));
         }
         else
         {
@@ -317,9 +398,46 @@ public class InputAmount extends LinearLayout
     {
         icon.bindData(token, assetService);
         symbolText.setText(token.getSymbol());
-        availableSymbol.setText(token.getSymbol());
-        availableAmount.setText(token.getStringBalanceForUI(5));
+
+        availableAmount.setText(String.format("%s: %s %s", context.getString(R.string.balance), token.getStringBalanceForUI(5), token.getSymbol()));
+
         updateAllFundsAmount();
+    }
+
+    private void updateEquivalent()
+    {
+        if (getTickerQuery() == null)
+        {
+            equivalent.setVisibility(View.GONE);
+            switchButton.setVisibility(View.GONE);
+            return;
+        }
+
+        RealmTokenTicker rtt = getTickerQuery().findFirst();
+        if (rtt == null)
+        {
+            equivalent.setVisibility(View.GONE);
+            switchButton.setVisibility(View.GONE);
+            return;
+        }
+
+        double cryptoRate = Double.parseDouble(rtt.getPrice());
+        BigDecimal amount = editText.getBigDecimalValue();
+        BigDecimal rate = new BigDecimal(cryptoRate);
+
+        BigDecimal value;
+        if (showingCrypto)
+        {
+            value = amount.multiply(rate).setScale(2, RoundingMode.CEILING);
+            equivalent.setText(String.format("%s %s", rtt.getCurrencySymbol(), value));
+        }
+        else
+        {
+            value = amount.divide(rate, 4, RoundingMode.FLOOR);
+            equivalent.setText(String.format("%s %s", value, token.tokenInfo.symbol));
+        }
+
+        equivalent.setVisibility(View.VISIBLE);
     }
 
     private void showFiat()
@@ -335,18 +453,18 @@ public class InputAmount extends LinearLayout
 
             if (rtt != null)
             {
-                String currencyLabel = rtt.getCurrencySymbol() + TickerService.getCurrencySymbol();
+                String currencyLabel = rtt.getCurrencySymbol();
                 symbolText.setText(currencyLabel);
                 //calculate available fiat
                 double cryptoRate = Double.parseDouble(rtt.getPrice());
                 double availableCryptoBalance = token.getCorrectedBalance(18).doubleValue();
-                availableAmount.setText(TickerService.getCurrencyString(availableCryptoBalance * cryptoRate));
-                availableSymbol.setText(rtt.getCurrencySymbol());
+                BigDecimal balance = new BigDecimal(cryptoRate).multiply(new BigDecimal(availableCryptoBalance)).setScale(2, RoundingMode.FLOOR);
+
+                availableAmount.setText(String.format("%s: %s %s", context.getString(R.string.balance), balance.toString(), rtt.getCurrencySymbol()));
+
                 updateAllFundsAmount(); //update amount if showing 'All Funds'
 
-                amountReadyCallback.updateCryptoAmount(
-                        getWeiInputAmount()
-                ); //now update
+                amountReadyCallback.updateCryptoAmount(getWeiInputAmount()); //now update
             }
             updateAllFundsAmount();
         }
@@ -384,8 +502,8 @@ public class InputAmount extends LinearLayout
             if (token.isEthereum() && token.hasPositiveBalance())
             {
                 RealmGasSpread gasSpread = tokensService.getTickerRealmInstance().where(RealmGasSpread.class)
-                            .equalTo("chainId", token.tokenInfo.chainId)
-                            .findFirst();
+                    .equalTo("chainId", token.tokenInfo.chainId)
+                    .findFirst();
 
                 if (gasSpread != null && gasSpread.getGasPrice().compareTo(BigInteger.ZERO) > 0)
                 {
@@ -397,8 +515,8 @@ public class InputAmount extends LinearLayout
                     gasFetch.setVisibility(View.VISIBLE);
                     Web3j web3j = TokenRepository.getWeb3jService(token.tokenInfo.chainId);
                     web3j.ethGasPrice().sendAsync()
-                            .thenAccept(ethGasPrice -> onLatestGasPrice(ethGasPrice.getGasPrice()))
-                            .exceptionally(this::onGasFetchError);
+                        .thenAccept(ethGasPrice -> onLatestGasPrice(ethGasPrice.getGasPrice()))
+                        .exceptionally(this::onGasFetchError);
                 }
             }
             else
@@ -445,37 +563,6 @@ public class InputAmount extends LinearLayout
             editText.setSelection(editText.getText().length());
         }
     };
-
-    private void setupAttrs(Context context, AttributeSet attrs)
-    {
-        TypedArray a = context.getTheme().obtainStyledAttributes(
-                attrs,
-                R.styleable.InputView,
-                0, 0
-        );
-
-        try
-        {
-            boolean showHeader = a.getBoolean(R.styleable.InputView_show_header, true);
-            boolean showAllFunds = a.getBoolean(R.styleable.InputView_show_allFunds, true);
-            boolean showChainName = a.getBoolean(R.styleable.InputView_showChainName, true);
-            boolean currencyMode = a.getBoolean(R.styleable.InputView_currencyMode, false);
-            int headerTextId = a.getResourceId(R.styleable.InputView_label, R.string.amount);
-            header.setVisibility(showHeader ? View.VISIBLE : View.GONE);
-            allFunds.setVisibility(showAllFunds ? View.VISIBLE : View.GONE);
-            header.setText(headerTextId);
-            header.getChainName().setVisibility(showChainName ? View.VISIBLE : View.GONE);
-            if (currencyMode)
-            {
-                symbolText.setText(TickerService.getCurrencySymbolTxt());
-                icon.showLocalCurrency();
-            }
-        }
-        finally
-        {
-            a.recycle();
-        }
-    }
 
     private Void onGasFetchError(Throwable throwable)
     {
@@ -552,5 +639,22 @@ public class InputAmount extends LinearLayout
     public boolean isSendAll()
     {
         return exactAmount.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    public void focus()
+    {
+        editText.requestFocus();
+    }
+
+    public void showControls(boolean show)
+    {
+        switchButton.setVisibility(show ? View.VISIBLE : View.GONE);
+        allFunds.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    public void setEditable(boolean editable)
+    {
+        this.isEditable = editable;
+        editText.setEnabled(editable);
     }
 }

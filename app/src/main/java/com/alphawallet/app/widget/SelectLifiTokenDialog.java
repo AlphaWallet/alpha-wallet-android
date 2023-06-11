@@ -19,23 +19,23 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.ui.widget.adapter.SelectTokenAdapter;
+import com.alphawallet.app.entity.lifi.LifiToken;
+import com.alphawallet.app.ui.widget.adapter.SelectLifiTokenAdapter;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.List;
 
-public class SelectTokenDialog extends BottomSheetDialog
+public class SelectLifiTokenDialog extends BottomSheetDialog
 {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private RecyclerView tokenList;
-    private SelectTokenAdapter adapter;
+    private SelectLifiTokenAdapter adapter;
     private LinearLayout searchLayout;
     private EditText search;
     private TextView noResultsText;
 
-    public SelectTokenDialog(@NonNull Activity activity)
+    public SelectLifiTokenDialog(@NonNull Activity activity)
     {
         super(activity);
         View view = View.inflate(getContext(), R.layout.dialog_select_token, null);
@@ -54,16 +54,15 @@ public class SelectTokenDialog extends BottomSheetDialog
         noResultsText = view.findViewById(R.id.no_results);
         ImageView btnClose = view.findViewById(R.id.image_close);
         btnClose.setOnClickListener(v -> dismiss());
-        search.requestFocus();
     }
 
-    public SelectTokenDialog(List<Token> tokenItems, Activity activity, OnTokenClickListener listener)
+    public SelectLifiTokenDialog(List<LifiToken> tokenItems, Activity activity, EventListener callback)
     {
         this(activity);
 
         noResultsText.setVisibility(tokenItems.size() > 0 ? View.GONE : View.VISIBLE);
 
-        adapter = new SelectTokenAdapter(tokenItems, listener);
+        adapter = new SelectLifiTokenAdapter(tokenItems, callback);
 
         tokenList.setLayoutManager(new LinearLayoutManager(getContext()));
         tokenList.setAdapter(adapter);
@@ -96,8 +95,13 @@ public class SelectTokenDialog extends BottomSheetDialog
         });
     }
 
-    public interface OnTokenClickListener
+    public void setSelectedToken(String address)
     {
-        void onTokenClicked(Token token);
+        adapter.setSelectedToken(address);
+    }
+
+    public interface EventListener
+    {
+        void onChainSelected(LifiToken tokenItem);
     }
 }

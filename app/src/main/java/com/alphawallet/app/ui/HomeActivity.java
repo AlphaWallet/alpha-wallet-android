@@ -337,11 +337,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         Intent i = new Intent(this, PriceAlertsService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(i);
-        } else {
-            startService(i);
-        }
+        startService(i);
     }
 
     private void onUpdateAvailable(String availableVersion)

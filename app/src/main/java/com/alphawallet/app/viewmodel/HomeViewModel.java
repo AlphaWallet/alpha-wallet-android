@@ -666,6 +666,13 @@ public class HomeViewModel extends BaseViewModel
                 return; //tokenscript with no holding token is currently meaningless. Is this always the case?
 
             String newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
+            String holdingContract = td.holdingToken;
+            TokenDefinition.Attestation attn = td.attestations != null ? td.attestations.get(holdingContract) : null;
+            if (attn != null)
+            {
+                newFileName = newFileName + "-" + attn.chainId;
+            }
+
             newFileName = newFileName + ".tsml";
 
             if (appExternal)

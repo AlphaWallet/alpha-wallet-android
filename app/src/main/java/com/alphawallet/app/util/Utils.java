@@ -1106,8 +1106,10 @@ public class Utils
         return context.getPackageName().equals("io.stormbird.wallet");
     }
 
-    public static boolean hasAttestation(String url)
+    /*public static boolean hasAttestation(String url)
     {
+        result.functionDetail = Utils.decompress(url);
+
         int hashIndex = url.indexOf("#attestation=");
         if (hashIndex >= 0)
         {
@@ -1120,6 +1122,7 @@ public class Utils
             try
             {
                 byte[] tryBase64Data = Base64.decode(url, Base64.DEFAULT); //is this a base64 string?
+
 
                 if (tryBase64Data.length > 0 )
                 {
@@ -1134,7 +1137,7 @@ public class Utils
 
             return false;
         }
-    }
+    }*/
 
     public static String getAttestationString(String url)
     {
@@ -1154,16 +1157,35 @@ public class Utils
         return decoded;
     }
 
-    public static TokenInfo getDefaultAttestationInfo(long chainId)
+    public static TokenInfo getDefaultAttestationInfo(long chainId, String collectionHash)
     {
-        return new TokenInfo(getEASContract(chainId), "EAS Attestation", "ATTN", 0, true, chainId);
+        return new TokenInfo(collectionHash, "EAS Attestation", "ATTN", 0, true, chainId);
+    }
+
+    public static boolean hasAttestation(String data)
+    {
+        try
+        {
+            String inflated = inflateData(getAttestationString(data));
+            return inflated.length() > 0;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
     public static String decompress(String url)
     {
-        Timber.d(toAttestationJson(inflateData(getAttestationString(url))));
-        return toAttestationJson(inflateData(getAttestationString(url)));
-//       return inflateData(getAttestationString(url));
+        try
+        {
+            //Timber.d(toAttestationJson(inflateData(getAttestationString(url))));
+            return toAttestationJson(inflateData(getAttestationString(url)));
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 
     private static String toAttestationJson(String jsonString)

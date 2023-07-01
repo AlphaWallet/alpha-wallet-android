@@ -416,7 +416,7 @@ public class Web3TokenView extends WebView
     public void displayTicketHolder(Token token, TicketRange range, AssetDefinitionService assetService, ViewType iconified)
     {
         //need to wait until the assetDefinitionService has finished loading assets
-        assetService.getAssetDefinitionASync(token.tokenInfo.chainId, token.tokenInfo.address)
+        assetService.getAssetDefinitionASync(token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(td -> renderTicketHolder(token, td, range, assetService, iconified), this::loadingError).isDisposed();

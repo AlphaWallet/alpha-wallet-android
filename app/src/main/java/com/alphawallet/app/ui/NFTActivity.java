@@ -112,7 +112,7 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
 
     private boolean hasTokenScriptOverride(Token t)
     {
-        return viewModel.getAssetDefinitionService().hasTokenView(t.tokenInfo.chainId, t.getAddress(), AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME);
+        return viewModel.getAssetDefinitionService().hasTokenView(t, AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME);
     }
 
     private void onSignature(XMLDsigDescriptor descriptor)

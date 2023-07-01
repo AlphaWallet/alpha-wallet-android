@@ -6,5 +6,6 @@ package com.alphawallet.token.entity;
 public enum TSOriginType
 {
     Contract,
-    Event
+    Event,
+    Attestation
 }

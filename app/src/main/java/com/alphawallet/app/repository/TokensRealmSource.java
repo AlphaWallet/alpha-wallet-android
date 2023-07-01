@@ -1,5 +1,6 @@
 package com.alphawallet.app.repository;
 
+import static com.alphawallet.app.service.AssetDefinitionService.getEASContract;
 import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
 import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
 
@@ -310,11 +311,14 @@ public class TokensRealmSource implements TokenLocalSource
 
     private Token fetchAttestation(long chainId, Wallet wallet, RealmAttestation rAttn)
     {
-        Token token = fetchToken(chainId, wallet, rAttn.getTokenAddress());
-        TokenInfo tInfo = token != null ? token.tokenInfo : Utils.getDefaultAttestationInfo(chainId);
+        Token token = fetchToken(chainId, wallet, rAttn.getTokenAddress()); //<-- getTokenAddress() should be the key
+        //We require to
+        rAttn.getAttestation();
+        TokenInfo tInfo = token != null ? token.tokenInfo : Utils.getDefaultAttestationInfo(chainId, rAttn.getTokenAddress());
         Attestation att = new Attestation(tInfo, ethereumNetworkRepository.getNetworkByChain(chainId).getShortName(), rAttn.getAttestation());
-        att.setTokenWallet(wallet.address);
         att.loadAttestationData(rAttn);
+        att.setTokenWallet(wallet.address);
+
         return att;
     }
 

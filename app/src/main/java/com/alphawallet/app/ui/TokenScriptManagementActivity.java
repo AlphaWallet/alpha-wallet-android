@@ -64,7 +64,7 @@ public class TokenScriptManagementActivity extends BaseActivity {
         viewModel.getTokenLocatorsLiveData().observe(this, new Observer<List<TokenLocator>>() {
             @Override
             public void onChanged(List<TokenLocator> tokenList) {
-                if (adapter == null) adapter = new TokenScriptManagementAdapter(thisActivity, tokenList, viewModel.getAssetService());
+                if (adapter == null) adapter = new TokenScriptManagementAdapter(thisActivity, tokenList, viewModel.getAssetService(), viewModel.getTokensService());
                 else adapter.refreshList(tokenList);
                 tokenScriptList.setAdapter(adapter);
             }

@@ -78,9 +78,7 @@ import timber.log.Timber;
 public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {
     private static final BigDecimal NEGATIVE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
-
     SendViewModel viewModel;
-
     private Wallet wallet;
     private Token token;
     private final Handler handler = new Handler();

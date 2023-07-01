@@ -750,23 +750,7 @@ public class WalletFragment extends BaseFragment implements
     private void initNotificationView(View view)
     {
         NotificationView notificationView = view.findViewById(R.id.notification);
-        boolean hasShownWarning = viewModel.isMarshMallowWarningShown();
-
-        if (!hasShownWarning && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M)
-        {
-            notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
-            notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
-            notificationView.setPrimaryButtonText(getContext().getString(R.string.hide_notification));
-            notificationView.setPrimaryButtonListener(() ->
-            {
-                notificationView.setVisibility(View.GONE);
-                viewModel.setMarshMallowWarning(true);
-            });
-        }
-        else
-        {
-            notificationView.setVisibility(View.GONE);
-        }
+        notificationView.setVisibility(View.GONE);
     }
 
     @Override

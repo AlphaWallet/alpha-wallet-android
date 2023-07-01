@@ -2,7 +2,6 @@ package com.alphawallet.app.service;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
@@ -22,6 +21,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.MutableLiveData;
@@ -33,6 +33,7 @@ import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.QueryResponse;
 import com.alphawallet.app.entity.TokenLocator;
+import com.alphawallet.app.entity.attestation.SchemaRecord;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
@@ -48,12 +49,10 @@ import com.alphawallet.app.repository.entity.RealmTokenScriptData;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.HomeViewModel;
-import com.alphawallet.app.web3j.StructuredData;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.ethereum.NetworkInfo;
 import com.alphawallet.token.entity.ActionModifier;
-import com.alphawallet.token.entity.AttestationValidation;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.AttributeInterface;
 import com.alphawallet.token.entity.ContractAddress;
@@ -76,20 +75,20 @@ import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import org.jetbrains.annotations.NotNull;
+import org.web3j.abi.DefaultFunctionEncoder;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
-import org.web3j.abi.datatypes.Bytes;
-import org.web3j.abi.datatypes.DynamicArray;
-import org.web3j.abi.datatypes.DynamicStruct;
+import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.StaticStruct;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.abi.datatypes.generated.Uint64;
+import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.Web3j;
@@ -140,6 +139,7 @@ import io.realm.Sort;
 import io.realm.exceptions.RealmException;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import timber.log.Timber;
+import wallet.core.jni.Hash;
 
 
 /**
@@ -428,7 +428,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             realm.executeTransaction(r -> {
                 for (ContractLocator cl : originContracts)
                 {
-                    String entryKey = getTSDataKey(cl.chainId, cl.address);
+                    //String entryKey = getTSDataKey(cl.chainId, cl.address);
+                    String entryKey = getTSDataKeyTemp(cl.chainId, cl.address);
                     RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
                             .equalTo("instanceKey", entryKey)
                             .findFirst();
@@ -459,9 +460,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return td;
     }
 
-    private String getTSDataKey(long chainId, String address)
+    private String getTSDataKeyTemp(long chainId, String address)
     {
-        return address + "-" + chainId;
+        if (address.equalsIgnoreCase(tokensService.getCurrentAddress()))
+        {
+            address = "ethereum";
+        }
+
+        return address.toLowerCase() + "-" + chainId;
     }
 
     //Start listening to the two script directories for files dropped in.
@@ -835,10 +841,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private TokenDefinition getDefinition(long chainId, String address)
+    private TokenDefinition getDefinition(String tsKey)
     {
-        if (address.equalsIgnoreCase(tokensService.getCurrentAddress())) address = "ethereum";
         TokenDefinition result = null;
+        String[] elements = tsKey.split("-");
+        if (elements.length < 2)
+        {
+            return null;
+        }
+
+        String address = elements[0];
+        long chainId = Long.parseLong(elements[1]);
         //try cache
         if (cachedDefinition != null)
         {
@@ -856,7 +869,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
-                    .equalTo("instanceKey", getTSDataKey(chainId, address))
+                    .equalTo("instanceKey", tsKey)
                     .findFirst();
 
             if (tsData != null)
@@ -884,11 +897,27 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public TokenScriptFile getTokenScriptFile(long chainId, String address)
     {
         //pull from database
-        if (address.equalsIgnoreCase(tokensService.getCurrentAddress())) address = "ethereum";
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
-                    .equalTo("instanceKey", getTSDataKey(chainId, address))
+                    .equalTo("instanceKey", getTSDataKeyTemp(chainId, address))// getTSDataKey(chainId, address))
+                    .findFirst();
+
+            if (tsData != null && tsData.getFilePath() != null)
+            {
+                return new TokenScriptFile(context, tsData.getFilePath());
+            }
+        }
+
+        return new TokenScriptFile(context);
+    }
+
+    public TokenScriptFile getTokenScriptFile(Token token)
+    {
+        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        {
+            RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
+                    .equalTo("instanceKey", token.getTSKey())
                     .findFirst();
 
             if (tsData != null && tsData.getFilePath() != null)
@@ -915,7 +944,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             address = "ethereum";
         }
         //is asset definition currently read?
-        final TokenDefinition assetDef = getDefinition(chainId, address.toLowerCase());
+        final TokenDefinition assetDef = getDefinition(getTSDataKeyTemp(chainId, address));
         if (assetDef == null && !address.equals("ethereum"))
         {
             //try web
@@ -925,18 +954,23 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return assetDef; // if nothing found use default
     }
 
-    public Single<TokenDefinition> getAssetDefinitionASync(long chainId, final String address)
+    public Single<TokenDefinition> getAssetDefinitionASync(long chainId, String address)
     {
-        if (address == null) return Single.fromCallable(TokenDefinition::new);
-        String contractName = address;
-        if (contractName.equalsIgnoreCase(tokensService.getCurrentAddress()))
-            contractName = "ethereum";
+        if (address == null)
+        {
+            return Single.fromCallable(TokenDefinition::new);
+        }
 
-        // hold until asset definitions have finished loading
-        waitForAssets();
+        String convertedAddr = (address.equalsIgnoreCase(tokensService.getCurrentAddress())) ? "ethereum" : address.toLowerCase();
+        return getAssetDefinitionASync(getDefinition(getTSDataKeyTemp(chainId, address)), convertedAddr);
+    }
 
-        final TokenDefinition assetDef = getDefinition(chainId, contractName.toLowerCase());
-        if (assetDef != null) return Single.fromCallable(() -> assetDef);
+    private Single<TokenDefinition> getAssetDefinitionASync(final TokenDefinition assetDef, final String contractName)
+    {
+        if (assetDef != null)
+        {
+            return Single.fromCallable(() -> assetDef);
+        }
         else if (!contractName.equals("ethereum"))
         {
             //at this stage, this script isn't replacing any existing script, so it's safe to write to database without checking if we need to delete anything
@@ -944,6 +978,20 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     .flatMap(this::handleNewTSFile);
         }
         else return Single.fromCallable(TokenDefinition::new);
+    }
+
+    public Single<TokenDefinition> getAssetDefinitionASync(Token token)
+    {
+        String contractName = token.tokenInfo.address;
+        if (contractName.equalsIgnoreCase(tokensService.getCurrentAddress()))
+        {
+            contractName = "ethereum";
+        }
+
+        // hold until asset definitions have finished loading
+        waitForAssets();
+
+        return getAssetDefinitionASync(getDefinition(token.getTSKey()), contractName);
     }
 
     private void waitForAssets()
@@ -969,7 +1017,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
-                    .equalTo("instanceKey", getTSDataKey(chainId, address))
+                    .equalTo("instanceKey", getTSDataKeyTemp(chainId, address))
                     .findFirst();
 
             if (tsData != null)
@@ -995,15 +1043,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      */
     public String getIssuerName(Token token)
     {
-        long chainId = token.tokenInfo.chainId;
-        String address = token.tokenInfo.address;
-
         String issuer = token.getNetworkName();
 
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
-                    .equalTo("instanceKey", getTSDataKey(chainId, address))
+                    .equalTo("instanceKey", token.getTSKey())
                     .findFirst();
 
             if (tsData != null)
@@ -1107,7 +1152,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             realm.executeTransaction(r -> {
                 for (ContractLocator cl : origins)
                 {
-                    String entryKey = getTSDataKey(cl.chainId, cl.address);
+                    String entryKey = getTSDataKeyTemp(cl.chainId, cl.address);
                     RealmTokenScriptData realmData = r.where(RealmTokenScriptData.class)
                             .equalTo("instanceKey", entryKey)
                             .findFirst();
@@ -1137,7 +1182,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         return token.getScriptURI()
                 .map(uri -> {
-                    if (!TextUtils.isEmpty(uri))
+                    if (!TextUtils.isEmpty(uri) && updateFlag != null)
                     {
                         updateFlag.postValue(true);
                     }
@@ -1156,7 +1201,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             return new File(UNCHANGED_SCRIPT); // blank file with UNCHANGED name
         }
 
-        File storeFile = storeFile(token.tokenInfo.address, scriptData.second);
+        String tokenKey = token.getTSKey();
+
+        File storeFile = storeFile(tokenKey, scriptData.second);
 
         TokenScriptFile tsf = new TokenScriptFile(context, storeFile.getAbsolutePath());
 
@@ -1165,14 +1212,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             realm.executeTransaction(r -> {
-                String entryKey = getTSDataKey(token.tokenInfo.chainId, token.tokenInfo.address);
+                //String entryKey = getTSDataKey(token.tokenInfo.chainId, token.tokenInfo.address);
                 RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
-                        .equalTo("instanceKey", entryKey)
+                        .equalTo("instanceKey", tokenKey)
                         .findFirst();
 
                 if (entry == null)
                 {
-                    entry = r.createObject(RealmTokenScriptData.class, entryKey);
+                    entry = r.createObject(RealmTokenScriptData.class, tokenKey);
                 }
 
                 entry.setFileHash(fileHash);
@@ -1194,15 +1241,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         String returnUri = uri;
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
-            String entryKey = getTSDataKey(token.tokenInfo.chainId, token.tokenInfo.address);
-
-            /*realm.executeTransaction(r -> {
-                RealmTokenScriptData entry = realm.where(RealmTokenScriptData.class)
-                        .equalTo("instanceKey", entryKey)
-                        .findFirst();
-
-                entry.setIpfsPath("");
-            });*/
+            String entryKey = token.getTSKey(); //getTSDataKey(token.tokenInfo.chainId, token.tokenInfo.address);
 
             RealmTokenScriptData entry = realm.where(RealmTokenScriptData.class)
                     .equalTo("instanceKey", entryKey)
@@ -1427,7 +1466,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             realm.executeTransaction(r -> {
-                String entryKey = getTSDataKey(chainId, address);
+                String entryKey = getTSDataKeyTemp(chainId, address);
                 RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
                         .equalTo("instanceKey", entryKey)
                         .findFirst();
@@ -1947,14 +1986,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return file;
     }
 
-    public boolean hasDefinition(long chainId, String address)
+    public boolean hasDefinition(Token token)
     {
         boolean hasDefinition = false;
-        if (address.equalsIgnoreCase(tokensService.getCurrentAddress())) address = "ethereum";
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
-                    .equalTo("instanceKey", getTSDataKey(chainId, address))
+                    .equalTo("instanceKey", token.getTSKey())
                     .findFirst();
 
             hasDefinition = tsData != null;
@@ -1969,13 +2007,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         assetChecked.clear();
     }
 
-    public boolean hasTokenView(long chainId, String address, String type)
+    public boolean hasTokenView(Token token, String type)
     {
-        if (address.equalsIgnoreCase(tokensService.getCurrentAddress())) address = "ethereum";
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
-                    .equalTo("instanceKey", getTSDataKey(chainId, address))
+                    .equalTo("instanceKey", token.getTSKey())
                     .findFirst();
 
             return (tsData != null && tsData.getViewList().size() > 0);
@@ -2311,14 +2348,25 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return observer;
     }
 
+    public Single<XMLDsigDescriptor> getSignatureData(Token token)
+    {
+        TokenScriptFile tsf = getTokenScriptFile(token);
+        return getSignatureData(tsf);
+    }
+
     public Single<XMLDsigDescriptor> getSignatureData(long chainId, String contractAddress)
+    {
+        TokenScriptFile tsf = getTokenScriptFile(chainId, contractAddress);
+        return getSignatureData(tsf);
+    }
+
+    private Single<XMLDsigDescriptor> getSignatureData(TokenScriptFile tsf)
     {
         return Single.fromCallable(() -> {
             XMLDsigDescriptor sigDescriptor = new XMLDsigDescriptor();
             sigDescriptor.result = "fail";
             sigDescriptor.type = SigReturnType.NO_TOKENSCRIPT;
 
-            TokenScriptFile tsf = getTokenScriptFile(chainId, contractAddress);
             if (tsf != null && tsf.exists())
             {
                 String hash = tsf.calcMD5();
@@ -2608,23 +2656,73 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return resolveAttrs(token, tokenId, definition, attrList, itemView);
     }
 
-    public TokenScriptResult.Attribute getAvailableAttestation(Token token, TSAction action, String attnId)
+    /*private Function formValidation(EasAttestation attn)
     {
+        //Commented out
+        byte[] signature = attn.getSignatureBytes();
+
+        List<Type> inputParams = Arrays.asList(attn.getAttestationCore(), new DynamicBytes(signature));
+        DefaultFunctionEncoder dfe = new DefaultFunctionEncoder();
+
+        List<Type> inputParam = Collections.singletonList(attn.getAttestationCore());
+        String hex = dfe.encodeParameters(inputParam);
+        //trim struct definition
+        hex = hex.substring(0x40);
+
+        List<TypeReference<?>> returnTypes = Arrays.asList(new TypeReference<Bool>() { }, new TypeReference<Address>() { }, new TypeReference<Address>() { }, new TypeReference<Bool>() { }, new TypeReference<Uint64>() { });
+        Function testValidation = new Function("verifyEASAttestation",
+                inputParams,
+                returnTypes);
+
+        String contractAddress = "0xeAC4F618232B5cA1C895B6e5468363fdd128E873";
+
+        String result = tokenscriptUtility.callSmartContract(attn.getChainId(), contractAddress, testValidation);
+        List<Type> values = FunctionReturnDecoder.decode(result, testValidation.getOutputParameters());
+
+        inputParams.clear();
+        //(string memory eventId, string memory ticketId, uint8 ticketClass, bytes memory commitment)
+        returnTypes = Arrays.asList(new TypeReference<Utf8String>() { }, new TypeReference<Utf8String>() { }, new TypeReference<Uint8>() { }, new TypeReference<DynamicBytes>() { });
+
+
+        //OK. Try decode
+        testValidation = new Function("decodeAttestationData",
+                inputParam,
+                returnTypes);
+
+
+        return testValidation;
+    }*/
+
+    public List<TokenScriptResult.Attribute> getAttestationAttrs(Token token, TSAction action, String attnId)
+    {
+        List<TokenScriptResult.Attribute> attrs = new ArrayList<>();
         Attestation att = (action != null && action.modifier == ActionModifier.ATTESTATION) ? (Attestation) tokensService.getAttestation(token.tokenInfo.chainId, token.getAddress(), attnId) : null;
         if (att != null)
         {
-            return new TokenScriptResult.Attribute("attestation", "attestation", BigInteger.ZERO, Numeric.toHexString(att.getAttestation()));
+            if (att.isEAS())
+            {
+                //can we rebuild the EasAttestation?
+                DefaultFunctionEncoder dfe = new DefaultFunctionEncoder();
+                EasAttestation easAttestation = att.getEasAttestation();
+                List<Type> inputParam = Collections.singletonList(easAttestation.getAttestationCore());
+                String coreAttestationHex = "0x" + dfe.encodeParameters(inputParam).substring(0x40);
+                attrs.add(new TokenScriptResult.Attribute("attestation", "attestation", BigInteger.ZERO, coreAttestationHex));
+                //also require signature
+                String signatureBytes = Numeric.toHexString(easAttestation.getSignatureBytes());
+                attrs.add(new TokenScriptResult.Attribute("attestationSig", "attestationSig", BigInteger.ZERO, signatureBytes));
+            }
+            else
+            {
+                attrs.add(new TokenScriptResult.Attribute("attestation", "attestation", BigInteger.ZERO, Numeric.toHexString(att.getAttestation())));
+            }
         }
-        else
-        {
-            return null;
-        }
+
+        return attrs;
     }
 
-    public Map<String, TSAction> getAttestationFunctionMap(long chainId, String address, String attnId)
+    public Map<String, TSAction> getAttestationFunctionMap(Token att)
     {
-        Token att = tokensService.getAttestation(chainId, address, attnId);
-        TokenDefinition td = getAssetDefinition(chainId, address);
+        TokenDefinition td = getAssetDefinition(att.tokenInfo.chainId, att.tokenInfo.address);
         Map<String, TSAction> actions = new HashMap<>();
         if (att != null && td != null)
         {
@@ -2819,7 +2917,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public Single<TokenDefinition> checkServerForScript(Token token, MutableLiveData<Boolean> updateFlag)
     {
-        TokenScriptFile tf = getTokenScriptFile(token.tokenInfo.chainId, token.getAddress());
+        TokenScriptFile tf = getTokenScriptFile(token);
+
         if ((tf != null && !TextUtils.isEmpty(tf.getName())) && !isInSecureZone(tf))
         {
             return Single.fromCallable(TokenDefinition::new); //early return for debug script check
@@ -2975,7 +3074,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public Attestation validateAttestation(String attestation, TokenInfo tInfo)
     {
-        TokenDefinition td = getDefinition(tInfo.chainId, tInfo.address);
+        TokenDefinition td = getDefinition(getTSDataKeyTemp(tInfo.chainId, tInfo.address));//getDefinition(tInfo.chainId, tInfo.address);
         Attestation att = null;
 
         if (td != null)
@@ -3029,16 +3128,35 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         List<Type> values = decodeAttestationData(attestation.data, attestationSchema.schema, names);
 
         NetworkInfo networkInfo = EthereumNetworkBase.getNetworkByChain(attestation.getChainId());
-        //For EAS attestation use the EAS contract as the token base
-        TokenInfo tInfo = Utils.getDefaultAttestationInfo(attestation.getChainId());
-        Attestation localAttestation = new Attestation(tInfo, networkInfo.name, importedAttestation.getBytes(StandardCharsets.UTF_8));
 
+        TokenInfo tInfo = Utils.getDefaultAttestationInfo(attestation.getChainId(), getEASContract(attestation.chainId));
+        Attestation localAttestation = new Attestation(tInfo, networkInfo.name, importedAttestation.getBytes(StandardCharsets.UTF_8));
+        localAttestation.handleEASAttestation(attestation, names, values, attestationValid);
+
+        String collectionHash = localAttestation.getAttestationCollectionId();
+
+        //Now regenerate with the correct collectionId
+        tInfo = Utils.getDefaultAttestationInfo(attestation.getChainId(), collectionHash);
+        localAttestation = new Attestation(tInfo, networkInfo.name, importedAttestation.getBytes(StandardCharsets.UTF_8));
         localAttestation.handleEASAttestation(attestation, names, values, attestationValid);
         localAttestation.setTokenWallet(tokensService.getCurrentAddress());
         return localAttestation;
     }
 
-    private List<Type> decodeAttestationData(String attestationData, String decodeSchema, List<String> names)
+    private String getDataValue(String key, List<String> names, List<Type> values)
+    {
+        Map<String, String> valueMap = new HashMap<>();
+        for (int index = 0; index < names.size(); index++)
+        {
+            String name = names.get(index);
+            Type<?> type = values.get(index);
+            valueMap.put(name, type.toString());
+        }
+
+        return valueMap.get(key);
+    }
+
+    private List<Type> decodeAttestationData(String attestationData, @NonNull String decodeSchema, List<String> names)
     {
         List<TypeReference<?>> returnTypes = new ArrayList<TypeReference<?>>();
         //build decoder
@@ -3074,7 +3192,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     tRef = new TypeReference<Utf8String>() { };
                     break;
                 case "bytes":
-                    tRef = new TypeReference<Bytes>() { };
+                    tRef = new TypeReference<DynamicBytes>() { };
                     break;
                 case "bool":
                     tRef = new TypeReference<Bool>() { };
@@ -3098,34 +3216,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //decode the schema and populate the Attestation element
         return FunctionReturnDecoder.decode(attestationData, org.web3j.abi.Utils.convert(returnTypes));
-    }
-
-    public static class SchemaRecord extends DynamicStruct
-    {
-        public byte[] uid;
-        public Address resolver;
-        public boolean revocable;
-        public String schema;
-
-        public SchemaRecord(byte[] uid, Address resolver, boolean revocable, String schema) {
-            super(
-                    new org.web3j.abi.datatypes.generated.Bytes32(uid),
-                    new org.web3j.abi.datatypes.Address(resolver.getValue()),
-                    new org.web3j.abi.datatypes.Bool(revocable),
-                    new org.web3j.abi.datatypes.Utf8String(schema));
-            this.uid = uid;
-            this.resolver = resolver;
-            this.revocable = revocable;
-            this.schema = schema;
-        }
-
-        public SchemaRecord(Bytes32 uid, Address resolver, Bool revocable, Utf8String schema) {
-            super(uid, resolver, revocable, schema);
-            this.uid = uid.getValue();
-            this.resolver = resolver;
-            this.revocable = revocable.getValue();
-            this.schema = schema.getValue();
-        }
     }
 
     private SchemaRecord fetchSchemaRecord(long chainId, String schemaUID)

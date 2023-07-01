@@ -156,7 +156,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         viewModel.checkTokenScriptValidity(token);
         token.clearResultMap();
 
-        if (token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
+        if (token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token))
         {
             loadItemViewHeight();
         }
@@ -195,7 +195,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     private void onNewScript(Boolean aBoolean)
     {
         //need to reload tokens, now we have an updated/new script
-        if (viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
+        if (viewModel.getAssetDefinitionService().hasDefinition(token))
         {
             initWebViewCheck();
             handler.postDelayed(this, TOKEN_SIZING_DELAY);
@@ -361,7 +361,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         }
         else
         {
-            viewModel.showFunction(this, token, function, selection);
+            viewModel.showFunction(this, token, function, selection, null);
         }
     }
 

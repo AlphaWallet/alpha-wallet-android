@@ -177,9 +177,9 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         callStandardFunctions = functionInterface;
         adapter = adp;
         selection.clear();
+        resetButtonCount();
         this.token = token;
-        functions = assetSvs.getAttestationFunctionMap(token.tokenInfo.chainId, token.getAddress(), ((Attestation)token).getAttestationUID());
-        //selection.add(((Attestation)token).getAttestationUID());
+        functions = assetSvs.getAttestationFunctionMap(token);
         assetService = assetSvs;
         showButtons = true;
 

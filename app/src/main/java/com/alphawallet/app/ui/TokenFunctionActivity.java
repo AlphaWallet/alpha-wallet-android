@@ -296,7 +296,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         }
         else
         {
-            viewModel.showFunction(this, token, function, idList);
+            viewModel.showFunction(this, token, function, idList, null);
         }
     }
 

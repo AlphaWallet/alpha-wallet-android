@@ -35,9 +35,11 @@ import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.tools.TokenDefinition;
 
 import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthLog;
@@ -657,10 +659,15 @@ public class Token
 
     public String getTokenName(AssetDefinitionService assetService, int count)
     {
+        String name = "";
         //see if this token is covered by any contract
-        if (assetService != null && assetService.hasDefinition(tokenInfo.chainId, tokenInfo.address))
+        if (assetService != null && assetService.hasDefinition(this))
         {
-            String name = assetService.getAssetDefinition(tokenInfo.chainId, getAddress()).getTokenName(count);
+            TokenDefinition td = assetService.getAssetDefinition(tokenInfo.chainId, getAddress());
+            if (td != null)
+            {
+                name = td.getTokenName(count);
+            }
             if (isNonFungible() && !TextUtils.isEmpty(name))
             {
                 return name;
@@ -669,15 +676,13 @@ public class Token
             {
                 return tokenInfo.name;
             }
-            else
+            else if (!TextUtils.isEmpty(name))
             {
                 return name;
             }
         }
-        else
-        {
-            return tokenInfo.name;
-        }
+
+        return tokenInfo.name;
     }
 
     public boolean hasRealValue()
@@ -1070,7 +1075,6 @@ public class Token
         return contractInteract.getScriptFileURI();
     }
 
-
     /**
      * Event filters for send and receive of the token, overriden by the token type
      */
@@ -1092,5 +1096,27 @@ public class Token
     public void addAssetElements(NFTAsset asset, Context ctx)
     {
 
+    }
+
+    public String getTSKey()
+    {
+        if (isEthereum())
+        {
+            return "ethereum-" + tokenInfo.chainId;
+        }
+        else
+        {
+            return tokenInfo.address.toLowerCase() + "-" + tokenInfo.chainId;
+        }
+    }
+
+    public Type<?> getIntrinsicType(String name)
+    {
+        return null;
+    }
+
+    public String getAttrValue(String typeName)
+    {
+        return "";
     }
 }

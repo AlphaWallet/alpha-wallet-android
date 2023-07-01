@@ -10,25 +10,34 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.repository.entity.RealmAttestation;
+import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.AttestationValidation;
 import com.alphawallet.token.entity.AttestationValidationStatus;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.tools.Numeric;
+import com.alphawallet.token.tools.TokenDefinition;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.crypto.Sign;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import io.reactivex.Single;
 import timber.log.Timber;
+import wallet.core.jni.Hash;
 
 /**
  * Created by JB on 23/02/2023.
@@ -45,9 +54,12 @@ public class Attestation extends Token
     private final Map<String, MemberData> additionalMembers = new HashMap<>();
     private boolean isValid;
     private ContractType baseTokenType = ContractType.ERC721; // default to ERC721
-    private static final String VALID_FROM = "validFrom";
-    private static final String VALID_TO = "validTo";
+    private static final String VALID_FROM = "time";
+    private static final String VALID_TO = "expirationTime";
     private static final String TICKET_ID = "TicketId";
+    private static final String SCRIPT_URI = "scriptURI";
+    private static final String EVENT_ID = "eventId";
+    private static final String SCHEMA_DATA_PREFIX = "data.";
 
 
     //TODO: Supplemental data
@@ -82,9 +94,8 @@ public class Attestation extends Token
             addToMemberData(t.getKey(), t.getValue());
         }
 
-        MemberData ticketId = new MemberData(TICKET_ID, attValidation._attestationId.longValue());
-        ticketId.setIsSchema();
-        additionalMembers.put(TICKET_ID, ticketId);
+        MemberData ticketId = new MemberData(SCHEMA_DATA_PREFIX + TICKET_ID, attValidation._attestationId.longValue());
+        additionalMembers.put(SCHEMA_DATA_PREFIX + TICKET_ID, ticketId);
     }
 
     public void handleEASAttestation(EasAttestation attn, List<String> names, List<Type> values, boolean isAttestationValid)
@@ -92,7 +103,7 @@ public class Attestation extends Token
         //add members
         for (int index = 0; index < names.size(); index++)
         {
-            String name = names.get(index);
+            String name = SCHEMA_DATA_PREFIX + names.get(index);
             Type<?> type = values.get(index);
             addToMemberData(name, type);
         }
@@ -104,8 +115,12 @@ public class Attestation extends Token
         validUntil = attn.expirationTime;
         long currentTime = System.currentTimeMillis() / 1000L;
         isValid = currentTime > validFrom && (validUntil == 0 || currentTime < validUntil);
-        additionalMembers.put(VALID_FROM, new MemberData(VALID_FROM, attn.time));
-        additionalMembers.put(VALID_TO, new MemberData(VALID_TO, attn.expirationTime));
+
+        additionalMembers.put(VALID_FROM, new MemberData(VALID_FROM, attn.time).setIsTime());
+        if (attn.expirationTime > 0)
+        {
+            additionalMembers.put(VALID_TO, new MemberData(VALID_TO, attn.expirationTime).setIsTime());
+        }
     }
 
     public AttestationValidationStatus isValid()
@@ -117,7 +132,7 @@ public class Attestation extends Token
         }
 
         //Check attestation is being collected by the correct wallet (TODO: if not correct wallet, and wallet is present in user's wallets offer to switch wallet)
-        if (TextUtils.isEmpty(attestationSubject) || !attestationSubject.equalsIgnoreCase(getWallet()))
+        if (TextUtils.isEmpty(attestationSubject) || (!attestationSubject.equalsIgnoreCase(getWallet()) && !attestationSubject.equals("0")))
         {
             return AttestationValidationStatus.Incorrect_Subject;
         }
@@ -136,26 +151,92 @@ public class Attestation extends Token
         StringBuilder identifier = new StringBuilder();
         for (Map.Entry<String, MemberData> m : additionalMembers.entrySet())
         {
-            if (m.getValue().isSchemaValue())
+            if (m.getValue().isURI() || !m.getValue().isSchemaValue() || m.getValue().isBytes()) //this may change between same attestations.
+            {
+                continue;
+            }
+
+            if (identifier.length() > 0)
+            {
+                identifier.append("-");
+            }
+
+            identifier.append(m.getValue().getString());
+        }
+
+        return Numeric.toHexStringNoPrefix(Hash.keccak256(identifier.toString().getBytes(StandardCharsets.UTF_8)));
+    }
+
+    public String getAttestationCollectionId()
+    {
+        String eventId = null;
+        MemberData eventMember = additionalMembers.get(EVENT_ID);
+        if (eventMember != null)
+        {
+            eventId = eventMember.getString();
+        }
+
+        EasAttestation easAttestation = getEasAttestation();
+
+        //issuer public key
+        //calculate hash from attestation
+        String hexStr = Numeric.cleanHexPrefix(easAttestation.schema) + "-" + Numeric.cleanHexPrefix(recoverPublicKey(easAttestation)) + (!TextUtils.isEmpty(eventId) ? ("-" + eventId) : "");
+        //now convert this into ASCII hex bytes
+        byte[] collectionBytes = hexStr.getBytes(StandardCharsets.UTF_8);
+        //get Hash
+        byte[] hash = Hash.keccak256(collectionBytes);
+
+        return Numeric.toHexString(hash);
+    }
+
+    public String getAttestationDescription(TokenDefinition td)
+    {
+        TokenDefinition.Attestation att = td != null ? td.getAttestation() : null;
+        if (att != null && att.attributes != null && att.attributes.size() > 0)
+        {
+            return displayTokenScriptAttrs(att);
+        }
+        else
+        {
+            return displayIntrinsicAttrs();
+        }
+    }
+
+    private String displayTokenScriptAttrs(TokenDefinition.Attestation att)
+    {
+        StringBuilder identifier = new StringBuilder();
+        for (Map.Entry<String, String> attr : att.attributes.entrySet())
+        {
+            String typeName = attr.getKey();
+            String attrTitle = attr.getValue();
+            MemberData attrVal = additionalMembers.get(typeName);
+            if (attrVal == null || !attrVal.isSchemaValue())
+            {
+                continue;
+            }
+
+            String attrValue = getAttrValue(typeName);
+
+            if (!TextUtils.isEmpty(attrValue))
             {
                 if (identifier.length() > 0)
                 {
-                    identifier.append("-");
+                    identifier.append(" ");
                 }
 
-                identifier.append(m.getValue().getString());
+                identifier.append(attrTitle).append(": ").append(attrValue);
             }
         }
 
         return identifier.toString();
     }
 
-    public String getAttestationDescription()
+    private String displayIntrinsicAttrs()
     {
         StringBuilder identifier = new StringBuilder();
         for (Map.Entry<String, MemberData> m : additionalMembers.entrySet())
         {
-            if (m.getValue().isSchemaValue())
+            if (m.getValue().isSchemaValue() && !m.getValue().isURI() && !m.getValue().isBytes())
             {
                 if (identifier.length() > 0)
                 {
@@ -187,13 +268,20 @@ public class Attestation extends Token
         validUntil = validToData != null ? validToData.getValue().longValue() : 0;
     }
 
+    public boolean isEAS()
+    {
+        //Can we reconstruct EASAttestation?
+        EasAttestation easAttestation = getEasAttestation();
+        return (easAttestation != null && easAttestation.getSignatureBytes().length == 65 && !TextUtils.isEmpty(easAttestation.version));
+    }
+
     @Override
     public void addAssetElements(NFTAsset asset, Context ctx)
     {
         //add all the attestation members
         for (Map.Entry<String, MemberData> m : additionalMembers.entrySet())
         {
-            if (!m.getValue().isSchemaValue())
+            if (!m.getValue().isSchemaValue() || m.getKey().contains(SCRIPT_URI))
             {
                 continue;
             }
@@ -207,6 +295,21 @@ public class Attestation extends Token
 
         addDateToAttributes(asset, validFrom, R.string.valid_from, ctx);
         addDateToAttributes(asset, validTo, R.string.valid_until, ctx);
+    }
+
+    @Override
+    public String getAttrValue(String typeName)
+    {
+        //pull out the value
+        MemberData attrVal = additionalMembers.get(typeName);
+        if (attrVal != null)
+        {
+            return attrVal.getString();
+        }
+        else
+        {
+            return "";
+        }
     }
 
     private void addDateToAttributes(NFTAsset asset, MemberData validFrom, int resource, Context ctx)
@@ -230,9 +333,8 @@ public class Attestation extends Token
         if (additionalMembers.isEmpty())
         {
             BigInteger id = recoverId(rAtt);
-            MemberData tId = new MemberData(TICKET_ID, id.longValue());
-            tId.setIsSchema();
-            additionalMembers.put(TICKET_ID, tId);
+            MemberData tId = new MemberData(SCHEMA_DATA_PREFIX + TICKET_ID, id.longValue());
+            additionalMembers.put(SCHEMA_DATA_PREFIX + TICKET_ID, tId);
         }
     }
 
@@ -312,6 +414,35 @@ public class Attestation extends Token
         }
     }
 
+    public EasAttestation getEasAttestation()
+    {
+        try
+        {
+            String rawAttestation = new String(attestation, StandardCharsets.UTF_8);
+            EasAttestation easAttn = new Gson().fromJson(rawAttestation, EasAttestation.class);
+            return easAttn;
+        }
+        catch (Exception e) //Expected
+        {
+            return null;
+        }
+    }
+
+    public String getAttestationName(TokenDefinition td)
+    {
+        NFTAsset nftAsset = new NFTAsset();
+        nftAsset.setupScriptElements(td);
+        String name = nftAsset.getName();
+        if (!TextUtils.isEmpty(name))
+        {
+            return name;
+        }
+        else
+        {
+            return tokenInfo.name;
+        }
+    }
+
     private static class MemberData
     {
         JSONObject element;
@@ -323,8 +454,15 @@ public class Attestation extends Token
                 element = new JSONObject();
                 element.put("name", name);
                 element.put("type", type.getTypeAsString());
-                element.put("value", type.getValue());
-                element.put("isSchema", true);
+                if (type.getTypeAsString().equals("bytes"))
+                {
+                    byte[] ddo = (byte[])type.getValue();
+                    element.put("value", Numeric.toHexString((byte[])type.getValue()));
+                }
+                else
+                {
+                    element.put("value", type.getValue());
+                }
             }
             catch (Exception e)
             {
@@ -409,7 +547,15 @@ public class Attestation extends Token
         {
             try
             {
-                return element.getString("value");
+                String type = element.getString("type");
+                if (type.equals("time"))
+                {
+                    return formatDate(Long.parseLong(element.getString("value")));
+                }
+                else
+                {
+                    return element.getString("value");
+                }
             }
             catch (Exception e)
             {
@@ -433,41 +579,12 @@ public class Attestation extends Token
             return false;
         }
 
-        public boolean isSchema()
-        {
-            try
-            {
-                return element.getBoolean("isSchema");
-            }
-            catch (Exception e)
-            {
-                Timber.e(e);
-            }
-
-            return false;
-        }
-
-        public void setIsSchema()
-        {
-            try
-            {
-                element.put("isSchema", true);
-            }
-            catch (Exception e)
-            {
-                Timber.e(e);
-            }
-        }
-
         public boolean isSchemaValue()
         {
-            //true if this is integer or string
             try
             {
-                return element.getBoolean("isSchema")
-                        && (element.getString("type").startsWith("uint")
-                        || element.getString("type").startsWith("int")
-                        || element.getString("type").equals("string"));
+                String name = element.getString("name");
+                return name.startsWith(SCHEMA_DATA_PREFIX);
             }
             catch (Exception e)
             {
@@ -476,5 +593,127 @@ public class Attestation extends Token
 
             return false;
         }
+
+        public boolean isURI()
+        {
+            try
+            {
+                String name = element.getString("name");
+                return name.endsWith(SCRIPT_URI);
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
+
+            return false;
+        }
+
+        public MemberData setIsTime()
+        {
+            try
+            {
+                element.put("type", "time");
+            }
+            catch (Exception e)
+            {
+                //
+            }
+            return this;
+        }
+
+        private String formatDate(long time)
+        {
+            DateFormat f = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault());
+            String formattedDate = f.format(time*1000);
+            return formattedDate;
+        }
+
+        public boolean isBytes()
+        {
+            try
+            {
+                String name = element.getString("type");
+                return name.equals("bytes");
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
+
+            return false;
+        }
+    }
+
+    /*@Override
+    public String getTSKey()
+    {
+        return tokenInfo.address.toLowerCase() + "-" + tokenInfo.chainId + "-" + getAttestationUID();
+    }*/
+
+    @Override
+    public Single<String> getScriptURI()
+    {
+        MemberData memberData = additionalMembers.get(SCHEMA_DATA_PREFIX + SCRIPT_URI);
+        if (memberData != null && !TextUtils.isEmpty(memberData.getString()))
+        {
+            return Single.fromCallable(memberData::getString);
+        }
+        else
+        {
+            return contractInteract.getScriptFileURI();
+        }
+    }
+
+    @Override
+    public Type<?> getIntrinsicType(String name)
+    {
+        EasAttestation easAttestation;
+        switch (name)
+        {
+            case "attestation":
+                easAttestation = getEasAttestation();
+                if (easAttestation != null)
+                {
+                    return easAttestation.getAttestationCore();
+                }
+                break;
+            case "attestationSig":
+                easAttestation = getEasAttestation();
+                if (easAttestation != null)
+                {
+                    return new DynamicBytes(easAttestation.getSignatureBytes());
+                }
+                break;
+            default:
+                break;
+        }
+
+        return null;
+    }
+
+    private static String recoverPublicKey(EasAttestation attestation)
+    {
+        String recoveredKey = "";
+
+        try
+        {
+            StructuredDataEncoder dataEncoder = new StructuredDataEncoder(attestation.getEIP712Attestation());
+            byte[] hash = dataEncoder.hashStructuredData();
+            byte[] r = Numeric.hexStringToByteArray(attestation.getR());
+            byte[] s = Numeric.hexStringToByteArray(attestation.getS());
+            byte v = (byte)(attestation.getV() & 0xFF);
+
+            Sign.SignatureData sig = new Sign.SignatureData(v, r, s);
+
+            BigInteger key = Sign.signedMessageHashToKey(hash, sig);
+            recoveredKey = Numeric.toHexString(Numeric.toBytesPadded(key, 64));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return recoveredKey;
     }
 }

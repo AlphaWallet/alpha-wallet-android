@@ -33,6 +33,7 @@ import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Bytes;
+import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Bytes32;
@@ -47,6 +48,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +65,7 @@ public class TokenDefinition
     protected Locale locale;
 
     public final Map<String, ContractInfo> contracts = new HashMap<>();
+    public final Map<String, Attestation> attestations = new HashMap<>();
     public final Map<String, TSAction> actions = new HashMap<>();
     private Map<String, String> labels = new HashMap<>(); // store plural etc for token name
     private final Map<String, NamedType> namedTypeLookup = new HashMap<>(); //used to protect against name collision
@@ -70,7 +73,6 @@ public class TokenDefinition
     private final Map<String, TSSelection> selections = new HashMap<>();
     private final Map<String, TSActivityView> activityCards = new HashMap<>();
     private final Map<String, AttnElement> structs = new HashMap<>();
-    private Attestation attestation = null;
 
     public String nameSpace;
     public TokenscriptContext context;
@@ -129,7 +131,7 @@ public class TokenDefinition
 
     public Attestation getAttestation()
     {
-        return attestation;
+        return attestations.get(holdingToken);
     }
 
     public EventDefinition parseEvent(Element resolve) throws SAXException
@@ -442,7 +444,7 @@ public class TokenDefinition
                 {
                     case "origins":
                         TSOrigins origin = parseOrigins(element); //parseOrigins(element);
-                        if (origin.isType(TSOriginType.Contract)) holdingToken = origin.getOriginName();
+                        if (origin.isType(TSOriginType.Contract) || origin.isType(TSOriginType.Attestation)) holdingToken = origin.getOriginName();
                         break;
                     case "contract":
                         handleAddresses(element);
@@ -476,7 +478,8 @@ public class TokenDefinition
                         }
                         break;
                     case "attestation":
-                        attestation = scanAttestation(element);
+                        Attestation attestation = scanAttestation(element);
+                        attestations.put(attestation.name, attestation);
                         break;
                     default:
                         break;
@@ -883,9 +886,9 @@ public class TokenDefinition
 
     private Attestation scanAttestation(Node attestationNode) throws SAXException
     {
-        Attestation attn = new Attestation();
-        //NodeList nList;
-        //nList = xml.getElementsByTagNameNS("https://github.com/TokenScript/attestation", "attestation");
+        Element element = (Element) attestationNode;
+        String name = element.getAttribute("name");
+        Attestation attn = new Attestation(name);
 
         for (Node n = attestationNode.getFirstChild(); n != null; n = n.getNextSibling())
         {
@@ -894,18 +897,23 @@ public class TokenDefinition
 
             switch (attnElement.getLocalName())
             {
+                case "meta":
+                    //read elements of the metadata
+                    attn.addMetaData(attnElement);
+                    break;
                 case "display":
                     handleAttestationDisplay(attnElement);
                     break;
-
+                case "eas":
+                    attn.addAttributes(attnElement);
+                    break;
                 case "struct":
                 case "ProofOfKnowledge":
-                    attn.members.add(parseAttestationStruct(attnElement));
+                    //attn.members.add(parseAttestationStruct(attnElement));
                     //attestation.add(parseAttestationStruct(attnElement));
                     break;
-
                 case "origins":
-                    attn.origin = parseOrigins(attnElement);
+                    //attn.origin = parseOrigins(attnElement);
                     //advance to function
                     Element functionElement = getFirstChildElement(attnElement);
                     attn.function = parseFunction(functionElement, Syntax.IA5String);
@@ -1059,13 +1067,20 @@ public class TokenDefinition
 
     public AttestationValidation getValidation(List<Type> values)
     {
-        if (attestation == null || !namedTypeLookup.containsKey(attestation.function.namedTypeReturn))
+        //legacy attestations should only have one type
+        Attestation attn = null;
+        if (attestations.size() > 0)
+        {
+            attn = (Attestation)attestations.values().toArray()[0];
+        }
+
+        if (attn == null || !namedTypeLookup.containsKey(attn.function.namedTypeReturn))
         {
             return null;
         }
 
         //get namedType for return
-        NamedType nType = namedTypeLookup.get(attestation.function.namedTypeReturn);
+        NamedType nType = namedTypeLookup.get(attn.function.namedTypeReturn);
         AttestationValidation.Builder builder = new AttestationValidation.Builder();
 
         //find issuerkey
@@ -1106,13 +1121,19 @@ public class TokenDefinition
     public List<TypeReference<?>> getAttestationReturnTypes()
     {
         List<TypeReference<?>> returnTypes = new ArrayList<>();
-        if (attestation == null || !namedTypeLookup.containsKey(attestation.function.namedTypeReturn))
+        Attestation attn = null;
+        if (attestations.size() > 0)
+        {
+            attn = (Attestation)attestations.values().toArray()[0];
+        }
+
+        if (attn == null || !namedTypeLookup.containsKey(attn.function.namedTypeReturn))
         {
             return returnTypes;
         }
 
         //get namedType for return
-        NamedType nType = namedTypeLookup.get(attestation.function.namedTypeReturn);
+        NamedType nType = namedTypeLookup.get(attn.function.namedTypeReturn);
 
         //add output params
         for (NamedType.SequenceElement element : nType.sequence)
@@ -1127,7 +1148,7 @@ public class TokenDefinition
                     returnTypes.add(new TypeReference<Bytes32>() {});
                     break;
                 case "bytes":
-                    returnTypes.add(new TypeReference<Bytes>() {});
+                    returnTypes.add(new TypeReference<DynamicBytes>() {});
                     break;
                 case "string":
                     returnTypes.add(new TypeReference<Utf8String>() {});
@@ -1240,15 +1261,66 @@ public class TokenDefinition
         BOOL,
     }
 
-    public static class Attestation
+    public class Attestation
     {
-        public TSOrigins origin; //single value for validation
+        //public TSOrigins origin; //single value for validation
         public FunctionDefinition function = null;
-        public final List<AttnElement> members;
+        //public final List<AttnElement> members;
+        public Map<String, String> metadata;
+        public Map<String, String> attributes;
+        public final String name;
+        public long chainId;
 
-        public Attestation()
+        public Attestation(String name)
         {
-            members = new ArrayList<>();
+            this.name = name;
+            metadata = null;
+            attributes = null;
+        }
+
+        public void addAttributes(Element element)
+        {
+            attributes = new HashMap<>();
+            //get schemaUID attribute
+            String schemaUID = element.getAttribute("schemaUID");
+            String networkStr = element.getAttribute("network");
+            //this is the backlink to the attestation
+            ContractInfo info = new ContractInfo("Attestation");
+            if (networkStr.length() > 0)
+            {
+                this.chainId = Long.parseLong(networkStr);
+            }
+            else
+            {
+                this.chainId = 1;
+            }
+            info.addresses.put(this.chainId, Collections.singletonList(schemaUID));
+            contracts.put(this.name, info);
+            for (Node n = element.getFirstChild(); n != null; n = n.getNextSibling())
+            {
+                if (n.getNodeType() != ELEMENT_NODE) continue;
+                Element attnElement = (Element) n;
+
+                String name = attnElement.getAttribute("name");
+                String text = attnElement.getTextContent();
+
+                attributes.put(name, text);
+            }
+        }
+
+        public void addMetaData(Element element)
+        {
+            metadata = new HashMap<>();
+            for (Node n = element.getFirstChild(); n != null; n = n.getNextSibling())
+            {
+                if (n.getNodeType() != ELEMENT_NODE) continue;
+                Element attnElement = (Element) n;
+
+                String metaName = attnElement.getLocalName();
+                String metaText = attnElement.getTextContent();
+
+                metadata.put(metaName, metaText);
+            }
         }
     }
 
@@ -1399,6 +1471,11 @@ public class TokenDefinition
                     tsOrigins = new TSOrigins.Builder(TSOriginType.Event)
                                     .name(ev.type.name)
                                     .event(ev).build();
+                    break;
+                case "attestation":
+                    String attestationName = element.getAttribute("name");
+                    tsOrigins = new TSOrigins.Builder(TSOriginType.Attestation)
+                                    .name(attestationName).build();
                     break;
                 default:
                     throw new SAXException("Unknown Origin Type: '" + element.getLocalName() + "'" );

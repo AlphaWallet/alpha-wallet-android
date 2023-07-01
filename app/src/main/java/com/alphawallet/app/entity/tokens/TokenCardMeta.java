@@ -53,7 +53,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.lastUpdate = timeStamp;
         this.type = type;
         this.balance = balance;
-        this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum(), group, attnId.hashCode());
+        this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum(), group, Math.abs(attnId.hashCode()));
         this.filterText = symbol + "'" + name;
         this.group = group;
     }

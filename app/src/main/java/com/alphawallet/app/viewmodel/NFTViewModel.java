@@ -114,7 +114,7 @@ public class NFTViewModel extends BaseViewModel {
     {
         if (token != null)
         {
-            disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)
+            disposable = assetDefinitionService.getSignatureData(token)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(sig::postValue, this::onSigCheckError);

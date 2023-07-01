@@ -3,6 +3,8 @@ package com.alphawallet.app.viewmodel;
 import static com.alphawallet.app.C.EXTRA_ADDRESS;
 import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
 import static com.alphawallet.app.widget.CopyTextView.KEY_ADDRESS;
+import static com.alphawallet.token.tools.TokenDefinition.NO_SCRIPT;
+import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
 
 import android.app.Activity;
 import android.content.ClipData;
@@ -59,6 +61,7 @@ import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.widget.WalletFragmentActionsView;
 import com.alphawallet.token.entity.AttestationValidationStatus;
+import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.Gson;
@@ -81,6 +84,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import timber.log.Timber;
 
 @HiltViewModel
 public class WalletViewModel extends BaseViewModel
@@ -378,7 +382,7 @@ public class WalletViewModel extends BaseViewModel
 
     public void showTokenDetail(Activity activity, Token token)
     {
-        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
+        boolean hasDefinition = assetDefinitionService.hasDefinition(token);
         switch (token.getInterfaceSpec())
         {
             case ETHEREUM:
@@ -673,9 +677,10 @@ public class WalletViewModel extends BaseViewModel
 
         //validation UID:
         storeAttestation(easAttn, qrAttn.functionDetail)
+                .map(this::completeImport)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(attn -> completeImport(easAttn, attn), this::onError)
+                .subscribe(this::checkTokenScript, this::onError)
                 .isDisposed();
     }
 
@@ -726,15 +731,41 @@ public class WalletViewModel extends BaseViewModel
         return attn;
     }
 
-    private void completeImport(EasAttestation attestation, Attestation tokenAttn)
+    private Token completeImport(Token token)
     {
-        if (tokenAttn.isValid() == AttestationValidationStatus.Pass)
+        if (token instanceof Attestation && ((Attestation)token).isValid() == AttestationValidationStatus.Pass)
         {
-            TokenCardMeta tcmAttestation = new TokenCardMeta(attestation.chainId, tokenAttn.getAddress(), "1", System.currentTimeMillis(),
+            Attestation tokenAttn = (Attestation)token;
+            TokenCardMeta tcmAttestation = new TokenCardMeta(tokenAttn.tokenInfo.chainId, tokenAttn.getAddress(), "1", System.currentTimeMillis(),
                     assetDefinitionService, tokenAttn.tokenInfo.name, tokenAttn.tokenInfo.symbol, tokenAttn.getBaseTokenType(),
                     TokenGroup.ATTESTATION, tokenAttn.getAttestationUID());
             tcmAttestation.isEnabled = true;
             updatedTokens.postValue(new TokenCardMeta[]{tcmAttestation});
+        }
+
+        return token;
+    }
+
+    public void checkTokenScript(Token token)
+    {
+        //check server for a TokenScript
+        disposable = assetDefinitionService.checkServerForScript(token, null)
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.single())
+                .subscribe(td -> handleFilename(td, token), Timber::w);
+    }
+
+    private void handleFilename(TokenDefinition td, Token token)
+    {
+        switch (td.nameSpace)
+        {
+            case UNCHANGED_SCRIPT:
+            case NO_SCRIPT:
+                break;
+            default:
+                //found a new script
+                completeImport(token);
+                break;
         }
     }
 

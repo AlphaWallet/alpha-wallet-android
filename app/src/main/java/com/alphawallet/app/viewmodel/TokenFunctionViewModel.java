@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
@@ -115,6 +116,7 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
     private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
+    private final MutableLiveData<Pair<GasEstimate, Web3Transaction>> gasEstimateError = new MutableLiveData<>();
     private final MutableLiveData<List<OpenSeaAsset.Trait>> traits = new MutableLiveData<>();
     private final MutableLiveData<AssetContract> assetContract = new MutableLiveData<>();
     private final MutableLiveData<NFTAsset> nftAsset = new MutableLiveData<>();
@@ -208,6 +210,11 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         return gasEstimateComplete;
     }
 
+    public MutableLiveData<Pair<GasEstimate, Web3Transaction>> gasEstimateError()
+    {
+        return gasEstimateError;
+    }
+
     public MutableLiveData<List<OpenSeaAsset.Trait>> traits()
     {
         return traits;
@@ -270,15 +277,23 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         ctx.startActivity(intent);
     }
 
-    public void showFunction(Context ctx, Token token, String method, List<BigInteger> tokenIds)
+    public void showFunction(Context ctx, Token token, String method, List<BigInteger> tokenIds, NFTAsset asset)
     {
         Intent intent = new Intent(ctx, FunctionActivity.class);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_STATE, method);
-        if (tokenIds == null)
+        if (asset != null)
+        {
+            intent.putExtra(C.EXTRA_NFTASSET, asset);
+        }
+
+        if (tokenIds == null || tokenIds.size() == 0)
+        {
             tokenIds = new ArrayList<>(Collections.singletonList(BigInteger.ZERO));
+        }
+
         intent.putExtra(C.EXTRA_TOKEN_ID, Utils.bigIntListToString(tokenIds, true));
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
@@ -286,7 +301,7 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
 
     public void checkTokenScriptValidity(Token token)
     {
-        disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)
+        disposable = assetDefinitionService.getSignatureData(token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig::postValue, this::onSigCheckError);
@@ -567,6 +582,8 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         {
             scriptUpdate.dispose();
         }
+
+        gasService.stopGasPriceCycle();
     }
 
     public OpenSeaService getOpenseaService()
@@ -641,19 +658,28 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(estimate -> buildNewConfirmation(estimate, w3tx),
-                        error -> buildNewConfirmation(new GasEstimate(BigInteger.ZERO), w3tx)); //node didn't like this tx
+                        error -> {
+                            buildNewConfirmation(new GasEstimate(BigInteger.ZERO), w3tx); //node didn't like this tx
+                        });
     }
 
     private void buildNewConfirmation(GasEstimate estimate, Web3Transaction w3tx)
     {
-        gasEstimateComplete.postValue(new Web3Transaction(
-                w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, estimate.getValue(), w3tx.nonce, w3tx.payload, w3tx.description));
+        if (estimate.hasError())
+        {
+            gasEstimateError.postValue(new Pair<>(estimate, w3tx));
+        }
+        else
+        {
+            gasEstimateComplete.postValue(new Web3Transaction(
+                    w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, estimate.getValue(), w3tx.nonce, w3tx.payload, w3tx.description));
+        }
     }
 
     @Override
     public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token)
     {
-        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
+        boolean hasDefinition = assetDefinitionService.hasDefinition(token);
         Intent intent = new Intent(context, Erc20DetailActivity.class);
         intent.putExtra(C.EXTRA_SENDING_TOKENS, !token.isEthereum());
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);

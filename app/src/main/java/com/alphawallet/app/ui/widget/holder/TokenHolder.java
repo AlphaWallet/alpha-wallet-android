@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Attestation;
@@ -34,6 +35,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.token.tools.Convert;
+import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.math.BigDecimal;
@@ -185,18 +187,13 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         Attestation attestation = (Attestation) tokensService.getAttestation(data.getChain(), data.getAddress(), data.getAttestationId());
         //TODO: Take name from schema data if available
-        if (token != null)
-        {
-            balanceEth.setText(shortTitle());
-        }
-        else
-        {
-            balanceEth.setText(attestation.tokenInfo.name);
-        }
-        //BigInteger attestationId = attestation.getAttestationUID();
-        balanceCoin.setText(attestation.getAttestationDescription());
+        TokenDefinition td = assetDefinition.getAssetDefinition(data.getChain(), data.getAddress());
+        NFTAsset nftAsset = new NFTAsset();
+        nftAsset.setupScriptElements(td);
+        balanceEth.setText(attestation.getAttestationName(td));
+        balanceCoin.setText(attestation.getAttestationDescription(td));
         balanceCoin.setVisibility(View.VISIBLE);
-        tokenIcon.setIsAttestation(attestation.getSymbol(), data.getChain());
+        tokenIcon.setAttestationIcon(nftAsset.getImage(), attestation.getSymbol(), data.getChain());
         token = attestation;
         blankTickerInfo();
     }

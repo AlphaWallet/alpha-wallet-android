@@ -148,7 +148,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         }
         else
         {
-            viewModel.showFunction(this, token, function, selection);
+            viewModel.showFunction(this, token, function, selection, null);
         }
     }
 

@@ -210,7 +210,7 @@ public class NFTViewModel extends BaseViewModel {
 
     public boolean hasTokenScript(Token token)
     {
-        return token != null && assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address) != null;
+        return token != null && assetDefinitionService.getAssetDefinition(token) != null;
     }
 
     public void updateAttributes(Token token)

@@ -401,7 +401,7 @@ public class WalletViewModel extends BaseViewModel
                 break;
 
             case ATTESTATION:
-                tokenDetailRouter.openAttestation(activity, token.tokenInfo.chainId, token.getAddress(), defaultWallet.getValue(), new NFTAsset((Attestation)token));
+                tokenDetailRouter.openAttestation(activity, token, defaultWallet.getValue(), new NFTAsset((Attestation)token));
                 break;
 
             case ERC721:

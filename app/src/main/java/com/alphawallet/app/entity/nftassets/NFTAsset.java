@@ -13,6 +13,7 @@ import com.alphawallet.app.entity.tokens.ERC1155Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.token.entity.AttestationDefinition;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import org.json.JSONArray;
@@ -595,7 +596,7 @@ public class NFTAsset implements Parcelable
     public boolean setupScriptElements(TokenDefinition td)
     {
         boolean hasMetaData = false;
-        TokenDefinition.Attestation internalAtt = td != null ? td.getAttestation() : null;
+        AttestationDefinition internalAtt = td != null ? td.getAttestation() : null;
         if (internalAtt != null && internalAtt.metadata.size() > 0)
         {
             internalAtt.metadata.keySet().forEach(key -> assetMap.put(key, internalAtt.metadata.get(key)));
@@ -607,7 +608,7 @@ public class NFTAsset implements Parcelable
 
     public void setupScriptAttributes(TokenDefinition td, Token token)
     {
-        TokenDefinition.Attestation internalAtt = td.getAttestation();
+        AttestationDefinition internalAtt = td.getAttestation();
         if (internalAtt != null && internalAtt.attributes != null && internalAtt.attributes.size() > 0)
         {
             for (Map.Entry<String, String> attr : internalAtt.attributes.entrySet())

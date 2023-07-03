@@ -68,13 +68,13 @@ public class TokenDetailRouter
         context.startActivityForResult(intent, C.TERMINATE_ACTIVITY);
     }
 
-    public void openAttestation(Activity context, long chainId, String address, Wallet wallet, NFTAsset asset)
+    public void openAttestation(Activity context, Token token, Wallet wallet, NFTAsset asset)
     {
         Intent intent = new Intent(context, NFTAssetDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
-        intent.putExtra(C.EXTRA_CHAIN_ID, chainId);
-        intent.putExtra(C.EXTRA_ADDRESS, address);
-        intent.putExtra(C.EXTRA_TOKEN_ID, "1");
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.tokenInfo.address);
+        intent.putExtra(C.EXTRA_TOKEN_ID, token.getUUID().toString());
         intent.putExtra(C.EXTRA_ATTESTATION_ID, asset.getAttestationID());
         intent.putExtra(C.EXTRA_NFTASSET, asset);
         context.startActivityForResult(intent, C.TERMINATE_ACTIVITY);

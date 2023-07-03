@@ -4,6 +4,7 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
 
 import com.alphawallet.token.entity.ActionModifier;
 import com.alphawallet.token.entity.As;
+import com.alphawallet.token.entity.AttestationDefinition;
 import com.alphawallet.token.entity.AttestationValidation;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.ContractInfo;
@@ -32,7 +33,6 @@ import org.w3c.dom.NodeList;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
-import org.web3j.abi.datatypes.Bytes;
 import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
@@ -48,7 +48,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +64,7 @@ public class TokenDefinition
     protected Locale locale;
 
     public final Map<String, ContractInfo> contracts = new HashMap<>();
-    public final Map<String, Attestation> attestations = new HashMap<>();
+    public final Map<String, AttestationDefinition> attestations = new HashMap<>();
     public final Map<String, TSAction> actions = new HashMap<>();
     private Map<String, String> labels = new HashMap<>(); // store plural etc for token name
     private final Map<String, NamedType> namedTypeLookup = new HashMap<>(); //used to protect against name collision
@@ -129,7 +128,7 @@ public class TokenDefinition
 
     public Map<String, TSActivityView> getActivityCards() { return activityCards; }
 
-    public Attestation getAttestation()
+    public AttestationDefinition getAttestation()
     {
         return attestations.get(holdingToken);
     }
@@ -478,7 +477,7 @@ public class TokenDefinition
                         }
                         break;
                     case "attestation":
-                        Attestation attestation = scanAttestation(element);
+                        AttestationDefinition attestation = scanAttestation(element);
                         attestations.put(attestation.name, attestation);
                         break;
                     default:
@@ -884,11 +883,11 @@ public class TokenDefinition
         return; // even if the document is signed, often it doesn't have KeyName
     }
 
-    private Attestation scanAttestation(Node attestationNode) throws SAXException
+    private AttestationDefinition scanAttestation(Node attestationNode) throws SAXException
     {
         Element element = (Element) attestationNode;
         String name = element.getAttribute("name");
-        Attestation attn = new Attestation(name);
+        AttestationDefinition attn = new AttestationDefinition(name);
 
         for (Node n = attestationNode.getFirstChild(); n != null; n = n.getNextSibling())
         {
@@ -905,7 +904,20 @@ public class TokenDefinition
                     handleAttestationDisplay(attnElement);
                     break;
                 case "eas":
-                    attn.addAttributes(attnElement);
+                    ContractInfo info = attn.addAttributes(attnElement);
+                    if (info != null)
+                    {
+                        contracts.put(attn.name, info);
+                    }
+                    break;
+                case "key":
+                    attn.handleKey(attnElement);
+                    break;
+                case "eventId":
+                    attn.handleEventId(attnElement);
+                    break;
+                case "idFields":
+                    attn.handleReplacementField(attnElement);
                     break;
                 case "struct":
                 case "ProofOfKnowledge":
@@ -920,112 +932,15 @@ public class TokenDefinition
                     attn.function.as = parseAs(functionElement);
                     break;
             }
-
-            //String label = tokenType.getAttribute("label");
-                /*switch (tokenType.getLocalName())
-                {
-                    case "token":
-                        Element tokenSpec = getFirstChildElement(tokenType);
-                        if (tokenSpec != null)
-                        {
-                            switch (tokenSpec.getLocalName())
-                            {
-                                case "ethereum":
-                                    String chainIdStr = tokenSpec.getAttribute("network");
-                                    long chainId = Long.parseLong(chainIdStr);
-                                    ContractInfo ci = new ContractInfo(tokenSpec.getLocalName());
-                                    ci.addresses.put(chainId, new ArrayList<>(Arrays.asList(ci.contractInterface)));
-                                    contracts.put(label, ci);
-                                    break;
-                                case "contract":
-                                    handleAddresses(getFirstChildElement(element));
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }*/
         }
 
         return attn;
     }
 
-    /*
-    <attn:display>
-    <attn:element name="title">
-      <attn:label contract="ReferralToken" ref="name"/>
-    </attn:element>
-    <attn:element name="subtitle">
-      <attn:label>
-        <attn:string xml:lang="en">Devcon Referral Attestation</attn:string>
-      </attn:label>
-    </attn:element>
-    <attn:element name="id">
-      <attn:label ref="ticketId"/>
-    </attn:element>
-  </attn:display>
-     */
     private void handleAttestationDisplay(Element attnElement)
     {
 
     }
-
-
-    /*
-    <attn:struct name="TicketData">
-    <attn:struct name="PreHashTicketData">
-      <attn:UTF8-String name="eventId" />
-      <attn:ASN1-Integer name="ticketId" />
-      <attn:ASN1-Integer name="ticketClass" />
-      <attn:Octet-String name="commitment2" />
-    </attn:struct>
-    <attn:signature name="IssuerSignature">
-      <attn:data>
-        <attn:prehash ref="PreHashTicketData" />
-      </attn:data>
-    </attn:signature>
-  </attn:struct>
-  <attn:struct name="SignedIdentifier">
-    <attn:struct name="IdentifierAttestation">
-      <attn:DER-Enum name="version"/>
-      <attn:ASN1-Integer name="serialNumber"/>
-      <attn:DER-Object name="signatureType"/>
-      <attn:DER-Object name="issuerSequence"/>
-      <attn:struct name="timeStamp">
-        <attn:UTF8-String name="validFromStr"/>
-        <attn:ASN1-Integer name="validFrom"/>
-        <attn:UTF8-String name="validToStr"/>
-        <attn:ASN1-Integer name="validTo"/>
-      </attn:struct>
-      <attn:DER-Object name="smartContractDef"/>
-      <attn:SubjectPublicKeyInfo name="subjectPublicKey"/>
-      <attn:struct name="filler"/>
-      <attn:DER-Compound name="commitment1"/>
-    </attn:struct>
-    <attn:signature name="AttestorSignature">
-      <attn:data>
-        <attn:prehash ref="IdentifierAttestation"/>
-      </attn:data>
-    </attn:signature>
-  </attn:struct>
-     */
-
-    //private final List<AttnElement> attestation = new ArrayList<>();
-
-    /*private AttnElement handleAttestationStruct(Element attrElement)
-    {
-        for(Node n = attrElement.getFirstChild(); n!=null; n=n.getNextSibling())
-        {
-            if (n.getNodeType() != ELEMENT_NODE) continue;
-            Element e = (Element) n;
-
-            AttnElement attnE = parseAttestationStruct(e);
-            attestation.add(attnE);
-        }
-    }*/
 
     private List<AttnElement> parseAttestationStructMembers(Node attnStruct)
     {
@@ -1068,10 +983,10 @@ public class TokenDefinition
     public AttestationValidation getValidation(List<Type> values)
     {
         //legacy attestations should only have one type
-        Attestation attn = null;
+        AttestationDefinition attn = null;
         if (attestations.size() > 0)
         {
-            attn = (Attestation)attestations.values().toArray()[0];
+            attn = (AttestationDefinition)attestations.values().toArray()[0];
         }
 
         if (attn == null || !namedTypeLookup.containsKey(attn.function.namedTypeReturn))
@@ -1121,10 +1036,10 @@ public class TokenDefinition
     public List<TypeReference<?>> getAttestationReturnTypes()
     {
         List<TypeReference<?>> returnTypes = new ArrayList<>();
-        Attestation attn = null;
+        AttestationDefinition attn = null;
         if (attestations.size() > 0)
         {
-            attn = (Attestation)attestations.values().toArray()[0];
+            attn = (AttestationDefinition)attestations.values().toArray()[0];
         }
 
         if (attn == null || !namedTypeLookup.containsKey(attn.function.namedTypeReturn))
@@ -1259,69 +1174,6 @@ public class TokenDefinition
         STRING,
         UINT,
         BOOL,
-    }
-
-    public class Attestation
-    {
-        //public TSOrigins origin; //single value for validation
-        public FunctionDefinition function = null;
-        //public final List<AttnElement> members;
-        public Map<String, String> metadata;
-        public Map<String, String> attributes;
-        public final String name;
-        public long chainId;
-
-        public Attestation(String name)
-        {
-            this.name = name;
-            metadata = null;
-            attributes = null;
-        }
-
-        public void addAttributes(Element element)
-        {
-            attributes = new HashMap<>();
-            //get schemaUID attribute
-            String schemaUID = element.getAttribute("schemaUID");
-            String networkStr = element.getAttribute("network");
-            //this is the backlink to the attestation
-            ContractInfo info = new ContractInfo("Attestation");
-            if (networkStr.length() > 0)
-            {
-                this.chainId = Long.parseLong(networkStr);
-            }
-            else
-            {
-                this.chainId = 1;
-            }
-            info.addresses.put(this.chainId, Collections.singletonList(schemaUID));
-            contracts.put(this.name, info);
-            for (Node n = element.getFirstChild(); n != null; n = n.getNextSibling())
-            {
-                if (n.getNodeType() != ELEMENT_NODE) continue;
-                Element attnElement = (Element) n;
-
-                String name = attnElement.getAttribute("name");
-                String text = attnElement.getTextContent();
-
-                attributes.put(name, text);
-            }
-        }
-
-        public void addMetaData(Element element)
-        {
-            metadata = new HashMap<>();
-            for (Node n = element.getFirstChild(); n != null; n = n.getNextSibling())
-            {
-                if (n.getNodeType() != ELEMENT_NODE) continue;
-                Element attnElement = (Element) n;
-
-                String metaName = attnElement.getLocalName();
-                String metaText = attnElement.getTextContent();
-
-                metadata.put(metaName, metaText);
-            }
-        }
     }
 
     private static class AttnElement

@@ -53,6 +53,7 @@ import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.ethereum.NetworkInfo;
 import com.alphawallet.token.entity.ActionModifier;
+import com.alphawallet.token.entity.AttestationDefinition;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.AttributeInterface;
 import com.alphawallet.token.entity.ContractAddress;
@@ -87,8 +88,6 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.abi.datatypes.generated.Uint64;
-import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.Web3j;
@@ -139,7 +138,6 @@ import io.realm.Sort;
 import io.realm.exceptions.RealmException;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import timber.log.Timber;
-import wallet.core.jni.Hash;
 
 
 /**
@@ -158,6 +156,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private static final String EIP5169_ISSUER = "EIP5169-IPFS";
     private static final String EIP5169_CERTIFIER = "Smart Token Labs";
     private static final String EIP5169_KEY_OWNER = "Contract Owner"; //TODO Source this from the contract via owner()
+    private static final String TS_EXTENSION = ".tsml";
 
     private final Context context;
     private final IPFSServiceType ipfsService;
@@ -715,7 +714,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      */
     public Single<Boolean> refreshAllAttributes(Token token)
     {
-        TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        TokenDefinition td = getAssetDefinition(token);
         if (td == null) return Single.fromCallable(() -> false);
 
         return Single.fromCallable(() -> {
@@ -775,7 +774,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public TokenScriptResult getTokenScriptResult(Token token, BigInteger tokenId)
     {
         TokenScriptResult result = new TokenScriptResult();
-        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        TokenDefinition definition = getAssetDefinition(token);
         if (definition != null)
         {
             for (String key : definition.attributes.keySet())
@@ -824,7 +823,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public TokenScriptResult.Attribute getAttribute(Token token, BigInteger tokenId, String attribute)
     {
-        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        TokenDefinition definition = getAssetDefinition(token);
         if (definition != null && definition.attributes.containsKey(attribute))
         {
             return getTokenscriptAttr(definition, tokenId, attribute);
@@ -912,18 +911,25 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return new TokenScriptFile(context);
     }
 
+    public String getDebugPath(String fileName)
+    {
+        return context.getExternalFilesDir("") + File.separator + fileName;
+    }
+
     public TokenScriptFile getTokenScriptFile(Token token)
     {
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        String fileName = token.getTSKey() + TS_EXTENSION;
+        //first try debug file
+        TokenScriptFile tsf = new TokenScriptFile(context, getDebugPath(fileName));
+        if (tsf.exists())
         {
-            RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
-                    .equalTo("instanceKey", token.getTSKey())
-                    .findFirst();
+            return tsf;
+        }
 
-            if (tsData != null && tsData.getFilePath() != null)
-            {
-                return new TokenScriptFile(context, tsData.getFilePath());
-            }
+        File f = new File(context.getFilesDir(), fileName);
+        if (f.exists())
+        {
+            return new TokenScriptFile(context, f.getAbsolutePath());
         }
 
         return new TokenScriptFile(context);
@@ -952,6 +958,26 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return assetDef; // if nothing found use default
+    }
+
+    public TokenDefinition getAssetDefinition(Token token)
+    {
+        if (token == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            TokenScriptFile tsf = getTokenScriptFile(token);
+            return parseFile(tsf.getInputStream());
+        }
+        catch (Exception e)
+        {
+            // NOP
+        }
+
+        return null;
     }
 
     public Single<TokenDefinition> getAssetDefinitionASync(long chainId, String address)
@@ -1243,6 +1269,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             String entryKey = token.getTSKey(); //getTSDataKey(token.tokenInfo.chainId, token.tokenInfo.address);
 
+            TokenScriptFile tsf = getTokenScriptFile(token);
+
             RealmTokenScriptData entry = realm.where(RealmTokenScriptData.class)
                     .equalTo("instanceKey", entryKey)
                     .findFirst();
@@ -1250,7 +1278,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             if (entry != null && !TextUtils.isEmpty(entry.getFileHash())
                     && !TextUtils.isEmpty(entry.getFilePath())
                     && !TextUtils.isEmpty(entry.getIpfsPath())
-                    && entry.getIpfsPath().equals(uri))
+                    && entry.getIpfsPath().equals(uri)
+                    && tsf.exists())
             {
                 returnUri = UNCHANGED_SCRIPT;
             }
@@ -1815,7 +1844,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private File getDownloadedXMLFile(String contractAddress)
     {
         //if in secure area will simply be address + XML
-        String filename = contractAddress + ".xml";
+        String filename = contractAddress + TS_EXTENSION;
         File file = new File(context.getFilesDir(), filename);
         if (file.exists() && file.canRead())
         {
@@ -1963,7 +1992,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         if (result.first == null || result.first.length() < 10) return new File("");
 
-        String fName = address + ".xml";
+        String fName = address + TS_EXTENSION;
 
         //Store received files in the internal storage area - no need to ask for permissions
         File file = new File(context.getFilesDir(), fName);
@@ -2019,10 +2048,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public String getTokenView(long chainId, String contractAddr, String type)
+    public String getTokenView(Token token, String type)
     {
         String viewHTML = "";
-        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
+        TokenDefinition td = getAssetDefinition(token);
         if (td != null)
         {
             viewHTML = td.getTokenView(type);
@@ -2031,10 +2060,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return viewHTML;
     }
 
-    public String getTokenViewStyle(long chainId, String contractAddr, String type)
+    public String getTokenViewStyle(Token token, String type)
     {
         String styleData = "";
-        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
+        TokenDefinition td = getAssetDefinition(token);
         if (td != null)
         {
             styleData = td.getTokenViewStyle(type);
@@ -2043,9 +2072,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return styleData;
     }
 
-    public List<Attribute> getTokenViewLocalAttributes(long chainId, String contractAddr)
+    public List<Attribute> getTokenViewLocalAttributes(Token token)
     {
-        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
+        TokenDefinition td = getAssetDefinition(token);
         List<Attribute> results = new ArrayList<>();
         if (td != null)
         {
@@ -2056,9 +2085,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return results;
     }
 
-    public Map<String, TSAction> getTokenFunctionMap(long chainId, String contractAddr)
+    public Map<String, TSAction> getTokenFunctionMap(Token token)
     {
-        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
+        if (token.getInterfaceSpec() == ContractType.ATTESTATION)
+        {
+            return getAttestationFunctionMap(token);
+        }
+
+        TokenDefinition td = getAssetDefinition(token);
         if (td != null)
         {
             return td.getActions();
@@ -2109,7 +2143,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return Single.fromCallable(() -> {
             ActionModifier requiredActionModifier = type == ContractType.ATTESTATION ? ActionModifier.ATTESTATION : ActionModifier.NONE;
             Map<BigInteger, List<String>> validActions = new HashMap<>();
-            TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
+            TokenDefinition td = getAssetDefinition(token);
             if (td != null)
             {
                 Map<String, TSAction> actions = td.getActions();
@@ -2170,10 +2204,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public String checkFunctionDenied(Token token, String actionName, List<BigInteger> tokenIds)
     {
         String denialMessage = null;
-        TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
+        TokenDefinition td = getAssetDefinition(token);
         if (td != null)
         {
-            BigInteger tokenId = tokenIds != null ? tokenIds.get(0) : BigInteger.ZERO;
+            BigInteger tokenId = (tokenIds != null && tokenIds.size() > 0) ? tokenIds.get(0) : BigInteger.ZERO;
             TSAction action = td.actions.get(actionName);
             TSSelection selection = action.exclude != null ? td.getSelection(action.exclude) : null;
             if (selection != null)
@@ -2302,7 +2336,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     case MODIFY:
                         try
                         {
-                            if (file.contains(".xml") || file.contains(".tsml"))
+                            if (file.contains(TS_EXTENSION))
                             {
                                 final File newTsFile = new File(listenerPath, file);
                                 handleNewTSFile(newTsFile)
@@ -2581,7 +2615,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         StringBuilder attrs = new StringBuilder();
 
-        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        TokenDefinition definition = getAssetDefinition(token);
         String label = token.getTokenTitle();
         if (definition != null && definition.getTokenName(1) != null)
         {
@@ -2641,7 +2675,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, TokenDefinition td, BigInteger tokenId, List<Attribute> extraAttrs, ViewType itemView)
     {
-        TokenDefinition definition = td != null ? td : getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        TokenDefinition definition = td != null ? td : getAssetDefinition(token);
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
         if (definition == null)
             return Observable.fromCallable(() -> new TokenScriptResult.Attribute("RAttrs", "", BigInteger.ZERO, ""));
@@ -2722,7 +2756,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public Map<String, TSAction> getAttestationFunctionMap(Token att)
     {
-        TokenDefinition td = getAssetDefinition(att.tokenInfo.chainId, att.tokenInfo.address);
+        TokenDefinition td = getAssetDefinition(att);
         Map<String, TSAction> actions = new HashMap<>();
         if (att != null && td != null)
         {
@@ -2750,7 +2784,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds, List<Attribute> extraAttrs)
     {
-        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        TokenDefinition definition = getAssetDefinition(token);
         if (definition == null)
         {
             return Observable.fromCallable(() -> new TokenScriptResult.Attribute("", "", BigInteger.ZERO, ""));
@@ -2806,7 +2840,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition def)
     {
-        TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        TokenDefinition td = getAssetDefinition(token);
         if (td == null) return "";
         Function function = tokenscriptUtility.generateTransactionFunction(token, tokenId, td, def, this);
         if (function.getInputParameters() == null)
@@ -2853,7 +2887,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public String resolveReference(@NotNull Token token, TSAction action, TokenscriptElement arg, BigInteger tokenId)
     {
-        TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
+        TokenDefinition td = getAssetDefinition(token);
         return tokenscriptUtility.resolveReference(token, arg, tokenId, td, this);
     }
 
@@ -3084,7 +3118,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             att.setTokenWallet(tokensService.getCurrentAddress());
 
             //call validation function and get details
-            TokenDefinition.Attestation definitionAtt = td.getAttestation();
+            AttestationDefinition definitionAtt = td.getAttestation();
             //can we get the details?
 
             if (definitionAtt != null && definitionAtt.function != null)

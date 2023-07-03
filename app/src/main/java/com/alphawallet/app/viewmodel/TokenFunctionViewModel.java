@@ -915,7 +915,7 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
 
     public boolean hasTokenScript(Token token)
     {
-        return token != null && assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address) != null;
+        return token != null && assetDefinitionService.getAssetDefinition(token) != null;
     }
 
     public void updateLocalAttributes(Token token, BigInteger tokenId)
@@ -934,7 +934,7 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         {
             return;
         }
-        TokenDefinition td = assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        TokenDefinition td = assetDefinitionService.getAssetDefinition(token);
         List<Attribute> localAttrList = assetDefinitionService.getLocalAttributes(td, availableActions);
 
         //now refresh all these attrs

@@ -894,7 +894,7 @@ public abstract class TokenscriptFunction
     public Single<TokenScriptResult.Attribute> fetchAttrResult(Token token, Attribute attr, BigInteger tokenId,
                                                                TokenDefinition td, AttributeInterface attrIf, ViewType itemView)
     {
-        final BigInteger useTokenId = (attr == null || !attr.usesTokenId()) ? BigInteger.ZERO : tokenId;
+        final BigInteger useTokenId = (attr == null) ? BigInteger.ZERO : tokenId;
         if (attr == null)
         {
             return Single.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));

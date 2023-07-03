@@ -389,14 +389,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-            if (asset != null && asset.isAttestation())
-            {
-                functionBar.setupAttestationFunctions(this, viewModel.getAssetDefinitionService(), token, null);
-            }
-            else
-            {
-                functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
-            }
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
             functionBar.revealButtons();
             functionBar.setWalletType(wallet.type);
         }
@@ -409,7 +402,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         {
             for (TokenScriptResult.Attribute attr : attestationAttrs)
             {
-                token.setAttributeResult(BigInteger.ONE, attr);
+                token.setAttributeResult(tokenId, attr);
             }
         }
     }
@@ -626,7 +619,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private void setupAttestation()
     {
         NFTAsset attnAsset = new NFTAsset();
-        TokenDefinition td = viewModel.getAssetDefinitionService().getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        TokenDefinition td = viewModel.getAssetDefinitionService().getAssetDefinition(token);
         if (td != null)
         {
             attnAsset.setupScriptElements(td);
@@ -704,7 +697,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
         //does the function have a view? If it's transaction only then handle here
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         if (functions == null) return;
         TSAction action = functions.get(function);
         token.clearResultMap();

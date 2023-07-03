@@ -663,7 +663,7 @@ public class Token
         //see if this token is covered by any contract
         if (assetService != null && assetService.hasDefinition(this))
         {
-            TokenDefinition td = assetService.getAssetDefinition(tokenInfo.chainId, getAddress());
+            TokenDefinition td = assetService.getAssetDefinition(this);
             if (td != null)
             {
                 name = td.getTokenName(count);
@@ -1118,5 +1118,15 @@ public class Token
     public String getAttrValue(String typeName)
     {
         return "";
+    }
+
+    public BigInteger getUUID()
+    {
+        return BigInteger.ONE;
+    }
+
+    public String getAttestationCollectionId()
+    {
+        return getTSKey();
     }
 }

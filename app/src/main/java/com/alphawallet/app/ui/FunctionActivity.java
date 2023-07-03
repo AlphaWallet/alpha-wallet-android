@@ -161,7 +161,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         try
         {
-            Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+            Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
             TSAction action = functions.get(actionMethod);
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
 
@@ -192,7 +192,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
 
         // Fetch attributes local to this action and add them to the injected token properties
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         if (functions == null)
         {
             recreate();
@@ -214,7 +214,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void addMultipleTokenIds(StringBuilder sb)
     {
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         TSAction action = functions.get(actionMethod);
         boolean hasTokenIds = false;
 
@@ -329,7 +329,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void completeTokenScriptFunction(String function)
     {
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         if (functions == null) return;
         action = functions.get(function);
 

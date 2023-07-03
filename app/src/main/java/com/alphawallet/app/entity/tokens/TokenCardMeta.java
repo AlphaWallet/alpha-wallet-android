@@ -65,8 +65,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         {
             int sepIndex = tokenId.indexOf("-");
             sepIndex = tokenId.indexOf("-", sepIndex+1);
-            String attnId = tokenId.substring(sepIndex+1, tokenId.length() - 4);
-            return attnId;
+            return tokenId.substring(sepIndex+1, tokenId.length() - 4);
         }
         else
         {
@@ -200,7 +199,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     private long calculateTokenNameWeight(long chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth, TokenGroup group, int attnId)
     {
-        int weight = 1000; //ensure base eth types are always displayed first
+        long weight = 1000; //ensure base eth types are always displayed first
         String name = svs != null ? svs.getTokenName(chainId, tokenAddress, 1) : null;
         if (name != null)
         {

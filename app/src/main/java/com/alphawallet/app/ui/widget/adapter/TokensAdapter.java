@@ -48,6 +48,7 @@ import com.alphawallet.token.entity.ViewType;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 {
@@ -393,7 +394,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     public SortedItem<TokenCardMeta> removeAttestation(Token token)
     {
         Attestation attn = (Attestation)token;
-        String attnKey = attn.getDatabaseKey().toLowerCase();
+        String attnKey = attn.getDatabaseKey().toLowerCase(Locale.ROOT);
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
@@ -402,7 +403,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
                 TokenSortedItem tsi = (TokenSortedItem) si;
                 TokenCardMeta thisToken = tsi.value;
 
-                if (thisToken.tokenId.toLowerCase().startsWith(attnKey))
+                if (thisToken.tokenId.toLowerCase(Locale.ROOT).startsWith(attnKey))
                 {
                     return items.removeItemAt(i);
                 }

@@ -1143,12 +1143,26 @@ public class Utils
     {
         int hashIndex = url.indexOf("#attestation=");
         String decoded;
-        if (hashIndex >= 0) //EAS style attestations have the magic link style
+        try
         {
-            url = url.substring(hashIndex + 13);
-            decoded = URLDecoder.decode(url, StandardCharsets.UTF_8);
+            if (hashIndex >= 0) //EAS style attestations have the magic link style
+            {
+                url = url.substring(hashIndex + 13);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                {
+                    decoded = URLDecoder.decode(url, StandardCharsets.UTF_8);
+                }
+                else
+                {
+                    decoded = URLDecoder.decode(url, "UTF-8");
+                }
+            }
+            else
+            {
+                decoded = url;
+            }
         }
-        else
+        catch (Exception e)
         {
             decoded = url;
         }

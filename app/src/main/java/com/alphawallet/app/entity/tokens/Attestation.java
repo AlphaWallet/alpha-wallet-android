@@ -183,7 +183,7 @@ public class Attestation extends Token
 
         //issuer public key
         //calculate hash from attestation
-        String hexStr = Numeric.cleanHexPrefix(easAttestation.schema).toLowerCase() + Keys.getAddress(recoverPublicKey(easAttestation)).toLowerCase()
+        String hexStr = Numeric.cleanHexPrefix(easAttestation.schema).toLowerCase(Locale.ROOT) + Keys.getAddress(recoverPublicKey(easAttestation)).toLowerCase(Locale.ROOT)
                 + (!TextUtils.isEmpty(eventId) ? eventId : "");
         //now convert this into ASCII hex bytes
         byte[] collectionBytes = hexStr.getBytes(StandardCharsets.UTF_8);

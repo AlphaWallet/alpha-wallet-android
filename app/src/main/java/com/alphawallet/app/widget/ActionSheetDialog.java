@@ -32,6 +32,7 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmTransaction;
+import com.alphawallet.app.service.SignatureLookupService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.TransactionSuccessActivity;
@@ -51,7 +52,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import timber.log.Timber;
 
 /**
  * Created by JB on 17/11/2020.
@@ -88,6 +93,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private boolean use1559Transactions = false;
     private Transaction transaction;
     private final WalletType walletType;
+    private Disposable disposable;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
                              String destName, String destAddress, TokensService ts,
@@ -165,7 +171,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                 List<NFTAsset> assetList = token.getAssetListFromTransaction(transaction);
                 amountDisplay.setVisibility(View.VISIBLE);
                 amountDisplay.setAmountFromAssetList(assetList);
-                setupTransactionDetails();
             }
             else
             {
@@ -174,6 +179,8 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                 assetDetailView.setVisibility(View.VISIBLE);
             }
         }
+
+        setupTransactionDetails();
 
         setupCancelListeners();
 
@@ -377,17 +384,35 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
     private void setupTransactionDetails()
     {
-        detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId, tokensService.getCurrentAddress(),
-                tokensService.getNetworkSymbol(token.tokenInfo.chainId), this);
-
         if (candidateTransaction.isBaseTransfer())
         {
             detailWidget.setVisibility(View.GONE);
+            return;
         }
         else
         {
             detailWidget.setVisibility(View.VISIBLE);
         }
+
+        SignatureLookupService svc = new SignatureLookupService();
+        disposable = svc.getFunctionName(candidateTransaction.payload)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe(this::onResult, this::recoverOnError);
+    }
+
+    private void recoverOnError(Throwable e)
+    {
+        Timber.w(e);
+        onResult("");
+    }
+
+    private void onResult(String functionName)
+    {
+        detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId,
+            tokensService.getNetworkSymbol(token.tokenInfo.chainId), this, functionName);
+
+        disposable.dispose();
     }
 
     @Override

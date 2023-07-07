@@ -1,116 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_holder"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:visibility="gone"
-    tools:visibility="visible">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/layout_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:visibility="visible">
 
     <View style="@style/Aw.Component.Separator" />
 
     <LinearLayout
-        android:id="@+id/layout_summary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingVertical="@dimen/standard_16"
-        android:paddingStart="@dimen/standard_16"
-        android:paddingEnd="@dimen/mini_4">
-
-        <TextView
-            style="@style/Aw.Typography.Label"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="@integer/widget_label"
-            android:gravity="start" />
-
-        <TextView
-            android:id="@+id/text_transaction_summary"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/small_12"
-            android:layout_weight="@integer/widget_content"
-            android:gravity="start"
-            tools:text="Destination: 0xabcdef" />
-
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_weight="@integer/widget_control"
-            android:background="@color/transparent"
-            android:padding="@dimen/mini_4"
-            android:src="@drawable/ic_expand_more"
-            app:tint="?colorControlNormal" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_detail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/cozy_20"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <LinearLayout
+            android:id="@+id/layout_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingVertical="@dimen/standard_16"
             android:paddingStart="@dimen/standard_16"
             android:paddingEnd="@dimen/mini_4">
 
-            <TextView
+        <TextView
                 style="@style/Aw.Typography.Label.Widget"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start|center_vertical"
-                android:layout_weight="@integer/widget_content"
-                android:text="@string/title_transaction_details"
-                android:visibility="visible" />
+                android:layout_weight="@integer/widget_label"
+                android:gravity="start"
+                android:lines="2"
+                android:text="@string/title_transaction_details" />
 
-            <androidx.viewpager.widget.ViewPager
+        <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="1dp"
+                android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/small_12"
-                android:layout_weight="@integer/widget_label" />
+                android:layout_weight="@integer/widget_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <ImageView
+            <ProgressBar
+                    android:id="@+id/progress"
+                    android:layout_width="@dimen/token_icon_small"
+                    android:layout_height="@dimen/token_icon_small"
+                    android:gravity="start" />
+
+            <TextView
+                    android:id="@+id/text_transaction_summary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="start"
+                    android:lines="1"
+                    android:visibility="gone"
+                    tools:text="Destination: 0xabcdef"
+                    tools:visibility="visible" />
+
+        </LinearLayout>
+
+        <ImageView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:layout_weight="@integer/widget_control"
                 android:background="@color/transparent"
                 android:padding="@dimen/mini_4"
-                android:src="@drawable/ic_expand_less_black"
+                android:src="@drawable/ic_expand_more"
                 app:tint="?colorControlNormal" />
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/layout_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/cozy_20"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="@dimen/standard_16"
+                android:paddingStart="@dimen/standard_16"
+                android:paddingEnd="@dimen/mini_4">
+
+            <TextView
+                    style="@style/Aw.Typography.Label.Widget"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:layout_weight="@integer/widget_content"
+                    android:text="@string/title_transaction_details"
+                    android:visibility="visible" />
+
+            <androidx.viewpager.widget.ViewPager
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="@dimen/small_12"
+                    android:layout_weight="@integer/widget_label" />
+
+            <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:layout_weight="@integer/widget_control"
+                    android:background="@color/transparent"
+                    android:padding="@dimen/mini_4"
+                    android:src="@drawable/ic_expand_less_black"
+                    app:tint="?colorControlNormal" />
 
         </LinearLayout>
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:fillViewport="true">
-
-            <TextView
-                android:id="@+id/text_full_details"
-                style="@style/Aw.Typography.Caption"
+        <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/standard_16"
-                android:layout_marginEnd="@dimen/standard_16"
-                android:clickable="false"
-                android:focusable="false"
-                android:gravity="start"
-                tools:text="0x6EBaF477F83E055589C1188bCC6DDCCD8C9B131a" />
+                android:orientation="vertical">
 
-        </ScrollView>
+            <TextView
+                    android:id="@+id/text_function_name"
+                    style="@style/Aw.Typography.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/standard_16"
+                    android:layout_marginBottom="@dimen/standard_16"
+                    tools:text="functionName()" />
+
+            <TextView
+                    android:id="@+id/text_full_details"
+                    style="@style/Aw.Typography.Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/standard_16"
+
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:gravity="start"
+                    tools:text="0x6EBaF477F83E055589C1188bCC6DDCCD8C9B13101234ABCDE" />
+        </LinearLayout>
 
     </LinearLayout>
 

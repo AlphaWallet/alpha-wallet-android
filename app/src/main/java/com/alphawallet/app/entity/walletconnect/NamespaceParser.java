@@ -19,7 +19,11 @@ public class NamespaceParser
     {
         for (Map.Entry<String, Wallet.Model.Namespace.Proposal> entry : requiredNamespaces.entrySet())
         {
-            chains.addAll(entry.getValue().getChains());
+            List<String> chains = entry.getValue().getChains();
+            if (chains != null)
+            {
+                this.chains.addAll(chains);
+            }
             methods.addAll(entry.getValue().getMethods());
             events.addAll(entry.getValue().getEvents());
         }

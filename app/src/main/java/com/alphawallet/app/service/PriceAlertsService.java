@@ -187,7 +187,7 @@ public class PriceAlertsService extends Service
 
     private Intent constructIntent(Token token)
     {
-        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
+        boolean hasDefinition = assetDefinitionService.hasDefinition(token);
         return tokenDetailRouter.makeERC20DetailsIntent(this, token.getAddress(), token.tokenInfo.symbol, token.tokenInfo.decimals,
                 !token.isEthereum(), defaultWallet, token, hasDefinition);
     }

@@ -1,5 +1,6 @@
 package com.alphawallet.app.util;
 
+import static com.alphawallet.app.service.AssetDefinitionService.getEASContract;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
@@ -19,6 +20,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
+import android.util.Base64;
 import android.util.TypedValue;
 import android.webkit.URLUtil;
 
@@ -28,11 +30,14 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.util.pattern.Patterns;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -44,14 +49,17 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpString;
 import org.web3j.utils.Numeric;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
@@ -64,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.Inflater;
 
 import timber.log.Timber;
 
@@ -1095,5 +1104,169 @@ public class Utils
     public static boolean isAlphaWallet(Context context)
     {
         return context.getPackageName().equals("io.stormbird.wallet");
+    }
+
+    /*public static boolean hasAttestation(String url)
+    {
+        result.functionDetail = Utils.decompress(url);
+
+        int hashIndex = url.indexOf("#attestation=");
+        if (hashIndex >= 0)
+        {
+            url = url.substring(hashIndex + 13);
+            return url.length() > 10;
+        }
+        else
+        {
+            //detect a base64 attestation
+            try
+            {
+                byte[] tryBase64Data = Base64.decode(url, Base64.DEFAULT); //is this a base64 string?
+
+
+                if (tryBase64Data.length > 0 )
+                {
+                    return true;
+                }
+            }
+            catch (IllegalArgumentException e)
+            {
+                // no action, return false;
+                Timber.w(e);
+            }
+
+            return false;
+        }
+    }*/
+
+    public static String getAttestationString(String url)
+    {
+        int hashIndex = url.indexOf("#attestation=");
+        String decoded;
+        try
+        {
+            if (hashIndex >= 0) //EAS style attestations have the magic link style
+            {
+                url = url.substring(hashIndex + 13);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                {
+                    decoded = URLDecoder.decode(url, StandardCharsets.UTF_8);
+                }
+                else
+                {
+                    decoded = URLDecoder.decode(url, "UTF-8");
+                }
+            }
+            else
+            {
+                decoded = url;
+            }
+        }
+        catch (Exception e)
+        {
+            decoded = url;
+        }
+
+        Timber.d("decoded url: %s", decoded);
+        return decoded;
+    }
+
+    public static TokenInfo getDefaultAttestationInfo(long chainId, String collectionHash)
+    {
+        return new TokenInfo(collectionHash, "EAS Attestation", "ATTN", 0, true, chainId);
+    }
+
+    public static boolean hasAttestation(String data)
+    {
+        try
+        {
+            String inflated = inflateData(getAttestationString(data));
+            return inflated.length() > 0;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+
+    public static String decompress(String url)
+    {
+        try
+        {
+            //Timber.d(toAttestationJson(inflateData(getAttestationString(url))));
+            return toAttestationJson(inflateData(getAttestationString(url)));
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+
+    private static String toAttestationJson(String jsonString)
+    {
+        // Remove the square brackets
+        jsonString = jsonString.substring(1, jsonString.length() - 1);
+        String[] e = jsonString.split(",");
+
+        // Clean the strings
+        for (int i = 0; i < e.length; i++) {
+            e[i] = e[i].trim();
+            e[i] = e[i].replaceAll("\"", "");
+        }
+
+        EasAttestation easAttestation =
+            new EasAttestation(
+                e[0],
+                Long.parseLong(e[1]),
+                e[2],
+                e[3],
+                e[4],
+                Long.parseLong(e[5]),
+                e[6],
+                e[7],
+                e[8],
+                e[9],
+                Long.parseLong(e[10]),
+                Long.parseLong(e[11]),
+                e[12],
+                Boolean.parseBoolean(e[13]),
+                e[14],
+                Long.parseLong(e[15])
+            );
+
+        return new Gson().toJson(easAttestation);
+    }
+
+    public static String inflateData(String deflatedData)
+    {
+        byte[] deflatedBytes = Base64.decode(deflatedData, Base64.DEFAULT);
+
+        Inflater inflater = new Inflater();
+        inflater.setInput(deflatedBytes);
+
+        byte[] inflatedData;
+
+        try
+        {
+            // Inflate the data
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            while (!inflater.finished())
+            {
+                int inflatedBytes = inflater.inflate(buffer);
+                outputStream.write(buffer, 0, inflatedBytes);
+            }
+            inflater.end();
+
+            inflatedData = outputStream.toByteArray();
+
+            // Convert the inflated bytes to a string
+            return new String(inflatedData);
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+            return "";
+        }
     }
 }

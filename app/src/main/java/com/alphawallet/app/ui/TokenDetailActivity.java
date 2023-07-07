@@ -134,7 +134,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
         //does the function have a view? If it's transaction only then handle here
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         TSAction action = functions.get(function);
 
         //handle TS function
@@ -148,7 +148,7 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         }
         else
         {
-            viewModel.showFunction(this, token, function, selection);
+            viewModel.showFunction(this, token, function, selection, null);
         }
     }
 

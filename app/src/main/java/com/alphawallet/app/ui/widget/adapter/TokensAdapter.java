@@ -13,9 +13,10 @@ import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.entity.tokens.Attestation;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
-import com.alphawallet.app.repository.TokensMappingRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
@@ -47,11 +48,11 @@ import com.alphawallet.token.entity.ViewType;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 {
     private static final String TAG = "TKNADAPTER";
-
     private TokenFilter filterType = TokenFilter.ALL;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
@@ -382,6 +383,27 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
                 TokenSortedItem tsi = (TokenSortedItem) si;
                 TokenCardMeta thisToken = tsi.value;
                 if (thisToken.tokenId.equalsIgnoreCase(id))
+                {
+                    return items.removeItemAt(i);
+                }
+            }
+        }
+        return null;
+    }
+
+    public SortedItem<TokenCardMeta> removeAttestation(Token token)
+    {
+        Attestation attn = (Attestation)token;
+        String attnKey = attn.getDatabaseKey().toLowerCase(Locale.ROOT);
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                TokenSortedItem tsi = (TokenSortedItem) si;
+                TokenCardMeta thisToken = tsi.value;
+
+                if (thisToken.tokenId.toLowerCase(Locale.ROOT).startsWith(attnKey))
                 {
                     return items.removeItemAt(i);
                 }

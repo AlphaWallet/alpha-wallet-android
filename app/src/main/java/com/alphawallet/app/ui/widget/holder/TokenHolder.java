@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Attestation;
@@ -34,6 +35,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.token.tools.Convert;
+import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.math.BigDecimal;
@@ -104,8 +106,19 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
         try
         {
+            tokenLayout.setVisibility(View.VISIBLE);
             token = tokensService.getToken(data.getChain(), data.getAddress());
-            if (token == null)
+            if (token != null)
+            {
+                token.group = data.getTokenGroup();
+            }
+
+            if (data.group == TokenGroup.ATTESTATION)
+            {
+                handleAttestation(data);
+                return;
+            }
+            else if (token == null)
             {
                 fillEmpty();
                 return;
@@ -115,16 +128,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
                 //edge condition - looking at a contract as an account
                 Token backupChain = tokensService.getToken(data.getChain(), "eth");
                 if (backupChain != null) token = backupChain;
-            }
-
-            token.group = data.getTokenGroup();
-
-            tokenLayout.setVisibility(View.VISIBLE);
-
-            if (data.group == TokenGroup.ATTESTATION)
-            {
-                handleAttestation(data);
-                return;
             }
 
             if (EthereumNetworkRepository.isPriorityToken(token))
@@ -182,20 +185,15 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void handleAttestation(TokenCardMeta data)
     {
-        Attestation attestation = (Attestation) tokensService.getAttestation(data.getChain(), data.getAddress(), data.getTokenID());
-        balanceEth.setText(shortTitle());
-        BigInteger attestationId = attestation.getAttestationId();
-        if (attestationId.compareTo(BigInteger.ZERO) > 0)
-        {
-            balanceCoin.setText(getString(R.string.valueSymbol, "AttestationId", attestationId.toString()));
-        }
-        else
-        {
-            balanceCoin.setText(getString(R.string.valueSymbol, "1", token.getSymbol()));
-        }
-
+        Attestation attestation = (Attestation) tokensService.getAttestation(data.getChain(), data.getAddress(), data.getAttestationId());
+        //TODO: Take name from schema data if available
+        TokenDefinition td = assetDefinition.getAssetDefinition(attestation);
+        NFTAsset nftAsset = new NFTAsset();
+        nftAsset.setupScriptElements(td);
+        balanceEth.setText(attestation.getAttestationName(td));
+        balanceCoin.setText(attestation.getAttestationDescription(td));
         balanceCoin.setVisibility(View.VISIBLE);
-        tokenIcon.setIsAttestation(attestation.getSymbol(), data.getChain());
+        tokenIcon.setAttestationIcon(nftAsset.getImage(), attestation.getSymbol(), data.getChain());
         token = attestation;
         blankTickerInfo();
     }

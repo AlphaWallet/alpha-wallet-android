@@ -1175,8 +1175,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             else if (importPath != null)
             {
-                boolean useAppExternalDir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !viewModel.checkDebugDirectory();
-                viewModel.importScriptFile(this, useAppExternalDir, startIntent);
+                viewModel.importScriptFile(this, startIntent);
             }
         }
         catch (SalesOrderMalformed s)
@@ -1300,5 +1299,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         ((WalletFragment)getFragment(WALLET)).importAttestation(attestation);
+    }
+
+    public void importEASAttestation(QRResult attestation)
+    {
+        if (attestation.type != EIP681Type.EAS_ATTESTATION)
+        {
+            return;
+        }
+
+        ((WalletFragment)getFragment(WALLET)).importEASAttestation(attestation);
     }
 }

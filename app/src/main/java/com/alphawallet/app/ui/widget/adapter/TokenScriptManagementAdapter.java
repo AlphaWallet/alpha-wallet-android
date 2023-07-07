@@ -17,6 +17,7 @@ import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.TokenScriptManagementActivity;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ChainName;
@@ -41,14 +42,16 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
     private final LayoutInflater inflater;
     private final List<TokenLocator> tokenLocators;
     private final AssetDefinitionService assetDefinitionService;
+    private final TokensService tokensService;
     private AWalletAlertDialog dialog;
     private final Handler handler = new Handler();
 
-    public TokenScriptManagementAdapter(TokenScriptManagementActivity activity, List<TokenLocator> locators, AssetDefinitionService assetDefinitionService) {
+    public TokenScriptManagementAdapter(TokenScriptManagementActivity activity, List<TokenLocator> locators, AssetDefinitionService assetDefinitionService, TokensService tokensService) {
         this.context = activity.getBaseContext();
         this.activity = activity;
         this.tokenLocators = new ArrayList<>(locators);
         this.assetDefinitionService = assetDefinitionService;
+        this.tokensService = tokensService;
         inflater = LayoutInflater.from(context);
     }
 
@@ -80,8 +83,10 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
                 address = originContract.addresses.get(chainId).iterator().next();
             }
 
+            Token token = tokensService.getToken(chainId, address);
+
             //see what the current TS file serving this contract is
-            TokenScriptFile servingFile = assetDefinitionService.getTokenScriptFile(chainId, address);
+            TokenScriptFile servingFile = assetDefinitionService.getTokenScriptFile(token);
             final TokenScriptFile overrideFile = (servingFile != null && !tokenLocator.getFullFileName().equals(servingFile.getAbsolutePath())) ? servingFile : null;
             if (overrideFile != null)
             {
@@ -108,7 +113,7 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
                 tokenSciptCardHolder.tokenFullName.setText(t.getFullName());
             }
 
-            assetDefinitionService.getSignatureData(chainId, address)
+            assetDefinitionService.getSignatureData(token)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(sig -> onSigData(sig, tokenSciptCardHolder), Throwable::printStackTrace).isDisposed();

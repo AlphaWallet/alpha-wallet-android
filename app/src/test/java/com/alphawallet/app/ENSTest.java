@@ -68,7 +68,7 @@ public class ENSTest
     {
 
         assertEquals(
-            ensResolver.resolve("web3j.eth"), ("0x7bfd522dea355ddee2be3c01dfa4419451759310").toLowerCase());
+            ensResolver.resolve("web3j.eth"), ("0xd8a50a7ab452c0c9e5581bac5ff15558e6f671a1").toLowerCase());
 
         assertEquals(
             ensResolver.resolve("1.offchainexample.eth"), ("0x41563129cdbbd0c5d3e1c86cf9563926b243834d").toLowerCase());
@@ -86,7 +86,7 @@ public class ENSTest
             ensResolver.resolve("1.offchainexample.eth"), ("0x41563129cdbbd0c5d3e1c86cf9563926b243834d").toLowerCase());
 
         assertEquals(
-            ensResolver.resolve("web3j.eth"), ("0x7bfd522dea355ddee2be3c01dfa4419451759310").toLowerCase());
+            ensResolver.resolve("web3j.eth"), ("0xd8a50a7ab452c0c9e5581bac5ff15558e6f671a1").toLowerCase());
 
 //        assertEquals(
 //            ensResolver.resolve("vladylav.wallet"), ("0xac1de5bbdc2c8d0b3e4324c87599dc66d3221c13").toLowerCase());
@@ -112,9 +112,8 @@ public class ENSTest
     @Test
     public void testAvatarAddressResolve() throws Exception
     {
-        String resolved = ensResolver.resolveAvatarFromAddress("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63");
-        assertEquals(resolved
-            , ("eip155:1/erc721:0x3c7e352481f4b2fdec1e642a3f0018661c77513d/350715860593289039463489"));
+        assertEquals(
+            ensResolver.resolveAvatarFromAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"), ("eip155:1/erc1155:0xb32979486938aa9694bfc898f35dbed459f44424/10063"));
     }
 
     @Test

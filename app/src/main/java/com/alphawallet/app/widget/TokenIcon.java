@@ -468,12 +468,29 @@ public class TokenIcon extends ConstraintLayout
         }
     }
 
-    public void setIsAttestation(String symbol, long chainId)
+    private void setIsAttestation(String symbol, long chainId)
     {
         loadImageFromResource(R.drawable.zero_one);
         textIcon.setVisibility(View.VISIBLE);
         textIcon.setBackgroundResource(0);
         textIcon.setText(Utils.getIconisedText(symbol));
         setChainIcon(chainId);
+    }
+
+    public void setAttestationIcon(String image, String symbol, long chain)
+    {
+        if (!TextUtils.isEmpty(image))
+        {
+            currentRq = Glide.with(this)
+                    .load(image)
+                    .placeholder(R.drawable.zero_one)
+                    .apply(new RequestOptions().circleCrop())
+                    .listener(requestListener)
+                    .into(new DrawableImageViewTarget(icon)).getRequest();
+        }
+        else
+        {
+            setIsAttestation(symbol, chain);
+        }
     }
 }

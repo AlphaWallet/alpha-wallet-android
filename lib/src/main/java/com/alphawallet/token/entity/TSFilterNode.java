@@ -99,6 +99,15 @@ public class TSFilterNode
     {
         String valueLeftStr = getValue(first, attrs);
         String valueRightStr = getValue(second, attrs);
+        boolean isBoolComparison = detemineBooleanComparison(valueLeftStr, valueRightStr);
+        String valueSupplementalLeftStr = valueLeftStr;
+        String valueSupplementalRightStr = valueRightStr;
+
+        if (isBoolComparison)
+        {
+            valueSupplementalLeftStr = valueLeftStr.equalsIgnoreCase("true") ? "1" : valueLeftStr;
+            valueSupplementalRightStr = valueRightStr.equalsIgnoreCase("true") ? "1" : valueRightStr;
+        }
 
         BigInteger valueLeft = getBIValue(first, attrs);
         BigInteger valueRight = getBIValue(second, attrs);
@@ -111,7 +120,8 @@ public class TSFilterNode
         {
             case EQUAL:
                 //compare strings
-                return compareLogic(valueLeftStr.equalsIgnoreCase(valueRightStr));
+                return compareLogic(valueLeftStr.equalsIgnoreCase(valueRightStr)
+                        || (isBoolComparison && valueSupplementalLeftStr.equalsIgnoreCase(valueSupplementalRightStr)));
             case GREATER_THAN:
                 //both sides must be values
                 if (!bothSidesValues) return LogicState.FALSE;
@@ -132,6 +142,14 @@ public class TSFilterNode
                 // should have caught this previously
                 return LogicState.FALSE;
         }
+    }
+
+    private boolean detemineBooleanComparison(String valueLeftStr, String valueRightStr)
+    {
+        return valueLeftStr.equalsIgnoreCase("true")
+                || valueLeftStr.equalsIgnoreCase("false")
+                || valueRightStr.equalsIgnoreCase("true")
+                || valueRightStr.equalsIgnoreCase("false");
     }
 
     private LogicState compareLogic(boolean comparison)

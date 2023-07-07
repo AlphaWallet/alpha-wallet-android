@@ -750,23 +750,7 @@ public class WalletFragment extends BaseFragment implements
     private void initNotificationView(View view)
     {
         NotificationView notificationView = view.findViewById(R.id.notification);
-        boolean hasShownWarning = viewModel.isMarshMallowWarningShown();
-
-        if (!hasShownWarning && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M)
-        {
-            notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
-            notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
-            notificationView.setPrimaryButtonText(getContext().getString(R.string.hide_notification));
-            notificationView.setPrimaryButtonListener(() ->
-            {
-                notificationView.setVisibility(View.GONE);
-                viewModel.setMarshMallowWarning(true);
-            });
-        }
-        else
-        {
-            notificationView.setVisibility(View.GONE);
-        }
+        notificationView.setVisibility(View.GONE);
     }
 
     @Override
@@ -787,6 +771,11 @@ public class WalletFragment extends BaseFragment implements
     public void importAttestation(QRResult attestation)
     {
         viewModel.importAttestation(attestation);
+    }
+
+    public void importEASAttestation(QRResult attestation)
+    {
+        viewModel.importEASAttestation(attestation);
     }
 
     private void attestationError(String message)
@@ -845,8 +834,17 @@ public class WalletFragment extends BaseFragment implements
             else if (viewHolder instanceof TokenHolder)
             {
                 Token token = ((TokenHolder) viewHolder).token;
-                viewModel.setTokenEnabled(token, false);
-                SortedItem<TokenCardMeta> removedToken = adapter.removeToken(token.tokenInfo.chainId, token.getAddress());
+                SortedItem<TokenCardMeta> removedToken;
+                if (token.getInterfaceSpec() == ContractType.ATTESTATION)
+                {
+                    viewModel.removeAttestation(token);
+                    removedToken = adapter.removeAttestation(token);
+                }
+                else
+                {
+                    viewModel.setTokenEnabled(token, false);
+                    removedToken = adapter.removeToken(token.tokenInfo.chainId, token.getAddress());
+                }
 
                 if (getContext() != null)
                 {

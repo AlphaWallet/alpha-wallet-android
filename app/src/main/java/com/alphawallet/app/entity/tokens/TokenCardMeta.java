@@ -43,20 +43,34 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type, TokenGroup group)
     {
-        this(chainId, tokenAddress, balance, timeStamp, svs, name, symbol, type, group, BigInteger.ZERO);
+        this(chainId, tokenAddress, balance, timeStamp, svs, name, symbol, type, group, "");
     }
 
-    public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type, TokenGroup group, BigInteger attnId)
+    public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type, TokenGroup group, String attnId)
     {
         this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress)
-                + (attnId.compareTo(BigInteger.ZERO) > 0 ? ("-" + attnId) : "")
-                + (group == TokenGroup.ATTESTATION ? "-att" : "");
+                + (!TextUtils.isEmpty(attnId) ? ("-" + attnId) : "") + (group == TokenGroup.ATTESTATION ? "-att" : "");
         this.lastUpdate = timeStamp;
         this.type = type;
         this.balance = balance;
-        this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum(), group, attnId);
+        this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum(), group, Math.abs(attnId.hashCode()));
         this.filterText = symbol + "'" + name;
         this.group = group;
+    }
+
+    public String getAttestationId()
+    {
+        //should end with -att
+        if (tokenId.endsWith("-att"))
+        {
+            int sepIndex = tokenId.indexOf("-");
+            sepIndex = tokenId.indexOf("-", sepIndex+1);
+            return tokenId.substring(sepIndex+1, tokenId.length() - 4);
+        }
+        else
+        {
+            return "";
+        }
     }
 
     public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, long lastTxUpdate, ContractType type, TokenGroup group)
@@ -78,7 +92,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.lastTxUpdate = token.lastTxCheck;
         this.type = token.getInterfaceSpec();
         this.balance = token.balance.toString();
-        this.nameWeight = calculateTokenNameWeight(token.tokenInfo.chainId, token.tokenInfo.address, null, token.getName(), token.getSymbol(), isEthereum(), token.group, BigInteger.ZERO);
+        this.nameWeight = calculateTokenNameWeight(token.tokenInfo.chainId, token.tokenInfo.address, null, token.getName(), token.getSymbol(), isEthereum(), token.group, 0);
         this.filterText = filterText;
         this.group = token.group;
         this.isEnabled = TextUtils.isEmpty(filterText) || !filterText.equals(CHECK_MARK);
@@ -183,9 +197,9 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         }
     }
 
-    private long calculateTokenNameWeight(long chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth, TokenGroup group, BigInteger attnId)
+    private long calculateTokenNameWeight(long chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth, TokenGroup group, int attnId)
     {
-        int weight = 1000; //ensure base eth types are always displayed first
+        long weight = 1000; //ensure base eth types are always displayed first
         String name = svs != null ? svs.getTokenName(chainId, tokenAddress, 1) : null;
         if (name != null)
         {
@@ -232,7 +246,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
         if (group == TokenGroup.ATTESTATION)
         {
-            weight += (attnId.longValue() + 1);
+            weight += (attnId + 1);
         }
 
         return weight;

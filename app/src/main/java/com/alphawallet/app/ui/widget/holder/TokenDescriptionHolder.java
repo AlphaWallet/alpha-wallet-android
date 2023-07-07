@@ -50,9 +50,9 @@ public class TokenDescriptionHolder extends BinderViewHolder<Token>
     public void bind(@Nullable Token token, @NonNull Bundle addition) {
         count.setText(String.valueOf(assetCount));
         String tokenName = token.tokenInfo.name;
-        if (assetService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress()) != null)
+        if (assetService.getAssetDefinition(token) != null)
         {
-            String nameCandidate = assetService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress()).getTokenName(token.getTokenCount());
+            String nameCandidate = assetService.getAssetDefinition(token).getTokenName(token.getTokenCount());
             if (nameCandidate != null && nameCandidate.length() > 0) tokenName = nameCandidate;
         }
         title.setText(tokenName);

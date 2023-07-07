@@ -4,6 +4,7 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
 
 import com.alphawallet.token.entity.ActionModifier;
 import com.alphawallet.token.entity.As;
+import com.alphawallet.token.entity.AttestationDefinition;
 import com.alphawallet.token.entity.AttestationValidation;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.ContractInfo;
@@ -32,7 +33,7 @@ import org.w3c.dom.NodeList;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
-import org.web3j.abi.datatypes.Bytes;
+import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Bytes32;
@@ -63,6 +64,7 @@ public class TokenDefinition
     protected Locale locale;
 
     public final Map<String, ContractInfo> contracts = new HashMap<>();
+    public final Map<String, AttestationDefinition> attestations = new HashMap<>();
     public final Map<String, TSAction> actions = new HashMap<>();
     private Map<String, String> labels = new HashMap<>(); // store plural etc for token name
     private final Map<String, NamedType> namedTypeLookup = new HashMap<>(); //used to protect against name collision
@@ -70,7 +72,6 @@ public class TokenDefinition
     private final Map<String, TSSelection> selections = new HashMap<>();
     private final Map<String, TSActivityView> activityCards = new HashMap<>();
     private final Map<String, AttnElement> structs = new HashMap<>();
-    private Attestation attestation = null;
 
     public String nameSpace;
     public TokenscriptContext context;
@@ -127,9 +128,9 @@ public class TokenDefinition
 
     public Map<String, TSActivityView> getActivityCards() { return activityCards; }
 
-    public Attestation getAttestation()
+    public AttestationDefinition getAttestation()
     {
-        return attestation;
+        return attestations.get(holdingToken);
     }
 
     public EventDefinition parseEvent(Element resolve) throws SAXException
@@ -442,7 +443,7 @@ public class TokenDefinition
                 {
                     case "origins":
                         TSOrigins origin = parseOrigins(element); //parseOrigins(element);
-                        if (origin.isType(TSOriginType.Contract)) holdingToken = origin.getOriginName();
+                        if (origin.isType(TSOriginType.Contract) || origin.isType(TSOriginType.Attestation)) holdingToken = origin.getOriginName();
                         break;
                     case "contract":
                         handleAddresses(element);
@@ -476,7 +477,8 @@ public class TokenDefinition
                         }
                         break;
                     case "attestation":
-                        attestation = scanAttestation(element);
+                        AttestationDefinition attestation = scanAttestation(element);
+                        attestations.put(attestation.name, attestation);
                         break;
                     default:
                         break;
@@ -881,11 +883,11 @@ public class TokenDefinition
         return; // even if the document is signed, often it doesn't have KeyName
     }
 
-    private Attestation scanAttestation(Node attestationNode) throws SAXException
+    private AttestationDefinition scanAttestation(Node attestationNode) throws SAXException
     {
-        Attestation attn = new Attestation();
-        //NodeList nList;
-        //nList = xml.getElementsByTagNameNS("https://github.com/TokenScript/attestation", "attestation");
+        Element element = (Element) attestationNode;
+        String name = element.getAttribute("name");
+        AttestationDefinition attn = new AttestationDefinition(name);
 
         for (Node n = attestationNode.getFirstChild(); n != null; n = n.getNextSibling())
         {
@@ -894,130 +896,51 @@ public class TokenDefinition
 
             switch (attnElement.getLocalName())
             {
+                case "meta":
+                    //read elements of the metadata
+                    attn.addMetaData(attnElement);
+                    break;
                 case "display":
                     handleAttestationDisplay(attnElement);
                     break;
-
+                case "eas":
+                    ContractInfo info = attn.addAttributes(attnElement);
+                    if (info != null)
+                    {
+                        contracts.put(attn.name, info);
+                    }
+                    break;
+                case "key":
+                    attn.handleKey(attnElement);
+                    break;
+                case "eventId":
+                    attn.handleEventId(attnElement);
+                    break;
+                case "idFields":
+                    attn.handleReplacementField(attnElement);
+                    break;
                 case "struct":
                 case "ProofOfKnowledge":
-                    attn.members.add(parseAttestationStruct(attnElement));
+                    //attn.members.add(parseAttestationStruct(attnElement));
                     //attestation.add(parseAttestationStruct(attnElement));
                     break;
-
                 case "origins":
-                    attn.origin = parseOrigins(attnElement);
+                    //attn.origin = parseOrigins(attnElement);
                     //advance to function
                     Element functionElement = getFirstChildElement(attnElement);
                     attn.function = parseFunction(functionElement, Syntax.IA5String);
                     attn.function.as = parseAs(functionElement);
                     break;
             }
-
-            //String label = tokenType.getAttribute("label");
-                /*switch (tokenType.getLocalName())
-                {
-                    case "token":
-                        Element tokenSpec = getFirstChildElement(tokenType);
-                        if (tokenSpec != null)
-                        {
-                            switch (tokenSpec.getLocalName())
-                            {
-                                case "ethereum":
-                                    String chainIdStr = tokenSpec.getAttribute("network");
-                                    long chainId = Long.parseLong(chainIdStr);
-                                    ContractInfo ci = new ContractInfo(tokenSpec.getLocalName());
-                                    ci.addresses.put(chainId, new ArrayList<>(Arrays.asList(ci.contractInterface)));
-                                    contracts.put(label, ci);
-                                    break;
-                                case "contract":
-                                    handleAddresses(getFirstChildElement(element));
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }*/
         }
 
         return attn;
     }
 
-    /*
-    <attn:display>
-    <attn:element name="title">
-      <attn:label contract="ReferralToken" ref="name"/>
-    </attn:element>
-    <attn:element name="subtitle">
-      <attn:label>
-        <attn:string xml:lang="en">Devcon Referral Attestation</attn:string>
-      </attn:label>
-    </attn:element>
-    <attn:element name="id">
-      <attn:label ref="ticketId"/>
-    </attn:element>
-  </attn:display>
-     */
     private void handleAttestationDisplay(Element attnElement)
     {
 
     }
-
-
-    /*
-    <attn:struct name="TicketData">
-    <attn:struct name="PreHashTicketData">
-      <attn:UTF8-String name="eventId" />
-      <attn:ASN1-Integer name="ticketId" />
-      <attn:ASN1-Integer name="ticketClass" />
-      <attn:Octet-String name="commitment2" />
-    </attn:struct>
-    <attn:signature name="IssuerSignature">
-      <attn:data>
-        <attn:prehash ref="PreHashTicketData" />
-      </attn:data>
-    </attn:signature>
-  </attn:struct>
-  <attn:struct name="SignedIdentifier">
-    <attn:struct name="IdentifierAttestation">
-      <attn:DER-Enum name="version"/>
-      <attn:ASN1-Integer name="serialNumber"/>
-      <attn:DER-Object name="signatureType"/>
-      <attn:DER-Object name="issuerSequence"/>
-      <attn:struct name="timeStamp">
-        <attn:UTF8-String name="validFromStr"/>
-        <attn:ASN1-Integer name="validFrom"/>
-        <attn:UTF8-String name="validToStr"/>
-        <attn:ASN1-Integer name="validTo"/>
-      </attn:struct>
-      <attn:DER-Object name="smartContractDef"/>
-      <attn:SubjectPublicKeyInfo name="subjectPublicKey"/>
-      <attn:struct name="filler"/>
-      <attn:DER-Compound name="commitment1"/>
-    </attn:struct>
-    <attn:signature name="AttestorSignature">
-      <attn:data>
-        <attn:prehash ref="IdentifierAttestation"/>
-      </attn:data>
-    </attn:signature>
-  </attn:struct>
-     */
-
-    //private final List<AttnElement> attestation = new ArrayList<>();
-
-    /*private AttnElement handleAttestationStruct(Element attrElement)
-    {
-        for(Node n = attrElement.getFirstChild(); n!=null; n=n.getNextSibling())
-        {
-            if (n.getNodeType() != ELEMENT_NODE) continue;
-            Element e = (Element) n;
-
-            AttnElement attnE = parseAttestationStruct(e);
-            attestation.add(attnE);
-        }
-    }*/
 
     private List<AttnElement> parseAttestationStructMembers(Node attnStruct)
     {
@@ -1059,13 +982,20 @@ public class TokenDefinition
 
     public AttestationValidation getValidation(List<Type> values)
     {
-        if (attestation == null || !namedTypeLookup.containsKey(attestation.function.namedTypeReturn))
+        //legacy attestations should only have one type
+        AttestationDefinition attn = null;
+        if (attestations.size() > 0)
+        {
+            attn = (AttestationDefinition)attestations.values().toArray()[0];
+        }
+
+        if (attn == null || !namedTypeLookup.containsKey(attn.function.namedTypeReturn))
         {
             return null;
         }
 
         //get namedType for return
-        NamedType nType = namedTypeLookup.get(attestation.function.namedTypeReturn);
+        NamedType nType = namedTypeLookup.get(attn.function.namedTypeReturn);
         AttestationValidation.Builder builder = new AttestationValidation.Builder();
 
         //find issuerkey
@@ -1079,6 +1009,9 @@ public class TokenDefinition
             //handle magic values plus generic
             switch (element.name)
             {
+                case "_issuerValid":
+                    builder.issuerValid((Boolean)values.get(index++).getValue());
+                    break;
                 case "_issuerAddress":
                     builder.issuerAddress((String)values.get(index++).getValue());
                     break;
@@ -1103,13 +1036,19 @@ public class TokenDefinition
     public List<TypeReference<?>> getAttestationReturnTypes()
     {
         List<TypeReference<?>> returnTypes = new ArrayList<>();
-        if (attestation == null || !namedTypeLookup.containsKey(attestation.function.namedTypeReturn))
+        AttestationDefinition attn = null;
+        if (attestations.size() > 0)
+        {
+            attn = (AttestationDefinition)attestations.values().toArray()[0];
+        }
+
+        if (attn == null || !namedTypeLookup.containsKey(attn.function.namedTypeReturn))
         {
             return returnTypes;
         }
 
         //get namedType for return
-        NamedType nType = namedTypeLookup.get(attestation.function.namedTypeReturn);
+        NamedType nType = namedTypeLookup.get(attn.function.namedTypeReturn);
 
         //add output params
         for (NamedType.SequenceElement element : nType.sequence)
@@ -1124,7 +1063,7 @@ public class TokenDefinition
                     returnTypes.add(new TypeReference<Bytes32>() {});
                     break;
                 case "bytes":
-                    returnTypes.add(new TypeReference<Bytes>() {});
+                    returnTypes.add(new TypeReference<DynamicBytes>() {});
                     break;
                 case "string":
                     returnTypes.add(new TypeReference<Utf8String>() {});
@@ -1235,18 +1174,6 @@ public class TokenDefinition
         STRING,
         UINT,
         BOOL,
-    }
-
-    public static class Attestation
-    {
-        public TSOrigins origin; //single value for validation
-        public FunctionDefinition function = null;
-        public final List<AttnElement> members;
-
-        public Attestation()
-        {
-            members = new ArrayList<>();
-        }
     }
 
     private static class AttnElement
@@ -1396,6 +1323,11 @@ public class TokenDefinition
                     tsOrigins = new TSOrigins.Builder(TSOriginType.Event)
                                     .name(ev.type.name)
                                     .event(ev).build();
+                    break;
+                case "attestation":
+                    String attestationName = element.getAttribute("name");
+                    tsOrigins = new TSOrigins.Builder(TSOriginType.Attestation)
+                                    .name(attestationName).build();
                     break;
                 default:
                     throw new SAXException("Unknown Origin Type: '" + element.getLocalName() + "'" );

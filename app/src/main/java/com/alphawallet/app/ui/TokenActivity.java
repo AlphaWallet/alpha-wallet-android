@@ -816,7 +816,7 @@ public class TokenActivity extends BaseActivity implements PageReadyCallback, St
         TokenDetailRouter tokenDetailRouter = new TokenDetailRouter();
         AssetDefinitionService assetDefinitionService = viewModel.getAssetDefinitionService();
         Wallet defaultWallet = viewModel.getWallet();
-        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
+        boolean hasDefinition = assetDefinitionService.hasDefinition(token);
         switch (token.getInterfaceSpec())
         {
             case ETHEREUM:

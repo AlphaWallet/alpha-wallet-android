@@ -564,6 +564,11 @@ public class TokensService
                         .flatMap(contractType -> tokenRepository.storeTokenInfo(wallet, tInfo, type));
     }
 
+    public Single<TokenInfo> storeTokenInfoDirect(Wallet wallet, TokenInfo tInfo, ContractType type)
+    {
+        return tokenRepository.storeTokenInfo(wallet, tInfo, type);
+    }
+
     //Fix undermined contract type
     private ContractType checkDefaultType(ContractType contractType, ContractType defaultType)
     {
@@ -1237,10 +1242,10 @@ public class TokensService
         else return tokenRepository.fetchToken(chainId, walletAddress, tokenAddress.toLowerCase());
     }
 
-    public Token getAttestation(long chainId, String addr, BigInteger tokenId)
+    public Token getAttestation(long chainId, String addr, String attnId)
     {
         //fetch attestation
-        return tokenRepository.fetchAttestation(chainId, currentAddress, addr.toLowerCase(), tokenId);
+        return tokenRepository.fetchAttestation(chainId, currentAddress, addr.toLowerCase(), attnId);
     }
 
     public List<Token> getAttestations(long chainId, String address)

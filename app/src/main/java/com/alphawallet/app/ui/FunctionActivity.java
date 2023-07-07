@@ -32,6 +32,7 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
@@ -91,9 +92,9 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         WebCompletionCallback, OnSetValuesListener, ActionSheetCallback
 {
     private TokenFunctionViewModel viewModel;
-
     private Token token;
     private List<BigInteger> tokenIds;
+    private NFTAsset asset;
     private BigInteger tokenId;
     private String actionMethod;
     private Web3TokenView tokenView;
@@ -111,8 +112,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         String tokenIdStr = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
         if (tokenIdStr == null || tokenIdStr.length() == 0) tokenIdStr = "0";
 
-        String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
         Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
+        asset = getIntent().getParcelableExtra(C.EXTRA_NFTASSET);
         if (wallet == null) {
             viewModel.getCurrentWallet();
         } else {
@@ -120,7 +121,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
 
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
-        token = viewModel.getTokenService().getToken(wallet.address, chainId, address);
+        token = resolveAssetToken(wallet, chainId);
+        //token = viewModel.getTokenService().getToken(wallet.address, chainId, address);
 
         if (token == null)
         {
@@ -131,7 +133,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenIds = token.stringHexToBigIntegerList(tokenIdStr);
         tokenId = tokenIds.get(0);
         tokenView = findViewById(R.id.web3_tokenview);
-
         tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.setWalletAddress(new Address(token.getWallet()));
         tokenView.setupWindowCallback(this);
@@ -144,11 +145,23 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         parsePass = 0;
     }
 
+    private Token resolveAssetToken(Wallet wallet, long chainId)
+    {
+        if (asset != null && asset.isAttestation())
+        {
+            return viewModel.getTokenService().getAttestation(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS), asset.getAttestationID());
+        }
+        else
+        {
+            return viewModel.getTokensService().getToken(wallet.address, chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        }
+    }
+
     private void displayFunction(String tokenAttrs)
     {
         try
         {
-            Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+            Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
             TSAction action = functions.get(actionMethod);
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
 
@@ -179,7 +192,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
 
         // Fetch attributes local to this action and add them to the injected token properties
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         if (functions == null)
         {
             recreate();
@@ -189,11 +202,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         action = functions.get(actionMethod);
         List<Attribute> localAttrs = (action != null && action.attributes != null) ? new ArrayList<>(action.attributes.values()) : null;
 
-        TokenScriptResult.Attribute attestation = viewModel.getAssetDefinitionService().getAvailableAttestation(token, action, tokenId);
-        if (attestation != null)
-        {
-            onAttr(attestation);
-        }
+        //Add attestation attributes
+        addAttestationAttrs();
 
         viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs)
                     .subscribeOn(Schedulers.io())
@@ -204,7 +214,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void addMultipleTokenIds(StringBuilder sb)
     {
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         TSAction action = functions.get(actionMethod);
         boolean hasTokenIds = false;
 
@@ -319,7 +329,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void completeTokenScriptFunction(String function)
     {
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         if (functions == null) return;
         action = functions.get(function);
 
@@ -682,6 +692,21 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         catch (Exception e)
         {
             e.printStackTrace();
+        }
+    }
+
+    private void addAttestationAttrs()
+    {
+        if (asset != null && asset.isAttestation())
+        {
+            List<TokenScriptResult.Attribute> attestationAttrs = viewModel.getAssetDefinitionService().getAttestationAttrs(token, action, asset.getAttestationID());
+            if (attestationAttrs != null)
+            {
+                for (TokenScriptResult.Attribute attr : attestationAttrs)
+                {
+                    onAttr(attr);
+                }
+            }
         }
     }
 

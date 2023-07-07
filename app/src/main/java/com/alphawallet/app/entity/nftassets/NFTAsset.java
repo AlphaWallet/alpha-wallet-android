@@ -3,14 +3,18 @@ package com.alphawallet.app.entity.nftassets;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.entity.opensea.OpenSeaAsset;
 import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.ERC1155Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.token.entity.AttestationDefinition;
+import com.alphawallet.token.tools.TokenDefinition;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,6 +53,7 @@ public class NFTAsset implements Parcelable
     };
     private static final String LOADING_TOKEN = "*Loading*";
     private static final String ID = "id";
+    private static final String ATTN_ID = "attn_id";
     private static final String NAME = "name";
     private static final String IMAGE = "image";
     private static final String IMAGE_URL = "image_url";
@@ -109,7 +114,7 @@ public class NFTAsset implements Parcelable
     {
         assetMap.put(ATTESTATION_ASSET, att.getName());
         attributeMap.put(NAME, "Attestation");
-        attributeMap.put(ID, att.getAttestationId().toString());
+        attributeMap.put(ID, att.getAttestationUID());
 
         balance = BigDecimal.ONE;
     }
@@ -576,6 +581,48 @@ public class NFTAsset implements Parcelable
     public String getTokenIdStr()
     {
         return attributeMap.getOrDefault(ID, "1");
+    }
+
+    public String getAttestationID()
+    {
+        return attributeMap.getOrDefault(ID, "1");
+    }
+
+    public void addAttribute(String name, String value)
+    {
+        attributeMap.put(name, value);
+    }
+
+    public boolean setupScriptElements(TokenDefinition td)
+    {
+        boolean hasMetaData = false;
+        AttestationDefinition internalAtt = td != null ? td.getAttestation() : null;
+        if (internalAtt != null && internalAtt.metadata.size() > 0)
+        {
+            internalAtt.metadata.keySet().forEach(key -> assetMap.put(key, internalAtt.metadata.get(key)));
+            hasMetaData = true;
+        }
+
+        return hasMetaData;
+    }
+
+    public void setupScriptAttributes(TokenDefinition td, Token token)
+    {
+        AttestationDefinition internalAtt = td.getAttestation();
+        if (internalAtt != null && internalAtt.attributes != null && internalAtt.attributes.size() > 0)
+        {
+            for (Map.Entry<String, String> attr : internalAtt.attributes.entrySet())
+            {
+                String typeName = attr.getKey();
+                String attrTitle = attr.getValue();
+                String attrValue = token.getAttrValue(typeName);
+
+                if (!TextUtils.isEmpty(attrValue))
+                {
+                    attributeMap.put(attrTitle, attrValue);
+                }
+            }
+        }
     }
 
     public enum Category

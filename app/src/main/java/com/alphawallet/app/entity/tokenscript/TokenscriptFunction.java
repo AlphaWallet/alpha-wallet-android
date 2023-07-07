@@ -418,6 +418,17 @@ public abstract class TokenscriptFunction
                         if (value == null) throw new Exception("Attempt to use null value");
                         params.add(new DynamicBytes(Numeric.hexStringToByteArray(value)));
                         break;
+                    case "struct":
+                        Type<?> intrinsicType = token.getIntrinsicType(arg.element.ref);
+                        if (intrinsicType == null)
+                        {
+                            intrinsicType = token.getIntrinsicType(arg.element.localRef);
+                        }
+                        if (intrinsicType != null)
+                        {
+                            params.add(intrinsicType);
+                        }
+                        break;
                     case "bytes1":
                         params.add(new Bytes1(argValueBytes));
                         break;
@@ -883,7 +894,7 @@ public abstract class TokenscriptFunction
     public Single<TokenScriptResult.Attribute> fetchAttrResult(Token token, Attribute attr, BigInteger tokenId,
                                                                TokenDefinition td, AttributeInterface attrIf, ViewType itemView)
     {
-        final BigInteger useTokenId = (attr == null || !attr.usesTokenId()) ? BigInteger.ZERO : tokenId;
+        final BigInteger useTokenId = (attr == null) ? BigInteger.ZERO : tokenId;
         if (attr == null)
         {
             return Single.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));

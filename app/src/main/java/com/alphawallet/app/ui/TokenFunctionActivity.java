@@ -276,7 +276,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     @Override
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         TSAction action = functions.get(function);
         if (action != null && action.view == null && action.function != null)
         {
@@ -296,7 +296,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         }
         else
         {
-            viewModel.showFunction(this, token, function, idList);
+            viewModel.showFunction(this, token, function, idList, null);
         }
     }
 

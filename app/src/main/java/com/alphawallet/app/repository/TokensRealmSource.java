@@ -1028,6 +1028,10 @@ public class TokensRealmSource implements TokenLocalSource
                     {
                         long chainId = rAtt.getChains().get(0);
                         Token token = fetchToken(chainId, wallet, rAtt.getTokenAddress());
+                        if (token == null || token.tokenInfo == null)
+                        {
+                            continue;
+                        }
                         TokenCardMeta tcmAttestation = new TokenCardMeta(chainId,
                                 rAtt.getTokenAddress(), "1", System.currentTimeMillis(),
                                 svs, rAtt.getName(), token.tokenInfo.symbol, token.getInterfaceSpec(), TokenGroup.ATTESTATION, new BigInteger(rAtt.getId()));

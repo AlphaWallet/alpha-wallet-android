@@ -92,6 +92,11 @@ public class QRParser {
 
         QRResult result = null;
 
+        if (url.startsWith("wc:"))
+        {
+            return new QRResult(url, EIP681Type.WALLET_CONNECT);
+        }
+
         //Check for import/magic link
         if (checkForMagicLink(url))
         {

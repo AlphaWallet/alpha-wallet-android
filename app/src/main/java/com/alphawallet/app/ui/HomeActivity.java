@@ -4,6 +4,7 @@ import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRAN
 import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.C.CHANGED_LOCALE;
 import static com.alphawallet.app.C.CHANGE_CURRENCY;
+import static com.alphawallet.app.C.QRCODE_SCAN;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.C.SETTINGS_INSTANTIATED;
@@ -93,6 +94,9 @@ import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
+import com.google.zxing.client.android.Intents;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
@@ -451,7 +455,27 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 {
                     loadingComplete();
                 });
+
+        getSupportFragmentManager()
+                .setFragmentResultListener(QRCODE_SCAN, this, (requestKey, b) ->
+                {
+                    ScanOptions options = Utils.getQRScanOptions(this);
+                    qrCodeScanner.launch(options);
+                });
     }
+
+    //TODO: Implement all QR scan using thie method
+    private final ActivityResultLauncher<ScanOptions> qrCodeScanner = registerForActivityResult(new ScanContract(),
+            result -> {
+                if(result.getContents() == null)
+                {
+                    Toast.makeText(this, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    viewModel.handleQRCode(this, result.getContents());
+                }
+            });
 
     @Override
     public void onNewIntent(Intent startIntent)

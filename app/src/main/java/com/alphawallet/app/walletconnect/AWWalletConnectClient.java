@@ -126,13 +126,18 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
     public void onSessionRequest(@NonNull Model.SessionRequest sessionRequest)
     {
+        String checkMethod;
         String method = sessionRequest.getRequest().getMethod();
         if (method.startsWith("eth_signTypedData"))
         {
-            method = "eth_signTypedData";
+            checkMethod = "eth_signTypedData";
+        }
+        else
+        {
+            checkMethod = method;
         }
 
-        if (!WCMethodChecker.includes(method))
+        if (!WCMethodChecker.includes(checkMethod))
         {
             reject(sessionRequest);
             return;
@@ -205,7 +210,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 updateNotification();
                 callback.onSessionProposalApproved();
-            }, 3000);
+            }, 500);
             return null;
         }, this::onSessionApproveError);
     }
@@ -447,11 +452,11 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         }
     }
 
-    @Override
+    /*@Override
     public void onAuthRequest(@NonNull Model.AuthRequest authRequest)
     {
         showApprovalDialog(authRequest);
-    }
+    }*/
 
     private void showApprovalDialog(Model.AuthRequest authRequest)
     {
@@ -572,6 +577,54 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     public void onSessionUpdateResponse(@NonNull Model.SessionUpdateResponse sessionUpdateResponse)
     {
         Timber.tag(TAG).i("onSessionUpdateResponse");
+    }
+
+    @Override
+    public void onAuthRequest(@NonNull Model.AuthRequest authRequest, @NonNull Model.VerifyContext verifyContext)
+    {
+        showApprovalDialog(authRequest);
+    }
+
+    @Override
+    public void onSessionProposal(@NonNull Model.SessionProposal sessionProposal, @NonNull Model.VerifyContext verifyContext)
+    {
+        WalletConnectV2SessionItem sessionItem = WalletConnectV2SessionItem.from(sessionProposal);
+        if (!validChainId(sessionItem.chains))
+        {
+            return;
+        }
+        AWWalletConnectClient.sessionProposal = sessionProposal;
+        Intent intent = new Intent(context, WalletConnectV2Activity.class);
+        intent.putExtra("session", sessionItem);
+        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+
+    @Override
+    public void onSessionRequest(@NonNull Model.SessionRequest sessionRequest, @NonNull Model.VerifyContext verifyContext)
+    {
+        String checkMethod;
+        String method = sessionRequest.getRequest().getMethod();
+        if (method.startsWith("eth_signTypedData"))
+        {
+            checkMethod = "eth_signTypedData";
+        }
+        else
+        {
+            checkMethod = method;
+        }
+
+        if (!WCMethodChecker.includes(checkMethod))
+        {
+            reject(sessionRequest);
+            return;
+        }
+
+        Model.Session settledSession = getSession(sessionRequest.getTopic());
+
+        WalletConnectV2SessionRequestHandler handler = new WalletConnectV2SessionRequestHandler(sessionRequest, settledSession, App.getInstance().getTopActivity(), this);
+        handler.handle(method, actionSheetCallback);
+        requestHandlers.append(sessionRequest.getRequest().getId(), handler);
     }
 
     public interface WalletConnectV2Callback

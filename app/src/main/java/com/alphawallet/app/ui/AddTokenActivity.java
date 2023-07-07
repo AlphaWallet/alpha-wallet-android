@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -48,6 +49,8 @@ import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.TestNetDialog;
 import com.alphawallet.token.tools.ParseMagicLink;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -415,6 +418,18 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             viewModel.setPrimaryChain(chainId);
         }
     }
+
+    /*private final ActivityResultLauncher<ScanOptions> qrCodeScanner = super.registerForActivityResult(new ScanContract(),
+            result -> {
+                if(result.getContents() == null)
+                {
+                    Toast.makeText(this, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    viewModel.handleQRCode(this, result.getContents());
+                }
+            });*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

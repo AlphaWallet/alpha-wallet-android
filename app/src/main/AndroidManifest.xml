@@ -197,6 +197,11 @@
             android:label="@string/title_import_token" />
 
         <activity
+                android:name="com.journeyapps.barcodescanner.CaptureActivity"
+                android:screenOrientation="fullSensor"
+                tools:replace="screenOrientation" />
+
+        <activity
             android:name=".ui.TransferTicketDetailActivity"
             android:label="@string/label_transfer_ticket_detail" />
 

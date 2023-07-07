@@ -39,10 +39,10 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.token.entity.ViewType;
-import com.google.zxing.BarcodeFormat;
+/*import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
-import com.journeyapps.barcodescanner.BarcodeEncoder;
+import com.journeyapps.barcodescanner.BarcodeEncoder;*/
 
 import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
@@ -113,7 +113,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     }
 
     private Bitmap createQRImage(String address) {
-        Point size = new Point();
+        /*Point size = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
         int imageSize = (int) (size.x * QR_IMAGE_WIDTH_RATIO);
         try {
@@ -128,7 +128,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         } catch (Exception e) {
             Toast.makeText(this, getString(R.string.error_fail_generate_qr), Toast.LENGTH_SHORT)
                     .show();
-        }
+        }*/
         return null;
     }
 

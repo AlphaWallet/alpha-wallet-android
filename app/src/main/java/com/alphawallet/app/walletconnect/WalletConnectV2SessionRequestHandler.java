@@ -33,6 +33,7 @@ public class WalletConnectV2SessionRequestHandler
     private final Activity activity;
     private final AWWalletConnectClient client;
     private WalletConnectV2SessionItem sessionItem;
+    private ActionSheet actionSheet;
 
     public WalletConnectV2SessionRequestHandler(Wallet.Model.SessionRequest sessionRequest, Wallet.Model.Session settledSession, Activity activity, AWWalletConnectClient client)
     {
@@ -128,7 +129,11 @@ public class WalletConnectV2SessionRequestHandler
 
     private void showActionSheet(ActionSheetCallback aCallback, BaseRequest signRequest, Signable signable)
     {
-        ActionSheet actionSheet = new ActionSheetSignDialog(activity, aCallback, signable);
+        if (actionSheet != null && actionSheet.isShowing())
+        {
+            actionSheet.forceDismiss();
+        }
+        actionSheet = new ActionSheetSignDialog(activity, aCallback, signable);
         actionSheet.setSigningWallet(signRequest.getWalletAddress());
         List<String> icons = Objects.requireNonNull(settledSession.getMetaData()).getIcons();
         if (!icons.isEmpty())

@@ -386,7 +386,10 @@ public class WalletsActivity extends BaseActivity implements
      */
     private void setupWallet(Wallet wallet)
     {
-        adapter.setDefaultWallet(wallet);
+        if (adapter != null)
+        {
+            adapter.setDefaultWallet(wallet);
+        }
         scrollToDefaultWallet();
         selectedWallet = wallet;
     }

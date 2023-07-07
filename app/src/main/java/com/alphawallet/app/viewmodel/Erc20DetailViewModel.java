@@ -117,7 +117,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public void checkTokenScriptValidity(Token token)
     {
-        disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)
+        disposable = assetDefinitionService.getSignatureData(token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig::postValue, this::onSigCheckError);

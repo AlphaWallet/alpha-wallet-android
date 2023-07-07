@@ -1056,4 +1056,6 @@
     <string name="title_request_post_notifications_permission">Get notified</string>
     <string name="message_deny_request_post_notifications_permission">You will not receive notifications while AlphaWallet is in the background. You can change this by going to Settings > Notifications</string>
     <string name="minted">Minted</string>
+    <string name="valid_from">Valid From</string>
+    <string name="valid_until">Valid Until</string>
 </resources>

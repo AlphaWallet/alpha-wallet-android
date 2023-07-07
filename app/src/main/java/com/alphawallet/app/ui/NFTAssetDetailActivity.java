@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +29,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionReturn;
@@ -53,8 +55,10 @@ import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.TSAction;
+import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenScriptResult.Attribute;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
+import com.alphawallet.token.tools.TokenDefinition;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -250,13 +254,15 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             token = resolveAssetToken();
             setup();
         }
+
+        viewModel.startGasPriceUpdate(chainId);
     }
 
     private Token resolveAssetToken()
     {
         if (asset != null && asset.isAttestation())
         {
-            return viewModel.getTokenService().getAttestation(chainId, token.getAddress(), tokenId);
+            return viewModel.getTokenService().getAttestation(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS), asset.getAttestationID());
         }
         else
         {
@@ -305,7 +311,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel.checkTokenScriptValidity(token);
         setTitle(token.tokenInfo.name);
         updateDefaultTokenData();
-        viewModel.getAsset(token, tokenId);
 
         if (asset != null && asset.isAttestation())
         {
@@ -313,6 +318,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
         else
         {
+            viewModel.getAsset(token, tokenId);
             viewModel.updateLocalAttributes(token, tokenId);
         }
     }
@@ -322,6 +328,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel = new ViewModelProvider(this)
                 .get(TokenFunctionViewModel.class);
         viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
+        viewModel.gasEstimateError().observe(this, this::estimateError);
         viewModel.nftAsset().observe(this, this::onNftAsset);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
@@ -333,10 +340,10 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void newScriptFound(Boolean status)
     {
+        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
         //determinate signature
         if (token != null && status)
         {
-            CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
             certificateToolbar.stopDownload();
             certificateToolbar.setVisibility(View.VISIBLE);
             viewModel.checkTokenScriptValidity(token);
@@ -345,6 +352,13 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
             //now re-load the verbs
             setupFunctionBar(viewModel.getWallet());
+
+            setupAttestation();
+        }
+        else
+        {
+            certificateToolbar.stopDownload();
+            //setupAttestation();
         }
     }
 
@@ -375,16 +389,35 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-            if (asset != null && asset.isAttestation())
-            {
-                functionBar.setupAttestationFunctions(this, viewModel.getAssetDefinitionService(), token, null);
-            }
-            else
-            {
-                functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
-            }
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
             functionBar.revealButtons();
             functionBar.setWalletType(wallet.type);
+        }
+    }
+
+    private void completeAttestationTokenScriptSetup(TSAction action)
+    {
+        List<TokenScriptResult.Attribute> attestationAttrs = viewModel.getAssetDefinitionService().getAttestationAttrs(token, action, asset.getAttestationID());
+        if (attestationAttrs != null)
+        {
+            for (TokenScriptResult.Attribute attr : attestationAttrs)
+            {
+                token.setAttributeResult(tokenId, attr);
+            }
+        }
+    }
+
+    private void completeTokenScriptSetup()
+    {
+        final List<Attribute> attrs = new ArrayList<>();
+
+        if (viewModel.hasTokenScript(token))
+        {
+            viewModel.getAssetDefinitionService().resolveAttrs(token, new ArrayList<>(Collections.singleton(tokenId)), null)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(attrs::add, this::onError, () -> showTSAttributes(attrs))
+                    .isDisposed();
         }
     }
 
@@ -436,36 +469,30 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             case ERC1155:
                 tivTokenStandard.setValue(getString(R.string.erc1155));
                 break;
+            case ATTESTATION:
+                tivContractAddress.setVisibility(View.GONE);
+                break;
             case ERC721_UNDETERMINED:
             default:
                 break;
         }
     }
 
-    private void loadAssetFromMetadata(NFTAsset asset)
+    private void loadAssetFromMetadata(NFTAsset loadedAsset)
     {
-        if (asset != null)
+        if (loadedAsset != null)
         {
-            updateTokenImage(asset);
+            updateTokenImage(loadedAsset);
 
-            addMetaDataInfo(asset);
+            addMetaDataInfo(loadedAsset);
 
-            nftAttributeLayout.bind(token, asset);
+            nftAttributeLayout.bind(token, loadedAsset);
 
             clearRefreshAnimation();
 
-            loadFromOpenSeaData(asset.getOpenSeaAsset());
+            loadFromOpenSeaData(loadedAsset.getOpenSeaAsset());
 
-            final List<Attribute> attrs = new ArrayList<>();
-
-            if (viewModel.hasTokenScript(token))
-            {
-                viewModel.getAssetDefinitionService().resolveAttrs(token, new ArrayList<>(Collections.singleton(tokenId)), null)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(attrs::add, this::onError, () -> showTSAttributes(attrs))
-                        .isDisposed();
-            }
+            completeTokenScriptSetup();
         }
     }
 
@@ -591,8 +618,32 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void setupAttestation()
     {
-        tokenImage.setImageResource(R.drawable.zero_one);
+        NFTAsset attnAsset = new NFTAsset();
+        TokenDefinition td = viewModel.getAssetDefinitionService().getAssetDefinition(token);
+        if (td != null)
+        {
+            attnAsset.setupScriptElements(td);
+            attnAsset.setupScriptAttributes(td, token);
+            tokenImage.setupTokenImage(attnAsset);
+            setTitle(attnAsset.getName());
+            if (!TextUtils.isEmpty(attnAsset.getDescription()))
+            {
+                tokenDescription.setVisibility(View.VISIBLE);
+                tokenDescription.setText(attnAsset.getDescription());
+            }
+        }
+        else
+        {
+            tokenImage.setImageResource(R.drawable.zero_one_block);
+            token.addAssetElements(attnAsset, this);
+            tokenDescription.setVisibility(View.GONE);
+        }
+
         progressBar.setVisibility(View.GONE);
+        tivTokenId.setVisibility(View.GONE);
+
+        //now populate
+        nftAttributeLayout.bind(token, attnAsset);
     }
 
     /**
@@ -646,16 +697,22 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
         //does the function have a view? If it's transaction only then handle here
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         if (functions == null) return;
         TSAction action = functions.get(function);
         token.clearResultMap();
 
+        BigInteger tokenId = selection.size() > 0 ? selection.get(0) : BigInteger.ONE;
+
         //handle TS function
         if (action != null && action.view == null && action.function != null)
         {
+            //test if we need to build attribute the list
+            completeAttestationTokenScriptSetup(action);
+            //viewModel.loadAttributesIfRequired();
+
             //open action sheet after we determine the gas limit
-            Web3Transaction web3Tx = viewModel.handleFunction(action, selection.get(0), token, this);
+            Web3Transaction web3Tx = viewModel.handleFunction(action, tokenId, token, this);
             if (web3Tx.gasLimit.equals(BigInteger.ZERO))
             {
                 calculateEstimateDialog();
@@ -670,7 +727,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
         else
         {
-            viewModel.showFunction(this, token, function, selection);
+            viewModel.showFunction(this, token, function, selection, asset);
         }
     }
 
@@ -685,44 +742,39 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         dialog.show();
     }
 
-    private void estimateError(final Web3Transaction w3tx)
+    private void estimateError(Pair<GasEstimate, Web3Transaction> estimate)
     {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(WARNING);
-        dialog.setTitle(R.string.confirm_transaction);
-        dialog.setMessage(R.string.error_transaction_may_fail);
-        dialog.setButtonText(R.string.button_ok);
+        dialog.setTitle(estimate.first.hasError() ?
+                R.string.dialog_title_gas_estimation_failed :
+                R.string.confirm_transaction
+        );
+        String message = estimate.first.hasError() ?
+                getString(R.string.dialog_message_gas_estimation_failed, estimate.first.getError()) :
+                getString(R.string.error_transaction_may_fail);
+        dialog.setMessage(message);
+        dialog.setButtonText(R.string.action_proceed);
         dialog.setSecondaryButtonText(R.string.action_cancel);
-        dialog.setButtonListener(v ->
-        {
+        dialog.setButtonListener(v -> {
+            Web3Transaction w3tx = estimate.second;
             BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
             checkConfirm(new Web3Transaction(w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, gasEstimate, w3tx.nonce, w3tx.payload, w3tx.description));
         });
-
-        dialog.setSecondaryButtonListener(v ->
-        {
-            dialog.dismiss();
-        });
-
+        dialog.setSecondaryButtonListener(v -> dialog.dismiss());
         dialog.show();
     }
 
     private void checkConfirm(Web3Transaction w3tx)
     {
-        if (w3tx.gasLimit.equals(BigInteger.ZERO))
-        {
-            estimateError(w3tx);
-        }
-        else
-        {
-            if (dialog != null && dialog.isShowing()) dialog.dismiss();
-            confirmationDialog = new ActionSheetDialog(this, w3tx, token, "", //TODO: Reverse resolve address
-                    w3tx.recipient.toString(), viewModel.getTokenService(), this);
-            confirmationDialog.setURL("TokenScript");
-            confirmationDialog.setCanceledOnTouchOutside(false);
-            confirmationDialog.show();
-        }
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        confirmationDialog = new ActionSheetDialog(this, w3tx, token, "", //TODO: Reverse resolve address
+                w3tx.recipient.toString(), viewModel.getTokenService(), this);
+        confirmationDialog.setURL("TokenScript");
+        confirmationDialog.setCanceledOnTouchOutside(false);
+        confirmationDialog.show();
     }
 
     @Override

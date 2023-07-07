@@ -247,7 +247,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
     private boolean hasTokenScriptOverride(Token t)
     {
-        return viewModel.getAssetDefinitionService().hasTokenView(t.tokenInfo.chainId, t.getAddress(), AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME);
+        return viewModel.getAssetDefinitionService().hasTokenView(t, AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME);
     }
 
     private TextWatcher setupTextWatcher(NFTAssetsAdapter adapter)

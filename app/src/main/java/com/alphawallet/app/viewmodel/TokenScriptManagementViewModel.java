@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TokensService;
 
 import java.util.List;
 
@@ -17,11 +18,13 @@ import io.reactivex.schedulers.Schedulers;
 public class TokenScriptManagementViewModel extends BaseViewModel {
 
     private final AssetDefinitionService assetDefinitionService;
+    private final TokensService tokensService;
     private final MutableLiveData<List<TokenLocator>> tokenLocatorsLiveData;
 
     @Inject
-    public TokenScriptManagementViewModel(AssetDefinitionService assetDefinitionService) {
+    public TokenScriptManagementViewModel(AssetDefinitionService assetDefinitionService, TokensService tokensService) {
         this.assetDefinitionService = assetDefinitionService;
+        this.tokensService = tokensService;
         tokenLocatorsLiveData = new MutableLiveData<>();
     }
 
@@ -45,5 +48,10 @@ public class TokenScriptManagementViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetService()
     {
         return assetDefinitionService;
+    }
+
+    public TokensService getTokensService()
+    {
+        return tokensService;
     }
 }

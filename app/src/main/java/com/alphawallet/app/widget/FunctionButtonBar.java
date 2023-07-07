@@ -166,29 +166,24 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         adapter = adp;
         selection.clear();
         if (tokenIds != null) selection.addAll(tokenIds);
+        resetButtonCount();
         this.token = token;
-        functions = assetSvs.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        functions = assetSvs.getTokenFunctionMap(token);
         assetService = assetSvs;
         getFunctionMap(assetSvs, token.getInterfaceSpec());
     }
 
-    public void setupAttestationFunctions(StandardFunctionInterface functionInterface, AssetDefinitionService assetSvs, Token token, NonFungibleAdapterInterface adp)
+    public void setupAttestationFunctions(StandardFunctionInterface functionInterface, AssetDefinitionService assetSvs, Token token, NonFungibleAdapterInterface adp, List<BigInteger> tokenIds)
     {
         callStandardFunctions = functionInterface;
         adapter = adp;
         selection.clear();
+        selection.addAll(tokenIds);
+        resetButtonCount();
         this.token = token;
-        functions = assetSvs.getAttestationFunctionMap(token.tokenInfo.chainId, token.getAddress(), ((Attestation)token).getAttestationId());
-        selection.add(((Attestation)token).getAttestationId());
+        functions = assetSvs.getAttestationFunctionMap(token);
         assetService = assetSvs;
-        showButtons = true;
-
-        for (Map.Entry<String, TSAction> entry : functions.entrySet())
-        {
-            addFunction(new ItemClick(entry.getKey(), 0));
-        }
-
-        showButtons();
+        getFunctionMap(assetSvs, token.getInterfaceSpec());
     }
 
     /**
@@ -586,7 +581,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         addTokenScriptFunctions(availableFunctions, token, tokenId);
 
         //If Token is Non-Fungible then display the custom functions first - usually these are more frequently used
-        if (!token.isNonFungible())
+        if (!token.isNonFungible() && token.getInterfaceSpec() != ContractType.ATTESTATION)
         {
             addStandardTokenFunctions(token);
         }
@@ -607,7 +602,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         findViewById(R.id.layoutButtons).setVisibility(View.GONE);
 
-        if (!token.isNonFungible())
+        if (!token.isNonFungible() && token.getInterfaceSpec() != ContractType.ATTESTATION)
         {
             addFunction(new ItemClick(context.getString(R.string.generate_payment_request), R.string.generate_payment_request));
         }
@@ -615,7 +610,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private void addTokenScriptFunctions(Map<String, TSAction> availableFunctions, Token token, BigInteger tokenId)
     {
-        TokenDefinition td = assetService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
+        TokenDefinition td = assetService.getAssetDefinition(token);
 
         if (td != null && tokenId != null && functions != null)
         {
@@ -650,7 +645,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
      */
     private boolean setupCustomTokenActions()
     {
-        if (token.tokenInfo.chainId == POLYGON_ID && token.isNonFungible())
+        if (token.tokenInfo.chainId == POLYGON_ID && token.isNonFungible() || token.getInterfaceSpec() == ContractType.ATTESTATION)
         {
             return false;
         }

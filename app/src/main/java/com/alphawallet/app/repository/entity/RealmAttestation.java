@@ -34,7 +34,8 @@ public class RealmAttestation extends RealmObject
         this.name = name;
     }
 
-    public String getTokenAddress() {
+    public String getTokenAddress()
+    {
         String tAddress = address;
         if (tAddress.contains("-"))
         {
@@ -44,6 +45,11 @@ public class RealmAttestation extends RealmObject
         {
             return address;
         }
+    }
+
+    public String getAttestationKey()
+    {
+        return address;
     }
 
     public String getSubTitle()

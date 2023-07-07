@@ -2,8 +2,9 @@ package com.alphawallet.app.viewmodel;
 
 import static com.alphawallet.app.C.EXTRA_ADDRESS;
 import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.widget.CopyTextView.KEY_ADDRESS;
+import static com.alphawallet.token.tools.TokenDefinition.NO_SCRIPT;
+import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
 
 import android.app.Activity;
 import android.content.ClipData;
@@ -24,6 +25,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -45,7 +47,6 @@ import com.alphawallet.app.repository.TokensMappingRepositoryType;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.repository.entity.RealmAttestation;
-import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.router.CoinbasePayRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
@@ -61,10 +62,12 @@ import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.widget.WalletFragmentActionsView;
 import com.alphawallet.token.entity.AttestationValidationStatus;
+import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
@@ -82,9 +85,9 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import timber.log.Timber;
 
 @HiltViewModel
 public class WalletViewModel extends BaseViewModel
@@ -382,7 +385,7 @@ public class WalletViewModel extends BaseViewModel
 
     public void showTokenDetail(Activity activity, Token token)
     {
-        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, token.getAddress());
+        boolean hasDefinition = assetDefinitionService.hasDefinition(token);
         switch (token.getInterfaceSpec())
         {
             case ETHEREUM:
@@ -401,7 +404,7 @@ public class WalletViewModel extends BaseViewModel
                 break;
 
             case ATTESTATION:
-                tokenDetailRouter.openAttestation(activity, token.tokenInfo.chainId, token.getAddress(), defaultWallet.getValue(), new NFTAsset((Attestation)token));
+                tokenDetailRouter.openAttestation(activity, token, defaultWallet.getValue(), new NFTAsset((Attestation)token));
                 break;
 
             case ERC721:
@@ -577,6 +580,7 @@ public class WalletViewModel extends BaseViewModel
         //Get token information - assume attestation is based on NFT
         //TODO: First validate Attestation
         tokensService.update(attestation.getAddress(), attestation.chainId, ContractType.ERC721)
+                .flatMap(tInfo -> getTokensService().storeTokenInfoDirect(getWallet(), tInfo, ContractType.ERC721))
                 .flatMap(tInfo -> storeAttestation(attestation, tInfo))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -589,7 +593,7 @@ public class WalletViewModel extends BaseViewModel
         if (tokenAttn.isValid() == AttestationValidationStatus.Pass)
         {
             TokenCardMeta tcmAttestation = new TokenCardMeta(attestation.chainId, attestation.getAddress(), "1", System.currentTimeMillis(),
-                    assetDefinitionService, tokenAttn.tokenInfo.name, tokenAttn.tokenInfo.symbol, tokenAttn.getBaseTokenType(), TokenGroup.ATTESTATION, tokenAttn.getAttestationId());
+                    assetDefinitionService, tokenAttn.tokenInfo.name, tokenAttn.tokenInfo.symbol, tokenAttn.getBaseTokenType(), TokenGroup.ATTESTATION, tokenAttn.getAttestationUID());
             tcmAttestation.isEnabled = true;
             updatedTokens.postValue(new TokenCardMeta[]{tcmAttestation});
         }
@@ -637,10 +641,7 @@ public class WalletViewModel extends BaseViewModel
                                 realmAttn = r.createObject(RealmAttestation.class, key);
                             }
 
-                            realmAttn.setAttestation(attestation.getAttestation());
-                            realmAttn.setChain(tInfo.chainId);
-                            realmAttn.setName(tInfo.name);
-                            realmAttn.setId(attn.getAttestationId().toString());
+                            attn.populateRealmAttestation(realmAttn);
                         });
                     }
                     catch (Exception e)
@@ -669,5 +670,123 @@ public class WalletViewModel extends BaseViewModel
         }
 
         return attn;
+    }
+
+    public void importEASAttestation(QRResult qrAttn)
+    {
+        //validate attestation
+        //get chain and address
+        EasAttestation easAttn = new Gson().fromJson(qrAttn.functionDetail, EasAttestation.class);
+
+        //validation UID:
+        storeAttestation(easAttn, qrAttn.functionDetail)
+                .map(this::completeImport)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::checkTokenScript, this::onError)
+                .isDisposed();
+    }
+
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
+    private Single<Attestation> storeAttestation(EasAttestation attestation, String importedAttestation)
+    {
+        //Use Default key unless specified
+        return Single.fromCallable(() -> {
+            Attestation attn = assetDefinitionService.validateAttestation(attestation, importedAttestation);
+            switch (attn.isValid())
+            {
+                case Pass:
+                    return storeAttestationInternal(attestation, attn, importedAttestation);
+                case Expired:
+                case Issuer_Not_Valid:
+                case Incorrect_Subject:
+                    attestationError.postValue(attn.isValid().getValue());
+                    break;
+            }
+
+            return attn;
+        });
+    }
+
+    private Attestation storeAttestationInternal(EasAttestation attestation, Attestation attn, String importedAttestation)
+    {
+        try (Realm realm = realmManager.getRealmInstance(defaultWallet.getValue()))
+        {
+            realm.executeTransaction(r -> {
+                String key = attn.getDatabaseKey();
+                RealmAttestation realmAttn = r.where(RealmAttestation.class)
+                        .equalTo("address", key)
+                        .findFirst();
+
+                if (realmAttn == null)
+                {
+                    realmAttn = r.createObject(RealmAttestation.class, key);
+                }
+
+                realmAttn.setId(importedAttestation);
+                attn.populateRealmAttestation(realmAttn);
+            });
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return attn;
+    }
+
+    private Token completeImport(Token token)
+    {
+        if (token instanceof Attestation && ((Attestation)token).isValid() == AttestationValidationStatus.Pass)
+        {
+            Attestation tokenAttn = (Attestation)token;
+            TokenCardMeta tcmAttestation = new TokenCardMeta(tokenAttn.tokenInfo.chainId, tokenAttn.getAddress(), "1", System.currentTimeMillis(),
+                    assetDefinitionService, tokenAttn.tokenInfo.name, tokenAttn.tokenInfo.symbol, tokenAttn.getBaseTokenType(),
+                    TokenGroup.ATTESTATION, tokenAttn.getAttestationUID());
+            tcmAttestation.isEnabled = true;
+            updatedTokens.postValue(new TokenCardMeta[]{tcmAttestation});
+        }
+
+        return token;
+    }
+
+    public void checkTokenScript(Token token)
+    {
+        //check server for a TokenScript
+        disposable = assetDefinitionService.checkServerForScript(token, null)
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.single())
+                .subscribe(td -> handleFilename(td, token), Timber::w);
+    }
+
+    private void handleFilename(TokenDefinition td, Token token)
+    {
+        switch (td.nameSpace)
+        {
+            case UNCHANGED_SCRIPT:
+            case NO_SCRIPT:
+                break;
+            default:
+                //found a new script
+                completeImport(token);
+                break;
+        }
+    }
+
+    public void removeAttestation(Token token)
+    {
+        try (Realm realm = realmManager.getRealmInstance(defaultWallet.getValue()))
+        {
+            realm.executeTransactionAsync(r -> {
+                String key = ((Attestation)token).getDatabaseKey();
+                RealmAttestation realmAttn = r.where(RealmAttestation.class)
+                        .equalTo("address", key)
+                        .findFirst();
+
+                if (realmAttn != null)
+                {
+                    realmAttn.deleteFromRealm();
+                }
+            });
+        }
     }
 }

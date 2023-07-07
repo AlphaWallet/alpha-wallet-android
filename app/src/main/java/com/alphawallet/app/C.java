@@ -117,6 +117,7 @@ public abstract class C {
     public static final String EXTRA_TOKEN_ID = "TID";
     public static final String EXTRA_TOKEN_BALANCE = "BALANCE";
     public static final String EXTRA_TOKENID_LIST = "TOKENIDLIST";
+    public static final String EXTRA_ATTESTATION_ID = "ATTNID";
     public static final String EXTRA_NFTASSET_LIST = "NFTASSET_LIST";
     public static final String EXTRA_NFTASSET = "NFTASSET";
     public static final String ERC875RANGE = "ERC875RANGE";

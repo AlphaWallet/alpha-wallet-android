@@ -15,5 +15,6 @@ public enum EIP681Type
     OTHER_PROTOCOL,
     WALLET_CONNECT,
     ATTESTATION,
-    OTHER
+    OTHER,
+    EAS_ATTESTATION
 }

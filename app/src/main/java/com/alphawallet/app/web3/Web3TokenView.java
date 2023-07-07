@@ -416,7 +416,7 @@ public class Web3TokenView extends WebView
     public void displayTicketHolder(Token token, TicketRange range, AssetDefinitionService assetService, ViewType iconified)
     {
         //need to wait until the assetDefinitionService has finished loading assets
-        assetService.getAssetDefinitionASync(token.tokenInfo.chainId, token.tokenInfo.address)
+        assetService.getAssetDefinitionASync(token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(td -> renderTicketHolder(token, td, range, assetService, iconified), this::loadingError).isDisposed();
@@ -462,7 +462,7 @@ public class Web3TokenView extends WebView
 
         final StringBuilder attrs = assetService.getTokenAttrs(token, tokenId, range.tokenIds.size());
 
-        assetService.resolveAttrs(token, null, tokenId, assetService.getTokenViewLocalAttributes(token.tokenInfo.chainId, token.tokenInfo.address), itemView)
+        assetService.resolveAttrs(token, null, tokenId, assetService.getTokenViewLocalAttributes(token), itemView)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(token, throwable, range),
@@ -493,9 +493,9 @@ public class Web3TokenView extends WebView
                 break;
         }
 
-        String view = assetService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewName);
+        String view = assetService.getTokenView(token, viewName);
         if (TextUtils.isEmpty(view)) view = buildViewError(token, range, viewName);
-        String style = assetService.getTokenViewStyle(token.tokenInfo.chainId, token.getAddress(), viewName);
+        String style = assetService.getTokenViewStyle(token, viewName);
         unencodedPage = injectWeb3TokenInit(view, attrs.toString(), range.tokenIds.get(0));
         unencodedPage = injectStyleAndWrapper(unencodedPage, style); //style injected last so it comes first
 

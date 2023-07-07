@@ -91,7 +91,7 @@ public interface TokenLocalSource
     void updateTicker(long chainId, String address, TokenTicker ticker);
     Single<TokenInfo> storeTokenInfo(Wallet wallet, TokenInfo tInfo, ContractType type);
 
-    Token fetchAttestation(long chainId, Wallet wallet, String address, BigInteger tokenId);
+    Token fetchAttestation(long chainId, Wallet wallet, String address, String attnId);
 
     List<Token> fetchAttestations(long chainId, String walletAddress, String tokenAddress);
 }

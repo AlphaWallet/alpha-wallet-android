@@ -170,7 +170,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         int holderType = getHolderType();
 
         //TokenScript view for ERC721 overrides OpenSea display
-        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
+        if (assetService.hasTokenView(t, ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
 
         List<TicketRangeElement> sortedList = generateSortedList(assetService, token, tokenIds); //generate sorted list
         addSortedItems(sortedList, t, holderType); //insert sorted items into view
@@ -186,7 +186,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         int holderType = getHolderType();
 
         //TokenScript view for ERC721 overrides OpenSea display
-        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
+        if (assetService.hasTokenView(t, ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
 
         addRanges(t, holderType);
         items.endBatchedUpdates();

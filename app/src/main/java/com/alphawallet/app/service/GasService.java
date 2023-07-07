@@ -318,6 +318,21 @@ public class GasService implements ContractGasProvider
     }
 
     public Single<GasEstimate> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress,
+                                                    BigInteger amount, Wallet wallet, final BigInteger defaultLimit)
+    {
+        updateChainId(chainId);
+        if (currentGasPrice == null)
+        {
+            return useNodeEstimate()
+                    .flatMap(com -> calculateGasEstimateInternal(transactionBytes, chainId, toAddress, amount, wallet, defaultLimit));
+        }
+        else
+        {
+            return calculateGasEstimateInternal(transactionBytes, chainId, toAddress, amount, wallet, defaultLimit);
+        }
+    }
+
+    public Single<GasEstimate> calculateGasEstimateInternal(byte[] transactionBytes, long chainId, String toAddress,
                                                      BigInteger amount, Wallet wallet, final BigInteger defaultLimit)
     {
         String txData = "";

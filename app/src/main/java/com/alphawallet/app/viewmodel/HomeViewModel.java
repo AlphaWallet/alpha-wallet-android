@@ -75,7 +75,10 @@ import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.widget.EmailPromptView;
 import com.alphawallet.app.widget.QRCodeActionsView;
 import com.alphawallet.app.widget.WhatsNewView;
+import com.alphawallet.token.entity.AttestationDefinition;
+import com.alphawallet.token.entity.ContractInfo;
 import com.alphawallet.token.entity.MagicLinkData;
+import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -83,9 +86,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.web3j.crypto.Keys;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -104,6 +110,7 @@ import io.realm.Sort;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import timber.log.Timber;
+import wallet.core.jni.Hash;
 
 @HiltViewModel
 public class HomeViewModel extends BaseViewModel
@@ -370,6 +377,9 @@ public class HomeViewModel extends BaseViewModel
             QRResult qrResult = parser.parse(qrCode);
             switch (qrResult.type)
             {
+                case EAS_ATTESTATION:
+                    ((HomeActivity) activity).importEASAttestation(qrResult);
+                    break;
                 case ADDRESS:
                     props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS.getValue());
                     track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
@@ -407,15 +417,17 @@ public class HomeViewModel extends BaseViewModel
                 case OTHER_PROTOCOL:
                     break;
                 case ATTESTATION:
-                    ((HomeActivity)activity).importAttestation(qrResult);
+                    ((HomeActivity) activity).importAttestation(qrResult);
                     break;
                 case WALLET_CONNECT:
                     startWalletConnect(activity, qrCode);
                     break;
             }
+
         }
         catch (Exception e)
         {
+            Timber.e(e);
             qrCode = null;
         }
 
@@ -674,7 +686,7 @@ public class HomeViewModel extends BaseViewModel
             xmlInputStream, locale, null);
     }
 
-    public void importScriptFile(Context ctx, boolean appExternal, Intent startIntent)
+    public void importScriptFile(Context ctx, Intent startIntent)
     {
         Uri uri = startIntent.getData();
         final ContentResolver contentResolver = ctx.getContentResolver();
@@ -685,17 +697,25 @@ public class HomeViewModel extends BaseViewModel
             if (td.holdingToken == null || td.holdingToken.length() == 0)
                 return; //tokenscript with no holding token is currently meaningless. Is this always the case?
 
-            String newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
-            newFileName = newFileName + ".tsml";
+            String holdingContract = td.holdingToken;
+            AttestationDefinition attn = td.attestations != null ? td.attestations.get(holdingContract) : null;
 
-            if (appExternal)
+            //determine type of holding token
+            String newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
+            ContractInfo info = td.contracts.get(td.holdingToken);
+            if (attn != null && info.contractInterface.equals("Attestation"))
             {
-                newFileName = ctx.getExternalFilesDir("") + File.separator + newFileName;
+                //calculate using formula: #{scheme.drop0x}#{address.drop0x.lowercased}#{eventId}
+                String address = Numeric.cleanHexPrefix(Numeric.toHexString(Keys.getAddress(attn.issuerKey))).toLowerCase();
+                String preHash = Numeric.cleanHexPrefix(newFileName).toLowerCase() + address + (!TextUtils.isEmpty(attn.terminationId) ? attn.terminationId : "");
+                newFileName = Numeric.toHexString(Hash.keccak256(preHash.getBytes(StandardCharsets.UTF_8)));
             }
             else
             {
-                newFileName = Environment.getExternalStorageDirectory() + File.separator + ALPHAWALLET_DIR + File.separator + newFileName;
+                newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
             }
+
+            newFileName = assetDefinitionService.getDebugPath(newFileName + ".tsml");
 
             //Store the new Definition
             try (FileOutputStream fos = new FileOutputStream(newFileName))

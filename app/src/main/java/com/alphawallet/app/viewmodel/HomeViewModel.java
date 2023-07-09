@@ -63,12 +63,15 @@ import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportWalletActivity;
 import com.alphawallet.app.ui.SendActivity;
+import com.alphawallet.app.ui.WalletConnectActivity;
+import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.entity.WCUtils;
+import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.widget.EmailPromptView;
 import com.alphawallet.app.widget.QRCodeActionsView;
 import com.alphawallet.app.widget.WhatsNewView;
@@ -416,6 +419,9 @@ public class HomeViewModel extends BaseViewModel
                 case ATTESTATION:
                     ((HomeActivity) activity).importAttestation(qrResult);
                     break;
+                case WALLET_CONNECT:
+                    startWalletConnect(activity, qrCode);
+                    break;
             }
 
         }
@@ -429,6 +435,25 @@ public class HomeViewModel extends BaseViewModel
         {
             Toast.makeText(activity, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void startWalletConnect(Activity activity, String qrCode)
+    {
+        Intent intent;
+        if (WalletConnectHelper.isWalletConnectV1(qrCode))
+        {
+            intent = new Intent(activity, WalletConnectActivity.class);
+            intent.putExtra("qrCode", qrCode);
+            //intent.putExtra(C.EXTRA_CHAIN_ID, 0);
+        }
+        else
+        {
+            intent = new Intent(activity, WalletConnectV2Activity.class);
+            intent.putExtra("url", qrCode);
+        }
+        activity.startActivity(intent);
+        //setResult(WALLET_CONNECT);
+        //finish();
     }
 
     private void showActionSheet(Activity activity, QRResult qrResult)

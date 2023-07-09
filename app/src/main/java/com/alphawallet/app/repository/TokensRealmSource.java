@@ -1043,6 +1043,10 @@ public class TokensRealmSource implements TokenLocalSource
                     {
                         long chainId = rAtt.getChains().get(0);
                         Attestation attn = (Attestation) fetchAttestation(chainId, wallet, rAtt);
+                        if (attn.tokenInfo == null)
+                        {
+                            continue;
+                        }
                         TokenCardMeta tcmAttestation = new TokenCardMeta(chainId,
                                 rAtt.getTokenAddress(), "1", System.currentTimeMillis(),
                                 svs, rAtt.getName(), attn.tokenInfo.symbol, attn.getBaseTokenType(), TokenGroup.ATTESTATION, attn.getAttestationUID());

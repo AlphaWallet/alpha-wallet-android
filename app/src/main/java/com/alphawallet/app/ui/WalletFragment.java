@@ -75,6 +75,9 @@ import com.alphawallet.app.widget.UserAvatar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+import com.google.zxing.client.android.Intents;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -742,7 +745,9 @@ public class WalletFragment extends BaseFragment implements
         }
         if (menuItem.getItemId() == R.id.action_scan)
         {
-            viewModel.showQRCodeScanning(getActivity());
+            Bundle b = new Bundle();
+            b.putParcelableArrayList(C.QRCODE_SCAN, null);
+            getParentFragmentManager().setFragmentResult(C.QRCODE_SCAN, b);
         }
         return super.onMenuItemClick(menuItem);
     }

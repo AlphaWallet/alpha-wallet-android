@@ -37,6 +37,8 @@ import com.alphawallet.app.util.pattern.Patterns;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
+import com.google.zxing.client.android.Intents;
+import com.journeyapps.barcodescanner.ScanOptions;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
@@ -1094,6 +1096,16 @@ public class Utils
         {
             return false;
         }
+    }
+
+    public static ScanOptions getQRScanOptions(Context ctx)
+    {
+        ScanOptions options = new ScanOptions();
+        options.addExtra(Intents.Scan.SCAN_TYPE, Intents.Scan.MIXED_SCAN);
+        options.setBeepEnabled(true);
+        options.setOrientationLocked(false);
+        options.setPrompt(ctx.getString(R.string.message_scan_camera));
+        return options;
     }
 
     public static String removeDoubleQuotes(String string)

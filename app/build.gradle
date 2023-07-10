@@ -12,7 +12,7 @@ buildscript {
     }
     dependencies {
         classpath "gradle.plugin.com.worker8.android_lint_reporter:android_lint_reporter:2.1.0"
-        classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.20.0-RC1"
+        classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.22.0"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
     }
 }
@@ -264,13 +264,13 @@ dependencies {
     //implementation "org.web3j:core:4.8.8-android"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation fileTree(include: ['*.aar'], dir: 'libs')
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
-    implementation 'org.slf4j:slf4j-api:2.0.0-alpha7'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'org.slf4j:slf4j-api:2.0.7'
 
     // Http client
-    implementation "com.squareup.okhttp3:okhttp:4.9.0"
-    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation "com.squareup.okhttp3:okhttp:4.11.0"
+    implementation 'com.google.code.gson:gson:2.9.1'
     implementation "com.squareup.picasso:picasso:2.71828"
     //noinspection GradleDependency
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1' //This cannot be updated until minSdkVersion is 31.

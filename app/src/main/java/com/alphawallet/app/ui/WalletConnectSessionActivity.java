@@ -202,19 +202,31 @@ public class WalletConnectSessionActivity extends BaseActivity
         popupMenu.show();
     }
 
-    private void setupClient(final String sessionId, final CustomAdapter.CustomViewHolder holder)
+    private void setupClient(final WalletConnectSessionItem session, final CustomAdapter.CustomViewHolder holder)
     {
-        viewModel.getClient(this, sessionId, client -> handler.post(() -> {
-            if (client == null || !client.isConnected())
-            {
-                holder.statusIcon.setVisibility(View.GONE);
-            }
-            else
-            {
-                holder.statusIcon.setVisibility(View.VISIBLE);
-                holder.statusIcon.setImageResource(R.drawable.ic_connected);
-            }
-        }));
+        if (session.wcVersion == 1)
+        {
+            viewModel.getClient(this, session.sessionId, client -> handler.post(() -> {
+                setStatusIconActive(holder, (client != null && client.isConnected()));
+            }));
+        }
+        else
+        {
+            setStatusIconActive(holder, (session.expiryTime > System.currentTimeMillis()));
+        }
+    }
+
+    private void setStatusIconActive(final CustomAdapter.CustomViewHolder holder, boolean active)
+    {
+        if (active)
+        {
+            holder.statusIcon.setVisibility(View.VISIBLE);
+            holder.statusIcon.setImageResource(R.drawable.ic_connected);
+        }
+        else
+        {
+            holder.statusIcon.setVisibility(View.GONE);
+        }
     }
 
     private void dialogConfirmDelete(WalletConnectSessionItem session)
@@ -294,7 +306,7 @@ public class WalletConnectSessionActivity extends BaseActivity
                 context.startActivity(newIntent(context, session));
             });
 
-            setupClient(session.sessionId, holder);
+            setupClient(session, holder);
 
             holder.clickLayer.setOnLongClickListener(v -> {
                 //delete this entry?

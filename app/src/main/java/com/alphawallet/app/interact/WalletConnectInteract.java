@@ -6,6 +6,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import com.alphawallet.app.entity.WalletConnectActions;
+import com.alphawallet.app.entity.lifi.Token;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.repository.entity.RealmWCSession;
@@ -17,7 +18,9 @@ import com.alphawallet.app.walletconnect.entity.WCUtils;
 import com.walletconnect.web3.wallet.client.Wallet;
 import com.walletconnect.web3.wallet.client.Web3Wallet;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -45,8 +48,12 @@ public class WalletConnectInteract
     public List<WalletConnectSessionItem> getSessions()
     {
         List<WalletConnectSessionItem> result = new ArrayList<>();
-        result.addAll(getWalletConnectV1SessionItems());
         result.addAll(getWalletConnectV2SessionItems());
+        result.addAll(getWalletConnectV1SessionItems());
+
+        //now sort for active/newness
+        result.sort((l, r) -> Long.compare(r.expiryTime, l.expiryTime));
+
         return result;
     }
 

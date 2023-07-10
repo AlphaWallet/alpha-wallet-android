@@ -32,6 +32,8 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         wallets = namespaceParser.getWallets();
         methods = namespaceParser.getMethods();
         events = namespaceParser.getEvents();
+        wcVersion = 2;
+        expiryTime = convertEpochTime(s.getExpiry());
     }
 
     public WalletConnectV2SessionItem(Parcel in)
@@ -46,6 +48,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         in.readStringList(wallets);
         in.readStringList(methods);
         in.readStringList(events);
+        expiryTime = in.readLong();
     }
 
     public WalletConnectV2SessionItem()
@@ -87,6 +90,7 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
         dest.writeStringList(wallets);
         dest.writeStringList(methods);
         dest.writeStringList(events);
+        dest.writeLong(expiryTime);
     }
 
     public static final Parcelable.Creator<WalletConnectV2SessionItem> CREATOR = new Parcelable.Creator<>()

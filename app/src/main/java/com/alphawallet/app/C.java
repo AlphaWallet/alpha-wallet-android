@@ -52,6 +52,8 @@ public abstract class C {
     public static final String OPTIMISM_GOERLI_TESTNET_NAME = "Optimism Goerli (Test)";
     public static final String ARBITRUM_GOERLI_TESTNET_NAME = "Arbitrum Goerli (Test)";
     public static final String OKX_NETWORK_NAME = "OKXChain Mainnet";
+    public static final String ROOTSTOCK_NETWORK_NAME = "Rootstock";
+    public static final String ROOTSTOCK_TESTNET_NAME = "Rootstock (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -82,6 +84,8 @@ public abstract class C {
     public static final String OPTIMISM_GOERLI_TEST_SYMBOL = "ETH";
     public static final String ARBITRUM_GOERLI_TEST_SYMBOL = "AGOR";
     public static final String OKX_SYMBOL = "OKT";
+    public static final String ROOTSTOCK_SYMBOL = "RBTC";
+    public static final String ROOTSTOCK_TEST_SYMBOL = "tBTC";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 

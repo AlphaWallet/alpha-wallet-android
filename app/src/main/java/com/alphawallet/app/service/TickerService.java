@@ -18,6 +18,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ROOTSTOCK_MAINNET_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 import android.text.TextUtils;
@@ -711,6 +712,7 @@ public class TickerService
         put(AURORA_MAINNET_ID, "aurora");
         put(MILKOMEDA_C1_ID, "cardano");
         put(CRONOS_MAIN_ID, "cronos");
+        put(ROOTSTOCK_MAINNET_ID, "rootstock");
     }};
 
     private static final Map<Long, String> dexGuruChainIdToAPISymbol = new HashMap<Long, String>()
@@ -745,6 +747,7 @@ public class TickerService
         put(MILKOMEDA_C1_ID, "cardano");
         put(CRONOS_MAIN_ID, "crypto-com-chain");
         put(OKX_ID, "okb");
+        put(ROOTSTOCK_MAINNET_ID, "rootstock");
     }};
 
     public static boolean validateCoinGeckoAPI(Token token)

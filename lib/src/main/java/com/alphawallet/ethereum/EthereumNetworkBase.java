@@ -41,6 +41,8 @@ public abstract class EthereumNetworkBase
     public static final long OPTIMISM_GOERLI_TEST_ID = 420;
     public static final long ARBITRUM_GOERLI_TEST_ID = 421613;
     public static final long OKX_ID = 66;
+    public static final long ROOTSTOCK_MAINNET_ID = 30;
+    public static final long ROOTSTOCK_TESTNET_ID = 31;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -75,6 +77,8 @@ public abstract class EthereumNetworkBase
     public static final String IOTEX_MAINNET_RPC_URL = "https://babel-api.mainnet.iotex.io";
     public static final String IOTEX_TESTNET_RPC_URL = "https://babel-api.testnet.iotex.io";
     public static final String OKX_RPC_URL = "https://exchainrpc.okex.org";
+    public static final String ROOTSTOCK_MAINNET_RPC_URL = "https://public-node.rsk.co";
+    public static final String ROOTSTOCK_TESTNET_RPC_URL = "https://public-node.testnet.rsk.co";
 
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>()
     {
@@ -147,6 +151,10 @@ public abstract class EthereumNetworkBase
                     IOTEX_TESTNET_ID, false));
             put(OKX_ID, new NetworkInfo("OKXChain Mainnet", "OKT", OKX_RPC_URL, "https://www.oklink.com/en/okc",
                 OKX_ID, false));
+            put(ROOTSTOCK_MAINNET_ID, new NetworkInfo("Rootstock", "RBTC", ROOTSTOCK_MAINNET_RPC_URL, "https://blockscout.com/rsk/mainnet/tx/",
+                    ROOTSTOCK_MAINNET_ID, false));
+            put(ROOTSTOCK_TESTNET_ID, new NetworkInfo("Rootstock (Test)", "tBTC", ROOTSTOCK_TESTNET_RPC_URL, "",
+                    ROOTSTOCK_TESTNET_ID, false));
         }
     };
 

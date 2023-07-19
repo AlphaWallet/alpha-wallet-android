@@ -3361,7 +3361,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         else if (chainId == ARBITRUM_MAIN_ID)
         {
-            return "";
+            return "0x5f0437f7c1db1f8e575732ca52cc8ad899b3c9fe38b78b67ff4ba7c37a8bf3b4";
         }
         else if (chainId == SEPOLIA_TESTNET_ID)
         {
@@ -3383,7 +3383,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         else if (chainId == ARBITRUM_MAIN_ID)
         {
-            return "";
+            return "0xe5c2bfd98a1b35573610b4e5a367bbcb5c736e42508a33fd6046bad63eaf18f9";
         }
         else if (chainId == SEPOLIA_TESTNET_ID)
         {

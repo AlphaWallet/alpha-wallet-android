@@ -204,7 +204,7 @@ public class TransactionsService
 
         TransferFetchType tfType = apiFetchProgress.get(chainId, TransferFetchType.ERC_20);
 
-        if (tfType.ordinal() >= availableTxTypes.length - 1) //available API routes may be zero if unsupported (eg custom network)
+        if (tfType.ordinal() >= availableTxTypes.length) //available API routes may be zero if unsupported (eg custom network)
         {
             apiFetchProgress.put(chainId, TransferFetchType.ERC_20); // completed reads from this chain, reset to start
             currentIndex++;

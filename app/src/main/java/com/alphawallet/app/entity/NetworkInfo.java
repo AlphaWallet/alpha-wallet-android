@@ -18,6 +18,7 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo
     private final String BLOCKSCOUT_API = "blockscout";
     private final String MATIC_API = "polygonscan";
     private final String OKX_API = "oklink";
+    private final String ARBISCAN_API = "https://api.arbiscan";
     private final String PALM_API = "explorer.palm";
 
     public  String backupNodeUrl = null;
@@ -64,17 +65,21 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo
         {
             return new TransferFetchType[0];
         }
-        else if (chainId == GOERLI_ID) //goerli doesn't yet implement erc1155 route TODO: test for when Etherscan Goerli implements ERC1155 tx:
-        {                              // https://api-goerli.etherscan.io/api?module=account&action=token1155tx&address=0x0000000000000000000000000000000000000000
+        else if (chainId == GOERLI_ID || etherscanAPI.startsWith(ARBISCAN_API))
+        {
             return new TransferFetchType[]{TransferFetchType.ERC_20, TransferFetchType.ERC_721};
         }
         else if (etherscanAPI.contains(MATIC_API) || etherscanAPI.contains(ETHERSCAN_API) || etherscanAPI.contains(OKX_API))
         {
             return new TransferFetchType[]{TransferFetchType.ERC_20, TransferFetchType.ERC_721, TransferFetchType.ERC_1155};
         }
-        else
+        else if (etherscanAPI.contains(BLOCKSCOUT_API))
         {
             return new TransferFetchType[]{TransferFetchType.ERC_20}; // assume it only supports tokenTx, eg Blockscout, Palm
+        }
+        else //play it safe, assume other API has ERC20
+        {
+            return new TransferFetchType[]{TransferFetchType.ERC_20, TransferFetchType.ERC_721};
         }
     }
 

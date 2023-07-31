@@ -358,6 +358,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     {
         if (gasWidgetInterface != null) gasWidgetInterface.onDestroy();
         if (assetDetailView != null) assetDetailView.onDestroy();
+        if (detailWidget != null) detailWidget.onDestroy();
     }
 
     public void setURL(String url)
@@ -387,32 +388,13 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         if (candidateTransaction.isBaseTransfer())
         {
             detailWidget.setVisibility(View.GONE);
-            return;
         }
         else
         {
             detailWidget.setVisibility(View.VISIBLE);
+            detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId,
+                    tokensService.getNetworkSymbol(token.tokenInfo.chainId), this);
         }
-
-        SignatureLookupService svc = new SignatureLookupService();
-        disposable = svc.getFunctionName(candidateTransaction.payload)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .subscribe(this::onResult, this::recoverOnError);
-    }
-
-    private void recoverOnError(Throwable e)
-    {
-        Timber.w(e);
-        onResult("");
-    }
-
-    private void onResult(String functionName)
-    {
-        detailWidget.setupTransaction(candidateTransaction, token.tokenInfo.chainId,
-            tokensService.getNetworkSymbol(token.tokenInfo.chainId), this, functionName);
-
-        disposable.dispose();
     }
 
     @Override

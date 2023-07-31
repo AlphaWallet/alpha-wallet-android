@@ -712,7 +712,9 @@ public class HomeViewModel extends BaseViewModel
             }
             else
             {
-                newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
+                //calculate using formula: "{address.lowercased}-{chainId}"
+                newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next() + "-"
+                        + td.contracts.get(td.holdingToken).addresses.keySet().iterator().next();
             }
 
             newFileName = assetDefinitionService.getDebugPath(newFileName + ".tsml");

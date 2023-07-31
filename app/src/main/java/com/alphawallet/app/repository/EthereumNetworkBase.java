@@ -129,6 +129,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             : FREE_MAINNET_RPC_URL;
     public static final String GOERLI_RPC_URL = usesProductionKey ? "https://goerli.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_GOERLI_RPC_URL;
+
+    public static final String SEPOLIA_RPC_URL = usesProductionKey ? "https://sepolia.infura.io/v3/" + keyProvider.getInfuraKey()
+            : SEPOLIA_TESTNET_RPC_URL;
     public static final String POLYGON_RPC_URL = usesProductionKey ? "https://polygon-mainnet.infura.io/v3/" + keyProvider.getInfuraKey()
             : FREE_POLYGON_RPC_URL;
     public static final String ARBITRUM_MAINNET_RPC = usesProductionKey ? "https://arbitrum-mainnet.infura.io/v3/" + keyProvider.getInfuraKey()
@@ -331,7 +334,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/", MILKOMEDA_C1_TEST_ID, "",
                     "https://explorer-devnet-cardano-evm.c1.milkomeda.com/api?"));
             put(SEPOLIA_TESTNET_ID, new NetworkInfo(C.SEPOLIA_TESTNET_NAME, C.SEPOLIA_SYMBOL,
-                    SEPOLIA_TESTNET_RPC_URL,
+                    SEPOLIA_RPC_URL,
                     "https://sepolia.etherscan.io/tx/", SEPOLIA_TESTNET_ID, "https://rpc2.sepolia.org",
                     "https://api-sepolia.etherscan.io/api?"));
             put(OPTIMISM_GOERLI_TEST_ID, new NetworkInfo(C.OPTIMISM_GOERLI_TESTNET_NAME, C.OPTIMISM_GOERLI_TEST_SYMBOL,

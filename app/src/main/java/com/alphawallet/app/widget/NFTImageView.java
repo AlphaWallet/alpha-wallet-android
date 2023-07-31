@@ -536,7 +536,7 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
             {
                 case "":
                     mimeStr = "";
-                    if (hint == ImageType.IMAGE)
+                    if (hint == ImageType.IMAGE || hint == ImageType.ANIM)
                     {
                         type = hint;
                     }

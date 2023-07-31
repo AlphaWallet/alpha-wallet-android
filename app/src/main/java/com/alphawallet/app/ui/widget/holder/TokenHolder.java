@@ -150,7 +150,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             if (!TextUtils.isEmpty(coinBalance))
             {
                 balanceCoin.setVisibility(View.VISIBLE);
-                String symbol = token.getSymbol().substring(0, Math.min(token.getSymbol().length(), 5)).toUpperCase();
+                String symbol = token.getSymbol().substring(0, Math.min(token.getSymbol().length(), Token.MAX_TOKEN_SYMBOL_LENGTH)).toUpperCase();
                 balanceCoin.setText(getString(R.string.valueSymbol, coinBalance, symbol));
             }
 

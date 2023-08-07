@@ -702,7 +702,7 @@
     <string name="gas_price_widget">Gas Price: %1$s</string>
     <string name="gas_max">Max Fee</string>
     <string name="priority_fee">Priority Fee</string>
-    <string name="base_fee">Base Fee: %1$s</string>
+    <string name="base_fee">Base Fee</string>
     <string name="gas_message">လုပ်ငန်းဆောင်ရွက်ခများသည် AlphaWallet နှင့်မသက်ဆိုင်ပဲ Etheruem Blockchain ၏ကွန်ရက်ကြပ်မှုအပေါ်မူတည်ပါသည်။ AlphaWallet သည် လုပ်ငန်းဆောင်ရွက်ခကို ၁၅စက္ကန့်တကြိမ် %1$s မှကိုးကား၍ အသုံးပြုပါသည်။</string>
     <string name="set_your_speed">ကိုယ်တိုင်အမြန်နှုန်းသတ်မှတ်မည်</string>
     <string name="nonce_optional">Nonce (optional)</string>

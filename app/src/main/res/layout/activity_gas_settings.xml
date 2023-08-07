@@ -12,6 +12,31 @@
 
         <include layout="@layout/layout_simple_toolbar" />
 
+        <LinearLayout
+                android:id="@+id/text_base_price_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_margin="6dp">
+
+            <TextView
+                    android:id="@+id/text_base_price_title"
+                    style="@style/Aw.Typography.Title.SemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/base_fee" />
+
+            <TextView
+                    android:id="@+id/text_base_price"
+                    android:layout_marginStart="6dp"
+                    style="@style/Aw.Typography.Control"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="14.92" />
+
+        </LinearLayout>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list"
             android:layout_width="match_parent"

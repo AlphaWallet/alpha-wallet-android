@@ -77,8 +77,6 @@ repositories {
 }
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion '33.0.0'
     sourceSets {
         main {
 
@@ -91,6 +89,7 @@ android {
         applicationId "io.stormbird.wallet"
         minSdkVersion 24
         targetSdkVersion 32
+        compileSdk 33
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         testInstrumentationRunnerArguments clearPackageData: 'true'
         def XInfuraAPI = "XInfuraAPI"

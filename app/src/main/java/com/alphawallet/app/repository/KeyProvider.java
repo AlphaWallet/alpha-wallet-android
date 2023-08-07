@@ -41,4 +41,6 @@ public interface KeyProvider
     String getBlockPiBaobabKey();
 
     String getBlockPiCypressKey();
+
+    String getBlockNativeKey();
 }

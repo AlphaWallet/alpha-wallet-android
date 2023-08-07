@@ -20,7 +20,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.EIP1559FeeOracleResult;
 import com.alphawallet.app.ui.widget.entity.GasSettingsCallback;
-import com.alphawallet.app.ui.widget.entity.GasSpeed2;
+import com.alphawallet.app.ui.widget.entity.GasSpeed;
 import com.alphawallet.app.util.BalanceUtils;
 
 import java.math.BigDecimal;
@@ -270,12 +270,12 @@ public class GasSliderView extends RelativeLayout
     }
 
     @SuppressLint("SetTextI18n")
-    public void initGasPrice(GasSpeed2 gs)
+    public void initGasPrice(GasSpeed gs)
     {
         if (!limitInit)
         {
             BigDecimal gweiPrice = BalanceUtils.weiToGweiBI(gs.gasPrice.maxFeePerGas);
-            BigDecimal gweiPriorityFee = BalanceUtils.weiToGweiBI(gs.gasPrice.maxPriorityFeePerGas);
+            BigDecimal gweiPriorityFee = BalanceUtils.weiToGweiBI(gs.gasPrice.priorityFee);
             gasPriceValue.setText(gweiPrice.setScale(1, RoundingMode.HALF_DOWN).toString());
             setPriceSlider(gweiPrice);
             priorityFeeValue.setText(gweiPriorityFee.setScale(2, RoundingMode.HALF_DOWN).toString());
@@ -290,7 +290,7 @@ public class GasSliderView extends RelativeLayout
         {
             BigDecimal gweiPrice = new BigDecimal(gasPriceStr);
             BigDecimal maxDefault = BalanceUtils.weiToGweiBI(maxPrice.maxFeePerGas).multiply(BigDecimal.valueOf(15.0));
-            BigDecimal gweiPriorityFee = BalanceUtils.weiToGweiBI(maxPrice.maxPriorityFeePerGas);
+            BigDecimal gweiPriorityFee = BalanceUtils.weiToGweiBI(maxPrice.priorityFee);
             if (gweiPriorityFee.compareTo(BigDecimal.valueOf(4.0)) > 0)
             {
                 maxPriorityFee = gweiPriorityFee.floatValue();

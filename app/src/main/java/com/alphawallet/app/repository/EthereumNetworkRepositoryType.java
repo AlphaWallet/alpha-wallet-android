@@ -58,6 +58,7 @@ public interface EthereumNetworkRepositoryType {
 
     boolean isChainContract(long chainId, String address);
     boolean hasLockedGas(long chainId);
+    boolean hasBlockNativeGasAPI(long chainId);
 
     NetworkInfo getBuiltInNetwork(long chainId);
 

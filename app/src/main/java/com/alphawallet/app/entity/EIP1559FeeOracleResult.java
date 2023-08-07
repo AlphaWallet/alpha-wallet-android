@@ -14,27 +14,27 @@ import java.math.BigInteger;
 public class EIP1559FeeOracleResult implements Parcelable
 {
     public final BigInteger maxFeePerGas;
-    public final BigInteger maxPriorityFeePerGas;
+    public final BigInteger priorityFee;
     public final BigInteger baseFee;
 
     public EIP1559FeeOracleResult(BigInteger maxFee, BigInteger maxPriority, BigInteger base)
     {
         maxFeePerGas = fixGasPriceReturn(maxFee);  // Some chains (eg Phi) have a gas price lower than 1Gwei.
-        maxPriorityFeePerGas = fixGasPriceReturn(maxPriority);
+        priorityFee = fixGasPriceReturn(maxPriority);
         baseFee = base;
     }
 
     public EIP1559FeeOracleResult(EIP1559FeeOracleResult r)
     {
         maxFeePerGas = r.maxFeePerGas;
-        maxPriorityFeePerGas = r.maxPriorityFeePerGas;
+        priorityFee = r.priorityFee;
         baseFee = r.baseFee;
     }
 
     protected EIP1559FeeOracleResult(Parcel in)
     {
         maxFeePerGas = new BigInteger(in.readString(), 16);
-        maxPriorityFeePerGas = new BigInteger(in.readString(), 16);
+        priorityFee = new BigInteger(in.readString(), 16);
         baseFee = new BigInteger(in.readString(), 16);
     }
 
@@ -60,7 +60,7 @@ public class EIP1559FeeOracleResult implements Parcelable
     public void writeToParcel(Parcel dest, int flags)
     {
         dest.writeString(maxFeePerGas.toString(16));
-        dest.writeString(maxPriorityFeePerGas.toString(16));
+        dest.writeString(priorityFee.toString(16));
         dest.writeString(baseFee.toString(16));
     }
 

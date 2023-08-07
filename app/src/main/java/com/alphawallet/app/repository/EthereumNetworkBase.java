@@ -492,10 +492,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //  <etherscanAPI from the above list> + GAS_API
     //If the gas oracle you're adding doesn't follow this spec then you'll have to change the getGasOracle method
     private static final List<Long> hasGasOracleAPI = Arrays.asList(MAINNET_ID, HECO_ID, BINANCE_MAIN_ID, POLYGON_ID);
-
+    private static final List<Long> hasBlockNativeGasOracleAPI = Arrays.asList(MAINNET_ID, POLYGON_ID);
     //These chains don't allow custom gas
-    private static final List<Long> hasLockedGas = Arrays.asList(OPTIMISTIC_MAIN_ID, ARBITRUM_MAIN_ID, KLAYTN_ID, KLAYTN_BAOBAB_ID);
-
+    private static final List<Long> hasLockedGas = Arrays.asList(KLAYTN_ID, KLAYTN_BAOBAB_ID);
     private static final List<Long> hasOpenSeaAPI = Arrays.asList(MAINNET_ID, POLYGON_ID, ARBITRUM_GOERLI_TEST_ID, AVALANCHE_ID, KLAYTN_ID, OPTIMISM_GOERLI_TEST_ID, GOERLI_ID);
 
     private static final LongSparseArray<BigInteger> blockGasLimit = new LongSparseArray<BigInteger>()
@@ -512,6 +511,20 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         if (hasGasOracleAPI.contains(chainId) && networkMap.indexOfKey(chainId) >= 0)
         {
             return networkMap.get(chainId).etherscanAPI + GAS_API;
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    private static final String BLOCKNATIVE_GAS_API = "https://api.blocknative.com/gasprices/blockprices?chainid=";
+
+    public static String getBlockNativeOracle(long chainId)
+    {
+        if (hasBlockNativeGasOracleAPI.contains(chainId) && networkMap.indexOfKey(chainId) >= 0)
+        {
+            return BLOCKNATIVE_GAS_API + chainId;
         }
         else
         {
@@ -595,6 +608,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public boolean hasLockedGas(long chainId)
     {
         return hasLockedGas.contains(chainId);
+    }
+
+    @Override
+    public boolean hasBlockNativeGasAPI(long chainId)
+    {
+        return hasBlockNativeGasOracleAPI.contains(chainId);
     }
 
     static final Map<Long, String> addressOverride = new HashMap<Long, String>()

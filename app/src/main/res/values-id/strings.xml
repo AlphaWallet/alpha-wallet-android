@@ -690,7 +690,7 @@
     <string name="gas_price_widget">Harga Gas: %1$s</string>
     <string name="gas_max">Biaya Maksimum</string>
     <string name="priority_fee">Biaya Prioritas</string>
-    <string name="base_fee">Biaya Dasar: %1$s</string>
+    <string name="base_fee">Biaya Dasar</string>
     <string name="gas_message">Biaya didasarkan pada beban jaringan blockchain Ethereum saat ini. Mereka tidak bergantung pada AlphaWallet. AlphaWallet menggunakan oracle langsung %1$s dan memperbarui harga gas setiap 15 detik.</string>
     <string name="set_your_speed">Tetapkan Milik Anda Sendiri</string>
     <string name="nonce_optional">Nonce (pilihan)</string>

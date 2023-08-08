@@ -769,9 +769,9 @@ public class HomeViewModel extends BaseViewModel
 
     public void sendMsgPumpToWC(Context context)
     {
-
-        Timber.d("Start WC service");
-        WCUtils.startServiceLocal(context, null, WalletConnectActions.MSG_PUMP);
+        //NB: WalletConnect v1 has been deprecated
+        //Timber.d("Start WC service");
+        //WCUtils.startServiceLocal(context, null, WalletConnectActions.MSG_PUMP);
     }
 
     // Restart walletconnect sessions if required

@@ -11,7 +11,7 @@ import static com.alphawallet.app.steps.Steps.getWalletAddress;
 import static com.alphawallet.app.util.Helper.click;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.junit.Assert.fail;
 
 import android.os.Build;

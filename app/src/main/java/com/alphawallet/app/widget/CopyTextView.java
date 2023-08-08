@@ -87,6 +87,26 @@ public class CopyTextView extends LinearLayout
         return originalText;
     }
 
+    public void setFixedText(CharSequence text)
+    {
+        originalText = text.toString();
+
+        setVisibility(TextUtils.isEmpty(originalText) ? View.GONE : View.VISIBLE);
+
+        if (Utils.isAddressValid(originalText))
+        {
+            button.setText(Utils.splitAddress(originalText));
+        }
+        else if (Utils.isTxHashValid(originalText))
+        {
+            button.setText(Utils.formatTxHash(originalText, 10));
+        }
+        else
+        {
+            button.setText(originalText);
+        }
+    }
+
     public void setText(CharSequence text)
     {
         originalText = text.toString();

@@ -8,6 +8,8 @@ import static com.alphawallet.app.util.Helper.click;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.alphawallet.app.util.Helper;
+
 import org.junit.Test;
 
 public class CoinbasePayTest extends BaseE2ETest
@@ -17,6 +19,7 @@ public class CoinbasePayTest extends BaseE2ETest
     {
         createNewWallet();
         click(withText("Buy ETH"));
+        Helper.wait(2);
         shouldSee("Buy with Coinbase Pay");
         click(withId(R.id.buy_with_coinbase_pay));
         shouldSee("Buy with Coinbase Pay");

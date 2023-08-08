@@ -235,7 +235,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
 
         displayAddress = Keys.toChecksumAddress(wallet.address);
         setTitle(getString(R.string.my_wallet_address));
-        copyAddress.setText(displayAddress);
+        copyAddress.setFixedText(displayAddress);
         currentMode = AddressMode.MODE_ADDRESS;
         if (getCurrentFocus() != null) {
             KeyboardUtils.hideKeyboard(getCurrentFocus());

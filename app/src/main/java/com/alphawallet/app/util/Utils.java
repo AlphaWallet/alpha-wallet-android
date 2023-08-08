@@ -1,6 +1,5 @@
 package com.alphawallet.app.util;
 
-import static com.alphawallet.app.service.AssetDefinitionService.getEASContract;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
@@ -37,9 +36,9 @@ import com.alphawallet.app.util.pattern.Patterns;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
+import com.google.gson.Gson;
 import com.google.zxing.client.android.Intents;
 import com.journeyapps.barcodescanner.ScanOptions;
-import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -56,7 +55,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -581,6 +579,15 @@ public class Utils
         {
             return "0x";
         }
+    }
+
+    public static String splitAddress(String address)
+    {
+        address = Keys.toChecksumAddress(address);
+        int split = address.length()/2;
+        String front = address.substring(0, split);
+        String back = address.substring(split);
+        return front + " " + back;
     }
 
     public static String formatTxHash(String txHash)
@@ -1280,5 +1287,43 @@ public class Utils
             Timber.e(e);
             return "";
         }
+    }
+
+    public static boolean isDefaultName(String name, Context ctx)
+    {
+        //wallet.name = getString(R.string.wallet_name_template, walletCount);
+        String walletStr = ctx.getString(R.string.wallet_name_template, 1);
+        String walletSplit[] = walletStr.split(" ");
+        walletStr = walletSplit[0];
+        if (!TextUtils.isEmpty(name) && name.startsWith(walletStr) && walletSplit.length == 2)
+        {
+            //check last part is a number
+            int walletNum = getWalletNum(walletSplit);
+            return walletNum > 0;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private static int getWalletNum(String[] walletSplit)
+    {
+        if (walletSplit.length != 2)
+        {
+            return 0;
+        }
+
+        String walletNum = walletSplit[1];
+        try
+        {
+            return Integer.parseInt(walletNum);
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return 0;
     }
 }

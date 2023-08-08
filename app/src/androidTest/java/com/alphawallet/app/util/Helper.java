@@ -28,15 +28,13 @@ import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
+import org.hamcrest.CoreMatchers;
 
 import java.util.concurrent.TimeoutException;
 import com.alphawallet.app.R;
+import com.walletconnect.android.Core;
 
 import junit.framework.AssertionFailedError;
-
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 
 import java.util.concurrent.TimeoutException;
 
@@ -175,14 +173,14 @@ public class Helper
 
     public static void click(Matcher<View> matcher, int timeoutInSeconds)
     {
-        onView(isRoot()).perform(Helper.waitUntil(Matchers.allOf(matcher, isDisplayed()), timeoutInSeconds));
+        onView(isRoot()).perform(Helper.waitUntil(CoreMatchers.allOf(matcher, isDisplayed()), timeoutInSeconds));
         onView(matcher).perform(ViewActions.click(doNothing())); // if click executed as long press, do nothing and retry clicking
     }
 
     public static void click(Matcher<View> matcher)
     {
 //        Helper.wait(1); //slight pause
-        onView(isRoot()).perform(Helper.waitUntil(Matchers.allOf(matcher, isDisplayed())));
+        onView(isRoot()).perform(Helper.waitUntil(CoreMatchers.allOf(matcher, isDisplayed())));
         onView(matcher).perform(ViewActions.click(doNothing())); // if click executed as long press, do nothing and retry clicking
     }
 

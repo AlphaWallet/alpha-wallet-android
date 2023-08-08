@@ -19,7 +19,7 @@ import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickListItem;
 import static com.alphawallet.app.util.Helper.clickStaticListItem;
 
-import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.CoreMatchers.allOf;
 
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.contrib.RecyclerViewActions;

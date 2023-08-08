@@ -27,8 +27,8 @@ import static com.alphawallet.app.util.Helper.waitForLoadingComplete;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.Helper.waitUntilThenBack;
 import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
 import android.view.KeyEvent;
@@ -159,13 +159,14 @@ public class Steps
         onView(withHint("0")).perform(replaceText(amountStr));
         onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));
         click(withId(R.string.action_next));
-        Helper.wait(1);
+        Helper.wait(6);
         try
         {
             click(withId(R.string.action_confirm));
         }
         catch (Error | Exception e)
         {
+            Helper.wait(2);
             waitForLoadingComplete("Calculating Gas Limit");
             click(withId(R.string.action_confirm));
         }

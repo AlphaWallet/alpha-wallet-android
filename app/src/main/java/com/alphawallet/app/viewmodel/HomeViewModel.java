@@ -303,7 +303,8 @@ public class HomeViewModel extends BaseViewModel
     private void updateWalletTitle(Context context, Wallet wallet)
     {
         transactionsService.changeWallet(wallet);
-        if (!TextUtils.isEmpty(wallet.name))
+        boolean usingDefaultName = Utils.isDefaultName(wallet.name, context);
+        if (!TextUtils.isEmpty(wallet.name) && !usingDefaultName)
         {
             walletName.postValue(wallet.name);
         }

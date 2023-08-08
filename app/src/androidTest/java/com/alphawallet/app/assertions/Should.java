@@ -8,8 +8,8 @@ import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.util.Helper.waitUntil;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
 import android.widget.TextView;

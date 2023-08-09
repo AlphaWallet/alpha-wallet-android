@@ -126,7 +126,7 @@ public class AdvancedSettingsActivity extends BaseActivity
             .withType(SettingsItemView.Type.TOGGLE)
             .withIcon(R.drawable.ic_icons_settings_1559)
             .withTitle(R.string.experimental_1559)
-            .withSubtitle(R.string.experimental_1559_tx_sub)
+//            .withSubtitle(R.string.experimental_1559_tx_sub)
             .withListener(this::on1559TransactionsClicked)
             .build();
 

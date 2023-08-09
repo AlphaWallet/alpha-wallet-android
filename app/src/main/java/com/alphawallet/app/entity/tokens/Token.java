@@ -64,6 +64,7 @@ public class Token
 {
     public final static int TOKEN_BALANCE_PRECISION = 4;
     public final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
+    public static final int MAX_TOKEN_SYMBOL_LENGTH = 8;
 
     public final TokenInfo tokenInfo;
     public BigDecimal balance;

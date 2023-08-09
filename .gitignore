@@ -46,6 +46,7 @@ fastlane/report.xml
 
 # Local configuration file (sdk path, etc)
 local.properties
+gradle.properties
 
 #C/C++ object files
 app/.cxx/

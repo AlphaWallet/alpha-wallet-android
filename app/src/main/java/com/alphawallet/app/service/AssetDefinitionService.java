@@ -918,6 +918,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public TokenScriptFile getTokenScriptFile(Token token)
     {
+        if (token == null)
+        {
+            return new TokenScriptFile(context);
+        }
+
         String fileName = token.getTSKey() + TS_EXTENSION;
         //first try debug file
         TokenScriptFile tsf = new TokenScriptFile(context, getDebugPath(fileName));

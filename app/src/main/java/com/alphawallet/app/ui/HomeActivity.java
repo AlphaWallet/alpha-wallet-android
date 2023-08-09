@@ -341,7 +341,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         Intent i = new Intent(this, PriceAlertsService.class);
-        startService(i);
+        try
+        {
+            startService(i); //cannot start the service while the app is in background mode.
+                             //TODO: Improve this patch using JobScheduler
+        }
+        catch (Exception e)
+        {
+            Timber.w(e);
+        }
     }
 
     private void onUpdateAvailable(String availableVersion)

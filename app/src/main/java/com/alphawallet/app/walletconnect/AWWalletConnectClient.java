@@ -5,6 +5,7 @@ import static com.alphawallet.hardware.SignatureReturnType.SIGNATURE_GENERATED;
 import static com.walletconnect.web3.wallet.client.Wallet.Model;
 import static com.walletconnect.web3.wallet.client.Wallet.Params;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -145,9 +146,13 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
         Model.Session settledSession = getSession(sessionRequest.getTopic());
 
-        WalletConnectV2SessionRequestHandler handler = new WalletConnectV2SessionRequestHandler(sessionRequest, settledSession, App.getInstance().getTopActivity(), this);
-        handler.handle(method, actionSheetCallback);
-        requestHandlers.append(sessionRequest.getRequest().getId(), handler);
+        Activity topActivity = App.getInstance().getTopActivity();
+        if (topActivity != null)
+        {
+            WalletConnectV2SessionRequestHandler handler = new WalletConnectV2SessionRequestHandler(sessionRequest, settledSession, topActivity, this);
+            handler.handle(method, actionSheetCallback);
+            requestHandlers.append(sessionRequest.getRequest().getId(), handler);
+        }
     }
 
     private Session getSession(String topic)
@@ -290,14 +295,22 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
     private void updateService(Context context, List<WalletConnectSessionItem> walletConnectSessionItems)
     {
-        if (walletConnectSessionItems.isEmpty())
+        try
         {
-            context.stopService(new Intent(context, WalletConnectV2Service.class));
+            if (walletConnectSessionItems.isEmpty())
+            {
+                context.stopService(new Intent(context, WalletConnectV2Service.class));
+            }
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                Intent service = new Intent(context, WalletConnectV2Service.class);
+                context.startForegroundService(service);
+            }
         }
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        catch (Exception e)
         {
-            Intent service = new Intent(context, WalletConnectV2Service.class);
-            context.startForegroundService(service);
+            //Unable to update
+            Timber.e(e);
         }
     }
 
@@ -472,9 +485,13 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     {
         EthereumMessage ethereumMessage = new EthereumMessage(message, origin, 0,
                 SignMessageType.SIGN_MESSAGE);
-        ActionSheet actionSheet = new ActionSheetSignDialog(App.getInstance().getTopActivity(), newActionSheetCallback(requestId, issuer), ethereumMessage);
-        actionSheet.setSigningWallet(walletAddress);
-        actionSheet.show();
+        Activity topActivity = App.getInstance().getTopActivity();
+        if (topActivity != null)
+        {
+            ActionSheet actionSheet = new ActionSheetSignDialog(topActivity, newActionSheetCallback(requestId, issuer), ethereumMessage);
+            actionSheet.setSigningWallet(walletAddress);
+            actionSheet.show();
+        }
     }
 
     private ActionSheetCallback newActionSheetCallback(long requestId, String issuer)
@@ -556,7 +573,11 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     private void closeWalletConnectActivity()
     {
         new Handler(Looper.getMainLooper()).post(() -> {
-            App.getInstance().getTopActivity().onBackPressed();
+            Activity topActivity = App.getInstance().getTopActivity();
+            if (topActivity != null)
+            {
+                topActivity.onBackPressed();
+            }
         });
     }
 
@@ -622,9 +643,13 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
         Model.Session settledSession = getSession(sessionRequest.getTopic());
 
-        WalletConnectV2SessionRequestHandler handler = new WalletConnectV2SessionRequestHandler(sessionRequest, settledSession, App.getInstance().getTopActivity(), this);
-        handler.handle(method, actionSheetCallback);
-        requestHandlers.append(sessionRequest.getRequest().getId(), handler);
+        Activity topActivity = App.getInstance().getTopActivity();
+        if (topActivity != null)
+        {
+            WalletConnectV2SessionRequestHandler handler = new WalletConnectV2SessionRequestHandler(sessionRequest, settledSession, topActivity, this);
+            handler.handle(method, actionSheetCallback);
+            requestHandlers.append(sessionRequest.getRequest().getId(), handler);
+        }
     }
 
     public interface WalletConnectV2Callback

@@ -49,7 +49,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type, TokenGroup group, String attnId)
     {
         this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress)
-                + (!TextUtils.isEmpty(attnId) ? ("-" + attnId) : "") + (group == TokenGroup.ATTESTATION ? "-att" : "");
+                + (!TextUtils.isEmpty(attnId) ? ("-" + attnId) : "") + (group == TokenGroup.ATTESTATION ? Attestation.ATTESTATION_SUFFIX : "");
         this.lastUpdate = timeStamp;
         this.type = type;
         this.balance = balance;
@@ -60,8 +60,8 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     public String getAttestationId()
     {
-        //should end with -att
-        if (tokenId.endsWith("-att"))
+        //should end with ATTESTATION_SUFFIX
+        if (tokenId.endsWith(Attestation.ATTESTATION_SUFFIX))
         {
             int sepIndex = tokenId.indexOf("-");
             sepIndex = tokenId.indexOf("-", sepIndex+1);
@@ -75,7 +75,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, long lastTxUpdate, ContractType type, TokenGroup group)
     {
-        this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress) + (group == TokenGroup.ATTESTATION ? "-att" : "");
+        this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress) + (group == TokenGroup.ATTESTATION ? Attestation.ATTESTATION_SUFFIX : "");
         this.lastUpdate = timeStamp;
         this.lastTxUpdate = lastTxUpdate;
         this.type = type;

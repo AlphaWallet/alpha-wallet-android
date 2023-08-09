@@ -391,6 +391,25 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         return null;
     }
 
+    public SortedItem<TokenCardMeta> removeEntry(String tokenId)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                TokenSortedItem tsi = (TokenSortedItem) si;
+                TokenCardMeta thisToken = tsi.value;
+
+                if (thisToken.tokenId.equals(tokenId))
+                {
+                    return items.removeItemAt(i);
+                }
+            }
+        }
+        return null;
+    }
+
     public SortedItem<TokenCardMeta> removeAttestation(Token token)
     {
         Attestation attn = (Attestation)token;

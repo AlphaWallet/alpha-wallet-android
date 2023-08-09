@@ -358,7 +358,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         else
         {
             certificateToolbar.stopDownload();
-            //setupAttestation();
+            setupAttestation();
         }
     }
 

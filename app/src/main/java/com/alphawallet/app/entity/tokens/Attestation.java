@@ -62,6 +62,7 @@ public class Attestation extends Token
     private static final String SCRIPT_URI = "scriptURI";
     private static final String EVENT_ID = "eventId";
     private static final String SCHEMA_DATA_PREFIX = "data.";
+    public static final String ATTESTATION_SUFFIX = "-att";
 
 
     //TODO: Supplemental data

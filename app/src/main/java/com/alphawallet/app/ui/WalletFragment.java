@@ -840,25 +840,38 @@ public class WalletFragment extends BaseFragment implements
             {
                 Token token = ((TokenHolder) viewHolder).token;
                 SortedItem<TokenCardMeta> removedToken;
-                if (token.getInterfaceSpec() == ContractType.ATTESTATION)
+                String tokenName = "";
+                if (token == null)
+                {
+                    //just delete this entry
+                    String tokenKey = ((TokenHolder) viewHolder).tokenKey;
+                    viewModel.removeTokenMetaItem(tokenKey);
+                    removedToken = adapter.removeEntry(tokenKey);
+                }
+                else if (token.getInterfaceSpec() == ContractType.ATTESTATION)
                 {
                     viewModel.removeAttestation(token);
                     removedToken = adapter.removeAttestation(token);
+                    tokenName = token.tokenInfo.name;
                 }
                 else
                 {
                     viewModel.setTokenEnabled(token, false);
                     removedToken = adapter.removeToken(token.tokenInfo.chainId, token.getAddress());
+                    tokenName = token.tokenInfo.name;
                 }
 
                 if (getContext() != null)
                 {
                     Snackbar snackbar = Snackbar
-                            .make(viewHolder.itemView, token.tokenInfo.name + " " + getContext().getString(R.string.token_hidden), Snackbar.LENGTH_LONG)
+                            .make(viewHolder.itemView, tokenName + " " + getContext().getString(R.string.token_hidden), Snackbar.LENGTH_LONG)
                             .setAction(getString(R.string.action_snackbar_undo), view ->
                             {
-                                viewModel.setTokenEnabled(token, true);
-                                adapter.addToken(removedToken);
+                                if (token != null)
+                                {
+                                    viewModel.setTokenEnabled(token, true);
+                                    adapter.addToken(removedToken);
+                                }
                             });
 
                     snackbar.show();

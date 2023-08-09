@@ -70,6 +70,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     public Token token;
     private TokensAdapterCallback tokensAdapterCallback;
+    public String tokenKey;
 
     public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs)
     {
@@ -106,6 +107,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
         try
         {
+            tokenKey = data.tokenId;
             tokenLayout.setVisibility(View.VISIBLE);
             token = tokensService.getToken(data.getChain(), data.getAddress());
             if (token != null)

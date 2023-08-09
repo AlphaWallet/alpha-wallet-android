@@ -772,6 +772,26 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
+    public void removeTokenMetaItem(String tokenKeyId)
+    {
+        final String tokenKey = tokenKeyId.endsWith(Attestation.ATTESTATION_SUFFIX) ? tokenKeyId.substring(0, tokenKeyId.length() - Attestation.ATTESTATION_SUFFIX.length())
+                : tokenKeyId;
+
+        try (Realm realm = realmManager.getRealmInstance(defaultWallet.getValue()))
+        {
+            realm.executeTransactionAsync(r -> {
+                RealmAttestation realmAttn = r.where(RealmAttestation.class)
+                        .equalTo("address", tokenKey)
+                        .findFirst();
+
+                if (realmAttn != null)
+                {
+                    realmAttn.deleteFromRealm();
+                }
+            });
+        }
+    }
+
     public void removeAttestation(Token token)
     {
         try (Realm realm = realmManager.getRealmInstance(defaultWallet.getValue()))

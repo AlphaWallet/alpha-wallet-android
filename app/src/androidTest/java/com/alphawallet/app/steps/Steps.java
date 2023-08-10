@@ -105,7 +105,8 @@ public class Steps
 
     public static void navigateToBrowser()
     {
-        click(withId(R.id.nav_browser_text), 20);
+        clickMadly(withId(R.id.nav_browser_text));
+        //click(withId(R.id.nav_browser_text), 20);
     }
 
     public static ViewAction scrollToImproved()

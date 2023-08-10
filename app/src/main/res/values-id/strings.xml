@@ -877,7 +877,6 @@
     <string name="label_slippage">Slippage (adalah perbedaan harga yang dapat terjadi antara saat order trading berlalu dan eksekusi aktualnya)</string>
     <string name="action_open_settings">Buka Pengaturan</string>
     <string name="message_no_connections_found">Tidak ada koneksi yang ditemukan untuk Chain ini.</string>
-    <string name="label_fees">Biaya</string>
     <string name="label_current_price">Harga Terkini</string>
     <string name="label_minimum_received">Minimum Diterima</string>
     <string name="label_balance">Saldo: </string>

@@ -22,7 +22,7 @@ jobs:
           distribution: zulu
           java-version: 11
           cache: gradle
-#        - name: Run Kotlin lint
-#          run: ./gradlew :app:detekt
-      - name: Run Android Lint
-        run: ./gradlew :app:lintAnalyticsDebug
+        - name: Run Kotlin lint
+          run: ./gradlew :app:detekt
+#      - name: Run Android Lint
+#        run: ./gradlew :app:lintAnalyticsDebug

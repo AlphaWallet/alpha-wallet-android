@@ -42,6 +42,7 @@ jobs:
           ./gradlew :app:uninstallAll :app:connectedNoAnalyticsDebugAndroidTest -x lint -PdisablePreDex
           kill %1
           kill %2
+          ./gradlew :app:uninstallAll
 
       - name: Collect tests results
         if: ${{ failure() }}
@@ -49,4 +50,3 @@ jobs:
         with:
           name: e2e-tests-results
           path: output/
-	    - run: ./gradlew :app:uninstallAll

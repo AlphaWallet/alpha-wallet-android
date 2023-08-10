@@ -48,7 +48,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest
     private final String contractOwnerPk = "0x69c22d654be7fe75e31fbe26cb56c93ec91144fab67cb71529c8081971635069";
     private final Web3j web3j;
 
-    private final boolean useMumbai = true; //for local testing
+    private final boolean useMumbai = false; //for local testing
 
     private static final Map<String, String[]> WALLETS_ON_GANACHE = new HashMap<String, String[]>()
     {

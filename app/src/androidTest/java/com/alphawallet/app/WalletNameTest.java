@@ -54,7 +54,9 @@ public class WalletNameTest extends BaseE2ETest
     private void renameWalletTo(String name)
     {
         click(withId(R.id.action_my_wallet));
+        Helper.wait(1);
         click(withSubstring("Rename this Wallet"));
+        Helper.wait(1);
         onView(withId(R.id.edit_text)).perform(replaceText(name));
         input(R.id.input_name, name);
         click(withText("Save Name"));

@@ -14,6 +14,8 @@ import static org.junit.Assert.fail;
 
 import android.os.Build;
 
+import com.alphawallet.app.util.Helper;
+
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -51,6 +53,12 @@ public class TransferTest extends BaseE2ETest
         importWalletFromSettingsPage(privateKey);
         addNewNetwork("Ganache", "GETH", GANACHE_URL);
         selectTestNet("Ganache");
+
+        Helper.wait(1);
+        //swipe down to ensure network is visible
+        //Helper.swipeDownAction();
+        Helper.wait(1);
+
         sendBalanceTo("GETH", "0.001", newWalletAddress);
         ensureTransactionConfirmed();
         switchToWallet(newWalletAddress);

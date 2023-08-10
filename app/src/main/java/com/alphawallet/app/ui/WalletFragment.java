@@ -256,7 +256,7 @@ public class WalletFragment extends BaseFragment implements
 
     private void initViews(@NonNull View view)
     {
-        refreshLayout = view.findViewById(R.id.refresh_layout);
+        refreshLayout = view.findViewById(R.id.refresh_layout_wallet);
         systemView = view.findViewById(R.id.system_view);
         recyclerView = view.findViewById(R.id.list);
         addressAvatar = view.findViewById(R.id.user_address_blockie);
@@ -656,7 +656,7 @@ public class WalletFragment extends BaseFragment implements
         if (viewModel != null && adapter != null)
         {
             //reload tokens
-            viewModel.reloadTokens();
+            refreshList();
 
             handler.post(() ->
             {

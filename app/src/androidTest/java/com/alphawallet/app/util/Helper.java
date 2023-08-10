@@ -3,9 +3,11 @@ package com.alphawallet.app.util;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.pressBack;
+import static androidx.test.espresso.action.ViewActions.swipeDown;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayingAtLeast;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
@@ -347,5 +349,30 @@ public class Helper
         }
 
         return false;
+    }
+
+    public static ViewAction withCustomConstraints(final ViewAction action, final Matcher<View> constraints) {
+        return new ViewAction() {
+            @Override
+            public Matcher<View> getConstraints() {
+                return constraints;
+            }
+
+            @Override
+            public String getDescription() {
+                return action.getDescription();
+            }
+
+            @Override
+            public void perform(UiController uiController, View view) {
+                action.perform(uiController, view);
+            }
+        };
+    }
+
+    public static void swipeDownAction()
+    {
+        onView(withId(R.id.refresh_layout_wallet))
+                .perform(withCustomConstraints(swipeDown(), isDisplayingAtLeast(40)));
     }
 }

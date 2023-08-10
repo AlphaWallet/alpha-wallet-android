@@ -238,7 +238,7 @@ public class Helper
             }
             catch (Exception e)
             {
-                Helper.wait(1);
+                //
             }
         }
 

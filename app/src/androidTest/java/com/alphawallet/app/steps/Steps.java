@@ -301,12 +301,12 @@ public class Steps
 
     public static void gotoWalletPage()
     {
-        click(withId(R.id.nav_wallet_text));
+        click(withId(R.id.nav_wallet_text), 20);
     }
 
     public static void gotoSettingsPage()
     {
-        click(withId(R.id.nav_settings_text));
+        click(withId(R.id.nav_settings_text), 20);
     }
 
     public static void toggleSwitch(int id)

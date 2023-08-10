@@ -44,6 +44,7 @@ jobs:
           kill %2
 
       - name: Collect tests results
+	./gradlew :app:uninstallAll
         if: ${{ failure() }}
         uses: actions/upload-artifact@v1
         with:

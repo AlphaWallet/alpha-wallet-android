@@ -1,125 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_list_item"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/layout_list_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
     <LinearLayout
-        android:id="@+id/layout_details"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:orientation="vertical"
-        android:paddingStart="15dp"
-        android:paddingTop="15dp"
-        android:paddingBottom="15dp">
+            android:id="@+id/layout_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:orientation="vertical"
+            android:paddingStart="15dp"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp">
 
         <LinearLayout
-            android:id="@+id/layout_speed_warning"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="3.1"
-            android:orientation="horizontal"
-            android:visibility="gone"
-            tools:visibility="visible">
+                android:id="@+id/layout_speed_warning"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="3.1"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                tools:visibility="visible">
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
-                android:src="@drawable/ic_red_warning" />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_red_warning" />
 
             <TextView
-                android:id="@+id/text_speed_warning"
-                style="@style/Aw.Typography.Title.SemiBold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/speed_too_low"
-                android:textColor="?colorError" />
+                    android:id="@+id/text_speed_warning"
+                    style="@style/Aw.Typography.Title.SemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/speed_too_low"
+                    android:textColor="?colorError" />
 
         </LinearLayout>
 
         <TextView
-            android:id="@+id/text_speed"
-            style="@style/Aw.Typography.Title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="Average" />
+                android:id="@+id/text_speed"
+                style="@style/Aw.Typography.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Average" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/text_speed_cost"
-                style="@style/Aw.Typography.Caption.SemiBold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="3dp"
-                android:lineSpacingExtra="7sp"
-                tools:text="$0.55" />
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/text_speed_cost_eth"
-                style="@style/Aw.Typography.Sub"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="(0.00362 ETH)" />
+                    android:id="@+id/text_currency"
+                    style="@style/Aw.Typography.Caption.SemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:lineSpacingExtra="7sp"
+                    tools:text="$" />
+
+            <TextView
+                    android:id="@+id/text_speed_cost"
+                    style="@style/Aw.Typography.Caption.SemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="3dp"
+                    android:lineSpacingExtra="7sp"
+                    tools:text="0.55" />
+
+            <TextView
+                    android:id="@+id/text_speed_cost_eth"
+                    style="@style/Aw.Typography.Sub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="0.00362ETH" />
 
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/text_gwei"
-                style="@style/Aw.Typography.Sub"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                tools:text="Gas Price/Max Fee: 45" />
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/text_priority_fee"
-                style="@style/Aw.Typography.Sub"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="3dp"
-                tools:text="Priority Fee: 2.00" />
+            <LinearLayout
+                    android:id="@+id/base_fee_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="3dp"
+                    android:gravity="center">
+
+                <TextView
+                        android:id="@+id/text_base_fee"
+                        style="@style/Aw.Typography.Sub"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Gas Price/Base Fee"
+                        tools:visibility="visible" />
+
+                <TextView
+                        android:id="@+id/text_base_fee_value"
+                        style="@style/Aw.Typography.Caption"
+                        android:layout_marginStart="2dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="12.03" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/max_fee_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="3dp"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:gravity="center">
+
+                <TextView
+                        android:id="@+id/text_max_fee"
+                        style="@style/Aw.Typography.Sub"
+                        android:text="@string/gas_max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                <TextView
+                        android:id="@+id/text_max_fee_currency"
+                        style="@style/Aw.Typography.Caption"
+                        android:layout_marginStart="2dp"
+                        tools:text="$"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                <TextView
+                        android:id="@+id/text_max_fee_value"
+                        style="@style/Aw.Typography.Caption"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="0.59" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/priority_fee_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="3dp"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:gravity="center">
+
+                <TextView
+                        android:id="@+id/text_priority_fee"
+                        android:text="@string/priority_fee"
+                        style="@style/Aw.Typography.Sub"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                <TextView
+                        android:id="@+id/text_priority_value"
+                        style="@style/Aw.Typography.Caption"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="2dp"
+                        tools:text="0.18" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:orientation="horizontal"
-        android:paddingEnd="@dimen/tiny_8">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:orientation="horizontal"
+            android:paddingEnd="@dimen/tiny_8">
 
         <TextView
-            android:id="@+id/text_speed_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/tiny_8"
-            tools:text=" ≈ 2 minutes" />
+                android:id="@+id/text_speed_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="@dimen/tiny_8"
+                tools:text=" ≈ 2 minutes" />
 
         <com.google.android.material.radiobutton.MaterialRadioButton
-            android:id="@+id/radio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:clickable="false"
-            android:focusable="false" />
+                android:id="@+id/radio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:clickable="false"
+                android:focusable="false" />
 
     </LinearLayout>
 

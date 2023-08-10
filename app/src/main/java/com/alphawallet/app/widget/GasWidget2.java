@@ -28,7 +28,7 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.GasSettingsActivity;
-import com.alphawallet.app.ui.widget.entity.GasSpeed2;
+import com.alphawallet.app.ui.widget.entity.GasSpeed;
 import com.alphawallet.app.ui.widget.entity.GasWidgetInterface;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
@@ -188,7 +188,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     {
         BigInteger useGasLimit = getUseGasLimit();
         boolean sufficientGas = true;
-        GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
+        GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
 
         //Calculate total network fee here:
         BigDecimal networkFee = new BigDecimal(gs.gasPrice.maxFeePerGas.multiply(useGasLimit));
@@ -289,11 +289,11 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     @Override
     public void run()
     {
-        GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
+        GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
         if (gs == null) return;
 
         Token baseCurrency = tokensService.getTokenOrBase(token.tokenInfo.chainId, token.getWallet());
-        BigInteger networkFee = gs.gasPrice.maxFeePerGas.multiply(getUseGasLimit());
+        BigInteger networkFee = (gs.gasPrice.baseFee.add(gs.gasPrice.priorityFee)).multiply(getUseGasLimit());
         String gasAmountInBase = BalanceUtils.getSlidingBaseValue(new BigDecimal(networkFee), baseCurrency.tokenInfo.decimals, GasSettingsActivity.GAS_PRECISION);
         if (gasAmountInBase.equals("0")) gasAmountInBase = "0.0001";
         String displayStr = context.getString(R.string.gas_amount, gasAmountInBase, baseCurrency.getSymbol());
@@ -357,22 +357,22 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     @Override
     public BigInteger getGasPrice(BigInteger defaultPrice)
     {
-        GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
+        GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
         return gs.gasPrice.maxFeePerGas;
     }
 
     @Override
     public BigInteger getGasMax()
     {
-        GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
+        GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
         return gs.gasPrice.maxFeePerGas;
     }
 
     @Override
     public BigInteger getPriorityFee()
     {
-        GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
-        return gs.gasPrice.maxPriorityFeePerGas;
+        GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
+        return gs.gasPrice.priorityFee;
     }
 
     @Override
@@ -390,8 +390,8 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     private void checkCustomGasPrice(BigInteger customGasPrice)
     {
         double dGasPrice = customGasPrice.doubleValue();
-        GasSpeed2 ug = gasSpread.getQuickestGasSpeed();
-        GasSpeed2 lg = gasSpread.getSlowestGasSpeed();
+        GasSpeed ug = gasSpread.getQuickestGasSpeed();
+        GasSpeed lg = gasSpread.getSlowestGasSpeed();
 
         if (resendGasPrice.compareTo(BigInteger.ZERO) > 0)
         {
@@ -484,7 +484,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
 
     public long getExpectedTransactionTime()
     {
-        GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
+        GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
         return gs.seconds;
     }
 

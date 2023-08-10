@@ -125,4 +125,10 @@ public class KeyProviderMockImpl implements KeyProvider
     {
         return FAKE_KEY_FOR_TESTING;
     }
+
+    @Override
+    public String getBlockNativeKey()
+    {
+        return FAKE_KEY_FOR_TESTING;
+    }
 }

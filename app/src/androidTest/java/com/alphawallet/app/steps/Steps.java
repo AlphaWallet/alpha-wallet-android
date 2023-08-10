@@ -103,12 +103,6 @@ public class Steps
         onView(withId(R.id.url_tv)).perform(replaceText(urlString), pressImeActionButton());
     }
 
-    public static void navigateToBrowser()
-    {
-        clickMadly(withId(R.id.nav_browser_text));
-        //click(withId(R.id.nav_browser_text), 20);
-    }
-
     public static ViewAction scrollToImproved()
     {
         return actionWithAssertions(new ScrollToActionImproved());
@@ -300,14 +294,22 @@ public class Steps
         pressBack();
     }
 
+    public static void navigateToBrowser()
+    {
+        clickMadly(withId(R.id.nav_browser_text));
+        //click(withId(R.id.nav_browser_text), 20);
+    }
+
     public static void gotoWalletPage()
     {
-        click(withId(R.id.nav_wallet_text), 20);
+        clickMadly(withId(R.id.nav_wallet_text));
+        //click(withId(R.id.nav_wallet_text), 20);
     }
 
     public static void gotoSettingsPage()
     {
-        click(withId(R.id.nav_settings_text), 20);
+        clickMadly(withId(R.id.nav_settings_text));
+        //click(withId(R.id.nav_settings_text), 20);
     }
 
     public static void toggleSwitch(int id)

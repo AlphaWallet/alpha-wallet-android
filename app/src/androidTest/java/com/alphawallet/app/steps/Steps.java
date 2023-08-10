@@ -21,6 +21,7 @@ import static com.alphawallet.app.assertions.Should.shouldNotSee;
 import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickListItem;
+import static com.alphawallet.app.util.Helper.clickMadly;
 import static com.alphawallet.app.util.Helper.clickStaticListItem;
 import static com.alphawallet.app.util.Helper.hasView;
 import static com.alphawallet.app.util.Helper.waitForLoadingComplete;
@@ -70,7 +71,8 @@ public class Steps
     {
         click(withId(R.id.button_create));
         closeSelectNetworkPage(false);
-        click(withText(R.string.action_close));
+        clickMadly(withText(R.string.action_close));
+        //click(withText(R.string.action_close));
     }
 
     public static void closeSecurityWarning()
@@ -103,7 +105,7 @@ public class Steps
 
     public static void navigateToBrowser()
     {
-        click(withId(R.id.nav_browser_text));
+        click(withId(R.id.nav_browser_text), 20);
     }
 
     public static ViewAction scrollToImproved()

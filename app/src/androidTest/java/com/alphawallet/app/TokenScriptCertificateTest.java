@@ -125,7 +125,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest
         //Ensure we're on the wallet page
         switchToWallet(ownerAddress);
 
-        Helper.wait(3);
+        Helper.wait(1);
 
         //add the token manually since test doesn't seem to work normally
         click(withId(R.id.action_my_wallet));

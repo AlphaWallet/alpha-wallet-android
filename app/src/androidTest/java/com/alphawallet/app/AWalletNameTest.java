@@ -18,7 +18,7 @@ import com.alphawallet.app.util.Helper;
 
 import org.junit.Test;
 
-public class WalletNameTest extends BaseE2ETest
+public class AWalletNameTest extends BaseE2ETest
 {
     @Test
     public void should_show_custom_name_instead_of_address()

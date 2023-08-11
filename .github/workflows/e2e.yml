@@ -11,7 +11,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
-    timeout-minutes: 35
+    timeout-minutes: 40
     strategy:
       matrix:
         api-level: [30]

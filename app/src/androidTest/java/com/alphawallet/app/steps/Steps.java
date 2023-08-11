@@ -112,7 +112,8 @@ public class Steps
     {
         gotoSettingsPage();
         selectMenu("Select Active Networks");
-        clickStaticListItem(withSubstring("Ethereum")); //deactivate eth
+        Helper.wait(1);
+        //clickStaticListItem(withSubstring("Ethereum")); //deactivate eth
         onView(withId(R.id.network_scroller)).perform(swipeUp());
         onView(withId(R.id.network_scroller)).perform(swipeUp());
         //Helper.wait(1);

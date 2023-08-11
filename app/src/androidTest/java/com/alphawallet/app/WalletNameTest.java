@@ -12,6 +12,7 @@ import static com.alphawallet.app.steps.Steps.gotoWalletPage;
 import static com.alphawallet.app.steps.Steps.input;
 import static com.alphawallet.app.steps.Steps.watchWalletWithENS;
 import static com.alphawallet.app.util.Helper.click;
+import static com.alphawallet.app.util.Helper.clickMadly;
 
 import com.alphawallet.app.util.Helper;
 
@@ -53,13 +54,13 @@ public class WalletNameTest extends BaseE2ETest
 
     private void renameWalletTo(String name)
     {
-        click(withId(R.id.action_my_wallet));
+        clickMadly(withId(R.id.action_my_wallet));
         Helper.wait(1);
-        click(withSubstring("Rename this Wallet"));
+        clickMadly(withSubstring("Rename this Wallet"));
         Helper.wait(1);
         onView(withId(R.id.edit_text)).perform(replaceText(name));
         input(R.id.input_name, name);
-        click(withText("Save Name"));
+        clickMadly(withText("Save Name"));
         Helper.wait(2);
     }
 

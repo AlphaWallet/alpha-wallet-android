@@ -1,5 +1,6 @@
 package com.alphawallet.app;
 
+import static androidx.test.espresso.Espresso.onView;
 import static com.alphawallet.app.steps.Steps.GANACHE_URL;
 import static com.alphawallet.app.steps.Steps.addCustomToken;
 import static com.alphawallet.app.steps.Steps.addNewNetwork;
@@ -19,6 +20,7 @@ import android.os.Build;
 
 import com.alphawallet.app.resources.Contracts;
 import com.alphawallet.app.util.EthUtils;
+import com.alphawallet.app.util.Helper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -94,6 +96,12 @@ public class TransferERC20Test extends BaseE2ETest
         addNewNetwork("Ganache", "GETH", GANACHE_URL);
         selectTestNet("Ganache");
         gotoWalletPage();
+
+        Helper.wait(1);
+        //swipe down to ensure network is visible
+        //Helper.swipeDownAction();
+        Helper.wait(1);
+
         addCustomToken(contractAddress);
         sendBalanceTo("AW test token", "1.11", newWalletAddress);
         ensureTransactionConfirmed();

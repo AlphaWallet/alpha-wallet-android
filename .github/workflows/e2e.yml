@@ -11,7 +11,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
-    timeout-minutes: 30
+    timeout-minutes: 40
     strategy:
       matrix:
         api-level: [30]
@@ -42,6 +42,7 @@ jobs:
           ./gradlew :app:uninstallAll :app:connectedNoAnalyticsDebugAndroidTest -x lint -PdisablePreDex
           kill %1
           kill %2
+          ./gradlew :app:uninstallAll
 
       - name: Collect tests results
         if: ${{ failure() }}

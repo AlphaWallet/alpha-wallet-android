@@ -73,7 +73,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        screenWidth = (int) ((float)DisplayUtils.getScreenResolution(this).x * 0.8f);
+        screenWidth = Math.min((int) ((float)DisplayUtils.getScreenResolution(this).x * 0.8f), 1500); //restrict max width
         super.onCreate(savedInstanceState);
         initViewModel();
         overrideNetwork = 0;
@@ -335,6 +335,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
             if (amountInput == null)
             {
                 getInfo();
+                if (screenWidth > 1900)
                 qrImageView.setImageBitmap(QRUtils.createQRImage(this, displayAddress, screenWidth));
                 qrImageView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in)); //<-- check if this is causing the load delay (it was)
             }

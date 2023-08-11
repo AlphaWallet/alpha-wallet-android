@@ -124,4 +124,10 @@ public class KeyProviderMockNonProductionImpl implements KeyProvider
     {
         return null;
     }
+
+    @Override
+    public String getBlockNativeKey()
+    {
+        return null;
+    }
 }

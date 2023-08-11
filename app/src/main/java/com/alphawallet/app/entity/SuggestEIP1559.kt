@@ -27,7 +27,7 @@ private const val rewardBlockPercentile = 40        // suggested priority fee to
 private const val maxTimeFactor = 15                // highest timeFactor index in the returned list of suggestion
 private const val extraPriorityFeeRatio = 0.25      // extra priority fee offered in case of expected baseFee rise
 private const val fallbackPriorityFee = 2000000000L // priority fee offered when there are no recent transactions
-private const val minPriorityFee = 100000000L       // Minimum priority fee in Wei, 0.1 Gwei
+private const val MIN_PRIORITY_FEE = 100000000L       // Minimum priority fee in Wei, 0.1 Gwei
 
 fun SuggestEIP1559(gasService: GasService, feeHistory: FeeHistory): Single<MutableMap<Int, EIP1559FeeOracleResult>> {
     return suggestPriorityFee(parseLong(feeHistory.oldestBlock.removePrefix("0x"), 16), feeHistory, gasService)
@@ -67,7 +67,12 @@ private fun calculateResult(priorityFee: BigInteger, feeHistory: FeeHistory): Si
         var maxBaseFee = ZERO
         val result = mutableMapOf<Int, EIP1559FeeOracleResult>()
         (maxTimeFactor downTo 0).forEach { timeFactor ->
-            var bf = predictMinBaseFee(baseFee, order, timeFactor.toDouble(), consistentBaseFee)
+            var bf: BigInteger
+            if (timeFactor < 1e-6) {
+                bf = baseFee.last()
+            } else {
+                bf = predictMinBaseFee(baseFee, order, timeFactor.toDouble(), consistentBaseFee)
+            }
             var t = BigDecimal(usePriorityFee)
             if (bf > maxBaseFee) {
                 maxBaseFee = bf
@@ -105,9 +110,6 @@ fun checkConsistentFees(baseFee: Array<BigInteger>): Boolean {
 }
 
 internal fun predictMinBaseFee(baseFee: Array<BigInteger>, order: List<Int>, timeFactor: Double, consistentBaseFee: Boolean): BigInteger {
-    if (timeFactor < 1e-6) {
-        return baseFee.last()
-    }
     val pendingWeight = (1 - exp(-1 / timeFactor)) / (1 - exp(-baseFee.size / timeFactor))
     var sumWeight = .0
     var result = ZERO
@@ -138,11 +140,13 @@ internal fun suggestPriorityFee(firstBlock: Long, feeHistory: FeeHistory, gasSer
             val blockCount = maxBlockCount(gasUsedRatio, ptr, needBlocks)
             if (blockCount > 0) {
                 // feeHistory API call with reward percentile specified is expensive and therefore is only requested for a few non-full recent blocks.
-                val feeHistoryFetch = gasService.getChainFeeHistory(blockCount, "0x" + (firstBlock + ptr).toString(16), rewardPercentile.toString()).blockingGet();
+                val feeHistoryFetch = gasService.getChainFeeHistory(blockCount, "0x" + (firstBlock + ptr).toString(16),
+                    rewardPercentile.toString()).blockingGet();
 
                 val rewardSize = feeHistoryFetch?.reward?.size ?: 0
                 (0 until rewardSize).forEach {
-                    rewards.add(BigInteger(Numeric.cleanHexPrefix(feeHistoryFetch.reward[it][0].removePrefix("0x")), 16))
+                    rewards.add(BigInteger(Numeric.cleanHexPrefix(feeHistoryFetch.reward[it][0].removePrefix("0x")),
+                        16))
                 }
                 if (rewardSize < blockCount) break
                 needBlocks -= blockCount
@@ -159,7 +163,7 @@ internal fun suggestPriorityFee(firstBlock: Long, feeHistory: FeeHistory, gasSer
 }
 
 fun calculatePriorityFee(feeHistory: FeeHistory): BigInteger? {
-    var priorityFee = BigInteger.valueOf(minPriorityFee)
+    var priorityFee = BigInteger.valueOf(MIN_PRIORITY_FEE)
 
     feeHistory.baseFeePerGas.forEach { element ->
         run {

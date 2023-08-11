@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -75,9 +74,6 @@ import com.alphawallet.app.widget.UserAvatar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
-import com.google.zxing.client.android.Intents;
-import com.journeyapps.barcodescanner.ScanContract;
-import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -256,7 +252,7 @@ public class WalletFragment extends BaseFragment implements
 
     private void initViews(@NonNull View view)
     {
-        refreshLayout = view.findViewById(R.id.refresh_layout);
+        refreshLayout = view.findViewById(R.id.refresh_layout_wallet);
         systemView = view.findViewById(R.id.system_view);
         recyclerView = view.findViewById(R.id.list);
         addressAvatar = view.findViewById(R.id.user_address_blockie);
@@ -502,7 +498,7 @@ public class WalletFragment extends BaseFragment implements
     @Override
     public void onBuyToken()
     {
-        BottomSheetDialog buyEthDialog = new BottomSheetDialog(getActivity());
+        final BottomSheetDialog buyEthDialog = new BottomSheetDialog(getActivity());
         BuyEthOptionsView buyEthOptionsView = new BuyEthOptionsView(getActivity());
         buyEthOptionsView.setOnBuyWithRampListener(v -> {
             Intent intent = viewModel.getBuyIntent(getCurrentWallet().address);
@@ -512,6 +508,12 @@ public class WalletFragment extends BaseFragment implements
         });
         buyEthOptionsView.setOnBuyWithCoinbasePayListener(v -> {
             viewModel.showBuyEthOptions(getActivity());
+        });
+        buyEthOptionsView.setDismissInterface(() -> {
+            if (buyEthDialog != null && buyEthDialog.isShowing())
+            {
+                buyEthDialog.dismiss();
+            }
         });
         buyEthDialog.setContentView(buyEthOptionsView);
         buyEthDialog.show();
@@ -656,7 +658,7 @@ public class WalletFragment extends BaseFragment implements
         if (viewModel != null && adapter != null)
         {
             //reload tokens
-            viewModel.reloadTokens();
+            refreshList();
 
             handler.post(() ->
             {

@@ -75,16 +75,11 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     {
         addTokenLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getData() == null) return;
-                boolean saved = result.getData().getBooleanExtra(RESET_WALLET, false);
-                if (saved)
-                {
-                    //finish and return
-                    Intent intent = new Intent();
-                    intent.putExtra(RESET_WALLET, true);
-                    setResult(RESULT_OK, intent);
-                    finish();
-                }
+                //finish and return
+                Intent intent = new Intent();
+                intent.putExtra(RESET_WALLET, true);
+                setResult(RESULT_OK, intent);
+                finish();
             });
     }
 

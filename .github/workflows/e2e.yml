@@ -36,8 +36,11 @@ jobs:
         run: |
           rm -rf ./output
           mkdir ./output
-          emulator -avd Blobby2_API_30 &
           adb shell settings put secure long_press_timeout 1500
+          adb shell settings put global window_animation_scale 0.0
+          adb shell settings put global transition_animation_scale 0.0
+          adb shell settings put global animator_duration_scale 0.0
+          adb shell settings put secure show_ime_with_hard_keyboard 0
           ganache --chain.chainId 2 -h 0.0.0.0 -p 8545 -m "horse light surface bamboo combine item lumber tunnel choose acid mail feature" &
           adb logcat >> output/emulator.log &
           ./gradlew :app:uninstallAll :app:connectedNoAnalyticsDebugAndroidTest -x lint -PdisablePreDex

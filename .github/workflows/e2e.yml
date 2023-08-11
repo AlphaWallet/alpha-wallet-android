@@ -36,6 +36,7 @@ jobs:
         run: |
           rm -rf ./output
           mkdir ./output
+          /usr/local/android-studio/plugins/emulator -avd Blobby2_API_30 &
           adb shell settings put secure long_press_timeout 1500
           ganache --chain.chainId 2 -h 0.0.0.0 -p 8545 -m "horse light surface bamboo combine item lumber tunnel choose acid mail feature" &
           adb logcat >> output/emulator.log &

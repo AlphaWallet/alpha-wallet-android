@@ -11,6 +11,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
+    timeout-minutes: 5
     strategy:
       matrix:
         api-level: [30]
@@ -32,7 +33,6 @@ jobs:
       - run: npm install ganache --global
 
       - name: Run tests
-        timeout-minutes: 5
         run: |
           rm -rf ./output
           mkdir ./output
@@ -48,10 +48,14 @@ jobs:
           kill %2
 
       - name: Collect tests results
-        run: ./gradlew :app:uninstallAll
         if: ${{ failure() }}
         uses: actions/upload-artifact@v1
         with:
           name: e2e-tests-results
           path: output/
           
+  cleanup:      
+    needs: test
+    runs-on: self-hosted
+    steps:
+      - run: ./gradlew :app:uninstallAll

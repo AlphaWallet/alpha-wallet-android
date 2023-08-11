@@ -54,3 +54,4 @@ jobs:
         with:
           name: e2e-tests-results
           path: output/
+      - run: ./gradlew :app:uninstallAll    

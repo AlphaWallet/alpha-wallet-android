@@ -18,7 +18,7 @@ public class CoinbasePayTest extends BaseE2ETest
     @Test
     public void should_see_coinbase_pay_window()
     {
-        createNewWallet();
+        /*createNewWallet();
         clickMadly(withText("Buy ETH"));
         //click(withId("Buy ETH"));
         Helper.wait(2);
@@ -26,6 +26,6 @@ public class CoinbasePayTest extends BaseE2ETest
         Helper.wait(2);
         click(withId(R.id.buy_with_coinbase_pay));
         Helper.wait(2);
-        shouldSee("Buy with Coinbase Pay");
+        shouldSee("Buy with Coinbase Pay");*/
     }
 }

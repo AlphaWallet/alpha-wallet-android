@@ -5,6 +5,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.util.Helper.click;
+import static com.alphawallet.app.util.Helper.clickMadly;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -18,7 +19,8 @@ public class CoinbasePayTest extends BaseE2ETest
     public void should_see_coinbase_pay_window()
     {
         createNewWallet();
-        click(withText("Buy ETH"));
+        clickMadly(withText("Buy ETH"));
+        //click(withId("Buy ETH"));
         Helper.wait(2);
         shouldSee("Buy with Coinbase Pay"); // <-- here - the test suite can't seem to find this
         Helper.wait(2);

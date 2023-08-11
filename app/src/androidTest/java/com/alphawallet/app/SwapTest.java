@@ -10,6 +10,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.util.Helper.click;
+import static com.alphawallet.app.util.Helper.clickMadly;
 import static org.hamcrest.CoreMatchers.allOf;
 
 import com.alphawallet.app.util.Helper;
@@ -23,7 +24,7 @@ public class SwapTest extends BaseE2ETest
     {
         createNewWallet();
         Helper.wait(1);
-        click(withText("0 ETH"), 30);
+        clickMadly(withText("0 ETH"));
         click(withId(R.id.more_button));
         click(withText("Swap"));
         shouldSee("Select Exchanges");

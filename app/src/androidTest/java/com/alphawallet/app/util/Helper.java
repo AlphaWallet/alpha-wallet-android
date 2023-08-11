@@ -238,29 +238,11 @@ public class Helper
             }
             catch (Exception e)
             {
-                //attempt to click on the screen
-                clickOnView();
                 //
             }
         }
 
         throw new RuntimeException("Can not find " + matcher.toString());
-    }
-
-    public static void clickOnView()
-    {
-        try
-        {
-            //large_title_view
-            onView(withId(R.id.large_title_view)).perform(ViewActions.click(doNothing()));
-            //onView(matcher).perform(ViewActions.click(doNothing()));
-            //click(matcher, 1);
-            return;
-        }
-        catch (Exception e)
-        {
-            //
-        }
     }
 
     //This is an item inside a list that doesn't scroll (eg TestNet / Mainnet list)

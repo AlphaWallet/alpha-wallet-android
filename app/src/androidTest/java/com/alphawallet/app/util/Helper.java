@@ -226,6 +226,27 @@ public class Helper
         throw new RuntimeException("Can not find " + matcher.toString());
     }
 
+    public static void clickMadly2(Matcher matcher)
+    {
+        for (int i = 0; i < 50; i++)
+        {
+            try
+            {
+                onView(matcher).perform(ViewActions.click(doNothing()));
+                return;
+            }
+            catch (Exception e)
+            {
+                //
+                Helper.wait(1);
+            }
+        }
+
+        throw new RuntimeException("Can not find " + matcher.toString());
+    }
+
+
+
     public static void clickMadly(Matcher matcher)
     {
         for (int i = 0; i < 50; i++)

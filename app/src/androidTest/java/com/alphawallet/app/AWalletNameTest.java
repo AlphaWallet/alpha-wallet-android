@@ -13,9 +13,13 @@ import static com.alphawallet.app.steps.Steps.input;
 import static com.alphawallet.app.steps.Steps.watchWalletWithENS;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickMadly;
+import static com.alphawallet.app.util.Helper.clickMadly2;
+
+import android.view.View;
 
 import com.alphawallet.app.util.Helper;
 
+import org.hamcrest.Matcher;
 import org.junit.Test;
 
 public class AWalletNameTest extends BaseE2ETest
@@ -54,7 +58,8 @@ public class AWalletNameTest extends BaseE2ETest
 
     private void renameWalletTo(String name)
     {
-        clickMadly(withId(R.id.action_my_wallet));
+        clickMadly2(withId(R.id.action_my_wallet));
+        //click(withId(R.id.action_my_wallet));
         Helper.wait(1);
         clickMadly(withSubstring("Rename this Wallet"));
         Helper.wait(1);

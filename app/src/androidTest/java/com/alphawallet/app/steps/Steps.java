@@ -117,7 +117,7 @@ public class Steps
         onView(withId(R.id.network_scroller)).perform(swipeUp());
         //Helper.wait(1);
         onView(withId(R.id.testnet_header)).perform(scrollToImproved());
-        //onView(allOf(withId(R.id.switch_material), isDescendantOfA(withId(R.id.testnet_header)))).perform(ViewActions.click());
+        onView(allOf(withId(R.id.switch_material), isDescendantOfA(withId(R.id.testnet_header)))).perform(ViewActions.click());
 
         clickMadly(withText(R.string.action_enable_testnet));
         Helper.wait(1);

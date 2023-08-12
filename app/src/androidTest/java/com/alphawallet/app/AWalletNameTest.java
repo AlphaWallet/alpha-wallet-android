@@ -5,7 +5,6 @@ import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.steps.Steps.getWalletAddress;
 import static com.alphawallet.app.steps.Steps.gotoSettingsPage;
@@ -15,6 +14,8 @@ import static com.alphawallet.app.steps.Steps.watchWalletWithENS;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickMadly;
 import static com.alphawallet.app.util.Helper.waitUntil;
+
+import androidx.test.espresso.Espresso;
 
 import com.alphawallet.app.util.Helper;
 
@@ -35,7 +36,8 @@ public class AWalletNameTest extends BaseE2ETest
         waitUntil(withSubstring("TestWallet"), 10);
 
         renameWalletTo("");
-        //shouldSeeFormattedAddress(address);  //TODO: Work out why this hangs
+        shouldSeeFormattedAddress(address);  //TODO: Work out why this hangs
+        Espresso.pressBack();
     }
 
     @Test
@@ -52,6 +54,7 @@ public class AWalletNameTest extends BaseE2ETest
         renameWalletTo("");
         gotoWalletPage();
         waitUntil(withSubstring("vitalik.eth"), 10);
+        Espresso.pressBack();
     }
 
     private void renameWalletTo(String name)

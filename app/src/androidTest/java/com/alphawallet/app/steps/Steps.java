@@ -8,10 +8,8 @@ import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
 import static androidx.test.espresso.action.ViewActions.swipeUp;
-import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
-import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static androidx.test.espresso.matcher.ViewMatchers.withHint;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
@@ -23,7 +21,6 @@ import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickListItem;
 import static com.alphawallet.app.util.Helper.clickMadly;
 import static com.alphawallet.app.util.Helper.clickStaticListItem;
-import static com.alphawallet.app.util.Helper.hasView;
 import static com.alphawallet.app.util.Helper.waitForLoadingComplete;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.Helper.waitUntilThenBack;
@@ -32,22 +29,10 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
-import android.view.KeyEvent;
-import android.view.View;
-import android.widget.HorizontalScrollView;
-import android.widget.ScrollView;
-
-import androidx.core.widget.NestedScrollView;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.ViewInteraction;
-import androidx.test.espresso.action.GeneralLocation;
-import androidx.test.espresso.action.GeneralSwipeAction;
-import androidx.test.espresso.action.Press;
-import androidx.test.espresso.action.Swipe;
 import androidx.test.espresso.action.ViewActions;
-import androidx.test.espresso.contrib.RecyclerViewActions;
-import androidx.test.espresso.matcher.ViewMatchers;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.assertions.Should;
@@ -55,7 +40,6 @@ import com.alphawallet.app.util.GetTextAction;
 import com.alphawallet.app.util.Helper;
 import com.alphawallet.app.util.ScrollToActionImproved;
 
-import org.hamcrest.Matcher;
 import org.hamcrest.core.AllOf;
 
 /**

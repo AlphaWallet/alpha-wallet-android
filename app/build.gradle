@@ -325,7 +325,7 @@ dependencies {
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
-    testImplementation group: 'org.json', name: 'json', version: '20230618'
+    testImplementation group: 'org.json', name: 'json', version: '20220320'
 
     // Component tests
     testImplementation 'org.robolectric:robolectric:4.8.2'

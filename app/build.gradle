@@ -334,7 +334,7 @@ dependencies {
 
     // E2e tests
     androidTestImplementation 'androidx.test:runner:1.5.0'
-    androidTestImplementation 'androidx.test:core:1.4.1'
+    androidTestImplementation 'androidx.test:core:1.5.0'
     androidTestUtil 'androidx.test:orchestrator:1.4.2'
     testImplementation 'org.hamcrest:hamcrest:2.1'
 

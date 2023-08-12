@@ -1,7 +1,6 @@
 package com.alphawallet.app;
 
 import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
@@ -42,7 +41,7 @@ import java.util.Map;
 /**
  * Created by JB on 1/09/2022.
  */
-public class TokenScriptCertificateTest extends BaseE2ETest
+public class AATokenScriptCertificateTest extends BaseE2ETest
 {
     private String doorContractAddress;
     private final String contractOwnerPk = "0x69c22d654be7fe75e31fbe26cb56c93ec91144fab67cb71529c8081971635069";
@@ -60,7 +59,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest
         }
     };
 
-    public TokenScriptCertificateTest()
+    public AATokenScriptCertificateTest()
     {
         int apiLevel = Build.VERSION.SDK_INT;
         String[] array = WALLETS_ON_GANACHE.get(String.valueOf(apiLevel));
@@ -128,11 +127,13 @@ public class TokenScriptCertificateTest extends BaseE2ETest
         Helper.wait(1);
 
         //add the token manually since test doesn't seem to work normally
-        click(withId(R.id.action_my_wallet));
-        click(withSubstring("Add / Hide Tokens"));
+        click(withId(R.id.edit_search));
+
+        //click(withId(R.id.action_my_wallet));
+        //click(withSubstring("Add / Hide Tokens"));
         Helper.wait(1);
-        click(withId(R.id.action_add));
-        Helper.wait(1);
+        //click(withId(R.id.action_add));
+        //Helper.wait(1);
 
         onView(allOf(withId(R.id.edit_text))).perform(replaceText(doorContractAddress));
 
@@ -145,7 +146,7 @@ public class TokenScriptCertificateTest extends BaseE2ETest
         Helper.wait(1);
 
         //only press back if we're on the add / hide screen
-        waitUntilThenBack(withSubstring("Add / Hide Tokens"), 10);
+        //waitUntilThenBack(withSubstring("Add / Hide Tokens"), 10);
 
         //Swipe up
         onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());

@@ -119,7 +119,7 @@ public class WalletFragment extends BaseFragment implements
     @Inject
     AWWalletConnectClient awWalletConnectClient;
 
-    private ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    private final ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result ->
             {
                 //send instruction to restart tokenService
@@ -189,12 +189,12 @@ public class WalletFragment extends BaseFragment implements
                     getParentFragmentManager().setFragmentResult(C.ADDED_TOKEN, b);
                 });
 
-        networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+        /*networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result ->
                 {
                     //send instruction to restart tokenService
                     getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
-                });
+                });*/
 
         handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result ->
@@ -764,7 +764,8 @@ public class WalletFragment extends BaseFragment implements
     public void onSearchClicked()
     {
         Intent intent = new Intent(getActivity(), SearchActivity.class);
-        startActivity(intent);
+        networkSettingsHandler.launch(intent);
+        //startActivity(intent);
     }
 
     @Override

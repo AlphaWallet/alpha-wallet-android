@@ -36,7 +36,6 @@ jobs:
         run: |
           rm -rf ./output
           mkdir ./output
-          pkill -f '.*GradleDaemon.*'
           adb shell settings put secure long_press_timeout 1500
           adb shell settings put global window_animation_scale 0.0
           adb shell settings put global transition_animation_scale 0.0

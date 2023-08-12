@@ -14,6 +14,7 @@ import static com.alphawallet.app.steps.Steps.watchWalletWithENS;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickMadly;
 import static com.alphawallet.app.util.Helper.clickMadly2;
+import static com.alphawallet.app.util.Helper.waitUntil;
 
 import android.view.View;
 
@@ -34,27 +35,27 @@ public class AWalletNameTest extends BaseE2ETest
         shouldSeeFormattedAddress(address);
 
         renameWalletTo("TestWallet");
-        shouldSee("TestWallet");
+        waitUntil(withSubstring("TestWallet"), 10);
 
         renameWalletTo("");
         shouldSeeFormattedAddress(address);
     }
 
-    /*@Test
+    @Test
     public void should_show_custom_name_instead_of_ENS_name()
     {
         watchWalletWithENS("vitalik.eth");
         // Should see ENS name instead of address
-        shouldSee("vitalik.eth");
+        waitUntil(withSubstring("vitalik.eth"), 10);
 
         renameWalletTo("Vitalik");
         gotoWalletPage();
-        shouldSee("Vitalik");
+        waitUntil(withSubstring("Vitalik"), 10);
 
         renameWalletTo("");
         gotoWalletPage();
-        shouldSee("vitalik.eth");
-    }*/
+        waitUntil(withSubstring("vitalik.eth"), 10);
+    }
 
     private void renameWalletTo(String name)
     {
@@ -71,6 +72,7 @@ public class AWalletNameTest extends BaseE2ETest
 
     private void shouldSeeFormattedAddress(String address)
     {
-        shouldSee(address.substring(0, 6) + "..." + address.substring(address.length() - 4)); // 0xabcd...wxyz
+        String formattedAddr = address.substring(0, 6) + "..." + address.substring(address.length() - 4);
+        waitUntil(withSubstring(formattedAddr), 10);
     }
 }

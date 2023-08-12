@@ -135,7 +135,7 @@ public class AATokenScriptCertificateTest extends BaseE2ETest
         //click(withId(R.id.action_add));
         //Helper.wait(1);
 
-        onView(allOf(withId(R.id.edit_text))).perform(replaceText(doorContractAddress));
+        onView(allOf(withId(R.id.st_editText))).perform(replaceText(doorContractAddress));
 
         onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 300));
 

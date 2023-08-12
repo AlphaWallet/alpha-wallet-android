@@ -1,9 +1,7 @@
 package com.alphawallet.app;
 
 import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.swipeUp;
-import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static com.alphawallet.app.assertions.Should.shouldSee;
@@ -15,9 +13,7 @@ import static com.alphawallet.app.steps.Steps.importPKWalletFromFrontPage;
 import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.steps.Steps.switchToWallet;
 import static com.alphawallet.app.util.Helper.click;
-import static com.alphawallet.app.util.Helper.clickMadly;
 import static com.alphawallet.app.util.Helper.waitUntil;
-import static com.alphawallet.app.util.Helper.waitUntilThenBack;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
@@ -43,7 +39,7 @@ import java.util.Map;
 /**
  * Created by JB on 1/09/2022.
  */
-public class AATokenScriptCertificateTest extends BaseE2ETest
+public class TokenScriptCertificateTest extends BaseE2ETest
 {
     private String doorContractAddress;
     private final String contractOwnerPk = "0x69c22d654be7fe75e31fbe26cb56c93ec91144fab67cb71529c8081971635069";
@@ -61,7 +57,7 @@ public class AATokenScriptCertificateTest extends BaseE2ETest
         }
     };
 
-    public AATokenScriptCertificateTest()
+    public TokenScriptCertificateTest()
     {
         int apiLevel = Build.VERSION.SDK_INT;
         String[] array = WALLETS_ON_GANACHE.get(String.valueOf(apiLevel));
@@ -158,7 +154,7 @@ public class AATokenScriptCertificateTest extends BaseE2ETest
         onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());
 
         //Select token
-        click(withSubstring("OFFIC"), 120);
+        click(withSubstring("OFFIC"), 20);
 
         //Wait for cert to resolve
         //click certificate

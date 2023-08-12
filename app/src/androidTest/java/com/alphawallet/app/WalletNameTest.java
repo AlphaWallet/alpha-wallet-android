@@ -14,17 +14,13 @@ import static com.alphawallet.app.steps.Steps.input;
 import static com.alphawallet.app.steps.Steps.watchWalletWithENS;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickMadly;
-import static com.alphawallet.app.util.Helper.clickMadly2;
 import static com.alphawallet.app.util.Helper.waitUntil;
-
-import android.view.View;
 
 import com.alphawallet.app.util.Helper;
 
-import org.hamcrest.Matcher;
 import org.junit.Test;
 
-public class AWalletNameTest extends BaseE2ETest
+public class WalletNameTest extends BaseE2ETest
 {
     @Test
     public void should_show_custom_name_instead_of_address()

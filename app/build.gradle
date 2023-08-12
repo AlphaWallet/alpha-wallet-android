@@ -336,7 +336,7 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.5.0'
     androidTestImplementation 'androidx.test:core:1.4.1'
     androidTestUtil 'androidx.test:orchestrator:1.4.2'
-    testImplementation 'org.hamcrest:hamcrest:2.2'
+    testImplementation 'org.hamcrest:hamcrest:2.1'
 
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {
         exclude group: "com.android.support", module: "support-annotations"

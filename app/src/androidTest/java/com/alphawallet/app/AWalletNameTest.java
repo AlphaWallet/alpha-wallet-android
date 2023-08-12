@@ -59,8 +59,8 @@ public class AWalletNameTest extends BaseE2ETest
 
     private void renameWalletTo(String name)
     {
-        clickMadly2(withId(R.id.action_my_wallet));
-        //click(withId(R.id.action_my_wallet));
+        //clickMadly2(withId(R.id.action_my_wallet));
+        click(withText(R.string.my_wallet_address));
         Helper.wait(1);
         clickMadly(withSubstring("Rename this Wallet"));
         Helper.wait(1);

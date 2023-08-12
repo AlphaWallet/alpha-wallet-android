@@ -8,6 +8,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.steps.Steps.GANACHE_URL;
+import static com.alphawallet.app.steps.Steps.addCustomToken;
 import static com.alphawallet.app.steps.Steps.addNewNetwork;
 import static com.alphawallet.app.steps.Steps.getWalletAddress;
 import static com.alphawallet.app.steps.Steps.importPKWalletFromFrontPage;
@@ -127,22 +128,16 @@ public class AATokenScriptCertificateTest extends BaseE2ETest
 
         Helper.wait(1);
 
-        //add the token manually since test doesn't seem to work normally
-        click(withId(R.id.edit_search));
+        addCustomToken(doorContractAddress);
 
-        //click(withId(R.id.action_my_wallet));
-        //click(withSubstring("Add / Hide Tokens"));
+        //add the token manually since test doesn't seem to work normally
+        /*click(withId(R.id.edit_search));
+
         Helper.wait(1);
-        //click(withId(R.id.action_add));
-        //Helper.wait(1);
 
         onView(allOf(withId(R.id.st_editText))).perform(replaceText(doorContractAddress));
 
         clickMadly(withId(R.id.select_token));
-
-        //onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 30));
-
-        //click(withId(R.id.select_token));
 
         click(withSubstring("Save"));
 
@@ -152,9 +147,9 @@ public class AATokenScriptCertificateTest extends BaseE2ETest
         //waitUntilThenBack(withSubstring("Add / Hide Tokens"), 10);
 
         //Swipe up
-        onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());
+        onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());*/
 
-        Helper.wait(2);
+        Helper.wait(1);
 
         onView(withId(R.id.coordinator)).perform(swipeUp());
 

@@ -383,6 +383,23 @@ public class Steps
     public static void addCustomToken(String contractAddress)
     {
         //add the token manually since test doesn't seem to work normally
+        gotoWalletPage();
+
+        Helper.wait(1);
+        click(withId(R.id.edit_search));
+
+        Helper.wait(1);
+        onView(AllOf.allOf(withId(R.id.st_editText))).perform(replaceText(contractAddress));
+
+        clickMadly(withId(R.id.select_token));
+
+        click(withSubstring("Save"));
+
+        Helper.wait(1);
+
+
+        /*onView(AllOf.allOf(withId(R.id.st_editText))).perform(replaceText(doorContractAddress));
+
         click(withId(R.id.action_my_wallet));
         click(withSubstring("Add / Hide Tokens"));
         Helper.wait(1);
@@ -404,7 +421,7 @@ public class Steps
             pressBack();
             Helper.wait(1);
             waitUntil(withId(R.id.nav_settings_text), 30);
-        }
+        }*/
 
         //pressBack();
 

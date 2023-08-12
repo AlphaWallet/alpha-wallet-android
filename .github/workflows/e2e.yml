@@ -54,7 +54,8 @@ jobs:
           name: e2e-tests-results
           path: output/
           
-  cleanup:      
+  cleanup:
+    if: ${{ always() }}      
     needs: test
     runs-on: self-hosted
     steps:

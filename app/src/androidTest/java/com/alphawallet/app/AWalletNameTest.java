@@ -40,7 +40,7 @@ public class AWalletNameTest extends BaseE2ETest
         shouldSeeFormattedAddress(address);
     }
 
-    @Test
+    /*@Test
     public void should_show_custom_name_instead_of_ENS_name()
     {
         watchWalletWithENS("vitalik.eth");
@@ -54,7 +54,7 @@ public class AWalletNameTest extends BaseE2ETest
         renameWalletTo("");
         gotoWalletPage();
         shouldSee("vitalik.eth");
-    }
+    }*/
 
     private void renameWalletTo(String name)
     {

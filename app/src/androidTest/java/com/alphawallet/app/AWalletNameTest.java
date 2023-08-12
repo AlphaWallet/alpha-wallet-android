@@ -8,6 +8,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.steps.Steps.getWalletAddress;
+import static com.alphawallet.app.steps.Steps.gotoSettingsPage;
 import static com.alphawallet.app.steps.Steps.gotoWalletPage;
 import static com.alphawallet.app.steps.Steps.input;
 import static com.alphawallet.app.steps.Steps.watchWalletWithENS;
@@ -60,14 +61,14 @@ public class AWalletNameTest extends BaseE2ETest
     private void renameWalletTo(String name)
     {
         //clickMadly2(withId(R.id.action_my_wallet));
-        click(withText(R.string.my_wallet_address));
-        Helper.wait(1);
-        clickMadly(withSubstring("Rename this Wallet"));
+        gotoSettingsPage();
+        click(withText("Name This Wallet"));
         Helper.wait(1);
         onView(withId(R.id.edit_text)).perform(replaceText(name));
         input(R.id.input_name, name);
         clickMadly(withText("Save Name"));
-        Helper.wait(2);
+        Helper.wait(1);
+        gotoWalletPage();
     }
 
     private void shouldSeeFormattedAddress(String address)

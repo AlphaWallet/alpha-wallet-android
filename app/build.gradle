@@ -333,10 +333,9 @@ dependencies {
     testImplementation 'androidx.test.ext:junit:1.1.5'
 
     // E2e tests
-    androidTestImplementation 'androidx.test:runner:1.6.0-alpha03'
-    androidTestImplementation 'androidx.test:core:1.6.0-alpha01'
-    androidTestImplementation 'androidx.tracing:tracing:1.1.0'
-    androidTestUtil 'androidx.test:orchestrator:1.5.0-alpha01'
+    androidTestImplementation 'androidx.test:runner:1.5.0'
+    androidTestImplementation 'androidx.test:core:1.4.1'
+    androidTestUtil 'androidx.test:orchestrator:1.4.2'
     testImplementation 'org.hamcrest:hamcrest:2.1'
 
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {

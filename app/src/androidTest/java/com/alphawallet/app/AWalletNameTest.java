@@ -37,7 +37,7 @@ public class AWalletNameTest extends BaseE2ETest
 
         renameWalletTo("");
         shouldSeeFormattedAddress(address);  //TODO: Work out why this hangs
-        Espresso.pressBack();
+        //Espresso.pressBack();
     }
 
     @Test
@@ -54,7 +54,7 @@ public class AWalletNameTest extends BaseE2ETest
         renameWalletTo("");
         gotoWalletPage();
         waitUntil(withSubstring("vitalik.eth"), 10);
-        Espresso.pressBack();
+        //Espresso.pressBack();
     }
 
     private void renameWalletTo(String name)

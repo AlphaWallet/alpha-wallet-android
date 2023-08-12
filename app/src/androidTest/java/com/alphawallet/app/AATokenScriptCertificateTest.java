@@ -14,6 +14,7 @@ import static com.alphawallet.app.steps.Steps.importPKWalletFromFrontPage;
 import static com.alphawallet.app.steps.Steps.selectTestNet;
 import static com.alphawallet.app.steps.Steps.switchToWallet;
 import static com.alphawallet.app.util.Helper.click;
+import static com.alphawallet.app.util.Helper.clickMadly;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.Helper.waitUntilThenBack;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -137,9 +138,11 @@ public class AATokenScriptCertificateTest extends BaseE2ETest
 
         onView(allOf(withId(R.id.st_editText))).perform(replaceText(doorContractAddress));
 
-        onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 30));
+        clickMadly(withId(R.id.select_token));
 
-        click(withId(R.id.select_token));
+        //onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 30));
+
+        //click(withId(R.id.select_token));
 
         click(withSubstring("Save"));
 

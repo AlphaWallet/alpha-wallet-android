@@ -33,7 +33,7 @@ import com.alphawallet.app.util.Helper;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DappBrowserTest extends BaseE2ETest
+public class AAADappBrowserTest extends BaseE2ETest
 {
     private static final String DEFAULT_HOME_PAGE = "https://courses.cs.washington.edu/courses/cse373/99sp/assignments/hw2/test1.html";
     private static final String URL_DAPP = "http://web.simmons.edu/~grovesd/comm244/notes/week3/html-test-page.html";

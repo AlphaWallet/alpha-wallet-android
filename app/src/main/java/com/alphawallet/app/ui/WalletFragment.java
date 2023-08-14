@@ -79,7 +79,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
@@ -214,26 +213,6 @@ public class WalletFragment extends BaseFragment implements
                         ((HomeActivity) getActivity()).backupWalletFail(keyBackup, noLockScreen);
                     }
                 });
-    }
-
-    private static AtomicBoolean isRunningTest;
-
-    public static synchronized boolean isRunningTest () {
-        if (null == isRunningTest) {
-            boolean istest;
-
-            try {
-                // "android.support.test.espresso.Espresso" if you haven't migrated to androidx yet
-                Class.forName ("androidx.test.espresso.Espresso");
-                istest = true;
-            } catch (ClassNotFoundException e) {
-                istest = false;
-            }
-
-            isRunningTest = new AtomicBoolean(istest);
-        }
-
-        return isRunningTest.get();
     }
 
     private void initList()

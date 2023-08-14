@@ -43,6 +43,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.KeyEncodingType;
 import com.alphawallet.app.entity.cryptokeys.KeyServiceException;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.hardware.HardwareCallback;
@@ -607,13 +608,14 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      */
     private void importHDKey()
     {
+        boolean requiresAuthentication = !Utils.isRunningTest();
         //first recover the seed phrase from non-authlocked key. This removes the need to keep the seed phrase as a member on the heap
         // - making the key operation more secure
         try
         {
             String seedPhrase = unpackMnemonic();
             HDWallet newWallet = new HDWallet(seedPhrase, "");
-            boolean success = storeHDKey(newWallet, true);
+            boolean success = storeHDKey(newWallet, requiresAuthentication);
             String reportAddress = success ? currentWallet.address : null;
             importCallback.walletValidated(reportAddress, KeyEncodingType.SEED_PHRASE_KEY, authLevel);
         }
@@ -812,33 +814,18 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     {
         try
         {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            {
-                keyGenerator.init(new KeyGenParameterSpec.Builder(
-                        keyAddress,
-                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                        .setBlockModes(BLOCK_MODE)
-                        .setKeySize(256)
-                        .setUserAuthenticationRequired(useAuthentication)
-                        .setInvalidatedByBiometricEnrollment(false)
-                        .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
-                        .setRandomizedEncryptionRequired(true)
-                        .setEncryptionPaddings(PADDING)
-                        .build());
-            }
-            else
-            {
-                keyGenerator.init(new KeyGenParameterSpec.Builder(
-                        keyAddress,
-                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                        .setBlockModes(BLOCK_MODE)
-                        .setKeySize(256)
-                        .setUserAuthenticationRequired(useAuthentication)
-                        .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
-                        .setRandomizedEncryptionRequired(true)
-                        .setEncryptionPaddings(PADDING)
-                        .build());
-            }
+            keyGenerator.init(new KeyGenParameterSpec.Builder(
+                    keyAddress,
+                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                    .setBlockModes(BLOCK_MODE)
+                    .setKeySize(256)
+                    .setUserAuthenticationRequired(useAuthentication)
+                    .setInvalidatedByBiometricEnrollment(false)
+                    .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
+                    .setRandomizedEncryptionRequired(true)
+                    .setEncryptionPaddings(PADDING)
+                    .build());
+
         }
         catch (IllegalStateException | InvalidAlgorithmParameterException e)
         {
@@ -851,7 +838,13 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     private void checkAuthentication(Operation operation)
     {
-        //first check if the phone is unlocked
+        if (Utils.isRunningTest()) //running tests in debug build mode, we don't use key unlock
+        {
+            requireAuthentication = false;
+            authenticatePass(operation);
+            return;
+        }
+
         String dialogTitle;
         switch (operation)
         {

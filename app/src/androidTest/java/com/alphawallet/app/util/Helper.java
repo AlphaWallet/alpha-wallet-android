@@ -280,6 +280,54 @@ public class Helper
         throw new RuntimeException("Can not find " + matcher.toString());
     }
 
+    public static ViewAction clickSomething(Matcher<View> matcher, int timeoutInSeconds)
+    {
+        return new ViewAction()
+        {
+            @Override
+            public Matcher<View> getConstraints()
+            {
+                return isRoot();
+            }
+
+            @Override
+            public String getDescription()
+            {
+                return "clickSomething " + matcher.toString() + " during " + timeoutInSeconds + " seconds.";
+            }
+
+            @Override
+            public void perform(final UiController uiController, final View view)
+            {
+                uiController.loopMainThreadUntilIdle();
+                final long startTime = System.currentTimeMillis();
+                final long endTime = startTime + timeoutInSeconds * 1000L;
+
+                do
+                {
+                    for (View child : TreeIterables.breadthFirstViewTraversal(view.getRootView()))
+                    {
+                        if (matcher.matches(child))
+                        {
+                            child.performClick();
+                            return;
+                        }
+                    }
+
+                    uiController.loopMainThreadForAtLeast(50);
+                }
+                while (System.currentTimeMillis() < endTime);
+
+                // timeout happens
+                throw new PerformException.Builder()
+                        .withActionDescription(this.getDescription())
+                        .withViewDescription(HumanReadables.describe(view))
+                        .withCause(new TimeoutException())
+                        .build();
+            }
+        };
+    }
+
     private static void scrollDown(int list)
     {
         onView(withId(list)).perform(ViewActions.pressKey(KeyEvent.KEYCODE_DPAD_DOWN));

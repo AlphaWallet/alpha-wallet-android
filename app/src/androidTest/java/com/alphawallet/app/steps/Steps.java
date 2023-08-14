@@ -20,6 +20,7 @@ import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickListItem;
 import static com.alphawallet.app.util.Helper.clickMadly;
+import static com.alphawallet.app.util.Helper.clickSomething;
 import static com.alphawallet.app.util.Helper.clickStaticListItem;
 import static com.alphawallet.app.util.Helper.waitForLoadingComplete;
 import static com.alphawallet.app.util.Helper.waitUntil;
@@ -387,14 +388,20 @@ public class Steps
         onView(AllOf.allOf(withId(R.id.st_editText))).perform(replaceText(contractAddress));
 
         //click on first token in list when it appears
+        Helper.wait(5);
 
+        onView(withId(R.id.main_list))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, androidx.test.espresso.action.ViewActions.click()));
+
+        // Works unpredictably
         onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 60));
-        click(withId(R.id.select_token));
+        clickSomething(withId(R.id.select_token), 30);
+        //clickMadly(withId(R.id.select_token));
+        //click(withId(R.id.select_token));
 
         click(withSubstring("Save"));
 
         Helper.wait(1);
-
 
         /*onView(AllOf.allOf(withId(R.id.st_editText))).perform(replaceText(doorContractAddress));
 

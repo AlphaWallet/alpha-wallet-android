@@ -268,15 +268,16 @@ public class Helper
         {
             try
             {
-                click(matcher, 0);
+                click(matcher, 1);
                 return;
             }
             catch (Exception e)
             {
-                Helper.wait(1);
+                //
             }
         }
-        //throw new RuntimeException("Can not find " + matcher.toString());
+
+        throw new RuntimeException("Can not find " + matcher.toString());
     }
 
     private static void scrollDown(int list)

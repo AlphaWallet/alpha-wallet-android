@@ -40,7 +40,7 @@ public class AAADappBrowserTest extends BaseE2ETest
 
     @Override
     @Before
-    public void setUp() 
+    public void setUp()
     {
         super.setUp();
         createNewWallet();

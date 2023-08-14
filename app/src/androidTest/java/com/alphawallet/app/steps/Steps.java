@@ -1,6 +1,5 @@
 package com.alphawallet.app.steps;
 
-import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static androidx.test.espresso.Espresso.pressBack;
@@ -26,16 +25,15 @@ import static com.alphawallet.app.util.Helper.waitForLoadingComplete;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.Helper.waitUntilThenBack;
 import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
-import static com.google.common.util.concurrent.Runnables.doNothing;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.anything;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.contrib.RecyclerViewActions;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.assertions.Should;
@@ -95,6 +93,8 @@ public class Steps
         return actionWithAssertions(new ScrollToActionImproved());
     }
 
+    //androidx.test.espresso.action
+
     public static void selectTestNet(String name)
     {
         gotoSettingsPage();
@@ -102,9 +102,13 @@ public class Steps
         Helper.wait(1);
         //clickMadly(withSubstring("Ethereum"));
         //main_list
+
+        onView(withId(R.id.main_list))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, androidx.test.espresso.action.ViewActions.click()));
+
         //onData(anything()).atPosition(1).perform(ViewActions.click());
-        onData(anything()).atPosition(0).perform(ViewActions.click());
-        clickStaticListItem(withSubstring("Chain ID: 1")); //deactivate eth
+        //onData(withId(R.id.main_list)).perform(androidx.test.espresso.action.ViewActions.click()).atPosition(0).perform(ViewActions.click());
+        //clickStaticListItem(withSubstring("Chain ID: 1")); //deactivate eth
         onView(withId(R.id.network_scroller)).perform(swipeUp());
         onView(withId(R.id.network_scroller)).perform(swipeUp());
         //Helper.wait(1);

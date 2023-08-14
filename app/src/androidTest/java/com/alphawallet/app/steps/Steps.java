@@ -1,5 +1,6 @@
 package com.alphawallet.app.steps;
 
+import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static androidx.test.espresso.Espresso.pressBack;
@@ -25,8 +26,10 @@ import static com.alphawallet.app.util.Helper.waitForLoadingComplete;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.Helper.waitUntilThenBack;
 import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
+import static com.google.common.util.concurrent.Runnables.doNothing;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.anything;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -98,6 +101,9 @@ public class Steps
         selectMenu("Select Active Networks");
         Helper.wait(1);
         //clickMadly(withSubstring("Ethereum"));
+        //main_list
+        //onData(anything()).atPosition(1).perform(ViewActions.click());
+        onData(withId(R.id.main_list)).atPosition(0).perform(ViewActions.click());
         clickStaticListItem(withSubstring("Chain ID: 1")); //deactivate eth
         onView(withId(R.id.network_scroller)).perform(swipeUp());
         onView(withId(R.id.network_scroller)).perform(swipeUp());

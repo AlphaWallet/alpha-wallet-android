@@ -388,10 +388,7 @@ public class Steps
         onView(AllOf.allOf(withId(R.id.st_editText))).perform(replaceText(contractAddress));
 
         //click on first token in list when it appears
-        Helper.wait(5);
-
-        onView(withId(R.id.main_list))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0, androidx.test.espresso.action.ViewActions.click()));
+        Helper.wait(1);
 
         // Works unpredictably
         onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 60));

@@ -103,7 +103,7 @@ public class Steps
         //clickMadly(withSubstring("Ethereum"));
         //main_list
         //onData(anything()).atPosition(1).perform(ViewActions.click());
-        onData(withId(R.id.main_list)).atPosition(0).perform(ViewActions.click());
+        onData(anything()).atPosition(0).perform(ViewActions.click());
         clickStaticListItem(withSubstring("Chain ID: 1")); //deactivate eth
         onView(withId(R.id.network_scroller)).perform(swipeUp());
         onView(withId(R.id.network_scroller)).perform(swipeUp());

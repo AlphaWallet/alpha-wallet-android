@@ -1085,6 +1085,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      */
     private void createPassword(Operation operation)
     {
+        boolean requireAuthentication = !Utils.isRunningTest();
+
         //generate password
         byte[] newPassword = new byte[256];
         SecureRandom random;
@@ -1107,7 +1109,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         random.nextBytes(newPassword);
 
-        boolean success = storeEncryptedBytes(newPassword, true, currentWallet.address);  //because we'll now only ever be importing keystore, always create with Auth if possible
+        boolean success = storeEncryptedBytes(newPassword, requireAuthentication, currentWallet.address);  //because we'll now only ever be importing keystore, always create with Auth if possible
 
         if (!success)
         {

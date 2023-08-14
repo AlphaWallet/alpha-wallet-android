@@ -386,7 +386,10 @@ public class Steps
         Helper.wait(1);
         onView(AllOf.allOf(withId(R.id.st_editText))).perform(replaceText(contractAddress));
 
-        clickMadly(withId(R.id.select_token));
+        //click on first token in list when it appears
+
+        onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 60));
+        click(withId(R.id.select_token));
 
         click(withSubstring("Save"));
 

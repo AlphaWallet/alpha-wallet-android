@@ -21,7 +21,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AATransferTest extends BaseE2ETest
+public class TransferTest extends BaseE2ETest
 {
     // On CI server, run tests on different API levels concurrently may cause failure: Replacement transaction underpriced.
     // Use different wallet to transfer token from can avoid this error

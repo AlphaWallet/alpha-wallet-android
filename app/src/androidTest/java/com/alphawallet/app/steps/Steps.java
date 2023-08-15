@@ -8,10 +8,8 @@ import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
 import static androidx.test.espresso.action.ViewActions.swipeUp;
-import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
-import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static androidx.test.espresso.matcher.ViewMatchers.withHint;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
@@ -22,8 +20,8 @@ import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.clickListItem;
 import static com.alphawallet.app.util.Helper.clickMadly;
+import static com.alphawallet.app.util.Helper.clickSomething;
 import static com.alphawallet.app.util.Helper.clickStaticListItem;
-import static com.alphawallet.app.util.Helper.hasView;
 import static com.alphawallet.app.util.Helper.waitForLoadingComplete;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.Helper.waitUntilThenBack;
@@ -32,22 +30,11 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
-import android.view.KeyEvent;
-import android.view.View;
-import android.widget.HorizontalScrollView;
-import android.widget.ScrollView;
-
-import androidx.core.widget.NestedScrollView;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.ViewInteraction;
-import androidx.test.espresso.action.GeneralLocation;
-import androidx.test.espresso.action.GeneralSwipeAction;
-import androidx.test.espresso.action.Press;
-import androidx.test.espresso.action.Swipe;
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.contrib.RecyclerViewActions;
-import androidx.test.espresso.matcher.ViewMatchers;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.assertions.Should;
@@ -55,7 +42,6 @@ import com.alphawallet.app.util.GetTextAction;
 import com.alphawallet.app.util.Helper;
 import com.alphawallet.app.util.ScrollToActionImproved;
 
-import org.hamcrest.Matcher;
 import org.hamcrest.core.AllOf;
 
 /**
@@ -108,12 +94,22 @@ public class Steps
         return actionWithAssertions(new ScrollToActionImproved());
     }
 
+    //androidx.test.espresso.action
+
     public static void selectTestNet(String name)
     {
         gotoSettingsPage();
         selectMenu("Select Active Networks");
         Helper.wait(1);
-        //clickStaticListItem(withSubstring("Ethereum")); //deactivate eth
+        //clickMadly(withSubstring("Ethereum"));
+        //main_list
+
+        onView(withId(R.id.main_list))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, androidx.test.espresso.action.ViewActions.click()));
+
+        //onData(anything()).atPosition(1).perform(ViewActions.click());
+        //onData(withId(R.id.main_list)).perform(androidx.test.espresso.action.ViewActions.click()).atPosition(0).perform(ViewActions.click());
+        //clickStaticListItem(withSubstring("Chain ID: 1")); //deactivate eth
         onView(withId(R.id.network_scroller)).perform(swipeUp());
         onView(withId(R.id.network_scroller)).perform(swipeUp());
         //Helper.wait(1);
@@ -383,6 +379,29 @@ public class Steps
     public static void addCustomToken(String contractAddress)
     {
         //add the token manually since test doesn't seem to work normally
+        gotoWalletPage();
+
+        Helper.wait(1);
+        click(withId(R.id.edit_search));
+
+        Helper.wait(1);
+        onView(AllOf.allOf(withId(R.id.st_editText))).perform(replaceText(contractAddress));
+
+        //click on first token in list when it appears
+        Helper.wait(1);
+
+        // Works unpredictably
+        onView(isRoot()).perform(waitUntil(withId(R.id.select_token), 60));
+        clickSomething(withId(R.id.select_token), 30);
+        //clickMadly(withId(R.id.select_token));
+        //click(withId(R.id.select_token));
+
+        click(withSubstring("Save"));
+
+        Helper.wait(1);
+
+        /*onView(AllOf.allOf(withId(R.id.st_editText))).perform(replaceText(doorContractAddress));
+
         click(withId(R.id.action_my_wallet));
         click(withSubstring("Add / Hide Tokens"));
         Helper.wait(1);
@@ -404,7 +423,7 @@ public class Steps
             pressBack();
             Helper.wait(1);
             waitUntil(withId(R.id.nav_settings_text), 30);
-        }
+        }*/
 
         //pressBack();
 

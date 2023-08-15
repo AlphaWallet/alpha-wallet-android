@@ -18,7 +18,6 @@ import static org.hamcrest.core.AllOf.allOf;
 import android.content.Context;
 import android.view.KeyEvent;
 import android.view.View;
-
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.test.espresso.PerformException;
@@ -29,14 +28,10 @@ import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
-import org.hamcrest.Matcher;
-import org.hamcrest.CoreMatchers;
-
-import java.util.concurrent.TimeoutException;
 import com.alphawallet.app.R;
-import com.walletconnect.android.Core;
 
-import junit.framework.AssertionFailedError;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matcher;
 
 import java.util.concurrent.TimeoutException;
 
@@ -226,6 +221,27 @@ public class Helper
         throw new RuntimeException("Can not find " + matcher.toString());
     }
 
+    public static void clickMadly2(Matcher matcher)
+    {
+        for (int i = 0; i < 50; i++)
+        {
+            try
+            {
+                onView(matcher).perform(ViewActions.click(doNothing()));
+                return;
+            }
+            catch (Exception e)
+            {
+                //
+                Helper.wait(1);
+            }
+        }
+
+        throw new RuntimeException("Can not find " + matcher.toString());
+    }
+
+
+
     public static void clickMadly(Matcher matcher)
     {
         for (int i = 0; i < 50; i++)
@@ -252,15 +268,64 @@ public class Helper
         {
             try
             {
-                click(matcher, 0);
+                click(matcher, 1);
                 return;
             }
             catch (Exception e)
             {
-                Helper.wait(1);
+                //
             }
         }
-        //throw new RuntimeException("Can not find " + matcher.toString());
+
+        throw new RuntimeException("Can not find " + matcher.toString());
+    }
+
+    public static ViewAction clickSomething(Matcher<View> matcher, int timeoutInSeconds)
+    {
+        return new ViewAction()
+        {
+            @Override
+            public Matcher<View> getConstraints()
+            {
+                return isRoot();
+            }
+
+            @Override
+            public String getDescription()
+            {
+                return "clickSomething " + matcher.toString() + " during " + timeoutInSeconds + " seconds.";
+            }
+
+            @Override
+            public void perform(final UiController uiController, final View view)
+            {
+                uiController.loopMainThreadUntilIdle();
+                final long startTime = System.currentTimeMillis();
+                final long endTime = startTime + timeoutInSeconds * 1000L;
+
+                do
+                {
+                    for (View child : TreeIterables.breadthFirstViewTraversal(view.getRootView()))
+                    {
+                        if (matcher.matches(child))
+                        {
+                            child.performClick();
+                            return;
+                        }
+                    }
+
+                    uiController.loopMainThreadForAtLeast(50);
+                }
+                while (System.currentTimeMillis() < endTime);
+
+                // timeout happens
+                throw new PerformException.Builder()
+                        .withActionDescription(this.getDescription())
+                        .withViewDescription(HumanReadables.describe(view))
+                        .withCause(new TimeoutException())
+                        .build();
+            }
+        };
     }
 
     private static void scrollDown(int list)

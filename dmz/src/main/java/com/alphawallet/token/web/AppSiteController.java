@@ -86,7 +86,7 @@ public class AppSiteController implements AttributeInterface
             "      \"package_name\": \"io.stormbird.wallet\",\n" +
             "      \"sha256_cert_fingerprints\": [\n" +
             "        \"8E:1E:C7:92:44:E2:AE:8F:5E:BE:A6:09:E5:CC:05:8F:01:9F:67:F4:A6:FF:E7:60:6E:DA:C8:64:8F:29:AB:C0\"\n" +
-            "        \"54:5B:5D:DE:90:45:11:98:14:5C:90:32:C6:AE:F6:85:C3:7D:F5:72:75:FF:25:07:0E:13:03:11:61:66:6A:E3\"\n" +
+            "        \"3C:6E:67:6B:7B:9D:AD:53:A3:03:85:CE:E4:53:D4:EC:D8:2A:DC:4B:14:58:4D:55:28:D2:E4:65:57:C3:4F:9D\"\n" +
             "      ]\n" +
             "    }\n" +
             "  }\n" +

@@ -140,7 +140,8 @@ internal fun suggestPriorityFee(firstBlock: Long, feeHistory: FeeHistory, gasSer
             val blockCount = maxBlockCount(gasUsedRatio, ptr, needBlocks)
             if (blockCount > 0) {
                 // feeHistory API call with reward percentile specified is expensive and therefore is only requested for a few non-full recent blocks.
-                val feeHistoryFetch = gasService.getChainFeeHistory(blockCount, Numeric.prependHexPrefix((firstBlock + ptr).toString(16)),
+                val feeHistoryFetch = gasService.getChainFeeHistory(blockCount,
+                    Numeric.prependHexPrefix((firstBlock + ptr).toString(16)),
                     rewardPercentile.toString()).blockingGet();
 
                 val rewardSize = feeHistoryFetch?.reward?.size ?: 0

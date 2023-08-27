@@ -60,6 +60,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import io.reactivex.Single;
@@ -682,7 +683,7 @@ public class AttestationImport
             address = "ethereum";
         }
 
-        return address.toLowerCase() + "-" + chainId;
+        return address.toLowerCase(Locale.ROOT) + "-" + chainId;
     }
 
 

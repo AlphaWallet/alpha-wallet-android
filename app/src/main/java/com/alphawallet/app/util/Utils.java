@@ -28,6 +28,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.RawRes;
 import androidx.fragment.app.FragmentActivity;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.EasAttestation;
@@ -1407,5 +1408,28 @@ public class Utils
         }
 
         return 0;
+    }
+
+    // Detect if we're running in test mode. Don't use keys in test mode
+    public static synchronized boolean isRunningTest()
+    {
+        if (!BuildConfig.DEBUG)
+        {
+            return false;
+        }
+
+        boolean istest;
+
+        try
+        {
+            Class.forName("androidx.test.espresso.Espresso");
+            istest = true;
+        }
+        catch (ClassNotFoundException e)
+        {
+            istest = false;
+        }
+
+        return istest;
     }
 }

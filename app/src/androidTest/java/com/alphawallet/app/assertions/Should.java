@@ -18,7 +18,7 @@ import com.alphawallet.app.R;
 
 public class Should
 {
-    private static final int TIMEOUT_IN_SECONDS = 5 * 60;
+    private static final int TIMEOUT_IN_SECONDS = 10;
 
     public static void shouldSee(String text)
     {

@@ -6,7 +6,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.alphawallet.app.steps.Steps.closeSecurityWarning;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiObjectNotFoundException;
@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 
 import timber.log.Timber;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidJUnit4ClassRunner.class)
 public abstract class BaseE2ETest
 {
     @Rule

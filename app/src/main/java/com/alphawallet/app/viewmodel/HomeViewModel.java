@@ -30,6 +30,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.GitHubRelease;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -39,6 +40,7 @@ import com.alphawallet.app.entity.Version;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.analytics.QrScanResultType;
+import com.alphawallet.app.entity.attestation.AttestationImport;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -133,6 +135,7 @@ public class HomeViewModel extends BaseViewModel
     private final ExternalBrowserRouter externalBrowserRouter;
     private final OkHttpClient httpClient;
     private final RealmManager realmManager;
+    private final TokensService tokensService;
     private final AlphaWalletNotificationService alphaWalletNotificationService;
     private final MutableLiveData<String> walletName = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -158,6 +161,7 @@ public class HomeViewModel extends BaseViewModel
         ExternalBrowserRouter externalBrowserRouter,
         OkHttpClient httpClient,
         RealmManager realmManager,
+        TokensService tokensService,
         AlphaWalletNotificationService alphaWalletNotificationService)
     {
         this.preferenceRepository = preferenceRepository;
@@ -176,6 +180,7 @@ public class HomeViewModel extends BaseViewModel
         this.alphaWalletNotificationService = alphaWalletNotificationService;
         setAnalyticsService(analyticsService);
         this.preferenceRepository.incrementLaunchCount();
+        this.tokensService = tokensService;
     }
 
     @Override
@@ -367,7 +372,7 @@ public class HomeViewModel extends BaseViewModel
         assetDefinitionService.setErrorCallback(callback);
     }
 
-    public void handleQRCode(Activity activity, String qrCode)
+    public void handleQRCode(HomeActivity activity, String qrCode)
     {
         try
         {
@@ -378,8 +383,9 @@ public class HomeViewModel extends BaseViewModel
             QRResult qrResult = parser.parse(qrCode);
             switch (qrResult.type)
             {
+                case ATTESTATION:
                 case EAS_ATTESTATION:
-                    ((HomeActivity) activity).importEASAttestation(qrResult);
+                    handleImportAttestation(activity, qrResult);
                     break;
                 case ADDRESS:
                     props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS.getValue());
@@ -406,8 +412,7 @@ public class HomeViewModel extends BaseViewModel
                 case URL:
                     props.put(QrScanResultType.KEY, QrScanResultType.URL.getValue());
                     track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
-
-                    ((HomeActivity) activity).onBrowserWithURL(qrCode);
+                    activity.onBrowserWithURL(qrCode);
                     break;
                 case MAGIC_LINK:
                     showImportLink(activity, qrCode);
@@ -416,9 +421,6 @@ public class HomeViewModel extends BaseViewModel
                     qrCode = null;
                     break;
                 case OTHER_PROTOCOL:
-                    break;
-                case ATTESTATION:
-                    ((HomeActivity) activity).importAttestation(qrResult);
                     break;
                 case WALLET_CONNECT:
                     startWalletConnect(activity, qrCode);
@@ -437,7 +439,6 @@ public class HomeViewModel extends BaseViewModel
             Toast.makeText(activity, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }
     }
-
     private void startWalletConnect(Activity activity, String qrCode)
     {
         Intent intent;
@@ -682,7 +683,6 @@ public class HomeViewModel extends BaseViewModel
     private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception
     {
         Locale locale = ctx.getResources().getConfiguration().getLocales().get(0);
-        //AttestationParser ap = new AttestationParser(xmlInputStream, locale, null);
         return new TokenDefinition(
             xmlInputStream, locale, null);
     }
@@ -905,5 +905,61 @@ public class HomeViewModel extends BaseViewModel
     public boolean isWatchOnlyWallet()
     {
         return preferenceRepository.isWatchOnly();
+    }
+
+    private Single<Wallet> getCurrentWallet()
+    {
+        if (defaultWallet.getValue() != null)
+        {
+            return Single.fromCallable(defaultWallet::getValue);
+        }
+        else
+        {
+            return genericWalletInteract.find();
+        }
+    }
+
+    private void handleImportAttestation(HomeActivity activity, QRResult qrResult)
+    {
+        disposable = getCurrentWallet()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(wallet -> completeImport(activity, wallet, qrResult));
+    }
+
+    private void completeImport(HomeActivity activity, Wallet wallet, QRResult qrResult)
+    {
+        if (wallet == null || wallet.watchOnly())
+        {
+            activity.importError(activity.getString(R.string.watch_wallet));
+        }
+        else
+        {
+            AttestationImport attnImport = new AttestationImport(assetDefinitionService, tokensService,
+                    activity, wallet, realmManager, httpClient);
+
+            //attempt to import the wallet
+            attnImport.importAttestation(qrResult);
+        }
+    }
+
+    public boolean handleSmartPass(HomeActivity homeActivity, String smartPassCandidate)
+    {
+        if (smartPassCandidate.startsWith(AttestationImport.SMART_PASS_URL))
+        {
+            smartPassCandidate = smartPassCandidate.substring(AttestationImport.SMART_PASS_URL.length()); //chop off leading URL
+            QRResult result = new QRResult(smartPassCandidate);
+            result.type = EIP681Type.EAS_ATTESTATION;
+            String taglessAttestation = Utils.parseEASAttestation(smartPassCandidate);
+            result.functionDetail = Utils.toAttestationJson(taglessAttestation);
+
+            if (!TextUtils.isEmpty(result.functionDetail))
+            {
+                handleImportAttestation(homeActivity, result);
+                return true;
+            }
+        }
+
+        return false;
     }
 }

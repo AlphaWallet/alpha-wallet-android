@@ -19,7 +19,6 @@ import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SuggestEIP1559Kt;
-import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -43,19 +42,14 @@ import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.ContractGasProvider;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import okhttp3.OkHttpClient;
@@ -88,8 +82,6 @@ public class GasService implements ContractGasProvider
     private final String ETHERSCAN_API_KEY;
     private final String POLYGONSCAN_API_KEY;
     private boolean keyFail;
-    private static final List<Long> noEIP1559 = new ArrayList<>();
-
     @Nullable
     private Disposable gasFetchDisposable;
 
@@ -113,11 +105,9 @@ public class GasService implements ContractGasProvider
     public void startGasPriceCycle(long chainId)
     {
         updateChainId(chainId);
-        if (gasFetchDisposable == null || gasFetchDisposable.isDisposed())
-        {
-            gasFetchDisposable = Observable.interval(0, FETCH_GAS_PRICE_INTERVAL_SECONDS, TimeUnit.SECONDS)
-                    .doOnNext(l -> fetchCurrentGasPrice()).subscribe();
-        }
+        if (gasFetchDisposable != null && !gasFetchDisposable.isDisposed()) gasFetchDisposable.dispose();
+        gasFetchDisposable = Observable.interval(0, FETCH_GAS_PRICE_INTERVAL_SECONDS, TimeUnit.SECONDS)
+                .doOnNext(l -> fetchCurrentGasPrice()).subscribe();
     }
 
     public void stopGasPriceCycle()
@@ -152,20 +142,17 @@ public class GasService implements ContractGasProvider
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(updated -> {
                     Timber.d("Updated gas prices: %s", updated);
-                    }, Throwable::printStackTrace)
+                }, Throwable::printStackTrace)
                 .isDisposed();
 
         //also update EIP1559 if required and we haven't previously determined there's no EIP1559 support
-        if (!noEIP1559.contains(currentChainId))
-        {
-            getEIP1559FeeStructure()
-                    .map(result -> updateEIP1559Realm(result, currentChainId))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(r -> {
-                        if (!r) Timber.d("Fail to update fees");
-                    }, this::handleError).isDisposed();
-        }
+        getEIP1559FeeStructure()
+                .map(result -> updateEIP1559Realm(result, currentChainId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(r -> {
+                    if (!r) Timber.d("Fail to update fees");
+                }, this::handleError).isDisposed();
     }
 
     @Override
@@ -487,7 +474,7 @@ public class GasService implements ContractGasProvider
     public Single<FeeHistory> getChainFeeHistory(int blockCount, String lastBlock, String rewardPercentiles)
     {
         //TODO: Replace once Web3j fully supports EIP1559
-        String requestJSON = FEE_HISTORY.replace(BLOCK_COUNT, ("0x" + Long.toHexString(blockCount))).replace(NEWEST_BLOCK, lastBlock)
+        String requestJSON = FEE_HISTORY.replace(BLOCK_COUNT, (Numeric.prependHexPrefix(Long.toHexString(blockCount)))).replace(NEWEST_BLOCK, lastBlock)
                 .replace(REWARD_PERCENTILES, rewardPercentiles);
 
         RequestBody requestBody = RequestBody.create(requestJSON, HttpService.JSON_MEDIA_TYPE);
@@ -514,7 +501,6 @@ public class GasService implements ContractGasProvider
             catch (org.json.JSONException j)
             {
                 Timber.e("Note: " + info.getShortName() + " does not appear to have EIP1559 support");
-                noEIP1559.add(info.chainId);
             }
             catch (Exception e)
             {

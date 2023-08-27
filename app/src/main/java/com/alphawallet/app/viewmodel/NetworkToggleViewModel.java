@@ -75,11 +75,6 @@ public class NetworkToggleViewModel extends BaseViewModel
         return networkRepository.getNetworkByChain(chainId);
     }
 
-    public boolean testnetEnabled()
-    {
-        return preferenceRepository.isTestnetEnabled();
-    }
-
     public List<NetworkItem> getNetworkList(boolean isMainNet)
     {
         List<NetworkItem> networkList = new ArrayList<>();

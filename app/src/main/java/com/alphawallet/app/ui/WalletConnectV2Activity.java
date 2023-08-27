@@ -180,6 +180,11 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
 
     private void displaySessionStatus(WalletConnectV2SessionItem session, Wallet wallet)
     {
+        if (session == null)
+        {
+            return;
+        }
+        
         if (session.icon == null)
         {
             icon.setImageResource(R.drawable.grey_circle);

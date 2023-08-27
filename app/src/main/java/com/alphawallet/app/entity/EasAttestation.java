@@ -1,8 +1,9 @@
 package com.alphawallet.app.entity;
 
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.entity.attestation.AttestationCoreData;
-import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeystoreAccountService;
 import com.alphawallet.token.tools.Numeric;
 
@@ -25,7 +26,7 @@ public class EasAttestation
     public long v;
     public String recipient;
     public String uid;
-    public String schema;
+    private String schema;
     public String signer;
     public long time;
     public long expirationTime;
@@ -33,8 +34,10 @@ public class EasAttestation
     public boolean revocable;
     public String data;
     public long nonce;
+    public long messageVersion;
+    private String refSchema;
 
-    public EasAttestation(String version, long chainId, String verifyingContract, String r, String s, long v, String signer, String uid, String schema, String recipient, long time, long expirationTime, String refUID, boolean revocable, String data, long nonce)
+    public EasAttestation(String version, long chainId, String verifyingContract, String r, String s, long v, String signer, String uid, String schema, String recipient, long time, long expirationTime, String refUID, boolean revocable, String data, long nonce, long messageVersion)
     {
         this.version = version;
         this.chainId = chainId;
@@ -52,6 +55,8 @@ public class EasAttestation
         this.revocable = revocable;
         this.data = data;
         this.nonce = nonce;
+        this.refSchema = null;
+        this.messageVersion = messageVersion;
     }
 
     public String getVersion()
@@ -140,13 +145,39 @@ public class EasAttestation
 
     public String getSchema()
     {
-        if (schema.equals("0"))
+        BigInteger schemaVal = new BigInteger(Numeric.cleanHexPrefix(schema), 16);
+        if (schemaVal.equals(BigInteger.ZERO))
+        {
+            return getRefSchema();
+        }
+        else
+        {
+            return schema;
+        }
+    }
+
+    private String getFixedSchema()
+    {
+        BigInteger schemaVal = new BigInteger(Numeric.cleanHexPrefix(schema), 16);
+        if (schemaVal.equals(BigInteger.ZERO))
         {
             return Numeric.toHexStringWithPrefixZeroPadded(BigInteger.ZERO, 64);
         }
         else
         {
             return schema;
+        }
+    }
+
+    private String getRefSchema()
+    {
+        if (TextUtils.isEmpty(refSchema))
+        {
+            return Numeric.toHexStringWithPrefixZeroPadded(BigInteger.ZERO, 64);
+        }
+        else
+        {
+            return refSchema;
         }
     }
 
@@ -258,6 +289,10 @@ public class EasAttestation
             types.put("EIP712Domain", jsonType);
 
             JSONArray attest = new JSONArray();
+            if (messageVersion > 0)
+            {
+                putElement(attest, "version", "uint16");
+            }
             putElement(attest, "schema", "bytes32");
             putElement(attest, "recipient", "address");
             putElement(attest, "time", "uint64");
@@ -312,13 +347,17 @@ public class EasAttestation
     private JSONObject formMessage() throws Exception
     {
         JSONObject jsonMessage = new JSONObject();
+        if (messageVersion > 0)
+        {
+            jsonMessage.put("version", messageVersion);
+        }
         jsonMessage.put("time", time);
         jsonMessage.put("data", data);
         jsonMessage.put("expirationTime", expirationTime);
         jsonMessage.put("recipient", recipient);
         jsonMessage.put("refUID", getRefUID());
         jsonMessage.put("revocable", revocable);
-        jsonMessage.put("schema", getSchema());
+        jsonMessage.put("schema", getFixedSchema());
 
         return jsonMessage;
     }
@@ -334,38 +373,14 @@ public class EasAttestation
 
     public AttestationCoreData getAttestationCore()
     {
-        /*
-verifyEASAttestation((bytes32,address,uint64,uint64,bool,bytes32,bytes),bytes)
-struct AttestationCoreData {
-    bytes32 schema; // The UID of the associated EAS schema
-    address recipient; // The recipient of the attestation.
-    uint64 time; // The time when the attestation is valid from (Unix timestamp).
-    uint64 expirationTime; // The time when the attestation expires (Unix timestamp).
-    bool revocable; // Whether the attestation is revocable.
-    bytes32 refUID; // The UID of the related attestation.
-    bytes data; // The actual Schema data (eg eventId: 12345, ticketId: 6 etc)
-}
-         */
+        BigInteger refVal = new BigInteger(refUID);
+        byte[] refBytes = Numeric.toBytesPadded(refVal, 32);
+        BigInteger schemaVal = Numeric.toBigInt(schema);
+        byte[] schemaBytes = Numeric.toBytesPadded(schemaVal, 32);
+        byte[] dataBytes = Numeric.hexStringToByteArray(data);
 
-        /*return new AttestationCoreData(new Address(recipient), time, expirationTime, revocable,
-                Numeric.toBytesPadded(new BigInteger(refUID), 32),
-                Numeric.hexStringToByteArray(data), BigInteger.ZERO,
-                Numeric.hexStringToByteArray(schema));*/
-
-        BigInteger bi = new BigInteger(refUID);
-
-        byte[] lala = Numeric.toBytesPadded(bi, 32);
-
-        BigInteger bi2 = Numeric.toBigInt(schema);
-
-        byte[] lala2 = Numeric.toBytesPadded(bi2, 32);
-
-        Address l = new Address(recipient);
-
-        byte[] bib = Numeric.hexStringToByteArray(data);
-
-        return new AttestationCoreData(lala2,
-                new Address(recipient), time, expirationTime, revocable, lala,
-                bib);
+        return new AttestationCoreData(schemaBytes,
+                new Address(recipient), time, expirationTime, revocable, refBytes,
+                dataBytes);
     }
 }

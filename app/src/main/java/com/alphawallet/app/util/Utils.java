@@ -15,6 +15,7 @@ import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -31,7 +32,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.util.pattern.Patterns;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
@@ -86,6 +86,8 @@ public class Utils
     private static final String TRUST_ICON_REPO_BASE = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/";
     private static final String TRUST_ICON_REPO = TRUST_ICON_REPO_BASE + CHAIN_REPO_ADDRESS_TOKEN + "/assets/" + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
     private static final String ALPHAWALLET_ICON_REPO = ALPHAWALLET_REPO_NAME + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
+    private static final String ATTESTATION_PREFIX = "#attestation=";
+    private static final String SMART_PASS_PREFIX = "ticket=";
 
     public static int dp2px(Context context, int dp)
     {
@@ -1125,55 +1127,97 @@ public class Utils
         return context.getPackageName().equals("io.stormbird.wallet");
     }
 
-    /*public static boolean hasAttestation(String url)
+    //Decode heuristic:
+    //1. use Android URI parser to extract "ticket" or "attestation"
+    //2. do URL decode on the extracted string
+    //3. Base64 decode and unzip, return decoded string if any
+    //4. Try the decode step "_ -> /" and "- -> +" and try Base64 decode and unzip, return decoded string
+    //5. Try EAS format: extract tag from "ticket=" or "#attestation=" and try Base64 decode and unzip.
+    public static String parseEASAttestation(String data)
     {
-        result.functionDetail = Utils.decompress(url);
-
-        int hashIndex = url.indexOf("#attestation=");
-        if (hashIndex >= 0)
+        String inflate;
+        String attestation = attestationViaParams(data);
+        if (!TextUtils.isEmpty(attestation))
         {
-            url = url.substring(hashIndex + 13);
-            return url.length() > 10;
+            //try decode without conversion
+            inflate = inflateData(attestation);
+            if (!TextUtils.isEmpty(inflate))
+            {
+                return inflate;
+            }
+            String decoded = attestation.replace("_", "/").replace("-", "+");
+            inflate = inflateData(decoded);
+            if (!TextUtils.isEmpty(inflate))
+            {
+                return inflate;
+            }
         }
-        else
+
+        //now check via pulling params directly
+        attestation = extractParam(data, SMART_PASS_PREFIX);
+        inflate = inflateData(attestation);
+        if (!TextUtils.isEmpty(inflate))
         {
-            //detect a base64 attestation
-            try
-            {
-                byte[] tryBase64Data = Base64.decode(url, Base64.DEFAULT); //is this a base64 string?
-
-
-                if (tryBase64Data.length > 0 )
-                {
-                    return true;
-                }
-            }
-            catch (IllegalArgumentException e)
-            {
-                // no action, return false;
-                Timber.w(e);
-            }
-
-            return false;
+            return inflate;
         }
-    }*/
 
-    public static String getAttestationString(String url)
+        attestation = extractParam(data, ATTESTATION_PREFIX);
+        return inflateData(attestation);
+    }
+
+    public static boolean hasEASAttestation(String data)
     {
-        int hashIndex = url.indexOf("#attestation=");
+        return parseEASAttestation(data).length() > 0;
+    }
+
+    //Used to pull the raw attestation zip from the magiclink
+    public static String extractRawAttestation(String data)
+    {
+        String inflate;
+        String attestation = attestationViaParams(data);
+        if (!TextUtils.isEmpty(attestation))
+        {
+            //try decode without conversion
+            inflate = inflateData(attestation);
+            if (!TextUtils.isEmpty(inflate))
+            {
+                return attestation;
+            }
+            String decoded = attestation.replace("_", "/").replace("-", "+");
+            inflate = inflateData(decoded);
+            if (!TextUtils.isEmpty(inflate))
+            {
+                return attestation;
+            }
+        }
+
+        //now check via pulling params directly
+        attestation = extractParam(data, SMART_PASS_PREFIX);
+        inflate = inflateData(attestation);
+        if (!TextUtils.isEmpty(inflate))
+        {
+            return attestation;
+        }
+
+        attestation = extractParam(data, ATTESTATION_PREFIX);
+        return inflateData(attestation);
+    }
+
+    private static String extractParam(String url, String param)
+    {
+        int paramIndex = url.indexOf(param);
         String decoded;
         try
         {
-            if (hashIndex >= 0) //EAS style attestations have the magic link style
+            if (paramIndex >= 0) //EAS style attestations have the magic link style
             {
-                url = url.substring(hashIndex + 13);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                url = url.substring(paramIndex + param.length());
+                decoded = universalURLDecode(url);
+                //find end param if there is one
+                int endIndex = decoded.indexOf("&");
+                if (endIndex > 0)
                 {
-                    decoded = URLDecoder.decode(url, StandardCharsets.UTF_8);
-                }
-                else
-                {
-                    decoded = URLDecoder.decode(url, "UTF-8");
+                    decoded = decoded.substring(0, endIndex);
                 }
             }
             else
@@ -1190,39 +1234,64 @@ public class Utils
         return decoded;
     }
 
-    public static TokenInfo getDefaultAttestationInfo(long chainId, String collectionHash)
+    private static String attestationViaParams(String url)
     {
-        return new TokenInfo(collectionHash, "EAS Attestation", "ATTN", 0, true, chainId);
-    }
-
-    public static boolean hasAttestation(String data)
-    {
+        String decoded = "";
         try
         {
-            String inflated = inflateData(getAttestationString(data));
-            return inflated.length() > 0;
+            Uri uri = Uri.parse(url);
+            String payload = uri.getQueryParameter("ticket");
+            if (TextUtils.isEmpty(payload))
+            {
+                payload = uri.getQueryParameter("attestation");
+            }
+
+            if (TextUtils.isEmpty(payload))
+            {
+                return "";
+            }
+
+            decoded = universalURLDecode(payload);
+            //decoded = decoded.replace("_", "/").replace("-", "+");
+
+            Timber.d("decoded url: %s", decoded);
         }
         catch (Exception e)
         {
-            return false;
+            // Expected
         }
+        return decoded;
     }
 
-    public static String decompress(String url)
+    public static String universalURLDecode(String url)
     {
+        String decoded;
         try
         {
-            //Timber.d(toAttestationJson(inflateData(getAttestationString(url))));
-            return toAttestationJson(inflateData(getAttestationString(url)));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            {
+                decoded = URLDecoder.decode(url, StandardCharsets.UTF_8);
+            }
+            else
+            {
+                decoded = URLDecoder.decode(url, "UTF-8");
+            }
         }
         catch (Exception e)
         {
-            return null;
+            decoded = url;
         }
+
+        return decoded;
     }
 
-    private static String toAttestationJson(String jsonString)
+    public static String toAttestationJson(String jsonString)
     {
+        if (TextUtils.isEmpty(jsonString))
+        {
+            return "";
+        }
+
         // Remove the square brackets
         jsonString = jsonString.substring(1, jsonString.length() - 1);
         String[] e = jsonString.split(",");
@@ -1231,6 +1300,18 @@ public class Utils
         for (int i = 0; i < e.length; i++) {
             e[i] = e[i].trim();
             e[i] = e[i].replaceAll("\"", "");
+        }
+
+        long versionParam = 0;
+
+        if (e.length < 16 || e.length > 17)
+        {
+            return "";
+        }
+
+        if (e.length == 17)
+        {
+            versionParam = Long.parseLong(e[16]);
         }
 
         EasAttestation easAttestation =
@@ -1250,7 +1331,8 @@ public class Utils
                 e[12],
                 Boolean.parseBoolean(e[13]),
                 e[14],
-                Long.parseLong(e[15])
+                Long.parseLong(e[15]),
+                versionParam
             );
 
         return new Gson().toJson(easAttestation);
@@ -1258,15 +1340,15 @@ public class Utils
 
     public static String inflateData(String deflatedData)
     {
-        byte[] deflatedBytes = Base64.decode(deflatedData, Base64.DEFAULT);
-
-        Inflater inflater = new Inflater();
-        inflater.setInput(deflatedBytes);
-
-        byte[] inflatedData;
-
         try
         {
+            byte[] deflatedBytes = Base64.decode(deflatedData, Base64.DEFAULT);
+
+            Inflater inflater = new Inflater();
+            inflater.setInput(deflatedBytes);
+
+            byte[] inflatedData;
+
             // Inflate the data
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];

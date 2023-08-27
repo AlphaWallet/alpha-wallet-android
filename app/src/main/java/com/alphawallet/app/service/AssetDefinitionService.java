@@ -2,9 +2,6 @@ package com.alphawallet.app.service;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
@@ -21,7 +18,6 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.MutableLiveData;
@@ -33,11 +29,10 @@ import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.QueryResponse;
 import com.alphawallet.app.entity.TokenLocator;
-import com.alphawallet.app.entity.attestation.SchemaRecord;
+import com.alphawallet.app.entity.attestation.AttestationImport;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
@@ -49,11 +44,7 @@ import com.alphawallet.app.repository.entity.RealmTokenScriptData;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.HomeViewModel;
-import com.alphawallet.app.web3j.StructuredDataEncoder;
-import com.alphawallet.ethereum.EthereumNetworkBase;
-import com.alphawallet.ethereum.NetworkInfo;
 import com.alphawallet.token.entity.ActionModifier;
-import com.alphawallet.token.entity.AttestationDefinition;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.AttributeInterface;
 import com.alphawallet.token.entity.ContractAddress;
@@ -78,18 +69,9 @@ import com.alphawallet.token.tools.TokenDefinition;
 import org.jetbrains.annotations.NotNull;
 import org.web3j.abi.DefaultFunctionEncoder;
 import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Bool;
-import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Bytes32;
-import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;
@@ -110,7 +92,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -840,7 +821,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private TokenDefinition getDefinition(String tsKey)
+    public TokenDefinition getDefinition(String tsKey)
     {
         TokenDefinition result = null;
         String[] elements = tsKey.split("-");
@@ -2178,7 +2159,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         {
                             //get required Attribute Results for this tokenId & selection
                             List<String> requiredAttributeNames = selection.getRequiredAttrs();
-                            Map<String, TokenScriptResult.Attribute> idAttrResults = getAttributeResultsForTokenIds(attrResults, requiredAttributeNames, tokenId);
+                            Map<String, TokenScriptResult.Attribute> idAttrResults = getAttributeResultsForTokenIds(td, attrResults, requiredAttributeNames, tokenId);
                             addIntrinsicAttributes(idAttrResults, token, tokenId); //adding intrinsic attributes eg ownerAddress, tokenId, contractAddress
 
                             //Now evaluate the selection
@@ -2243,15 +2224,21 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return denialMessage;
     }
 
-    private Map<String, TokenScriptResult.Attribute> getAttributeResultsForTokenIds(Map<BigInteger, Map<String, TokenScriptResult.Attribute>> attrResults, List<String> requiredAttributeNames,
+    private Map<String, TokenScriptResult.Attribute> getAttributeResultsForTokenIds(TokenDefinition td, Map<BigInteger, Map<String, TokenScriptResult.Attribute>> attrResults, List<String> requiredAttributeNames,
                                                                                     BigInteger tokenId)
     {
         Map<String, TokenScriptResult.Attribute> results = new HashMap<>();
-        if (!attrResults.containsKey(tokenId)) return results; //check values
 
         for (String attributeName : requiredAttributeNames)
         {
-            results.put(attributeName, attrResults.get(tokenId).get(attributeName));
+            BigInteger useTokenId = td.useZeroForTokenIdAgnostic(attributeName, tokenId);
+
+            if (!attrResults.containsKey(useTokenId))
+            {
+                continue;
+            }
+
+            results.put(attributeName, attrResults.get(useTokenId).get(attributeName));
         }
 
         return results;
@@ -2266,14 +2253,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 Attribute attr = td.attributes.get(attrName);
                 if (attr == null) continue;
-                TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, ViewType.VIEW).blockingGet();
+                BigInteger useTokenId = td.useZeroForTokenIdAgnostic(attrName, tokenId);
+                TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, useTokenId, td, this, ViewType.VIEW).blockingGet();
                 if (attrResult != null)
                 {
-                    Map<String, TokenScriptResult.Attribute> tokenIdMap = resultSet.get(tokenId);
+                    Map<String, TokenScriptResult.Attribute> tokenIdMap = resultSet.get(useTokenId);
                     if (tokenIdMap == null)
                     {
                         tokenIdMap = new HashMap<>();
-                        resultSet.put(tokenId, tokenIdMap);
+                        resultSet.put(useTokenId, tokenIdMap);
                     }
                     tokenIdMap.put(attrName, attrResult);
                 }
@@ -2744,7 +2732,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 DefaultFunctionEncoder dfe = new DefaultFunctionEncoder();
                 EasAttestation easAttestation = att.getEasAttestation();
                 List<Type> inputParam = Collections.singletonList(easAttestation.getAttestationCore());
-                String coreAttestationHex = "0x" + dfe.encodeParameters(inputParam).substring(0x40);
+                String coreAttestationHex = Numeric.prependHexPrefix(dfe.encodeParameters(inputParam).substring(0x40));
                 attrs.add(new TokenScriptResult.Attribute("attestation", "attestation", BigInteger.ZERO, coreAttestationHex));
                 //also require signature
                 String signatureBytes = Numeric.toHexString(easAttestation.getSignatureBytes());
@@ -3111,293 +3099,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public Attestation validateAttestation(String attestation, TokenInfo tInfo)
+    public Function generateTransactionFunction(Token token, BigInteger tokenId, TokenDefinition td, FunctionDefinition fd)
     {
-        TokenDefinition td = getDefinition(getTSDataKeyTemp(tInfo.chainId, tInfo.address));//getDefinition(tInfo.chainId, tInfo.address);
-        Attestation att = null;
-
-        if (td != null)
-        {
-            NetworkInfo networkInfo = EthereumNetworkBase.getNetworkByChain(tInfo.chainId);
-            att = new Attestation(tInfo, networkInfo.name, Numeric.hexStringToByteArray(attestation));
-            att.setTokenWallet(tokensService.getCurrentAddress());
-
-            //call validation function and get details
-            AttestationDefinition definitionAtt = td.getAttestation();
-            //can we get the details?
-
-            if (definitionAtt != null && definitionAtt.function != null)
-            {
-                //pull return type
-                FunctionDefinition fd = definitionAtt.function;
-                //add attestation to attr map
-                //call function
-                org.web3j.abi.datatypes.Function transaction = tokenscriptUtility.generateTransactionFunction(att, BigInteger.ZERO, td, fd, this);
-                transaction = new Function(fd.method, transaction.getInputParameters(), td.getAttestationReturnTypes()); //set return types
-
-                //call and handle result
-                String result = tokenscriptUtility.callSmartContract(tInfo.chainId, tInfo.address, transaction);
-
-                //break down result
-                List<Type> values = FunctionReturnDecoder.decode(result, transaction.getOutputParameters());
-
-                //interpret these values
-                att.handleValidation(td.getValidation(values));
-            }
-        }
-
-        return att;
+        return tokenscriptUtility.generateTransactionFunction(token, tokenId, td, fd, this);
     }
 
-    public Attestation validateAttestation(EasAttestation attestation, String importedAttestation)
+    public String callSmartContract(long chainId, String contractAddress, Function function)
     {
-        String recoverAttestationSigner = recoverSigner(attestation);
-
-        //1. Validate signer via key attestation service (using UID).
-        //call validate
-        SchemaRecord schemaRecord = fetchSchemaRecord(attestation.getChainId(), getKeySchemaUID(attestation.getChainId()));
-        boolean attestationValid = checkAttestationIssuer(schemaRecord, attestation.getChainId(), recoverAttestationSigner);
-
-        //2. Decode the ABI encoded payload to pull out the info. ABI Decode the schema bytes
-        //initially we need a hardcoded schema - this should be fetched from the schema record EAS contract
-        //fetch the schema of the attestation
-        SchemaRecord attestationSchema = fetchSchemaRecord(attestation.getChainId(), attestation.schema);
-        //convert into functionDecode
-        List<String> names = new ArrayList<>();
-        List<Type> values = decodeAttestationData(attestation.data, attestationSchema.schema, names);
-
-        NetworkInfo networkInfo = EthereumNetworkBase.getNetworkByChain(attestation.getChainId());
-
-        TokenInfo tInfo = Utils.getDefaultAttestationInfo(attestation.getChainId(), getEASContract(attestation.chainId));
-        Attestation localAttestation = new Attestation(tInfo, networkInfo.name, importedAttestation.getBytes(StandardCharsets.UTF_8));
-        localAttestation.handleEASAttestation(attestation, names, values, attestationValid);
-
-        String collectionHash = localAttestation.getAttestationCollectionId();
-
-        //Now regenerate with the correct collectionId
-        tInfo = Utils.getDefaultAttestationInfo(attestation.getChainId(), collectionHash);
-        localAttestation = new Attestation(tInfo, networkInfo.name, importedAttestation.getBytes(StandardCharsets.UTF_8));
-        localAttestation.handleEASAttestation(attestation, names, values, attestationValid);
-        localAttestation.setTokenWallet(tokensService.getCurrentAddress());
-        return localAttestation;
-    }
-
-    private String getDataValue(String key, List<String> names, List<Type> values)
-    {
-        Map<String, String> valueMap = new HashMap<>();
-        for (int index = 0; index < names.size(); index++)
-        {
-            String name = names.get(index);
-            Type<?> type = values.get(index);
-            valueMap.put(name, type.toString());
-        }
-
-        return valueMap.get(key);
-    }
-
-    private List<Type> decodeAttestationData(String attestationData, @NonNull String decodeSchema, List<String> names)
-    {
-        List<TypeReference<?>> returnTypes = new ArrayList<TypeReference<?>>();
-        //build decoder
-        String[] typeData = decodeSchema.split(",");
-        for (String typeElement : typeData)
-        {
-            String[] data = typeElement.split(" ");
-            String type = data[0];
-            String name = data[1];
-            if (type.startsWith("uint") || type.startsWith("int"))
-            {
-                type = "uint";
-            }
-            else if (type.startsWith("bytes") && !type.equals("bytes"))
-            {
-                type = "bytes32";
-            }
-
-            TypeReference<?> tRef = null;
-
-            switch (type)
-            {
-                case "uint":
-                    tRef = new TypeReference<Uint256>() { };
-                    break;
-                case "address":
-                    tRef = new TypeReference<Address>() { };
-                    break;
-                case "bytes32":
-                    tRef = new TypeReference<Bytes32>() { };
-                    break;
-                case "string":
-                    tRef = new TypeReference<Utf8String>() { };
-                    break;
-                case "bytes":
-                    tRef = new TypeReference<DynamicBytes>() { };
-                    break;
-                case "bool":
-                    tRef = new TypeReference<Bool>() { };
-                    break;
-                default:
-                    break;
-            }
-
-            if (tRef != null)
-            {
-                returnTypes.add(tRef);
-            }
-            else
-            {
-                Timber.e("Unhandled type!");
-                returnTypes.add(new TypeReference<Uint256>() { });
-            }
-
-            names.add(name);
-        }
-
-        //decode the schema and populate the Attestation element
-        return FunctionReturnDecoder.decode(attestationData, org.web3j.abi.Utils.convert(returnTypes));
-    }
-
-    private SchemaRecord fetchSchemaRecord(long chainId, String schemaUID)
-    {
-        //1. Resolve UID. For now, just use default: This should be on a switch for chains
-        String globalResolver = getEASSchemaContract(chainId);
-
-        //format transaction to get key resolver
-        Function getKeyResolver2 = new Function("getSchema",
-                Collections.singletonList(new Bytes32(Numeric.hexStringToByteArray(schemaUID))),
-                Collections.singletonList(new TypeReference<SchemaRecord>() {}));
-
-        String result = tokenscriptUtility.callSmartContract(chainId, globalResolver, getKeyResolver2);
-        List<Type> values = FunctionReturnDecoder.decode(result, getKeyResolver2.getOutputParameters());
-
-        return (SchemaRecord)values.get(0);
-    }
-
-    private boolean checkAttestationIssuer(SchemaRecord schemaRecord, long chainId, String signer)
-    {
-        String rootKeyUID = getDefaultRootKeyUID(chainId);
-        //pull the key resolver
-        Address resolverAddr = schemaRecord.resolver;
-        //call the resolver to test key validity
-        Function validateKey = new Function("validateSignature",
-                Arrays.asList((new Bytes32(Numeric.hexStringToByteArray(rootKeyUID))),
-                        new Address(signer)),
-                Collections.singletonList(new TypeReference<Bool>() {}));
-
-        String result = tokenscriptUtility.callSmartContract(chainId, resolverAddr.getValue(), validateKey);
-        List<Type> values = FunctionReturnDecoder.decode(result, validateKey.getOutputParameters());
-        return ((Bool)values.get(0)).getValue();
-    }
-
-    private String recoverSigner(EasAttestation attestation)
-    {
-        String recoveredAddress = "";
-
-        try
-        {
-            StructuredDataEncoder dataEncoder = new StructuredDataEncoder(attestation.getEIP712Attestation());
-            byte[] hash = dataEncoder.hashStructuredData();
-            byte[] r = Numeric.hexStringToByteArray(attestation.getR());
-            byte[] s = Numeric.hexStringToByteArray(attestation.getS());
-            byte v = (byte)(attestation.getV() & 0xFF);
-
-            Sign.SignatureData sig = new Sign.SignatureData(v, r, s);
-
-            BigInteger key = Sign.signedMessageHashToKey(hash, sig);
-            recoveredAddress = "0x" + Keys.getAddress(key);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return recoveredAddress;
-    }
-
-    // NB Java 11 doesn't have support for switching on a 'long' :(
-    public static String getEASContract(long chainId)
-    {
-        if (chainId == MAINNET_ID)
-        {
-            return "0xA1207F3BBa224E2c9c3c6D5aF63D0eb1582Ce587";
-        }
-        else if (chainId == ARBITRUM_MAIN_ID)
-        {
-            return "0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458";
-        }
-        else if (chainId == SEPOLIA_TESTNET_ID)
-        {
-            return "0xC2679fBD37d54388Ce493F1DB75320D236e1815e";
-        }
-        else
-        {
-            //Support Optimism Goerli (0xC2679fBD37d54388Ce493F1DB75320D236e1815e)
-            return "";
-        }
-    }
-
-    private String getEASSchemaContract(long chainId)
-    {
-        if (chainId == MAINNET_ID)
-        {
-            return "0xA7b39296258348C78294F95B872b282326A97BDF";
-        }
-        else if (chainId == ARBITRUM_MAIN_ID)
-        {
-            return "0xA310da9c5B885E7fb3fbA9D66E9Ba6Df512b78eB";
-        }
-        else if (chainId == SEPOLIA_TESTNET_ID)
-        {
-            return "0x0a7E2Ff54e76B8E6659aedc9103FB21c038050D0";
-        }
-        else
-        {
-            //Support Optimism Goerli (0x7b24C7f8AF365B4E308b6acb0A7dfc85d034Cb3f)
-            return "";
-        }
-    }
-
-    //UID of schema used for keys on each chain - the resolver is tied to this UID
-    private String getKeySchemaUID(long chainId)
-    {
-        if (chainId == MAINNET_ID)
-        {
-            return "";
-        }
-        else if (chainId == ARBITRUM_MAIN_ID)
-        {
-            return "0x5f0437f7c1db1f8e575732ca52cc8ad899b3c9fe38b78b67ff4ba7c37a8bf3b4";
-        }
-        else if (chainId == SEPOLIA_TESTNET_ID)
-        {
-            return "0x4455598d3ec459c4af59335f7729fea0f50ced46cb1cd67914f5349d44142ec1";
-        }
-        else
-        {
-            //Support Optimism Goerli (0x7b24C7f8AF365B4E308b6acb0A7dfc85d034Cb3f)
-            return "";
-        }
-    }
-
-    // If not specified
-    private String getDefaultRootKeyUID(long chainId)
-    {
-        if (chainId == MAINNET_ID)
-        {
-            return "";
-        }
-        else if (chainId == ARBITRUM_MAIN_ID)
-        {
-            return "0xe5c2bfd98a1b35573610b4e5a367bbcb5c736e42508a33fd6046bad63eaf18f9";
-        }
-        else if (chainId == SEPOLIA_TESTNET_ID)
-        {
-            return "0xee99de42f544fa9a47caaf8d4a4426c1104b6d7a9df7f661f892730f1b5b1e23";
-        }
-        else
-        {
-            //Support Optimism Goerli (0x7b24C7f8AF365B4E308b6acb0A7dfc85d034Cb3f)
-            return "";
-        }
+        return tokenscriptUtility.callSmartContract(chainId, contractAddress, function);
     }
 }

@@ -649,7 +649,7 @@ public class ERC1155Token extends Token
 
         filter.addSingleTopic(null);
         filter.addSingleTopic(null);
-        filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(getWallet()))); //listen for events 'to' the wallet
+        filter.addSingleTopic(Numeric.prependHexPrefix(TypeEncoder.encode(new Address(getWallet())))); //listen for events 'to' the wallet
         return filter;
     }
 
@@ -664,7 +664,7 @@ public class ERC1155Token extends Token
                         .addSingleTopic(EventEncoder.encode(event)); // send event format
 
         filter.addSingleTopic(null);
-        filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(getWallet()))); //listen for events 'from' the wallet
+        filter.addSingleTopic(Numeric.prependHexPrefix(TypeEncoder.encode(new Address(getWallet())))); //listen for events 'from' the wallet
         filter.addSingleTopic(null);
         return filter;
     }

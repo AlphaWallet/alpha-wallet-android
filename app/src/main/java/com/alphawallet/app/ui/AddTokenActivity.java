@@ -329,7 +329,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         HashSet<Long> chainsNotEnabled = new HashSet<>();
         for (TokenCardMeta token : selected)
         {
-            NetworkInfo info = viewModel.ethereumNetworkRepository().getNetworkByChain(token.getChain());
+            NetworkInfo info = viewModel.getNetworkInfo(token.getChain());
             if (!activeChains.contains(info.chainId))
             {
                 chainsNotEnabled.add(info.chainId);
@@ -550,7 +550,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
 
         for (TokenCardMeta token : adapter.getSelected())
         {
-            NetworkInfo info = viewModel.ethereumNetworkRepository().getNetworkByChain(token.getChain());
+            NetworkInfo info = viewModel.getNetworkInfo(token.getChain());
             selectedChains.add(info.chainId);
         }
 

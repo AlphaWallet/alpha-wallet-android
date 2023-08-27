@@ -982,4 +982,11 @@
     <string name="minted">Minted</string>
     <string name="valid_from">有效起始日期</string>
     <string name="valid_until">有效期至日期</string>
+    <string name="attestation_imported">已导入证明</string>
+    <string name="attestation_import_failed">证明导入失败</string>
+    <string name="key_address">发行人地址</string>
+    <string name="no_connection">无连接</string>
+    <string name="imported_smart_pass">进口 SmartPass</string>
+    <string name="smartpass_imported">SmartPass 已导入。您的通票应升级。</string>
+    <string name="no_connection_to_smart_layer">没有连接到 SmartLayer 网络 - 稍后尝试再次导入您的 SmartPass。</string>
 </resources>

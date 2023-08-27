@@ -10,7 +10,8 @@ import java.math.BigInteger;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
-public class RealmToken extends RealmObject {
+public class RealmToken extends RealmObject
+{
     @PrimaryKey
     private String address;
     private String name;
@@ -30,31 +31,38 @@ public class RealmToken extends RealmObject {
     private boolean visibilityChanged;
     private String erc1155BlockRead;
 
-    public int getDecimals() {
+    public int getDecimals()
+    {
         return decimals;
     }
 
-    public void setDecimals(int decimals) {
+    public void setDecimals(int decimals)
+    {
         this.decimals = decimals;
-}
+    }
 
-    public String getSymbol() {
+    public String getSymbol()
+    {
         return symbol;
     }
 
-    public void setSymbol(String symbol) {
+    public void setSymbol(String symbol)
+    {
         this.symbol = symbol;
     }
 
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(String name)
+    {
         this.name = name;
     }
 
-    public String getTokenAddress() {
+    public String getTokenAddress()
+    {
         String tAddress = address;
         if (tAddress.contains(".")) //base chain
         {
@@ -70,16 +78,27 @@ public class RealmToken extends RealmObject {
         }
     }
 
-    public long getUpdateTime() {
+    public long getUpdateTime()
+    {
         return addedTime;
     }
 
-    public void setUpdateTime(long addedTime) {
-        this.addedTime = addedTime;
+    //
+    public void setUpdateTime(long addedTime)
+    {
+        this.updatedTime = addedTime;
     }
 
-    public String getBalance() {
-        return balance;
+    public String getBalance()
+    {
+        if (TextUtils.isEmpty(balance))
+        {
+            return "0";
+        }
+        else
+        {
+            return balance;
+        }
     }
 
     public void setBalance(String balance)
@@ -97,13 +116,18 @@ public class RealmToken extends RealmObject {
         return this.updatedTime;
     }
 
-    public boolean getEnabled() {
+    public boolean getEnabled()
+    {
         return isEnabled;
     }
 
-    public boolean isEnabled() { return isEnabled; }
+    public boolean isEnabled()
+    {
+        return isEnabled;
+    }
 
-    public void setEnabled(boolean isEnabled) {
+    public void setEnabled(boolean isEnabled)
+    {
         this.isEnabled = isEnabled;
     }
 
@@ -148,10 +172,21 @@ public class RealmToken extends RealmObject {
     {
         this.lastBlockRead = lastBlockCheck;
     }
-    public long getLastBlock() { return lastBlockRead; }
 
-    public long getChainId() { return chainId; }
-    public void setChainId(long chainId) { this.chainId = chainId; }
+    public long getLastBlock()
+    {
+        return lastBlockRead;
+    }
+
+    public long getChainId()
+    {
+        return chainId;
+    }
+
+    public void setChainId(long chainId)
+    {
+        this.chainId = chainId;
+    }
 
     public long getLastTxTime()
     {

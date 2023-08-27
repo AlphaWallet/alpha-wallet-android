@@ -986,4 +986,11 @@
     <string name="minted">Minted</string>
     <string name="valid_from">Berlaku dari tanggal</string>
     <string name="valid_until">Berlaku hingga</string>
+    <string name="attestation_imported">Pengesahan Diimpor</string>
+    <string name="attestation_import_failed">Pengesahan Impor Gagal</string>
+    <string name="key_address">Alamat Penerbit</string>
+    <string name="no_connection">Tidak Ada Koneksi</string>
+    <string name="imported_smart_pass">SmartPass yang Diimpor</string>
+    <string name="smartpass_imported">SmartPass telah diimpor. Pass Anda harus ditingkatkan.</string>
+    <string name="no_connection_to_smart_layer">Tidak ada koneksi ke jaringan SmartLayer - coba impor Pass Anda lagi nanti.</string>
 </resources>

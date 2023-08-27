@@ -89,16 +89,16 @@ public class QRParser {
 
         if (url == null) return null;
 
-        if (Utils.hasAttestation(url))
+        if (Utils.hasEASAttestation(url))
         {
             result = new QRResult(url);
             result.type = EIP681Type.EAS_ATTESTATION;
-            result.functionDetail = Utils.decompress(url);
+            String taglessAttestation = Utils.parseEASAttestation(url);
+            result.functionDetail = Utils.toAttestationJson(taglessAttestation);
             return result;
         }
 
         String[] parts = url.split(":");
-
 
         if (url.startsWith("wc:"))
         {

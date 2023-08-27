@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
@@ -44,8 +45,18 @@ public class ChainAdapter extends ArrayAdapter<String>
         TextView chainName = convertView.findViewById(R.id.chain_name);
         ImageView chainIcon = convertView.findViewById(R.id.chain_icon);
 
-        chainName.setText(EthereumNetworkBase.getNetworkInfo(chainId).name);
-        chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(chainId));
+        NetworkInfo info = EthereumNetworkBase.getNetworkInfo(chainId);
+
+        if (info != null)
+        {
+            chainName.setText(EthereumNetworkBase.getNetworkInfo(chainId).name);
+            chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(chainId));
+        }
+        else
+        {
+            chainName.setText("Unhandled Chain");
+            chainIcon.setImageResource(EthereumNetworkRepository.getChainLogo(R.drawable.ic_goerli));
+        }
 
         return convertView;
     }

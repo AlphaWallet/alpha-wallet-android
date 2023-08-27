@@ -104,10 +104,15 @@ public class RealmAttestation extends RealmObject
         this.attestation = Base64.encodeToString(attestation, Base64.DEFAULT);
     }
 
-    public void setAttestation(String attestation)
+    public void setAttestationLink(String attestation)
     {
         //should be in hex
-        this.attestation = Base64.encodeToString(Numeric.hexStringToByteArray(attestation), Base64.DEFAULT);
+        this.attestation = attestation;
+    }
+
+    public String getAttestationLink()
+    {
+        return attestation;
     }
 
     public byte[] getAttestation()
@@ -118,12 +123,6 @@ public class RealmAttestation extends RealmObject
     public boolean supportsChain(List<Long> networkFilters)
     {
         HashSet<Long> knownChains = new HashSet<>(Utils.longListToArray(chains));
-
-        //validate attestation
-        if (TextUtils.isEmpty(id))
-        {
-            return false;
-        }
 
         for (long chainId : knownChains)
         {

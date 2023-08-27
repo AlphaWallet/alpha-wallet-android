@@ -106,18 +106,23 @@ public class TokenRepository implements TokenRepositoryType {
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource localSource,
-            OkHttpClient okClient,
             Context context,
             TickerService tickerService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.localSource = localSource;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
-        this.okClient = okClient;
         this.context = context;
         this.tickerService = tickerService;
 
         web3jNodeServers = new ConcurrentHashMap<>();
         currentAddress = ethereumNetworkRepository.getCurrentWalletAddress();
+
+        okClient = new OkHttpClient.Builder()
+                .connectTimeout(C.CONNECT_TIMEOUT * 4, TimeUnit.SECONDS) //events can take longer to render
+                .connectTimeout(C.READ_TIMEOUT * 4, TimeUnit.SECONDS)
+                .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
+                .build();
     }
 
     private void buildWeb3jClient(NetworkInfo networkInfo)
@@ -417,13 +422,6 @@ public class TokenRepository implements TokenRepositoryType {
 
     private Single<TokenInfo> tokenInfoFromOKLinkService(String contractAddr)
     {
-        OkHttpClient okClient = new OkHttpClient.Builder()
-            .connectTimeout(C.CONNECT_TIMEOUT * 3, TimeUnit.SECONDS) //events can take longer to render
-            .connectTimeout(C.READ_TIMEOUT * 3, TimeUnit.SECONDS)
-            .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
-            .retryOnConnectionFailure(true)
-            .build();
-
         return Single.fromCallable(() -> OkLinkService.get(okClient).getTokenInfo(contractAddr)).observeOn(Schedulers.io());
     }
 
@@ -1011,7 +1009,16 @@ public class TokenRepository implements TokenRepositoryType {
                     = createEthCallTransaction(wallet.address, contractAddress, encodedFunction);
             EthCall response = getService(network.chainId).ethCall(transaction, DefaultBlockParameterName.LATEST).send();
 
-            return response.getValue();
+            if (response.hasError() && response.getError().getMessage().equals("execution reverted"))
+            {
+                //contract does not have this function
+                //TODO: Handle this
+                return null;
+            }
+            else
+            {
+                return response.getValue();
+            }
         }
         catch (InterruptedIOException|UnknownHostException|JsonParseException e)
         {
@@ -1312,7 +1319,7 @@ public class TokenRepository implements TokenRepositoryType {
     {
         OkHttpClient okClient = new OkHttpClient.Builder()
                 .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
-                .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
+                .connectTimeout(C.READ_TIMEOUT * 3, TimeUnit.SECONDS)
                 .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();

@@ -1,6 +1,5 @@
 package com.alphawallet.app.repository;
 
-import static com.alphawallet.app.service.AssetDefinitionService.getEASContract;
 import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
 import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
 
@@ -10,8 +9,10 @@ import android.util.Pair;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.attestation.AttestationImport;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
@@ -36,6 +37,7 @@ import com.google.gson.JsonSyntaxException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -312,14 +314,10 @@ public class TokensRealmSource implements TokenLocalSource
     private Token fetchAttestation(long chainId, Wallet wallet, RealmAttestation rAttn)
     {
         Token token = fetchToken(chainId, wallet, rAttn.getTokenAddress()); //<-- getTokenAddress() should be the key
-        //We require to
-        rAttn.getAttestation();
-        TokenInfo tInfo = token != null ? token.tokenInfo : Utils.getDefaultAttestationInfo(chainId, rAttn.getTokenAddress());
-        Attestation att = new Attestation(tInfo, ethereumNetworkRepository.getNetworkByChain(chainId).getShortName(), rAttn.getAttestation());
-        att.loadAttestationData(rAttn);
-        att.setTokenWallet(wallet.address);
-
-        return att;
+        TokenFactory tf = new TokenFactory();
+        Token attn = tf.createAttestation(rAttn, token, ethereumNetworkRepository.getNetworkByChain(chainId), wallet.address);
+        attn.setTokenWallet(wallet.address);
+        return attn;
     }
 
     @Override
@@ -351,11 +349,12 @@ public class TokensRealmSource implements TokenLocalSource
                     .like("address", databaseKey(chainId, tokenAddress) + "-*", Case.INSENSITIVE)
                     .findAll();
 
+            // TODO: Restore using TokenFactory
             for (RealmAttestation thisAttn : realmAttestations)
             {
                 Attestation att = new Attestation(baseToken.tokenInfo, baseToken.getNetworkName(), thisAttn.getAttestation());
                 att.setTokenWallet(walletAddress);
-                att.loadAttestationData(thisAttn); //TODO: Store issuer, expiry dates etc in Realm
+                att.loadAttestationData(thisAttn, ""); //TODO: Store issuer, expiry dates etc in Realm
                 attestations.add(att);
             }
         }
@@ -463,7 +462,7 @@ public class TokensRealmSource implements TokenLocalSource
     {
         realmToken.setLastTxTime(System.currentTimeMillis());
 
-        if (realmToken.getBalance() == null || !realmToken.getBalance().equals(token.getBalanceRaw().toString()))
+        if (!realmToken.getBalance().equals(token.getBalanceRaw().toString()))
         {
             token.setRealmBalance(realmToken);
         }
@@ -567,7 +566,7 @@ public class TokensRealmSource implements TokenLocalSource
             if (realmToken != null)
             {
                 final String currentBalance = realmToken.getBalance();
-                final String newBalance = (balanceArray == null) ? balance.toString() : Utils.bigIntListToString(balanceArray, true);
+                final String newBalance = (balanceArray == null || balanceArray.size() == 0) ? balance.toString() : Utils.bigIntListToString(balanceArray, true);
 
                 //does the token need updating?
                 if (token.checkInfoRequiresUpdate(realmToken))
@@ -592,11 +591,19 @@ public class TokensRealmSource implements TokenLocalSource
                     Timber.tag(TAG).d("Zero out ERC721 balance: %s :%s", realmToken.getName(), token.getAddress());
                     balanceChanged = true;
                 }
-                else if (!newBalance.equals(currentBalance) || !checkEthToken(realm, token))
+                else if (!TextUtils.isEmpty(newBalance) && (!newBalance.equals(currentBalance) || !checkEthToken(realm, token)))
                 {
                     realm.executeTransaction(r -> {
                         realmToken.setBalance(newBalance);
-                        if (token.isEthereum()) updateEthToken(r, token, newBalance);
+                        if (token.isEthereum())
+                        {
+                            updateEthToken(r, token, newBalance);
+                        }
+                        if (currentBalance.equals("0") && !realmToken.isVisibilityChanged())
+                        {
+                            realmToken.setEnabled(true);
+                            realmToken.setUpdateTime(System.currentTimeMillis());
+                        }
                     });
                     Timber.tag(TAG).d("Update Token Balance: %s :%s", realmToken.getName(), token.getAddress());
                     balanceChanged = true;
@@ -1271,7 +1278,7 @@ public class TokensRealmSource implements TokenLocalSource
         }
         catch (Exception e)
         {
-            //
+            Timber.w(e);
         }
 
         //This will trigger an update of the holder
@@ -1476,17 +1483,6 @@ public class TokensRealmSource implements TokenLocalSource
         {
             realmItem = realm.createObject(RealmTokenTicker.class, databaseKey);
             realmItem.setCreatedTime(ticker.updateTime);
-        }
-        else
-        {
-            //compare old ticker to see if we need an update
-            if (realmItem.getCurrencySymbol().equals(ticker.priceSymbol) && realmItem.getPrice().equals(ticker.price)
-                && realmItem.getPercentChange24h().equals(ticker.percentChange24h))
-            {
-                //no update, but update the received time
-                realmItem.setUpdatedTime(ticker.updateTime);
-                return false;
-            }
         }
 
         realmItem.setPercentChange24h(ticker.percentChange24h);

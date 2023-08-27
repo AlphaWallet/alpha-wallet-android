@@ -1016,4 +1016,11 @@
     <string name="minted">Minted</string>
     <string name="valid_from">မှ တရားဝင်</string>
     <string name="valid_until">သည်အထိ အကျုံးဝင်သည်။</string>
+    <string name="attestation_imported">တင်သွင်းခဲ့သော စုံစမ်းစစ်ဆေးမှု</string>
+    <string name="attestation_import_failed">စမ်းသပ်မှု တင်သွင်းမှု မအောင်မြင်ခဲ့</string>
+    <string name="key_address">ထုတ်ဝေသူ လိပ်စာ</string>
+    <string name="no_connection">ဆက်သွယ်မှုမရှိပါ</string>
+    <string name="imported_smart_pass">တင်သွင်းတဲ့ SmartPass</string>
+    <string name="smartpass_imported">SmartPass ကို တင်သွင်းခဲ့ပါတယ်။ ခင်ဗျားရဲ့ လက်မှတ်ကို အဆင့်မြှင့်သင့်ပါတယ်။</string>
+    <string name="no_connection_to_smart_layer">SmartLayer ကွန်ယက်နဲ့ ဆက်သွယ်မှုမရှိပါနဲ့ - နောက်ပိုင်းမှာ SmartPass ကို တင်သွင်းဖို့ ကြိုးစားပါ။</string>
 </resources>

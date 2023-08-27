@@ -168,14 +168,12 @@ public class RepositoriesModule
     TokenRepositoryType provideTokenRepository(
         EthereumNetworkRepositoryType ethereumNetworkRepository,
         TokenLocalSource tokenLocalSource,
-        OkHttpClient httpClient,
         @ApplicationContext Context context,
         TickerService tickerService)
     {
         return new TokenRepository(
             ethereumNetworkRepository,
             tokenLocalSource,
-            httpClient,
             context,
             tickerService);
     }

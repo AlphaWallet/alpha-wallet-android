@@ -213,8 +213,8 @@ public class Token
         }
     }
 
-    public String getTokenSymbol(Token token){
-
+    public String getTokenSymbol(Token token)
+    {
         if (!TextUtils.isEmpty(token.tokenInfo.symbol) && token.tokenInfo.symbol.length() > 1)
         {
            return Utils.getIconisedText(token.tokenInfo.symbol);
@@ -277,15 +277,7 @@ public class Token
         }
         else
         {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            {
-                return Html.fromHtml(str, FROM_HTML_MODE_COMPACT).toString();
-            }
-            else
-            {
-                //noinspection deprecation
-                return Html.fromHtml(str).toString();
-            }
+            return Html.fromHtml(str, FROM_HTML_MODE_COMPACT).toString();
         }
     }
 
@@ -305,6 +297,28 @@ public class Token
         {
             return tokenInfo.symbol;
         }
+    }
+
+    protected BigDecimal getDecimalValue(String value)
+    {
+        BigDecimal bd = BigDecimal.ZERO;
+        try
+        {
+            bd = new BigDecimal(value);
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                bd = new BigDecimal(new BigInteger(Numeric.cleanHexPrefix(value), 16)); //try hex
+            }
+            catch (Exception hex)
+            {
+                //
+            }
+        }
+
+        return bd;
     }
 
     public String getSymbol()
@@ -571,7 +585,7 @@ public class Token
 
     public String convertValue(String prefix, EventResult vResult, int precision)
     {
-        BigDecimal val = (vResult != null) ? new BigDecimal(vResult.value) : BigDecimal.ZERO;
+        BigDecimal val = getDecimalValue(vResult.value);
         return prefix + BalanceUtils.getScaledValueFixed(val,
                 tokenInfo.decimals, precision);
     }

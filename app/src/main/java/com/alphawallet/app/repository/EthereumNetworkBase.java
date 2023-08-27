@@ -848,6 +848,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return networkMap.get(chainId);
     }
 
+    // Static variant to replace static in the other EthereumNetworkBase
+    public static NetworkInfo getNetwork(long chainId)
+    {
+        return networkMap.get(chainId);
+    }
+
     // fetches the last transaction nonce; if it's identical to the last used one then increment by one
     // to ensure we don't get transaction replacement
     @Override

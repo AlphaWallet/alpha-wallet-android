@@ -43,4 +43,8 @@ public interface KeyProvider
     String getBlockPiCypressKey();
 
     String getBlockNativeKey();
+
+    String getSmartPassKey();
+
+    String getSmartPassDevKey();
 }

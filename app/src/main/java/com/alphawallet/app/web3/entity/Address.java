@@ -7,6 +7,8 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.util.Hex;
 
+import org.web3j.utils.Numeric;
+
 
 public class Address implements Parcelable {
 
@@ -31,7 +33,7 @@ public class Address implements Parcelable {
 
     @Override
     public String toString() {
-        return "0x" + value;
+        return Numeric.prependHexPrefix(value);
     }
 
     @Override

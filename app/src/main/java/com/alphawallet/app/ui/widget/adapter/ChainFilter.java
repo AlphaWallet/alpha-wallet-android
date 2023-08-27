@@ -1,7 +1,7 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import com.alphawallet.app.entity.lifi.Chain;
-import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public class ChainFilter
         List<Chain> filteredChains = new ArrayList<>();
         for (Chain c : chains)
         {
-            if (EthereumNetworkBase.getNetworkByChain(c.id) != null)
+            if (EthereumNetworkBase.getNetwork(c.id) != null)
             {
                 filteredChains.add(c);
             }

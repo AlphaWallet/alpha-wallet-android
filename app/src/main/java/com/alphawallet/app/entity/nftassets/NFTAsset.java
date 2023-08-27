@@ -3,7 +3,6 @@ package com.alphawallet.app.entity.nftassets;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.Pair;
 
 import androidx.annotation.Nullable;
 

@@ -324,7 +324,7 @@ public class TransactionInput
             byte[] tradeBytes = parser.getTradeBytes(ticketIndexArray, contractAddress, priceWei, expiry);
             //attempt ecrecover
             BigInteger key = Sign.signedMessageToKey(tradeBytes, sig);
-            address = "0x" + Keys.getAddress(key);
+            address = Numeric.prependHexPrefix(Keys.getAddress(key));
         }
         catch (Exception e)
         {

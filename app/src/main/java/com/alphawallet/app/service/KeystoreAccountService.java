@@ -142,7 +142,7 @@ public class KeystoreAccountService implements AccountKeystoreService
         try
         {
             JSONObject jsonObject = new JSONObject(store);
-            return "0x" + Numeric.cleanHexPrefix(jsonObject.getString("address"));
+            return Numeric.prependHexPrefix(jsonObject.getString("address"));
         }
         catch (JSONException ex)
         {
@@ -430,7 +430,7 @@ public class KeystoreAccountService implements AccountKeystoreService
                     {
                         String fName = f.getName();
                         int index = fName.lastIndexOf("-");
-                        String address = "0x" + fName.substring(index + 1);
+                        String address = Numeric.prependHexPrefix(fName.substring(index + 1));
                         if (Utils.isAddressValid(address))
                         {
                             String d = fName.substring(5, index - 1).replace("T", " ").substring(0, 23);

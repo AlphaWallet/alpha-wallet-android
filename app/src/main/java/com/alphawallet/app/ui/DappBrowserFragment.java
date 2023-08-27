@@ -619,6 +619,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 startBalanceListener();
                 viewModel.updateGasPrice(activeNetwork.chainId);
             }
+            viewModel.getTokenService().stopUpdateCycle();
         }
         addressBar.leaveEditMode();
     }
@@ -630,6 +631,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         addressBar.leaveFocus();
         if (viewModel != null) viewModel.stopBalanceUpdate();
         stopBalanceListener();
+        viewModel.getTokenService().startUpdateCycle();
     }
 
     /**

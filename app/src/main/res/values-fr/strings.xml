@@ -995,4 +995,11 @@
     <string name="minted">Minted</string>
     <string name="valid_from">Valable à Compter</string>
     <string name="valid_until">Valable Jusque</string>
+    <string name="attestation_imported">Attestation importée</string>
+    <string name="attestation_import_failed">Échec de l\'importation de l\'attestation</string>
+    <string name="key_address">Issuer Address</string>
+    <string name="no_connection">No Connection</string>
+    <string name="imported_smart_pass">Imported Smart Pass</string>
+    <string name="smartpass_imported">Smart pass has been imported. Your pass should be upgraded.</string>
+    <string name="no_connection_to_smart_layer">No connection to Smart Layer network - try to import your token again later.</string>
 </resources>

@@ -572,7 +572,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         try
         {
             JSONObject jsonObject = new JSONObject(store);
-            return "0x" + Numeric.cleanHexPrefix(jsonObject.getString("address"));
+            return Numeric.prependHexPrefix(jsonObject.getString("address"));
         }
         catch (JSONException ex)
         {

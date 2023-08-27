@@ -45,6 +45,7 @@ import com.alphawallet.hardware.SignatureFromKey;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.security.SignatureException;
@@ -592,7 +593,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     {
         Sign.SignatureData sigData = CryptoFunctions.sigFromByteArray(returnSig.signature);
         BigInteger recoveredKey = Sign.signedMessageToKey(TEST_STRING.getBytes(), sigData);
-        String address = "0x" + Keys.getAddress(recoveredKey);
+        String address = Numeric.prependHexPrefix(Keys.getAddress(recoveredKey));
 
         disposable = fetchWalletsInteract
                 .fetch()

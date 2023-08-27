@@ -29,6 +29,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -37,6 +38,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.OpenSeaAsset;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -115,6 +117,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private long chainId;
     private Disposable disposable;
 
+    private boolean loadingInProgress;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
@@ -159,10 +163,13 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         super.onResume();
         if (viewModel != null)
         {
-            progressBar.setVisibility(View.VISIBLE);
-            viewModel.prepare();
-            getIntentData();
-            tokenImage.onResume();
+            if (!loadingInProgress)
+            {
+                progressBar.setVisibility(View.VISIBLE);
+                viewModel.prepare();
+                getIntentData();
+                tokenImage.onResume();
+            }
         }
         else
         {
@@ -187,6 +194,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         super.onPause();
         tokenImage.onPause();
+        loadingInProgress = false;
     }
 
     @Override
@@ -307,6 +315,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void setup()
     {
+        loadingInProgress = true;
         viewModel.checkForNewScript(token);
         viewModel.checkTokenScriptValidity(token);
         setTitle(token.tokenInfo.name);
@@ -493,6 +502,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             loadFromOpenSeaData(loadedAsset.getOpenSeaAsset());
 
             completeTokenScriptSetup();
+            loadingInProgress = false;
         }
     }
 
@@ -620,7 +630,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         NFTAsset attnAsset = new NFTAsset();
         TokenDefinition td = viewModel.getAssetDefinitionService().getAssetDefinition(token);
-        if (td != null)
+        if (token.getInterfaceSpec() != ContractType.ATTESTATION)
+        {
+            return;
+        }
+        else if (td != null)
         {
             attnAsset.setupScriptElements(td);
             attnAsset.setupScriptAttributes(td, token);
@@ -634,13 +648,14 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
         else
         {
-            tokenImage.setImageResource(R.drawable.zero_one_block);
+            tokenImage.setAttestationImage(token);
             token.addAssetElements(attnAsset, this);
             tokenDescription.setVisibility(View.GONE);
         }
 
         progressBar.setVisibility(View.GONE);
         tivTokenId.setVisibility(View.GONE);
+        showIssuer(((Attestation)token).getIssuer());
 
         //now populate
         nftAttributeLayout.bind(token, attnAsset);
@@ -775,6 +790,15 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         confirmationDialog.setURL("TokenScript");
         confirmationDialog.setCanceledOnTouchOutside(false);
         confirmationDialog.show();
+    }
+
+    private void showIssuer(String issuer)
+    {
+        if (!TextUtils.isEmpty(issuer))
+        {
+            ((TokenInfoView)findViewById(R.id.key_address)).setCopyableValue(issuer);
+            ((TokenInfoView)findViewById(R.id.key_address)).setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

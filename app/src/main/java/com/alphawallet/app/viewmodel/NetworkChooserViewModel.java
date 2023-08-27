@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.TokensService;
@@ -21,16 +20,13 @@ public class NetworkChooserViewModel extends BaseViewModel
 {
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
-    private final PreferenceRepositoryType preferenceRepository;
 
     @Inject
     public NetworkChooserViewModel(EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
-                                   TokensService tokensService,
-                                   PreferenceRepositoryType preferenceRepository)
+                                   TokensService tokensService)
     {
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
-        this.preferenceRepository = preferenceRepository;
     }
 
     public NetworkInfo[] getNetworkList()
@@ -52,11 +48,6 @@ public class NetworkChooserViewModel extends BaseViewModel
     public NetworkInfo getNetworkByChain(long chainId)
     {
         return networkRepository.getNetworkByChain(chainId);
-    }
-
-    public boolean isMainNet(long networkId)
-    {
-        return EthereumNetworkBase.hasRealValue(networkId);
     }
 
     public long getSelectedNetwork()

@@ -350,7 +350,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.3.0'
     androidTestImplementation 'androidx.browser:browser:1.4.0'
 
-    implementation 'com.trustwallet:wallet-core:2.6.4'
+    implementation 'com.trustwallet:wallet-core:2.6.16'
 
     implementation 'com.github.florent37:TutoShowcase:d8b91be8a2'
 
@@ -366,11 +366,10 @@ dependencies {
     implementation 'com.jakewharton.timber:timber:5.0.1'
 
     implementation platform('com.walletconnect:android-bom:1.13.1')
-    implementation('com.walletconnect:web3wallet:1.10.0', {
+    implementation("com.walletconnect:android-core", {
         exclude group: 'org.web3j', module: '*'
     })
-
-    implementation('com.walletconnect:android-core:1.18.0', {
+    implementation("com.walletconnect:web3wallet", {
         exclude group: 'org.web3j', module: '*'
     })
 

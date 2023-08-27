@@ -3,11 +3,17 @@ package com.alphawallet.app.entity.tokens;
 import android.text.TextUtils;
 
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.EasAttestation;
+import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.attestation.AttestationImport;
+import com.alphawallet.app.repository.entity.RealmAttestation;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.util.Utils;
+import com.google.gson.Gson;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -199,5 +205,53 @@ public class TokenFactory
     {
         return new TokenInfo(realmItem.getTokenAddress(), realmItem.getName(), realmItem.getSymbol(),
                 realmItem.getDecimals(), realmItem.isEnabled(), realmItem.getChainId());
+    }
+
+    public Token createAttestation(RealmAttestation rAttn, Token token, NetworkInfo info, String wallet)
+    {
+        String jsonAttestation = Utils.toAttestationJson(Utils.parseEASAttestation(rAttn.getAttestationLink()));
+        if (TextUtils.isEmpty(jsonAttestation))
+        {
+            return getLegacyAttestation(rAttn, token, info, wallet);
+        }
+        else
+        {
+            EasAttestation easAttn = new Gson().fromJson(jsonAttestation, EasAttestation.class);
+            String recoverAttestationSigner = AttestationImport.recoverSigner(easAttn);
+            TokenInfo tInfo = createAttestationTokenInfo(token, info, recoverAttestationSigner,
+                    rAttn.getTokenAddress(), Attestation.hasSmartPassElementCheck(rAttn.getSubTitle()));
+            Attestation attn = new Attestation(tInfo, info.name, rAttn.getAttestationLink().getBytes(StandardCharsets.UTF_8));
+            attn.setTokenWallet(wallet);
+            attn.loadAttestationData(rAttn, recoverAttestationSigner);
+            return attn;
+        }
+    }
+
+    private TokenInfo createAttestationTokenInfo(Token token, NetworkInfo info, String recoverAttestationSigner, String tokenAddress, boolean hasSmartPassElement)
+    {
+        TokenInfo tInfo;
+        if (token != null)
+        {
+            tInfo = token.tokenInfo;
+        }
+        else if (hasSmartPassElement && Attestation.getKnownRootIssuers(info.chainId).contains(recoverAttestationSigner))
+        {
+            tInfo = Attestation.getSmartPassInfo(info.chainId, tokenAddress);
+        }
+        else
+        {
+            tInfo = Attestation.getDefaultAttestationInfo(info.chainId, tokenAddress);
+        }
+
+        return tInfo;
+    }
+
+    private Token getLegacyAttestation(RealmAttestation rAttn, Token token, NetworkInfo info, String wallet)
+    {
+        TokenInfo tInfo = token != null ? token.tokenInfo : Attestation.getDefaultAttestationInfo(info.chainId, rAttn.getTokenAddress());
+        Attestation att = new Attestation(tInfo, info.getShortName(), rAttn.getAttestation());
+        att.loadAttestationData(rAttn, "");
+        att.setTokenWallet(wallet);
+        return att;
     }
 }

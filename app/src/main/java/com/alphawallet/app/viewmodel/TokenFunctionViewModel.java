@@ -215,16 +215,6 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         return gasEstimateError;
     }
 
-    public MutableLiveData<List<OpenSeaAsset.Trait>> traits()
-    {
-        return traits;
-    }
-
-    public MutableLiveData<AssetContract> assetContract()
-    {
-        return assetContract;
-    }
-
     public MutableLiveData<NFTAsset> nftAsset()
     {
         return nftAsset;

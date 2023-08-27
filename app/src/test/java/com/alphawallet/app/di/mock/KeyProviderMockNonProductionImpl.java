@@ -130,4 +130,16 @@ public class KeyProviderMockNonProductionImpl implements KeyProvider
     {
         return null;
     }
+
+    @Override
+    public String getSmartPassKey()
+    {
+        return null;
+    }
+
+    @Override
+    public String getSmartPassDevKey()
+    {
+        return null;
+    }
 }

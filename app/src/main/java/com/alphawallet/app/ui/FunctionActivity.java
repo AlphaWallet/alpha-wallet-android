@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,6 +28,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionReturn;
@@ -122,7 +124,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         token = resolveAssetToken(wallet, chainId);
-        //token = viewModel.getTokenService().getToken(wallet.address, chainId, address);
 
         if (token == null)
         {
@@ -256,8 +257,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private void onAttr(TokenScriptResult.Attribute attribute)
     {
         //is the attr incomplete?
-        Timber.d("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
-        TokenScriptResult.addPair(attrs, attribute);
+        if (!TextUtils.isEmpty(attribute.id))
+        {
+            Timber.d("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
+            TokenScriptResult.addPair(attrs, attribute);
+        }
     }
 
     private void fillEmpty()
@@ -306,6 +310,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 .get(TokenFunctionViewModel.class);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
+        viewModel.gasEstimateError().observe(this, this::estimateError);
         viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
@@ -411,16 +416,19 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             //open action sheet after we determine the gas limit
             Web3Transaction web3Tx = viewModel.handleFunction(action, tokenId, token, this);
-            if (web3Tx.gasLimit.equals(BigInteger.ZERO))
+            if (web3Tx != null)
             {
-                calculateEstimateDialog();
-                //get gas estimate
-                viewModel.estimateGasLimit(web3Tx, token.tokenInfo.chainId);
-            }
-            else
-            {
-                //go straight to confirmation
-                checkConfirm(web3Tx);
+                if (web3Tx.gasLimit.equals(BigInteger.ZERO))
+                {
+                    calculateEstimateDialog();
+                    //get gas estimate
+                    viewModel.estimateGasLimit(web3Tx, token.tokenInfo.chainId);
+                }
+                else
+                {
+                    //go straight to confirmation
+                    checkConfirm(web3Tx);
+                }
             }
             viewModel.getAssetDefinitionService().clearResultMap();
         }
@@ -434,7 +442,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         if (w3tx.gasLimit.equals(BigInteger.ZERO))
         {
-            estimateError(w3tx);
+            estimateError(new Pair<>(new GasEstimate(BigInteger.ZERO, "Gas Estimate Zero"), w3tx));
         }
         else if (confirmationDialog == null || !confirmationDialog.isShowing())
         {
@@ -457,24 +465,28 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         alertDialog.show();
     }
 
-    private void estimateError(final Web3Transaction w3tx)
+    private void estimateError(Pair<GasEstimate, Web3Transaction> estimate)
     {
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
         if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(WARNING);
-        alertDialog.setTitle(R.string.confirm_transaction);
-        alertDialog.setMessage(R.string.error_transaction_may_fail);
-        alertDialog.setButtonText(R.string.button_ok);
+        alertDialog.setTitle(estimate.first.hasError() ?
+                R.string.dialog_title_gas_estimation_failed :
+                R.string.confirm_transaction
+        );
+        String message = estimate.first.hasError() ?
+                getString(R.string.dialog_message_gas_estimation_failed, estimate.first.getError()) :
+                getString(R.string.error_transaction_may_fail);
+        alertDialog.setMessage(message);
+        alertDialog.setButtonText(R.string.action_proceed);
         alertDialog.setSecondaryButtonText(R.string.action_cancel);
         alertDialog.setButtonListener(v -> {
+            Web3Transaction w3tx = estimate.second;
             BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
             checkConfirm(new Web3Transaction(w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, gasEstimate, w3tx.nonce, w3tx.payload, w3tx.description));
         });
-
-        alertDialog.setSecondaryButtonListener(v -> {
-            alertDialog.dismiss();
-        });
-
+        alertDialog.setSecondaryButtonListener(v -> alertDialog.dismiss());
         alertDialog.show();
     }
 
@@ -682,7 +694,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         try
         {
             BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
-            addressRecovered = "0x" + Keys.getAddress(recoveredKey);
+            addressRecovered = Numeric.prependHexPrefix(Keys.getAddress(recoveredKey));
             Timber.d("Recovered: %s", addressRecovered);
         }
         catch (SignatureException e)

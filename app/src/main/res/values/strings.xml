@@ -1058,4 +1058,11 @@
     <string name="minted">Minted</string>
     <string name="valid_from">Valid From</string>
     <string name="valid_until">Valid Until</string>
+    <string name="attestation_imported">Attestation Imported</string>
+    <string name="attestation_import_failed">Attestation Import Failed</string>
+    <string name="key_address">Issuer Address</string>
+    <string name="no_connection">No Connection</string>
+    <string name="imported_smart_pass">Imported SmartPass</string>
+    <string name="smartpass_imported">SmartPass has been imported. Your Pass has been upgraded.</string>
+    <string name="no_connection_to_smart_layer">No connection to SmartLayer network - try to import your SmartPass again later.</string>
 </resources>

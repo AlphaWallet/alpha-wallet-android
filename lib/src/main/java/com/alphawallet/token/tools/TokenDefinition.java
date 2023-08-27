@@ -267,6 +267,21 @@ public class TokenDefinition
         return false;
     }
 
+    //If there's no tokenId input in the call use tokenId 0
+    public BigInteger useZeroForTokenIdAgnostic(String attributeName, BigInteger tokenId)
+    {
+        Attribute attr = attributes.get(attributeName);
+
+        if (!attr.usesTokenId())
+        {
+            return BigInteger.ZERO;
+        }
+        else
+        {
+            return tokenId;
+        }
+    }
+
     public enum Syntax {
         DirectoryString, IA5String, Integer, GeneralizedTime,
         Boolean, BitString, CountryString, JPEG, NumericString

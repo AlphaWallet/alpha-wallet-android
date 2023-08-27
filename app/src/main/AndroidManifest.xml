@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.alphawallet.app"
-    android:targetSandboxVersion="1">
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.alphawallet.app"
+        android:targetSandboxVersion="1">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -16,35 +16,35 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <uses-feature
-        android:name="android.hardware.fingerprint"
-        android:required="false" />
+            android:name="android.hardware.fingerprint"
+            android:required="false" />
     <uses-feature
             android:name="android.hardware.camera"
             android:required="false" />
 
     <application
-        android:name=".App"
-        android:allowBackup="false"
-        android:extractNativeLibs="true"
-        android:hardwareAccelerated="false"
-        android:largeHeap="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:launchMode="singleTask"
-        android:requestLegacyExternalStorage="true"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:testOnly="false"
-        android:theme="@style/AppTheme.NoActionBar"
-        android:usesCleartextTraffic="true"
-        tools:replace="android:name, android:theme, android:allowBackup">
+            android:name=".App"
+            android:allowBackup="false"
+            android:extractNativeLibs="true"
+            android:hardwareAccelerated="false"
+            android:largeHeap="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:requestLegacyExternalStorage="true"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:supportsRtl="true"
+            android:testOnly="false"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:usesCleartextTraffic="true"
+            tools:replace="android:name, android:theme, android:allowBackup">
 
         <activity
-            android:name=".ui.HomeActivity"
-            android:exported="true"
-            android:launchMode="singleTask"
-            android:theme="@style/AppTheme.NoActionBar.Splash"
-            android:windowSoftInputMode="adjustPan">
+                android:name=".ui.HomeActivity"
+                android:exported="true"
+                android:launchMode="singleTask"
+                android:theme="@style/AppTheme.NoActionBar.Splash"
+                android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -91,108 +91,107 @@
         </activity>
 
         <activity
-            android:name=".ui.ApiV1Activity"
-            android:theme="@style/AppTheme.NoActionBar.Transparent"
-            android:label="API V1 Activity" />
+                android:name=".ui.ApiV1Activity"
+                android:theme="@style/AppTheme.NoActionBar.Transparent"
+                android:label="API V1 Activity" />
 
         <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
+                android:name="androidx.core.content.FileProvider"
+                android:authorities="${applicationId}.fileprovider"
+                android:exported="false"
+                android:grantUriPermissions="true">
             <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/filepaths" />
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/filepaths" />
         </provider>
 
         <activity
-            android:name=".ui.WalletsActivity"
-            android:label="@string/title_account_list" />
+                android:name=".ui.WalletsActivity"
+                android:label="@string/title_account_list" />
 
         <activity
-            android:name=".ui.SplashActivity"
-            android:theme="@style/AppTheme.NoActionBar.Splash" />
+                android:name=".ui.SplashActivity"
+                android:theme="@style/AppTheme.NoActionBar.Splash" />
 
         <service
-            android:name=".service.WalletConnectService"
-            android:enabled="true" />
+                android:name=".service.WalletConnectService"
+                android:enabled="true" />
 
         <service
-            android:name=".service.WalletConnectV2Service"
-            android:enabled="true">
-        </service>
+                android:name=".service.WalletConnectV2Service"
+                android:enabled="true"/>
 
         <service
-            android:name=".service.AlphaWalletFirebaseMessagingService"
-            android:exported="false">
+                android:name=".service.AlphaWalletFirebaseMessagingService"
+                android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
             <meta-data
-                android:name="com.google.firebase.messaging.default_notification_channel_id"
-                android:value="alphawallet" />
+                    android:name="com.google.firebase.messaging.default_notification_channel_id"
+                    android:value="alphawallet" />
         </service>
 
         <activity
-            android:name=".ui.WalletConnectV2Activity"
-            android:launchMode="singleTop"
-            android:label="WalletConnectV2" />
+                android:name=".ui.WalletConnectV2Activity"
+                android:launchMode="singleTop"
+                android:label="WalletConnectV2" />
 
         <activity
-            android:name=".ui.WalletConnectNotificationActivity"
-            android:label="WalletConnectV2" />
+                android:name=".ui.WalletConnectNotificationActivity"
+                android:label="WalletConnectV2" />
 
         <activity
-            android:name=".ui.NameThisWalletActivity"
-            android:label="@string/name_this_wallet"
-            android:windowSoftInputMode="adjustResize" />
+                android:name=".ui.NameThisWalletActivity"
+                android:label="@string/name_this_wallet"
+                android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".ui.ImportWalletActivity"
-            android:label="@string/title_import"
-            android:screenOrientation="sensor"
-            android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
+                android:name=".ui.ImportWalletActivity"
+                android:label="@string/title_import"
+                android:screenOrientation="sensor"
+                android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <activity
-            android:name=".ui.TransactionDetailActivity"
-            android:label="@string/title_transaction_details" />
+                android:name=".ui.TransactionDetailActivity"
+                android:label="@string/title_transaction_details" />
         <activity
-            android:name=".ui.MyAddressActivity"
-            android:label="@string/title_my_address" />
+                android:name=".ui.MyAddressActivity"
+                android:label="@string/title_my_address" />
 
         <activity
-            android:name=".ui.SendActivity"
-            android:label="@string/title_activity_send"
-            android:windowSoftInputMode="adjustResize" />
+                android:name=".ui.SendActivity"
+                android:label="@string/title_activity_send"
+                android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".ui.AddTokenActivity"
-            android:label="@string/title_add_token" />
+                android:name=".ui.AddTokenActivity"
+                android:label="@string/title_add_token" />
 
         <activity
-            android:name=".ui.AssetDisplayActivity"
-            android:label="@string/title_use_token" />
+                android:name=".ui.AssetDisplayActivity"
+                android:label="@string/title_use_token" />
 
         <activity
-            android:name=".ui.RedeemSignatureDisplayActivity"
-            android:label="@string/title_use_token" />
+                android:name=".ui.RedeemSignatureDisplayActivity"
+                android:label="@string/title_use_token" />
 
         <activity
-            android:name=".ui.GasSettingsActivity"
-            android:label="@string/title_send_settings" />
+                android:name=".ui.GasSettingsActivity"
+                android:label="@string/title_send_settings" />
 
         <activity
-            android:name=".ui.SellDetailActivity"
-            android:label="@string/action_sell"
-            android:windowSoftInputMode="adjustPan" />
+                android:name=".ui.SellDetailActivity"
+                android:label="@string/action_sell"
+                android:windowSoftInputMode="adjustPan" />
 
         <activity
-            android:name=".ui.RedeemAssetSelectActivity"
-            android:label="@string/title_redeem" />
+                android:name=".ui.RedeemAssetSelectActivity"
+                android:label="@string/title_redeem" />
 
         <activity
-            android:name=".ui.ImportTokenActivity"
-            android:label="@string/title_import_token" />
+                android:name=".ui.ImportTokenActivity"
+                android:label="@string/title_import_token" />
 
         <activity
                 android:name="com.journeyapps.barcodescanner.CaptureActivity"
@@ -200,191 +199,191 @@
                 tools:replace="screenOrientation" />
 
         <activity
-            android:name=".ui.TransferTicketDetailActivity"
-            android:label="@string/label_transfer_ticket_detail" />
+                android:name=".ui.TransferTicketDetailActivity"
+                android:label="@string/label_transfer_ticket_detail" />
 
         <activity
-            android:name=".ui.TokenDetailActivity"
-            android:hardwareAccelerated="true"
-            android:label="@string/token_details" />
+                android:name=".ui.TokenDetailActivity"
+                android:hardwareAccelerated="true"
+                android:label="@string/token_details" />
 
         <activity
-            android:name=".ui.Erc20DetailActivity"
-            android:label="@string/erc20_details" />
+                android:name=".ui.Erc20DetailActivity"
+                android:label="@string/erc20_details" />
 
         <activity
-            android:name=".ui.TokenFunctionActivity"
-            android:label="@string/token_function" />
+                android:name=".ui.TokenFunctionActivity"
+                android:label="@string/token_function" />
 
         <activity
-            android:name=".ui.FunctionActivity"
-            android:label="@string/token_function" />
+                android:name=".ui.FunctionActivity"
+                android:label="@string/token_function" />
 
         <activity
-            android:name=".ui.WalletActionsActivity"
-            android:label="Wallet Actions" />
+                android:name=".ui.WalletActionsActivity"
+                android:label="Wallet Actions" />
 
         <activity
-            android:name=".ui.AddEditDappActivity"
-            android:label="Add DApp" />
+                android:name=".ui.AddEditDappActivity"
+                android:label="Add DApp" />
 
         <activity
-            android:name=".ui.NetworkChooserActivity"
-            android:label="Select DApp Browser Network" />
+                android:name=".ui.NetworkChooserActivity"
+                android:label="Select DApp Browser Network" />
 
         <activity
-            android:name=".ui.NetworkToggleActivity"
-            android:label="Select Network Filters" />
+                android:name=".ui.NetworkToggleActivity"
+                android:label="Select Network Filters" />
 
         <activity
-            android:name=".ui.TokenManagementActivity"
-            android:label="Manage Tokens" />
+                android:name=".ui.TokenManagementActivity"
+                android:label="Manage Tokens" />
 
         <activity
-            android:name=".ui.SelectLocaleActivity"
-            android:label="Select Language" />
+                android:name=".ui.SelectLocaleActivity"
+                android:label="Select Language" />
 
         <activity
-            android:name=".ui.SelectCurrencyActivity"
-            android:label="Select Currency" />
+                android:name=".ui.SelectCurrencyActivity"
+                android:label="Select Currency" />
 
         <activity
-            android:name=".ui.ScammerWarningActivity"
-            android:label="Scammer Warning"
-            android:noHistory="true" />
+                android:name=".ui.ScammerWarningActivity"
+                android:label="Scammer Warning"
+                android:noHistory="true" />
 
         <activity
-            android:name=".ui.BackupKeyActivity"
-            android:windowSoftInputMode="stateHidden|adjustResize" />
+                android:name=".ui.BackupKeyActivity"
+                android:windowSoftInputMode="stateHidden|adjustResize" />
 
         <activity
-            android:name=".ui.SupportSettingsActivity"
-            android:label="Support Settings" />
+                android:name=".ui.SupportSettingsActivity"
+                android:label="Support Settings" />
 
         <activity
-            android:name=".ui.AdvancedSettingsActivity"
-            android:label="Advanced Settings" />
+                android:name=".ui.AdvancedSettingsActivity"
+                android:label="Advanced Settings" />
 
         <activity
-            android:name=".ui.StaticViewer"
-            android:label="View Text" />
+                android:name=".ui.StaticViewer"
+                android:label="View Text" />
 
         <activity
-            android:name=".ui.TokenScriptManagementActivity"
-            android:label="@string/tokenscript_management" />
+                android:name=".ui.TokenScriptManagementActivity"
+                android:label="@string/tokenscript_management" />
 
         <activity
-            android:name=".ui.TokenActivity"
-            android:hardwareAccelerated="true"
-            android:label="@string/activity_label" />
+                android:name=".ui.TokenActivity"
+                android:hardwareAccelerated="true"
+                android:label="@string/activity_label" />
 
         <activity
-            android:name=".ui.WalletConnectActivity"
-            android:label="WalletConnect"
-            android:launchMode="singleTop" />
+                android:name=".ui.WalletConnectActivity"
+                android:label="WalletConnect"
+                android:launchMode="singleTop" />
 
         <activity
-            android:name=".ui.BackupFlowActivity"
-            android:label="WalletConnect" />
+                android:name=".ui.BackupFlowActivity"
+                android:label="WalletConnect" />
 
         <activity
-            android:name=".ui.SignDetailActivity"
-            android:label="Sign Details" />
+                android:name=".ui.SignDetailActivity"
+                android:label="Sign Details" />
 
         <activity
-            android:name=".ui.WalletConnectSessionActivity"
-            android:label="WalletConnect Sessions" />
+                android:name=".ui.WalletConnectSessionActivity"
+                android:label="WalletConnect Sessions" />
 
         <activity
-            android:name=".ui.TransactionSuccessActivity"
-            android:label="Transaction Success" />
+                android:name=".ui.TransactionSuccessActivity"
+                android:label="Transaction Success" />
 
         <activity
-            android:name=".ui.SetPriceAlertActivity"
-            android:label="Set New Alert"
-            android:windowSoftInputMode="adjustResize" />
+                android:name=".ui.SetPriceAlertActivity"
+                android:label="Set New Alert"
+                android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".ui.AddCustomRPCNetworkActivity"
-            android:label="@string/title_activity_add_custom_rpcnetwork" />
+                android:name=".ui.AddCustomRPCNetworkActivity"
+                android:label="@string/title_activity_add_custom_rpcnetwork" />
 
         <activity
-            android:name=".ui.NFTActivity"
-            android:label="ERC721 Master Activity" />
+                android:name=".ui.NFTActivity"
+                android:label="ERC721 Master Activity" />
 
         <activity
-            android:name=".ui.Erc1155AssetSelectActivity"
-            android:label="ERC1155 Asset Selection" />
+                android:name=".ui.Erc1155AssetSelectActivity"
+                android:label="ERC1155 Asset Selection" />
 
         <activity
-            android:name=".ui.NFTAssetDetailActivity"
-            android:hardwareAccelerated="true"
-            android:label="ERC1155 Asset Details" />
+                android:name=".ui.NFTAssetDetailActivity"
+                android:hardwareAccelerated="true"
+                android:label="ERC1155 Asset Details" />
 
         <activity
-            android:name=".ui.Erc1155AssetListActivity"
-            android:hardwareAccelerated="true"
-            android:label="ERC1155 Asset Details" />
+                android:name=".ui.Erc1155AssetListActivity"
+                android:hardwareAccelerated="true"
+                android:label="ERC1155 Asset Details" />
 
         <activity
-            android:name=".ui.TransferNFTActivity"
-            android:label="NFT Transfer" />
+                android:name=".ui.TransferNFTActivity"
+                android:label="NFT Transfer" />
 
         <activity
-            android:name=".ui.SelectThemeActivity"
-            android:label="Select Mode" />
+                android:name=".ui.SelectThemeActivity"
+                android:label="Select Mode" />
 
         <activity
-            android:name=".ui.SearchActivity"
-            android:label="Search Tokens" />
+                android:name=".ui.SearchActivity"
+                android:label="Search Tokens" />
 
         <activity
-            android:name=".ui.QRScanning.QRScannerActivity"
-            android:hardwareAccelerated="true"
-            android:label="@string/qr_scanner" />
+                android:name=".ui.QRScanning.QRScannerActivity"
+                android:hardwareAccelerated="true"
+                android:label="@string/qr_scanner" />
 
         <activity
-            android:name=".ui.SwapActivity"
-            android:label="Native Swap"
-            android:windowSoftInputMode="adjustResize" />
+                android:name=".ui.SwapActivity"
+                android:label="Native Swap"
+                android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".ui.SelectRouteActivity"
-            android:label="@string/title_select_route" />
+                android:name=".ui.SelectRouteActivity"
+                android:label="@string/title_select_route" />
 
         <activity
-            android:name=".ui.SelectSwapProvidersActivity"
-            android:label="@string/title_select_exchanges" />
+                android:name=".ui.SelectSwapProvidersActivity"
+                android:label="@string/title_select_exchanges" />
 
         <activity
-            android:name=".ui.NodeStatusActivity"
-            android:label="@string/action_node_status" />
+                android:name=".ui.NodeStatusActivity"
+                android:label="@string/action_node_status" />
 
         <activity
-            android:name=".ui.CoinbasePayActivity"
-            android:label="@string/title_buy_with_coinbase_pay" />
+                android:name=".ui.CoinbasePayActivity"
+                android:label="@string/title_buy_with_coinbase_pay" />
 
         <activity
-            android:name=".ui.WalletDiagnosticActivity"
-            android:label="@string/key_diagnostic" />
+                android:name=".ui.WalletDiagnosticActivity"
+                android:label="@string/key_diagnostic" />
 
         <activity
-            android:name=".ui.AnalyticsSettingsActivity"
-            android:label="@string/settings_title_analytics" />
+                android:name=".ui.AnalyticsSettingsActivity"
+                android:label="@string/settings_title_analytics" />
 
         <activity
-            android:name=".ui.CrashReportSettingsActivity"
-            android:label="@string/settings_title_crash_reporting" />
+                android:name=".ui.CrashReportSettingsActivity"
+                android:label="@string/settings_title_crash_reporting" />
 
         <activity
-            android:name=".ui.NotificationSettingsActivity"
-            android:label="@string/title_notifications" />
+                android:name=".ui.NotificationSettingsActivity"
+                android:label="@string/title_notifications" />
 
         <service
-            android:name=".service.PriceAlertsService"
-            android:enabled="true"
-            android:exported="false"
-            android:stopWithTask="true" />
+                android:name=".service.PriceAlertsService"
+                android:enabled="true"
+                android:exported="false"
+                android:stopWithTask="true" />
 
     </application>
 

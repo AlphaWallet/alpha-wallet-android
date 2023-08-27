@@ -995,4 +995,11 @@
     <string name="minted">Minted</string>
     <string name="valid_from">Có hiệu lực từ ngày</string>
     <string name="valid_until">Có hiệu lực</string>
+    <string name="attestation_imported">Chứng thực được nhập</string>
+    <string name="attestation_import_failed">Nhập chứng thực không thành công</string>
+    <string name="key_address">Địa chỉ nhà phát hành</string>
+    <string name="no_connection">Không có kết nối</string>
+    <string name="imported_smart_pass">SmartPass nhập khẩu</string>
+    <string name="smartpass_imported">SmartPass đã được nhập. Thẻ của bạn nên được nâng cấp.</string>
+    <string name="no_connection_to_smart_layer">Không có kết nối với mạng SmartLayer - hãy thử nhập lại SmartPass của bạn sau.</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity.tokens;
 
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.repository.TokensRealmSource.attestationDatabaseKey;
 
 import android.content.Context;
@@ -9,8 +10,9 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.entity.RealmAttestation;
-import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.AttestationDefinition;
 import com.alphawallet.token.entity.AttestationValidation;
@@ -21,6 +23,7 @@ import com.alphawallet.token.tools.TokenDefinition;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Type;
@@ -31,7 +34,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -49,8 +52,6 @@ public class Attestation extends Token
     private final byte[] attestation;
     private String attestationSubject;
     private String issuerKey;
-    private boolean issuerValid;
-    private String issuerAddress;
     private long validFrom;
     private long validUntil;
     private final Map<String, MemberData> additionalMembers = new HashMap<>();
@@ -60,18 +61,30 @@ public class Attestation extends Token
     private static final String VALID_TO = "expirationTime";
     private static final String TICKET_ID = "TicketId";
     private static final String SCRIPT_URI = "scriptURI";
-    private static final String EVENT_ID = "eventId";
+    private static final String EVENT_ID = "orgId";
     private static final String SCHEMA_DATA_PREFIX = "data.";
     public static final String ATTESTATION_SUFFIX = "-att";
-
+    public static final String EAS_ATTESTATION_TEXT = "EAS Attestation";
+    public static final String EAS_ATTESTATION_SYMBOL = "ATTN";
+    public static final String SMART_PASS = "Smartpass";
+    private static final String SMARTLAYER = "SL";//"SMARTLAYER";
 
     //TODO: Supplemental data
-
     public Attestation(TokenInfo tokenInfo, String networkName, byte[] attestation)
     {
         super(tokenInfo, BigDecimal.ONE, System.currentTimeMillis(), networkName, ContractType.ATTESTATION);
         this.attestation = attestation;
         setAttributeResult(BigInteger.ONE, new TokenScriptResult.Attribute("attestation", "attestation", BigInteger.ONE, Numeric.toHexString(attestation)));
+    }
+
+    public static TokenInfo getDefaultAttestationInfo(long chainId, String collectionHash)
+    {
+        return new TokenInfo(collectionHash, EAS_ATTESTATION_TEXT, EAS_ATTESTATION_SYMBOL, 0, true, chainId);
+    }
+
+    public static TokenInfo getSmartPassInfo(long chainId, String collectionHash)
+    {
+        return new TokenInfo(collectionHash, SMART_PASS, EAS_ATTESTATION_SYMBOL, 0, true, chainId);
     }
 
     public byte[] getAttestation()
@@ -87,10 +100,8 @@ public class Attestation extends Token
         }
 
         attestationSubject = attValidation._subjectAddress;
-        issuerAddress = attValidation._issuerAddress;
         isValid = attValidation._isValid;
         issuerKey = attValidation._issuerKey;
-        issuerValid = attValidation._issuerValid || (!TextUtils.isEmpty(issuerKey) && (TextUtils.isEmpty(issuerAddress) || !issuerKey.equalsIgnoreCase(issuerAddress)));
 
         for (Map.Entry<String, Type<?>> t : attValidation.additionalMembers.entrySet())
         {
@@ -101,7 +112,7 @@ public class Attestation extends Token
         additionalMembers.put(SCHEMA_DATA_PREFIX + TICKET_ID, ticketId);
     }
 
-    public void handleEASAttestation(EasAttestation attn, List<String> names, List<Type> values, boolean isAttestationValid)
+    public void handleEASAttestation(EasAttestation attn, List<String> names, List<Type> values, String issuer)
     {
         //add members
         for (int index = 0; index < names.size(); index++)
@@ -111,8 +122,7 @@ public class Attestation extends Token
             addToMemberData(name, type);
         }
 
-        issuerAddress = attn.signer;
-        issuerValid = isAttestationValid;
+        issuerKey = issuer;
         attestationSubject = attn.recipient;
         validFrom = attn.time;
         validUntil = attn.expirationTime;
@@ -135,15 +145,9 @@ public class Attestation extends Token
         }
 
         //Check attestation is being collected by the correct wallet (TODO: if not correct wallet, and wallet is present in user's wallets offer to switch wallet)
-        if (TextUtils.isEmpty(attestationSubject) || (!attestationSubject.equalsIgnoreCase(getWallet()) && !attestationSubject.equals("0")))
+        if (TextUtils.isEmpty(attestationSubject) || (!attestationSubject.equalsIgnoreCase(getWallet()) && !attestationSubject.equals("0") && !attestationSubject.equals(ZERO_ADDRESS)))
         {
             return AttestationValidationStatus.Incorrect_Subject;
-        }
-
-        //Check issuer - if not valid issuer fail.
-        if (!issuerValid)
-        {
-            return AttestationValidationStatus.Issuer_Not_Valid;
         }
 
         return AttestationValidationStatus.Pass;
@@ -182,12 +186,21 @@ public class Attestation extends Token
 
         EasAttestation easAttestation = getEasAttestation();
 
-        //issuer public key
-        //calculate hash from attestation
-        String hexStr = Numeric.cleanHexPrefix(easAttestation.schema).toLowerCase(Locale.ROOT) + Keys.getAddress(recoverPublicKey(easAttestation)).toLowerCase(Locale.ROOT)
-                + (!TextUtils.isEmpty(eventId) ? eventId : "");
-        //now convert this into ASCII hex bytes
-        byte[] collectionBytes = hexStr.getBytes(StandardCharsets.UTF_8);
+        byte[] collectionBytes;
+        if (easAttestation == null)
+        {
+            collectionBytes = "No Collection".getBytes(StandardCharsets.UTF_8);
+        }
+        else
+        {
+            //issuer public key
+            //calculate hash from attestation
+            String hexStr = Numeric.cleanHexPrefix(easAttestation.getSchema()).toLowerCase(Locale.ROOT) + Keys.getAddress(recoverPublicKey(easAttestation)).toLowerCase(Locale.ROOT)
+                    + (!TextUtils.isEmpty(eventId) ? eventId : "");
+            //now convert this into ASCII hex bytes
+            collectionBytes = hexStr.getBytes(StandardCharsets.UTF_8);
+        }
+
         //get Hash
         byte[] hash = Hash.keccak256(collectionBytes);
 
@@ -254,7 +267,7 @@ public class Attestation extends Token
                     identifier.append(" ");
                 }
 
-                identifier.append(m.getKey()).append(": ").append(m.getValue().getString());
+                identifier.append(m.getValue().getCleanKey()).append(": ").append(m.getValue().getString());
             }
         }
 
@@ -263,12 +276,12 @@ public class Attestation extends Token
 
     public String getIssuer()
     {
-        return issuerAddress;
+        return issuerKey;
     }
 
-    public void loadAttestationData(RealmAttestation rAtt)
+    public void loadAttestationData(RealmAttestation rAtt, String recoveredIssuer)
     {
-        populateMembersFromJSON(rAtt.getSubTitle());
+        additionalMembers.putAll(getMembersFromJSON(rAtt.getSubTitle()));
         isValid = rAtt.isValid();
         patchLegacyAttestation(rAtt);
 
@@ -277,6 +290,8 @@ public class Attestation extends Token
 
         validFrom = validFromData != null ? validFromData.getValue().longValue() : 0;
         validUntil = validToData != null ? validToData.getValue().longValue() : 0;
+
+        issuerKey = recoveredIssuer;
     }
 
     public boolean isEAS()
@@ -368,7 +383,7 @@ public class Attestation extends Token
     public void populateRealmAttestation(RealmAttestation rAtt)
     {
         rAtt.setSubTitle(generateMembersJSON());
-        rAtt.setAttestation(attestation);
+        //rAtt.setAttestation(attestation);
         rAtt.setChain(tokenInfo.chainId);
         rAtt.setName(tokenInfo.name);
     }
@@ -405,8 +420,9 @@ public class Attestation extends Token
         additionalMembers.put(name, new MemberData(name, type));
     }
 
-    private void populateMembersFromJSON(String jsonData)
+    private static Map<String, MemberData> getMembersFromJSON(String jsonData)
     {
+        Map<String, MemberData> members = new HashMap<>();
         try
         {
             JSONArray elements = new JSONArray(jsonData);
@@ -414,13 +430,15 @@ public class Attestation extends Token
             for (index = 0; index < elements.length(); index++)
             {
                 JSONObject element = elements.getJSONObject(index);
-                additionalMembers.put(element.getString("name"), new MemberData(element));
+                members.put(element.getString("name"), new MemberData(element));
             }
         }
         catch (Exception e)
         {
             Timber.e(e);
         }
+
+        return members;
     }
 
     public EasAttestation getEasAttestation()
@@ -428,8 +446,8 @@ public class Attestation extends Token
         try
         {
             String rawAttestation = new String(attestation, StandardCharsets.UTF_8);
-            EasAttestation easAttn = new Gson().fromJson(rawAttestation, EasAttestation.class);
-            return easAttn;
+            String taglessAttestation = Utils.parseEASAttestation(rawAttestation);
+            return new Gson().fromJson(Utils.toAttestationJson(taglessAttestation), EasAttestation.class);
         }
         catch (Exception e) //Expected
         {
@@ -450,6 +468,30 @@ public class Attestation extends Token
         {
             return tokenInfo.name;
         }
+    }
+
+    public static boolean hasSmartPassElementCheck(String jsonData)
+    {
+        return hasSmartPassElementInternal(getMembersFromJSON(jsonData));
+    }
+
+    public boolean hasSmartPassElement()
+    {
+        return hasSmartPassElementInternal(additionalMembers);
+    }
+
+    private static boolean hasSmartPassElementInternal(Map<String, MemberData> members)
+    {
+        MemberData orgId = members.getOrDefault("data.orgId", null);
+        String orgIdValue = orgId != null ? orgId.getString() : "";
+        return orgIdValue.equalsIgnoreCase(SMARTLAYER);
+    }
+
+    public boolean isSmartPass()
+    {
+        //find SMARTPASS in the schema elements and check against correct issuer. TODO: check against keychain if not valid
+        boolean issuerMatch = getKnownRootIssuers(tokenInfo.chainId).contains(issuerKey);
+        return hasSmartPassElementInternal(additionalMembers) && issuerMatch;
     }
 
     private static class MemberData
@@ -532,6 +574,23 @@ public class Attestation extends Token
         public String getEncoding()
         {
             return element.toString();
+        }
+
+        public String getCleanKey()
+        {
+            try
+            {
+                String name = element.get("name").toString();
+                if (name.startsWith(SCHEMA_DATA_PREFIX))
+                {
+                    name = name.substring(SCHEMA_DATA_PREFIX.length());
+                }
+                return name;
+            }
+            catch (JSONException e)
+            {
+                return "";
+            }
         }
 
         public BigInteger getValue()
@@ -731,5 +790,21 @@ public class Attestation extends Token
             //TODO: Support ASN.1 Attestations
             return BigInteger.ONE;
         }
+    }
+
+    public static List<String> getKnownRootIssuers(long chainId)
+    {
+        List<String> knownIssuers = new ArrayList<>();
+        // Add production keys - these should work on any issued attestation
+        knownIssuers.add("0x715e50699db0a553119a4eb1cd13808eedc2910d"); //production key
+        knownIssuers.add("0xA20efc4B9537d27acfD052003e311f762620642D".toLowerCase(Locale.ROOT)); //Testkey for resolve
+
+        // Testnet keys should only work on testnet chains
+        if (!EthereumNetworkBase.hasRealValue(chainId))
+        {
+            knownIssuers.add("0x4461110869a5d65df76b85e2cd8bbfdda2ca6e4d");
+        }
+
+        return knownIssuers;
     }
 }

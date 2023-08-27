@@ -25,6 +25,7 @@ import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
+import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -203,7 +204,7 @@ public class QRSelectionTest
         List<QREncoding> qrList = new ArrayList<>();
 
         //test key address
-        String testAddress = "0x" + Keys.getAddress(testKey.getPublicKey());
+        String testAddress = Numeric.prependHexPrefix(Keys.getAddress(testKey.getPublicKey()));
 
         //generate all ticket redeem combos up to index 256, then check signature and regenerate the selection
         final int indicesCount = 8 * 2;
@@ -263,7 +264,7 @@ public class QRSelectionTest
                 Sign.SignatureData sigData = sigFromBase64Fix(sPair.signature.signature);
 
                 //check the signature corresponds to the test address
-                String addressHex = "0x" + ecRecoverAddress(sPair.message.getBytes(), sigData);
+                String addressHex = Numeric.prependHexPrefix(ecRecoverAddress(sPair.message.getBytes(), sigData));
                 // compare BigInteger and Integer. this is quicker than using stream->collect
                 assertEquals(qr.indices.toString(), selectionRecreate.toString());
                 assertTrue(addressHex.equals(testAddress));

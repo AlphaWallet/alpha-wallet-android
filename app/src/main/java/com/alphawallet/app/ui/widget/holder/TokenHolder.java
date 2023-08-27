@@ -39,7 +39,6 @@ import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.Locale;
 
@@ -195,7 +194,14 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         balanceEth.setText(attestation.getAttestationName(td));
         balanceCoin.setText(attestation.getAttestationDescription(td));
         balanceCoin.setVisibility(View.VISIBLE);
-        tokenIcon.setAttestationIcon(nftAsset.getImage(), attestation.getSymbol(), data.getChain());
+        if (attestation.isSmartPass())
+        {
+            tokenIcon.setSmartPassIcon(data.getChain());
+        }
+        else
+        {
+            tokenIcon.setAttestationIcon(nftAsset.getImage(), attestation.getSymbol(), data.getChain());
+        }
         token = attestation;
         blankTickerInfo();
     }

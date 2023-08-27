@@ -201,7 +201,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
         findViewById(R.id.toolbar_title).setVisibility(View.GONE);
         setTitle("");
         displayAddress = Keys.toChecksumAddress(wallet.address);
-        networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork);
+        networkInfo = viewModel.getNetworkByChain(overrideNetwork);
         currentMode = AddressMode.MODE_POS;
         layoutInputAmount.setVisibility(View.VISIBLE);
 

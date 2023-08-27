@@ -3,8 +3,9 @@ package com.alphawallet.app.service;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.Result;
 import com.alphawallet.app.util.JsonUtils;
-import com.alphawallet.token.tools.Numeric;
 import com.google.gson.Gson;
+
+import org.web3j.utils.Numeric;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -47,7 +48,7 @@ public class SignatureLookupService
 
     private String getFirstFourBytes(String payload)
     {
-        return ("0x" + Numeric.cleanHexPrefix(payload)).substring(0, 10);
+        return (Numeric.prependHexPrefix(payload)).substring(0, 10);
     }
 
     private String executeRequest(Request request)

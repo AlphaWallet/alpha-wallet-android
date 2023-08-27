@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -58,17 +57,18 @@ import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
-import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
 import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.entity.MediaLinks;
-import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.attestation.AttestationImportInterface;
+import com.alphawallet.app.entity.attestation.SmartPassReturn;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.NotificationService;
@@ -76,7 +76,6 @@ import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
 import com.alphawallet.app.util.LocaleUtils;
-import com.alphawallet.app.util.PermissionUtils;
 import com.alphawallet.app.util.UpdateUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
@@ -94,13 +93,11 @@ import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
-import com.google.zxing.client.android.Intents;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
-import java.net.URLDecoder;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -110,7 +107,7 @@ import timber.log.Timber;
 
 @AndroidEntryPoint
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface,
-        FragmentMessenger, Runnable, ActionSheetCallback, LifecycleEventObserver, PagerCallback
+        FragmentMessenger, Runnable, ActionSheetCallback, LifecycleEventObserver, PagerCallback, AttestationImportInterface
 {
     @Inject
     AWWalletConnectClient awWalletConnectClient;
@@ -468,11 +465,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .setFragmentResultListener(QRCODE_SCAN, this, (requestKey, b) ->
                 {
                     ScanOptions options = Utils.getQRScanOptions(this);
+                    hideDialog();
                     qrCodeScanner.launch(options);
                 });
     }
 
-    //TODO: Implement all QR scan using thie method
+    //TODO: Implement all QR scan using this method
     private final ActivityResultLauncher<ScanOptions> qrCodeScanner = registerForActivityResult(new ScanContract(),
             result -> {
                 if(result.getContents() == null)
@@ -1129,9 +1127,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         try
         {
-            if (importData != null) importData = URLDecoder.decode(importData, "UTF-8");
-            DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
-            if (importData != null && importData.startsWith(NotificationService.AWSTARTUP))
+            if (importData != null) importData = Utils.universalURLDecode(importData);
+
+            if (importData != null && viewModel.handleSmartPass(this, importData))
+            {
+                //Complete
+            }
+            else if (importData != null && importData.startsWith(NotificationService.AWSTARTUP))
             {
                 importData = importData.substring(NotificationService.AWSTARTUP.length());
                 //move window to token if found
@@ -1139,6 +1141,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             else if (startIntent.getStringExtra("url") != null)
             {
+                DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
                 String url = startIntent.getStringExtra("url");
                 showPage(DAPP_BROWSER);
                 if (!dappFrag.isDetached()) dappFrag.loadDirect(url);
@@ -1319,23 +1322,98 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    public void importAttestation(QRResult attestation)
+    @Override
+    public void attestationImported(TokenCardMeta newToken)
     {
-        if (attestation.type != EIP681Type.ATTESTATION)
-        {
-            return;
-        }
+        runOnUiThread(() -> {
+            BaseFragment frag = getFragment(WALLET);
+            if (frag instanceof WalletFragment)
+            {
+                ((WalletFragment) frag).updateAttestationMeta(newToken); //add to wallet
+            }
 
-        ((WalletFragment)getFragment(WALLET)).importAttestation(attestation);
+            //display import success
+            if (dialog == null || !dialog.isShowing())
+            {
+                AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
+
+                aDialog.setTitle(R.string.attestation_imported);
+                aDialog.setIcon(AWalletAlertDialog.SUCCESS);
+                aDialog.setButtonText(R.string.button_ok);
+                aDialog.setButtonListener(v ->
+                        aDialog.dismiss());
+                dialog = aDialog;
+                dialog.show();
+            }
+        });
     }
 
-    public void importEASAttestation(QRResult attestation)
+    @Override
+    public void importError(String error)
     {
-        if (attestation.type != EIP681Type.EAS_ATTESTATION)
-        {
-            return;
-        }
+        runOnUiThread(() -> {
+            hideDialog();
+            AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
 
-        ((WalletFragment)getFragment(WALLET)).importEASAttestation(attestation);
+            aDialog.setTitle(R.string.attestation_import_failed);
+            aDialog.setMessage(error);
+            aDialog.setIcon(AWalletAlertDialog.ERROR);
+            aDialog.setButtonText(R.string.button_ok);
+            aDialog.setButtonListener(v ->
+                    aDialog.dismiss());
+            dialog = aDialog;
+            dialog.show();
+        });
+    }
+
+    @Override
+    public void smartPassValidation(SmartPassReturn validation)
+    {
+        //Handle smart pass return
+        switch (validation)
+        {
+            case ALREADY_IMPORTED:
+                //No need to report anything
+                break;
+            case IMPORT_SUCCESS:
+                importedSmartPass();
+                break;
+            case IMPORT_FAILED:
+                //No need to report anything?
+                break;
+            case NO_CONNECTION:
+                showNoConnection();
+                break;
+        }
+    }
+
+    private void showNoConnection()
+    {
+        runOnUiThread(() -> {
+            AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
+            aDialog.setTitle(R.string.no_connection);
+            aDialog.setMessage(R.string.no_connection_to_smart_layer);
+            aDialog.setIcon(AWalletAlertDialog.WARNING);
+            aDialog.setButtonText(R.string.button_ok);
+            aDialog.setButtonListener(v ->
+                    aDialog.dismiss());
+            dialog = aDialog;
+            dialog.show();
+        });
+    }
+
+    private void importedSmartPass()
+    {
+        runOnUiThread(() -> {
+            AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
+            aDialog.setTitle(R.string.imported_smart_pass);
+            aDialog.setMessage(R.string.smartpass_imported);
+            aDialog.setIcon(AWalletAlertDialog.SUCCESS);
+            aDialog.setButtonText(R.string.button_ok);
+            aDialog.setButtonListener(v ->
+                    aDialog.dismiss());
+            dialog = aDialog;
+            dialog.show();
+        });
     }
 }

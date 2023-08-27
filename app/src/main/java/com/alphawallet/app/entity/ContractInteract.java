@@ -47,11 +47,16 @@ public class ContractInteract
 
     private String loadMetaData(String tokenURI)
     {
-        if (TextUtils.isEmpty(tokenURI)) return "";
+        if (TextUtils.isEmpty(tokenURI))
+        {
+            return "";
+        }
+        else if (Utils.isJson(tokenURI))
+        {
+            return tokenURI;
+        }
 
         //check if this is direct metadata, some tokens do this
-        if (Utils.isJson(tokenURI)) return tokenURI;
-
         setupClient();
 
         return client.getContent(tokenURI);

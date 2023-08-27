@@ -39,7 +39,7 @@ public class CustomNetworkViewModel extends BaseViewModel
 
     public NetworkInfo getNetworkInfo(long chainId)
     {
-        return this.ethereumNetworkRepository.getNetworkByChain(chainId);
+        return ethereumNetworkRepository.getNetworkByChain(chainId);
     }
 
     public boolean isTestNetwork(NetworkInfo network)

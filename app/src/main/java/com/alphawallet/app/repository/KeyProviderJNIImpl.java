@@ -48,4 +48,8 @@ public class KeyProviderJNIImpl implements KeyProvider
     public native String getBlockPiCypressKey();
 
     public native String getBlockNativeKey();
+
+    public native String getSmartPassKey();
+
+    public native String getSmartPassDevKey();
 }

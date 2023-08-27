@@ -125,9 +125,11 @@ public class AWHttpService extends HttpService
             requestBody = RequestBody.create("", MEDIA_TYPE_TEXT);
         }
 
-        Headers headers = buildHeaders();
         okhttp3.Request httpRequest =
-                new okhttp3.Request.Builder().url(url).headers(headers).post(requestBody).build();
+                new okhttp3.Request.Builder()
+                        .url(url)
+                        .headers(buildHeaders())
+                        .post(requestBody).build();
 
         okhttp3.Response response = null;
 

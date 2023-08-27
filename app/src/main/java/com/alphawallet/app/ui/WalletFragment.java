@@ -42,12 +42,10 @@ import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -243,7 +241,6 @@ public class WalletFragment extends BaseFragment implements
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
         viewModel.onUpdatedTokens().observe(getViewLifecycleOwner(), this::updateMetas);
-        viewModel.attestationError().observe(getViewLifecycleOwner(), this::attestationError);
         viewModel.getTokensService().startWalletSync(this);
         viewModel.activeWalletConnectSessions().observe(getViewLifecycleOwner(), walletConnectSessionItems -> {
             adapter.showActiveWalletConnectSessions(walletConnectSessionItems);
@@ -300,16 +297,12 @@ public class WalletFragment extends BaseFragment implements
             systemView.hide();
             viewModel.checkDeleteMetas(metas);
             viewModel.calculateFiatValues();
-            checkAttestationNotice(metas);
         }
     }
 
-    private void checkAttestationNotice(TokenCardMeta[] metas)
+    public void updateAttestationMeta(TokenCardMeta tcm)
     {
-        if (metas.length == 1 && metas[0].group == TokenGroup.ATTESTATION)
-        {
-            Toast.makeText(getActivity(), "Attestation Imported", Toast.LENGTH_SHORT).show();
-        }
+        updateMetas(new TokenCardMeta[]{tcm});
     }
 
     //Refresh value of wallet once sync is complete
@@ -374,6 +367,7 @@ public class WalletFragment extends BaseFragment implements
     {
         isVisible = true;
         viewModel.startUpdateListener();
+        viewModel.getTokensService().startUpdateCycle();
     }
 
     @Override
@@ -774,35 +768,6 @@ public class WalletFragment extends BaseFragment implements
         Intent intent = new Intent(getActivity(), NetworkToggleActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
         networkSettingsHandler.launch(intent);
-    }
-
-    public void importAttestation(QRResult attestation)
-    {
-        viewModel.importAttestation(attestation);
-    }
-
-    public void importEASAttestation(QRResult attestation)
-    {
-        viewModel.importEASAttestation(attestation);
-    }
-
-    private void attestationError(String message)
-    {
-        if (dialog == null)
-        {
-            dialog = new AWalletAlertDialog(requireContext());
-        }
-        else
-        {
-            dialog.dismiss();
-        }
-
-        dialog.setIcon(AWalletAlertDialog.ERROR);
-        dialog.setTitle(R.string.attestation);
-        dialog.setMessage(message);
-        dialog.setButtonText(R.string.dialog_ok);
-        dialog.setButtonListener(v -> dialog.dismiss());
-        dialog.show();
     }
 
     public class SwipeCallback extends ItemTouchHelper.SimpleCallback

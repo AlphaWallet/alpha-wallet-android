@@ -33,7 +33,9 @@ import androidx.core.content.ContextCompat;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.util.Utils;
@@ -512,6 +514,22 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
                 break;
         }
         return true;
+    }
+
+    public void setAttestationImage(Token token)
+    {
+        if (token.getInterfaceSpec() == ContractType.ATTESTATION)
+        {
+            Attestation attn = (Attestation) token;
+            if (attn.isSmartPass())
+            {
+                setImageResource(R.drawable.smart_pass);
+            }
+            else
+            {
+                setImageResource(R.drawable.zero_one_block);
+            }
+        }
     }
 
     private static class DisplayType

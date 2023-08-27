@@ -150,14 +150,6 @@ public class BlockNativeGasAPI
             }
         }
 
-        /*
-        public EIP1559FeeOracleResult(BigInteger maxFee, BigInteger maxPriority, BigInteger base)
-    {
-        maxFeePerGas = fixGasPriceReturn(maxFee);  // Some chains (eg Phi) have a gas price lower than 1Gwei.
-        maxPriorityFeePerGas = fixGasPriceReturn(maxPriority);
-        baseFee = base;
-    }
-         */
         public EIP1559FeeOracleResult getFeeOracleResult(BigInteger baseFee)
         {
             return new EIP1559FeeOracleResult(getMaxFeePerGasWei(), getMaxPriorityFeePerGasWei(), baseFee);

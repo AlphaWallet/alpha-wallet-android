@@ -981,4 +981,11 @@
     <string name="minted">Minted</string>
     <string name="valid_from">Válido desde</string>
     <string name="valid_until">Válido hasta</string>
+    <string name="attestation_imported">Atestación importada</string>
+    <string name="attestation_import_failed">Error al importar la atestación</string>
+    <string name="key_address">Dirección del Emisor</string>
+    <string name="no_connection">Sin Conexión</string>
+    <string name="imported_smart_pass">Smart Pass importado</string>
+    <string name="smartpass_imported">Se ha importado un pase inteligente. Su pase debe ser actualizado.</string>
+    <string name="no_connection_to_smart_layer">No hay conexión a la red Smart Layer: intente importar su Pass nuevamente más tarde.</string>
 </resources>

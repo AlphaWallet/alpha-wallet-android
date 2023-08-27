@@ -643,6 +643,11 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
         Model.Session settledSession = getSession(sessionRequest.getTopic());
 
+        if (settledSession == null)
+        {
+            return;
+        }
+
         Activity topActivity = App.getInstance().getTopActivity();
         if (topActivity != null)
         {

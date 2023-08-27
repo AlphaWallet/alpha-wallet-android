@@ -131,4 +131,16 @@ public class KeyProviderMockImpl implements KeyProvider
     {
         return FAKE_KEY_FOR_TESTING;
     }
+
+    @Override
+    public String getSmartPassKey()
+    {
+        return FAKE_KEY_FOR_TESTING;
+    }
+
+    @Override
+    public String getSmartPassDevKey()
+    {
+        return FAKE_KEY_FOR_TESTING;
+    }
 }

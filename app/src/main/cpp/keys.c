@@ -270,3 +270,25 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBlockNativeKey( JNIEnv
     return (*env)->NewStringUTF(env, key);
 #endif
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSmartPassKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, smartpass);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSmartPassDevKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, smartpassDev);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}

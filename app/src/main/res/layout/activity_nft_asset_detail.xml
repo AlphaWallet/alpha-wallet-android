@@ -77,6 +77,13 @@
                 custom:tokenInfoLabel="@string/contract_address" />
 
             <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/key_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/key_address" />
+
+            <com.alphawallet.app.widget.TokenInfoView
                 android:id="@+id/balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

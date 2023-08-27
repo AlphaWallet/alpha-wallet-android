@@ -18,9 +18,9 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.service.SignatureLookupService;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.token.tools.Numeric;
 
 import org.jetbrains.annotations.NotNull;
+import org.web3j.utils.Numeric;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -66,7 +66,7 @@ public class TransactionDetailWidget extends LinearLayout
         }
         else
         {
-            String displayText = ("0x" + Numeric.cleanHexPrefix(w3tx.payload)).substring(0, 10);
+            String displayText = (Numeric.prependHexPrefix(w3tx.payload)).substring(0, 10);
             textTransactionSummary.setText(displayText);
             textFunctionName.setText(displayText);
         }

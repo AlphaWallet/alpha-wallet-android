@@ -20,6 +20,6 @@ public enum AttestationValidationStatus
 
     public String getValue()
     {
-        return "Screen: " + validationMessage;
+        return validationMessage;
     }
 }

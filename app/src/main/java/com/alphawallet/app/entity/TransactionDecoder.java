@@ -157,7 +157,7 @@ public class TransactionDecoder
                         BigInteger dataCount = Numeric.toBigInt(argData);
                         String hexBytes = readBytes(input, dataCount.intValue());
                         thisData.miscData.add(hexBytes);
-                        thisData.hexArgs.add("0x" + hexBytes);
+                        thisData.hexArgs.add(Numeric.prependHexPrefix(hexBytes));
                         break;
                     case "string":
                         count = new BigInteger(argData, 16);
@@ -179,7 +179,7 @@ public class TransactionDecoder
                     case "address":
                         if (argData.length() >= 64 - ADDRESS_LENGTH_IN_HEX)
                         {
-                            String addr = "0x" + argData.substring(64 - ADDRESS_LENGTH_IN_HEX);
+                            String addr = Numeric.prependHexPrefix(argData.substring(64 - ADDRESS_LENGTH_IN_HEX));
                             thisData.addresses.add(addr);
                             thisData.hexArgs.add(addr);
                         }

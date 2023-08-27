@@ -33,13 +33,10 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.ui.widget.entity.StatusType;
-import com.alphawallet.app.util.RoundedTopCorners;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -474,6 +471,16 @@ public class TokenIcon extends ConstraintLayout
         textIcon.setVisibility(View.VISIBLE);
         textIcon.setBackgroundResource(0);
         textIcon.setText(Utils.getIconisedText(symbol));
+        setChainIcon(chainId);
+    }
+
+    public void setSmartPassIcon(long chainId)
+    {
+        currentRq = Glide.with(this)
+                .load(R.drawable.smart_pass)
+                .apply(new RequestOptions().circleCrop())
+                .listener(requestListener)
+                .into(new DrawableImageViewTarget(icon)).getRequest();
         setChainIcon(chainId);
     }
 

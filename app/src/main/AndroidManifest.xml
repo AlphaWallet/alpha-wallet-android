@@ -43,6 +43,7 @@
                 android:name=".ui.HomeActivity"
                 android:exported="true"
                 android:launchMode="singleTask"
+                android:hardwareAccelerated="true"
                 android:theme="@style/AppTheme.NoActionBar.Splash"
                 android:windowSoftInputMode="adjustPan">
             <intent-filter>

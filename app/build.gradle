@@ -247,8 +247,6 @@ private String getPAT() {
 
 private String getGitHubUsername() {
     project.findProperty("gpr.user")
-
-
 }
 
 dependencies {
@@ -352,7 +350,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.3.0'
     androidTestImplementation 'androidx.browser:browser:1.4.0'
 
-    implementation 'com.trustwallet:wallet-core:3.2.13'
+    implementation 'com.trustwallet:wallet-core:2.6.16'
 
     implementation 'com.github.florent37:TutoShowcase:d8b91be8a2'
 

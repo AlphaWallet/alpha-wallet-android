@@ -5,8 +5,6 @@ import static com.alphawallet.app.util.KeyboardUtils.showKeyboard;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,8 +18,10 @@ import androidx.annotation.Nullable;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.ui.widget.adapter.DappBrowserSuggestionsAdapter;
+import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.KeyboardUtils;
+import com.alphawallet.app.util.Utils;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +33,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
-public class AddressBar extends MaterialToolbar
+public class AddressBar extends MaterialToolbar implements ItemClickListener
 {
     private final int ANIMATION_DURATION = 100;
 
@@ -63,7 +63,7 @@ public class AddressBar extends MaterialToolbar
         adapter = new DappBrowserSuggestionsAdapter(
                 getContext(),
                 list,
-                this::load
+                this
         );
         this.listener = listener;
         urlTv.setAdapter(null);
@@ -91,27 +91,6 @@ public class AddressBar extends MaterialToolbar
         urlTv.setOnLongClickListener(v -> {
             urlTv.dismissDropDown();
             return false;
-        });
-
-        urlTv.addTextChangedListener(new TextWatcher()
-        {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
-            {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
-            {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable)
-            {
-                adapter.setHighlighted(editable.toString());
-            }
         });
     }
 
@@ -265,7 +244,7 @@ public class AddressBar extends MaterialToolbar
 
     public void removeSuggestion(DApp dApp)
     {
-        adapter.removeSuggestion(dApp);
+        adapter.removeSuggestion(dApp.getUrl());
     }
 
     public void addSuggestion(DApp dapp)
@@ -363,5 +342,23 @@ public class AddressBar extends MaterialToolbar
     {
         button.setEnabled(false);
         button.setAlpha(0.3f);
+    }
+
+    @Override
+    public void onItemLongClick(String url)
+    {
+        //erase entry
+        adapter.removeSuggestion(url);
+        DappBrowserUtils.removeFromHistory(getContext(), url);
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onItemClick(String url)
+    {
+        if (Utils.isValidUrl(url))
+        {
+            load(url);
+        }
     }
 }

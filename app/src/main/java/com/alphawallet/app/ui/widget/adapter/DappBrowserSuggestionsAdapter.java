@@ -1,15 +1,9 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-
 import android.graphics.drawable.Drawable;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
+import android.os.Vibrator;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,30 +14,30 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.RequestOptions;
-import com.alphawallet.app.util.DappBrowserUtils;
-import com.alphawallet.app.util.Utils;
-
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.ui.widget.entity.SuggestionsFilter;
+import com.alphawallet.app.util.DappBrowserUtils;
+import com.alphawallet.app.util.Utils;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements Filterable {
     private final List<DApp> suggestions;
     public List<DApp> filteredSuggestions;
     private final ItemClickListener listener;
-//    private String text;
-//    private TextView name;
+    private final Vibrator vibrate;
 
     public DappBrowserSuggestionsAdapter(@NonNull Context context,
                                          List<DApp> suggestions,
@@ -52,6 +46,7 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
         this.suggestions = suggestions;
         this.listener = listener;
         this.filteredSuggestions = new ArrayList<>();
+        this.vibrate = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         //this.text = "";
 
         // Append browser history to known DApps list during initialisation
@@ -74,12 +69,30 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
         notifyDataSetChanged();
     }
 
-    public void removeSuggestion(DApp dapp) {
-        for (DApp d : suggestions) {
-            if (d.getName().equals(dapp.getName()) && d.getUrl().equals(dapp.getUrl())) {
-                suggestions.remove(d);
-                break;
+    public void removeSuggestion(String dappUrl)
+    {
+        filterList(suggestions, dappUrl);
+        filterList(filteredSuggestions, dappUrl);
+    }
+
+    private void filterList(List<DApp> dappList, String urlToRemove)
+    {
+        List<Integer> removeList = new ArrayList<>();
+
+        for (int i = 0; i < dappList.size(); i++)
+        {
+            if (dappList.get(i).getUrl().equals(urlToRemove))
+            {
+                removeList.add(i);
             }
+        }
+
+        removeList.sort((d1, d2) -> Integer.compare(d2, d1));
+
+        //remove in reverse order
+        for (Integer i : removeList)
+        {
+            dappList.remove((int)i);
         }
     }
 
@@ -112,6 +125,11 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
 
         RelativeLayout layout = convertView.findViewById(R.id.layout);
         layout.setOnClickListener(v -> listener.onItemClick(dapp.getUrl()));
+        layout.setOnLongClickListener(v -> {
+            vibrate.vibrate(100);
+            listener.onItemLongClick(dapp.getUrl());
+            return true;
+        });
 
         ImageView icon = convertView.findViewById(R.id.icon);
         String visibleUrl = Utils.getDomainName(dapp.getUrl());
@@ -140,8 +158,6 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
             description.setText(dapp.getUrl());
         }
 
-        //highlightSearch(text, dapp.getName());
-
         return convertView;
     }
 
@@ -159,28 +175,4 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
             return false;
         }
     };
-
-    private void highlightSearch(String text, String name) {
-        String lowerCaseText;
-        String lowerCaseName;
-        if (!text.isEmpty()) {
-            lowerCaseName = name.toLowerCase();
-            lowerCaseText = text.toLowerCase();
-            int start = lowerCaseName.indexOf(lowerCaseText);
-            int end = lowerCaseText.length() + start;
-            SpannableStringBuilder builder = new SpannableStringBuilder(name);
-            if (start >= 0) {
-                int highlightColor = ContextCompat.getColor(getContext(), R.color.text_secondary);
-                builder.setSpan(new ForegroundColorSpan(highlightColor), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-            //this.name.setText(builder);
-        } else {
-            //this.name.setText(name);
-        }
-    }
-
-    public void setHighlighted(String text) {
-        //this.text = text;
-        notifyDataSetChanged();
-    }
 }

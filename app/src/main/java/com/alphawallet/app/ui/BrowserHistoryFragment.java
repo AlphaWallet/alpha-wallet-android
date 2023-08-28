@@ -109,7 +109,7 @@ public class BrowserHistoryFragment extends BaseFragment
 
     private void onHistoryItemRemoved(DApp dapp)
     {
-        DappBrowserUtils.removeFromHistory(getContext(), dapp);
+        DappBrowserUtils.removeFromHistory(getContext(), dapp.getUrl());
         adapter.setDapps(getData());
         showOrHideViews();
         setFragmentResult(DAPP_REMOVE_HISTORY, dapp);

@@ -234,8 +234,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://blockscout.com/etc/mainnet/api?"));
             put(GNOSIS_ID, new NetworkInfo(C.XDAI_NETWORK_NAME, C.xDAI_SYMBOL,
                     XDAI_RPC_URL,
-                    "https://blockscout.com/xdai/mainnet/tx/", GNOSIS_ID,
-                    "https://rpc.ankr.com/gnosis", "https://blockscout.com/xdai/mainnet/api?"));
+                    "https://gnosis.blockscout.com/tx/", GNOSIS_ID,
+                    "https://rpc.ankr.com/gnosis", "https://gnosis.blockscout.com?"));
             put(GOERLI_ID, new NetworkInfo(C.GOERLI_NETWORK_NAME, C.GOERLI_SYMBOL,
                     GOERLI_RPC_URL,
                     "https://goerli.etherscan.io/tx/", GOERLI_ID,
@@ -339,8 +339,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://api-sepolia.etherscan.io/api?"));
             put(OPTIMISM_GOERLI_TEST_ID, new NetworkInfo(C.OPTIMISM_GOERLI_TESTNET_NAME, C.OPTIMISM_GOERLI_TEST_SYMBOL,
                     OPTIMISM_GOERLI_TESTNET_RPC_URL,
-                    "https://blockscout.com/optimism/goerli/tx/", OPTIMISM_GOERLI_TEST_ID, OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL,
-                    "https://blockscout.com/optimism/goerli/api?"));
+                    "https://optimism-goerli.blockscout.com/tx/", OPTIMISM_GOERLI_TEST_ID, OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL,
+                    "https://optimism-goerli.blockscout.com/api?"));
             put(ARBITRUM_GOERLI_TEST_ID, new NetworkInfo(C.ARBITRUM_GOERLI_TESTNET_NAME, C.ARBITRUM_SYMBOL,
                     ARBITRUM_GOERLI_TESTNET_RPC_URL,
                     "https://goerli-rollup-explorer.arbitrum.io/tx/", ARBITRUM_GOERLI_TEST_ID, ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL,

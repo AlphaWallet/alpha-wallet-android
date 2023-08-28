@@ -187,6 +187,10 @@ public class Web3View extends WebView {
         getSettings().setUserAgentString(getSettings().getUserAgentString()
                 + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
         WebView.setWebContentsDebuggingEnabled(true); //so devs can debug their scripts/pages
+        setInitialScale(0);
+        getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+        getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+
         addJavascriptInterface(new SignCallbackJSInterface(
                 this,
                 innerOnSignTransactionListener,

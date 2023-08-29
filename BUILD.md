@@ -1,6 +1,6 @@
 # Build instruction
-### NOTE: Use JDK11
-- Android Gradle Plugin requires Java 11
+### NOTE: Use JDK17
+- Android Gradle Plugin requires Java 17
 - Java 16 is not supported due to IllegalAccessError compile error when Realm tries to access the com.sun.tools.javac package
 
 To build everything:

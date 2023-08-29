@@ -71,7 +71,7 @@ gpr.key=The GitHub Personal Access Token you created in previous step
 ```
 6. Build the project in AndroidStudio or Run `./gradlew build` to install tools and dependencies. See [BUILD.md](BUILD.md) for more details.
 
-You can also build it from the commandline just like other Android apps. Note that JDK 8 and 11 are the versions supported by Android.
+You can also build it from the commandline just like other Android apps. Note that JDK 17 is the version now supported by Android. We build with the JetBrains JDK.
 
 Find more information in our available [documentation](https://github.com/AlphaWallet/alpha-wallet-android/blob/master/docs/overview.md).
 

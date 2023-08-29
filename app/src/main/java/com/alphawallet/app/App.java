@@ -24,6 +24,7 @@ import dagger.hilt.android.HiltAndroidApp;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.realm.Realm;
 import timber.log.Timber;
+import timber.log.Timber.DebugTree;
 
 @HiltAndroidApp
 public class App extends Application

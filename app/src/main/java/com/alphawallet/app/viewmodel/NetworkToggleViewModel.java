@@ -82,7 +82,7 @@ public class NetworkToggleViewModel extends BaseViewModel
 
         for (NetworkInfo info : getNetworkList())
         {
-            if (EthereumNetworkRepository.hasRealValue(info.chainId) == isMainNet)
+            if (info != null && EthereumNetworkRepository.hasRealValue(info.chainId) == isMainNet)
             {
                 networkList.add(new NetworkItem(info.name, info.chainId, filterIds.contains(info.chainId)));
             }

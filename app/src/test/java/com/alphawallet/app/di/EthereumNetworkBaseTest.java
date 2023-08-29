@@ -20,8 +20,8 @@ public class EthereumNetworkBaseTest
     @Test
     public void should_getNodeURLByNetworkId_when_use_production_key()
     {
-        assertThat(EthereumNetworkBase.getNodeURLByNetworkId(61L), equalTo("https://www.ethercluster.com/etc"));
-        assertThat(EthereumNetworkBase.getNodeURLByNetworkId(100L), equalTo("https://rpc.gnosischain.com"));
+        assertThat(EthereumNetworkBase.getNodeURLByNetworkId(61L), equalTo(EthereumNetworkBase.CLASSIC_RPC_URL));
+        assertThat(EthereumNetworkBase.getNodeURLByNetworkId(100L), equalTo(com.alphawallet.ethereum.EthereumNetworkBase.XDAI_RPC_URL));
     }
 
     @Test

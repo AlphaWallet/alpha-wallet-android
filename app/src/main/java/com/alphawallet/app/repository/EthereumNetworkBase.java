@@ -161,7 +161,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //If you supply a main RPC and secondary it will try the secondary if the primary node times out after 10 seconds.
     //See the declaration of NetworkInfo - it has a member backupNodeUrl. Put your secondary node here.
 
-    public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
+    public static final String CLASSIC_RPC_URL = "https://etc.rivet.link";
     public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
     public static final String BINANCE_TEST_FALLBACK_RPC_URL = "https://data-seed-prebsc-2-s1.binance.org:8545";
     public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed.binance.org";
@@ -285,11 +285,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://api-optimistic.etherscan.io/api?"));
             put(CRONOS_MAIN_ID, new NetworkInfo(C.CRONOS_MAIN_NETWORK, C.CRONOS_SYMBOL,
                     CRONOS_MAIN_RPC_URL,
-                    "https://cronoscan.com/tx/", CRONOS_MAIN_ID, CRONOS_MAIN_RPC_URL,
-                    "https://api.cronoscan.com/api?"));
+                    "https://cronos.org/explorer/tx/", CRONOS_MAIN_ID, CRONOS_MAIN_RPC_URL,
+                    "https://cronos.org/explorer/api?"));
             put(CRONOS_TEST_ID, new NetworkInfo(C.CRONOS_TEST_NETWORK, C.CRONOS_TEST_SYMBOL,
                     CRONOS_TEST_URL,
-                    "https://testnet.cronoscan.com/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
+                    "https://explorer.cronos.org/testnet/tx/", CRONOS_TEST_ID, CRONOS_TEST_URL,
                     "https://testnet.cronoscan.com/api?"));
             put(ARBITRUM_MAIN_ID, new NetworkInfo(C.ARBITRUM_ONE_NETWORK, C.ARBITRUM_SYMBOL,
                     ARBITRUM_MAINNET_RPC,
@@ -343,8 +343,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://optimism-goerli.blockscout.com/api?"));
             put(ARBITRUM_GOERLI_TEST_ID, new NetworkInfo(C.ARBITRUM_GOERLI_TESTNET_NAME, C.ARBITRUM_SYMBOL,
                     ARBITRUM_GOERLI_TESTNET_RPC_URL,
-                    "https://goerli-rollup-explorer.arbitrum.io/tx/", ARBITRUM_GOERLI_TEST_ID, ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL,
-                    "https://goerli-rollup-explorer.arbitrum.io/api?"));
+                    "https://testnet.arbiscan.io/tx/", ARBITRUM_GOERLI_TEST_ID, ARBITRUM_GOERLI_TESTNET_FALLBACK_RPC_URL,
+                    "https://api-goerli.arbiscan.io/api?"));
             put(OKX_ID, new NetworkInfo(C.OKX_NETWORK_NAME, C.OKX_SYMBOL,
                 OKX_RPC_URL,
                 "https://www.oklink.com/en/okc/tx/", OKX_ID, "",

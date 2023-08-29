@@ -83,8 +83,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 245
-        versionName "3.66"
+        versionCode 246
+        versionName "3.67"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 24
@@ -217,7 +217,19 @@ android {
     ndkVersion '25.1.8937393'
 }
 
-task printVersionName {
+tasks.register("printVersionName") {
+    doLast {
+        println android.defaultConfig.versionName
+    }
+}
+
+tasks.register("printVersionCode") {
+    doLast {
+        println android.defaultConfig.versionCode
+    }
+}
+
+/*task printVersionName {
     doLast {
         println android.defaultConfig.versionName
     }
@@ -227,7 +239,7 @@ task printVersionCode {
     doLast {
         println android.defaultConfig.versionCode
     }
-}
+}*/
 
 gradle.projectsEvaluated({
     def username = getGitHubUsername()
@@ -311,49 +323,11 @@ dependencies {
     // Image Loader
     implementation 'com.github.bumptech.glide:glide:4.13.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
-
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-android'
-
-    // Unit tests
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.mockito:mockito-core:3.12.4'
-    testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '2.0.9'
-    testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
-    testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
-    testImplementation group: 'org.json', name: 'json', version: '20220320'
-
-    // Component tests
-    testImplementation 'org.robolectric:robolectric:4.8.2'
-    testImplementation 'androidx.test:core:1.4.0'
-    testImplementation 'androidx.test.ext:junit:1.1.4'
-
-    // E2e tests
-    androidTestImplementation 'androidx.test:runner:1.5.0-alpha02'
-    androidTestImplementation 'androidx.test:core:1.4.1-alpha05'
-    androidTestUtil 'androidx.test:orchestrator:1.4.2-alpha02'
-    testImplementation 'org.hamcrest:hamcrest:2.1'
-
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {
-        exclude group: "com.android.support", module: "support-annotations"
-    })
-    androidTestImplementation('tools.fastlane:screengrab:2.1.1', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.3.0'
-    androidTestImplementation 'androidx.browser:browser:1.4.0'
-
     implementation 'com.trustwallet:wallet-core:2.6.16'
-
     implementation 'com.github.florent37:TutoShowcase:d8b91be8a2'
-
-    // Do not upgrade unless we have migrated to AndroidX
     implementation 'com.github.google:flexbox-layout:2.0.1'
-
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
-
     implementation 'com.github.mailchimp:mailchimp-sdk-android:1.0.0'
     implementation 'androidx.preference:preference-ktx:1.2.1'
 
@@ -378,8 +352,48 @@ dependencies {
     analyticsImplementation 'com.mixpanel.android:mixpanel-android:5.8.4'
     analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.4.1'
 
-    // Notifications
+    // Notifications: NB there appears to be an incompatibility in the newer builds of firebase-messaging.
+    // Update when resolved.
+    //noinspection GradleDependency
     implementation 'com.google.firebase:firebase-messaging:21.1.0'
+
+
+    //
+    // Testing libraries
+    //
+
+    // Updating breaks the tests
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.3.0'
+    androidTestImplementation 'androidx.browser:browser:1.4.0'
+
+    // Unit tests
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:3.12.4'
+    testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '2.0.9'
+    testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
+    testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
+    testImplementation group: 'org.json', name: 'json', version: '20220320'
+
+    // Component tests: Updating these appears to break the tests.
+    testImplementation 'org.robolectric:robolectric:4.8.2'
+    testImplementation 'androidx.test:core:1.4.0'
+    testImplementation 'androidx.test.ext:junit:1.1.4'
+
+    // E2e tests: Updating these values breaks the e2e tests. Versioning here is only for tests:
+    // no need to update unless it stops working due to incompatibility
+    androidTestImplementation 'androidx.test:runner:1.5.0-alpha02'
+    androidTestImplementation 'androidx.test:core:1.4.1-alpha05'
+    androidTestUtil 'androidx.test:orchestrator:1.4.2-alpha02'
+    testImplementation 'org.hamcrest:hamcrest:2.1'
+
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {
+        exclude group: "com.android.support", module: "support-annotations"
+    })
+    androidTestImplementation('tools.fastlane:screengrab:2.1.1', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
 }
 
 // WARNING WARNING WARNING

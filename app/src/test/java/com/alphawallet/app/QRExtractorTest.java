@@ -2,39 +2,19 @@ package com.alphawallet.app;
 
 import static com.alphawallet.app.entity.EIP681Type.OTHER;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.util.QRParser;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.math.BigInteger;
 import java.util.Base64;
 import java.util.Map;
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
- */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({TextUtils.class})
 public class QRExtractorTest {
-
-    @Before
-    public void setUp()
-    {
-        PowerMockito.mockStatic(TextUtils.class);
-    }
 
     @Test
     public void extractingIsCorrect()
@@ -127,7 +107,7 @@ public class QRExtractorTest {
         QRResult result;
         Map<String, String> params;
 
-        when(TextUtils.isEmpty(anyString())).thenReturn(false);
+        //when(TextUtils.isEmpty(anyString())).thenReturn(false);
 
         CryptoFunctions cryptoFunctions = new CryptoFunctions()
         {

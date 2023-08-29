@@ -88,7 +88,7 @@ android {
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 24
-        targetSdkVersion 32
+        targetSdkVersion 33
         compileSdk 33
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         testInstrumentationRunnerArguments clearPackageData: 'true'
@@ -96,7 +96,7 @@ android {
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\""
         def DEFAULT_OPENSEA_API_KEY = "\"...\""; //Put your OpenSea developer API key in here, otherwise you are reliant on the backup NFT fetch method (which usually works ok)
-        def DEFAULT_POLYGONSCAN_API_KEY = "\"\""; //Put your Polygonscan developer API key in here to get access to Polygon/Mumbai token discovery and transactions
+        def DEFAULT_POLYGONSCAN_API_KEY = "\"...\""; //Put your Polygonscan developer API key in here to get access to Polygon/Mumbai token discovery and transactions
         def DEFUALT_WALLETCONNECT_PROJECT_ID = "\"40c6071febfd93f4fe485c232a8a4cd9\""
         def DEFAULT_AURORA_API_KEY = "\"HFDDY5BNKGXBB82DE2G8S64C3C41B76PYI\""; //Put your Aurorascan.dev API key here - this one will rate limit as it is common
 
@@ -121,11 +121,14 @@ android {
 
         externalNativeBuild {
             cmake {
-                cFlags "-DIFKEY=\\\"" + DEFAULT_INFURA_API_KEY + "\\\""
-                cFlags "-DOSKEY=\\\"" + DEFAULT_OPENSEA_API_KEY + "\\\""
-                cFlags "-DPSKEY=\\\"" + DEFAULT_POLYGONSCAN_API_KEY + "\\\""
-                cFlags "-DASKEY=\\\"" + DEFAULT_AURORA_API_KEY + "\\\""
-                cFlags "-DWALLETCONNECT_PROJECT_ID=\\\"" + DEFUALT_WALLETCONNECT_PROJECT_ID + "\\\""
+                cFlags "-DIFKEY=" + DEFAULT_INFURA_API_KEY + ""
+                cFlags "-DOSKEY=" + DEFAULT_OPENSEA_API_KEY + ""
+                cFlags "-DPSKEY=" + DEFAULT_POLYGONSCAN_API_KEY + ""
+                cFlags "-DASKEY=" + DEFAULT_AURORA_API_KEY + ""
+                cFlags "-DWCKEY=" + DEFUALT_WALLETCONNECT_PROJECT_ID + ""
+            }
+            cmake {
+                cFlags "-Wno-dev"
             }
         }
     }
@@ -174,31 +177,19 @@ android {
         }
     }
     packagingOptions {
-        exclude 'META-INF/NOTICE' // will not include NOTICE file
-        exclude 'META-INF/LICENSE' // will not include LICENSE file
-        exclude 'META-INF/LICENSE.md'
-        exclude 'META-INF/NOTICE.md'
-        exclude 'META-INF/LICENSE-notice.md'
-        exclude 'solidity/ens/build/*.bin'
-        exclude 'solidity/ens/*.sol'
-        exclude 'solidity/ens/build/*.abi'
-        exclude 'en-mnemonic-word-list.txt'
-        exclude 'solidity/*'
-    }
-    lintOptions {
-        baseline file("./check/lint-baseline.xml")
-        lintConfig file('./check/lint-rules.xml')
-        abortOnError false
+        jniLibs {
+            excludes += ['solidity/*']
+        }
+        resources {
+            excludes += ['META-INF/NOTICE', 'META-INF/LICENSE', 'META-INF/LICENSE.md', 'META-INF/NOTICE.md', 'META-INF/LICENSE-notice.md', 'solidity/ens/build/*.bin', 'solidity/ens/*.sol', 'solidity/ens/build/*.abi', 'en-mnemonic-word-list.txt', 'solidity/*']
+        }
     }
     compileOptions {
-        targetCompatibility JavaVersion.VERSION_11
-        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '11'
-    }
-    dexOptions {
-        javaMaxHeapSize = "4g"
+        jvmTarget = '17'
     }
     externalNativeBuild {
         cmake {
@@ -217,6 +208,13 @@ android {
         includeInApk false
         includeInBundle false
     }
+    namespace 'com.alphawallet.app'
+    lint {
+        abortOnError false
+        baseline file('./check/lint-baseline.xml')
+        lintConfig file('./check/lint-rules.xml')
+    }
+    ndkVersion '25.1.8937393'
 }
 
 task printVersionName {
@@ -263,22 +261,22 @@ dependencies {
     //implementation "org.web3j:core:4.8.8-android"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation fileTree(include: ['*.aar'], dir: 'libs')
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    //NB: Downgrade jackson due to bug in 2.15 releases that makes it incompatible with Gradle 8
+    //noinspection GradleDependency
+    implementation platform('com.fasterxml.jackson:jackson-bom:2.14.3')
+    implementation 'com.fasterxml.jackson.core:jackson-core'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
     implementation 'org.slf4j:slf4j-api:2.0.7'
 
     // Http client
     implementation "com.squareup.okhttp3:okhttp:4.11.0"
     implementation 'com.google.code.gson:gson:2.10.1'
-    implementation "com.squareup.picasso:picasso:2.71828"
-    //noinspection GradleDependency
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1' //This cannot be updated until minSdkVersion is 31.
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    //noinspection GradleDependency,GradleCompatible
-    implementation 'androidx.appcompat:appcompat:1.3.1' //Do not update; next version is incompatible with API30 and below
-    implementation 'com.google.android.material:material:1.6.1'
+
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.recyclerview:recyclerview:1.3.1'
     implementation 'androidx.biometric:biometric:1.1.0'
     implementation 'androidx.gridlayout:gridlayout:1.0.0'
 
@@ -298,17 +296,14 @@ dependencies {
     // Keyboard visibility
     implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3'
 
-    //implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.2.2'
-    //implementation 'org.slf4j:slf4j-nop:1.7.25'
-
     // Dagger 2
 
     // dagger-hilt
-    implementation "com.google.dagger:hilt-android:2.40.5"
-    annotationProcessor "com.google.dagger:hilt-compiler:2.40.5"
+    implementation "com.google.dagger:hilt-android:2.44"
+    annotationProcessor "com.google.dagger:hilt-compiler:2.44"
 
     // WebKit - for WebView Dark Mode
-    implementation 'androidx.webkit:webkit:1.5.0'
+    implementation 'androidx.webkit:webkit:1.7.0'
 
     //Use Leak Canary for debug builds only
     //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
@@ -360,7 +355,7 @@ dependencies {
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 
     implementation 'com.github.mailchimp:mailchimp-sdk-android:1.0.0'
-    implementation 'androidx.preference:preference-ktx:1.2.0'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
 
     //Timber
     implementation 'com.jakewharton.timber:timber:5.0.1'
@@ -373,13 +368,15 @@ dependencies {
         exclude group: 'org.web3j', module: '*'
     })
 
-    implementation 'androidx.work:work-runtime:2.7.1'
+    runtimeOnly 'androidx.work:work-runtime-ktx:2.8.1'
 
     //Analytics
     analyticsImplementation 'com.google.android.play:core:1.10.3'
+
+    analyticsImplementation 'com.google.android.play:core:1.10.3'
     analyticsImplementation 'com.google.firebase:firebase-analytics:21.3.0'
     analyticsImplementation 'com.mixpanel.android:mixpanel-android:5.8.4'
-    analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.4.0'
+    analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.4.1'
 
     // Notifications
     implementation 'com.google.firebase:firebase-messaging:21.1.0'

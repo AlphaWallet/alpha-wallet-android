@@ -35,6 +35,7 @@ app/noAnalytics/release/output.json
 .gradle/
 /build
 app/release
+app/CMakeFiles
 app/debug
 app/debug/output.json
 

@@ -253,6 +253,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
         if (C.ACTION_TOKEN_SHORTCUT.equals(getIntent().getAction()))
         {
+            loadingInProgress = true;
             disposable = viewModel.findActiveWallet().subscribe(this::onActiveWalletFetched);
         }
         else
@@ -290,10 +291,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
         else
         {
-            if (!activeWallet.address.equals(walletAddress))
-            {
-                showWarnDialog(walletAddress);
-            }
             asset = token.getAssetForToken(tokenId);
             setup();
         }

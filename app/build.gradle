@@ -29,7 +29,7 @@ apply plugin: 'io.gitlab.arturbosch.detekt'
 apply plugin: 'com.dicedmelon.gradle.jacoco-android'
 
 jacoco {
-    toolVersion = "0.8.8"
+    toolVersion = "0.8.9"
 }
 
 tasks.withType(Test).configureEach {
@@ -179,6 +179,7 @@ android {
     packagingOptions {
         jniLibs {
             excludes += ['solidity/*']
+            useLegacyPackaging true
         }
         resources {
             excludes += ['META-INF/NOTICE', 'META-INF/LICENSE', 'META-INF/LICENSE.md', 'META-INF/NOTICE.md', 'META-INF/LICENSE-notice.md', 'solidity/ens/build/*.bin', 'solidity/ens/*.sol', 'solidity/ens/build/*.abi', 'en-mnemonic-word-list.txt', 'solidity/*']
@@ -228,18 +229,6 @@ tasks.register("printVersionCode") {
         println android.defaultConfig.versionCode
     }
 }
-
-/*task printVersionName {
-    doLast {
-        println android.defaultConfig.versionName
-    }
-}
-
-task printVersionCode {
-    doLast {
-        println android.defaultConfig.versionCode
-    }
-}*/
 
 gradle.projectsEvaluated({
     def username = getGitHubUsername()

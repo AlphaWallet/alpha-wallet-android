@@ -1,6 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+import android.text.TextUtils;
 
 import androidx.core.util.Pair;
 import androidx.lifecycle.LiveData;
@@ -20,6 +21,8 @@ import com.alphawallet.token.entity.Signable;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import io.reactivex.Completable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -36,6 +39,7 @@ public class SignDialogViewModel extends BaseViewModel
     private final MutableLiveData<Boolean> completed = new MutableLiveData<>(false);
     private final MutableLiveData<Pair<Integer, Integer>> message = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
+    private String signingWallet;
 
     @Inject
     public SignDialogViewModel(
@@ -48,11 +52,7 @@ public class SignDialogViewModel extends BaseViewModel
         this.transactionRepositoryType = transactionRepositoryType;
         this.keyService = keyService;
         this.walletInteract = walletInteract;
-
-        disposable = walletInteract.find()
-                .observeOn(Schedulers.io())
-                .subscribeOn(Schedulers.io())
-                .subscribe(wallet::postValue, this::onError);
+        this.signingWallet = null;
     }
 
     public LiveData<Boolean> completed()
@@ -82,6 +82,18 @@ public class SignDialogViewModel extends BaseViewModel
     public void getAuthentication(Activity activity, SignAuthenticationCallback sCallback)
     {
         keyService.getAuthenticationForSignature(wallet.getValue(), activity, sCallback);
+    }
+
+    private Single<Wallet> getWallet()
+    {
+        if (!TextUtils.isEmpty(signingWallet))
+        {
+            return walletInteract.findWallet(signingWallet); //wallet override
+        }
+        else
+        {
+            return walletInteract.find();
+        }
     }
 
     public void signMessage(Signable message, ActionSheetCallback aCallback)
@@ -130,11 +142,19 @@ public class SignDialogViewModel extends BaseViewModel
 
     public void setSigningWallet(String account)
     {
-        disposable = walletInteract.findWallet(account)
+        signingWallet = account;
+    }
+
+    public void completeWalletSetup()
+    {
+        disposable = getWallet()
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
-                .subscribe(wallet::postValue, this::onError); // TODO: If wallet not found then report error to user rather than trying to sign on default wallet
+                .subscribe(wallet::postValue, this::onError);
 
-        compareToActiveWallet(account);
+        if (!TextUtils.isEmpty(signingWallet))
+        {
+            compareToActiveWallet(signingWallet);
+        }
     }
 }

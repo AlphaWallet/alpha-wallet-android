@@ -1,6 +1,7 @@
 package com.alphawallet.app.widget;
 
 import android.app.Activity;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -69,6 +70,15 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
         viewModel.onWallet().observe((LifecycleOwner) activity, this::onWallet);
 
         setCanceledOnTouchOutside(false);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+
+        //ensure wallet is fixed
+        viewModel.completeWalletSetup();
     }
 
     private void setupView()

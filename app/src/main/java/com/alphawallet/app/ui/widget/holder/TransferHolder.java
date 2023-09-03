@@ -24,7 +24,6 @@ import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.TokenActivity;
 import com.alphawallet.app.ui.TransactionDetailActivity;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.Utils;

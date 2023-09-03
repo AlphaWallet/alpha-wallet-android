@@ -556,6 +556,7 @@ public class TokenDefinition
                 switch (card.getLocalName())
                 {
                     case "token":
+                    case "token-card":
                         processTokenCardElements(card);
                         break;
                     case "card":
@@ -928,8 +929,8 @@ public class TokenDefinition
                 case "key":
                     attn.handleKey(attnElement);
                     break;
-                case "eventId":
-                    attn.handleEventId(attnElement);
+                case "collectionFields":
+                    attn.handleCollectionFields(attnElement);
                     break;
                 case "idFields":
                     attn.handleReplacementField(attnElement);
@@ -939,7 +940,7 @@ public class TokenDefinition
                     //attn.members.add(parseAttestationStruct(attnElement));
                     //attestation.add(parseAttestationStruct(attnElement));
                     break;
-                case "origins":
+                case "origins": //TODO: Recode this
                     //attn.origin = parseOrigins(attnElement);
                     //advance to function
                     Element functionElement = getFirstChildElement(attnElement);

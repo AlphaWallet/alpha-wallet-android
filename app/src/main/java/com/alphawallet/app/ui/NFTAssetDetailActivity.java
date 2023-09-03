@@ -3,7 +3,6 @@ package com.alphawallet.app.ui;
 import static android.text.Html.FROM_HTML_MODE_LEGACY;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-
 import static java.util.Collections.singletonList;
 
 import android.content.Intent;
@@ -16,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -44,8 +44,9 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
 import com.alphawallet.app.util.ShortcutUtils;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
+import com.alphawallet.app.web3.Web3TokenView;
+import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
@@ -57,15 +58,16 @@ import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.TSAction;
+import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenScriptResult.Attribute;
+import com.alphawallet.token.entity.ViewType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +78,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
-
 
 @AndroidEntryPoint
 public class NFTAssetDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
@@ -117,8 +118,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private long chainId;
     private Disposable disposable;
 
-    private boolean loadingInProgress;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
@@ -132,8 +131,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         initIntents();
 
         initViewModel();
-
-        getIntentData();
     }
 
     private void initIntents()
@@ -163,13 +160,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         super.onResume();
         if (viewModel != null)
         {
-            if (!loadingInProgress)
-            {
-                progressBar.setVisibility(View.VISIBLE);
-                viewModel.prepare();
-                getIntentData();
-                tokenImage.onResume();
-            }
+            progressBar.setVisibility(View.VISIBLE);
+            getIntentData();
+            tokenImage.onResume();
         }
         else
         {
@@ -194,7 +187,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         super.onPause();
         tokenImage.onPause();
-        loadingInProgress = false;
     }
 
     @Override
@@ -253,8 +245,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
         if (C.ACTION_TOKEN_SHORTCUT.equals(getIntent().getAction()))
         {
-            loadingInProgress = true;
-            disposable = viewModel.findActiveWallet().subscribe(this::onActiveWalletFetched);
+            handleShortCut();
         }
         else
         {
@@ -279,7 +270,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
-    private void onActiveWalletFetched(Wallet activeWallet)
+    private void handleShortCut()
     {
         String walletAddress = getIntent().getStringExtra(C.Key.WALLET);
         viewModel.loadWallet(walletAddress);
@@ -296,23 +287,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
-    private void showWarnDialog(String walletAddress)
-    {
-        AWalletAlertDialog alertDialog = new AWalletAlertDialog(this);
-        alertDialog.setIcon(WARNING);
-        alertDialog.setMessage(getApplicationContext().getString(R.string.warn_asset_not_belongs_to_active_wallet, Utils.formatAddress(walletAddress)));
-        alertDialog.setButton(R.string.yes_continue, v -> alertDialog.dismiss());
-        alertDialog.setSecondaryButton(R.string.dialog_cancel_back, view -> {
-            alertDialog.dismiss();
-            finish();
-        });
-        alertDialog.setCanceledOnTouchOutside(false);
-        alertDialog.show();
-    }
-
     private void setup()
     {
-        loadingInProgress = true;
         viewModel.checkForNewScript(token);
         viewModel.checkTokenScriptValidity(token);
         setTitle(token.tokenInfo.name);
@@ -499,7 +475,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             loadFromOpenSeaData(loadedAsset.getOpenSeaAsset());
 
             completeTokenScriptSetup();
-            loadingInProgress = false;
         }
     }
 
@@ -635,7 +610,10 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         {
             attnAsset.setupScriptElements(td);
             attnAsset.setupScriptAttributes(td, token);
-            tokenImage.setupTokenImage(attnAsset);
+            if (!displayTokenView(td))
+            {
+                tokenImage.setupTokenImage(attnAsset);
+            }
             setTitle(attnAsset.getName());
             if (!TextUtils.isEmpty(attnAsset.getDescription()))
             {
@@ -844,5 +822,35 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     public WalletType getWalletType()
     {
         return viewModel.getWallet().type;
+    }
+
+    /***
+     * TokenScript view handling
+     */
+    private boolean displayTokenView(TokenDefinition td)
+    {
+        if (!td.hasTokenView())
+        {
+            return false;
+        }
+
+        try
+        {
+            //Attempt to display the token-view
+            Web3TokenView scriptView = findViewById(R.id.web3_tokenview);
+            LinearLayout webWrapper = findViewById(R.id.layout_webwrapper);
+            webWrapper.setVisibility(View.VISIBLE);
+            scriptView.setChainId(token.tokenInfo.chainId);
+            scriptView.setWalletAddress(new Address(token.getWallet()));
+
+            scriptView.renderTokenScriptView(token, new TicketRange(BigInteger.ONE, token.getAddress()), viewModel.getAssetDefinitionService(), ViewType.VIEW);
+        }
+        catch (Exception e)
+        {
+            //fillEmpty();
+            return false;
+        }
+
+        return true;
     }
 }

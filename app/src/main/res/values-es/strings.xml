@@ -218,7 +218,7 @@
     <string name="ticket">Ticket</string>
     <string name="tickets">Tickets</string>
     <string name="failed">Fallida</string>
-    <string name="total_cost_for_x_tickets">Coste total de %1d %2s:</string>
+    <string name="total_cost_for_x_tickets">Coste total de %1$d %2$s:</string>
     <string name="title_import_token">Importar tickets</string>
     <string name="action_cancel">Cancelar</string>
     <string name="confirm_purchase">Confirmar compra</string>
@@ -244,8 +244,8 @@
     <string name="universal_link_expiry_on">El MagicLink expira el:</string>
     <string name="confirm_sale_total">Total: %s</string>
     <string name="set_universal_link_expiry">Define la expiración del MagicLink:</string>
-    <string name="tickets_selected">%1s %2s seleccionados</string>
-    <string name="eth_per_ticket_w_value">%1s %2s/ticket</string>
+    <string name="tickets_selected">%1$s %2$s seleccionados</string>
+    <string name="eth_per_ticket_w_value">%1$s %2$s/ticket</string>
     <string name="universal_link_info">Se creará un MagicLink para que los compradores puedan adquirir tus tickets.</string>
     <string name="date_hint">DD/MM/YYYY</string>
     <string name="universal_link_notice">Antes de que expire el enlace, cualquiera que tenga el MagicLink puede comprar tus tickets con un clic.</string>
@@ -952,7 +952,7 @@
     <string name="use_hardware_card">Usar tarjeta de hardware</string>
     <string name="unsupported_network">Red no admitida (ID de cadena: %s)</string>
     <string name="error_eip712_unsupported_network">Se le solicitó que firmara un mensaje para una cadena no admitida. (ID: %s)</string>
-    <string name="error_eip712_incompatible_network">Se le solicitó que firmara un mensaje para la cadena %1s. Actualmente estás en la cadena %2s.</string>
+    <string name="error_eip712_incompatible_network">Se le solicitó que firmara un mensaje para la cadena %1$s. Actualmente estás en la cadena %2$s.</string>
     <string name="error_eip712_wc2_disabled_network">Se le solicitó que firmara un mensaje para %s. Habilite esta cadena para su sesión de WalletConnect.</string>
     <string name="action_view_session">Ver sesión</string>
     <string name="error_walletconnect_session_request_unsupported_network">No se puede manejar la solicitud de sesión de una cadena no admitida. (ID: %s)</string>
@@ -971,8 +971,8 @@
     <string name="action_proceed">Proceder</string>
     <string name="setting_title_notification_incoming_tokens">Fichas entrantes</string>
     <string name="setting_description_notification_incoming_tokens">Muestre notificaciones cuando su billetera activa reciba tokens.</string>
-    <string name="notification_message_incoming_token_with_recipient">La billetera %1s ha recibido %2s de %3s. Toque aquí para ver los detalles de la transacción.</string>
-    <string name="notification_message_incoming_token">La cartera %1s ha recibido %2s. Toque aquí para ver los detalles de la transacción.</string>
+    <string name="notification_message_incoming_token_with_recipient">La billetera %1$s ha recibido %2$s de %3$s. Toque aquí para ver los detalles de la transacción.</string>
+    <string name="notification_message_incoming_token">La cartera %1$s ha recibido %2$s. Toque aquí para ver los detalles de la transacción.</string>
     <string name="btn_ok_request_post_notifications_permission">Quiero recibir notificaciones</string>
     <string name="btn_skip">Saltar por ahora</string>
     <string name="body_request_post_notifications_permission">Mientras AlphaWallet está en segundo plano, puede enviarle notificaciones de varios eventos, como cuando su billetera recibe tokens.</string>

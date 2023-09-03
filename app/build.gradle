@@ -170,6 +170,7 @@ android {
         }
         release {
             minifyEnabled false
+            shrinkResources false
             if (signingConfigs.release.storeFile) {
                 signingConfig signingConfigs.release
             }

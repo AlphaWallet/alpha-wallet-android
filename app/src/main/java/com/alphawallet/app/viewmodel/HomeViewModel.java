@@ -706,10 +706,9 @@ public class HomeViewModel extends BaseViewModel
             ContractInfo info = td.contracts.get(td.holdingToken);
             if (attn != null && info.contractInterface.equals("Attestation"))
             {
-                //calculate using formula: #{scheme.drop0x}#{address.drop0x.lowercased}#{eventId}
-                String address = Numeric.cleanHexPrefix(Numeric.toHexString(Keys.getAddress(attn.issuerKey))).toLowerCase();
-                String preHash = Numeric.cleanHexPrefix(newFileName).toLowerCase() + address + (!TextUtils.isEmpty(attn.terminationId) ? attn.terminationId : "");
-                newFileName = Numeric.toHexString(Hash.keccak256(preHash.getBytes(StandardCharsets.UTF_8)));
+                //recover the prehash from attestation
+                byte[] preHash = attn.getCollectionIdPreHash();
+                newFileName = Numeric.toHexString(Hash.keccak256(preHash));
             }
             else
             {

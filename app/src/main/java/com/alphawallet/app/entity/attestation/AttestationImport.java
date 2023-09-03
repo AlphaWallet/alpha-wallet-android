@@ -286,9 +286,8 @@ public class AttestationImport
 
     private void completeImport(Token token)
     {
-        if (token instanceof Attestation && ((Attestation)token).isValid() == AttestationValidationStatus.Pass)
+        if (token instanceof Attestation tokenAttn && ((Attestation)token).isValid() == AttestationValidationStatus.Pass)
         {
-            Attestation tokenAttn = (Attestation)token;
             TokenCardMeta tcmAttestation = new TokenCardMeta(tokenAttn.tokenInfo.chainId, tokenAttn.getAddress(), "1", System.currentTimeMillis(),
                     assetDefinitionService, tokenAttn.tokenInfo.name, tokenAttn.tokenInfo.symbol, tokenAttn.getBaseTokenType(),
                     TokenGroup.ATTESTATION, tokenAttn.getAttestationUID());
@@ -370,14 +369,7 @@ public class AttestationImport
         String collectionHash = localAttestation.getAttestationCollectionId();
 
         //is it a smartpass?
-        if (localAttestation.hasSmartPassElement() && issuerOnKeyChain)
-        {
-            tInfo = Attestation.getSmartPassInfo(attestation.getChainId(), collectionHash);
-        }
-        else
-        {
-            tInfo = Attestation.getDefaultAttestationInfo(attestation.getChainId(), collectionHash);
-        }
+        tInfo = Attestation.getDefaultAttestationInfo(attestation.getChainId(), collectionHash);
 
         //Now regenerate with the correct collectionId
         localAttestation = new Attestation(tInfo, networkInfo.name, originLink.getBytes(StandardCharsets.UTF_8));

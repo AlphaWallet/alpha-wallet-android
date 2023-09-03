@@ -1253,8 +1253,6 @@ public class Utils
             }
 
             decoded = universalURLDecode(payload);
-            //decoded = decoded.replace("_", "/").replace("-", "+");
-
             Timber.d("decoded url: %s", decoded);
         }
         catch (Exception e)

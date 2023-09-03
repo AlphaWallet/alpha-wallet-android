@@ -271,7 +271,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_script_view);
         setupViews();

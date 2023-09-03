@@ -985,8 +985,8 @@
     <string name="action_proceed">Procéder</string>
     <string name="setting_title_notification_incoming_tokens">Jetons entrants</string>
     <string name="setting_description_notification_incoming_tokens">Afficher les notifications lorsque les jetons sont reçus par votre portefeuille actif.</string>
-    <string name="notification_message_incoming_token_with_recipient">Le portefeuille %1s a reçu %2s de %3s. Appuyez ici pour afficher les détails de la transaction.</string>
-    <string name="notification_message_incoming_token">Le portefeuille %1s a reçu %2s. Appuyez ici pour afficher les détails de la transaction.</string>
+    <string name="notification_message_incoming_token_with_recipient">Le portefeuille %1$s a reçu %2$s de %3$s. Appuyez ici pour afficher les détails de la transaction.</string>
+    <string name="notification_message_incoming_token">Le portefeuille %1$s a reçu %2$s. Appuyez ici pour afficher les détails de la transaction.</string>
     <string name="btn_ok_request_post_notifications_permission">Je veux recevoir des notifications</string>
     <string name="btn_skip">Ignorer pour l\'instant</string>
     <string name="body_request_post_notifications_permission">Pendant qu\'AlphaWallet est en arrière-plan, il peut vous envoyer des notifications pour divers événements, comme lorsque votre portefeuille reçoit des jetons.</string>

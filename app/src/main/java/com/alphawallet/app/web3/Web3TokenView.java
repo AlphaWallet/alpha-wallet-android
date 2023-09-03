@@ -432,7 +432,7 @@ public class Web3TokenView extends WebView
         if (td != null && td.holdingToken != null)
         {
             //use webview
-            renderTokenscriptView(token, range, assetService, iconified);
+            renderTokenScriptView(token, range, assetService, iconified);
         }
         else
         {
@@ -456,7 +456,7 @@ public class Web3TokenView extends WebView
         loadData(displayData, "text/html", "utf-8");
     }
 
-    public void renderTokenscriptView(Token token, TicketRange range, AssetDefinitionService assetService, ViewType itemView)
+    public void renderTokenScriptView(Token token, TicketRange range, AssetDefinitionService assetService, ViewType itemView)
     {
         BigInteger tokenId = range.tokenIds.get(0);
 

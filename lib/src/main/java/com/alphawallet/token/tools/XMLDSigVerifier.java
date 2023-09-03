@@ -24,6 +24,7 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -243,12 +244,11 @@ public class XMLDSigVerifier {
             result.issuerPrincipal = signingCert.getIssuerX500Principal().getName();
             result.subjectPrincipal = signingCert.getSubjectX500Principal().getName();
             result.keyType = signingCert.getSigAlgName();
-            for (Object o : xmlKeyInfo.getContent())
+            for (XMLStructure o : xmlKeyInfo.getContent())
             {
-                XMLStructure xmlStructure = (XMLStructure) o;
-                if (xmlStructure instanceof KeyName)
+                if (o instanceof KeyName)
                 {
-                    result.keyName = ((KeyName) xmlStructure).getName();
+                    result.keyName = ((KeyName) o).getName();
                 }
             }
         }
@@ -260,34 +260,39 @@ public class XMLDSigVerifier {
         return result;
     }
 
-    private List getCertificateChainFromXML(List xmlElements) throws KeyStoreException {
+    private List<X509Certificate> getCertificateChainFromXML(List<XMLStructure> xmlElements) throws KeyStoreException, ClassCastException {
         boolean found = false;
-        List certs = null;
+        List<X509Certificate> certs = new ArrayList<>();
         for (int i = 0; i < xmlElements.size(); i++)
         {
-            XMLStructure xmlStructure = (XMLStructure) xmlElements.get(i);
+            XMLStructure xmlStructure = xmlElements.get(i);
             if (xmlStructure instanceof X509Data)
             {
                 if(found) throw new KeyStoreException("Duplicate X509Data element");
                 found = true;
-                certs = (List<X509Certificate>) ((X509Data) xmlStructure).getContent();
+                for (Object o : ((X509Data) xmlStructure).getContent())
+                {
+                    if (o instanceof X509Certificate)
+                    {
+                        certs.add((X509Certificate)o);
+                    }
+                }
             }
         }
         return certs;
     }
 
-    private PublicKey recoverPublicKeyFromXML(List xmlElements) throws KeyStoreException {
+    private PublicKey recoverPublicKeyFromXML(List<XMLStructure> xmlElements) throws KeyStoreException {
         boolean found = false;
         PublicKey keyVal = null;
         for (int i = 0; i < xmlElements.size(); i++)
         {
-            XMLStructure xmlStructure = (XMLStructure) xmlElements.get(i);
-            if (xmlStructure instanceof KeyValue)
+            XMLStructure xmlStructure = xmlElements.get(i);
+            if (xmlStructure instanceof KeyValue kv)
             {
                 //should only be one KeyValue
                 if(found) throw new KeyStoreException("Duplicate Key found");
                 found = true;
-                KeyValue kv = (KeyValue) xmlStructure;
                 try
                 {
                     keyVal = kv.getPublicKey();
@@ -301,7 +306,7 @@ public class XMLDSigVerifier {
         return keyVal;
     }
 
-    private X509Certificate selectSigningKeyFromXML(List xmlElements) throws KeyStoreException, CertificateNotYetValidException {
+    private X509Certificate selectSigningKeyFromXML(List<XMLStructure> xmlElements) throws KeyStoreException, CertificateNotYetValidException {
         PublicKey recovered = recoverPublicKeyFromXML(xmlElements);
         //Certificates from the XML might be in the wrong order
         List<X509Certificate> certList = reorderCertificateChain(getCertificateChainFromXML(xmlElements));
@@ -346,16 +351,14 @@ public class XMLDSigVerifier {
         {
             if (keyInfo == null) throw new KeySelectorException("Null KeyInfo object!");
             PublicKey signer = null;
-            List list = keyInfo.getContent();
+            List<XMLStructure> list = keyInfo.getContent();
             boolean found = false;
-            for (Object o : list)
+            for (XMLStructure xmlStructure : list)
             {
-                XMLStructure xmlStructure = (XMLStructure) o;
-                if (xmlStructure instanceof KeyValue)
+                if (xmlStructure instanceof KeyValue kv)
                 {
                     if(found) throw new KeySelectorException("Duplicate KeyValue");
                     found = true;
-                    KeyValue kv = (KeyValue) xmlStructure;
                     try
                     {
                         signer = kv.getPublicKey();
@@ -376,7 +379,6 @@ public class XMLDSigVerifier {
             {
                 throw new KeySelectorException(e.getMessage());
             }
-            ;
             if (signingCert != null)
             {
                 return new SimpleKeySelectorResult(signingCert.getPublicKey());
@@ -390,7 +392,7 @@ public class XMLDSigVerifier {
 
     private class SimpleKeySelectorResult implements KeySelectorResult
     {
-        private PublicKey pk;
+        private final PublicKey pk;
         SimpleKeySelectorResult(PublicKey pk) {
             this.pk = pk;
         }

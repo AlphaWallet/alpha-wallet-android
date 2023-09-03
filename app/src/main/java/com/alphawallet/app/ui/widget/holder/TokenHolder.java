@@ -194,7 +194,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         balanceEth.setText(attestation.getAttestationName(td));
         balanceCoin.setText(attestation.getAttestationDescription(td));
         balanceCoin.setVisibility(View.VISIBLE);
-        if (attestation.isSmartPass())
+        if (attestation.knownIssuerKey())
         {
             tokenIcon.setSmartPassIcon(data.getChain());
         }

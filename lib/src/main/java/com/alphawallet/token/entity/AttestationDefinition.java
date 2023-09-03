@@ -2,15 +2,18 @@ package com.alphawallet.token.entity;
 
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
-import com.alphawallet.token.entity.ContractInfo;
-import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.tools.Numeric;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.web3j.crypto.Keys;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -27,19 +30,17 @@ public class AttestationDefinition
     public final String name;
     public long chainId;
     public byte[] issuerKey; //also used to generate collectionId
-    public String terminationId; //used to generate collectionId
+    //Note these are in List form to preserve order, important in generating the collectionHash
+    public List<String> collectionKeys;
+    public List<String> collectionText;
     public String replacementFieldId; //used to check if new attestation should replace the old
+    public String schemaUID;
 
     public AttestationDefinition(String name)
     {
         this.name = name;
         metadata = null;
         attributes = null;
-    }
-
-    public void handleEventId(Element element)
-    {
-        terminationId = element.getTextContent();
     }
 
     public void handleReplacementField(Element element)
@@ -50,7 +51,7 @@ public class AttestationDefinition
     public void handleKey(Element element)
     {
         //should be the key itself
-        String key = Numeric.cleanHexPrefix(element.getTextContent());
+        String key = Numeric.cleanHexPrefix(element.getTextContent().trim());
         if (key.length() == 130 && key.startsWith("04"))
         {
             key = key.substring(2);
@@ -62,7 +63,7 @@ public class AttestationDefinition
     public ContractInfo addAttributes(Element element)
     {
         //get schemaUID attribute
-        String schemaUID = element.getAttribute("schemaUID");
+        schemaUID = element.getAttribute("schemaUID");
         String networkStr = element.getAttribute("network");
         //this is the backlink to the attestation
         ContractInfo info = new ContractInfo("Attestation");
@@ -111,5 +112,37 @@ public class AttestationDefinition
                 metadata.put(metaName, metaText);
             }
         }
+    }
+
+    public void handleCollectionFields(Element element)
+    {
+        collectionKeys = new ArrayList<>();
+        collectionText = new ArrayList<>();
+        for (Node n = element.getFirstChild(); n != null; n = n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE) continue;
+            Element attnElement = (Element) n;
+
+            if (attnElement.getLocalName().equals("collectionField"))
+            {
+                collectionKeys.add(attnElement.getAttribute("name"));
+                collectionText.add(attnElement.getTextContent());
+            }
+        }
+    }
+
+    public byte[] getCollectionIdPreHash()
+    {
+        //produce the collectionId
+        StringBuilder sb = new StringBuilder();
+        sb.append(Numeric.cleanHexPrefix(schemaUID).toLowerCase(Locale.ROOT));
+        sb.append(Keys.getAddress(Numeric.toHexString(issuerKey)).toLowerCase(Locale.ROOT));
+
+        for (String collectionItem : collectionText)
+        {
+            sb.append(collectionItem);
+        }
+
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

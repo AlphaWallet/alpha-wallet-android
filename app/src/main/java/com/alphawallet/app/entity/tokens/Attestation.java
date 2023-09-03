@@ -61,13 +61,13 @@ public class Attestation extends Token
     private static final String VALID_TO = "expirationTime";
     private static final String TICKET_ID = "TicketId";
     private static final String SCRIPT_URI = "scriptURI";
-    private static final String EVENT_ID = "orgId";
+    private static final String EVENT_IDS = "orgId,eventId,devconId"; //TODO: Remove once we use TokenScript
+    private static final String SECONDARY_IDS = "version";
     private static final String SCHEMA_DATA_PREFIX = "data.";
     public static final String ATTESTATION_SUFFIX = "-att";
     public static final String EAS_ATTESTATION_TEXT = "EAS Attestation";
     public static final String EAS_ATTESTATION_SYMBOL = "ATTN";
-    public static final String SMART_PASS = "Smartpass";
-    private static final String SMARTLAYER = "SL";//"SMARTLAYER";
+    private static final String SMART_LAYER = "SMARTLAYER"; //TODO: Remove once we use TokenScript
 
     //TODO: Supplemental data
     public Attestation(TokenInfo tokenInfo, String networkName, byte[] attestation)
@@ -80,11 +80,6 @@ public class Attestation extends Token
     public static TokenInfo getDefaultAttestationInfo(long chainId, String collectionHash)
     {
         return new TokenInfo(collectionHash, EAS_ATTESTATION_TEXT, EAS_ATTESTATION_SYMBOL, 0, true, chainId);
-    }
-
-    public static TokenInfo getSmartPassInfo(long chainId, String collectionHash)
-    {
-        return new TokenInfo(collectionHash, SMART_PASS, EAS_ATTESTATION_SYMBOL, 0, true, chainId);
     }
 
     public byte[] getAttestation()
@@ -177,12 +172,9 @@ public class Attestation extends Token
     @Override
     public String getAttestationCollectionId()
     {
-        String eventId = null;
-        MemberData eventMember = additionalMembers.get(SCHEMA_DATA_PREFIX + EVENT_ID);
-        if (eventMember != null)
-        {
-            eventId = eventMember.getString();
-        }
+        // TODO: Pull these from the TokenScript
+        String eventId = getCollectionId(EVENT_IDS);
+        String eventPostFix = getCollectionId(SECONDARY_IDS);
 
         EasAttestation easAttestation = getEasAttestation();
 
@@ -196,7 +188,7 @@ public class Attestation extends Token
             //issuer public key
             //calculate hash from attestation
             String hexStr = Numeric.cleanHexPrefix(easAttestation.getSchema()).toLowerCase(Locale.ROOT) + Keys.getAddress(recoverPublicKey(easAttestation)).toLowerCase(Locale.ROOT)
-                    + (!TextUtils.isEmpty(eventId) ? eventId : "");
+                    + eventId + eventPostFix;
             //now convert this into ASCII hex bytes
             collectionBytes = hexStr.getBytes(StandardCharsets.UTF_8);
         }
@@ -205,6 +197,23 @@ public class Attestation extends Token
         byte[] hash = Hash.keccak256(collectionBytes);
 
         return Numeric.toHexString(hash);
+    }
+
+    private String getCollectionId(String eventIds)
+    {
+        String collectionId = "";
+        String[] candidates = eventIds.split(",");
+        for (String candidate : candidates)
+        {
+            MemberData memberData = additionalMembers.get(SCHEMA_DATA_PREFIX + candidate);
+            if (memberData != null)
+            {
+                collectionId = memberData.getString();
+                break;
+            }
+        }
+
+        return collectionId;
     }
 
     @Override
@@ -470,28 +479,20 @@ public class Attestation extends Token
         }
     }
 
-    public static boolean hasSmartPassElementCheck(String jsonData)
+    public boolean knownIssuerKey()
     {
-        return hasSmartPassElementInternal(getMembersFromJSON(jsonData));
-    }
-
-    public boolean hasSmartPassElement()
-    {
-        return hasSmartPassElementInternal(additionalMembers);
-    }
-
-    private static boolean hasSmartPassElementInternal(Map<String, MemberData> members)
-    {
-        MemberData orgId = members.getOrDefault("data.orgId", null);
-        String orgIdValue = orgId != null ? orgId.getString() : "";
-        return orgIdValue.equalsIgnoreCase(SMARTLAYER);
+        return getKnownRootIssuers(tokenInfo.chainId).contains(issuerKey);
     }
 
     public boolean isSmartPass()
     {
-        //find SMARTPASS in the schema elements and check against correct issuer. TODO: check against keychain if not valid
-        boolean issuerMatch = getKnownRootIssuers(tokenInfo.chainId).contains(issuerKey);
-        return hasSmartPassElementInternal(additionalMembers) && issuerMatch;
+        //TODO: This should use TokenScript
+        return knownIssuerKey() && orgIsSmartLayer();
+    }
+
+    private boolean orgIsSmartLayer()
+    {
+        return getCollectionId(EVENT_IDS).equalsIgnoreCase(SMART_LAYER);
     }
 
     private static class MemberData
@@ -769,6 +770,7 @@ public class Attestation extends Token
 
             BigInteger key = Sign.signedMessageHashToKey(hash, sig);
             recoveredKey = Numeric.toHexString(Numeric.toBytesPadded(key, 64));
+            Timber.i("Public Key: %s", recoveredKey);
         }
         catch (Exception e)
         {

@@ -9,6 +9,7 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
@@ -55,11 +56,15 @@ public class TransactionHandler
     {
         List<BigInteger> result = new ArrayList<>();
         org.web3j.abi.datatypes.Function function = balanceOfArray(address);
-        List<Uint256> indices = callSmartContractFunctionArray(function, contractAddress, address);
+        List<Type<?>> indices = callSmartContractFunctionArray(function, contractAddress, address);
         if (indices == null) throw new BadContract();
-        for (Uint256 val : indices)
+        for (Type<?> val : indices)
         {
-            result.add(val.getValue());
+            if (val instanceof Uint)
+            {
+                Uint256 uintValue = (Uint256) val;
+                result.add(uintValue.getValue());
+            }
         }
         return result;
     }
@@ -143,7 +148,7 @@ public class TransactionHandler
         return ethCall.getValue();
     }
 
-    private List callSmartContractFunctionArray(
+    private List<Type<?>> callSmartContractFunctionArray(
             org.web3j.abi.datatypes.Function function, String contractAddress, String address) throws Exception
     {
         String encodedFunction = FunctionEncoder.encode(function);
@@ -154,9 +159,8 @@ public class TransactionHandler
         List<Type> values = FunctionReturnDecoder.decode(value, function.getOutputParameters());
         if (values.isEmpty()) return null;
 
-        Type T = values.get(0);
-        Object o = T.getValue();
-        return (List) o;
+        Type<?> T = values.get(0);
+        return Collections.singletonList(T);
     }
 
     private static org.web3j.abi.datatypes.Function stringParam(String param) {

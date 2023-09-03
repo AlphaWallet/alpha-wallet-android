@@ -218,8 +218,8 @@ public class TokenFactory
         {
             EasAttestation easAttn = new Gson().fromJson(jsonAttestation, EasAttestation.class);
             String recoverAttestationSigner = AttestationImport.recoverSigner(easAttn);
-            TokenInfo tInfo = createAttestationTokenInfo(token, info, recoverAttestationSigner,
-                    rAttn.getTokenAddress(), Attestation.hasSmartPassElementCheck(rAttn.getSubTitle()));
+            TokenInfo tInfo = createAttestationTokenInfo(token, info,
+                    rAttn.getTokenAddress());
             Attestation attn = new Attestation(tInfo, info.name, rAttn.getAttestationLink().getBytes(StandardCharsets.UTF_8));
             attn.setTokenWallet(wallet);
             attn.loadAttestationData(rAttn, recoverAttestationSigner);
@@ -227,16 +227,12 @@ public class TokenFactory
         }
     }
 
-    private TokenInfo createAttestationTokenInfo(Token token, NetworkInfo info, String recoverAttestationSigner, String tokenAddress, boolean hasSmartPassElement)
+    private TokenInfo createAttestationTokenInfo(Token token, NetworkInfo info, String tokenAddress)
     {
         TokenInfo tInfo;
         if (token != null)
         {
             tInfo = token.tokenInfo;
-        }
-        else if (hasSmartPassElement && Attestation.getKnownRootIssuers(info.chainId).contains(recoverAttestationSigner))
-        {
-            tInfo = Attestation.getSmartPassInfo(info.chainId, tokenAddress);
         }
         else
         {

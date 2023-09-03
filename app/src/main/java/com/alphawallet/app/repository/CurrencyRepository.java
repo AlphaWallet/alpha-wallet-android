@@ -25,7 +25,8 @@ public class CurrencyRepository implements CurrencyRepositoryType {
             new CurrencyItem("VND", "Vietnamese đồng", "₫", R.drawable.ic_flags_vietnam),
             new CurrencyItem("PKR", "Pakistani Rupee", "Rs", R.drawable.ic_flags_pakistan),
             new CurrencyItem("MMK", "Myanmar Kyat", "Ks", R.drawable.ic_flags_myanmar),
-            new CurrencyItem("IDR", "Indonesian Rupiah", "Rp", R.drawable.ic_flags_indonesia)
+            new CurrencyItem("IDR", "Indonesian Rupiah", "Rp", R.drawable.ic_flags_indonesia),
+            new CurrencyItem("BDT", "Bangladeshi Taka", "৳", R.drawable.ic_flags_bangladesh)
     };
 
     private final PreferenceRepositoryType preferences;

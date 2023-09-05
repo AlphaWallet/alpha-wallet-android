@@ -1507,7 +1507,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     public void reloadPage()
     {
-        if (currentFragment.equals(DAPP_BROWSER))
+        if (currentFragment != null && currentFragment.equals(DAPP_BROWSER))
         {
             if (refresh != null)
             {

@@ -6,7 +6,6 @@ import static com.alphawallet.app.util.Utils.parseTokenId;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 import static org.web3j.tx.Contract.staticExtractEventParameters;
 
-import android.app.Activity;
 import android.text.TextUtils;
 import android.util.Pair;
 
@@ -24,7 +23,6 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TransactionsService;
-import com.alphawallet.app.viewmodel.BaseViewModel;
 
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
@@ -172,12 +170,6 @@ public class ERC721Token extends Token
             function = new Function("safeTransferFrom", params, returnTypes);
         }
         return function;
-    }
-
-    @Override
-    public void clickReact(BaseViewModel viewModel, Activity activity)
-    {
-        viewModel.showTokenList(activity, this);
     }
 
     @Override

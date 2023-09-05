@@ -161,12 +161,14 @@ public class WalletsActivity extends BaseActivity implements
             viewModel.noWalletsError().observe(this, this::noWallets);
             viewModel.baseTokens().observe(this, this::updateBaseTokens);
         }
+
         disposable = viewModel.getWalletInteract().find()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onActiveWalletFetched);
+
+        initViews();
         viewModel.onPrepare(balanceChain, this);
-        initViews(); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
     }
 
     private void onActiveWalletFetched(Wallet activeWallet)
@@ -389,8 +391,8 @@ public class WalletsActivity extends BaseActivity implements
         if (adapter != null)
         {
             adapter.setDefaultWallet(wallet);
+            scrollToDefaultWallet();
         }
-        scrollToDefaultWallet();
         selectedWallet = wallet;
     }
 

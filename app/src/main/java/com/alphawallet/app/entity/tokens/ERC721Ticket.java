@@ -1,7 +1,5 @@
 package com.alphawallet.app.entity.tokens;
 
-import android.app.Activity;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
@@ -12,7 +10,6 @@ import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 
 import org.web3j.abi.datatypes.Function;
@@ -107,12 +104,6 @@ public class ERC721Ticket extends Token
     public void setRealmBalance(RealmToken realmToken)
     {
         realmToken.setBalance(Utils.bigIntListToString(balanceArray, true));
-    }
-
-    @Override
-    public void clickReact(BaseViewModel viewModel, Activity activity)
-    {
-        viewModel.showTokenList(activity, this);
     }
 
     @Override

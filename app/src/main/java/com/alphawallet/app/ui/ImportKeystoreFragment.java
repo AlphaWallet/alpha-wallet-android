@@ -122,7 +122,7 @@ public class ImportKeystoreFragment extends ImportFragment
 
     public boolean backPressed()
     {
-        if (password.getVisibility() == View.VISIBLE)
+        if (password != null && password.getVisibility() == View.VISIBLE)
         {
             showKeystore();
             return true;

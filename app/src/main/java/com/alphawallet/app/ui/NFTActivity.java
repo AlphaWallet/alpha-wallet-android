@@ -363,9 +363,18 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
 
     private void hideMenu()
     {
-        sendMultipleTokensMenuItem.setVisible(false);
-        switchToGridViewMenuItem.setVisible(false);
-        switchToListViewMenuItem.setVisible(false);
+        if (sendMultipleTokensMenuItem != null)
+        {
+            sendMultipleTokensMenuItem.setVisible(false);
+        }
+        if (switchToGridViewMenuItem != null)
+        {
+            switchToGridViewMenuItem.setVisible(false);
+        }
+        if (switchToListViewMenuItem != null)
+        {
+            switchToListViewMenuItem.setVisible(false);
+        }
     }
 
     private void showMenu()

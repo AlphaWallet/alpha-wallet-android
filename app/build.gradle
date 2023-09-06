@@ -66,16 +66,6 @@ android_lint_reporter {
     showLog = true // optional - default to false, show extra information, will slow things down
 }
 
-repositories {
-    maven {
-        url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
-        credentials {
-            username = getGitHubUsername()
-            password = getPAT()
-        }
-    }
-}
-
 android {
     sourceSets {
         main {
@@ -231,24 +221,6 @@ tasks.register("printVersionCode") {
     }
 }
 
-gradle.projectsEvaluated({
-    def username = getGitHubUsername()
-    def password = getPAT()
-    if (!username || !password) {
-        throw new GradleException('Please provide GitHub username and Personal Access Token. Find more here https://github.com/alphaWallet/alpha-wallet-android#getting-started')
-    }
-})
-
-// GitHub Personal Access Token
-private String getPAT() {
-    def encodedToken = project.findProperty("gpr.key")
-    new String(encodedToken.decodeBase64())
-}
-
-private String getGitHubUsername() {
-    project.findProperty("gpr.user")
-}
-
 dependencies {
     implementation project(":lib")
 
@@ -314,7 +286,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.13.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-android'
-    implementation 'com.trustwallet:wallet-core:2.6.16'
+    implementation 'com.trustwallet:wallet-core:3.2.18'
     implementation 'com.github.florent37:TutoShowcase:d8b91be8a2'
     implementation 'com.github.google:flexbox-layout:2.0.1'
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'

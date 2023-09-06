@@ -432,7 +432,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         {
             tivTokenId.setValue(sequenceId);
         }
-        else
+        else if (tokenId != null)
         {
             tivTokenId.setValue(tokenId.toString());
         }

@@ -5,7 +5,6 @@ import static com.alphawallet.app.repository.TokenRepository.callSmartContractFu
 import static com.alphawallet.app.util.Utils.parseTokenId;
 import static org.web3j.tx.Contract.staticExtractEventParameters;
 
-import android.app.Activity;
 import android.util.Pair;
 
 import com.alphawallet.app.R;
@@ -23,7 +22,6 @@ import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.BaseViewModel;
 
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
@@ -544,12 +542,6 @@ public class ERC1155Token extends Token
     public String getStringBalanceForUI(int scale)
     {
         return getBalanceRaw().toString();
-    }
-
-    @Override
-    public void clickReact(BaseViewModel viewModel, Activity activity)
-    {
-        viewModel.showTokenList(activity, this);
     }
 
     @Override

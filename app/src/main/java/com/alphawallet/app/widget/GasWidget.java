@@ -388,8 +388,15 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
     @Override
     public BigInteger getGasPrice(BigInteger defaultPrice)
     {
-        GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
-        return gs.gasPrice.maxFeePerGas;
+        if (gasSpread == null || !gasSpread.isResultValid())
+        {
+            return defaultPrice;
+        }
+        else
+        {
+            GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
+            return gs.gasPrice.maxFeePerGas;
+        }
     }
 
     @Override

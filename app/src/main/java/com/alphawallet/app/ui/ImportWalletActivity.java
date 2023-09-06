@@ -329,8 +329,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     {
         if (item.getItemId() == android.R.id.home && currentPage == ImportType.KEYSTORE_FORM_INDEX)
         {
-            if (((ImportKeystoreFragment) pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()).second).backPressed())
-                return true;
+            return (((ImportKeystoreFragment) pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()).second).backPressed());
         }
         else if (item.getItemId() == R.id.action_scan)
         {

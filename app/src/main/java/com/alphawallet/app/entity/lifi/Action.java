@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity.lifi;
 
+import android.text.TextUtils;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -42,9 +44,16 @@ public class Action
 
     public String getCurrentPrice()
     {
-        return new BigDecimal(fromToken.priceUSD)
-                .divide(new BigDecimal(toToken.priceUSD), 4, RoundingMode.DOWN)
-                .stripTrailingZeros()
-                .toPlainString();
+        if (fromToken == null || TextUtils.isEmpty(fromToken.priceUSD) || new BigDecimal(fromToken.priceUSD).equals(BigDecimal.ZERO))
+        {
+            return "0";
+        }
+        else
+        {
+            return new BigDecimal(fromToken.priceUSD)
+                    .divide(new BigDecimal(toToken.priceUSD), 4, RoundingMode.DOWN)
+                    .stripTrailingZeros()
+                    .toPlainString();
+        }
     }
 }

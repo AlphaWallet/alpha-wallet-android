@@ -2,9 +2,7 @@ package com.alphawallet.app.entity.tokens;
 
 import static android.text.Html.FROM_HTML_MODE_COMPACT;
 
-import android.app.Activity;
 import android.content.Context;
-import android.os.Build;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -31,7 +29,6 @@ import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
@@ -329,11 +326,6 @@ public class Token
     public String getShortSymbol()
     {
         return Utils.getShortSymbol(getShortestNameOrSymbol());
-    }
-
-    public void clickReact(BaseViewModel viewModel, Activity context)
-    {
-        viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
     }
 
     public BigDecimal getCorrectedBalance(int scale)

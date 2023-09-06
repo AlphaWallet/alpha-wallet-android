@@ -13,7 +13,6 @@ import static com.alphawallet.app.service.KeystoreAccountService.KEYSTORE_FOLDER
 import static com.alphawallet.app.service.KeystoreAccountService.bytesFromSignature;
 import static com.alphawallet.app.service.LegacyKeystore.getLegacyPassword;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -90,7 +89,6 @@ import wallet.core.jni.Hash;
 import wallet.core.jni.Mnemonic;
 import wallet.core.jni.PrivateKey;
 
-@TargetApi(23)
 public class KeyService implements AuthenticationCallback, PinAuthenticationCallbackInterface, HardwareCallback
 {
     private static final String TAG = "HDWallet";

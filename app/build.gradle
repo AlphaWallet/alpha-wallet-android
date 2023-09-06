@@ -66,16 +66,6 @@ android_lint_reporter {
     showLog = true // optional - default to false, show extra information, will slow things down
 }
 
-repositories {
-    maven {
-        url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
-        /*credentials {
-            username = "smarttokenlabs@hotmail.com" as String?: System.getenv("GITHUB_USER")
-            password = "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" as String?: System.getenv("GITHUB_TOKEN")
-        }*/
-    }
-}
-
 android {
     sourceSets {
         main {

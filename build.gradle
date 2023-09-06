@@ -27,7 +27,13 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
+                credentials {
+                    username = "smarttokenlabs@hotmail.com" as String?: System.getenv("GITHUB_USER")
+                    password = "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" as String?: System.getenv("GITHUB_TOKEN")
+                }
+        }
         // WARNING WARNING WARNING
         // you are about to add here a repository which provides some library for the Android app
         // don't do that. add that repository to app/build.gradle

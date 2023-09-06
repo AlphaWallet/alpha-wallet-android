@@ -31,7 +31,7 @@ allprojects {
         maven { url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
                 credentials {
                     username = "JamesSmartCell" as String?: System.getenv("GITHUB_USER")
-                    password = "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" as String?: System.getenv("GITHUB_TOKEN")
+                    password = getPAT() as String?: System.getenv("GITHUB_TOKEN")
                 }
         }
         // WARNING WARNING WARNING
@@ -55,6 +55,12 @@ allprojects {
 
 tasks.register("clean") {
     delete rootProject.buildDir
+}
+
+private String getPAT() {
+    //project.findProperty("gpr.key")
+    def encodedToken = project.findProperty("gpr.key")
+    new String(encodedToken.decodeBase64())
 }
 
 //task clean(type: Delete) {

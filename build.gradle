@@ -30,8 +30,8 @@ allprojects {
         maven { url = uri("https://jitpack.io") }
         maven { url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
                 credentials {
-                    username = "smarttokenlabs@hotmail.com" as String?: System.getenv("GITHUB_USER")
-                    password = "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" as String?: System.getenv("GITHUB_TOKEN")
+                    username = "JamesSmartCell" as String?: System.getenv("GITHUB_USER")
+                    password = "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" as String?: System.getenv("GITHUB_TOKEN")
                 }
         }
         // WARNING WARNING WARNING

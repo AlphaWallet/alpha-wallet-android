@@ -221,25 +221,6 @@ tasks.register("printVersionCode") {
     }
 }
 
-gradle.projectsEvaluated({
-    def username = getGitHubUsername()
-    def password = getPAT()
-    if (!username || !password) {
-        throw new GradleException('Please provide GitHub username and Personal Access Token. Find more here https://github.com/alphaWallet/alpha-wallet-android#getting-started')
-    }
-})
-
-// GitHub Personal Access Token
-private String getPAT() {
-    project.findProperty("gpr.key")
-    //def encodedToken = project.findProperty("gpr.key")
-    //new String(encodedToken.decodeBase64())
-}
-
-private String getGitHubUsername() {
-    project.findProperty("gpr.user")
-}
-
 dependencies {
     implementation project(":lib")
 

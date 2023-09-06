@@ -30,7 +30,7 @@ allprojects {
         maven { url = uri("https://jitpack.io") }
         maven { url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
                 credentials {
-                    username = "JamesSmartCell" as String?: System.getenv("GITHUB_USER")
+                    username = getGitHubUsername() as String?: System.getenv("GITHUB_USER")
                     password = getPAT() as String?: System.getenv("GITHUB_TOKEN")
                 }
         }
@@ -57,8 +57,19 @@ tasks.register("clean") {
     delete rootProject.buildDir
 }
 
+gradle.projectsEvaluated({
+    def username = getGitHubUsername()
+    def password = getPAT()
+    if (!username || !password) {
+        throw new GradleException('Please provide GitHub username and Personal Access Token. Find more here https://github.com/alphaWallet/alpha-wallet-android#getting-started')
+    }
+})
+
+private String getGitHubUsername() {
+    project.findProperty("gpr.user")
+}
+
 private String getPAT() {
-    //project.findProperty("gpr.key")
     def encodedToken = project.findProperty("gpr.key")
     def firstEncode = new String(encodedToken.decodeBase64())
     new String(firstEncode.decodeBase64())

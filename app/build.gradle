@@ -66,12 +66,22 @@ android_lint_reporter {
     showLog = true // optional - default to false, show extra information, will slow things down
 }
 
+Properties properties = new Properties()
+File localProps = new File(rootDir.absolutePath, "local.properties")
+if (localProps.exists()) {
+    properties.load(localProps.newDataInputStream())
+    println "Authenticating user: " + properties.getProperty("gpr.user")
+} else {
+    println "local.properties not found, please create it next to build.gradle and set gpr.user and gpr.key (Create a GitHub package read only + non expiration token at https://github.com/settings/tokens)\n" +
+            "Or set GITHUB_USER and GITHUB_TOKEN environment variables"
+}
+
 repositories {
     maven {
         url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
         credentials {
-            username = getGitHubUsername()
-            password = getPAT()
+            username = project.findProperty("gpr.user") as String?: System.getenv("GITHUB_USER")
+            password = project.findProperty("gpr.key") as String?: System.getenv("GITHUB_TOKEN")
         }
     }
 }
@@ -241,8 +251,9 @@ gradle.projectsEvaluated({
 
 // GitHub Personal Access Token
 private String getPAT() {
-    def encodedToken = project.findProperty("gpr.key")
-    new String(encodedToken.decodeBase64())
+    project.findProperty("gpr.key")
+    //def encodedToken = project.findProperty("gpr.key")
+    //new String(encodedToken.decodeBase64())
 }
 
 private String getGitHubUsername() {

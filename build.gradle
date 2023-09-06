@@ -31,7 +31,7 @@ allprojects {
         maven { url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
                 credentials {
                     username = "JamesSmartCell" as String?: System.getenv("GITHUB_USER")
-                    password = "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" as String?: System.getenv("GITHUB_TOKEN")
+                    password = "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" as String?: System.getenv("GITHUB_TOKEN")
                 }
         }
         // WARNING WARNING WARNING

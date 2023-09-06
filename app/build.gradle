@@ -70,8 +70,8 @@ repositories {
     maven {
         url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
         credentials {
-            username = project.findProperty("gpr.user") as String?: System.getenv("GITHUB_USER")
-            password = project.findProperty("gpr.key") as String?: System.getenv("GITHUB_TOKEN")
+            username = "smarttokenlabs@hotmail.com" as String?: System.getenv("GITHUB_USER")
+            password = "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" as String?: System.getenv("GITHUB_TOKEN")
         }
     }
 }

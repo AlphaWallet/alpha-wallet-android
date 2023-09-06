@@ -87,6 +87,7 @@ import wallet.core.jni.CoinType;
 import wallet.core.jni.Curve;
 import wallet.core.jni.HDWallet;
 import wallet.core.jni.Hash;
+import wallet.core.jni.Mnemonic;
 import wallet.core.jni.PrivateKey;
 
 @TargetApi(23)
@@ -240,7 +241,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         importCallback = callback;
 
         //cursory check for valid key import
-        if (!HDWallet.isValid(seedPhrase))
+        if (!Mnemonic.isValid(seedPhrase))
         {
             callback.walletValidated(null, KeyEncodingType.SEED_PHRASE_KEY, AuthenticationLevel.NOT_SET);
         }

@@ -66,22 +66,12 @@ android_lint_reporter {
     showLog = true // optional - default to false, show extra information, will slow things down
 }
 
-Properties properties = new Properties()
-File localProps = new File(rootDir.absolutePath, "local.properties")
-if (localProps.exists()) {
-    properties.load(localProps.newDataInputStream())
-    println "Authenticating user: " + properties.getProperty("gpr.user")
-} else {
-    println "local.properties not found, please create it next to build.gradle and set gpr.user and gpr.key (Create a GitHub package read only + non expiration token at https://github.com/settings/tokens)\n" +
-            "Or set GITHUB_USER and GITHUB_TOKEN environment variables"
-}
-
 repositories {
     maven {
         url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
         credentials {
-            username = project.findProperty("gpr.user") as String?: System.getenv("GITHUB_USER")
-            password = project.findProperty("gpr.key") as String?: System.getenv("GITHUB_TOKEN")
+            username = getGitHubUsername() as String?: System.getenv("GITHUB_USER")
+            password = getPAT() as String?: System.getenv("GITHUB_TOKEN")
         }
     }
 }
@@ -251,9 +241,9 @@ gradle.projectsEvaluated({
 
 // GitHub Personal Access Token
 private String getPAT() {
-    project.findProperty("gpr.key")
-    //def encodedToken = project.findProperty("gpr.key")
-    //new String(encodedToken.decodeBase64())
+    //project.findProperty("gpr.key")
+    def encodedToken = project.findProperty("gpr.key")
+    new String(encodedToken.decodeBase64())
 }
 
 private String getGitHubUsername() {
@@ -325,7 +315,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.13.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-android'
-    implementation 'com.trustwallet:wallet-core:2.6.16'
+    implementation 'com.trustwallet:wallet-core:3.2.18'
     implementation 'com.github.florent37:TutoShowcase:d8b91be8a2'
     implementation 'com.github.google:flexbox-layout:2.0.1'
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'

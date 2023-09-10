@@ -32,6 +32,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String HIDE_ZERO_BALANCE_TOKENS = "hide_zero_balance_tokens";
     public static final String FULL_SCREEN_STATE = "full_screen";
     public static final String EXPERIMENTAL_1559_TX = "ex_1559_tx";
+    public static final String DEVELOPER_OVERRIDE = "developer_override";
     public static final String TESTNET_ENABLED = "testnet_enabled";
     public static final String PRICE_ALERTS = "price_alerts";
     private static final String SET_NETWORK_FILTERS = "set_filters";
@@ -182,6 +183,18 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public void setUse1559Transactions(boolean state)
     {
         pref.edit().putBoolean(EXPERIMENTAL_1559_TX, state).apply();
+    }
+
+    @Override
+    public boolean getDeveloperOverride()
+    {
+        return pref.getBoolean(DEVELOPER_OVERRIDE, false);
+    }
+
+    @Override
+    public void setDeveloperOverride(boolean state)
+    {
+        pref.edit().putBoolean(DEVELOPER_OVERRIDE, state).apply();
     }
 
     @Override

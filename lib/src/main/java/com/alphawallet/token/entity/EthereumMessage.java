@@ -130,4 +130,34 @@ public class EthereumMessage implements Signable {
     private byte[] getEthereumMessagePrefix(int messageLength) {
         return MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes();
     }
+
+    @Override
+    public boolean isDangerous()
+    {
+        boolean hasPrefix = hasPrefix();
+        boolean isText = StandardCharsets.UTF_8.newEncoder().canEncode(userMessage);
+
+        return !hasPrefix() && !StandardCharsets.UTF_8.newEncoder().canEncode(userMessage);
+    }
+
+    public boolean hasPrefix()
+    {
+        //check for leading personal message:
+        byte[] msgPrefix = EthereumMessage.MESSAGE_PREFIX.getBytes();
+        //match?
+        boolean hasPrefix = true;
+        if (prehash.length > msgPrefix.length)
+        {
+            for (int i = 0; i < msgPrefix.length; i++)
+            {
+                if (prehash[i] != msgPrefix[i])
+                {
+                    hasPrefix = false;
+                    break;
+                }
+            }
+        }
+
+        return hasPrefix;
+    }
 }

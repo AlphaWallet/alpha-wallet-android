@@ -336,6 +336,9 @@
     <string name="signer_address">Alamat</string>
     <string name="requester_url">Pemohon</string>
     <string name="dialog_title_sign_message">Tandai Pesan</string>
+    <string name="dialog_title_sign_message_sheet">⚠ Tandai Pesan ⚠</string>
+    <string name="sign_message_could_be_a_scam">Bahaya: Periksa sebelum menandatangani</string>
+    <string name="sign_message_could_be_a_scam2">Anda bisa berada dalam bahaya kehilangan token Anda terutama jika permintaan ini datang dari \'airdrop\'. Sign Message digunakan terutama oleh scammers. Lakukan penelusuran web untuk situs web ini dan gunakan \'penipuan\'.</string>
     <string name="dialog_title_sign_personal_message">Tandai Pesan Pribadi</string>
     <string name="dialog_title_sign_typed_message">Tandai pesan yang diketik</string>
     <string name="dialog_reject">Tolak</string>
@@ -993,4 +996,8 @@
     <string name="imported_smart_pass">SmartPass yang Diimpor</string>
     <string name="smartpass_imported">SmartPass telah diimpor. Pass Anda harus ditingkatkan.</string>
     <string name="no_connection_to_smart_layer">Tidak ada koneksi ke jaringan SmartLayer - coba impor Pass Anda lagi nanti.</string>
+    <string name="session_not_authorised">Sesi ini tidak diizinkan untuk menandatangani pesan di %s namun Anda dapat melewati batasan ini untuk menandatangani. Dengan pesan yang diketik tidak ada bahaya.</string>
+    <string name="override">Mengesampingkan</string>
+    <string name="developer_override">Penggantian Pengembang</string>
+    <string name="override_warning_text">Anda mungkin tanpa sadar menandatangani transaksi, yang dapat mengosongkan dana Anda. Anda mungkin ingin menandatangani bytecode sebagai pengembang, dan Anda dapat mengabaikan peringatan ini jika Anda menyetel mode pengembang di Setelan lanjutan.</string>
 </resources>

@@ -360,6 +360,9 @@
     <string name="signer_address">Address</string>
     <string name="requester_url">Requester</string>
     <string name="dialog_title_sign_message">Sign Message</string>
+    <string name="dialog_title_sign_message_sheet">⚠ Sign Message ⚠</string>
+    <string name="sign_message_could_be_a_scam">Danger: Check before signing</string>
+    <string name="sign_message_could_be_a_scam2">You could be in danger of losing your tokens esp if this request came from an \'airdrop\'. Sign Message is used by scammers. Do a web search for this website and use \'scam\'.</string>
     <string name="dialog_title_sign_personal_message">Sign Personal Message</string>
     <string name="dialog_title_sign_typed_message">Sign Typed Message</string>
     <string name="dialog_reject">Reject</string>
@@ -1065,4 +1068,8 @@
     <string name="imported_smart_pass">Imported SmartPass</string>
     <string name="smartpass_imported">SmartPass has been imported. Your Pass has been upgraded.</string>
     <string name="no_connection_to_smart_layer">No connection to SmartLayer network - try to import your SmartPass again later.</string>
+    <string name="session_not_authorised">This session is not authorised to sign messages on %s however you can bypass this restriction to sign. With typed message there is no danger.</string>
+    <string name="override">Override</string>
+    <string name="developer_override">Developer Override</string>
+    <string name="override_warning_text">You might be about to unknowingly sign a transaction, which could empty your funds. You may want to sign bytecode as a developer, and you can override this warning if you set developer mode in Advanced settings.</string>
 </resources>

@@ -46,6 +46,10 @@ public interface PreferenceRepositoryType
 
     void setUse1559Transactions(boolean toggleState);
 
+    boolean getDeveloperOverride();
+
+    void setDeveloperOverride(boolean toggleState);
+
     boolean isTestnetEnabled();
 
     void setTestnetEnabled(boolean enabled);

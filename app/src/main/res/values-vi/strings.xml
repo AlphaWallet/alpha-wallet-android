@@ -338,6 +338,9 @@
     <string name="signer_address">Địa chỉ</string>
     <string name="requester_url">Người yêu cầu</string>
     <string name="dialog_title_sign_message">Sign Message</string>
+    <string name="dialog_title_sign_message_sheet">⚠ Sign Message ⚠</string>
+    <string name="sign_message_could_be_a_scam">Nguy hiểm: Kiểm tra trước khi ký</string>
+    <string name="sign_message_could_be_a_scam2">Đặc biệt, bạn có thể gặp nguy cơ mất mã thông báo nếu yêu cầu này đến từ \'airdrop\'. Tin nhắn ký hiệu chủ yếu được sử dụng bởi những kẻ lừa đảo. Thực hiện tìm kiếm trên web cho trang web này và sử dụng \'scam\'.</string>
     <string name="dialog_title_sign_personal_message">Sign Personal Message</string>
     <string name="dialog_title_sign_typed_message">Sign Typed Message</string>
     <string name="dialog_reject">Từ chối</string>
@@ -1002,4 +1005,8 @@
     <string name="imported_smart_pass">SmartPass nhập khẩu</string>
     <string name="smartpass_imported">SmartPass đã được nhập. Thẻ của bạn nên được nâng cấp.</string>
     <string name="no_connection_to_smart_layer">Không có kết nối với mạng SmartLayer - hãy thử nhập lại SmartPass của bạn sau.</string>
+    <string name="session_not_authorised">Phiên này không được phép ký tin nhắn trên %s tuy nhiên bạn có thể bỏ qua hạn chế này để ký. Với tin nhắn đánh máy không có nguy hiểm.</string>
+    <string name="override">Ghi đè</string>
+    <string name="developer_override">Ghi đè Nhà phát triển</string>
+    <string name="override_warning_text">Bạn có thể sắp vô tình ký một giao dịch, điều này có thể khiến tiền của bạn bị rỗng. Bạn có thể muốn ký mã byte với tư cách là nhà phát triển và bạn có thể ghi đè cảnh báo này nếu bạn đặt chế độ nhà phát triển trong cài đặt Nâng cao.</string>
 </resources>

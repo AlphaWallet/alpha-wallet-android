@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
+import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 
 /**
@@ -98,8 +99,19 @@ public class SignDataWidget extends LinearLayout
     {
         this.signable = signable;
         String message = signable.getUserMessage().toString();
-        previewText.setText(message);
-        messageText.setText(message);
+
+        if (signable.getMessageType() == SignMessageType.SIGN_MESSAGE) //Warn user that sign is dangerous
+        {
+            ((ImageView)findViewById(R.id.image_sign_warning)).setVisibility(View.VISIBLE);
+            previewText.setText(R.string.sign_message_could_be_a_scam);
+            message = getContext().getString(R.string.sign_message_could_be_a_scam2) + "\n\n" + message;
+            messageText.setText(message);
+        }
+        else
+        {
+            previewText.setText(message);
+            messageText.setText(message);
+        }
 
         layoutHolder.setOnClickListener(v -> {
             if (previewText.getVisibility() == View.VISIBLE)

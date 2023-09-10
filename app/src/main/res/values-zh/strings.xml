@@ -326,6 +326,9 @@
     <string name="signer_address">签署人地址</string>
     <string name="requester_url">请求链接</string>
     <string name="dialog_title_sign_message">签署消息</string>
+    <string name="dialog_title_sign_message_sheet">⚠ 签署消息 ⚠</string>
+    <string name="sign_message_could_be_a_scam">危险：签字前检查</string>
+    <string name="sign_message_could_be_a_scam2">您可能面临丢失代币的危险，尤其是如果此请求来自“空投”。 Sign Message 主要由诈骗者使用。 对该网站进行网络搜索并使用“诈骗”。</string>
     <string name="dialog_title_sign_personal_message">签署消息\'Personal\'</string>
     <string name="dialog_title_sign_typed_message">签署消息\'Typed\'</string>
     <string name="dialog_reject">拒绝</string>
@@ -989,4 +992,8 @@
     <string name="imported_smart_pass">进口 SmartPass</string>
     <string name="smartpass_imported">SmartPass 已导入。您的通票应升级。</string>
     <string name="no_connection_to_smart_layer">没有连接到 SmartLayer 网络 - 稍后尝试再次导入您的 SmartPass。</string>
+    <string name="session_not_authorised">此会话无权在 %s 上签署邮件，但是您可以绕过此限制进行签名。 使用键入的消息不会有任何危险。</string>
+    <string name="override">覆盖</string>
+    <string name="developer_override">开发者覆盖</string>
+    <string name="override_warning_text">您可能会在不知情的情况下签署一项交易，这可能会清空您的资金。 您可能希望以开发人员的身份对字节码进行签名，如果您在高级设置中设置开发人员模式，则可以覆盖此警告。</string>
 </resources>

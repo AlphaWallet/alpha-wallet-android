@@ -14,11 +14,14 @@ import android.content.ContextWrapper;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
+import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.TypedValue;
@@ -26,6 +29,7 @@ import android.webkit.URLUtil;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.RawRes;
+import androidx.annotation.StyleRes;
 import androidx.fragment.app.FragmentActivity;
 
 import com.alphawallet.app.BuildConfig;
@@ -221,7 +225,7 @@ public class Utils
         {
             default:
             case SIGN_MESSAGE:
-                return R.string.dialog_title_sign_message;
+                return R.string.dialog_title_sign_message_sheet; //warn user this is unsafe
             case SIGN_PERSONAL_MESSAGE:
                 return R.string.dialog_title_sign_personal_message;
             case SIGN_TYPED_DATA:
@@ -229,6 +233,20 @@ public class Utils
             case SIGN_TYPED_DATA_V4:
                 return R.string.dialog_title_sign_typed_message;
         }
+    }
+
+    public static CharSequence getSignMessageTitle(String message)
+    {
+        //produce readable text to display in the signing prompt
+        StyledStringBuilder sb = new StyledStringBuilder();
+        sb.startStyleGroup();
+        sb.append(message);
+        int i = message.length();
+        sb.setSpan(new ForegroundColorSpan(Color.RED), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.setSpan(new ForegroundColorSpan(Color.RED), i-1, i, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.applyStyles();
+
+        return sb;
     }
 
     public static CharSequence formatTypedMessage(ProviderTypedData[] rawData)

@@ -75,6 +75,16 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
         return preferenceRepository.getUse1559Transactions();
     }
 
+    public boolean getDeveloperOverrideState()
+    {
+        return preferenceRepository.getDeveloperOverride();
+    }
+
+    public void toggleDeveloperOverride(boolean toggleState)
+    {
+        preferenceRepository.setDeveloperOverride(toggleState);
+    }
+
     public boolean getFullScreenState()
     {
         return preferenceRepository.getFullScreenState();

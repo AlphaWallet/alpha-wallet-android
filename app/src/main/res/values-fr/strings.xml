@@ -335,6 +335,9 @@
     <string name="signer_address">Adresse</string>
     <string name="requester_url">Demandeur</string>
     <string name="dialog_title_sign_message">Signer message</string>
+    <string name="dialog_title_sign_message_sheet">⚠ Signer message ⚠</string>
+    <string name="sign_message_could_be_a_scam">Danger: Vérifiez avant de signer</string>
+    <string name="sign_message_could_be_a_scam2">Vous pourriez courir le risque de perdre vos jetons, surtout si cette demande provenait d\'un « airdrop ». Sign Message est principalement utilisé par les escrocs. Effectuez une recherche sur ce site Web et utilisez « arnaque ».</string>
     <string name="dialog_title_sign_personal_message">Signer un message personnel</string>
     <string name="dialog_title_sign_typed_message">Signer un message dactylographié</string>
     <string name="dialog_reject">Rejeter</string>
@@ -1002,4 +1005,8 @@
     <string name="imported_smart_pass">Imported Smart Pass</string>
     <string name="smartpass_imported">Smart pass has been imported. Your pass should be upgraded.</string>
     <string name="no_connection_to_smart_layer">No connection to Smart Layer network - try to import your token again later.</string>
+    <string name="session_not_authorised">Cette session n\'est pas autorisée à signer des messages sur %s mais vous pouvez contourner cette restriction pour signer. Avec un message tapé, il n\'y a aucun danger.</string>
+    <string name="override">Passer outre</string>
+    <string name="developer_override">Remplacement du Développeur</string>
+    <string name="override_warning_text">Vous êtes peut-être sur le point de signer sans le savoir une transaction, ce qui pourrait vider vos fonds. Vous souhaiterez peut-être signer le bytecode en tant que développeur et vous pouvez ignorer cet avertissement si vous définissez le mode développeur dans les paramètres avancés.</string>
 </resources>

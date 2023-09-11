@@ -3,7 +3,7 @@ package com.alphawallet.app.util
 import com.alphawallet.app.BuildConfig
 import timber.log.Timber
 
-object TimberUtils
+object TimberInit
 {
     @JvmStatic
     fun configTimber()

@@ -12,8 +12,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 
-import com.alphawallet.app.util.ReleaseTree;
-import com.alphawallet.app.util.TimberUtils;
+import com.alphawallet.app.util.TimberInit;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 
 import java.util.EmptyStackException;
@@ -60,7 +59,7 @@ public class App extends Application
         super.onCreate();
         mInstance = this;
         Realm.init(this);
-        TimberUtils.configTimber();
+        TimberInit.configTimber();
 
         int defaultTheme = PreferenceManager.getDefaultSharedPreferences(this)
                 .getInt("theme", C.THEME_AUTO);

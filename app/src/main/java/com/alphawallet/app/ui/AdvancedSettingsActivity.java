@@ -348,8 +348,6 @@ public class AdvancedSettingsActivity extends BaseActivity
                     LinearLayout advancedSettingsLayout = findViewById(R.id.layout);
                     advancedSettingsLayout.removeView(tokenScript);
                     showAlphaWalletDirectoryConfirmation();
-                    //need to set up the listener
-                    viewModel.startFileListeners();
                 }
                 break;
         }

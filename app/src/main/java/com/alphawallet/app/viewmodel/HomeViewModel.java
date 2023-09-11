@@ -687,7 +687,7 @@ public class HomeViewModel extends BaseViewModel
             xmlInputStream, locale, null);
     }
 
-    public void importScriptFile(Context ctx, Intent startIntent)
+    public void importScriptFile(HomeActivity ctx, Intent startIntent)
     {
         Uri uri = startIntent.getData();
         final ContentResolver contentResolver = ctx.getContentResolver();
@@ -733,6 +733,9 @@ public class HomeViewModel extends BaseViewModel
 
             iStream.close();
 
+            //register new file
+            assetDefinitionService.notifyNewScriptLoaded(newFileName);
+
             disposable = assetDefinitionService.resetAttributes(td)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -740,16 +743,9 @@ public class HomeViewModel extends BaseViewModel
         }
         catch (Exception e)
         {
-            Timber.w(e);
+            //import error
+            ctx.tokenScriptError(e.getMessage());
         }
-    }
-
-    public boolean checkDebugDirectory()
-    {
-        File directory = new File(Environment.getExternalStorageDirectory()
-            + File.separator + ALPHAWALLET_DIR);
-
-        return directory.exists();
     }
 
     public void setWalletStartup()

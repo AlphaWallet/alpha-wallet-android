@@ -2,12 +2,7 @@ package com.alphawallet.app.ui;
 
 import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static com.alphawallet.app.C.ADDED_TOKEN;
-import static com.alphawallet.app.C.CHANGED_LOCALE;
-import static com.alphawallet.app.C.CHANGE_CURRENCY;
-import static com.alphawallet.app.C.QRCODE_SCAN;
-import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.C.RESET_WALLET;
-import static com.alphawallet.app.C.SETTINGS_INSTANTIATED;
 import static com.alphawallet.app.C.SHOW_BACKUP;
 import static com.alphawallet.app.entity.WalletPage.ACTIVITY;
 import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
@@ -36,7 +31,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -399,7 +393,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(RESET_WALLET, this, (requestKey, b) ->
+                .setFragmentResultListener(C.RESET_WALLET, this, (requestKey, b) ->
                 {
                     viewModel.restartTokensService();
                     resetTokens();
@@ -407,17 +401,17 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(CHANGE_CURRENCY, this, (k, b) ->
+                .setFragmentResultListener(C.CHANGE_CURRENCY, this, (k, b) ->
                 {
                     resetTokens();
                     showPage(WALLET);
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(RESET_TOOLBAR, this, (requestKey, b) -> invalidateOptionsMenu());
+                .setFragmentResultListener(C.RESET_TOOLBAR, this, (requestKey, b) -> invalidateOptionsMenu());
 
         getSupportFragmentManager()
-                .setFragmentResultListener(ADDED_TOKEN, this, (requestKey, b) ->
+                .setFragmentResultListener(C.ADDED_TOKEN, this, (requestKey, b) ->
                 {
                     List<ContractLocator> contractList = b.getParcelableArrayList(ADDED_TOKEN);
                     if (contractList != null)
@@ -427,7 +421,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(SHOW_BACKUP, this, (requestKey, b) -> showBackupWalletDialog(b.getBoolean(SHOW_BACKUP, false)));
+                .setFragmentResultListener(C.SHOW_BACKUP, this, (requestKey, b) -> showBackupWalletDialog(b.getBoolean(SHOW_BACKUP, false)));
 
         getSupportFragmentManager()
                 .setFragmentResultListener(C.HANDLE_BACKUP, this, (requestKey, b) ->
@@ -450,19 +444,19 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(CHANGED_LOCALE, this, (requestKey, b) ->
+                .setFragmentResultListener(C.CHANGED_LOCALE, this, (requestKey, b) ->
                 {
                     viewModel.restartHomeActivity(getApplicationContext());
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(SETTINGS_INSTANTIATED, this, (k, b) ->
+                .setFragmentResultListener(C.SETTINGS_INSTANTIATED, this, (k, b) ->
                 {
                     loadingComplete();
                 });
 
         getSupportFragmentManager()
-                .setFragmentResultListener(QRCODE_SCAN, this, (requestKey, b) ->
+                .setFragmentResultListener(C.QRCODE_SCAN, this, (requestKey, b) ->
                 {
                     ScanOptions options = Utils.getQRScanOptions(this);
                     hideDialog();
@@ -957,26 +951,25 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private boolean checkNotificationPermission(int permissionTag)
     {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NOTIFICATION_POLICY)
-                == PackageManager.PERMISSION_GRANTED)
-        {
-            return true;
-        }
-        else
-        {
-            final String[] permissions = new String[]{Manifest.permission.ACCESS_NOTIFICATION_POLICY};
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_NOTIFICATION_POLICY))
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED)
             {
-                Timber.tag("HomeActivity").w("Notification permission is not granted. Requesting permission");
-                ActivityCompat.requestPermissions(this, permissions, permissionTag);
+                String[] permissions;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU)
+                {
+                    permissions = new String[]{Manifest.permission.POST_NOTIFICATIONS};
+                }
+                else
+                {
+                    permissions = new String[]{Manifest.permission.ACCESS_NOTIFICATION_POLICY};
+                }
+                requestPermissions(permissions, permissionTag);
                 return false;
             }
             else
             {
                 return true;
             }
-        }
     }
 
     @Override
@@ -996,6 +989,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
             case RC_ASSET_EXTERNAL_WRITE_PERM:
                 //Can't get here
+                break;
+            case RC_ASSET_NOTIFICATION_PERM:
+                //display import notification
                 break;
         }
     }

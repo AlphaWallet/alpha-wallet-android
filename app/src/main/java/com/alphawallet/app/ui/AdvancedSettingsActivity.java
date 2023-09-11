@@ -44,6 +44,7 @@ public class AdvancedSettingsActivity extends BaseActivity
     private SettingsItemView eip1559Transactions;
     private SettingsItemView analytics;
     private SettingsItemView crashReporting;
+    private SettingsItemView developerOverride;
     private AWalletAlertDialog waitDialog = null;
 
     @Nullable
@@ -142,8 +143,21 @@ public class AdvancedSettingsActivity extends BaseActivity
             .withListener(this::onCrashReportingClicked)
             .build();
 
+        developerOverride = new SettingsItemView.Builder(this)
+                .withType(SettingsItemView.Type.TOGGLE)
+                .withIcon(R.drawable.ic_settings_warning)
+                .withTitle(R.string.developer_override)
+                .withListener(this::onDeveloperOverride)
+                .build();
+
         fullScreenSettings.setToggleState(viewModel.getFullScreenState());
         eip1559Transactions.setToggleState(viewModel.get1559TransactionsState());
+        developerOverride.setToggleState(viewModel.getDeveloperOverrideState());
+    }
+
+    private void onDeveloperOverride()
+    {
+        viewModel.toggleDeveloperOverride(developerOverride.getToggleState());
     }
 
     private void onFullScreenClicked()
@@ -172,6 +186,7 @@ public class AdvancedSettingsActivity extends BaseActivity
         advancedSettingsLayout.addView(eip1559Transactions);
         advancedSettingsLayout.addView(analytics);
         advancedSettingsLayout.addView(crashReporting);
+        advancedSettingsLayout.addView(developerOverride);
     }
 
     private void onNodeStatusClicked()

@@ -24,4 +24,9 @@ public interface Signable
     {
         return -1;
     }
+
+    default boolean isDangerous()
+    {
+        return false;
+    }
 }

@@ -343,6 +343,9 @@
     <string name="signer_address">လိပ်စာ</string>
     <string name="requester_url">တောင်းခံသူ</string>
     <string name="dialog_title_sign_message">မက်ဆေ့ကိုလက်မှတ်ထိုးမည်</string>
+    <string name="dialog_title_sign_message_sheet">⚠ မက်ဆေ့ကိုလက်မှတ်ထိုးမည် ⚠</string>
+    <string name="sign_message_could_be_a_scam">အန္တရာယ်- လက်မှတ်မထိုးမီ စစ်ဆေးပါ။</string>
+    <string name="sign_message_could_be_a_scam2">ဤတောင်းဆိုချက်သည် \'airdrop\' မှလာပါက သင်၏ တိုကင် esp ဆုံးရှုံးရန် အန္တရာယ်ရှိနိုင်သည်။ Sign Message ကို လိမ်လည်သူများမှ အဓိကအသုံးပြုသည်။ ဤဝဘ်ဆိုက်အတွက် ဝဘ်ရှာဖွေပြီး \'scam\' ကို အသုံးပြုပါ။</string>
     <string name="dialog_title_sign_personal_message">ကိုယ်ပိုင်မက်ဆေ့လက်မှတ်ထိုးမည်</string>
     <string name="dialog_title_sign_typed_message">ရေးထားသောမက်ဆေ့ကိုလက်မှတ်ထိုးမည်</string>
     <string name="dialog_reject">ငြင်းပယ်သည်</string>
@@ -1023,4 +1026,8 @@
     <string name="imported_smart_pass">တင်သွင်းတဲ့ SmartPass</string>
     <string name="smartpass_imported">SmartPass ကို တင်သွင်းခဲ့ပါတယ်။ ခင်ဗျားရဲ့ လက်မှတ်ကို အဆင့်မြှင့်သင့်ပါတယ်။</string>
     <string name="no_connection_to_smart_layer">SmartLayer ကွန်ယက်နဲ့ ဆက်သွယ်မှုမရှိပါနဲ့ - နောက်ပိုင်းမှာ SmartPass ကို တင်သွင်းဖို့ ကြိုးစားပါ။</string>
+    <string name="session_not_authorised">ဤစက်ရှင်သည် %s တွင် မက်ဆေ့ချ်များကို လက်မှတ်ထိုးရန် လုပ်ပိုင်ခွင့်မရှိသော်လည်း လက်မှတ်ထိုးရန် ဤကန့်သတ်ချက်ကို ကျော်ဖြတ်နိုင်သည်။ စာရိုက်ခြင်းဖြင့် အန္တရာယ်မရှိပါ။</string>
+    <string name="override">ပဓာန</string>
+    <string name="developer_override">Developer Override</string>
+    <string name="override_warning_text">သင့်ငွေများကို အချည်းနှီးဖြစ်စေနိုင်သည့် ငွေပေးငွေယူတစ်ခုအား သင်မသိလိုက်ဘဲ လက်မှတ်ထိုးပါတော့မည်။ သင်သည် ဆော့ဖ်ဝဲအင်ဂျင်နီယာတစ်ဦးအနေဖြင့် bytecode ကို လက်မှတ်ထိုးလိုနိုင်ပြီး၊ Advanced ဆက်တင်များတွင် developer မုဒ်ကို သင်သတ်မှတ်ပါက ဤသတိပေးချက်ကို အစားထိုးနိုင်ပါသည်။</string>
 </resources>

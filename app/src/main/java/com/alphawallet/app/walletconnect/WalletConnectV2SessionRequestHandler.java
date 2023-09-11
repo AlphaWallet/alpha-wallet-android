@@ -1,10 +1,14 @@
 package com.alphawallet.app.walletconnect;
 
+import static com.alphawallet.app.repository.SharedPreferenceRepository.DEVELOPER_OVERRIDE;
+
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
+import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.walletconnect.SignType;
@@ -17,6 +21,8 @@ import com.alphawallet.app.walletconnect.entity.EthSignRequest;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheet;
 import com.alphawallet.app.widget.ActionSheetSignDialog;
+import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.walletconnect.web3.wallet.client.Wallet;
 
@@ -72,9 +78,13 @@ public class WalletConnectV2SessionRequestHandler
         {
             Signable signable = signRequest.getSignable(sessionRequest.getRequest().getId(),
                 Objects.requireNonNull(settledSession.getMetaData()).getUrl());
-            if (!validateChainId(signable))
+            if (signable.isDangerous())
             {
-                showErrorDialog(aCallback, signable, getSessionItem());
+                showNotSigning(aCallback, signRequest, signable);
+            }
+            else if (!validateChainId(signable))
+            {
+                checkProceed(aCallback, signRequest, signable);
             }
             else
             {
@@ -98,7 +108,7 @@ public class WalletConnectV2SessionRequestHandler
             case SIGN_TYPED_DATA_V3:
             case SIGN_TYPED_DATA_V4:
                 return (signable.getChainId() == -1 || //if chainId is unspecified treat as no restriction intended
-                        !getChainListFromSession().contains(signable.getChainId()));
+                        getChainListFromSession().contains(signable.getChainId()));
             case ATTESTATION:
                 //TODO: Check attestation signing chain
                 return true;
@@ -143,6 +153,25 @@ public class WalletConnectV2SessionRequestHandler
         actionSheet.show();
     }
 
+    private void checkProceed(ActionSheetCallback aCallback, BaseRequest signRequest, Signable signable)
+    {
+        AWalletAlertDialog errorDialog = new AWalletAlertDialog(activity, AWalletAlertDialog.ERROR);
+        String networkName = EthereumNetworkBase.isChainSupported(signable.getChainId()) ? EthereumNetworkBase.getShortChainName(signable.getChainId())
+                : Long.toString(signable.getChainId());
+        String message = activity.getString(R.string.session_not_authorised, networkName);
+        errorDialog.setMessage(message);
+        errorDialog.setButton(R.string.override, v -> {
+            errorDialog.dismiss();
+            showActionSheet(aCallback, signRequest, signable);
+        });
+        errorDialog.setSecondaryButton(R.string.action_cancel, v -> {
+            errorDialog.dismiss();
+            cancelRequest(aCallback, signable, errorDialog);
+        });
+        errorDialog.setCancelable(false);
+        errorDialog.show();
+    }
+
     private void showErrorDialog(ActionSheetCallback aCallback, Signable signable, WalletConnectV2SessionItem session)
     {
         AWalletAlertDialog errorDialog = new AWalletAlertDialog(activity, AWalletAlertDialog.ERROR);
@@ -154,10 +183,32 @@ public class WalletConnectV2SessionRequestHandler
         errorDialog.setButton(R.string.action_view_session, v -> {
             openSessionDetail(session);
             cancelRequest(aCallback, signable, errorDialog);
+            errorDialog.dismiss();
         });
         errorDialog.setSecondaryButton(R.string.action_cancel, v -> {
             cancelRequest(aCallback, signable, errorDialog);
+            errorDialog.dismiss();
         });
+        errorDialog.setCancelable(false);
+        errorDialog.show();
+    }
+
+    private void showNotSigning(ActionSheetCallback aCallback, BaseRequest signRequest, Signable signable)
+    {
+        final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity);
+        boolean hasDeveloperOverride = pref.getBoolean(DEVELOPER_OVERRIDE, false);
+        AWalletAlertDialog errorDialog = new AWalletAlertDialog(activity, AWalletAlertDialog.ERROR);
+        errorDialog.setMessage(activity.getString(R.string.override_warning_text));
+        errorDialog.setButton(R.string.action_cancel, v -> {
+            cancelRequest(aCallback, signable, errorDialog);
+        });
+        if (hasDeveloperOverride)
+        {
+            errorDialog.setSecondaryButton(R.string.override, v -> {
+                showActionSheet(aCallback, signRequest, signable);
+                errorDialog.dismiss();
+            });
+        }
         errorDialog.setCancelable(false);
         errorDialog.show();
     }

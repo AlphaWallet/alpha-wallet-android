@@ -325,6 +325,9 @@
     <string name="signer_address">Dirección</string>
     <string name="requester_url">Solicitante</string>
     <string name="dialog_title_sign_message">Firmar mensaje</string>
+    <string name="dialog_title_sign_message_sheet">⚠ Firmar mensaje ⚠</string>
+    <string name="sign_message_could_be_a_scam">Peligro: Verifique antes de firmar</string>
+    <string name="sign_message_could_be_a_scam2">Podría estar en peligro de perder sus tokens, especialmente si esta solicitud proviene de un \'airdrop\'. Sign Message es utilizado principalmente por estafadores. Haga una búsqueda en la web de este sitio web y utilice \'estafa\'.</string>
     <string name="dialog_title_sign_personal_message">Firmar \'Personal\' mensaje</string>
     <string name="dialog_title_sign_typed_message">Firmar \'Typed\' mensaje</string>
     <string name="dialog_reject">Rechazar</string>
@@ -988,4 +991,8 @@
     <string name="imported_smart_pass">Smart Pass importado</string>
     <string name="smartpass_imported">Se ha importado un pase inteligente. Su pase debe ser actualizado.</string>
     <string name="no_connection_to_smart_layer">No hay conexión a la red Smart Layer: intente importar su Pass nuevamente más tarde.</string>
+    <string name="session_not_authorised">Esta sesión no está autorizada para firmar mensajes en %s, sin embargo, puedes evitar esta restricción para firmar. Con mensaje escrito no hay peligro.</string>
+    <string name="override">Anular</string>
+    <string name="developer_override">Anulación del Desarrollador</string>
+    <string name="override_warning_text">Es posible que esté a punto de firmar una transacción sin saberlo, lo que podría vaciar sus fondos. Es posible que desee firmar el código de bytes como desarrollador y puede anular esta advertencia si configura el modo de desarrollador en la configuración avanzada.</string>
 </resources>

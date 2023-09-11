@@ -23,6 +23,7 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SignDialogViewModel;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.hardware.SignatureReturnType;
+import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
 import com.bumptech.glide.Glide;
 
@@ -92,6 +93,11 @@ public class ActionSheetSignDialog extends ActionSheet implements StandardFuncti
             signWidget.setupSignData(signable, () -> {
                 functionBar.setPrimaryButtonEnabled(true);
             });
+        }
+        else if (signable.getMessageType() == SignMessageType.SIGN_MESSAGE)
+        {
+            toolbar.setTitle(Utils.getSignMessageTitle(getContext().getString(R.string.dialog_title_sign_message_sheet)));
+            signWidget.setupSignData(signable);
         }
         else
         {

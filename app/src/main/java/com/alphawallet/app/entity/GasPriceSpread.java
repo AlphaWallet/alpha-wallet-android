@@ -17,6 +17,8 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 /**
  * Created by JB on 20/01/2022.
  */
@@ -265,6 +267,18 @@ public class GasPriceSpread implements Parcelable
         fees.put(TXSpeed.CUSTOM, new GasSpeed(gsCustom.speed, fastSeconds, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFee)));
     }
 
+    public void setCustom(@Nullable GasSpeed gs)
+    {
+        if (gs != null)
+        {
+            GasSpeed rapid = fees.get(TXSpeed.RAPID);
+            BigInteger baseFee = rapid != null ? rapid.gasPrice.baseFee : gs.gasPrice.baseFee;
+
+            GasSpeed custom = new GasSpeed(gs.speed, gs.seconds, new EIP1559FeeOracleResult(gs.gasPrice.maxFeePerGas, gs.gasPrice.priorityFee, baseFee));
+            fees.put(TXSpeed.CUSTOM, custom);
+        }
+    }
+
     public void setCustom(BigInteger gasPrice, long fastSeconds)
     {
         GasSpeed gsCustom = fees.get(TXSpeed.CUSTOM);
@@ -344,7 +358,8 @@ public class GasPriceSpread implements Parcelable
 
     public boolean hasCustom()
     {
-        return fees.get(TXSpeed.CUSTOM).seconds != 0;
+        GasSpeed custom = fees.get(TXSpeed.CUSTOM);
+        return (custom != null && custom.seconds != 0);
     }
 
     public boolean hasLockedGas() { return hasLockedGas; }
@@ -372,5 +387,10 @@ public class GasPriceSpread implements Parcelable
         }
 
         return 0;
+    }
+
+    public GasSpeed getCustom()
+    {
+        return fees.get(TXSpeed.CUSTOM);
     }
 }

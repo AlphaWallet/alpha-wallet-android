@@ -14,6 +14,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.walletconnect.entity.BaseRequest;
@@ -139,6 +140,11 @@ public class WalletConnectV2SessionRequestHandler
 
     private void showActionSheet(ActionSheetCallback aCallback, BaseRequest signRequest, Signable signable)
     {
+        if (activity instanceof HomeActivity homeActivity)
+        {
+            homeActivity.clearWalletConnectRequest();
+        }
+
         if (actionSheet != null && actionSheet.isShowing())
         {
             actionSheet.forceDismiss();

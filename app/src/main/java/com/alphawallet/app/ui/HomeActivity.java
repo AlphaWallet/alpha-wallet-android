@@ -82,7 +82,6 @@ import com.alphawallet.app.viewmodel.BaseNavigationActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
-import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
@@ -95,6 +94,7 @@ import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
+import com.walletconnect.android.CoreClient;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
@@ -137,6 +137,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private boolean isForeground;
     private volatile boolean tokenClicked = false;
     private String openLink;
+    private AWalletAlertDialog wcProgressDialog;
     private final ActivityResultLauncher<String> requestPermissionLauncher =
         registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted)
@@ -826,10 +827,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             aDialog.setMessage(message);
             aDialog.setIcon(AWalletAlertDialog.ERROR);
             aDialog.setButtonText(R.string.button_ok);
-            aDialog.setButtonListener(v ->
-            {
-                aDialog.dismiss();
-            });
+            aDialog.setButtonListener(v -> aDialog.dismiss());
             dialog = aDialog;
             dialog.show();
         }, 500);
@@ -952,6 +950,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (dialog != null && dialog.isShowing())
         {
             dialog.dismiss();
+        }
+        if (wcProgressDialog != null && wcProgressDialog.isShowing())
+        {
+            wcProgressDialog.dismiss();
         }
     }
 
@@ -1187,22 +1189,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             else if (importData != null && importData.startsWith("wc:"))
             {
-                Intent intent;
-
-                if (WalletConnectHelper.isWalletConnectV1(importData))
+                //Determine if any action is required; if this is not a pairing request then ignore for now
+                if (importData.contains("relay-protocol"))
                 {
-                    intent = new Intent(this, WalletConnectActivity.class);
-                    intent.putExtra("qrCode", WalletConnectActivity.WC_INTENT + importData);
+                    Intent intent = new Intent(this, WalletConnectV2Activity.class);
+                    intent.putExtra("url", importData);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
                 }
                 else
                 {
-                    intent = new Intent(this, WalletConnectV2Activity.class);
-                    intent.putExtra("url", importData);
+                    walletConnectRequestPending();
                 }
-
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-
-                startActivity(intent);
             }
             else if (importPath != null)
             {
@@ -1415,5 +1413,25 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             dialog = aDialog;
             dialog.show();
         });
+    }
+
+    //WalletConnect progress
+    private void walletConnectRequestPending()
+    {
+        hideDialog();
+        runOnUiThread(() -> {
+            wcProgressDialog = new AWalletAlertDialog(this);
+            wcProgressDialog.setProgressMode();
+            wcProgressDialog.setTitle(R.string.title_wallet_connect);
+            wcProgressDialog.setCancelable(false);
+            wcProgressDialog.show();
+            handler.postDelayed(this::hideDialog, 10000);
+        });
+    }
+
+    public void clearWalletConnectRequest()
+    {
+        handler.removeCallbacksAndMessages(null);
+        runOnUiThread(this::hideDialog);
     }
 }

@@ -1,63 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_holder"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/layout_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
     <View style="@style/Aw.Component.Separator" />
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:minHeight="60dp"
-        android:orientation="horizontal"
-        android:paddingVertical="@dimen/standard_16"
-        android:paddingStart="@dimen/standard_16"
-        android:paddingEnd="@dimen/mini_4">
-
-        <TextView
-            android:id="@+id/text_message_title"
-            style="@style/Aw.Typography.Label.Widget"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="@integer/widget_label"
-            android:gravity="start|center_vertical"
-            android:text="@string/message_to_sign" />
-
-        <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="@integer/widget_content"
-                android:layout_marginHorizontal="@dimen/small_12"
-                android:gravity="start">
-
-            <ImageView
-                    android:id="@+id/image_sign_warning"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    tools:visibility="visible"
-                    android:src="@drawable/ic_red_warning"/>
-
-        <TextView
-            android:id="@+id/text_preview"
-            style="@style/Aw.Typography.Caption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="start"
-            android:maxLines="1"
-            android:visibility="visible"
-            tools:text="Message:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337" />
+            android:gravity="center_vertical"
+            android:minHeight="60dp"
+            android:orientation="horizontal"
+            android:paddingVertical="@dimen/standard_16"
+            android:paddingStart="@dimen/standard_16"
+            android:paddingEnd="@dimen/mini_4">
 
-        </LinearLayout>
+        <TextView
+                android:id="@+id/text_message_title"
+                style="@style/Aw.Typography.Label.Widget"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="@integer/widget_label"
+                android:gravity="start|center_vertical"
+                android:text="@string/message_to_sign" />
+
+        <TextView
+                android:id="@+id/text_preview"
+                style="@style/Aw.Typography.Caption"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/small_12"
+                android:layout_weight="@integer/widget_content"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="1"
+                android:visibility="visible"
+                tools:text="Message:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337" />
 
         <ImageView
                 android:id="@+id/image_more"
+                android:contentDescription="@string/action_more_details"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
@@ -69,21 +55,21 @@
     </LinearLayout>
 
     <ScrollView
-        android:id="@+id/scroll_view"
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:fillViewport="true"
-        android:visibility="gone"
-        tools:visibility="visible">
+            android:id="@+id/scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:fillViewport="true"
+            android:visibility="gone"
+            tools:visibility="visible">
 
         <TextView
-            android:id="@+id/text_message"
-            style="@style/Aw.Typography.Caption"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="start"
-            android:padding="@dimen/standard_16"
-            tools:text="Message:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337" />
+                android:id="@+id/text_message"
+                style="@style/Aw.Typography.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:padding="@dimen/standard_16"
+                tools:text="Message:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337\nMessage:\n  Hi Alice!\nA number:\n 1337" />
 
     </ScrollView>
 

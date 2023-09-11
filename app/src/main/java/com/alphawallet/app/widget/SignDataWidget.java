@@ -102,7 +102,7 @@ public class SignDataWidget extends LinearLayout
 
         if (signable.getMessageType() == SignMessageType.SIGN_MESSAGE) //Warn user that sign is dangerous
         {
-            ((ImageView)findViewById(R.id.image_sign_warning)).setVisibility(View.VISIBLE);
+            previewText.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_red_warning, 0, 0, 0);
             previewText.setText(R.string.sign_message_could_be_a_scam);
             message = getContext().getString(R.string.sign_message_could_be_a_scam2) + "\n\n" + message;
             messageText.setText(message);

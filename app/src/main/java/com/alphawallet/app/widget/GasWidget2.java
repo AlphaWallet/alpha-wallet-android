@@ -270,7 +270,9 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     {
         try
         {
+            GasSpeed custom = getCustomGasSpeed();
             gasSpread = new GasPriceSpread(getContext(), gs.getResult());
+            gasSpread.setCustom(custom);
 
             //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
             handler.post(this);
@@ -357,8 +359,15 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     @Override
     public BigInteger getGasPrice(BigInteger defaultPrice)
     {
-        GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
-        return gs.gasPrice.maxFeePerGas;
+        if (gasSpread != null)
+        {
+            GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
+            return gs.gasPrice.maxFeePerGas;
+        }
+        else
+        {
+            return defaultPrice;
+        }
     }
 
     @Override
@@ -511,6 +520,18 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
 
         //now update speeds
         handler.post(this);
+    }
+
+    private GasSpeed getCustomGasSpeed()
+    {
+        if (gasSpread != null)
+        {
+            return gasSpread.hasCustom() ? gasSpread.getCustom() : null;
+        }
+        else
+        {
+            return null;
+        }
     }
 }
 

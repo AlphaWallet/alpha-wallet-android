@@ -49,7 +49,7 @@ public class BalanceUtils
         value = value.divide(BigDecimal.valueOf(10).pow(decimalReduction));
         if (value.compareTo(BigDecimal.ONE) > 0)
         {
-            return getScaledValue(value, 18, 2);
+            return getScaledValue(value, 0, 2);
         }
         else
         {

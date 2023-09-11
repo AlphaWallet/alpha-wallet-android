@@ -13,7 +13,6 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Environment;
-import android.os.FileObserver;
 import android.text.TextUtils;
 import android.util.Pair;
 
@@ -29,7 +28,6 @@ import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.QueryResponse;
 import com.alphawallet.app.entity.TokenLocator;
-import com.alphawallet.app.entity.attestation.AttestationImport;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
@@ -138,13 +136,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private static final String EIP5169_CERTIFIER = "Smart Token Labs";
     private static final String EIP5169_KEY_OWNER = "Contract Owner"; //TODO Source this from the contract via owner()
     private static final String TS_EXTENSION = ".tsml";
-
     private final Context context;
     private final IPFSServiceType ipfsService;
-
     private final Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
-    private FileObserver fileObserver;                     //Observer which scans the override directory waiting for file change
-    private FileObserver fileObserverQ;                    //Observer for Android Q directory
     private final NotificationService notificationService;
     private final RealmManager realmManager;
     private final TokensService tokensService;
@@ -216,7 +210,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //executes after observable completes due to blockingForEach
         loadInternalAssets();
-        startDirectoryListeners();
         finishLoading();
     }
 
@@ -450,38 +443,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return address.toLowerCase() + "-" + chainId;
     }
 
-    //Start listening to the two script directories for files dropped in.
-    //Why two directories? User may not want to allow AlphaWallet to have read file permission,
-    //but we still want to allow them to be able to click on scripts in eg Telegram and install them
-    //without needing to go through a permission screen
-    //Using AlphaWallet directory is more convenient for developers using eg Android Studio to drop files into their phone
-    private void startDirectoryListeners()
-    {
-        //listen for new files dropped into app external directory
-        fileObserverQ = startFileListener(context.getExternalFilesDir("").getAbsolutePath());
-        startAlphaWalletListener();
-    }
-
-    public void startAlphaWalletListener()
-    {
-        //listen for new files dropped into AlphaWallet directory, if we have permission
-        if (checkReadPermission())
-        {
-            File alphaWalletDir = new File(
-                    Environment.getExternalStorageDirectory()
-                            + File.separator + HomeViewModel.ALPHAWALLET_DIR);
-
-            if (alphaWalletDir.exists())
-            {
-                fileObserver = startFileListener(alphaWalletDir.getAbsolutePath());
-            }
-        }
-    }
-
     public void onDestroy()
     {
-        if (fileObserver != null) fileObserver.stopWatching();
-        if (fileObserverQ != null) fileObserverQ.stopWatching();
         if (eventListener != null && !eventListener.isDisposed()) eventListener.dispose();
     }
 
@@ -1123,28 +1086,33 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             return signalUnchangedScript(newFile.getName());
         }
+        TokenScriptFile tsf;
+        TokenDefinition decodeTs;
         //1. check validity & check for origin tokens
         //2. check for existing and check if this is a debug file or script from server
         //3. update signature data
         //4. update database
-        TokenScriptFile tsf = new TokenScriptFile(context, newFile.getAbsolutePath());
         try
         {
-            boolean isDebugOverride = tsf.isDebug();
-            final TokenDefinition td = parseFile(tsf.getInputStream());
-            List<ContractLocator> originContracts = getOriginContracts(td);
-            //remove all old definitions & certificates
-            updateScriptEntriesInRealm(originContracts, isDebugOverride, tsf.calcMD5());
-            cachedDefinition = null;
-            return cacheSignature(tsf)
-                    .map(contracts -> fileLoadComplete(originContracts, tsf, td));
+            tsf = new TokenScriptFile(context, newFile.getAbsolutePath());
+            decodeTs = parseFile(tsf.getInputStream());
         }
         catch (Exception e)
         {
-            Timber.e(e);
+            return Single.fromCallable(TokenDefinition::new);
         }
 
-        return Single.fromCallable(TokenDefinition::new);
+        final TokenDefinition td = decodeTs;
+        final List<ContractLocator> originContracts = getOriginContracts(td);
+
+        return Single.fromCallable(() -> {
+                boolean isDebugOverride = tsf.isDebug();
+                //remove all old definitions & certificates
+                updateScriptEntriesInRealm(originContracts, isDebugOverride, tsf.calcMD5());
+                cachedDefinition = null;
+                return tsf;
+        }).flatMap(tt -> cacheSignature(tsf))
+          .map(a -> fileLoadComplete(originContracts, tsf, td));
     }
 
     private Single<TokenDefinition> signalUnchangedScript(String name)
@@ -2307,72 +2275,33 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private FileObserver startFileListener(String path)
+    public void notifyNewScriptLoaded(final String newTsFileName)
     {
-        FileObserver observer = new FileObserver(path)
+        final File newTsFile = new File(newTsFileName);
+        handleNewTSFile(newTsFile)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(td -> notifyNewScript(td, newTsFile), this::onScriptError)
+                .isDisposed();
+    }
+
+    private void onScriptError(Throwable throwable)
+    {
+        Timber.e(throwable);
+    }
+
+    private void notifyNewScript(TokenDefinition tokenDefinition, File file)
+    {
+        if (!TextUtils.isEmpty(tokenDefinition.holdingToken))
         {
-            private final String listenerPath = path;
-
-            @Override
-            public void onEvent(int event, @Nullable String file)
+            notificationService.DisplayNotification("Definition Updated", file.getName(),
+                    NotificationCompat.PRIORITY_MAX);
+            List<ContractLocator> originContracts = getOriginContracts(tokenDefinition);
+            for (ContractLocator cl : originContracts)
             {
-                //watch for new files and file change
-                switch (event)
-                {
-                    case CREATE:
-                        //if this file already exists then wait for the modify
-                        File checkFile = new File(listenerPath, file);
-                        if (checkFile.exists() && checkFile.canRead())
-                        {
-                            break;
-                        }
-                    case MODIFY:
-                        try
-                        {
-                            if (file.contains(TS_EXTENSION))
-                            {
-                                final File newTsFile = new File(listenerPath, file);
-                                handleNewTSFile(newTsFile)
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(td -> notifyNewScript(td, newTsFile), this::onScriptError)
-                                        .isDisposed();
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            if (homeMessenger != null)
-                                homeMessenger.tokenScriptError(e.getMessage());
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                tokensService.addUnknownTokenToCheck(new ContractAddress(cl.chainId, cl.address));
             }
-
-            private void onScriptError(Throwable throwable)
-            {
-                Timber.e(throwable);
-            }
-
-            private void notifyNewScript(TokenDefinition tokenDefinition, File file)
-            {
-                if (!TextUtils.isEmpty(tokenDefinition.holdingToken))
-                {
-                    notificationService.DisplayNotification("Definition Updated", file.getName(),
-                            NotificationCompat.PRIORITY_MAX);
-                    List<ContractLocator> originContracts = getOriginContracts(tokenDefinition);
-                    for (ContractLocator cl : originContracts)
-                    {
-                        tokensService.addUnknownTokenToCheck(new ContractAddress(cl.chainId, cl.address));
-                    }
-                }
-            }
-        };
-
-        observer.startWatching();
-
-        return observer;
+        }
     }
 
     public Single<XMLDsigDescriptor> getSignatureData(Token token)

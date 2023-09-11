@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
+        package="com.alphawallet.app"
         android:targetSandboxVersion="1">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -271,11 +273,6 @@
         <activity
                 android:name=".ui.TokenScriptManagementActivity"
                 android:label="@string/tokenscript_management" />
-
-        <activity
-                android:name=".ui.TokenActivity"
-                android:hardwareAccelerated="true"
-                android:label="@string/activity_label" />
 
         <activity
                 android:name=".ui.WalletConnectActivity"

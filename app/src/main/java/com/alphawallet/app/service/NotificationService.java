@@ -12,6 +12,7 @@ import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -87,7 +88,17 @@ public class NotificationService
 
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager != null) notificationManager.notify(NOTIFICATION_ID, builder.build());
+        if (notificationManager != null)
+        {
+            try
+            {
+                notificationManager.notify(NOTIFICATION_ID, builder.build());
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
 
     void displayPriceAlertNotification(String title, String content, int priority, Intent openAppIntent)
@@ -107,7 +118,7 @@ public class NotificationService
                 .setColor(color)
                 .setContentTitle(title)
                 .setContentText(content)
-                .setSound(notification, 1)
+                .setSound(notification, AudioManager.STREAM_NOTIFICATION)
                 .setAutoCancel(true)
                 .setOngoing(true)
                 .setCategory(NotificationCompat.CATEGORY_EVENT)
@@ -116,14 +127,24 @@ public class NotificationService
 
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager != null) notificationManager.notify(NOTIFICATION_ID, builder.build());
+        if (notificationManager != null)
+        {
+            try
+            {
+                notificationManager.notify(NOTIFICATION_ID, builder.build());
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void checkNotificationPermission()
     {
-        if (!(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NOTIFICATION_POLICY)
+        if (!(ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                 == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NOTIFICATION_POLICY)
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                         != PackageManager.PERMISSION_DENIED))
         {
             Intent intent = new Intent(C.REQUEST_NOTIFICATION_ACCESS);

@@ -47,7 +47,7 @@ import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.hardware.SignatureFromKey;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import org.web3j.crypto.Keys;
 

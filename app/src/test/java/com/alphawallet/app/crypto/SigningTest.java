@@ -3,10 +3,10 @@ package com.alphawallet.app.crypto;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
-import com.alphawallet.app.web3j.StructuredDataEncoder;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import org.junit.Test;
+import org.web3j.crypto.StructuredDataEncoder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

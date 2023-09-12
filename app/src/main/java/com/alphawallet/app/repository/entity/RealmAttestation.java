@@ -4,7 +4,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import java.util.HashSet;
 import java.util.List;

@@ -31,7 +31,7 @@ import com.alphawallet.app.viewmodel.BackupKeyViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.web3j.crypto.Credentials;

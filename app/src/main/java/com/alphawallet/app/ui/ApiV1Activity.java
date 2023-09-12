@@ -27,7 +27,7 @@ import com.alphawallet.app.widget.ApiV1Dialog;
 import com.alphawallet.app.widget.ConfirmationWidget;
 import com.alphawallet.app.widget.SignDataWidget;
 import com.alphawallet.token.entity.Signable;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import dagger.hilt.android.AndroidEntryPoint;
 

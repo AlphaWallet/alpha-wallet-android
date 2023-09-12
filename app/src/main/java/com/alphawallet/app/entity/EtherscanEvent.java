@@ -3,7 +3,7 @@ package com.alphawallet.app.entity;
 import android.text.TextUtils;
 
 import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -30,7 +30,7 @@ import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.Nullable;

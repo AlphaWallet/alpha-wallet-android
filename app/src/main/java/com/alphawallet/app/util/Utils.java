@@ -29,7 +29,6 @@ import android.webkit.URLUtil;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.RawRes;
-import androidx.annotation.StyleRes;
 import androidx.fragment.app.FragmentActivity;
 
 import com.alphawallet.app.BuildConfig;
@@ -38,7 +37,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.util.pattern.Patterns;
-import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.ProviderTypedData;
 import com.alphawallet.token.entity.Signable;
 import com.google.gson.Gson;
@@ -49,6 +47,7 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
+import org.web3j.crypto.StructuredDataEncoder;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;

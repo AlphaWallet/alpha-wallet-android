@@ -6,7 +6,6 @@ import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject
 import com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID
-import com.alphawallet.token.tools.Numeric
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.registerTypeAdapter
 import com.github.salomonbrys.kotson.typeToken
@@ -15,6 +14,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonSyntaxException
 import okhttp3.*
 import okio.ByteString
+import org.web3j.utils.Numeric
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit

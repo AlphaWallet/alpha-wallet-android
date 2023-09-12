@@ -80,7 +80,7 @@ import com.alphawallet.app.widget.WhatsNewView;
 import com.alphawallet.token.entity.AttestationDefinition;
 import com.alphawallet.token.entity.ContractInfo;
 import com.alphawallet.token.entity.MagicLinkData;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;

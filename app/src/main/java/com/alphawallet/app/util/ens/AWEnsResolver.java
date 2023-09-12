@@ -10,7 +10,7 @@ import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3j.ens.EnsResolutionException;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

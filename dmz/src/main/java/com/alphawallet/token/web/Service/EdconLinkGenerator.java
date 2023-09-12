@@ -1,7 +1,7 @@
 package com.alphawallet.token.web.Service;
 
 import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Sign;

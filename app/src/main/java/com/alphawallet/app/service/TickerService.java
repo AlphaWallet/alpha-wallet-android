@@ -37,7 +37,7 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.token.entity.EthereumReadBuffer;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;

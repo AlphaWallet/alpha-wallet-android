@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.alphawallet.token.entity.BadContract;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.web.Service.EthRPCNodes;
 
 import okhttp3.OkHttpClient;

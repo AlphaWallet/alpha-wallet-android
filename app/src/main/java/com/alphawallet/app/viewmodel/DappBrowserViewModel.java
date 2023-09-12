@@ -320,7 +320,7 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
     @Override
     public void transactionSigned(SignatureFromKey sigData, Web3Transaction w3Tx)
     {
-        transactionSigned.postValue(new TransactionReturn(com.alphawallet.token.tools.Numeric.toHexString(sigData.signature), w3Tx));
+        transactionSigned.postValue(new TransactionReturn(Numeric.toHexString(sigData.signature), w3Tx));
     }
 
     public void showMyAddress(Context ctx)

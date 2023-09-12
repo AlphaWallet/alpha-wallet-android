@@ -12,7 +12,7 @@
  */
 package com.alphawallet.app.web3j.ens;
 
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 public class EnsUtils {
 

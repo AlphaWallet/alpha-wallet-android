@@ -1,6 +1,6 @@
 package com.alphawallet.token.entity;
 
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -58,7 +58,7 @@ import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.Convert;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigDecimal;

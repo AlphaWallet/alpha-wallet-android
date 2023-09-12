@@ -15,11 +15,14 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java-library'
 
 dependencies {
-    implementation files('../app/libs/abi-4.8.8-android.jar')
-    implementation files('../app/libs/core-4.8.8-android.jar')
-    implementation files('../app/libs/crypto-4.8.8-android.jar')
-    implementation files('../app/libs/utils-4.8.8-android.jar')
+    //implementation 'org.web3j:core:4.9.8'
+    implementation files('../app/libs/abi-4.9.8.jar')
+    implementation files('../app/libs/core-4.9.8.jar')
+    implementation files('../app/libs/crypto-4.9.8.jar')
+    implementation files('../app/libs/utils-4.9.8.jar')
+
     testImplementation 'junit:junit:4.13.2'
+
     implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
     // https://mvnrepository.com/artifact/com.github.cliftonlabs/json-simple
     implementation group: 'com.github.cliftonlabs', name: 'json-simple', version: '4.0.1'

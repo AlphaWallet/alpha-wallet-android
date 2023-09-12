@@ -1,8 +1,5 @@
 package com.alphawallet.token.entity;
-
-import static com.alphawallet.token.tools.Numeric.cleanHexPrefix;
-
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -105,7 +102,7 @@ public class EthereumMessage implements Signable {
     }
 
     private String hexToUtf8(CharSequence hexData) {
-        String hex = cleanHexPrefix(hexData.toString());
+        String hex = Numeric.cleanHexPrefix(hexData.toString());
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
         for (int i = 0; i < hex.length(); i += 2) {
             byteBuffer.write((byte) Integer.parseInt(hex.substring(i, i + 2), 16));

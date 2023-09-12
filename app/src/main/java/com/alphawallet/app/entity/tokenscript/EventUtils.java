@@ -769,7 +769,7 @@ public abstract class EventUtils
             String tokenIdStr = EventUtils.getTopicVal(ev, log);
             if (tokenIdStr.startsWith("0x"))
             {
-                tokenId = com.alphawallet.token.tools.Numeric.toBigInt(tokenIdStr);
+                tokenId = Numeric.toBigInt(tokenIdStr);
             }
             else
             {

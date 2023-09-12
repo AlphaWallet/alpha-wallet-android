@@ -13,12 +13,11 @@ import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.entity.RealmAttestation;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.AttestationDefinition;
 import com.alphawallet.token.entity.AttestationValidation;
 import com.alphawallet.token.entity.AttestationValidationStatus;
 import com.alphawallet.token.entity.TokenScriptResult;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.gson.Gson;
 
@@ -29,6 +28,7 @@ import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+import org.web3j.crypto.StructuredDataEncoder;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

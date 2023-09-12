@@ -5,12 +5,12 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.entity.attestation.AttestationCoreData;
 import com.alphawallet.app.service.KeystoreAccountService;
-import com.alphawallet.token.tools.Numeric;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.crypto.Sign;
+import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 

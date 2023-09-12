@@ -1,6 +1,6 @@
 package com.alphawallet.app.entity.attestation;
 
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;

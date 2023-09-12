@@ -5,7 +5,7 @@ import org.junit.Test;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;

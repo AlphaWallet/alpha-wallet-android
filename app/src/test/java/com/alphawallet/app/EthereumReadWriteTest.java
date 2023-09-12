@@ -2,7 +2,7 @@ package com.alphawallet.app;
 
 import com.alphawallet.token.entity.EthereumReadBuffer;
 import com.alphawallet.token.entity.EthereumWriteBuffer;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import org.junit.Test;
 import org.junit.Assert;

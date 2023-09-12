@@ -2,7 +2,7 @@ package com.alphawallet.token.entity;
 
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.alphawallet.token.util.DateTime;
 import com.alphawallet.token.util.DateTimeFactory;

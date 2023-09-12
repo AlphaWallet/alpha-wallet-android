@@ -28,13 +28,11 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.AttestationDefinition;
 import com.alphawallet.token.entity.AttestationValidationStatus;
 import com.alphawallet.token.entity.FunctionDefinition;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
-import com.bumptech.glide.RequestBuilder;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -51,6 +49,7 @@ import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+import org.web3j.crypto.StructuredDataEncoder;
 
 import java.io.IOException;
 import java.math.BigInteger;

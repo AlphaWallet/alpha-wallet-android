@@ -42,7 +42,7 @@ import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.walletconnect.android.Core;
 import com.walletconnect.android.CoreClient;
 import com.walletconnect.android.cacao.signature.SignatureType;

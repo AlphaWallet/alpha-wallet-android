@@ -53,7 +53,7 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.Signable;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

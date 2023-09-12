@@ -49,7 +49,7 @@ import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.app.widget.TokenSelector;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.hardware.SignatureFromKey;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package com.alphawallet.app.walletconnect.util
 
-import com.alphawallet.token.tools.Numeric
+import org.web3j.utils.Numeric
 
 fun ByteArray.toHexString(): String {
     return Numeric.toHexString(this, 0, this.size, false)

@@ -1,6 +1,7 @@
 package com.alphawallet.token.tools;
 
 import org.junit.Test;
+import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
 
 import javax.xml.crypto.MarshalException;

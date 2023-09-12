@@ -12,6 +12,7 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
 import org.bouncycastle.util.encoders.Hex;
+import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.security.*;

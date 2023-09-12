@@ -1042,7 +1042,7 @@ public abstract class TokenscriptFunction
                     }
                     else
                     {
-                        convertedValue = com.alphawallet.token.tools.Numeric.toHexString(inputBytes);
+                        convertedValue = Numeric.toHexString(inputBytes);
                     }
                     break;
                 case e18:

@@ -65,7 +65,7 @@ import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptElement;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;

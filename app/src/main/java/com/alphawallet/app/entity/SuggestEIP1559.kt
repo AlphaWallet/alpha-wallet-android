@@ -8,8 +8,8 @@ based on: https://github.com/zsfelfoldi/feehistory
 */
 
 import com.alphawallet.app.service.GasService
-import com.alphawallet.token.tools.Numeric
 import io.reactivex.Single
+import org.web3j.utils.Numeric
 import java.lang.Long.parseLong
 import java.math.BigDecimal
 import java.math.BigInteger

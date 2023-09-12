@@ -108,8 +108,9 @@ public class WalletConnectV2SessionRequestHandler
                 return true; //no chain checking
             case SIGN_TYPED_DATA_V3:
             case SIGN_TYPED_DATA_V4:
-                return (signable.getChainId() == -1 || //if chainId is unspecified treat as no restriction intended
-                        getChainListFromSession().contains(signable.getChainId()));
+                return true; //Many V4 constructs have the wrong chainId specified.
+                /*return (signable.getChainId() == -1 || //if chainId is unspecified treat as no restriction intended
+                        getChainListFromSession().contains(signable.getChainId()));*/
             case ATTESTATION:
                 //TODO: Check attestation signing chain
                 return true;

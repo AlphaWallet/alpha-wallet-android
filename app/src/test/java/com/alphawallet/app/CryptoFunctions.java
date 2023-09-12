@@ -1,11 +1,11 @@
 package com.alphawallet.app;
 
-import com.alphawallet.app.web3j.StructuredDataEncoder;
 import com.alphawallet.token.entity.CryptoFunctionsInterface;
 import com.alphawallet.token.entity.ProviderTypedData;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+import org.web3j.crypto.StructuredDataEncoder;
 
 import java.math.BigInteger;
 import java.security.SignatureException;

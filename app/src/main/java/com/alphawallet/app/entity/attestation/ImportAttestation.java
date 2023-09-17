@@ -5,7 +5,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
 
-import android.net.Uri;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
@@ -51,7 +50,6 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.StructuredDataEncoder;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -72,7 +70,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import timber.log.Timber;
 
-public class AttestationImport
+public class ImportAttestation
 {
     private final AssetDefinitionService assetDefinitionService;
     private final AttestationImportInterface callback;
@@ -81,15 +79,13 @@ public class AttestationImport
     private final RealmManager realmManager;
     private final OkHttpClient client;
     private final KeyProvider keyProvider = KeyProviderFactory.get();
-
-    public static final String SMART_LAYER_DOMAIN = "https://www.smartlayer.network/pass";
-    public static final String SMART_LAYER_DOMAIN_DEV = "https://smart-layer.vercel.app/pass";
     public static final String SMART_PASS_URL = "https://aw.app/openurl?url=";
+    public static final String DELETE_KEY = "DELETE";
 
     private static final String SMART_PASS_API = "https://backend.smartlayer.network/passes/pass-installed-in-aw";
     private static final String SMART_PASS_API_DEV = "https://d2a5tt41o5qmyt.cloudfront.net/passes/pass-installed-in-aw";
 
-    public AttestationImport(AssetDefinitionService assetService,
+    public ImportAttestation(AssetDefinitionService assetService,
                              TokensService tokensService,
                              AttestationImportInterface assetInterface,
                              Wallet wallet,
@@ -154,7 +150,7 @@ public class AttestationImport
         switch (attn.isValid())
         {
             case Pass:
-                return storeAttestationInternal(attestation, tInfo, attn);
+                return storeAttestationInternal(tInfo, attn);
             case Expired:
             case Issuer_Not_Valid:
             case Incorrect_Subject:
@@ -165,7 +161,7 @@ public class AttestationImport
         return Single.fromCallable(() -> attn);
     }
 
-    private Single<Attestation> storeAttestationInternal(QRResult attestation, TokenInfo tInfo, Attestation attn)
+    private Single<Attestation> storeAttestationInternal(TokenInfo tInfo, Attestation attn)
     {
         //complete the import
         //write to realm
@@ -228,8 +224,8 @@ public class AttestationImport
         EasAttestation easAttn = new Gson().fromJson(qrAttn.functionDetail, EasAttestation.class);
 
         //validation UID:
-        storeAttestation(easAttn, qrAttn.functionDetail, qrAttn.getAddress())
-                .flatMap(attn -> callSmartPassLog(attn, qrAttn.getAddress()))
+        storeAttestation(easAttn, qrAttn.getAddress())
+                .flatMap(this::callSmartPassLog)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::checkTokenScript, err -> callback.importError(err.getMessage()))
@@ -237,7 +233,7 @@ public class AttestationImport
     }
 
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
-    private Single<Attestation> storeAttestation(EasAttestation attestation, String importedAttestation, String originLink)
+    private Single<Attestation> storeAttestation(EasAttestation attestation, String originLink)
     {
         //Use Default key unless specified
         return Single.fromCallable(() -> {
@@ -259,6 +255,10 @@ public class AttestationImport
 
     private Attestation storeAttestationInternal(String originLink, Attestation attn)
     {
+        TokenDefinition td = assetDefinitionService.getAssetDefinitionDeepScan(attn);
+        String identifierHash = attn.getAttestationIdHash(td);
+        removeOutdatedAttestation(identifierHash, attn.getDatabaseKey()); // detect attestation we are updating (if any) and remove
+
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             realm.executeTransaction(r -> {
@@ -274,6 +274,12 @@ public class AttestationImport
 
                 realmAttn.setAttestationLink(originLink);
                 attn.populateRealmAttestation(realmAttn);
+                realmAttn.setIdentifierHash(identifierHash);
+                if (td != null)
+                {
+                    realmAttn.setCollectionId(attn.getAttestationCollectionId(td));
+                }
+                r.insertOrUpdate(realmAttn);
             });
         }
         catch (Exception e)
@@ -281,6 +287,29 @@ public class AttestationImport
             e.printStackTrace();
         }
         return attn;
+    }
+
+    private void removeOutdatedAttestation(String identifierHash, String databaseUID)
+    {
+        try (Realm realm = realmManager.getRealmInstance(wallet))
+        {
+            RealmAttestation realmAttn = realm.where(RealmAttestation.class)
+                    .equalTo("identifierHash", identifierHash)
+                    .findFirst();
+
+            if (realmAttn != null && !realmAttn.getAttestationKey().equals(databaseUID))
+            {
+                //check if this is the same
+                realm.executeTransaction(r -> {
+                    realmAttn.setCollectionId(DELETE_KEY);
+                    r.insertOrUpdate(realmAttn);
+                });
+            }
+        }
+        catch (Exception e)
+        {
+            Timber.w(e);
+        }
     }
 
     private void completeImport(Token token)
@@ -299,10 +328,49 @@ public class AttestationImport
     {
         //check server for a TokenScript
         assetDefinitionService.checkServerForScript(token, null)
+                .flatMap(td -> updateAttestationIdentifier(token, td))
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(td -> completeImport(token), Timber::w)
+                .observeOn(Schedulers.io())
+                .subscribe(this::completeImport, Timber::w)
                 .isDisposed();
+    }
+
+    // Update attestation identifier hash if we pulled a TokenScript
+    private Single<Token> updateAttestationIdentifier(Token token, TokenDefinition td)
+    {
+        if (td != null && !TextUtils.isEmpty(td.holdingToken) && token instanceof Attestation attn)
+        {
+            return Single.fromCallable(() -> {
+                String identifierHash = attn.getAttestationIdHash(td);
+                try (Realm realm = realmManager.getRealmInstance(wallet))
+                {
+                    String key = attn.getDatabaseKey();
+                    RealmAttestation realmAttn = realm.where(RealmAttestation.class)
+                            .equalTo("address", key)
+                            .findFirst();
+
+                    if (realmAttn != null && realmAttn.getIdentifierHash() != null && !realmAttn.getIdentifierHash().equals(identifierHash))
+                    {
+                        realm.executeTransaction(r -> {
+                            Timber.i("Attestation: Updated idHash: %s -> %s", realmAttn.getIdentifierHash(), identifierHash);
+                            realmAttn.setIdentifierHash(identifierHash);
+                            realmAttn.setCollectionId(attn.getAttestationCollectionId(td));
+                        });
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Timber.w(e);
+                }
+
+                return token;
+            }).subscribeOn(Schedulers.io());
+        }
+        else
+        {
+            return Single.fromCallable(() -> token);
+        }
     }
 
     //Handling
@@ -344,7 +412,7 @@ public class AttestationImport
         return att;
     }
 
-    public Attestation loadAttestation(EasAttestation attestation, String originLink)
+    private Attestation loadAttestation(EasAttestation attestation, String originLink)
     {
         String recoverAttestationSigner = recoverSigner(attestation);
 
@@ -367,7 +435,6 @@ public class AttestationImport
 
         String collectionHash = localAttestation.getAttestationCollectionId();
 
-        //is it a smartpass?
         tInfo = Attestation.getDefaultAttestationInfo(attestation.getChainId(), collectionHash);
 
         //Now regenerate with the correct collectionId
@@ -543,6 +610,7 @@ public class AttestationImport
 
             Sign.SignatureData sig = new Sign.SignatureData(v, r, s);
             BigInteger key = Sign.signedMessageHashToKey(hash, sig);
+            Timber.d("PublicKey: %s", Numeric.toHexString(Numeric.toBytesPadded(key, 64)));
             recoveredAddress = Numeric.prependHexPrefix(Keys.getAddress(key));
         }
         catch (Exception e)
@@ -679,13 +747,13 @@ public class AttestationImport
 
 
     //Smart Pass handling
-    private Single<Attestation> callSmartPassLog(Attestation attn, String fullPass)
+    private Single<Attestation> callSmartPassLog(Attestation attn)
     {
         return Single.fromCallable(() -> {
             //check if attestation is valid, and if it's a smartpass
             if (attn.isValid() == AttestationValidationStatus.Pass && attn.isSmartPass())
             {
-                callback.smartPassValidation(callPassConfirmAPI(attn, fullPass));
+                callback.smartPassValidation(callPassConfirmAPI(attn));
             }
 
             return attn;
@@ -693,11 +761,11 @@ public class AttestationImport
     }
 
     //call API if required
-    private SmartPassReturn callPassConfirmAPI(Attestation attn, String magicLink)
+    private SmartPassReturn callPassConfirmAPI(Attestation attn)
     {
         //need to send the raw attestation (not processed)
         //isolate the pass
-        String rawPass = Utils.extractRawAttestation(magicLink);
+        String rawPass = attn.getRawAttestation();
         if (TextUtils.isEmpty(rawPass))
         {
             return SmartPassReturn.IMPORT_FAILED; //Should not happen if we get to this stage!

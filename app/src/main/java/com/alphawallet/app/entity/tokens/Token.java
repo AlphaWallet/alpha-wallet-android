@@ -21,6 +21,7 @@ import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EventResult;
+import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
@@ -1117,6 +1118,17 @@ public class Token
         }
     }
 
+    public String getDatabaseKey()
+    {
+        //pull IDs from the members
+        return TokensRealmSource.databaseKey(tokenInfo.chainId, tokenInfo.address);
+    }
+
+    public String getTSKey(TokenDefinition td)
+    {
+        return getTSKey();
+    }
+
     public Type<?> getIntrinsicType(String name)
     {
         return null;
@@ -1133,6 +1145,11 @@ public class Token
     }
 
     public String getAttestationCollectionId()
+    {
+        return getTSKey();
+    }
+
+    public String getAttestationCollectionId(TokenDefinition td)
     {
         return getTSKey();
     }

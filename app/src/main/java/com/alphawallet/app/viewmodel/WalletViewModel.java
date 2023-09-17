@@ -29,6 +29,7 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.QrScanSource;
+import com.alphawallet.app.entity.attestation.ImportAttestation;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokens.Attestation;
@@ -97,8 +98,8 @@ public class WalletViewModel extends BaseViewModel
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GenericWalletInteract.BackupLevel> backupEvent = new MutableLiveData<>();
     private final MutableLiveData<Pair<Double, Double>> fiatValues = new MutableLiveData<>();
+    private final MutableLiveData<Token[]> tokensToRemove = new MutableLiveData<>();
     private final FetchTokensInteract fetchTokensInteract;
-    private final TokensMappingRepositoryType tokensMappingRepository;
     private final TokenDetailRouter tokenDetailRouter;
     private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
@@ -132,8 +133,7 @@ public class WalletViewModel extends BaseViewModel
             RealmManager realmManager,
             OnRampRepositoryType onRampRepository,
             AnalyticsServiceType analyticsService,
-            AWWalletConnectClient awWalletConnectClient,
-            TokensMappingRepositoryType tokensMappingRepository)
+            AWWalletConnectClient awWalletConnectClient)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokenDetailRouter = tokenDetailRouter;
@@ -148,7 +148,6 @@ public class WalletViewModel extends BaseViewModel
         this.realmManager = realmManager;
         this.onRampRepository = onRampRepository;
         this.awWalletConnectClient = awWalletConnectClient;
-        this.tokensMappingRepository = tokensMappingRepository;
         setAnalyticsService(analyticsService);
     }
 
@@ -175,6 +174,11 @@ public class WalletViewModel extends BaseViewModel
     public LiveData<Pair<Double, Double>> onFiatValues()
     {
         return fiatValues;
+    }
+
+    public LiveData<Token[]> removeDisplayTokens()
+    {
+        return tokensToRemove;
     }
 
     public String getWalletAddr()
@@ -585,14 +589,13 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    public void removeAttestation(Token token)
+    public void deleteToken(Token token)
     {
         try (Realm realm = realmManager.getRealmInstance(defaultWallet.getValue()))
         {
             realm.executeTransactionAsync(r -> {
-                String key = ((Attestation)token).getDatabaseKey();
                 RealmAttestation realmAttn = r.where(RealmAttestation.class)
-                        .equalTo("address", key)
+                        .equalTo("address", token.getDatabaseKey())
                         .findFirst();
 
                 if (realmAttn != null)
@@ -601,5 +604,35 @@ public class WalletViewModel extends BaseViewModel
                 }
             });
         }
+    }
+
+    public void checkRemovedMetas()
+    {
+        disposable = Single.fromCallable(() -> {
+            final List<Token> forRemoval = new ArrayList<>();
+
+            try (Realm realm = realmManager.getRealmInstance(defaultWallet.getValue()))
+            {
+                RealmResults<RealmAttestation> attnResults = realm.where(RealmAttestation.class)
+                        .equalTo("collectionId", ImportAttestation.DELETE_KEY)
+                        .findAll();
+
+                for (RealmAttestation attn : attnResults)
+                {
+                    long chainId = attn.getChains().get(0);
+                    Attestation attestationForRemoval = (Attestation) tokensService.getAttestation(chainId, attn.getTokenAddress(), attn.getAttestationID());
+                    forRemoval.add(attestationForRemoval);
+                }
+
+                if (attnResults.size() > 0)
+                {
+                    realm.executeTransaction(r -> attnResults.deleteAllFromRealm());
+                }
+            }
+
+            return forRemoval.toArray(new Token[0]);
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(tokensToRemove::postValue);
     }
 }

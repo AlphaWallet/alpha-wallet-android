@@ -90,7 +90,7 @@ android {
         def DEFUALT_WALLETCONNECT_PROJECT_ID = "\"40c6071febfd93f4fe485c232a8a4cd9\""
         def DEFAULT_AURORA_API_KEY = "\"HFDDY5BNKGXBB82DE2G8S64C3C41B76PYI\""; //Put your Aurorascan.dev API key here - this one will rate limit as it is common
 
-        buildConfigField 'int', 'DB_VERSION', '51'
+        buildConfigField 'int', 'DB_VERSION', '53'
 
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
         buildConfigField "String", "WALLETCONNECT_PROJECT_ID", DEFUALT_WALLETCONNECT_PROJECT_ID
@@ -237,7 +237,7 @@ dependencies {
     implementation fileTree(include: ['*.aar'], dir: 'libs')
     //NB: Downgrade jackson due to bug in 2.15 releases that makes it incompatible with Gradle 8
     //noinspection GradleDependency
-    implementation platform('com.fasterxml.jackson:jackson-bom:2.13.5')
+    implementation platform('com.fasterxml.jackson:jackson-bom:2.13.5') //Don't upgrade from 2.13.5 due to Android API24 compatibility
     implementation 'com.fasterxml.jackson.core:jackson-core'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 

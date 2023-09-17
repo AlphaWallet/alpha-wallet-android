@@ -38,6 +38,7 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -66,12 +67,11 @@ public class TokenDefinition
     public final Map<String, ContractInfo> contracts = new HashMap<>();
     public final Map<String, AttestationDefinition> attestations = new HashMap<>();
     public final Map<String, TSAction> actions = new HashMap<>();
-    private Map<String, String> labels = new HashMap<>(); // store plural etc for token name
+    private final Map<String, String> labels = new HashMap<>(); // store plural etc for token name
     private final Map<String, NamedType> namedTypeLookup = new HashMap<>(); //used to protect against name collision
     private final TSTokenViewHolder tokenViews = new TSTokenViewHolder();
     private final Map<String, TSSelection> selections = new HashMap<>();
     private final Map<String, TSActivityView> activityCards = new HashMap<>();
-    private final Map<String, AttnElement> structs = new HashMap<>();
 
     public String nameSpace;
     public TokenscriptContext context;
@@ -282,6 +282,66 @@ public class TokenDefinition
         }
     }
 
+    public List<String> getAttestationIdFields()
+    {
+        if (attestations.size() > 0)
+        {
+            return getAttestation().replacementFieldIds;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public List<String> getAttestationCollectionKeys()
+    {
+        if (attestations.size() > 0)
+        {
+            return getAttestation().collectionKeys;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public String getAttestationSchemaUID()
+    {
+        if (getAttestation() != null)
+        {
+            return getAttestation().schemaUID;
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public byte[] getAttestationCollectionPreHash()
+    {
+        if (getAttestation() != null)
+        {
+            return getAttestation().getCollectionIdPreHash();
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public boolean matchCollection(String attestationCollectionId)
+    {
+        if (getAttestation() != null)
+        {
+            return getAttestation().matchCollection(attestationCollectionId);
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     public enum Syntax {
         DirectoryString, IA5String, Integer, GeneralizedTime,
         Boolean, BitString, CountryString, JPEG, NumericString
@@ -464,7 +524,7 @@ public class TokenDefinition
                         handleAddresses(element);
                         break;
                     case "label":
-                        labels = extractLabelTag(element);
+                        labels.putAll(extractLabelTag(element));
                         break;
                     case "selection":
                         TSSelection selection = parseSelection(element);
@@ -482,13 +542,6 @@ public class TokenDefinition
                         if (attr.bitmask != null || attr.function != null)
                         {
                             attributes.put(attr.name, attr);
-                        }
-                        break;
-                    case "struct":
-                        AttnElement struct = parseAttestationStruct(element);
-                        if (struct.type != null)
-                        {
-                            structs.put(struct.name, struct);
                         }
                         break;
                     case "attestation":

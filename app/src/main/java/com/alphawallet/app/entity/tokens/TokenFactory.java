@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.attestation.AttestationImport;
+import com.alphawallet.app.entity.attestation.ImportAttestation;
 import com.alphawallet.app.repository.entity.RealmAttestation;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.util.Utils;
@@ -217,7 +217,7 @@ public class TokenFactory
         else
         {
             EasAttestation easAttn = new Gson().fromJson(jsonAttestation, EasAttestation.class);
-            String recoverAttestationSigner = AttestationImport.recoverSigner(easAttn);
+            String recoverAttestationSigner = ImportAttestation.recoverSigner(easAttn);
             TokenInfo tInfo = createAttestationTokenInfo(token, info,
                     rAttn.getTokenAddress());
             Attestation attn = new Attestation(tInfo, info.name, rAttn.getAttestationLink().getBytes(StandardCharsets.UTF_8));

@@ -94,4 +94,5 @@ public interface TokenLocalSource
     Token fetchAttestation(long chainId, Wallet wallet, String address, String attnId);
 
     List<Token> fetchAttestations(long chainId, String walletAddress, String tokenAddress);
+    List<Token> fetchAttestations(String walletAddress);
 }

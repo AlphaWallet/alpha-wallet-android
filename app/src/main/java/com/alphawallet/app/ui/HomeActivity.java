@@ -472,7 +472,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 {
                     Toast.makeText(this, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
                 }
-                else
+                else if (viewModel.requiresProcessing(result.getContents()))
                 {
                     viewModel.handleQRCode(this, result.getContents());
                 }
@@ -1078,7 +1078,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 }
                 break;
             default:
-                super.onActivityResult(requestCode, resultCode, data);
+                //No Action
                 break;
         }
     }

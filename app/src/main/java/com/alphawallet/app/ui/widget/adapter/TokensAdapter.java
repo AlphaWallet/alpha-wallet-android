@@ -359,32 +359,29 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
-            if (si instanceof TokenSortedItem)
+            if (si instanceof TokenSortedItem tsi && tsi.value.tokenId != null)
             {
-                TokenSortedItem tsi = (TokenSortedItem) si;
                 TokenCardMeta thisToken = tsi.value;
                 if (thisToken.tokenId.equalsIgnoreCase(token.tokenId))
                 {
-                    items.removeItemAt(i);
+                    items.remove(tsi);
                     break;
                 }
             }
         }
     }
 
-    public SortedItem<TokenCardMeta> removeToken(long chainId, String tokenAddress)
+    public SortedItem<TokenCardMeta> removeToken(String removalKey)
     {
-        String id = TokensRealmSource.databaseKey(chainId, tokenAddress);
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
-            if (si instanceof TokenSortedItem)
+            if (si instanceof TokenSortedItem tsi && tsi.value.tokenId != null)
             {
-                TokenSortedItem tsi = (TokenSortedItem) si;
-                TokenCardMeta thisToken = tsi.value;
-                if (thisToken.tokenId.equalsIgnoreCase(id))
+                if (tsi.value.tokenId.toLowerCase(Locale.ROOT).startsWith(removalKey))
                 {
-                    return items.removeItemAt(i);
+                    items.remove(tsi);
+                    return tsi;
                 }
             }
         }
@@ -396,35 +393,33 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
-            if (si instanceof TokenSortedItem)
+            if (si instanceof TokenSortedItem tsi && tsi.value.tokenId != null)
             {
-                TokenSortedItem tsi = (TokenSortedItem) si;
                 TokenCardMeta thisToken = tsi.value;
 
                 if (thisToken.tokenId.equals(tokenId))
                 {
-                    return items.removeItemAt(i);
+                    items.remove(tsi);
+                    return tsi;
                 }
             }
         }
         return null;
     }
 
-    public SortedItem<TokenCardMeta> removeAttestation(Token token)
+    public SortedItem<TokenCardMeta> removeToken(Token token)
     {
-        Attestation attn = (Attestation)token;
-        String attnKey = attn.getDatabaseKey().toLowerCase(Locale.ROOT);
+        String tokenKey = token.getDatabaseKey().toLowerCase(Locale.ROOT);
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
-            if (si instanceof TokenSortedItem)
+            if (si instanceof TokenSortedItem tsi && tsi.value.tokenId != null)
             {
-                TokenSortedItem tsi = (TokenSortedItem) si;
                 TokenCardMeta thisToken = tsi.value;
-
-                if (thisToken.tokenId.toLowerCase(Locale.ROOT).startsWith(attnKey))
+                if (thisToken.tokenId.toLowerCase(Locale.ROOT).startsWith(tokenKey))
                 {
-                    return items.removeItemAt(i);
+                    items.remove(tsi);
+                    return tsi;
                 }
             }
         }
@@ -433,7 +428,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
     private boolean canDisplayToken(TokenCardMeta token)
     {
-        if (token == null) return false;
+        if (token == null || token.balance == null) return false;
         if (token.balance.equals("-2"))
         {
             return false;

@@ -111,8 +111,6 @@ public class WalletFragment extends BaseFragment implements
     private LargeTitleView largeTitleView;
     private ActivityResultLauncher<Intent> handleBackupClick;
     private ActivityResultLauncher<Intent> tokenManagementLauncher;
-    private AWalletAlertDialog dialog;
-
 
     @Inject
     AWWalletConnectClient awWalletConnectClient;
@@ -187,29 +185,22 @@ public class WalletFragment extends BaseFragment implements
                     getParentFragmentManager().setFragmentResult(C.ADDED_TOKEN, b);
                 });
 
-        /*networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-                result ->
-                {
-                    //send instruction to restart tokenService
-                    getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
-                });*/
-
         handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result ->
                 {
                     String keyBackup = null;
                     boolean noLockScreen = false;
                     Intent data = result.getData();
-                    if (data != null) keyBackup = data.getStringExtra("Key");
-                    if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
-                    if (result.getResultCode() == RESULT_OK)
+                    if (data != null)
                     {
-                        ((HomeActivity) getActivity()).backupWalletSuccess(keyBackup);
+                        keyBackup = data.getStringExtra("Key");
+                        data.getBooleanExtra("nolock", false);
                     }
-                    else
-                    {
-                        ((HomeActivity) getActivity()).backupWalletFail(keyBackup, noLockScreen);
-                    }
+                    Bundle backup = new Bundle();
+                    backup.putBoolean(C.HANDLE_BACKUP, result.getResultCode() == RESULT_OK);
+                    backup.putString("Key", keyBackup);
+                    backup.putBoolean("nolock", noLockScreen);
+                    getParentFragmentManager().setFragmentResult(C.HANDLE_BACKUP, backup);
                 });
     }
 
@@ -241,6 +232,7 @@ public class WalletFragment extends BaseFragment implements
         viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
         viewModel.onFiatValues().observe(getViewLifecycleOwner(), this::updateValue);
         viewModel.onUpdatedTokens().observe(getViewLifecycleOwner(), this::updateMetas);
+        viewModel.removeDisplayTokens().observe(getViewLifecycleOwner(), this::removeTokens);
         viewModel.getTokensService().startWalletSync(this);
         viewModel.activeWalletConnectSessions().observe(getViewLifecycleOwner(), walletConnectSessionItems -> {
             adapter.showActiveWalletConnectSessions(walletConnectSessionItems);
@@ -303,6 +295,7 @@ public class WalletFragment extends BaseFragment implements
     public void updateAttestationMeta(TokenCardMeta tcm)
     {
         updateMetas(new TokenCardMeta[]{tcm});
+        viewModel.checkRemovedMetas();
     }
 
     //Refresh value of wallet once sync is complete
@@ -360,6 +353,14 @@ public class WalletFragment extends BaseFragment implements
             viewModel.notifyRefresh();
             awWalletConnectClient.updateNotification();
         });
+    }
+
+    private void removeTokens(Token[] tokensToRemove)
+    {
+        for (Token remove : tokensToRemove)
+        {
+            adapter.removeToken(remove.getDatabaseKey());
+        }
     }
 
     @Override
@@ -818,14 +819,14 @@ public class WalletFragment extends BaseFragment implements
                 }
                 else if (token.getInterfaceSpec() == ContractType.ATTESTATION)
                 {
-                    viewModel.removeAttestation(token);
-                    removedToken = adapter.removeAttestation(token);
+                    viewModel.deleteToken(token);
+                    removedToken = adapter.removeToken(token.getDatabaseKey());
                     tokenName = token.tokenInfo.name;
                 }
                 else
                 {
                     viewModel.setTokenEnabled(token, false);
-                    removedToken = adapter.removeToken(token.tokenInfo.chainId, token.getAddress());
+                    removedToken = adapter.removeToken(token.getDatabaseKey());
                     tokenName = token.tokenInfo.name;
                 }
 

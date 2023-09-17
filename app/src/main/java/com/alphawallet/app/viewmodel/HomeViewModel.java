@@ -12,7 +12,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
@@ -40,7 +39,7 @@ import com.alphawallet.app.entity.Version;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.analytics.QrScanResultType;
-import com.alphawallet.app.entity.attestation.AttestationImport;
+import com.alphawallet.app.entity.attestation.ImportAttestation;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -77,10 +76,8 @@ import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.widget.EmailPromptView;
 import com.alphawallet.app.widget.QRCodeActionsView;
 import com.alphawallet.app.widget.WhatsNewView;
-import com.alphawallet.token.entity.AttestationDefinition;
 import com.alphawallet.token.entity.ContractInfo;
 import com.alphawallet.token.entity.MagicLinkData;
-import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -88,12 +85,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.web3j.crypto.Keys;
+import org.web3j.utils.Numeric;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -118,7 +113,7 @@ import wallet.core.jni.Hash;
 public class HomeViewModel extends BaseViewModel
 {
     public static final String ALPHAWALLET_DIR = "AlphaWallet";
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
+    private static final long ECHO_MAX_MILLIS = 250; //if second QRCODE read comes before 250 millis, reject
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<String> backUpMessage = new MutableLiveData<>();
 
@@ -144,25 +139,26 @@ public class HomeViewModel extends BaseViewModel
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
     private BottomSheetDialog dialog;
+    private long qrReadTime = Long.MAX_VALUE;
 
     @Inject
     HomeViewModel(
-        PreferenceRepositoryType preferenceRepository,
-        LocaleRepositoryType localeRepository,
-        ImportTokenRouter importTokenRouter,
-        AssetDefinitionService assetDefinitionService,
-        GenericWalletInteract genericWalletInteract,
-        FetchWalletsInteract fetchWalletsInteract,
-        CurrencyRepositoryType currencyRepository,
-        EthereumNetworkRepositoryType ethereumNetworkRepository,
-        MyAddressRouter myAddressRouter,
-        TransactionsService transactionsService,
-        AnalyticsServiceType analyticsService,
-        ExternalBrowserRouter externalBrowserRouter,
-        OkHttpClient httpClient,
-        RealmManager realmManager,
-        TokensService tokensService,
-        AlphaWalletNotificationService alphaWalletNotificationService)
+            PreferenceRepositoryType preferenceRepository,
+            LocaleRepositoryType localeRepository,
+            ImportTokenRouter importTokenRouter,
+            AssetDefinitionService assetDefinitionService,
+            GenericWalletInteract genericWalletInteract,
+            FetchWalletsInteract fetchWalletsInteract,
+            CurrencyRepositoryType currencyRepository,
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            MyAddressRouter myAddressRouter,
+            TransactionsService transactionsService,
+            AnalyticsServiceType analyticsService,
+            ExternalBrowserRouter externalBrowserRouter,
+            OkHttpClient httpClient,
+            RealmManager realmManager,
+            TokensService tokensService,
+            AlphaWalletNotificationService alphaWalletNotificationService)
     {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
@@ -376,8 +372,6 @@ public class HomeViewModel extends BaseViewModel
     {
         try
         {
-            if (qrCode == null) return;
-
             AnalyticsProperties props = new AnalyticsProperties();
             QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
             QRResult qrResult = parser.parse(qrCode);
@@ -439,6 +433,21 @@ public class HomeViewModel extends BaseViewModel
             Toast.makeText(activity, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }
     }
+
+    public boolean requiresProcessing(String qrCode)
+    {
+        //prevent echoes
+        long currentTime = System.currentTimeMillis();
+        if (qrCode == null || ((qrReadTime + ECHO_MAX_MILLIS) > currentTime))
+        {
+            Timber.d("QR Read: %s", (qrReadTime - currentTime));
+            return false;
+        }
+
+        qrReadTime = currentTime;
+        return true;
+    }
+
     private void startWalletConnect(Activity activity, String qrCode)
     {
         Intent intent;
@@ -698,23 +707,20 @@ public class HomeViewModel extends BaseViewModel
             if (td.holdingToken == null || td.holdingToken.length() == 0)
                 return; //tokenscript with no holding token is currently meaningless. Is this always the case?
 
-            String holdingContract = td.holdingToken;
-            AttestationDefinition attn = td.attestations != null ? td.attestations.get(holdingContract) : null;
-
             //determine type of holding token
-            String newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
+            String newFileName;
             ContractInfo info = td.contracts.get(td.holdingToken);
-            if (attn != null && info.contractInterface.equals("Attestation"))
+            byte[] preHash = td.getAttestationCollectionPreHash();
+            if (preHash != null)
             {
-                //recover the prehash from attestation
-                byte[] preHash = attn.getCollectionIdPreHash();
-                newFileName = Numeric.toHexString(Hash.keccak256(preHash));
+                newFileName = Numeric.toHexString(Hash.keccak256(preHash))
+                        + "-" + info.addresses.keySet().iterator().next();
             }
             else
             {
                 //calculate using formula: "{address.lowercased}-{chainId}"
-                newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next() + "-"
-                        + td.contracts.get(td.holdingToken).addresses.keySet().iterator().next();
+                newFileName = info.addresses.values().iterator().next().iterator().next() + "-"
+                        + info.addresses.keySet().iterator().next();
             }
 
             newFileName = assetDefinitionService.getDebugPath(newFileName + ".tsml");
@@ -737,9 +743,10 @@ public class HomeViewModel extends BaseViewModel
             assetDefinitionService.notifyNewScriptLoaded(newFileName);
 
             disposable = assetDefinitionService.resetAttributes(td)
+                    .map(pf -> assetDefinitionService.updateAttestations(td))// do required update for attestations
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(System.out::println);
+                    .subscribe();
         }
         catch (Exception e)
         {
@@ -930,7 +937,7 @@ public class HomeViewModel extends BaseViewModel
         }
         else
         {
-            AttestationImport attnImport = new AttestationImport(assetDefinitionService, tokensService,
+            ImportAttestation attnImport = new ImportAttestation(assetDefinitionService, tokensService,
                     activity, wallet, realmManager, httpClient);
 
             //attempt to import the wallet
@@ -940,9 +947,9 @@ public class HomeViewModel extends BaseViewModel
 
     public boolean handleSmartPass(HomeActivity homeActivity, String smartPassCandidate)
     {
-        if (smartPassCandidate.startsWith(AttestationImport.SMART_PASS_URL))
+        if (smartPassCandidate.startsWith(ImportAttestation.SMART_PASS_URL))
         {
-            smartPassCandidate = smartPassCandidate.substring(AttestationImport.SMART_PASS_URL.length()); //chop off leading URL
+            smartPassCandidate = smartPassCandidate.substring(ImportAttestation.SMART_PASS_URL.length()); //chop off leading URL
             QRResult result = new QRResult(smartPassCandidate);
             result.type = EIP681Type.EAS_ATTESTATION;
             String taglessAttestation = Utils.parseEASAttestation(smartPassCandidate);

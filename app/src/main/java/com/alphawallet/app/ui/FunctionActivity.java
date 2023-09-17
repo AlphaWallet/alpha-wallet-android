@@ -204,7 +204,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         List<Attribute> localAttrs = (action != null && action.attributes != null) ? new ArrayList<>(action.attributes.values()) : null;
 
         //Add attestation attributes
-        addAttestationAttrs();
+        attrs.append(viewModel.addAttestationAttrs(asset, token, action));
 
         viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs)
                     .subscribeOn(Schedulers.io())
@@ -698,28 +698,9 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             addressRecovered = Numeric.prependHexPrefix(Keys.getAddress(recoveredKey));
             Timber.d("Recovered: %s", addressRecovered);
         }
-        catch (SignatureException e)
-        {
-            e.printStackTrace();
-        }
         catch (Exception e)
         {
             e.printStackTrace();
-        }
-    }
-
-    private void addAttestationAttrs()
-    {
-        if (asset != null && asset.isAttestation())
-        {
-            List<TokenScriptResult.Attribute> attestationAttrs = viewModel.getAssetDefinitionService().getAttestationAttrs(token, action, asset.getAttestationID());
-            if (attestationAttrs != null)
-            {
-                for (TokenScriptResult.Attribute attr : attestationAttrs)
-                {
-                    onAttr(attr);
-                }
-            }
         }
     }
 

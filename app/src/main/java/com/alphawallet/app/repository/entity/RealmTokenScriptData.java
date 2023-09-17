@@ -26,6 +26,7 @@ public class RealmTokenScriptData extends RealmObject
     private String viewList; //CSV list of event views //TODO: replace with RealmMap when available
     private String ipfsPath;
     private boolean hasEvents; //TokenScript has events
+    private String schemaUID;
 
     public long getChainId()
     {
@@ -147,5 +148,15 @@ public class RealmTokenScriptData extends RealmObject
     public void setIpfsPath(String ipfsPath)
     {
         this.ipfsPath = ipfsPath;
+    }
+
+    public String getSchemaUID()
+    {
+        return schemaUID;
+    }
+
+    public void setSchemaUID(String schemaUID)
+    {
+        this.schemaUID = schemaUID;
     }
 }

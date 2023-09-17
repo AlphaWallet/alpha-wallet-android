@@ -9,10 +9,8 @@ import android.util.Pair;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
-import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.attestation.AttestationImport;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
@@ -37,7 +35,6 @@ import com.google.gson.JsonSyntaxException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -356,6 +353,29 @@ public class TokensRealmSource implements TokenLocalSource
                 att.setTokenWallet(walletAddress);
                 att.loadAttestationData(thisAttn, ""); //TODO: Store issuer, expiry dates etc in Realm
                 attestations.add(att);
+            }
+        }
+
+        return attestations;
+    }
+
+    @Override
+    public List<Token> fetchAttestations(String walletAddress)
+    {
+        List<Token> attestations = new ArrayList<>();
+        Wallet wallet = new Wallet(walletAddress);
+        try (Realm realm = realmManager.getRealmInstance(wallet))
+        {
+            RealmResults<RealmAttestation> realmItems = realm.where(RealmAttestation.class)
+                    .findAll();
+
+            for (RealmAttestation rAtt : realmItems)
+            {
+                Attestation attn = (Attestation) fetchAttestation(rAtt.getChains().get(0), wallet, rAtt);
+                if (attn != null)
+                {
+                    attestations.add(attn);
+                }
             }
         }
 
@@ -995,6 +1015,11 @@ public class TokensRealmSource implements TokenLocalSource
             //ensure root tokens for filters are in there
             try (Realm realm = realmManager.getRealmInstance(wallet))
             {
+                /*realm.executeTransaction(r -> {
+                    RealmResults<RealmAttestation> realmIt = realm.where(RealmAttestation.class).findAll();
+                    realmIt.deleteAllFromRealm();
+                });*/
+
                 RealmResults<RealmToken> realmItems = realm.where(RealmToken.class).sort("addedTime", Sort.ASCENDING).beginGroup().equalTo("isEnabled", true).or().like("address", wallet.address + "*", Case.INSENSITIVE).endGroup().like("address", ADDRESS_FORMAT).findAll();
 
                 for (RealmToken t : realmItems)
@@ -1046,19 +1071,26 @@ public class TokensRealmSource implements TokenLocalSource
 
                 for (RealmAttestation rAtt : realmItems)
                 {
-                    if (rAtt.supportsChain(networkFilters))
+                    try
                     {
-                        long chainId = rAtt.getChains().get(0);
-                        Attestation attn = (Attestation) fetchAttestation(chainId, wallet, rAtt);
-                        if (attn.tokenInfo == null)
+                        if (rAtt.supportsChain(networkFilters))
                         {
-                            continue;
+                            long chainId = rAtt.getChains().get(0);
+                            Attestation attn = (Attestation) fetchAttestation(chainId, wallet, rAtt);
+                            if (attn.tokenInfo == null)
+                            {
+                                continue;
+                            }
+                            TokenCardMeta tcmAttestation = new TokenCardMeta(chainId,
+                                    rAtt.getTokenAddress(), "1", System.currentTimeMillis(),
+                                    svs, rAtt.getName(), attn.tokenInfo.symbol, attn.getBaseTokenType(), TokenGroup.ATTESTATION, attn.getAttestationUID());
+                            tcmAttestation.isEnabled = true;
+                            metaList.add(tcmAttestation);
                         }
-                        TokenCardMeta tcmAttestation = new TokenCardMeta(chainId,
-                                rAtt.getTokenAddress(), "1", System.currentTimeMillis(),
-                                svs, rAtt.getName(), attn.tokenInfo.symbol, attn.getBaseTokenType(), TokenGroup.ATTESTATION, attn.getAttestationUID());
-                        tcmAttestation.isEnabled = true;
-                        metaList.add(tcmAttestation);
+                    }
+                    catch (Exception e)
+                    {
+                        Timber.w(e);
                     }
                 }
             }

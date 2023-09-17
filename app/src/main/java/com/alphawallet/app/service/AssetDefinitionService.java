@@ -28,6 +28,7 @@ import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.QueryResponse;
 import com.alphawallet.app.entity.TokenLocator;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
@@ -36,6 +37,7 @@ import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.repository.entity.RealmAttestation;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmCertificateData;
 import com.alphawallet.app.repository.entity.RealmTokenScriptData;
@@ -61,7 +63,6 @@ import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.entity.ViewType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
-import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import org.jetbrains.annotations.NotNull;
@@ -75,6 +76,7 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.protocol.core.methods.response.Log;
+import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedOutputStream;
@@ -117,6 +119,7 @@ import io.realm.Sort;
 import io.realm.exceptions.RealmException;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import timber.log.Timber;
+import wallet.core.jni.Hash;
 
 
 /**
@@ -381,7 +384,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private TokenDefinition fileLoadComplete(List<ContractLocator> originContracts, TokenScriptFile file, TokenDefinition td)
     {
-        if (originContracts.size() == 0) return td; //no action needed
+        if (originContracts.size() == 0 || td.getAttestation() != null) return td; //no action needed, not accessible to Attestation //TODO: Refactor once we handle multiple attestations
 
         boolean hasEvents = td.hasEvents();
 
@@ -401,8 +404,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             realm.executeTransaction(r -> {
                 for (ContractLocator cl : originContracts)
                 {
-                    //String entryKey = getTSDataKey(cl.chainId, cl.address);
-                    String entryKey = getTSDataKeyTemp(cl.chainId, cl.address);
+                    String entryKey = getTSDataKey(cl.chainId, cl.address);
                     RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
                             .equalTo("instanceKey", entryKey)
                             .findFirst();
@@ -421,6 +423,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         entry.setNames(td.getTokenNameList());
                         entry.setViewList(td.getViews());
                         entry.setHasEvents(hasEvents);
+                        entry.setSchemaUID(td.getAttestationSchemaUID());
                     }
                 }
             });
@@ -433,7 +436,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return td;
     }
 
-    private String getTSDataKeyTemp(long chainId, String address)
+    private String getTSDataKey(long chainId, String address)
     {
         if (address.equalsIgnoreCase(tokensService.getCurrentAddress()))
         {
@@ -843,7 +846,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
-                    .equalTo("instanceKey", getTSDataKeyTemp(chainId, address))// getTSDataKey(chainId, address))
+                    .equalTo("instanceKey", getTSDataKey(chainId, address))// getTSDataKey(chainId, address))
                     .findFirst();
 
             if (tsData != null && tsData.getFilePath() != null)
@@ -866,9 +869,115 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             return new TokenScriptFile(context);
         }
+        else if (token instanceof Attestation attn)
+        {
+            return getAttestationTSFile(attn);
+        }
+        else
+        {
+            return locateTokenScriptFile(token.getTSKey() + TS_EXTENSION);
+        }
+    }
 
-        String fileName = token.getTSKey() + TS_EXTENSION;
-        //first try debug file
+    public TokenDefinition getAssetDefinitionDeepScan(Attestation attn)
+    {
+        try
+        {
+            TokenScriptFile tsf = locateTokenScriptFile(attn.getTSKey() + TS_EXTENSION); //try easy find
+            if (tsf.exists())
+            {
+                return parseFile(tsf.getInputStream());
+            }
+
+            //load filenames that are sufficient length to be attestation definitions
+            //then include the files in the app external directory - these are placed here when there's no file permission
+            List<File> fileList = new ArrayList<>();
+            File[] files = context.getExternalFilesDir("").listFiles();
+            if (files != null)
+            {
+                fileList.addAll(Arrays.asList(files)); //now add files in the app's external directory; /Android/data/[app-name]/files. These override internal
+            }
+
+            //finally the files downloaded from the server
+            files = context.getFilesDir().listFiles();
+            if (files != null)
+            {
+                fileList.addAll(Arrays.asList(files)); //first add files in app internal area - these are downloaded from the server
+            }
+
+            // now check each file that is an attestation
+            for (File f : fileList)
+            {
+                if (f.isFile() && f.canRead() && allowableExtension(f))
+                {
+                    tsf = new TokenScriptFile(context, f.getAbsolutePath());
+                    TokenDefinition td = parseFile(tsf.getInputStream());
+                    if (td.getAttestation() != null && td.matchCollection(attn.getAttestationCollectionId(td)))
+                    {
+                        return td;
+                    }
+                }
+            }
+
+        }
+        catch (Exception e)
+        {
+            // NOP
+        }
+
+        return null;
+    }
+
+    // Find a TokenScript even if we have to check by Schema for a match
+    private TokenScriptFile getAttestationTSFile(Attestation attn)
+    {
+        //first attempt to restore directly from file - note this won't work for newly imported attestations as we don't have a collection ID
+        TokenScriptFile tsfReturn = locateTokenScriptFile(attn.getTSKey() + TS_EXTENSION);
+        if (tsfReturn.exists())
+        {
+            return tsfReturn;
+        }
+
+        //1. load TokenScripts with matching schemaUID
+        //2. for each: calculate the collectionId using that tokenscript's collectionIdFields
+        //3. find matching collectionId, return collectionId
+        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        {
+            //Otherwise, attempt to match this attestation with a valid script
+            RealmResults<RealmTokenScriptData> realmData = realm.where(RealmTokenScriptData.class)
+                    .equalTo("schemaUID", attn.getSchemaUID())
+                    .findAll();
+
+            for (RealmTokenScriptData tsCandidate : realmData)
+            {
+                //Open this definition
+                try
+                {
+                    TokenScriptFile tsf = locateTokenScriptFile(tsCandidate.getFilePath());
+                    if (!tsf.exists())
+                    {
+                        continue;
+                    }
+
+                    TokenDefinition td = parseFile(tsf.getInputStream());
+                    if (td.matchCollection(attn.getAttestationCollectionId(td)))
+                    {
+                        tsfReturn = tsf;
+                        break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Timber.w(e);
+                }
+            }
+        }
+
+        return tsfReturn;
+    }
+
+    private TokenScriptFile locateTokenScriptFile(String fileName)
+    {
         TokenScriptFile tsf = new TokenScriptFile(context, getDebugPath(fileName));
         if (tsf.exists())
         {
@@ -881,7 +990,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             return new TokenScriptFile(context, f.getAbsolutePath());
         }
 
-        return new TokenScriptFile(context);
+        return new TokenScriptFile(context, fileName);
     }
 
     /**
@@ -899,7 +1008,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             address = "ethereum";
         }
         //is asset definition currently read?
-        final TokenDefinition assetDef = getDefinition(getTSDataKeyTemp(chainId, address));
+        final TokenDefinition assetDef = getDefinition(getTSDataKey(chainId, address));
         if (assetDef == null && !address.equals("ethereum"))
         {
             //try web
@@ -937,7 +1046,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         String convertedAddr = (address.equalsIgnoreCase(tokensService.getCurrentAddress())) ? "ethereum" : address.toLowerCase();
-        return getAssetDefinitionASync(getDefinition(getTSDataKeyTemp(chainId, address)), convertedAddr);
+        return getAssetDefinitionASync(getDefinition(getTSDataKey(chainId, address)), convertedAddr);
     }
 
     private Single<TokenDefinition> getAssetDefinitionASync(final TokenDefinition assetDef, final String contractName)
@@ -992,7 +1101,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
-                    .equalTo("instanceKey", getTSDataKeyTemp(chainId, address))
+                    .equalTo("instanceKey", getTSDataKey(chainId, address))
                     .findFirst();
 
             if (tsData != null)
@@ -1066,15 +1175,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private TokenDefinition parseFile(InputStream xmlInputStream) throws Exception
     {
-        Locale locale;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        {
-            locale = context.getResources().getConfiguration().getLocales().get(0);
-        }
-        else
-        {
-            locale = context.getResources().getConfiguration().locale;
-        }
+        Locale locale = context.getResources().getConfiguration().getLocales().get(0);
 
         return new TokenDefinition(
                 xmlInputStream, locale, this);
@@ -1104,11 +1205,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         final TokenDefinition td = decodeTs;
         final List<ContractLocator> originContracts = getOriginContracts(td);
+        final String schemaUID = td.getAttestationSchemaUID();
 
         return Single.fromCallable(() -> {
                 boolean isDebugOverride = tsf.isDebug();
                 //remove all old definitions & certificates
-                updateScriptEntriesInRealm(originContracts, isDebugOverride, tsf.calcMD5());
+                updateScriptEntriesInRealm(originContracts, isDebugOverride, tsf.calcMD5(), schemaUID);
                 cachedDefinition = null;
                 return tsf;
         }).flatMap(tt -> cacheSignature(tsf))
@@ -1125,14 +1227,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return Single.fromCallable(() -> placeHolder);
     }
 
-    private void updateScriptEntriesInRealm(List<ContractLocator> origins, boolean isDebug, String newFileHash)
+    private void updateScriptEntriesInRealm(List<ContractLocator> origins, boolean isDebug, String newFileHash, String schemaUID)
     {
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             realm.executeTransaction(r -> {
                 for (ContractLocator cl : origins)
                 {
-                    String entryKey = getTSDataKeyTemp(cl.chainId, cl.address);
+                    String entryKey = getTSDataKey(cl.chainId, cl.address);
                     RealmTokenScriptData realmData = r.where(RealmTokenScriptData.class)
                             .equalTo("instanceKey", entryKey)
                             .findFirst();
@@ -1174,6 +1276,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 .map(scriptData -> storeEntry(token, scriptData));
     }
 
+    // Write the TokenScript to Android Storage
+    /** @noinspection ResultOfMethodCallIgnored*/
     private File storeEntry(Token token, Pair<String, Pair<String, Boolean>> scriptData) throws IOException
     {
         if (TextUtils.isEmpty(scriptData.second.first) || scriptData.second.first.equals(UNCHANGED_SCRIPT))
@@ -1181,13 +1285,34 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             return new File(UNCHANGED_SCRIPT); // blank file with UNCHANGED name
         }
 
-        String tokenKey = token.getTSKey();
+        String tempFileKey = token.getTSKey();
 
-        File storeFile = storeFile(tokenKey, scriptData.second);
+        File tempStoreFile = storeFile(tempFileKey, scriptData.second);
 
-        TokenScriptFile tsf = new TokenScriptFile(context, storeFile.getAbsolutePath());
+        TokenScriptFile tsf = new TokenScriptFile(context, tempStoreFile.getAbsolutePath());
+
+        TokenDefinition td = getTokenDefinition(tsf);
+
+        byte[] preHash = td.getAttestationCollectionPreHash();
+        if (preHash != null)
+        {
+            if (token instanceof Attestation attn && !td.getAttestation().compareIssuerKey(attn.getIssuer()))
+            {
+                //refuse to download
+                tempStoreFile.delete();
+                return new File("");
+            }
+
+            //store this TokenScript with the correct CollectionId
+            tempFileKey = Numeric.toHexString(Hash.keccak256(preHash)) + "-" + token.tokenInfo.chainId + TS_EXTENSION;
+            File updatedFile = new File(context.getFilesDir(), tempFileKey);
+            tempStoreFile.renameTo(updatedFile);
+            tsf = new TokenScriptFile(context, updatedFile.getAbsolutePath());
+        }
 
         String fileHash = tsf.calcMD5();
+        final String tokenKey = tempFileKey;
+        final File storeFile = tsf;
 
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
@@ -1205,6 +1330,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 entry.setFileHash(fileHash);
                 if (scriptData.second.second) entry.setIpfsPath(scriptData.first); //if sourced from IPFS store path
                 entry.setFilePath(storeFile.getAbsolutePath());
+                entry.setSchemaUID(td.getAttestationSchemaUID());
             });
         }
         catch (Exception e)
@@ -1449,7 +1575,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             realm.executeTransaction(r -> {
-                String entryKey = getTSDataKeyTemp(chainId, address);
+                String entryKey = getTSDataKey(chainId, address);
                 RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
                         .equalTo("instanceKey", entryKey)
                         .findFirst();
@@ -1460,6 +1586,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 entry.setNames(td.getTokenNameList());
                 entry.setHasEvents(td.hasEvents());
                 entry.setViewList(td.getViews());
+                entry.setSchemaUID(td.getAttestationSchemaUID());
                 entry.setFileHash(BUNDLED_SCRIPT);
             });
         }
@@ -2562,6 +2689,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             TokenScriptResult.addPair(attrs, "balance", token.balance.toString());
         }
 
+        if (token.getInterfaceSpec() == ContractType.ATTESTATION)
+        {
+            addAttestationAttributes(attrs, (Attestation)token, definition);
+        }
+
         return attrs;
     }
 
@@ -2612,43 +2744,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return resolveAttrs(token, tokenId, definition, attrList, itemView);
     }
 
-    /*private Function formValidation(EasAttestation attn)
-    {
-        //Commented out
-        byte[] signature = attn.getSignatureBytes();
-
-        List<Type> inputParams = Arrays.asList(attn.getAttestationCore(), new DynamicBytes(signature));
-        DefaultFunctionEncoder dfe = new DefaultFunctionEncoder();
-
-        List<Type> inputParam = Collections.singletonList(attn.getAttestationCore());
-        String hex = dfe.encodeParameters(inputParam);
-        //trim struct definition
-        hex = hex.substring(0x40);
-
-        List<TypeReference<?>> returnTypes = Arrays.asList(new TypeReference<Bool>() { }, new TypeReference<Address>() { }, new TypeReference<Address>() { }, new TypeReference<Bool>() { }, new TypeReference<Uint64>() { });
-        Function testValidation = new Function("verifyEASAttestation",
-                inputParams,
-                returnTypes);
-
-        String contractAddress = "0xeAC4F618232B5cA1C895B6e5468363fdd128E873";
-
-        String result = tokenscriptUtility.callSmartContract(attn.getChainId(), contractAddress, testValidation);
-        List<Type> values = FunctionReturnDecoder.decode(result, testValidation.getOutputParameters());
-
-        inputParams.clear();
-        //(string memory eventId, string memory ticketId, uint8 ticketClass, bytes memory commitment)
-        returnTypes = Arrays.asList(new TypeReference<Utf8String>() { }, new TypeReference<Utf8String>() { }, new TypeReference<Uint8>() { }, new TypeReference<DynamicBytes>() { });
-
-
-        //OK. Try decode
-        testValidation = new Function("decodeAttestationData",
-                inputParam,
-                returnTypes);
-
-
-        return testValidation;
-    }*/
-
     public List<TokenScriptResult.Attribute> getAttestationAttrs(Token token, TSAction action, String attnId)
     {
         List<TokenScriptResult.Attribute> attrs = new ArrayList<>();
@@ -2666,6 +2761,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 //also require signature
                 String signatureBytes = Numeric.toHexString(easAttestation.getSignatureBytes());
                 attrs.add(new TokenScriptResult.Attribute("attestationSig", "attestationSig", BigInteger.ZERO, signatureBytes));
+                //inject the raw attestation
+                attrs.add(new TokenScriptResult.Attribute("attestationSig", "rawAttestation", BigInteger.ZERO, att.getRawAttestation()));
             }
             else
             {
@@ -2674,6 +2771,28 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return attrs;
+    }
+
+    private void addAttestationAttributes(StringBuilder attrs, Attestation att, TokenDefinition td)
+    {
+        if (att.isEAS())
+        {
+            DefaultFunctionEncoder dfe = new DefaultFunctionEncoder();
+            EasAttestation easAttestation = att.getEasAttestation();
+            List<Type> inputParam = Collections.singletonList(easAttestation.getAttestationCore());
+            String coreAttestationHex = Numeric.prependHexPrefix(dfe.encodeParameters(inputParam).substring(0x40)); // 0x40?
+            TokenScriptResult.addPair(attrs, "attestation", coreAttestationHex);
+            String signatureBytes = Numeric.toHexString(easAttestation.getSignatureBytes());
+            TokenScriptResult.addPair(attrs, "attestationSig", signatureBytes);
+            TokenScriptResult.addPair(attrs, "rawAttestation", att.getRawAttestation());
+
+            //add all the required attributes
+            attrs.append(att.addTokenScriptAttributes());
+        }
+        else
+        {
+            TokenScriptResult.addPair(attrs, "attestation", Numeric.toHexString(att.getAttestation()));
+        }
     }
 
     public Map<String, TSAction> getAttestationFunctionMap(Token att)
@@ -2693,6 +2812,53 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return actions;
+    }
+
+    // Trawl through all attestations in this wallet database and update their collectionId pointer if required
+    public String updateAttestations(TokenDefinition td)
+    {
+        byte[] preHash = td.getAttestation().getCollectionIdPreHash();
+        String scriptCollectionId = Numeric.toHexString(Hash.keccak256(preHash));
+        Wallet wallet = new Wallet(tokensService.getCurrentAddress());
+        int updateSize;
+
+        try (Realm realm = realmManager.getRealmInstance(wallet))
+        {
+            List<RealmAttestation> forUpdate = getRealmItemsForUpdate(realm, td, scriptCollectionId);
+            updateSize = forUpdate.size();
+
+            //now execute update
+            if (forUpdate.size() > 0)
+            {
+                realm.executeTransaction(r -> {
+                    for (RealmAttestation rAtt : forUpdate)
+                    {
+                        rAtt.setCollectionId(scriptCollectionId);
+                    }
+                });
+            }
+        }
+
+        return String.valueOf(updateSize);
+    }
+
+    private List<RealmAttestation> getRealmItemsForUpdate(Realm realm, TokenDefinition td, String scriptCollectionId)
+    {
+        List<RealmAttestation> forUpdate = new ArrayList<>();
+        RealmResults<RealmAttestation> realmItems = realm.where(RealmAttestation.class)
+                .notEqualTo("collectionId", scriptCollectionId)
+                .findAll();
+
+        for (RealmAttestation rAtt : realmItems)
+        {
+            Attestation attn = (Attestation) tokensService.getAttestation(rAtt.getChains().get(0), rAtt.getTokenAddress(), rAtt.getAttestationID());
+            if (attn != null && attn.getAttestationCollectionId(td).equals(scriptCollectionId))
+            {
+                forUpdate.add(rAtt);
+            }
+        }
+
+        return forUpdate;
     }
 
     private Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId, TokenDefinition td,
@@ -2871,13 +3037,22 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
+    //Import script from scriptURI
     public Single<TokenDefinition> checkServerForScript(Token token, MutableLiveData<Boolean> updateFlag)
     {
         TokenScriptFile tf = getTokenScriptFile(token);
 
-        if ((tf != null && !TextUtils.isEmpty(tf.getName())) && !isInSecureZone(tf))
+        if ((tf != null && tf.exists()) && !isInSecureZone(tf))
         {
-            return Single.fromCallable(TokenDefinition::new); //early return for debug script check
+            try
+            {
+                TokenDefinition td = parseFile(tf.getInputStream());
+                return Single.fromCallable(() -> td);
+            }
+            catch (Exception ignored)
+            {
+                // Drop through to try server if debug script didn't work
+            }
         }
 
         //try the contractURI, then server

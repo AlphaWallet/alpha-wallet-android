@@ -1217,8 +1217,7 @@ public class Utils
             return attestation;
         }
 
-        attestation = extractParam(data, ATTESTATION_PREFIX);
-        return inflateData(attestation);
+        return extractParam(data, ATTESTATION_PREFIX);
     }
 
     private static String extractParam(String url, String param)
@@ -1382,7 +1381,6 @@ public class Utils
         }
         catch (Exception e)
         {
-            Timber.e(e);
             return "";
         }
     }

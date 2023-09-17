@@ -11,6 +11,7 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmAttestation;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.AttestationDefinition;
@@ -55,6 +56,7 @@ public class Attestation extends Token
     private long validFrom;
     private long validUntil;
     private final Map<String, MemberData> additionalMembers = new HashMap<>();
+    private String collectionId;
     private boolean isValid;
     private ContractType baseTokenType = ContractType.ERC721; // default to ERC721
     private static final String VALID_FROM = "time";
@@ -69,11 +71,11 @@ public class Attestation extends Token
     public static final String EAS_ATTESTATION_SYMBOL = "ATTN";
     private static final String SMART_LAYER = "SMARTLAYER"; //TODO: Remove once we use TokenScript
 
-    //TODO: Supplemental data
     public Attestation(TokenInfo tokenInfo, String networkName, byte[] attestation)
     {
         super(tokenInfo, BigDecimal.ONE, System.currentTimeMillis(), networkName, ContractType.ATTESTATION);
         this.attestation = attestation;
+        this.collectionId = null;
         setAttributeResult(BigInteger.ONE, new TokenScriptResult.Attribute("attestation", "attestation", BigInteger.ONE, Numeric.toHexString(attestation)));
     }
 
@@ -87,6 +89,7 @@ public class Attestation extends Token
         return attestation;
     }
 
+    //Legacy Attestation Validation
     public void handleValidation(AttestationValidation attValidation)
     {
         if (attValidation == null)
@@ -131,6 +134,51 @@ public class Attestation extends Token
         }
     }
 
+    public String getSchemaUID()
+    {
+        EasAttestation attn = getEasAttestation();
+        if (attn != null)
+        {
+            return attn.getSchema();
+        }
+        else
+        {
+            return Numeric.toHexStringWithPrefixZeroPadded(BigInteger.ZERO, 64);
+        }
+    }
+
+    public String addTokenScriptAttributes()
+    {
+        StringBuilder outerStruct = new StringBuilder();
+        StringBuilder innerStruct = new StringBuilder();
+
+        outerStruct.append("attest: {\n");
+        innerStruct.append("data: {\n");
+
+        for (Map.Entry<String, MemberData> m : additionalMembers.entrySet())
+        {
+            if (m.getValue().isURI())
+            {
+                continue;
+            }
+
+            if (m.getValue().isSchemaValue())
+            {
+                TokenScriptResult.addPair(innerStruct, m.getValue().getCleanKey(), m.getValue().getString());
+            }
+            else
+            {
+                TokenScriptResult.addPair(outerStruct, m.getKey(), m.getValue().getString());
+            }
+        }
+
+        innerStruct.append("\n}"); // close data
+        outerStruct.append(innerStruct.toString());
+        outerStruct.append("\n}"); // close att
+
+        return outerStruct.toString();
+    }
+
     public AttestationValidationStatus isValid()
     {
         //Check has expired
@@ -169,34 +217,135 @@ public class Attestation extends Token
         return Numeric.toHexStringNoPrefix(Hash.keccak256(identifier.toString().getBytes(StandardCharsets.UTF_8)));
     }
 
+    private String getIdFieldValues(TokenDefinition td)
+    {
+        List<String> idFields = (td != null) ? td.getAttestationIdFields() : null;
+        if (idFields == null || idFields.isEmpty())
+        {
+            return getAttestationUID();
+        }
+        else
+        {
+            return getFieldDataJoin(idFields);
+        }
+    }
+
+    private String getCollectionFieldValues(TokenDefinition td)
+    {
+        List<String> collectionKeys = (td != null) ? td.getAttestationCollectionKeys() : null;
+        if (collectionKeys == null || collectionKeys.isEmpty())
+        {
+            return "";
+        }
+        else
+        {
+            return getFieldDataJoin(collectionKeys);
+        }
+    }
+
+    private String getFieldDataJoin(List<String> keys)
+    {
+        StringBuilder identifier = new StringBuilder();
+        for (String idField : keys)
+        {
+            MemberData m = additionalMembers.get(SCHEMA_DATA_PREFIX + idField);
+            if (m == null)
+            {
+                m = additionalMembers.get(idField);
+            }
+
+            addToUID(identifier, m);
+        }
+
+        return identifier.toString();
+    }
+
+    private void addToUID(StringBuilder identifier, MemberData m)
+    {
+        if (m == null)
+        {
+            return;
+        }
+
+        identifier.append(m.getString());
+    }
+
+    // Used for determining if this attestation replaces another
+    // the new formula is keccak256(chainId + collectionId + idFields)
+    // Any existing match to this when importing a new attestation means this attn should replace the old one
+    public String getAttestationIdHash(TokenDefinition td)
+    {
+        String collectionId = getAttestationCollectionId(td);
+        String idFields = getIdFieldValues(td);
+        String identifierPreHash = tokenInfo.chainId + Numeric.cleanHexPrefix(collectionId) + idFields;
+        byte[] identifierBytes = identifierPreHash.getBytes(StandardCharsets.UTF_8);
+        byte[] hash = Hash.keccak256(identifierBytes);
+        return Numeric.toHexString(hash);
+    }
+
+    //Formula for collectionId is keccak256(addr of publicKey + collectionIdFields)
+    @Override
+    public String getAttestationCollectionId(TokenDefinition td)
+    {
+        //Early return: if there's no tokenDefinition then we try the legacy method
+        if (td == null || td.getAttestationCollectionKeys() == null || td.getAttestationCollectionKeys().isEmpty())
+        {
+            return getAttestationCollectionId();
+        }
+
+        String collectionIdStr = getCollectionFieldValues(td); //obtain joined string with collectionIds values (not keys)
+        String collectionPrefix = getCollectionPrefix(); //fetch collectionId prefix calc (schema + public key)
+
+        String collectionStr = collectionPrefix + collectionIdStr;
+        byte[] collectionBytes = collectionStr.getBytes(StandardCharsets.UTF_8);;
+        byte[] hash = Hash.keccak256(collectionBytes);
+        return Numeric.toHexString(hash);
+    }
+
+    // Gets a placeholder hash for this attestation for initial storage
+    // This value will be replaced if there's a TokenScript which specifies a CollectionID
     @Override
     public String getAttestationCollectionId()
     {
-        // TODO: Pull these from the TokenScript
-        String eventId = getCollectionId(EVENT_IDS);
-        String eventPostFix = getCollectionId(SECONDARY_IDS);
+        // produce generic UID for Attestation by using attn schema elements
+        String collectionStr = getCollectionPrefix() + getFieldDataJoin(getAttestationAttributeKeys());
+        byte[] collectionBytes = collectionStr.getBytes(StandardCharsets.UTF_8);;
+        byte[] hash = Hash.keccak256(collectionBytes);
+        return Numeric.toHexString(hash);
+    }
 
+    // collectionId = keccak256(publickey + collectionIdFields)
+    private String getCollectionPrefix()
+    {
         EasAttestation easAttestation = getEasAttestation();
+        String collectionPrefix;
 
-        byte[] collectionBytes;
         if (easAttestation == null)
         {
-            collectionBytes = "No Collection".getBytes(StandardCharsets.UTF_8);
+            collectionPrefix = "No Collection";
         }
         else
         {
             //issuer public key
             //calculate hash from attestation
-            String hexStr = Numeric.cleanHexPrefix(easAttestation.getSchema()).toLowerCase(Locale.ROOT) + Keys.getAddress(recoverPublicKey(easAttestation)).toLowerCase(Locale.ROOT)
-                    + eventId + eventPostFix;
-            //now convert this into ASCII hex bytes
-            collectionBytes = hexStr.getBytes(StandardCharsets.UTF_8);
+            collectionPrefix = Keys.getAddress(recoverPublicKey(easAttestation)).toLowerCase(Locale.ROOT);
         }
 
-        //get Hash
-        byte[] hash = Hash.keccak256(collectionBytes);
+        return collectionPrefix;
+    }
 
-        return Numeric.toHexString(hash);
+    private List<String> getAttestationAttributeKeys()
+    {
+        List<String> keySet = new ArrayList<>();
+        for (Map.Entry<String, MemberData> m : additionalMembers.entrySet())
+        {
+            if (m.getValue().isSchemaValue() && !m.getValue().isURI())
+            {
+                keySet.add(m.getKey());
+            }
+        }
+
+        return keySet;
     }
 
     private String getCollectionId(String eventIds)
@@ -219,7 +368,32 @@ public class Attestation extends Token
     @Override
     public String getTSKey()
     {
-        return getAttestationCollectionId();
+        if (collectionId != null)
+        {
+            return collectionId + "-" + tokenInfo.chainId;
+        }
+        else
+        {
+            return getAttestationCollectionId() + "-" + tokenInfo.chainId;
+        }
+    }
+
+    @Override
+    public String getTSKey(TokenDefinition td)
+    {
+        return getAttestationCollectionId(td) + "-" + tokenInfo.chainId;
+    }
+
+    public String getCollectionId()
+    {
+        if (collectionId != null)
+        {
+            return collectionId;
+        }
+        else
+        {
+            return getAttestationCollectionId();
+        }
     }
 
     public String getAttestationDescription(TokenDefinition td)
@@ -301,6 +475,7 @@ public class Attestation extends Token
         validUntil = validToData != null ? validToData.getValue().longValue() : 0;
 
         issuerKey = recoveredIssuer;
+        collectionId = rAtt.getCollectionId();
     }
 
     public boolean isEAS()
@@ -408,6 +583,7 @@ public class Attestation extends Token
         return members.toString();
     }
 
+    @Override
     public String getDatabaseKey()
     {
         //pull IDs from the members
@@ -495,6 +671,18 @@ public class Attestation extends Token
         return getCollectionId(EVENT_IDS).equalsIgnoreCase(SMART_LAYER);
     }
 
+    public String getRawAttestation()
+    {
+        String attestationLink = new String(attestation, StandardCharsets.UTF_8);
+        // extract raw attestation for API usage
+        return Utils.extractRawAttestation(attestationLink);
+    }
+
+    public String getStoredCollectionId()
+    {
+        return collectionId;
+    }
+
     private static class MemberData
     {
         JSONObject element;
@@ -508,7 +696,6 @@ public class Attestation extends Token
                 element.put("type", type.getTypeAsString());
                 if (type.getTypeAsString().equals("bytes"))
                 {
-                    byte[] ddo = (byte[])type.getValue();
                     element.put("value", Numeric.toHexString((byte[])type.getValue()));
                 }
                 else

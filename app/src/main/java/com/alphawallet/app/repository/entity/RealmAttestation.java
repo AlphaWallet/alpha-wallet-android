@@ -1,10 +1,8 @@
 package com.alphawallet.app.repository.entity;
 
-import android.text.TextUtils;
 import android.util.Base64;
 
 import com.alphawallet.app.util.Utils;
-import org.web3j.utils.Numeric;
 
 import java.util.HashSet;
 import java.util.List;
@@ -23,8 +21,11 @@ public class RealmAttestation extends RealmObject
     private String chains;
     private String subTitle;
     private String id;
-    private String hash;
+    private String collectionId;    //for quick lookup. //TODO: This may change when we receive an updated TokenScript
     private String attestation;
+    private String identifierHash;  //this is only populated if there's a TokenScript.
+                                    //the formula is keccak256(chainId + collectionID + idFields)
+                                    //if it matches an existing attestation we replace
 
     public String getName() {
         return name;
@@ -36,14 +37,27 @@ public class RealmAttestation extends RealmObject
 
     public String getTokenAddress()
     {
-        String tAddress = address;
-        if (tAddress.contains("-"))
+        if (address.contains("-"))
         {
-            return tAddress.split("-")[0];
+            return address.split("-")[0];
         }
         else
         {
             return address;
+        }
+    }
+
+    public String getAttestationID()
+    {
+        int secondIndex = address.indexOf("-");
+        secondIndex = secondIndex != -1 ? address.indexOf("-", secondIndex + 1) : -1;
+        if (secondIndex != -1)
+        {
+            return address.substring(secondIndex+1);
+        }
+        else
+        {
+            return "";
         }
     }
 
@@ -70,16 +84,6 @@ public class RealmAttestation extends RealmObject
     public void setId(String id)
     {
         this.id = id;
-    }
-
-    public String getHash()
-    {
-        return hash;
-    }
-
-    public void setHash(String hash)
-    {
-        this.hash = hash;
     }
 
     public List<Long> getChains()
@@ -133,5 +137,25 @@ public class RealmAttestation extends RealmObject
         }
 
         return false;
+    }
+
+    public String getIdentifierHash()
+    {
+        return identifierHash;
+    }
+
+    public void setIdentifierHash(String identifierHash)
+    {
+        this.identifierHash = identifierHash;
+    }
+
+    public String getCollectionId()
+    {
+        return collectionId;
+    }
+
+    public void setCollectionId(String collectionId)
+    {
+        this.collectionId = collectionId;
     }
 }

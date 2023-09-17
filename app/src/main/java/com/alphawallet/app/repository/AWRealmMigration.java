@@ -457,6 +457,39 @@ public class AWRealmMigration implements RealmMigration
 
             oldVersion = 51;
         }
+
+        if (oldVersion == 51)
+        {
+            RealmObjectSchema realmData = schema.get("RealmTokenScriptData");
+            if (realmData != null && !realmData.hasField("schemaUID"))
+            {
+                realmData.addField("schemaUID", String.class);
+            }
+
+            realmData = schema.get("RealmAttestation");
+            if (realmData != null && !realmData.hasField("identifierHash"))
+            {
+                realmData.addField("identifierHash", String.class);
+            }
+
+            if (realmData != null && realmData.hasField("hash"))
+            {
+                realmData.renameField("hash", "schemaUID");
+            }
+
+            oldVersion = 52;
+        }
+
+        if (oldVersion == 52)
+        {
+            RealmObjectSchema realmData = schema.get("RealmAttestation");
+            if (realmData != null && realmData.hasField("schemaUID"))
+            {
+                realmData.renameField("schemaUID", "collectionId");
+            }
+
+            oldVersion = 53;
+        }
     }
 
     @Override

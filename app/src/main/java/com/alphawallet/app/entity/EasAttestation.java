@@ -26,7 +26,7 @@ public class EasAttestation
     public long v;
     public String recipient;
     public String uid;
-    private String schema;
+    private final String schema;
     public String signer;
     public long time;
     public long expirationTime;
@@ -35,7 +35,6 @@ public class EasAttestation
     public String data;
     public long nonce;
     public long messageVersion;
-    private String refSchema;
 
     public EasAttestation(String version, long chainId, String verifyingContract, String r, String s, long v, String signer, String uid, String schema, String recipient, long time, long expirationTime, String refUID, boolean revocable, String data, long nonce, long messageVersion)
     {
@@ -55,7 +54,6 @@ public class EasAttestation
         this.revocable = revocable;
         this.data = data;
         this.nonce = nonce;
-        this.refSchema = null;
         this.messageVersion = messageVersion;
     }
 
@@ -148,42 +146,12 @@ public class EasAttestation
         BigInteger schemaVal = new BigInteger(Numeric.cleanHexPrefix(schema), 16);
         if (schemaVal.equals(BigInteger.ZERO))
         {
-            return getRefSchema();
-        }
-        else
-        {
-            return schema;
-        }
-    }
-
-    private String getFixedSchema()
-    {
-        BigInteger schemaVal = new BigInteger(Numeric.cleanHexPrefix(schema), 16);
-        if (schemaVal.equals(BigInteger.ZERO))
-        {
             return Numeric.toHexStringWithPrefixZeroPadded(BigInteger.ZERO, 64);
         }
         else
         {
             return schema;
         }
-    }
-
-    private String getRefSchema()
-    {
-        if (TextUtils.isEmpty(refSchema))
-        {
-            return Numeric.toHexStringWithPrefixZeroPadded(BigInteger.ZERO, 64);
-        }
-        else
-        {
-            return refSchema;
-        }
-    }
-
-    public void setSchema(String schema)
-    {
-        this.schema = schema;
     }
 
     public String getSigner()
@@ -357,7 +325,7 @@ public class EasAttestation
         jsonMessage.put("recipient", recipient);
         jsonMessage.put("refUID", getRefUID());
         jsonMessage.put("revocable", revocable);
-        jsonMessage.put("schema", getFixedSchema());
+        jsonMessage.put("schema", getSchema());
 
         return jsonMessage;
     }

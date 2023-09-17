@@ -982,4 +982,34 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     {
         return genericWalletInteract.findWallet(walletAddress);
     }
+
+
+    public String addAttestationAttrs(NFTAsset asset, Token token, TSAction action)
+    {
+        StringBuilder attrs = new StringBuilder();
+        if (asset != null && asset.isAttestation())
+        {
+            List<TokenScriptResult.Attribute> attestationAttrs = assetDefinitionService.getAttestationAttrs(token, action, asset.getAttestationID());
+            if (attestationAttrs != null)
+            {
+                for (TokenScriptResult.Attribute attr : attestationAttrs)
+                {
+                    onAttr(attrs, attr);
+                }
+            }
+        }
+
+        return attrs.toString();
+    }
+
+    private void onAttr(StringBuilder attrs, TokenScriptResult.Attribute attribute)
+    {
+        //is the attr incomplete?
+        if (!TextUtils.isEmpty(attribute.id))
+        {
+            Timber.d("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
+            TokenScriptResult.addPair(attrs, attribute);
+        }
+    }
+
 }

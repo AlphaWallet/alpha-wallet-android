@@ -1,6 +1,7 @@
 package com.alphawallet.token.entity;
 
 import static org.w3c.dom.Node.ELEMENT_NODE;
+import static org.web3j.crypto.Hash.sha3;
 
 import org.web3j.utils.Numeric;
 
@@ -33,7 +34,7 @@ public class AttestationDefinition
     //Note these are in List form to preserve order, important in generating the collectionHash
     public List<String> collectionKeys;
     public List<String> collectionText;
-    public String replacementFieldId; //used to check if new attestation should replace the old
+    public List<String> replacementFieldIds; //used to check if new attestation should replace the old
     public String schemaUID;
 
     public AttestationDefinition(String name)
@@ -41,11 +42,23 @@ public class AttestationDefinition
         this.name = name;
         metadata = null;
         attributes = null;
+        replacementFieldIds = null;
+        schemaUID = "";
     }
 
     public void handleReplacementField(Element element)
     {
-        replacementFieldId = element.getTextContent();
+        replacementFieldIds = new ArrayList<>();
+        for (Node n = element.getFirstChild(); n != null; n = n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE) continue;
+            Element attnElement = (Element) n;
+
+            if (attnElement.getLocalName().equals("idField"))
+            {
+                replacementFieldIds.add(attnElement.getAttribute("name"));
+            }
+        }
     }
 
     public void handleKey(Element element)
@@ -131,12 +144,17 @@ public class AttestationDefinition
         }
     }
 
+    public String getIssuerKeyAddress()
+    {
+        return Keys.getAddress(Numeric.toHexString(issuerKey)).toLowerCase(Locale.ROOT);
+    }
+
     public byte[] getCollectionIdPreHash()
     {
         //produce the collectionId
         StringBuilder sb = new StringBuilder();
-        sb.append(Numeric.cleanHexPrefix(schemaUID).toLowerCase(Locale.ROOT));
-        sb.append(Keys.getAddress(Numeric.toHexString(issuerKey)).toLowerCase(Locale.ROOT));
+        //sb.append(Numeric.cleanHexPrefix(schemaUID).toLowerCase(Locale.ROOT)); //Exclude schemaUID from collectionId
+        sb.append(getIssuerKeyAddress());
 
         for (String collectionItem : collectionText)
         {
@@ -144,5 +162,20 @@ public class AttestationDefinition
         }
 
         return sb.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    public boolean compareIssuerKey(String issuer)
+    {
+        return getIssuerKeyAddress().equalsIgnoreCase(issuer);
+    }
+
+    public boolean matchCollection(String calculatedAttnCollectionId)
+    {
+        //get collectionId for this script
+        byte[] preHash = getCollectionIdPreHash();
+        String scriptCollectionId = Numeric.toHexString(sha3(preHash));
+
+        //matches?
+        return calculatedAttnCollectionId.equals(scriptCollectionId);
     }
 }

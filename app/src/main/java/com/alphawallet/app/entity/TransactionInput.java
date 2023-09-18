@@ -299,7 +299,7 @@ public class TransactionInput
             case UNKNOWN_FUNCTION:
             case INVALID_OPERATION:
             default:
-                address = tx.from;
+                address = tx.to;
                 break;
         }
 

@@ -254,6 +254,20 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
         return eventName;
     }
 
+    public String getToAddress()
+    {
+        Map<String, EventResult> resultMap = getEventResultMap();
+        EventResult evTo = resultMap.get("to");
+        if (evTo != null)
+        {
+            return evTo.value;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     public StatusType getEventStatusType()
     {
         switch (eventName)

@@ -57,7 +57,6 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final TokensService tokensService;
     private String hashKey;
-    private boolean fromTokenView;
 
     @Nullable
     private Disposable disposable;
@@ -82,7 +81,6 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
     @Override
     public void bind(@Nullable TokenTransferData data, @NonNull Bundle addition)
     {
-        fromTokenView = false;
         transferData = data;
         String walletAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
 
@@ -165,12 +163,6 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         date.setVisibility(View.VISIBLE);
 
         hashKey = data.hash;
-    }
-
-    @Override
-    public void setFromTokenView()
-    {
-        fromTokenView = true;
     }
 
     private String getEventAmount(TokenTransferData eventData, Transaction tx)
@@ -260,6 +252,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         intent.putExtra(C.EXTRA_TXHASH, hashKey);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
+        intent.putExtra(C.EXTRA_TRANSACTION_DATA, transferData);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         getContext().startActivity(intent);
     }

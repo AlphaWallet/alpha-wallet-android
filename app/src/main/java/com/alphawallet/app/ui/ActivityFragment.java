@@ -60,7 +60,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        LocaleUtils.setActiveLocale(getContext());
+        LocaleUtils.setActiveLocale(requireContext());
         View view = inflater.inflate(R.layout.fragment_transactions, container, false);
         toolbar(view);
         setToolbarTitle(R.string.activity_label);
@@ -185,7 +185,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
         listView = view.findViewById(R.id.list);
-        listView.setLayoutManager(new LinearLayoutManager(getContext()));
+        listView.setLayoutManager(new LinearLayoutManager(requireContext()));
         listView.setAdapter(adapter);
         listView.addRecyclerListener(holder -> adapter.onRViewRecycled(holder));
 
@@ -205,7 +205,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     {
         if (adapter.isEmpty())
         {
-            EmptyTransactionsView emptyView = new EmptyTransactionsView(getContext(), this);
+            EmptyTransactionsView emptyView = new EmptyTransactionsView(requireContext(), this);
             systemView.showEmpty(emptyView);
         }
         else

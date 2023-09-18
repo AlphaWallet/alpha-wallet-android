@@ -203,7 +203,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
         setupVisibilities();
 
-        String from = transaction.from != null ? transaction.from : "";
+        String from = (transferData != null) ? transferData.getFromAddress() : (transaction.from != null ? transaction.from : "");
         fromValue.setText(from);
 
         token = viewModel.getToken(transaction.chainId, transaction.to);
@@ -356,9 +356,16 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
     private void setupWalletDetails()
     {
-        String operationName = token.getOperationName(transaction, this);
-        String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
-        amount.setText(Utils.isContractCall(this, operationName) ? "" : transactionOperation);
+        if (transferData != null)
+        {
+            amount.setText(transferData.getEventAmount(token, transaction));
+        }
+        else
+        {
+            String operationName = token.getOperationName(transaction, this);
+            String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
+            amount.setText(Utils.isContractCall(this, operationName) ? "" : transactionOperation);
+        }
     }
 
     @Override

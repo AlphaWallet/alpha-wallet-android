@@ -140,7 +140,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
             if (view != null) itemView = view.tokenView;
         }
 
-        String transactionValue = getEventAmount(data, tx);
+        String transactionValue = transferData.getEventAmount(token, tx);
 
         if (TextUtils.isEmpty(transactionValue))
         {
@@ -163,50 +163,6 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
         date.setVisibility(View.VISIBLE);
 
         hashKey = data.hash;
-    }
-
-    private String getEventAmount(TokenTransferData eventData, Transaction tx)
-    {
-        if (token == null)
-        {
-            return "";
-        }
-
-        if (tx != null)
-        {
-            tx.getDestination(token); //build decoded input
-        }
-
-        Map<String, EventResult> resultMap = eventData.getEventResultMap();
-        String value = "";
-        switch (eventData.eventName)
-        {
-            case "received":
-                value = "+ ";
-                //drop through
-            case "sent":
-                if (value.length() == 0) value = "- ";
-                if (resultMap.get("amount") != null)
-                {
-                    value = token.convertValue(value, resultMap.get("amount"), TRANSACTION_BALANCE_PRECISION);
-                }
-                break;
-            case "approvalObtained":
-            case "ownerApproved":
-                if (resultMap.get("value") != null)
-                {
-                    value = token.convertValue(value, resultMap.get("value"), TRANSACTION_BALANCE_PRECISION);
-                }
-                break;
-            default:
-                if (token != null && tx != null)
-                {
-                    value = token.isEthereum() ? token.getTransactionValue(tx, TRANSACTION_BALANCE_PRECISION) : tx.getOperationResult(token, TRANSACTION_BALANCE_PRECISION);
-                }
-                break;
-        }
-
-        return value;
     }
 
     private String getTitle(TokenTransferData eventData)

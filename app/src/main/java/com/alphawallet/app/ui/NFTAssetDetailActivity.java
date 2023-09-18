@@ -116,7 +116,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private ActivityResultLauncher<Intent> getGasSettings;
     private boolean triggeredReload;
     private long chainId;
-    private Disposable disposable;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -176,10 +175,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel.onDestroy();
         super.onDestroy();
         tokenImage.onDestroy();
-        if (disposable != null && !disposable.isDisposed())
-        {
-            disposable.dispose();
-        }
     }
 
     @Override
@@ -332,7 +327,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
             setTitle(token.getTokenName(viewModel.getAssetDefinitionService(), 1));
 
-            //now re-load the verbs
+            //now re-load the verbs if already called. If wallet is null this won't complete
             setupFunctionBar(viewModel.getWallet());
 
             setupAttestation();
@@ -367,8 +362,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void setupFunctionBar(Wallet wallet)
     {
-        if (token == null) return;
-        if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
+        if (token != null && wallet != null && (BuildConfig.DEBUG || wallet.type != WalletType.WATCH))
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));

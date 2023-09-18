@@ -2817,6 +2817,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     // Trawl through all attestations in this wallet database and update their collectionId pointer if required
     public String updateAttestations(TokenDefinition td)
     {
+        if (td.getAttestation() == null)
+        {
+            return "0";
+        }
+
         byte[] preHash = td.getAttestation().getCollectionIdPreHash();
         String scriptCollectionId = Numeric.toHexString(Hash.keccak256(preHash));
         Wallet wallet = new Wallet(tokensService.getCurrentAddress());

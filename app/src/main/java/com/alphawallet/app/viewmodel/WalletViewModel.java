@@ -92,7 +92,6 @@ public class WalletViewModel extends BaseViewModel
 {
     public static long BALANCE_BACKUP_CHECK_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     public static double VALUE_THRESHOLD = 200.0; //$200 USD value is difference between red and grey backup warnings
-
     private final MutableLiveData<TokenCardMeta[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<TokenCardMeta[]> updatedTokens = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -193,6 +192,7 @@ public class WalletViewModel extends BaseViewModel
 
     public void prepare()
     {
+        lastTokenFetchTime = 0;
         lastBackupCheck = System.currentTimeMillis() - BALANCE_BACKUP_CHECK_INTERVAL + 5 * DateUtils.SECOND_IN_MILLIS;
         //load the activity meta list
         disposable = genericWalletInteract
@@ -202,6 +202,7 @@ public class WalletViewModel extends BaseViewModel
 
     public void reloadTokens()
     {
+        lastTokenFetchTime = 0;
         tokensService.startUpdateCycle();
         if (defaultWallet.getValue() != null)
         {

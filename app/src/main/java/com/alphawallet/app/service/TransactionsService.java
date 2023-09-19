@@ -502,8 +502,7 @@ public class TransactionsService
     public void restartService()
     {
         stopAllChainUpdate();
-        tokensService.stopUpdateCycle();
-        tokensService.startUpdateCycle();
+        tokensService.restartUpdateCycle();
         fetchTransactions();
     }
 

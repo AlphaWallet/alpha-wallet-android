@@ -209,6 +209,7 @@ public class TokensService
             addLockedTokens();
             if (openseaService != null) openseaService.resetOffsetRead(networkFilter);
             tokenRepository.updateLocalAddress(newWalletAddr);
+            lastStartCycleTime = 0;
         }
     }
 
@@ -222,10 +223,32 @@ public class TokensService
                 .observeOn(Schedulers.newThread()).subscribe();
     }
 
-    public void startUpdateCycle()
+    private long lastStartCycleTime = 0;
+
+    public void restartUpdateCycle()
     {
         stopUpdateCycle();
-        if (!Utils.isAddressValid(currentAddress)) return;
+        lastStartCycleTime = 0;
+        startUpdateCycle();
+    }
+
+    public void startUpdateCycle()
+    {
+        if ((lastStartCycleTime + 1000) > System.currentTimeMillis())
+        {
+            return; // Block this refresh - we need to ensure the cycle restarts but within 1 second no need to restart
+        }
+        else
+        {
+            lastStartCycleTime = System.currentTimeMillis();
+        }
+
+        if (!Utils.isAddressValid(currentAddress))
+        {
+            return;
+        }
+
+        stopUpdateCycle();
 
         syncCount = 0;
 
